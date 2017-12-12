@@ -1,0 +1,5 @@
+
+let ch = chan(2);
+ch.send('abc');
+ch.send('xyz');
+assert([ch.recv(), ch.recv()] == ['abc', 'xyz']);

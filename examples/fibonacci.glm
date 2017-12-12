@@ -1,0 +1,17 @@
+
+let fibonacciGenerator = fn() {
+    let x = 1;
+    let y = 1;
+    return fn() {
+        let z = x;
+        x = y;
+        y = x + z;
+        return z;
+    };
+};
+
+println("Fibonacci series:");
+let nextFib = fibonacciGenerator();
+for i in range(0, 10) {
+    println(i, " == ", nextFib());
+}

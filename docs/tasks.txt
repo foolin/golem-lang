@@ -1,0 +1,99 @@
+
+finish tutorial
+
+-------------------------------------
+
+ide support
+
+intrinsic functions on various types:
+
+    list, str, range, dict  
+        loDash
+        all need elems() to iterate over (i, v)
+        dict elems(): (i, k, v) or (i, (k, v))
+        map 
+        filter
+
+    dict: fromStruct(), toStruct(f = null)
+
+    str:  
+        toRune() // str-with-one-char
+        parseInt(radix = 10),  // radix
+        parseFloat(), 
+        format() // variadic
+    int:  
+        toChar() // str-with-one-char, utf8.ValidRune()
+        toStr(radix = 10)
+
+    iterable.stream().  Maybe
+
+
+typeOf()
+meta() 
+    struct: fields
+    func: minArity, maxArity, isVariadic
+
+--------------------------------------------
+
+prop
+
+immutability
+freeze() builtin, or maybe 
+    'frozen' keyword for list, set, dict, struct
+    with freeze() intrinsic for list, set, dict
+
+formal parameters (not for lambda):
+    optional formal parameters -- will require special parsing to disallow scoping
+    variadic functions
+
+Fix implementation of intrinsics so it doesn't create a function all the time.
+This may not be possible.
+
+modules:
+    io, net, http, time, bytes, random
+    is bytes an intrinsic type instead?
+
+chan: range, close(), isOpen()
+select waitGroup 
+sync{}
+
+try with resources
+
+write Control Flow Graph, use the POP opcode to keep stack size down
+unreachable statements
+
+REPL
+:paste mode
+
+documentation
+ghpages
+editor support: vscode, atom, sublime, etc
+
+label: for, while
+
+'like'
+
+destructing tuple: assignment, lambda
+
+blank id '_': for, assignment, like
+
+check for recursive data structures in String() functions
+
+improve error messages
+
+more than one file
+source name in line number table
+
+markdown golem-doc
+
+$eq, $hash, --> allow composite keys in hashMap
+$str
+$cmp, $iter
+
+string unicode escape
+multiline strings
+
+annotations
+
+$add, $sub, etc
+
