@@ -18,7 +18,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mjarmy/golem-lang/ast"
-	g "github.com/mjarmy/golem-lang/core"
 	"github.com/mjarmy/golem-lang/lib"
 	"sort"
 )
@@ -230,7 +229,7 @@ func (a *analyzer) visitFunc(fn *ast.FnExpr) {
 
 	// visit child nodes
 	for _, f := range fn.FormalParams {
-		f.Variable = a.curScope.put(f.Symbol.Text, false)
+		f.Ident.Variable = a.curScope.put(f.Ident.Symbol.Text, f.IsConst)
 	}
 	a.visitBlock(fn.Body)
 
@@ -248,7 +247,10 @@ func (a *analyzer) makeParentCaptures() []*ast.Variable {
 
 	fscope := a.curScope.funcScope
 	num := len(fscope.captures)
-	g.Assert(num == len(fscope.parentCaptures), "capture length mismatch")
+
+	if num != len(fscope.parentCaptures) {
+		panic("capture length mismatch")
+	}
 	if num == 0 {
 		return nil
 	}

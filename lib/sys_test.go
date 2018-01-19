@@ -21,9 +21,7 @@ import (
 
 func TestSys(t *testing.T) {
 	sys := InitSysModule()
-	exit, err := sys.GetContents().GetField(g.MakeStr("exit"))
-	g.Assert(exit != nil, "sys_test")
-	g.Assert(err == nil, "sys_test")
-	//fnExit := exit.(g.NativeFunc)
-	//fnExit.Invoke([]g.Value{g.MakeInt(-1)})
+	exit, err := sys.GetContents().GetField(nil, g.MakeStr("exit"))
+	tassert(t, exit != nil)
+	tassert(t, err == nil)
 }

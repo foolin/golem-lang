@@ -22,16 +22,16 @@ import (
 // Value
 
 type Value interface {
-	TypeOf() Type
+	Type() Type
 
-	HashCode() (Int, Error)
-	Eq(Value) Bool
-	ToStr() Str
+	Freeze() (Value, Error)
+	Frozen() (Bool, Error)
 
-	Cmp(Value) (Int, Error)
-	Plus(Value) (Value, Error)
-
-	GetField(Str) (Value, Error)
+	Eq(Context, Value) (Bool, Error)
+	HashCode(Context) (Int, Error)
+	ToStr(Context) Str
+	Cmp(Context, Value) (Int, Error)
+	GetField(Context, Str) (Value, Error)
 }
 
 //---------------------------------------------------------------
@@ -39,12 +39,12 @@ type Value interface {
 
 type (
 	Getable interface {
-		Get(Value) (Value, Error)
+		Get(Context, Value) (Value, Error)
 	}
 
 	Indexable interface {
 		Getable
-		Set(Value, Value) Error
+		Set(Context, Value, Value) Error
 	}
 
 	Lenable interface {
@@ -52,13 +52,13 @@ type (
 	}
 
 	Sliceable interface {
-		Slice(Value, Value) (Value, Error)
-		SliceFrom(Value) (Value, Error)
-		SliceTo(Value) (Value, Error)
+		Slice(Context, Value, Value) (Value, Error)
+		SliceFrom(Context, Value) (Value, Error)
+		SliceTo(Context, Value) (Value, Error)
 	}
 
 	Iterable interface {
-		NewIterator() Iterator
+		NewIterator(Context) Iterator
 	}
 )
 
@@ -90,6 +90,8 @@ type (
 		Lenable
 		Sliceable
 		Iterable
+
+		Concat(Str) Str
 	}
 
 	Number interface {
@@ -97,6 +99,7 @@ type (
 		FloatVal() float64
 		IntVal() int64
 
+		Add(Value) (Number, Error)
 		Sub(Value) (Number, Error)
 		Mul(Value) (Number, Error)
 		Div(Value) (Number, Error)
@@ -136,27 +139,34 @@ type (
 		Iterable
 		Sliceable
 
-		Add(Value) Error
-		AddAll(Value) Error
-		Clear()
-		Contains(Value) (Bool, Error)
-		IndexOf(Value) Int
 		IsEmpty() Bool
-		Join(Str) Str
+		Clear() Error
+
+		Contains(Context, Value) (Bool, Error)
+		IndexOf(Context, Value) (Int, Error)
+		Join(Context, Str) Str
+
+		Add(Context, Value) Error
+		AddAll(Context, Value) Error
+		Remove(Context, Int) Error
 
 		Values() []Value
+
+		Map(Context, func(Value) (Value, Error)) (Value, Error)
+		Reduce(Context, Value, func(Value, Value) (Value, Error)) (Value, Error)
+		Filter(Context, func(Value) (Value, Error)) (Value, Error)
 	}
 
 	Range interface {
 		Composite
 		Getable
 		Lenable
-		Sliceable
 		Iterable
 
 		From() Int
 		To() Int
 		Step() Int
+		Count() Int
 	}
 
 	Tuple interface {
@@ -171,10 +181,12 @@ type (
 		Lenable
 		Iterable
 
-		AddAll(Value) Error
-		Clear()
-		ContainsKey(Value) (Bool, Error)
 		IsEmpty() Bool
+		Clear() Error
+
+		ContainsKey(Context, Value) (Bool, Error)
+		AddAll(Context, Value) Error
+		Remove(Context, Value) (Bool, Error)
 	}
 
 	Set interface {
@@ -182,21 +194,23 @@ type (
 		Lenable
 		Iterable
 
-		Add(Value) Error
-		AddAll(Value) Error
-		Clear()
-		Contains(Value) (Bool, Error)
 		IsEmpty() Bool
+		Clear() Error
+
+		Contains(Context, Value) (Bool, Error)
+		Add(Context, Value) Error
+		AddAll(Context, Value) Error
+		Remove(Context, Value) (Bool, Error)
 	}
 
 	Struct interface {
 		Composite
-		Indexable
 
-		Keys() []string
+		FieldNames() []string
 		Has(Value) (Bool, Error)
-		InitField(Str, Value) Error
-		SetField(Str, Value) Error
+
+		InitField(Context, Str, Value) Error
+		SetField(Context, Str, Value) Error
 	}
 
 	Iterator interface {
@@ -212,6 +226,11 @@ type (
 // Func represents an instance of a function
 type Func interface {
 	Value
+	MinArity() int
+	MaxArity() int // by convention, -1 means variadic
+
+	Invoke(Context, []Value) (Value, Error)
+
 	funcMarker()
 }
 

@@ -41,48 +41,48 @@ func NewBytecodeFunc(template *Template) BytecodeFunc {
 
 func (f *bytecodeFunc) funcMarker() {}
 
-func (f *bytecodeFunc) TypeOf() Type { return TFUNC }
+func (f *bytecodeFunc) Type() Type { return TFUNC }
 
-func (f *bytecodeFunc) HashCode() (Int, Error) {
+func (f *bytecodeFunc) Freeze() (Value, Error) {
+	return f, nil
+}
+
+func (f *bytecodeFunc) Frozen() (Bool, Error) {
+	return TRUE, nil
+}
+
+func (f *bytecodeFunc) HashCode(cx Context) (Int, Error) {
 	return nil, TypeMismatchError("Expected Hashable Type")
 }
 
-func (f *bytecodeFunc) GetField(key Str) (Value, Error) {
+func (f *bytecodeFunc) GetField(cx Context, key Str) (Value, Error) {
 	return nil, NoSuchFieldError(key.String())
 }
 
-func (f *bytecodeFunc) Cmp(v Value) (Int, Error) {
+func (f *bytecodeFunc) Cmp(cx Context, v Value) (Int, Error) {
 	return nil, TypeMismatchError("Expected Comparable Type")
 }
 
-func (f *bytecodeFunc) ToStr() Str {
+func (f *bytecodeFunc) ToStr(cx Context) Str {
 	return MakeStr(fmt.Sprintf("func<%p>", f))
 }
 
-func (f *bytecodeFunc) Eq(v Value) Bool {
+func (f *bytecodeFunc) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case BytecodeFunc:
 		// equality is based on identity
-		return MakeBool(f == t)
+		return MakeBool(f == t), nil
 	default:
-		return FALSE
-	}
-}
-
-func (f *bytecodeFunc) Plus(v Value) (Value, Error) {
-	switch t := v.(type) {
-
-	case Str:
-		return strcat(f, t), nil
-
-	default:
-		return nil, TypeMismatchError("Expected Number Type")
+		return FALSE, nil
 	}
 }
 
 func (f *bytecodeFunc) Template() *Template {
 	return f.template
 }
+
+func (f *bytecodeFunc) MinArity() int { return f.template.Arity }
+func (f *bytecodeFunc) MaxArity() int { return f.template.Arity }
 
 func (f *bytecodeFunc) GetCapture(idx int) *Ref {
 	return f.captures[idx]
@@ -92,6 +92,10 @@ func (f *bytecodeFunc) PushCapture(ref *Ref) {
 	f.captures = append(f.captures, ref)
 }
 
+func (f *bytecodeFunc) Invoke(cx Context, values []Value) (Value, Error) {
+	return cx.Eval(f, values)
+}
+
 //---------------------------------------------------------------
 // Template
 
@@ -99,7 +103,7 @@ func (f *bytecodeFunc) PushCapture(ref *Ref) {
 // instance.  Templates are created at compile time, and
 // are immutable at run time.
 type Template struct {
-	Arity             int
+	Arity             int // TODO MinArity, MaxArity
 	NumCaptures       int
 	NumLocals         int
 	OpCodes           []byte
@@ -107,13 +111,14 @@ type Template struct {
 	ExceptionHandlers []ExceptionHandler
 }
 
-// LineNumberEntry tracks which sequence of opcodes are on a given line
+// A LineNumberEntry tracks which sequence of opcodes are on a given line
 type LineNumberEntry struct {
 	Index   int
 	LineNum int
 }
 
-// ExceptionHandler contains the instruction pointers for catch and finally
+// An ExceptionHandler handles exceptions for a given block of opcodes,
+// by providing the instruction pointers for 'catch' and 'finally'
 type ExceptionHandler struct {
 	Begin   int
 	End     int

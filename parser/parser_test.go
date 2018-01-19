@@ -69,7 +69,25 @@ func fail_expr(t *testing.T, p *Parser, expect string) {
 }
 
 func newParser(source string) *Parser {
-	return NewParser(scanner.NewScanner(source))
+	builtins := map[string]bool{
+		"print":   true,
+		"println": true,
+		"str":     true,
+		"len":     true,
+		"range":   true,
+		"assert":  true,
+		"merge":   true,
+		"chan":    true,
+		"typeof":  true,
+		"freeze":  true,
+		"frozen":  true,
+	}
+	isBuiltIn := func(s string) bool {
+		_, ok := builtins[s]
+		return ok
+	}
+
+	return NewParser(scanner.NewScanner(source), isBuiltIn)
 }
 
 func TestPrimary(t *testing.T) {
@@ -85,6 +103,9 @@ func TestPrimary(t *testing.T) {
 
 	p = newParser("1 2")
 	fail_expr(t, p, "Unexpected Token '2' at (1, 3)")
+
+	p = newParser("a == goto")
+	fail_expr(t, p, "Unexpected Reserved Word 'goto' at (1, 6)")
 
 	p = newParser("1 #")
 	fail_expr(t, p, "Unexpected Character '#' at (1, 3)")
@@ -371,6 +392,15 @@ func TestFn(t *testing.T) {
 
 	p = newParser("fn a(x) {return x*x; } fn b() { }")
 	ok(t, p, "fn() { fn a(x) { return (x * x); } fn b() {  } }")
+
+	p = newParser("fn(const x, y) {  }")
+	ok_expr(t, p, "fn(const x, y) {  }")
+
+	p = newParser("fn(x, const y) {  }")
+	ok_expr(t, p, "fn(x, const y) {  }")
+
+	p = newParser("fn(const x, const y) {  }")
+	ok_expr(t, p, "fn(const x, const y) {  }")
 }
 
 func TestTry(t *testing.T) {
@@ -736,35 +766,14 @@ func TestLambda(t *testing.T) {
 
 func TestSpawn(t *testing.T) {
 
-	p := newParser("spawn foo();")
-	ok(t, p, "fn() { spawn foo(); }")
+	p := newParser("go foo();")
+	ok(t, p, "fn() { go foo(); }")
 
-	p = newParser("spawn false(a,b,c);")
-	ok(t, p, "fn() { spawn false(a, b, c); }")
+	p = newParser("go false(a,b,c);")
+	ok(t, p, "fn() { go false(a, b, c); }")
 
-	p = newParser("spawn foo;")
-	fail(t, p, "Unexpected Token ';' at (1, 10)")
-}
-
-func TestPub(t *testing.T) {
-
-	p := newParser("pub let a = 1;")
-	ok(t, p, "fn() { pub let a = 1; }")
-
-	p = newParser("pub const a = 1;")
-	ok(t, p, "fn() { pub const a = 1; }")
-
-	p = newParser("pub fn a() {}")
-	ok(t, p, "fn() { pub fn a() {  } }")
-
-	p = newParser("pub fn a() { pub let b = 1; }")
-	fail(t, p, "Unexpected Token 'pub' at (1, 14)")
-
-	p = newParser("pub a = 1;")
-	fail(t, p, "Unexpected Token 'a' at (1, 5)")
-
-	p = newParser("pub fn() {}")
-	fail(t, p, "Unexpected Token '(' at (1, 7)")
+	p = newParser("go foo;")
+	fail(t, p, "Unexpected Token ';' at (1, 7)")
 }
 
 func TestImport(t *testing.T) {

@@ -29,10 +29,8 @@ type ioModule struct {
 func InitIoModule() g.Module {
 
 	file := g.NewNativeFunc(
-		func(values []g.Value) (g.Value, g.Error) {
-			if len(values) != 1 {
-				return nil, g.ArityMismatchError("1", len(values))
-			}
+		1, 1,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
 			s, ok := values[0].(g.Str)
 			if !ok {
 				return nil, g.TypeMismatchError("Expected Str")
@@ -41,20 +39,20 @@ func InitIoModule() g.Module {
 			return makeFile(s), nil
 		})
 
-	contents, err := g.NewStruct([]*g.StructEntry{
-		{"File", true, false, file}})
-	g.Assert(err == nil, "InitIoModule")
+	contents, err := g.NewStruct([]g.Field{
+		g.NewField("File", true, file)}, true)
+	if err != nil {
+		panic("InitIoModule")
+	}
+
 	return &ioModule{contents}
 }
 
 func makeFile(name g.Str) g.Struct {
 
 	isDir := g.NewNativeFunc(
-		func(values []g.Value) (g.Value, g.Error) {
-			if len(values) != 0 {
-				return nil, g.ArityMismatchError("0", len(values))
-			}
-
+		0, 0,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
 			fi, err := os.Stat(name.String())
 			if err != nil {
 				return nil, g.MakeError("IoError", err.Error())
@@ -68,11 +66,9 @@ func makeFile(name g.Str) g.Struct {
 		})
 
 	items := g.NewNativeFunc(
-		func(values []g.Value) (g.Value, g.Error) {
-			if len(values) != 0 {
-				return nil, g.ArityMismatchError("0", len(values))
-			}
 
+		0, 0,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
 			files, err := ioutil.ReadDir(name.String())
 			if err != nil {
 				return nil, g.MakeError("IoError", err.Error())
@@ -89,11 +85,8 @@ func makeFile(name g.Str) g.Struct {
 		})
 
 	readLines := g.NewNativeFunc(
-		func(values []g.Value) (g.Value, g.Error) {
-			if len(values) != 0 {
-				return nil, g.ArityMismatchError("0", len(values))
-			}
-
+		0, 0,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
 			f, err := os.Open(name.String())
 			if err != nil {
 				return nil, g.MakeError("IoError", err.Error())
@@ -113,13 +106,15 @@ func makeFile(name g.Str) g.Struct {
 			return g.NewList(list), nil
 		})
 
-	file, err := g.NewStruct([]*g.StructEntry{
-		{"isDir", true, false, isDir},
-		{"items", true, false, items},
-		{"readLines", true, false, readLines},
-		{"name", true, false, name}})
+	file, err := g.NewStruct([]g.Field{
+		g.NewField("isDir", true, isDir),
+		g.NewField("items", true, items),
+		g.NewField("readLines", true, readLines),
+		g.NewField("name", true, name)}, true)
+	if err != nil {
+		panic("InitIoModule")
+	}
 
-	g.Assert(err == nil, "InitIoModule")
 	return file
 }
 

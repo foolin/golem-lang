@@ -36,13 +36,21 @@ func MakeFloat(f float64) Float {
 
 func (f _float) basicMarker() {}
 
-func (f _float) TypeOf() Type { return TFLOAT }
+func (f _float) Type() Type { return TFLOAT }
 
-func (f _float) ToStr() Str {
+func (f _float) Freeze() (Value, Error) {
+	return f, nil
+}
+
+func (f _float) Frozen() (Bool, Error) {
+	return TRUE, nil
+}
+
+func (f _float) ToStr(cx Context) Str {
 	return MakeStr(fmt.Sprintf("%g", f))
 }
 
-func (f _float) HashCode() (Int, Error) {
+func (f _float) HashCode(cx Context) (Int, Error) {
 
 	writer := new(bytes.Buffer)
 	err := binary.Write(writer, binary.LittleEndian, f.FloatVal())
@@ -61,25 +69,21 @@ func (f _float) HashCode() (Int, Error) {
 	return MakeInt(hashCode), nil
 }
 
-func (f _float) Eq(v Value) Bool {
+func (f _float) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
 
 	case _float:
-		return MakeBool(f == t)
+		return MakeBool(f == t), nil
 
 	case _int:
-		return MakeBool(f.FloatVal() == t.FloatVal())
+		return MakeBool(f.FloatVal() == t.FloatVal()), nil
 
 	default:
-		return FALSE
+		return FALSE, nil
 	}
 }
 
-func (f _float) GetField(key Str) (Value, Error) {
-	return nil, NoSuchFieldError(key.String())
-}
-
-func (f _float) Cmp(v Value) (Int, Error) {
+func (f _float) Cmp(cx Context, v Value) (Int, Error) {
 	switch t := v.(type) {
 
 	case _float:
@@ -106,11 +110,8 @@ func (f _float) Cmp(v Value) (Int, Error) {
 	}
 }
 
-func (f _float) Plus(v Value) (Value, Error) {
+func (f _float) Add(v Value) (Number, Error) {
 	switch t := v.(type) {
-
-	case Str:
-		return strcat(f, t), nil
 
 	case _int:
 		return f + _float(t), nil
@@ -175,4 +176,11 @@ func (f _float) Div(v Value) (Number, Error) {
 
 func (f _float) Negate() Number {
 	return 0 - f
+}
+
+//--------------------------------------------------------------
+// intrinsic functions
+
+func (f _float) GetField(cx Context, key Str) (Value, Error) {
+	return nil, NoSuchFieldError(key.String())
 }

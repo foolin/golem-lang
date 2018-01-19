@@ -20,51 +20,56 @@ import (
 	"testing"
 )
 
+func newField(name string, isConst bool, value Value) *field {
+	f, _ := NewField(name, isConst, value).(*field)
+	return f
+}
+
 func TestStructMap(t *testing.T) {
 	sm := newStructMap()
-	assert(t, sm.size == 0)
-	assert(t, reflect.DeepEqual(sm.keys(), []string{}))
+	tassert(t, sm.size == 0)
+	tassert(t, reflect.DeepEqual(sm.fieldNames(), []string{}))
 
 	_, has := sm.get("a")
-	assert(t, !has)
+	tassert(t, !has)
 	_, has = sm.get("b")
-	assert(t, !has)
+	tassert(t, !has)
 
-	sm.put(&StructEntry{"a", true, false, ZERO})
-	assert(t, sm.size == 1)
-	assert(t, len(sm.buckets) == 5)
-	assert(t, reflect.DeepEqual(sm.keys(), []string{"a"}))
+	sm.put(newField("a", true, ZERO))
+	tassert(t, sm.size == 1)
+	tassert(t, len(sm.buckets) == 5)
+	tassert(t, reflect.DeepEqual(sm.fieldNames(), []string{"a"}))
 
-	e, has := sm.get("a")
-	assert(t, has)
-	ok(t, e.Value, nil, ZERO)
+	f, has := sm.get("a")
+	tassert(t, has)
+	ok(t, f.value, nil, ZERO)
 	_, has = sm.get("b")
-	assert(t, !has)
+	tassert(t, !has)
 
-	sm.put(&StructEntry{"b", true, false, ONE})
-	assert(t, sm.size == 2)
-	assert(t, len(sm.buckets) == 5)
-	assert(t, reflect.DeepEqual(sm.keys(), []string{"b", "a"}))
+	sm.put(newField("b", true, ONE))
+	tassert(t, sm.size == 2)
+	tassert(t, len(sm.buckets) == 5)
+	tassert(t, reflect.DeepEqual(sm.fieldNames(), []string{"b", "a"}))
 
-	e, has = sm.get("a")
-	assert(t, has)
-	ok(t, e.Value, nil, ZERO)
-	e, has = sm.get("b")
-	assert(t, has)
-	ok(t, e.Value, nil, ONE)
+	f, has = sm.get("a")
+	tassert(t, has)
+	ok(t, f.value, nil, ZERO)
+	f, has = sm.get("b")
+	tassert(t, has)
+	ok(t, f.value, nil, ONE)
 
-	sm.put(&StructEntry{"c", true, false, NEG_ONE})
-	assert(t, sm.size == 3)
-	assert(t, len(sm.buckets) == 11)
-	assert(t, reflect.DeepEqual(sm.keys(), []string{"b", "a", "c"}))
+	sm.put(newField("c", true, NEG_ONE))
+	tassert(t, sm.size == 3)
+	tassert(t, len(sm.buckets) == 11)
+	tassert(t, reflect.DeepEqual(sm.fieldNames(), []string{"b", "a", "c"}))
 
-	e, has = sm.get("c")
-	assert(t, has)
-	ok(t, e.Value, nil, NEG_ONE)
+	f, has = sm.get("c")
+	tassert(t, has)
+	ok(t, f.value, nil, NEG_ONE)
 
-	sm.put(&StructEntry{"c", true, false, ZERO})
+	sm.put(newField("c", true, ZERO))
 
-	e, has = sm.get("c")
-	assert(t, has)
-	ok(t, e.Value, nil, NEG_ONE)
+	f, has = sm.get("c")
+	tassert(t, has)
+	ok(t, f.value, nil, NEG_ONE)
 }

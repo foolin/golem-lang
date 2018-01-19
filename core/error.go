@@ -25,7 +25,7 @@ import (
 type ErrorKind int
 
 const (
-	GENERIC ErrorKind = iota
+	ERROR ErrorKind = iota
 	NULL_VALUE
 	TYPE_MISMATCH
 	ARITY_MISMATCH
@@ -40,13 +40,14 @@ const (
 	ASSERTION_FAILED
 	CONST_SYMBOL
 	UNDEFINIED_SYMBOL
+	IMMUTABLE_VALUE
 )
 
 func (t ErrorKind) String() string {
 	switch t {
 
-	case GENERIC:
-		return "Generic"
+	case ERROR:
+		return "Error"
 	case NULL_VALUE:
 		return "NullValue"
 	case TYPE_MISMATCH:
@@ -75,6 +76,8 @@ func (t ErrorKind) String() string {
 		return "ConstSymbol"
 	case UNDEFINIED_SYMBOL:
 		return "UndefinedSymbol"
+	case IMMUTABLE_VALUE:
+		return "ImmutableValue"
 
 	default:
 		panic("unreachable")
@@ -92,23 +95,12 @@ type Error interface {
 
 type serror struct {
 	kind ErrorKind
-	stc  Struct
+	st   Struct
+	str  string
 }
 
 func (e *serror) Error() string {
-	kind, kerr := e.stc.Get(MakeStr("kind"))
-	msg, merr := e.stc.Get(MakeStr("msg"))
-
-	if kerr == nil {
-		if merr == nil {
-			return strings.Join([]string{
-				kind.ToStr().String(), ": ", msg.ToStr().String()}, "")
-		} else {
-			return kind.ToStr().String()
-		}
-	} else {
-		return e.stc.ToStr().String()
-	}
+	return e.str
 }
 
 func (e *serror) Kind() ErrorKind {
@@ -116,47 +108,75 @@ func (e *serror) Kind() ErrorKind {
 }
 
 func (e *serror) Struct() Struct {
-	return e.stc
+	return e.st
 }
 
 func makeError(kind ErrorKind, msg string) Error {
-	var stc Struct
+
+	var st Struct
 	var err Error
+	var str string
+
 	if msg == "" {
-		stc, err = NewStruct([]*StructEntry{
-			{"kind", true, false, MakeStr(kind.String())}})
+		st, err = NewStruct([]Field{
+			NewField("kind", true, MakeStr(kind.String()))}, true)
+		str = kind.String()
 	} else {
-		stc, err = NewStruct([]*StructEntry{
-			{"kind", true, false, MakeStr(kind.String())},
-			{"msg", true, false, MakeStr(msg)}})
+		st, err = NewStruct([]Field{
+			NewField("kind", true, MakeStr(kind.String())),
+			NewField("msg", true, MakeStr(msg))}, true)
+
+		str = strings.Join([]string{kind.String(), ": ", msg}, "")
 	}
 	if err != nil {
 		panic("invalid struct")
 	}
 
-	return &serror{kind, stc}
+	return &serror{kind, st, str}
 }
 
 func MakeError(kind string, msg string) Error {
-	var stc Struct
+
+	var st Struct
 	var err Error
+	var str string
+
 	if msg == "" {
-		stc, err = NewStruct([]*StructEntry{
-			{"kind", true, false, MakeStr(kind)}})
+		st, err = NewStruct([]Field{
+			NewField("kind", true, MakeStr(kind))}, true)
+		str = kind
 	} else {
-		stc, err = NewStruct([]*StructEntry{
-			{"kind", true, false, MakeStr(kind)},
-			{"msg", true, false, MakeStr(msg)}})
+		st, err = NewStruct([]Field{
+			NewField("kind", true, MakeStr(kind)),
+			NewField("msg", true, MakeStr(msg))}, true)
+
+		str = strings.Join([]string{kind, ": ", msg}, "")
 	}
 	if err != nil {
 		panic("invalid struct")
 	}
 
-	return &serror{GENERIC, stc}
+	return &serror{ERROR, st, str}
 }
 
-func GenericError(stc Struct) Error {
-	return &serror{GENERIC, stc}
+func MakeErrorFromStruct(cx Context, st Struct) Error {
+
+	var str string
+	kind, kerr := st.GetField(cx, MakeStr("kind"))
+	msg, merr := st.GetField(cx, MakeStr("msg"))
+
+	if kerr == nil {
+		if merr == nil {
+			str = strings.Join([]string{
+				kind.ToStr(cx).String(), ": ", msg.ToStr(cx).String()}, "")
+		} else {
+			str = kind.ToStr(cx).String()
+		}
+	} else {
+		str = st.ToStr(cx).String()
+	}
+
+	return &serror{ERROR, st, str}
 }
 
 func NullValueError() Error {
@@ -183,8 +203,10 @@ func DivideByZeroError() Error {
 	return makeError(DIVIDE_BY_ZERO, "")
 }
 
-func IndexOutOfBoundsError() Error {
-	return makeError(INDEX_OUT_OF_BOUNDS, "")
+func IndexOutOfBoundsError(val int) Error {
+	return makeError(
+		INDEX_OUT_OF_BOUNDS,
+		fmt.Sprintf("%d", val))
 }
 
 func NoSuchFieldError(field string) Error {
@@ -227,4 +249,8 @@ func UndefinedSymbolError(name string) Error {
 	return makeError(
 		UNDEFINIED_SYMBOL,
 		fmt.Sprintf("Symbol '%s' is not defined", name))
+}
+
+func ImmutableValueError() Error {
+	return makeError(IMMUTABLE_VALUE, "")
 }

@@ -20,28 +20,28 @@ import (
 )
 
 func TestChain(t *testing.T) {
-	s0 := newStruct([]*StructEntry{
-		{"a", true, false, ONE},
-		{"b", true, false, MakeInt(2)}})
-	s1 := newStruct([]*StructEntry{
-		{"b", true, false, MakeInt(3)},
-		{"c", true, false, MakeInt(4)}})
+	s0 := newStruct([]Field{
+		NewField("a", true, ONE),
+		NewField("b", true, MakeInt(2))})
+	s1 := newStruct([]Field{
+		NewField("b", true, MakeInt(3)),
+		NewField("c", true, MakeInt(4))})
 
 	c := MergeStructs([]Struct{s0, s1})
-	//println(c.ToStr().String())
-	assert(t, len(c.Keys()) == 3)
-	//ok(t, c.ToStr(), nil, MakeStr("struct { b: 2, c: 4, a: 1 }"))
+	//println(c.ToStr(cx).String())
+	tassert(t, len(c.FieldNames()) == 3)
+	//ok(t, c.ToStr(cx), nil, MakeStr("struct { b: 2, c: 4, a: 1 }"))
 
-	v, err := c.GetField(MakeStr("a"))
+	v, err := c.GetField(cx, MakeStr("a"))
 	ok(t, v, err, ONE)
-	v, err = c.GetField(MakeStr("b"))
+	v, err = c.GetField(cx, MakeStr("b"))
 	ok(t, v, err, MakeInt(2))
-	v, err = c.GetField(MakeStr("c"))
+	v, err = c.GetField(cx, MakeStr("c"))
 	ok(t, v, err, MakeInt(4))
 }
 
-func newStruct(entries []*StructEntry) Struct {
-	stc, err := NewStruct(entries)
+func newStruct(fields []Field) Struct {
+	stc, err := NewStruct(fields, false)
 	if err != nil {
 		panic("invalid struct")
 	}
@@ -49,78 +49,54 @@ func newStruct(entries []*StructEntry) Struct {
 }
 
 func TestStruct(t *testing.T) {
-	stc := newStruct([]*StructEntry{})
+	stc := newStruct([]Field{})
 	okType(t, stc, TSTRUCT)
-	assert(t, reflect.DeepEqual(stc.Keys(), []string{}))
+	tassert(t, reflect.DeepEqual(stc.FieldNames(), []string{}))
 
-	s := stc.ToStr()
+	s := stc.ToStr(cx)
 	ok(t, s, nil, MakeStr("struct { }"))
 
-	z := stc.Eq(newStruct([]*StructEntry{}))
-	ok(t, z, nil, TRUE)
-	z = stc.Eq(newStruct([]*StructEntry{{"a", true, false, ONE}}))
-	ok(t, z, nil, FALSE)
+	z, err := stc.Eq(cx, newStruct([]Field{}))
+	ok(t, z, err, TRUE)
+	z, err = stc.Eq(cx, newStruct([]Field{NewField("a", true, ONE)}))
+	ok(t, z, err, FALSE)
 
-	val, err := stc.Plus(MakeStr("a"))
-	ok(t, val, err, MakeStr("struct { }a"))
-
-	val, err = stc.GetField(MakeStr("a"))
+	val, err := stc.GetField(cx, MakeStr("a"))
 	fail(t, val, err, "NoSuchField: Field 'a' not found")
-
-	val, err = stc.Get(MakeStr("a"))
-	fail(t, val, err, "NoSuchField: Field 'a' not found")
-
-	val, err = stc.Get(ZERO)
-	fail(t, val, err, "TypeMismatch: Expected 'Str'")
 
 	//////////////////
 
-	stc = newStruct([]*StructEntry{{"a", false, false, ONE}})
+	stc = newStruct([]Field{NewField("a", false, ONE)})
 	okType(t, stc, TSTRUCT)
 
-	s = stc.ToStr()
+	s = stc.ToStr(cx)
 	ok(t, s, nil, MakeStr("struct { a: 1 }"))
 
-	z = stc.Eq(newStruct([]*StructEntry{}))
-	ok(t, z, nil, FALSE)
-	z = stc.Eq(newStruct([]*StructEntry{{"a", true, false, ONE}}))
-	ok(t, z, nil, TRUE)
+	z, err = stc.Eq(cx, newStruct([]Field{}))
+	ok(t, z, err, FALSE)
+	z, err = stc.Eq(cx, newStruct([]Field{NewField("a", true, ONE)}))
+	ok(t, z, err, TRUE)
 
-	val, err = stc.Plus(MakeStr("a"))
-	ok(t, val, err, MakeStr("struct { a: 1 }a"))
-
-	val, err = stc.GetField(MakeStr("a"))
+	val, err = stc.GetField(cx, MakeStr("a"))
 	ok(t, val, err, ONE)
 
-	val, err = stc.GetField(MakeStr("b"))
+	val, err = stc.GetField(cx, MakeStr("b"))
 	fail(t, val, err, "NoSuchField: Field 'b' not found")
 
-	val, err = stc.Get(MakeStr("a"))
-	ok(t, val, err, ONE)
-
-	val, err = stc.Get(MakeStr("b"))
-	fail(t, val, err, "NoSuchField: Field 'b' not found")
-
-	err = stc.SetField(MakeStr("a"), MakeInt(123))
+	err = stc.SetField(cx, MakeStr("a"), MakeInt(123))
 	if err != nil {
 		panic("unexpected error")
 	}
 
-	val, err = stc.GetField(MakeStr("a"))
+	val, err = stc.GetField(cx, MakeStr("a"))
 	ok(t, val, err, MakeInt(123))
 
-	val, err = stc.Get(MakeStr("a"))
-	ok(t, val, err, MakeInt(123))
-
-	err = stc.Set(MakeStr("a"), MakeInt(456))
+	err = stc.SetField(cx, MakeStr("a"), MakeInt(456))
 	if err != nil {
 		panic("unexpected error")
 	}
 
-	val, err = stc.GetField(MakeStr("a"))
-	ok(t, val, err, MakeInt(456))
-
-	val, err = stc.Get(MakeStr("a"))
+	val, err = stc.GetField(cx, MakeStr("a"))
 	ok(t, val, err, MakeInt(456))
 
 	val, err = stc.Has(MakeStr("a"))
@@ -132,70 +108,49 @@ func TestStruct(t *testing.T) {
 	val, err = stc.Has(ZERO)
 	fail(t, val, err, "TypeMismatch: Expected 'Str'")
 
-	stc, err = NewStruct([]*StructEntry{{"a", true, false, NULL}})
+	stc, err = NewStruct([]Field{NewField("a", true, NULL)}, false)
 	if err != nil {
 		panic("oops")
 	}
-	val, err = stc.GetField(MakeStr("a"))
+	val, err = stc.GetField(cx, MakeStr("a"))
 	ok(t, val, err, NULL)
 
-	assert(t, reflect.DeepEqual(stc.Keys(), []string{"a"}))
+	tassert(t, reflect.DeepEqual(stc.FieldNames(), []string{"a"}))
 
-	stc, err = NewStruct([]*StructEntry{
-		{"a", true, false, ONE},
-		{"a", true, false, ZERO}})
+	stc, err = NewStruct([]Field{
+		NewField("a", true, ONE),
+		NewField("a", true, ZERO)}, false)
 	fail(t, stc, err, "DuplicateField: Field 'a' is a duplicate")
-
-	stc, err = BlankStruct([]*StructEntryDef{{"a", true, false}})
-	val, err = stc.GetField(MakeStr("a"))
-	ok(t, val, err, NULL)
-
-	err = stc.SetField(MakeStr("a"), MakeInt(123))
-	fail(t, nil, err, "ReadonlyField: Field 'a' is readonly")
-
-	err = stc.InitField(MakeStr("a"), MakeInt(123))
-	assert(t, err == nil)
-
-	val, err = stc.GetField(MakeStr("a"))
-	ok(t, val, err, MakeInt(123))
 }
 
 func TestNativeProp(t *testing.T) {
 
 	var propValue Value = ZERO
 
-	getter := &nativeFunc{
-		func(values []Value) (Value, Error) {
-			if len(values) != 0 {
-				return nil, ArityMismatchError("0", len(values))
-			}
+	getter := NewNativeFunc(0, 0,
+		func(cx Context, values []Value) (Value, Error) {
 			return propValue, nil
-		}}
+		})
 
-	setter := &nativeFunc{
-		func(values []Value) (Value, Error) {
-			if len(values) != 1 {
-				return nil, ArityMismatchError("1", len(values))
-			}
+	setter := NewNativeFunc(1, 1,
+		func(cx Context, values []Value) (Value, Error) {
 			propValue = values[0]
-			return NULL, nil
-		}}
+			return nil, nil
+		})
 
-	prop := NewTuple([]Value{getter, setter})
+	stc, err := NewStruct([]Field{NewProperty("a", getter, setter)}, false)
+	tassert(t, err == nil)
 
-	stc, err := NewStruct([]*StructEntry{{"a", false, true, prop}})
-	Assert(err == nil, "invalid struct")
-
-	val, err := stc.GetField(MakeStr("a"))
+	val, err := stc.GetField(cx, MakeStr("a"))
 	ok(t, val, err, ZERO)
-	Assert(propValue == ZERO, "invalid struct")
+	tassert(t, propValue == ZERO)
 
-	err = stc.SetField(MakeStr("a"), ONE)
-	Assert(err == nil, "invalid struct")
+	err = stc.SetField(cx, MakeStr("a"), ONE)
+	tassert(t, err == nil)
 
-	val, err = stc.GetField(MakeStr("a"))
+	val, err = stc.GetField(cx, MakeStr("a"))
 	ok(t, val, err, ONE)
-	Assert(propValue == ONE, "invalid struct")
+	tassert(t, propValue == ONE)
 }
 
 func TestList(t *testing.T) {
@@ -205,210 +160,174 @@ func TestList(t *testing.T) {
 	var v Value
 	var err Error
 
-	v = ls.ToStr()
+	v = ls.ToStr(cx)
 	ok(t, v, nil, MakeStr("[ ]"))
 
-	v = ls.Eq(NewList([]Value{}))
-	ok(t, v, nil, TRUE)
+	v, err = ls.Eq(cx, NewList([]Value{}))
+	ok(t, v, err, TRUE)
 
-	v = ls.Eq(NewList([]Value{MakeStr("a")}))
-	ok(t, v, nil, FALSE)
+	v, err = ls.Eq(cx, NewList([]Value{MakeStr("a")}))
+	ok(t, v, err, FALSE)
 
-	v = ls.Eq(NULL)
-	ok(t, v, nil, FALSE)
+	v, err = ls.Eq(cx, NULL)
+	ok(t, v, err, FALSE)
 
 	v = ls.Len()
 	ok(t, v, nil, ZERO)
 
-	ls.Add(MakeStr("a"))
+	ls.Add(cx, MakeStr("a"))
 
-	v = ls.Eq(NewList([]Value{}))
-	ok(t, v, nil, FALSE)
+	v, err = ls.Eq(cx, NewList([]Value{}))
+	ok(t, v, err, FALSE)
 
-	v = ls.Eq(NewList([]Value{MakeStr("a")}))
-	ok(t, v, nil, TRUE)
+	v, err = ls.Eq(cx, NewList([]Value{MakeStr("a")}))
+	ok(t, v, err, TRUE)
 
 	v = ls.Len()
 	ok(t, v, nil, ONE)
 
-	v, err = ls.Get(ZERO)
+	v, err = ls.Get(cx, ZERO)
 	ok(t, v, err, MakeStr("a"))
 
-	err = ls.Set(ZERO, MakeStr("b"))
-	assert(t, err == nil)
+	err = ls.Set(cx, ZERO, MakeStr("b"))
+	tassert(t, err == nil)
 
-	v, err = ls.Get(ZERO)
+	v, err = ls.Get(cx, ZERO)
 	ok(t, v, err, MakeStr("b"))
 
-	v, err = ls.Get(NEG_ONE)
-	fail(t, v, err, "IndexOutOfBounds")
+	v, err = ls.Get(cx, NEG_ONE)
+	ok(t, v, err, MakeStr("b"))
 
-	v, err = ls.Get(ONE)
-	fail(t, v, err, "IndexOutOfBounds")
+	v, err = ls.Get(cx, ONE)
+	fail(t, v, err, "IndexOutOfBounds: 1")
 
-	err = ls.Set(NEG_ONE, TRUE)
-	fail(t, nil, err, "IndexOutOfBounds")
+	err = ls.Set(cx, NEG_ONE, TRUE)
+	tassert(t, err == nil)
 
-	err = ls.Set(ONE, TRUE)
-	fail(t, nil, err, "IndexOutOfBounds")
+	err = ls.Set(cx, ONE, TRUE)
+	fail(t, nil, err, "IndexOutOfBounds: 1")
 
-	v = ls.ToStr()
-	ok(t, v, nil, MakeStr("[ b ]"))
+	v = ls.ToStr(cx)
+	ok(t, v, nil, MakeStr("[ true ]"))
 
-	ls.Add(MakeStr("z"))
+	ls.Add(cx, MakeStr("z"))
 
-	v = ls.ToStr()
-	ok(t, v, nil, MakeStr("[ b, z ]"))
-
-	//////////////////////////////
-	// sliceable
-
-	ls = NewList([]Value{})
-	v, err = ls.SliceFrom(ZERO)
-	fail(t, nil, err, "IndexOutOfBounds")
-	v, err = ls.SliceTo(ZERO)
-	fail(t, nil, err, "IndexOutOfBounds")
-	v, err = ls.SliceTo(ONE)
-	fail(t, nil, err, "IndexOutOfBounds")
-	v, err = ls.Slice(ZERO, ONE)
-	fail(t, nil, err, "IndexOutOfBounds")
-
-	ls = NewList([]Value{TRUE, FALSE, NULL})
-	v, err = ls.SliceFrom(ONE)
-	ok(t, v, err, NewList([]Value{FALSE, NULL}))
-	v, err = ls.SliceTo(ONE)
-	ok(t, v, err, NewList([]Value{TRUE}))
-	v, err = ls.Slice(ZERO, ONE)
-	ok(t, v, err, NewList([]Value{TRUE}))
-	v, err = ls.Slice(ZERO, MakeInt(3))
-	ok(t, v, err, NewList([]Value{TRUE, FALSE, NULL}))
-
-	v, err = ls.Slice(ZERO, ZERO)
-	ok(t, v, err, NewList([]Value{}))
-
-	v, err = ls.Slice(MakeInt(2), ZERO)
-	fail(t, nil, err, "IndexOutOfBounds")
-
-	v, err = ls.SliceFrom(MakeInt(7))
-	fail(t, nil, err, "IndexOutOfBounds")
-	v, err = ls.SliceTo(MakeInt(7))
-	fail(t, nil, err, "IndexOutOfBounds")
-	v, err = ls.Slice(MakeInt(7), MakeInt(7))
-	fail(t, nil, err, "IndexOutOfBounds")
+	v = ls.ToStr(cx)
+	ok(t, v, nil, MakeStr("[ true, z ]"))
 }
 
 func TestCompositeHashCode(t *testing.T) {
-	h, err := NewDict([]*HEntry{}).HashCode()
+	h, err := NewDict(cx, []*HEntry{}).HashCode(cx)
 	fail(t, h, err, "TypeMismatch: Expected Hashable Type")
 
-	h, err = NewList([]Value{}).HashCode()
+	h, err = NewList([]Value{}).HashCode(cx)
 	fail(t, h, err, "TypeMismatch: Expected Hashable Type")
 
-	h, err = newStruct([]*StructEntry{}).HashCode()
+	h, err = newStruct([]Field{}).HashCode(cx)
 	fail(t, h, err, "TypeMismatch: Expected Hashable Type")
 }
 
 func TestDict(t *testing.T) {
-	d := NewDict([]*HEntry{})
+	d := NewDict(cx, []*HEntry{})
 	okType(t, d, TDICT)
 
 	var v Value
 	var err Error
 
-	v = d.ToStr()
+	v = d.ToStr(cx)
 	ok(t, v, err, MakeStr("dict { }"))
 
-	v = d.Eq(NewDict([]*HEntry{}))
-	ok(t, v, nil, TRUE)
+	v, err = d.Eq(cx, NewDict(cx, []*HEntry{}))
+	ok(t, v, err, TRUE)
 
-	v = d.Eq(NULL)
-	ok(t, v, nil, FALSE)
+	v, err = d.Eq(cx, NULL)
+	ok(t, v, err, FALSE)
 
 	v = d.Len()
 	ok(t, v, nil, ZERO)
 
-	v, err = d.Get(MakeStr("a"))
+	v, err = d.Get(cx, MakeStr("a"))
 	ok(t, v, err, NULL)
 
-	err = d.Set(MakeStr("a"), ONE)
-	assert(t, err == nil)
+	err = d.Set(cx, MakeStr("a"), ONE)
+	tassert(t, err == nil)
 
-	v, err = d.Get(MakeStr("a"))
+	v, err = d.Get(cx, MakeStr("a"))
 	ok(t, v, err, ONE)
 
-	v = d.Eq(NewDict([]*HEntry{}))
-	ok(t, v, nil, FALSE)
+	v, err = d.Eq(cx, NewDict(cx, []*HEntry{}))
+	ok(t, v, err, FALSE)
 
-	v = d.Eq(NewDict([]*HEntry{{MakeStr("a"), ONE}}))
-	ok(t, v, nil, TRUE)
+	v, err = d.Eq(cx, NewDict(cx, []*HEntry{{MakeStr("a"), ONE}}))
+	ok(t, v, err, TRUE)
 
 	v = d.Len()
 	ok(t, v, nil, ONE)
 
-	v = d.ToStr()
+	v = d.ToStr(cx)
 	ok(t, v, nil, MakeStr("dict { a: 1 }"))
 
-	err = d.Set(MakeStr("b"), MakeInt(2))
-	assert(t, err == nil)
+	err = d.Set(cx, MakeStr("b"), MakeInt(2))
+	tassert(t, err == nil)
 
-	v, err = d.Get(MakeStr("b"))
+	v, err = d.Get(cx, MakeStr("b"))
 	ok(t, v, err, MakeInt(2))
 
-	v = d.ToStr()
+	v = d.ToStr(cx)
 	ok(t, v, nil, MakeStr("dict { b: 2, a: 1 }"))
 
 	tp := NewTuple([]Value{ONE, ZERO})
-	d = NewDict([]*HEntry{{tp, TRUE}})
+	d = NewDict(cx, []*HEntry{{tp, TRUE}})
 
-	v = d.ToStr()
+	v = d.ToStr(cx)
 	ok(t, v, nil, MakeStr("dict { (1, 0): true }"))
 
-	v, err = d.Get(tp)
+	v, err = d.Get(cx, tp)
 	ok(t, v, err, TRUE)
 }
 
 func TestSet(t *testing.T) {
-	s := NewSet([]Value{})
-	okType(t, s, TDICT)
+	s := NewSet(cx, []Value{})
+	okType(t, s, TSET)
 
 	var v Value
 	var err Error
 
-	v = s.ToStr()
+	v = s.ToStr(cx)
 	ok(t, v, err, MakeStr("set { }"))
 
-	v = s.Eq(NewSet([]Value{}))
-	ok(t, v, nil, TRUE)
+	v, err = s.Eq(cx, NewSet(cx, []Value{}))
+	ok(t, v, err, TRUE)
 
-	v = s.Eq(NewSet([]Value{ONE}))
-	ok(t, v, nil, FALSE)
+	v, err = s.Eq(cx, NewSet(cx, []Value{ONE}))
+	ok(t, v, err, FALSE)
 
-	v = s.Eq(NULL)
-	ok(t, v, nil, FALSE)
+	v, err = s.Eq(cx, NULL)
+	ok(t, v, err, FALSE)
 
 	v = s.Len()
 	ok(t, v, nil, ZERO)
 
-	s = NewSet([]Value{ONE})
+	s = NewSet(cx, []Value{ONE})
 
-	v = s.ToStr()
+	v = s.ToStr(cx)
 	ok(t, v, err, MakeStr("set { 1 }"))
 
-	v = s.Eq(NewSet([]Value{}))
-	ok(t, v, nil, FALSE)
+	v, err = s.Eq(cx, NewSet(cx, []Value{}))
+	ok(t, v, err, FALSE)
 
-	v = s.Eq(NewSet([]Value{ONE, ONE, ONE}))
-	ok(t, v, nil, TRUE)
+	v, err = s.Eq(cx, NewSet(cx, []Value{ONE, ONE, ONE}))
+	ok(t, v, err, TRUE)
 
-	v = s.Eq(NULL)
-	ok(t, v, nil, FALSE)
+	v, err = s.Eq(cx, NULL)
+	ok(t, v, err, FALSE)
 
 	v = s.Len()
 	ok(t, v, nil, ONE)
 
-	s = NewSet([]Value{ONE, ZERO, ZERO, ONE})
+	s = NewSet(cx, []Value{ONE, ZERO, ZERO, ONE})
 
-	v = s.ToStr()
+	v = s.ToStr(cx)
 	ok(t, v, err, MakeStr("set { 0, 1 }"))
 
 	v = s.Len()
@@ -422,28 +341,29 @@ func TestTuple(t *testing.T) {
 	tp := NewTuple([]Value{ONE, ZERO})
 	okType(t, tp, TTUPLE)
 
-	v = tp.Eq(NewTuple([]Value{ZERO, ZERO}))
-	ok(t, v, nil, FALSE)
+	v, err = tp.Eq(cx, NewTuple([]Value{ZERO, ZERO}))
+	ok(t, v, err, FALSE)
 
-	v = tp.Eq(NewTuple([]Value{ONE, ZERO}))
-	ok(t, v, nil, TRUE)
+	v, err = tp.Eq(cx, NewTuple([]Value{ONE, ZERO}))
+	ok(t, v, err, TRUE)
 
-	v = tp.Eq(NULL)
-	ok(t, v, nil, FALSE)
+	v, err = tp.Eq(cx, NULL)
+	ok(t, v, err, FALSE)
 
-	v, err = tp.Get(ZERO)
+	v, err = tp.Get(cx, ZERO)
 	ok(t, v, err, ONE)
 
-	v, err = tp.Get(ONE)
+	v, err = tp.Get(cx, ONE)
 	ok(t, v, err, ZERO)
 
-	v, err = tp.Get(NEG_ONE)
-	fail(t, v, err, "IndexOutOfBounds")
+	v, err = tp.Get(cx, NEG_ONE)
+	println("adfasfda", v.ToStr(cx))
+	ok(t, v, err, ZERO)
 
-	v, err = tp.Get(MakeInt(2))
-	fail(t, v, err, "IndexOutOfBounds")
+	v, err = tp.Get(cx, MakeInt(2))
+	fail(t, v, err, "IndexOutOfBounds: 2")
 
-	v = tp.ToStr()
+	v = tp.ToStr(cx)
 	ok(t, v, nil, MakeStr("(1, 0)"))
 
 	v = tp.Len()
@@ -465,13 +385,13 @@ func TestRange(t *testing.T) {
 	r := newRange(0, 5, 1)
 	okType(t, r, TRANGE)
 
-	v = r.Eq(newRange(0, 5, 2))
+	v, err = r.Eq(cx, newRange(0, 5, 2))
 	ok(t, v, err, FALSE)
 
-	v = r.Eq(newRange(0, 5, 1))
+	v, err = r.Eq(cx, newRange(0, 5, 1))
 	ok(t, v, err, TRUE)
 
-	v = r.Eq(NULL)
+	v, err = r.Eq(cx, NULL)
 	ok(t, v, err, FALSE)
 
 	v = r.Len()
@@ -480,9 +400,9 @@ func TestRange(t *testing.T) {
 	v = newRange(0, 6, 3).Len()
 	ok(t, v, nil, MakeInt(2))
 	v = newRange(0, 7, 3).Len()
-	ok(t, v, nil, MakeInt(2))
+	ok(t, v, nil, MakeInt(3))
 	v = newRange(0, 8, 3).Len()
-	ok(t, v, nil, MakeInt(2))
+	ok(t, v, nil, MakeInt(3))
 	v = newRange(0, 9, 3).Len()
 	ok(t, v, nil, MakeInt(3))
 
@@ -497,63 +417,51 @@ func TestRange(t *testing.T) {
 	v = newRange(0, -5, -1).Len()
 	ok(t, v, nil, MakeInt(5))
 	v = newRange(-1, -8, -3).Len()
-	ok(t, v, nil, MakeInt(2))
+	ok(t, v, nil, MakeInt(3))
 
 	r = newRange(0, 5, 1)
-	v, err = r.Get(ONE)
+	v, err = r.Get(cx, ONE)
 	ok(t, v, err, MakeInt(1))
 
 	r = newRange(3, 9, 2)
-	v, err = r.Get(MakeInt(2))
+	v, err = r.Get(cx, MakeInt(2))
 	ok(t, v, err, MakeInt(7))
 
 	r = newRange(-9, -13, -1)
-	v, err = r.Get(ONE)
+	v, err = r.Get(cx, ONE)
 	ok(t, v, err, MakeInt(-10))
-
-	r = newRange(0, 5, 1)
-	v, err = r.Slice(ONE, MakeInt(3))
-	ok(t, v, err, newRange(1, 3, 1))
-	v, err = r.SliceFrom(ONE)
-	ok(t, v, err, newRange(1, 5, 1))
-	v, err = r.SliceTo(MakeInt(3))
-	ok(t, v, err, newRange(0, 3, 1))
-
-	ok(t, r.From(), nil, ZERO)
-	ok(t, r.To(), nil, MakeInt(5))
-	ok(t, r.Step(), nil, ONE)
 }
 
 func TestRangeIterator(t *testing.T) {
 
 	var ibl Iterable = newRange(1, 5, 1)
 
-	var itr Iterator = ibl.NewIterator()
+	var itr Iterator = ibl.NewIterator(cx)
 	v, err := itr.IterGet()
 	fail(t, v, err, "NoSuchElement")
 	var n int64 = 1
 	for itr.IterNext().BoolVal() {
 		v, err = itr.IterGet()
-		assert(t, err == nil)
+		tassert(t, err == nil)
 
 		i, ok := v.(Int)
-		assert(t, ok)
+		tassert(t, ok)
 		n *= i.IntVal()
 	}
-	assert(t, n == 24)
+	tassert(t, n == 24)
 	v, err = itr.IterGet()
 	fail(t, v, err, "NoSuchElement")
 
-	itr = ibl.NewIterator()
+	itr = ibl.NewIterator(cx)
 	n = 1
 	for structInvokeBoolFunc(t, itr, MakeStr("nextValue")).BoolVal() {
 		v := structInvokeFunc(t, itr, MakeStr("getValue"))
 
 		i, ok := v.(Int)
-		assert(t, ok)
+		tassert(t, ok)
 		n *= i.IntVal()
 	}
-	assert(t, n == 24)
+	tassert(t, n == 24)
 }
 
 func TestListIterator(t *testing.T) {
@@ -561,100 +469,100 @@ func TestListIterator(t *testing.T) {
 	var ibl Iterable = NewList(
 		[]Value{MakeInt(1), MakeInt(2), MakeInt(3), MakeInt(4)})
 
-	var itr Iterator = ibl.NewIterator()
+	var itr Iterator = ibl.NewIterator(cx)
 	v, err := itr.IterGet()
 	fail(t, v, err, "NoSuchElement")
 	var n int64 = 1
 	for itr.IterNext().BoolVal() {
 		v, err = itr.IterGet()
-		assert(t, err == nil)
+		tassert(t, err == nil)
 
 		i, ok := v.(Int)
-		assert(t, ok)
+		tassert(t, ok)
 		n *= i.IntVal()
 	}
-	assert(t, n == 24)
+	tassert(t, n == 24)
 	v, err = itr.IterGet()
 	fail(t, v, err, "NoSuchElement")
 
-	itr = ibl.NewIterator()
-	err = itr.SetField(MakeStr("nextValue"), NULL)
-	fail(t, nil, err, "ReadonlyField: Field 'nextValue' is readonly")
-	err = itr.SetField(MakeStr("getValue"), NULL)
-	fail(t, nil, err, "ReadonlyField: Field 'getValue' is readonly")
+	itr = ibl.NewIterator(cx)
+	err = itr.SetField(cx, MakeStr("nextValue"), NULL)
+	fail(t, nil, err, "ImmutableValue")
+	err = itr.SetField(cx, MakeStr("getValue"), NULL)
+	fail(t, nil, err, "ImmutableValue")
 
 	n = 1
 	for structInvokeBoolFunc(t, itr, MakeStr("nextValue")).BoolVal() {
 		v := structInvokeFunc(t, itr, MakeStr("getValue"))
 
 		i, ok := v.(Int)
-		assert(t, ok)
+		tassert(t, ok)
 		n *= i.IntVal()
 	}
-	assert(t, n == 24)
+	tassert(t, n == 24)
 }
 
 func TestDictIterator(t *testing.T) {
 
-	var ibl Iterable = NewDict(
+	var ibl Iterable = NewDict(cx,
 		[]*HEntry{
 			{MakeStr("a"), ONE},
 			{MakeStr("b"), MakeInt(2)},
 			{MakeStr("c"), MakeInt(3)}})
 
-	var itr Iterator = ibl.NewIterator()
+	var itr Iterator = ibl.NewIterator(cx)
 	v, err := itr.IterGet()
 	fail(t, v, err, "NoSuchElement")
 	s := MakeStr("")
 	for itr.IterNext().BoolVal() {
 		v, err = itr.IterGet()
-		assert(t, err == nil)
+		tassert(t, err == nil)
 
 		tp, ok := v.(Tuple)
-		assert(t, ok)
-		s = strcat(s, tp)
+		tassert(t, ok)
+		s = s.Concat(tp.ToStr(cx))
 	}
 	ok(t, s, nil, MakeStr("(b, 2)(a, 1)(c, 3)"))
 	v, err = itr.IterGet()
 	fail(t, v, err, "NoSuchElement")
 
-	itr = ibl.NewIterator()
+	itr = ibl.NewIterator(cx)
 	s = MakeStr("")
 	for structInvokeBoolFunc(t, itr, MakeStr("nextValue")).BoolVal() {
 		v := structInvokeFunc(t, itr, MakeStr("getValue"))
 
 		tp, ok := v.(Tuple)
-		assert(t, ok)
-		s = strcat(s, tp)
+		tassert(t, ok)
+		s = s.Concat(tp.ToStr(cx))
 	}
 	ok(t, s, nil, MakeStr("(b, 2)(a, 1)(c, 3)"))
 }
 
 func TestSetIterator(t *testing.T) {
 
-	var ibl Iterable = NewSet(
+	var ibl Iterable = NewSet(cx,
 		[]Value{MakeStr("a"), MakeStr("b"), MakeStr("c")})
 
-	var itr Iterator = ibl.NewIterator()
+	var itr Iterator = ibl.NewIterator(cx)
 	v, err := itr.IterGet()
 	fail(t, v, err, "NoSuchElement")
 	s := MakeStr("")
 	for itr.IterNext().BoolVal() {
 		v, err = itr.IterGet()
-		assert(t, err == nil)
+		tassert(t, err == nil)
 
-		s = strcat(s, v)
+		s = s.Concat(v.ToStr(cx))
 	}
 	ok(t, s, nil, MakeStr("bac"))
 	v, err = itr.IterGet()
 	fail(t, v, err, "NoSuchElement")
 
-	itr = ibl.NewIterator()
+	itr = ibl.NewIterator(cx)
 	s = MakeStr("")
 	for structInvokeBoolFunc(t, itr, MakeStr("nextValue")).BoolVal() {
 		v := structInvokeFunc(t, itr, MakeStr("getValue"))
 
-		s = strcat(s, v)
+		s = s.Concat(v.ToStr(cx))
 	}
 	ok(t, s, nil, MakeStr("bac"))
 }

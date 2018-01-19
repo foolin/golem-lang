@@ -32,65 +32,56 @@ func NewBufferedChan(size int) Chan {
 
 func (ch *channel) chanMarker() {}
 
-func (ch *channel) TypeOf() Type { return TCHAN }
+func (ch *channel) Type() Type { return TCHAN }
 
-func (ch *channel) Eq(v Value) Bool {
+func (ch *channel) Freeze() (Value, Error) {
+	return ch, nil
+}
+
+func (ch *channel) Frozen() (Bool, Error) {
+	return TRUE, nil
+}
+
+func (ch *channel) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *channel:
 		// equality is based on identity
-		return MakeBool(ch == t)
+		return MakeBool(ch == t), nil
 	default:
-		return FALSE
+		return FALSE, nil
 	}
 }
 
-func (ch *channel) HashCode() (Int, Error) {
+func (ch *channel) HashCode(cx Context) (Int, Error) {
 	return nil, TypeMismatchError("Expected Hashable Type")
 }
 
-func (ch *channel) Cmp(v Value) (Int, Error) {
+func (ch *channel) Cmp(cx Context, v Value) (Int, Error) {
 	return nil, TypeMismatchError("Expected Comparable Type")
 }
 
-func (ch *channel) ToStr() Str {
+func (ch *channel) ToStr(cx Context) Str {
 	return MakeStr(fmt.Sprintf("channel<%p>", ch))
-}
-
-func (ch *channel) Plus(v Value) (Value, Error) {
-	switch t := v.(type) {
-
-	case Str:
-		return strcat(ch, t), nil
-
-	default:
-		return nil, TypeMismatchError("Expected Number Type")
-	}
 }
 
 //--------------------------------------------------------------
 // intrinsic functions
 
-func (ch *channel) GetField(key Str) (Value, Error) {
-	switch key.String() {
+func (ch *channel) GetField(cx Context, key Str) (Value, Error) {
+	switch sn := key.String(); sn {
 
 	case "send":
-		return &intrinsicFunc{ch, "send", &nativeFunc{
-			func(values []Value) (Value, Error) {
-				if len(values) != 1 {
-					return nil, ArityMismatchError("1", len(values))
-				}
-
+		return &intrinsicFunc{ch, sn, &nativeFunc{
+			1, 1,
+			func(cx Context, values []Value) (Value, Error) {
 				ch.ch <- values[0]
 				return NULL, nil
 			}}}, nil
 
 	case "recv":
-		return &intrinsicFunc{ch, "recv", &nativeFunc{
-			func(values []Value) (Value, Error) {
-				if len(values) != 0 {
-					return nil, ArityMismatchError("0", len(values))
-				}
-
+		return &intrinsicFunc{ch, sn, &nativeFunc{
+			0, 0,
+			func(cx Context, values []Value) (Value, Error) {
 				val := <-ch.ch
 				return val, nil
 			}}}, nil

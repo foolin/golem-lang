@@ -18,45 +18,26 @@ import (
 	//"fmt"
 )
 
-type StructEntry struct {
-	Key        string
-	IsConst    bool
-	IsProperty bool
-	Value      Value
-}
-
-type StructEntryDef struct {
-	Key        string
-	IsConst    bool
-	IsProperty bool
-}
-
 //--------------------------------------------------------------
+// Struct
 
-func NewStruct(entries []*StructEntry) (Struct, Error) {
-
-	smap := newStructMap()
-	for _, e := range entries {
-		if _, has := smap.get(e.Key); has {
-			return nil, DuplicateFieldError(e.Key)
-		}
-		smap.put(e)
-	}
-
-	return &_struct{smap}, nil
+type _struct struct {
+	smap   *structMap
+	frozen bool
 }
 
-func BlankStruct(def []*StructEntryDef) (Struct, Error) {
+func NewStruct(fields []Field, frozen bool) (Struct, Error) {
 
 	smap := newStructMap()
-	for _, d := range def {
-		if _, has := smap.get(d.Key); has {
-			return nil, DuplicateFieldError(d.Key)
+	for _, f := range fields {
+		ff := f.(*field)
+		if _, has := smap.get(ff.name); has {
+			return nil, DuplicateFieldError(ff.name)
 		}
-		smap.put(&StructEntry{d.Key, d.IsConst, d.IsProperty, NULL})
+		smap.put(ff)
 	}
 
-	return &_struct{smap}, nil
+	return &_struct{smap, frozen}, nil
 }
 
 func MergeStructs(structs []Struct) Struct {
@@ -65,180 +46,188 @@ func MergeStructs(structs []Struct) Struct {
 	}
 
 	smap := newStructMap()
+	frozen := false
 
-	// subtlety: keys that are defined in more
+	// FieldNames that are defined in more
 	// than one of the structs are combined so that the value
 	// is taken only from the first such struct
+
+	// If any of the structs are frozen,
+	// then the resulting struct is also frozen.
+
 	for _, s := range structs {
-		for _, b := range (s.(*_struct)).smap.buckets {
-			for _, e := range b {
-				smap.put(e)
+		st := s.(*_struct)
+		if st.frozen {
+			frozen = true
+		}
+		for _, b := range st.smap.buckets {
+			for _, f := range b {
+				smap.put(f)
 			}
 		}
 	}
 
-	return &_struct{smap}
+	return &_struct{smap, frozen}
 }
 
-type _struct struct {
-	smap *structMap
+func (st *_struct) compositeMarker() {}
+
+func (st *_struct) Type() Type { return TSTRUCT }
+
+func (st *_struct) Freeze() (Value, Error) {
+	st.frozen = true
+	return st, nil
 }
 
-func (stc *_struct) compositeMarker() {}
+func (st *_struct) Frozen() (Bool, Error) {
+	return MakeBool(st.frozen), nil
+}
 
-func (stc *_struct) TypeOf() Type { return TSTRUCT }
-
-func (stc *_struct) ToStr() Str {
+func (st *_struct) ToStr(cx Context) Str {
 
 	var buf bytes.Buffer
 	buf.WriteString("struct {")
-	for i, k := range stc.Keys() {
+	for i, n := range st.FieldNames() {
 		if i > 0 {
 			buf.WriteString(",")
 		}
 		buf.WriteString(" ")
-		buf.WriteString(k)
+		buf.WriteString(n)
 		buf.WriteString(": ")
 
-		v, err := stc.GetField(str(k))
-		Assert(err == nil, "invalid struct")
-		buf.WriteString(v.ToStr().String())
+		v, err := st.GetField(cx, str(n))
+		assert(err == nil)
+		buf.WriteString(v.ToStr(cx).String())
 	}
 	buf.WriteString(" }")
 	return MakeStr(buf.String())
 }
 
-func (stc *_struct) HashCode() (Int, Error) {
+func (st *_struct) HashCode(cx Context) (Int, Error) {
 	// TODO $hash()
 	return nil, TypeMismatchError("Expected Hashable Type")
 }
 
-func (stc *_struct) Eq(v Value) Bool {
+func (st *_struct) Eq(cx Context, v Value) (Bool, Error) {
 
 	// same type
 	that, ok := v.(Struct)
 	if !ok {
-		return FALSE
+		return FALSE, nil
 	}
 
-	// same number of keys
-	keys := stc.Keys()
-	if len(keys) != len(that.Keys()) {
-		return FALSE
+	// same number of fields
+	fields := st.FieldNames()
+	if len(fields) != len(that.FieldNames()) {
+		return FALSE, nil
 	}
 
-	// all keys have same value
-	for _, k := range keys {
-		a, err := stc.GetField(str(k))
-		Assert(err == nil, "invalid chain")
+	// all fields have same value
+	for _, n := range fields {
+		a, err := st.GetField(cx, str(n))
+		assert(err == nil)
 
-		b, err := that.GetField(str(k))
+		b, err := that.GetField(cx, str(n))
 		if err != nil {
-			Assert(err.Kind() == NO_SUCH_FIELD, "invalid chain")
-			return FALSE
+			assert(err.Kind() == NO_SUCH_FIELD)
 		}
 
-		if a.Eq(b) != TRUE {
-			return FALSE
+		eq, err := a.Eq(cx, b)
+		if err != nil {
+			return nil, err
+		}
+		if eq != TRUE {
+			return FALSE, nil
 		}
 	}
 
 	// done
-	return TRUE
+	return TRUE, nil
 }
 
-func (stc *_struct) Cmp(v Value) (Int, Error) {
+func (st *_struct) Cmp(cx Context, v Value) (Int, Error) {
 	return nil, TypeMismatchError("Expected Comparable Type")
 }
 
-func (stc *_struct) Plus(v Value) (Value, Error) {
-	switch t := v.(type) {
-
-	case Str:
-		return strcat(stc, t), nil
-
-	default:
-		return nil, TypeMismatchError("Expected Number Type")
-	}
-}
-
-func (stc *_struct) Get(index Value) (Value, Error) {
-	if s, ok := index.(Str); ok {
-		return stc.GetField(s)
-	} else {
-		return nil, TypeMismatchError("Expected 'Str'")
-	}
-}
-
-func (stc *_struct) Set(index Value, val Value) Error {
-	if s, ok := index.(Str); ok {
-		return stc.SetField(s, val)
-	} else {
-		return TypeMismatchError("Expected 'Str'")
-	}
-}
-
-func (stc *_struct) GetField(key Str) (Value, Error) {
-	e, has := stc.smap.get(key.String())
+func (st *_struct) GetField(cx Context, name Str) (Value, Error) {
+	f, has := st.smap.get(name.String())
 	if has {
-		if e.IsProperty {
-			// The value for a property is always a tuple
-			// containing two functions: the getter, and the setter.
-			// TODO Add support for BytecodeFunc properties.
-			fn := ((e.Value.(tuple))[0]).(NativeFunc)
-			return fn.Invoke(nil)
+		if f.isProperty {
+			fn := ((f.value.(tuple))[0]).(Func)
+			return fn.Invoke(cx, nil)
 		} else {
-			return e.Value, nil
+			return f.value, nil
 		}
 	} else {
-		return nil, NoSuchFieldError(key.String())
+		return nil, NoSuchFieldError(name.String())
 	}
 }
 
-func (stc *_struct) SetField(key Str, val Value) Error {
-	e, has := stc.smap.get(key.String())
-	if has {
-		if e.IsConst {
-			return ReadonlyFieldError(key.String())
-		} else {
-
-			if e.IsProperty {
-				// The value for a property is always a tuple
-				// containing two functions: the getter, and the setter.
-				// TODO Add support for BytecodeFunc properties.
-				fn := ((e.Value.(tuple))[1]).(NativeFunc)
-				_, err := fn.Invoke([]Value{val})
-				return err
-			} else {
-				e.Value = val
-				return nil
-			}
-		}
-	} else {
-		return NoSuchFieldError(key.String())
-	}
+func (st *_struct) FieldNames() []string {
+	return st.smap.fieldNames()
 }
 
-func (stc *_struct) Keys() []string {
-	return stc.smap.keys()
-}
-
-func (stc *_struct) Has(key Value) (Bool, Error) {
-	if s, ok := key.(Str); ok {
-		_, has := stc.smap.get(s.String())
+func (st *_struct) Has(name Value) (Bool, Error) {
+	if s, ok := name.(Str); ok {
+		_, has := st.smap.get(s.String())
 		return MakeBool(has), nil
 	} else {
 		return nil, TypeMismatchError("Expected 'Str'")
 	}
 }
 
-func (stc *_struct) InitField(key Str, val Value) Error {
-	e, has := stc.smap.get(key.String())
+//---------------------------------------------------------------
+// Mutation
+
+func (st *_struct) InitField(cx Context, name Str, val Value) Error {
+	// We ignore 'frozen' here, since we are initializing the value
+
+	f, has := st.smap.get(name.String())
 	if has {
 		// We ignore IsConst here, since we are initializing the value
-		e.Value = val
-		return nil
+		if f.isProperty {
+			// TODO what are the semantics here?
+			// Do we really want to invoke this func?
+
+			//// The value for a property is always a tuple
+			//// containing two functions: the getter, and the setter.
+			//fn := ((f.value.(tuple))[1]).(Func)
+			//_, err := fn.Invoke(cx, []Value{val})
+			//return err
+
+			return nil
+		} else {
+			f.value = val
+			return nil
+		}
 	} else {
-		return NoSuchFieldError(key.String())
+		return NoSuchFieldError(name.String())
+	}
+}
+
+func (st *_struct) SetField(cx Context, name Str, val Value) Error {
+
+	if st.frozen {
+		return ImmutableValueError()
+	}
+
+	f, has := st.smap.get(name.String())
+	if has {
+		if f.isConst {
+			return ReadonlyFieldError(name.String())
+		} else {
+			if f.isProperty {
+				// The value for a property is always a tuple
+				// containing two functions: the getter, and the setter.
+				fn := ((f.value.(tuple))[1]).(Func)
+				_, err := fn.Invoke(cx, []Value{val})
+				return err
+			} else {
+				f.value = val
+				return nil
+			}
+		}
+	} else {
+		return NoSuchFieldError(name.String())
 	}
 }

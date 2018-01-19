@@ -16,22 +16,31 @@ package core
 
 import (
 	"bytes"
-	"reflect"
 )
 
 type dict struct {
 	hashMap *HashMap
+	frozen  bool
 }
 
-func NewDict(entries []*HEntry) Dict {
-	return &dict{NewHashMap(entries)}
+func NewDict(cx Context, entries []*HEntry) Dict {
+	return &dict{NewHashMap(cx, entries), false}
 }
 
 func (d *dict) compositeMarker() {}
 
-func (d *dict) TypeOf() Type { return TDICT }
+func (d *dict) Type() Type { return TDICT }
 
-func (d *dict) ToStr() Str {
+func (d *dict) Freeze() (Value, Error) {
+	d.frozen = true
+	return d, nil
+}
+
+func (d *dict) Frozen() (Bool, Error) {
+	return MakeBool(d.frozen), nil
+}
+
+func (d *dict) ToStr(cx Context) Str {
 
 	var buf bytes.Buffer
 	buf.WriteString("dict {")
@@ -46,11 +55,11 @@ func (d *dict) ToStr() Str {
 		idx++
 
 		buf.WriteString(" ")
-		s := entry.Key.ToStr()
+		s := entry.Key.ToStr(cx)
 		buf.WriteString(s.String())
 
 		buf.WriteString(": ")
-		s = entry.Value.ToStr()
+		s = entry.Value.ToStr(cx)
 		buf.WriteString(s.String())
 	}
 
@@ -58,61 +67,74 @@ func (d *dict) ToStr() Str {
 	return MakeStr(buf.String())
 }
 
-func (d *dict) HashCode() (Int, Error) {
+func (d *dict) HashCode(cx Context) (Int, Error) {
 	return nil, TypeMismatchError("Expected Hashable Type")
 }
 
-func (d *dict) Eq(v Value) Bool {
+func (d *dict) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *dict:
-		return MakeBool(reflect.DeepEqual(d.hashMap, t.hashMap))
+		return d.hashMap.Eq(cx, t.hashMap)
 	default:
-		return FALSE
+		return FALSE, nil
 	}
 }
 
-func (d *dict) Cmp(v Value) (Int, Error) {
+func (d *dict) Cmp(cx Context, v Value) (Int, Error) {
 	return nil, TypeMismatchError("Expected Comparable Type")
 }
 
-func (d *dict) Plus(v Value) (Value, Error) {
-	switch t := v.(type) {
-
-	case Str:
-		return strcat(d, t), nil
-
-	default:
-		return nil, TypeMismatchError("Expected Number Type")
-	}
-}
-
-func (d *dict) Get(key Value) (Value, Error) {
-	return d.hashMap.Get(key)
-}
-
-func (d *dict) Set(key Value, val Value) Error {
-	return d.hashMap.Put(key, val)
+func (d *dict) Get(cx Context, key Value) (Value, Error) {
+	return d.hashMap.Get(cx, key)
 }
 
 func (d *dict) Len() Int {
 	return d.hashMap.Len()
 }
 
-func (d *dict) Clear() {
-	d.hashMap = EmptyHashMap()
-}
-
 func (d *dict) IsEmpty() Bool {
 	return MakeBool(d.hashMap.Len().IntVal() == 0)
 }
 
-func (d *dict) ContainsKey(key Value) (Bool, Error) {
-	return d.hashMap.ContainsKey(key)
+func (d *dict) ContainsKey(cx Context, key Value) (Bool, Error) {
+	return d.hashMap.ContainsKey(cx, key)
 }
 
-func (d *dict) AddAll(val Value) Error {
+//---------------------------------------------------------------
+// Mutation
+
+func (d *dict) Set(cx Context, key Value, val Value) Error {
+	if d.frozen {
+		return ImmutableValueError()
+	}
+
+	return d.hashMap.Put(cx, key, val)
+}
+
+func (d *dict) Clear() Error {
+	if d.frozen {
+		return ImmutableValueError()
+	}
+
+	d.hashMap = EmptyHashMap()
+	return nil
+}
+
+func (d *dict) Remove(cx Context, key Value) (Bool, Error) {
+	if d.frozen {
+		return nil, ImmutableValueError()
+	}
+
+	return d.hashMap.Remove(cx, key)
+}
+
+func (d *dict) AddAll(cx Context, val Value) Error {
+	if d.frozen {
+		return ImmutableValueError()
+	}
+
 	if ibl, ok := val.(Iterable); ok {
-		itr := ibl.NewIterator()
+		itr := ibl.NewIterator(cx)
 		for itr.IterNext().BoolVal() {
 			v, err := itr.IterGet()
 			if err != nil {
@@ -120,7 +142,7 @@ func (d *dict) AddAll(val Value) Error {
 			}
 			if tp, ok := v.(tuple); ok {
 				if len(tp) == 2 {
-					d.hashMap.Put(tp[0], tp[1])
+					d.hashMap.Put(cx, tp[0], tp[1])
 				} else {
 					return TupleLengthError(2, len(tp))
 				}
@@ -144,27 +166,9 @@ type dictIterator struct {
 	hasNext bool
 }
 
-func (d *dict) NewIterator() Iterator {
-
-	stc, err := NewStruct([]*StructEntry{
-		{"nextValue", true, false, NULL},
-		{"getValue", true, false, NULL}})
-	if err != nil {
-		panic("invalid struct")
-	}
-
-	itr := &dictIterator{stc, d, d.hashMap.Iterator(), false}
-
-	stc.InitField(MakeStr("nextValue"), &nativeFunc{
-		func(values []Value) (Value, Error) {
-			return itr.IterNext(), nil
-		}})
-	stc.InitField(MakeStr("getValue"), &nativeFunc{
-		func(values []Value) (Value, Error) {
-			return itr.IterGet()
-		}})
-
-	return itr
+func (d *dict) NewIterator(cx Context) Iterator {
+	return initIteratorStruct(cx,
+		&dictIterator{newIteratorStruct(), d, d.hashMap.Iterator(), false})
 }
 
 func (i *dictIterator) IterNext() Bool {
@@ -185,16 +189,14 @@ func (i *dictIterator) IterGet() (Value, Error) {
 //--------------------------------------------------------------
 // intrinsic functions
 
-func (d *dict) GetField(key Str) (Value, Error) {
-	switch key.String() {
+func (d *dict) GetField(cx Context, key Str) (Value, Error) {
+	switch sn := key.String(); sn {
 
 	case "addAll":
-		return &intrinsicFunc{d, "addAll", &nativeFunc{
-			func(values []Value) (Value, Error) {
-				if len(values) != 1 {
-					return nil, ArityMismatchError("1", len(values))
-				}
-				err := d.AddAll(values[0])
+		return &intrinsicFunc{d, sn, &nativeFunc{
+			1, 1,
+			func(cx Context, values []Value) (Value, Error) {
+				err := d.AddAll(cx, values[0])
 				if err != nil {
 					return nil, err
 				} else {
@@ -203,31 +205,36 @@ func (d *dict) GetField(key Str) (Value, Error) {
 			}}}, nil
 
 	case "clear":
-		return &intrinsicFunc{d, "clear", &nativeFunc{
-			func(values []Value) (Value, Error) {
-				if len(values) != 0 {
-					return nil, ArityMismatchError("0", len(values))
+		return &intrinsicFunc{d, sn, &nativeFunc{
+			0, 0,
+			func(cx Context, values []Value) (Value, Error) {
+				err := d.Clear()
+				if err != nil {
+					return nil, err
+				} else {
+					return d, nil
 				}
-				d.Clear()
-				return d, nil
 			}}}, nil
 
 	case "isEmpty":
-		return &intrinsicFunc{d, "isEmpty", &nativeFunc{
-			func(values []Value) (Value, Error) {
-				if len(values) != 0 {
-					return nil, ArityMismatchError("0", len(values))
-				}
+		return &intrinsicFunc{d, sn, &nativeFunc{
+			0, 0,
+			func(cx Context, values []Value) (Value, Error) {
 				return d.IsEmpty(), nil
 			}}}, nil
 
 	case "containsKey":
-		return &intrinsicFunc{d, "containsKey", &nativeFunc{
-			func(values []Value) (Value, Error) {
-				if len(values) != 1 {
-					return nil, ArityMismatchError("1", len(values))
-				}
-				return d.ContainsKey(values[0])
+		return &intrinsicFunc{d, sn, &nativeFunc{
+			1, 1,
+			func(cx Context, values []Value) (Value, Error) {
+				return d.ContainsKey(cx, values[0])
+			}}}, nil
+
+	case "remove":
+		return &intrinsicFunc{d, sn, &nativeFunc{
+			1, 1,
+			func(cx Context, values []Value) (Value, Error) {
+				return d.Remove(cx, values[0])
 			}}}, nil
 
 	default:

@@ -374,6 +374,8 @@ func (s *Scanner) nextIdentOrKeyword() *ast.Token {
 		return &ast.Token{ast.CASE, text, pos}
 	case "default":
 		return &ast.Token{ast.DEFAULT, text, pos}
+	case "prop":
+		return &ast.Token{ast.PROP, text, pos}
 	case "try":
 		return &ast.Token{ast.TRY, text, pos}
 	case "catch":
@@ -382,10 +384,8 @@ func (s *Scanner) nextIdentOrKeyword() *ast.Token {
 		return &ast.Token{ast.FINALLY, text, pos}
 	case "throw":
 		return &ast.Token{ast.THROW, text, pos}
-	case "spawn":
-		return &ast.Token{ast.SPAWN, text, pos}
-	case "pub":
-		return &ast.Token{ast.PUB, text, pos}
+	case "go":
+		return &ast.Token{ast.GO, text, pos}
 	case "module":
 		return &ast.Token{ast.MODULE, text, pos}
 	case "import":
@@ -400,22 +400,13 @@ func (s *Scanner) nextIdentOrKeyword() *ast.Token {
 		return &ast.Token{ast.THIS, text, pos}
 	case "has":
 		return &ast.Token{ast.HAS, text, pos}
-	case "print":
-		return &ast.Token{ast.FN_PRINT, text, pos}
-	case "println":
-		return &ast.Token{ast.FN_PRINTLN, text, pos}
-	case "str":
-		return &ast.Token{ast.FN_STR, text, pos}
-	case "len":
-		return &ast.Token{ast.FN_LEN, text, pos}
-	case "range":
-		return &ast.Token{ast.FN_RANGE, text, pos}
-	case "assert":
-		return &ast.Token{ast.FN_ASSERT, text, pos}
-	case "merge":
-		return &ast.Token{ast.FN_MERGE, text, pos}
-	case "chan":
-		return &ast.Token{ast.FN_CHAN, text, pos}
+
+	case "byte", "defer", "goto", "like", "native", "package",
+		"priv", "private", "prot", "protected", "pub", "public",
+		"rune", "select", "static", "sync", "rsync", "with", "yield":
+
+		// reserve a bunch of keywords just in case
+		return &ast.Token{ast.RESERVED, text, pos}
 
 	default:
 		return &ast.Token{ast.IDENT, text, pos}

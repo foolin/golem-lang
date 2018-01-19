@@ -20,23 +20,30 @@ import (
 
 func TestNative(t *testing.T) {
 
-	a := Builtins[STR]
-	b := Builtins[LEN]
+	a := BuiltinStr
+	b := BuiltinLen
 
 	okType(t, a, TFUNC)
 	okType(t, b, TFUNC)
 
-	assert(t, a.Eq(a).BoolVal())
-	assert(t, b.Eq(b).BoolVal())
-	assert(t, !a.Eq(b).BoolVal())
-	assert(t, !b.Eq(a).BoolVal())
+	z, err := a.Eq(cx, a)
+	ok(t, z, err, TRUE)
+
+	z, err = b.Eq(cx, b)
+	ok(t, z, err, TRUE)
+
+	z, err = a.Eq(cx, b)
+	ok(t, z, err, FALSE)
+
+	z, err = b.Eq(cx, a)
+	ok(t, z, err, FALSE)
 
 	ls := NewList([]Value{ONE, ZERO})
 
-	v, err := a.Invoke([]Value{ls})
+	v, err := a.Invoke(nil, []Value{ls})
 	ok(t, v, err, MakeStr("[ 1, 0 ]"))
 
-	v, err = b.Invoke([]Value{ls})
+	v, err = b.Invoke(nil, []Value{ls})
 	ok(t, v, err, MakeInt(2))
 
 }

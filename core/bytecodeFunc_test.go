@@ -27,10 +27,17 @@ func TestBytecodeFunc(t *testing.T) {
 	okType(t, a, TFUNC)
 	okType(t, b, TFUNC)
 
-	assert(t, a.Eq(a).BoolVal())
-	assert(t, b.Eq(b).BoolVal())
-	assert(t, !a.Eq(b).BoolVal())
-	assert(t, !b.Eq(a).BoolVal())
+	v, err := a.Eq(cx, a)
+	ok(t, v, err, TRUE)
+
+	v, err = b.Eq(cx, b)
+	ok(t, v, err, TRUE)
+
+	v, err = a.Eq(cx, b)
+	ok(t, v, err, FALSE)
+
+	v, err = b.Eq(cx, a)
+	ok(t, v, err, FALSE)
 }
 
 func TestLineNumber(t *testing.T) {
@@ -44,12 +51,12 @@ func TestLineNumber(t *testing.T) {
 			{29, 0}},
 		nil}
 
-	assert(t, tp.LineNumber(0) == 0)
-	assert(t, tp.LineNumber(1) == 2)
-	assert(t, tp.LineNumber(10) == 2)
-	assert(t, tp.LineNumber(11) == 3)
-	assert(t, tp.LineNumber(19) == 3)
-	assert(t, tp.LineNumber(20) == 4)
-	assert(t, tp.LineNumber(28) == 4)
-	assert(t, tp.LineNumber(29) == 0)
+	tassert(t, tp.LineNumber(0) == 0)
+	tassert(t, tp.LineNumber(1) == 2)
+	tassert(t, tp.LineNumber(10) == 2)
+	tassert(t, tp.LineNumber(11) == 3)
+	tassert(t, tp.LineNumber(19) == 3)
+	tassert(t, tp.LineNumber(20) == 4)
+	tassert(t, tp.LineNumber(28) == 4)
+	tassert(t, tp.LineNumber(29) == 0)
 }

@@ -33,7 +33,7 @@ type Module interface {
 type BytecodeModule struct {
 	Pool       []Basic
 	Refs       []*Ref
-	StructDefs [][]*StructEntryDef
+	StructDefs [][]Field
 	Templates  []*Template
 	Contents   Struct
 }
@@ -53,7 +53,7 @@ func (m *BytecodeModule) String() string {
 
 	buf.WriteString("    Pool:\n")
 	for i, val := range m.Pool {
-		typeOf := val.TypeOf()
+		typeOf := val.Type()
 		buf.WriteString("        ")
 		buf.WriteString(fmt.Sprintf("%d: %v(%v)\n", i, typeOf, val))
 	}

@@ -75,14 +75,12 @@ type (
 		Token     *Token
 		Decls     []*Decl
 		Semicolon *Token
-		IsPub     bool
 	}
 
 	Let struct {
 		Token     *Token
 		Decls     []*Decl
 		Semicolon *Token
-		IsPub     bool
 	}
 
 	Decl struct {
@@ -94,7 +92,6 @@ type (
 		Token *Token
 		Ident *IdentExpr
 		Func  *FnExpr
-		IsPub bool
 	}
 
 	If struct {
@@ -170,7 +167,7 @@ type (
 		FinallyBlock *Block
 	}
 
-	Spawn struct {
+	Go struct {
 		Token      *Token
 		Invocation *InvokeExpr
 		Semicolon  *Token
@@ -222,13 +219,18 @@ type (
 
 	FnExpr struct {
 		Token        *Token
-		FormalParams []*IdentExpr
+		FormalParams []*FormalParam
 		Body         *Block
 
 		// set by analyzer
 		NumLocals      int
 		NumCaptures    int
 		ParentCaptures []*Variable
+	}
+
+	FormalParam struct {
+		Ident   *IdentExpr
+		IsConst bool
 	}
 
 	InvokeExpr struct {
@@ -341,7 +343,7 @@ func (*Continue) stmtMarker() {}
 func (*Return) stmtMarker()   {}
 func (*Throw) stmtMarker()    {}
 func (*Try) stmtMarker()      {}
-func (*Spawn) stmtMarker()    {}
+func (*Go) stmtMarker()       {}
 
 func (*While) loopMarker() {}
 func (*For) loopMarker()   {}
@@ -443,8 +445,8 @@ func (n *Try) End() Pos {
 	}
 }
 
-func (n *Spawn) Begin() Pos { return n.Token.Position }
-func (n *Spawn) End() Pos   { return n.Semicolon.Position }
+func (n *Go) Begin() Pos { return n.Token.Position }
+func (n *Go) End() Pos   { return n.Semicolon.Position }
 
 func (n *Assignment) Begin() Pos { return n.Assignee.Begin() }
 func (n *Assignment) End() Pos   { return n.Val.End() }
@@ -547,9 +549,6 @@ func (imp *Import) String() string {
 
 func (cns *Const) String() string {
 	buf := new(bytes.Buffer)
-	if cns.IsPub {
-		buf.WriteString("pub ")
-	}
 	buf.WriteString("const ")
 	buf.WriteString(stringDecls(cns.Decls))
 	buf.WriteString(";")
@@ -558,9 +557,6 @@ func (cns *Const) String() string {
 
 func (let *Let) String() string {
 	buf := new(bytes.Buffer)
-	if let.IsPub {
-		buf.WriteString("pub ")
-	}
 	buf.WriteString("let ")
 	buf.WriteString(stringDecls(let.Decls))
 	buf.WriteString(";")
@@ -569,12 +565,9 @@ func (let *Let) String() string {
 
 func (nf *NamedFn) String() string {
 	buf := new(bytes.Buffer)
-	if nf.IsPub {
-		buf.WriteString("pub ")
-	}
 	buf.WriteString("fn ")
 	buf.WriteString(nf.Ident.String())
-	buf.WriteString(identsString(nf.Func.FormalParams))
+	buf.WriteString(stringFormalParams(nf.Func.FormalParams))
 	buf.WriteString(" ")
 	buf.WriteString(nf.Func.Body.String())
 	return buf.String()
@@ -614,8 +607,23 @@ func (fr *For) String() string {
 	if len(fr.Idents) == 1 {
 		return fmt.Sprintf("for %v in %v %v", fr.Idents[0], fr.Iterable, fr.Body)
 	} else {
-		return fmt.Sprintf("for %s in %v %v", identsString(fr.Idents), fr.Iterable, fr.Body)
+		return fmt.Sprintf("for %s in %v %v", stringIdents(fr.Idents), fr.Iterable, fr.Body)
 	}
+}
+
+func stringIdents(idents []*IdentExpr) string {
+	var buf bytes.Buffer
+
+	buf.WriteString("(")
+	for idx, p := range idents {
+		if idx > 0 {
+			buf.WriteString(", ")
+		}
+		buf.WriteString(p.String())
+	}
+	buf.WriteString(")")
+
+	return buf.String()
 }
 
 func (sw *Switch) String() string {
@@ -710,8 +718,8 @@ func (t *Try) String() string {
 	return buf.String()
 }
 
-func (sp *Spawn) String() string {
-	return fmt.Sprintf("spawn %v;", sp.Invocation)
+func (sp *Go) String() string {
+	return fmt.Sprintf("go %v;", sp.Invocation)
 }
 
 func (trn *TernaryExpr) String() string {
@@ -751,22 +759,25 @@ func (fn *FnExpr) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString("fn")
-	buf.WriteString(identsString(fn.FormalParams))
+	buf.WriteString(stringFormalParams(fn.FormalParams))
 	buf.WriteString(" ")
 	buf.WriteString(fn.Body.String())
 
 	return buf.String()
 }
 
-func identsString(idents []*IdentExpr) string {
+func stringFormalParams(params []*FormalParam) string {
 	var buf bytes.Buffer
 
 	buf.WriteString("(")
-	for idx, p := range idents {
+	for idx, p := range params {
 		if idx > 0 {
 			buf.WriteString(", ")
 		}
-		buf.WriteString(p.String())
+		if p.IsConst {
+			buf.WriteString("const ")
+		}
+		buf.WriteString(p.Ident.String())
 	}
 	buf.WriteString(")")
 

@@ -26,7 +26,8 @@ type sysModule struct {
 func InitSysModule() g.Module {
 
 	exit := g.NewNativeFunc(
-		func(values []g.Value) (g.Value, g.Error) {
+		0, 1,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
 			switch len(values) {
 			case 0:
 				os.Exit(0)
@@ -37,16 +38,17 @@ func InitSysModule() g.Module {
 					return nil, g.TypeMismatchError("Expected Int")
 				}
 			default:
-				return nil, g.ArityMismatchError("0 or 1", len(values))
+				panic("arity mismatch")
 			}
 
 			// we will never actually get here
 			return g.NULL, nil
 		})
 
-	contents, err := g.NewStruct([]*g.StructEntry{
-		{"exit", true, false, exit}})
-	g.Assert(err == nil, "InitSysModule")
+	contents, err := g.NewStruct([]g.Field{g.NewField("exit", true, exit)}, true)
+	if err != nil {
+		panic("InitSysModule")
+	}
 
 	return &sysModule{contents}
 }

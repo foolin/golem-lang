@@ -25,7 +25,7 @@ import (
 	"testing"
 )
 
-func assert(t *testing.T, flag bool) {
+func tassert(t *testing.T, flag bool) {
 	if !flag {
 		t.Error("assertion failure")
 	}
@@ -63,10 +63,12 @@ func ok(t *testing.T, mod *g.BytecodeModule, expect *g.BytecodeModule) {
 	}
 }
 
+var builtInMgr = g.NewBuiltinManager(g.CommandLineBuiltins)
+
 func newAnalyzer(source string) analyzer.Analyzer {
 
 	scanner := scanner.NewScanner(source)
-	parser := parser.NewParser(scanner)
+	parser := parser.NewParser(scanner, builtInMgr.Contains)
 	mod, err := parser.ParseModule()
 	if err != nil {
 		panic(err)
@@ -80,20 +82,24 @@ func newAnalyzer(source string) analyzer.Analyzer {
 	return anl
 }
 
+func newCompiler(analyzer analyzer.Analyzer) Compiler {
+	return NewCompiler(analyzer, builtInMgr)
+}
+
 func contents() g.Struct {
-	stc, _ := g.NewStruct([]*g.StructEntry{})
+	stc, _ := g.NewStruct([]g.Field{}, true)
 	return stc
 }
 
 func TestExpression(t *testing.T) {
 
-	mod := NewCompiler(newAnalyzer("-2 + -1 + -0 + 0 + 1 + 2;")).Compile()
+	mod := newCompiler(newAnalyzer("-2 + -1 + -0 + 0 + 1 + 2;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.MakeInt(int64(-2)),
 			g.MakeInt(int64(2))},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 0,
@@ -117,7 +123,7 @@ func TestExpression(t *testing.T) {
 					{16, 0}},
 				nil}}, contents()})
 
-	mod = NewCompiler(newAnalyzer("(2 + 3) * -4 / 10;")).Compile()
+	mod = newCompiler(newAnalyzer("(2 + 3) * -4 / 10;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.MakeInt(int64(2)),
@@ -125,7 +131,7 @@ func TestExpression(t *testing.T) {
 			g.MakeInt(int64(-4)),
 			g.MakeInt(int64(10))},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 0,
@@ -145,11 +151,11 @@ func TestExpression(t *testing.T) {
 					{16, 0}},
 				nil}}, contents()})
 
-	mod = NewCompiler(newAnalyzer("null / true + \nfalse;")).Compile()
+	mod = newCompiler(newAnalyzer("null / true + \nfalse;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 0,
@@ -169,13 +175,13 @@ func TestExpression(t *testing.T) {
 					{6, 0}},
 				nil}}, contents()})
 
-	mod = NewCompiler(newAnalyzer("'a' * 1.23e4;")).Compile()
+	mod = newCompiler(newAnalyzer("'a' * 1.23e4;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.MakeStr("a"),
 			g.MakeFloat(float64(12300))},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 0,
@@ -191,12 +197,12 @@ func TestExpression(t *testing.T) {
 					{8, 0}},
 				nil}}, contents()})
 
-	mod = NewCompiler(newAnalyzer("'a' == true;")).Compile()
+	mod = newCompiler(newAnalyzer("'a' == true;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.MakeStr("a")},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 0,
@@ -212,11 +218,11 @@ func TestExpression(t *testing.T) {
 					{6, 0}},
 				nil}}, contents()})
 
-	mod = NewCompiler(newAnalyzer("true != false;")).Compile()
+	mod = newCompiler(newAnalyzer("true != false;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 0,
@@ -230,11 +236,11 @@ func TestExpression(t *testing.T) {
 					{4, 0}},
 				nil}}, contents()})
 
-	mod = NewCompiler(newAnalyzer("true > false; true >= false;")).Compile()
+	mod = newCompiler(newAnalyzer("true > false; true >= false;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 0,
@@ -249,11 +255,11 @@ func TestExpression(t *testing.T) {
 					{7, 0}},
 				nil}}, contents()})
 
-	mod = NewCompiler(newAnalyzer("true < false; true <= false; true <=> false;")).Compile()
+	mod = newCompiler(newAnalyzer("true < false; true <= false; true <=> false;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 0,
@@ -269,13 +275,13 @@ func TestExpression(t *testing.T) {
 					{10, 0}},
 				nil}}, contents()})
 
-	mod = NewCompiler(newAnalyzer("let a = 2 && 3;")).Compile()
+	mod = newCompiler(newAnalyzer("let a = 2 && 3;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.MakeInt(int64(2)),
 			g.MakeInt(int64(3))},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 1,
@@ -296,13 +302,13 @@ func TestExpression(t *testing.T) {
 					{21, 0}},
 				nil}}, contents()})
 
-	mod = NewCompiler(newAnalyzer("let a = 2 || 3;")).Compile()
+	mod = newCompiler(newAnalyzer("let a = 2 || 3;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.MakeInt(int64(2)),
 			g.MakeInt(int64(3))},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 1,
@@ -326,13 +332,13 @@ func TestExpression(t *testing.T) {
 
 func TestAssignment(t *testing.T) {
 
-	mod := NewCompiler(newAnalyzer("let a = 1;\nconst b = \n2;a = 3;")).Compile()
+	mod := newCompiler(newAnalyzer("let a = 1;\nconst b = \n2;a = 3;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.MakeInt(2),
 			g.MakeInt(3)},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 2,
@@ -375,14 +381,14 @@ func TestIf(t *testing.T) {
 
 	source := "if (3 == 2) { let a = 42; }"
 	anl := newAnalyzer(source)
-	mod := NewCompiler(anl).Compile()
+	mod := newCompiler(anl).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.MakeInt(3),
 			g.MakeInt(2),
 			g.MakeInt(42)},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 1,
@@ -410,14 +416,14 @@ func TestIf(t *testing.T) {
 		let d = 4;`
 
 	anl = newAnalyzer(source)
-	mod = NewCompiler(anl).Compile()
+	mod = newCompiler(anl).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.MakeInt(2),
 			g.MakeInt(3),
 			g.MakeInt(4)},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 4,
@@ -450,12 +456,12 @@ func TestIf(t *testing.T) {
 func TestWhile(t *testing.T) {
 
 	source := "let a = 1; while (0 < 1) { let b = 2; }"
-	mod := NewCompiler(newAnalyzer(source)).Compile()
+	mod := newCompiler(newAnalyzer(source)).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.MakeInt(2)},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 2,
@@ -478,14 +484,14 @@ func TestWhile(t *testing.T) {
 				nil}}, contents()})
 
 	source = "let a = 'z'; while (0 < 1) \n{ break; continue; let b = 2; } let c = 3;"
-	mod = NewCompiler(newAnalyzer(source)).Compile()
+	mod = newCompiler(newAnalyzer(source)).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.MakeStr("z"),
 			g.MakeInt(2),
 			g.MakeInt(3)},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 3,
@@ -517,12 +523,12 @@ func TestReturn(t *testing.T) {
 
 	source := "return;"
 	anl := newAnalyzer(source)
-	mod := NewCompiler(anl).Compile()
+	mod := newCompiler(anl).Compile()
 
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 0,
@@ -538,14 +544,14 @@ func TestReturn(t *testing.T) {
 
 	source = "let a = 1; return a \n- 2; a = 3;"
 	anl = newAnalyzer(source)
-	mod = NewCompiler(anl).Compile()
+	mod = newCompiler(anl).Compile()
 
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.MakeInt(2),
 			g.MakeInt(3)},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 1,
@@ -583,7 +589,7 @@ let b = fn(x) {
 };
 `
 	anl := newAnalyzer(source)
-	mod := NewCompiler(anl).Compile()
+	mod := newCompiler(anl).Compile()
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
@@ -596,7 +602,7 @@ let b = fn(x) {
 			g.MakeInt(42),
 			g.MakeInt(7)},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{0, 0, 2,
 				[]byte{
@@ -663,7 +669,7 @@ b(1);
 c(2, 3);
 `
 	anl = newAnalyzer(source)
-	mod = NewCompiler(anl).Compile()
+	mod = newCompiler(anl).Compile()
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
@@ -677,7 +683,7 @@ c(2, 3);
 			g.MakeInt(3),
 			g.MakeInt(4)},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{0, 0, 3,
 				[]byte{
@@ -757,12 +763,12 @@ const accumGen = fn(n) {
 };`
 
 	anl := newAnalyzer(source)
-	mod := NewCompiler(anl).Compile()
+	mod := newCompiler(anl).Compile()
 
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{0, 0, 1,
 				[]byte{
@@ -815,7 +821,7 @@ const accumGen = fn(n) {
 };`
 
 	anl = newAnalyzer(source)
-	mod = NewCompiler(anl).Compile()
+	mod = newCompiler(anl).Compile()
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
 	//fmt.Println("----------------------------")
@@ -826,7 +832,7 @@ const accumGen = fn(n) {
 		[]g.Basic{
 			g.MakeInt(2)},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{0, 0, 2,
 				[]byte{
@@ -886,7 +892,7 @@ let c = a++;
 let d = b--;
 `
 	anl := newAnalyzer(source)
-	mod := NewCompiler(anl).Compile()
+	mod := newCompiler(anl).Compile()
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
 	//fmt.Println("----------------------------")
@@ -898,7 +904,7 @@ let d = b--;
 			g.MakeInt(int64(10)),
 			g.MakeInt(int64(20))},
 		nil,
-		[][]*g.StructEntryDef{},
+		[][]g.Field{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 4,
@@ -934,14 +940,14 @@ let d = b--;
 func TestPool(t *testing.T) {
 	pool := g.EmptyHashMap()
 
-	assert(t, poolIndex(pool, g.MakeInt(4)) == 0)
-	assert(t, poolIndex(pool, g.MakeStr("a")) == 1)
-	assert(t, poolIndex(pool, g.MakeFloat(1.0)) == 2)
-	assert(t, poolIndex(pool, g.MakeStr("a")) == 1)
-	assert(t, poolIndex(pool, g.MakeInt(4)) == 0)
+	tassert(t, poolIndex(pool, g.MakeInt(4)) == 0)
+	tassert(t, poolIndex(pool, g.MakeStr("a")) == 1)
+	tassert(t, poolIndex(pool, g.MakeFloat(1.0)) == 2)
+	tassert(t, poolIndex(pool, g.MakeStr("a")) == 1)
+	tassert(t, poolIndex(pool, g.MakeInt(4)) == 0)
 
 	slice := makePoolSlice(pool)
-	assert(t, reflect.DeepEqual(
+	tassert(t, reflect.DeepEqual(
 		slice,
 		[]g.Basic{
 			g.MakeInt(4),
@@ -962,8 +968,8 @@ finally {
 assert(a == 2);
 `
 	anl := newAnalyzer(source)
-	mod := NewCompiler(anl).Compile()
-	assert(t, mod.Templates[0].ExceptionHandlers[0] ==
+	mod := newCompiler(anl).Compile()
+	tassert(t, mod.Templates[0].ExceptionHandlers[0] ==
 		g.ExceptionHandler{5, 14, -1, 14})
 
 	source = `
@@ -978,7 +984,7 @@ try {
 }
 `
 	anl = newAnalyzer(source)
-	mod = NewCompiler(anl).Compile()
+	mod = newCompiler(anl).Compile()
 	//	fmt.Println("----------------------------")
 	//	fmt.Println(source)
 	//	fmt.Println("----------------------------")

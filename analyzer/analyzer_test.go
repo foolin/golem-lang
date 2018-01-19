@@ -40,9 +40,27 @@ func fail(t *testing.T, errors []error, expect string) {
 	}
 }
 
+var builtins = map[string]bool{
+	"print":   true,
+	"println": true,
+	"str":     true,
+	"len":     true,
+	"range":   true,
+	"assert":  true,
+	"merge":   true,
+	"chan":    true,
+	"typeof":  true,
+	"freeze":  true,
+	"frozen":  true,
+}
+var isBuiltIn = func(s string) bool {
+	_, ok := builtins[s]
+	return ok
+}
+
 func dump(source string) {
 	scanner := scanner.NewScanner(source)
-	parser := parser.NewParser(scanner)
+	parser := parser.NewParser(scanner, isBuiltIn)
 	mod, err := parser.ParseModule()
 	if err != nil {
 		panic("analyzer_test: could not parse")
@@ -51,8 +69,9 @@ func dump(source string) {
 }
 
 func newAnalyzer(source string) Analyzer {
+
 	scanner := scanner.NewScanner(source)
-	parser := parser.NewParser(scanner)
+	parser := parser.NewParser(scanner, isBuiltIn)
 	mod, err := parser.ParseModule()
 	if err != nil {
 		panic("analyzer_test: could not parse")
@@ -766,4 +785,10 @@ FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
 
 	errors = newAnalyzer("import foo;").Analyze()
 	fail(t, errors, "[Module 'foo' is not defined]")
+}
+
+func TestFormalParams(t *testing.T) {
+
+	errors := newAnalyzer("fn(const a, b) { a = 1; };").Analyze()
+	fail(t, errors, "[Symbol 'a' is constant]")
 }

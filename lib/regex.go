@@ -26,10 +26,8 @@ type regexModule struct {
 func InitRegexModule() g.Module {
 
 	compile := g.NewNativeFunc(
-		func(values []g.Value) (g.Value, g.Error) {
-			if len(values) != 1 {
-				return nil, g.ArityMismatchError("1", len(values))
-			}
+		1, 1,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
 			s, ok := values[0].(g.Str)
 			if !ok {
 				return nil, g.TypeMismatchError("Expected Str")
@@ -43,19 +41,19 @@ func InitRegexModule() g.Module {
 			return makePattern(rgx), nil
 		})
 
-	contents, err := g.NewStruct([]*g.StructEntry{
-		{"compile", true, false, compile}})
-	g.Assert(err == nil, "InitRegexModule")
+	contents, err := g.NewStruct([]g.Field{g.NewField("compile", true, compile)}, true)
+	if err != nil {
+		panic("InitRegexModule")
+	}
+
 	return &regexModule{contents}
 }
 
 func makePattern(rgx *regexp.Regexp) g.Struct {
 
 	match := g.NewNativeFunc(
-		func(values []g.Value) (g.Value, g.Error) {
-			if len(values) != 1 {
-				return nil, g.ArityMismatchError("1", len(values))
-			}
+		1, 1,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
 			s, ok := values[0].(g.Str)
 			if !ok {
 				return nil, g.TypeMismatchError("Expected Str")
@@ -64,9 +62,11 @@ func makePattern(rgx *regexp.Regexp) g.Struct {
 			return g.MakeBool(rgx.MatchString(s.String())), nil
 		})
 
-	pattern, err := g.NewStruct([]*g.StructEntry{
-		{"match", true, false, match}})
-	g.Assert(err == nil, "InitSysModule")
+	pattern, err := g.NewStruct([]g.Field{g.NewField("match", true, match)}, true)
+	if err != nil {
+		panic("InitRegexModule")
+	}
+
 	return pattern
 }
 

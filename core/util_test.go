@@ -18,37 +18,91 @@ import (
 	"testing"
 )
 
-func TestValidateIndex(t *testing.T) {
-	i, err := validateIndex(MakeInt(0), 2)
-	ok(t, i, err, MakeInt(0))
+func iok(t *testing.T, val int, err Error, expect int) {
 
-	i, err = validateIndex(MakeInt(1), 2)
-	ok(t, i, err, MakeInt(1))
+	if err != nil {
+		t.Error(err, " != ", nil)
+	}
 
-	i, err = validateIndex(MakeStr(""), 2)
-	fail(t, i, err, "TypeMismatch: Expected 'Int'")
+	if val != expect {
+		t.Error(val, " != ", expect)
+	}
+}
 
-	i, err = validateIndex(MakeInt(-1), 2)
-	fail(t, i, err, "IndexOutOfBounds")
-
-	i, err = validateIndex(MakeInt(2), 2)
-	fail(t, i, err, "IndexOutOfBounds")
+func ifail(t *testing.T, err Error, expect string) {
+	if err == nil || err.Error() != expect {
+		t.Error(err.Error(), " != ", expect)
+	}
 }
 
 func TestValuesEq(t *testing.T) {
 
-	v := valuesEq([]Value{ONE}, []Value{ONE})
-	ok(t, v, nil, TRUE)
+	v, err := valuesEq(cx, []Value{ONE}, []Value{ONE})
+	ok(t, v, err, TRUE)
 
-	v = valuesEq([]Value{}, []Value{})
-	ok(t, v, nil, TRUE)
+	v, err = valuesEq(cx, []Value{}, []Value{})
+	ok(t, v, err, TRUE)
 
-	v = valuesEq([]Value{ONE}, []Value{ZERO})
-	ok(t, v, nil, FALSE)
+	v, err = valuesEq(cx, []Value{ONE}, []Value{ZERO})
+	ok(t, v, err, FALSE)
 
-	v = valuesEq([]Value{ONE}, []Value{})
-	ok(t, v, nil, FALSE)
+	v, err = valuesEq(cx, []Value{ONE}, []Value{})
+	ok(t, v, err, FALSE)
 
-	v = valuesEq([]Value{}, []Value{ZERO})
-	ok(t, v, nil, FALSE)
+	v, err = valuesEq(cx, []Value{}, []Value{ZERO})
+	ok(t, v, err, FALSE)
+}
+
+func TestIndex(t *testing.T) {
+
+	n, err := posIndex(ZERO, 3)
+	iok(t, n, err, 0)
+
+	n, err = posIndex(MakeInt(3), 3)
+	iok(t, n, err, 3)
+
+	n, err = posIndex(NEG_ONE, 3)
+	iok(t, n, err, 2)
+
+	n, err = posIndex(MakeInt(-3), 3)
+	iok(t, n, err, 0)
+
+	_, err = posIndex(MakeStr(""), 3)
+	ifail(t, err, "TypeMismatch: Expected 'Int'")
+
+	//--------------------------------------
+
+	n, err = boundedIndex(ZERO, 3)
+	iok(t, n, err, 0)
+
+	n, err = boundedIndex(NEG_ONE, 3)
+	iok(t, n, err, 2)
+
+	n, err = boundedIndex(MakeInt(-3), 3)
+	iok(t, n, err, 0)
+
+	_, err = boundedIndex(MakeStr(""), 3)
+	ifail(t, err, "TypeMismatch: Expected 'Int'")
+
+	_, err = boundedIndex(MakeInt(-4), 3)
+	ifail(t, err, "IndexOutOfBounds: -1")
+
+	n, err = boundedIndex(MakeInt(3), 3)
+	ifail(t, err, "IndexOutOfBounds: 3")
+
+	//--------------------------------------
+
+	a, b, err := sliceIndices(ZERO, NEG_ONE, 3)
+	iok(t, a, err, 0)
+	iok(t, b, err, 2)
+
+	a, b, err = sliceIndices(MakeInt(-3), MakeInt(3), 3)
+	iok(t, a, err, 0)
+	iok(t, b, err, 3)
+
+	_, _, err = sliceIndices(MakeStr(""), ZERO, 3)
+	ifail(t, err, "TypeMismatch: Expected 'Int'")
+
+	_, _, err = sliceIndices(ZERO, MakeStr(""), 3)
+	ifail(t, err, "TypeMismatch: Expected 'Int'")
 }

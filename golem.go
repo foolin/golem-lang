@@ -32,20 +32,23 @@ func main() {
 		panic("No source file was specified")
 	}
 
+	// builtins
+	builtInMgr := g.NewBuiltinManager(g.CommandLineBuiltins)
+
 	// read source
 	filename := os.Args[1]
-	buf, err := ioutil.ReadFile(filename)
-	if err != nil {
-		panic(err)
+	buf, e := ioutil.ReadFile(filename)
+	if e != nil {
+		panic(e)
 	}
 	source := string(buf)
 
 	// parse
 	scanner := scanner.NewScanner(source)
-	parser := parser.NewParser(scanner)
-	exprMod, err := parser.ParseModule()
-	if err != nil {
-		panic(err.Error())
+	parser := parser.NewParser(scanner, builtInMgr.Contains)
+	exprMod, e := parser.ParseModule()
+	if e != nil {
+		panic(e.Error())
 	}
 
 	// analyze
@@ -56,19 +59,19 @@ func main() {
 	}
 
 	// compile
-	cmp := compiler.NewCompiler(anl)
+	cmp := compiler.NewCompiler(anl, builtInMgr)
 	mod := cmp.Compile()
 
 	// interpret
-	intp := interpreter.NewInterpreter(mod)
-	_, errTrace := intp.Init()
-	if errTrace != nil {
-		fmt.Printf("%v\n", errTrace.Error)
-		fmt.Printf("%v\n", errTrace.StackTrace)
+	intp := interpreter.NewInterpreter(mod, builtInMgr)
+	_, err := intp.Init()
+	if err != nil {
+		dumpError(intp, err)
+		os.Exit(-1)
 	}
 
 	// run main
-	mainVal, mainErr := mod.Contents.GetField(g.MakeStr("main"))
+	mainVal, mainErr := mod.Contents.GetField(intp, g.MakeStr("main"))
 	if mainErr == nil {
 		mainFn, ok := mainVal.(g.BytecodeFunc)
 		if !ok {
@@ -88,11 +91,32 @@ func main() {
 			panic("'main' has too many arguments")
 		}
 
-		intp = interpreter.NewInterpreter(mod)
-		_, errTrace := intp.RunBytecode(mainFn, params)
-		if errTrace != nil {
-			fmt.Printf("%v\n", errTrace.Error)
-			fmt.Printf("%v\n", errTrace.StackTrace)
+		_, err := intp.Eval(mainFn, params)
+		if err != nil {
+			dumpError(intp, err)
+			os.Exit(-1)
 		}
+	}
+}
+
+func dumpError(cx g.Context, err g.Error) {
+	fmt.Printf("Error: %s\n", err.Error())
+
+	v, e := err.Struct().GetField(cx, g.MakeStr("stackTrace"))
+	if e != nil {
+		return
+	}
+	ls, ok := v.(g.List)
+	if !ok {
+		return
+	}
+
+	itr := ls.NewIterator(cx)
+	for itr.IterNext().BoolVal() {
+		v, e = itr.IterGet()
+		if e != nil {
+			return
+		}
+		fmt.Printf("%s\n", v.ToStr(cx))
 	}
 }

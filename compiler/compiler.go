@@ -29,6 +29,8 @@ type Compiler interface {
 }
 
 type compiler struct {
+	builtInMgr g.BuiltinManager
+
 	pool     *g.HashMap
 	opc      []byte
 	lnum     []g.LineNumberEntry
@@ -36,17 +38,17 @@ type compiler struct {
 
 	funcs      []*ast.FnExpr
 	templates  []*g.Template
-	structDefs [][]*g.StructEntryDef
+	structDefs [][]g.Field
 	idx        int
 }
 
-func NewCompiler(anl analyzer.Analyzer) Compiler {
+func NewCompiler(anl analyzer.Analyzer, builtInMgr g.BuiltinManager) Compiler {
 
 	funcs := []*ast.FnExpr{anl.Module()}
 	templates := []*g.Template{}
-	structDefs := [][]*g.StructEntryDef{}
+	structDefs := [][]g.Field{}
 
-	return &compiler{g.EmptyHashMap(), nil, nil, nil, funcs, templates, structDefs, 0}
+	return &compiler{builtInMgr, g.EmptyHashMap(), nil, nil, nil, funcs, templates, structDefs, 0}
 }
 
 func (c *compiler) Compile() *g.BytecodeModule {
@@ -67,68 +69,55 @@ func (c *compiler) Compile() *g.BytecodeModule {
 
 func (c *compiler) makeModuleContents(mod *g.BytecodeModule) g.Struct {
 
-	entries := []*g.StructEntry{}
+	entries := []g.Field{}
 	nodes := c.funcs[0].Body.Nodes
 	for _, n := range nodes {
 		switch t := n.(type) {
 		case *ast.Let:
-			if t.IsPub {
-				for _, d := range t.Decls {
-					vbl := d.Ident.Variable
-					entries = append(entries, c.makeModuleProperty(
-						mod, d.Ident.Symbol.Text, vbl.Index, vbl.IsConst))
-				}
+			for _, d := range t.Decls {
+				vbl := d.Ident.Variable
+				entries = append(entries, c.makeModuleProperty(
+					mod, d.Ident.Symbol.Text, vbl.Index, vbl.IsConst))
 			}
 		case *ast.Const:
-			if t.IsPub {
-				for _, d := range t.Decls {
-					vbl := d.Ident.Variable
-					entries = append(entries, c.makeModuleProperty(
-						mod, d.Ident.Symbol.Text, vbl.Index, vbl.IsConst))
-				}
+			for _, d := range t.Decls {
+				vbl := d.Ident.Variable
+				entries = append(entries, c.makeModuleProperty(
+					mod, d.Ident.Symbol.Text, vbl.Index, vbl.IsConst))
 			}
 		case *ast.NamedFn:
-			if t.IsPub {
-				vbl := t.Ident.Variable
-				entries = append(entries, c.makeModuleProperty(
-					mod, t.Ident.Symbol.Text, vbl.Index, vbl.IsConst))
-			}
+			vbl := t.Ident.Variable
+			entries = append(entries, c.makeModuleProperty(
+				mod, t.Ident.Symbol.Text, vbl.Index, vbl.IsConst))
 		}
 	}
 
-	stc, err := g.NewStruct(entries)
-	g.Assert(err == nil, "invalid module contents")
+	stc, err := g.NewStruct(entries, false)
+	assert(err == nil)
 	return stc
 }
 
 func (c *compiler) makeModuleProperty(
 	mod *g.BytecodeModule,
-	key string,
+	name string,
 	refIndex int,
-	isConst bool) *g.StructEntry {
+	isConst bool) g.Field {
 
-	getter := g.NewNativeFunc(
-		func(values []g.Value) (g.Value, g.Error) {
-			if len(values) != 0 {
-				return nil, g.ArityMismatchError("0", len(values))
-			}
+	getter := g.NewNativeFunc(0, 0,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
 			return mod.Refs[refIndex].Val, nil
 		})
 
-	var setter g.NativeFunc = nil
+	var setter g.Func = nil
 	if !isConst {
-		setter = g.NewNativeFunc(
-			func(values []g.Value) (g.Value, g.Error) {
-				if len(values) != 1 {
-					return nil, g.ArityMismatchError("1", len(values))
-				}
+		setter = g.NewNativeFunc(1, 1,
+			func(cx g.Context, values []g.Value) (g.Value, g.Error) {
 				mod.Refs[refIndex].Val = values[0]
-				return g.NULL, nil
+				return nil, nil
 			})
 	}
 
-	prop := g.NewTuple([]g.Value{getter, setter})
-	return &g.StructEntry{key, isConst, true, prop}
+	return g.NewProperty(name, getter, setter)
 }
 
 func (c *compiler) compileFunc(fe *ast.FnExpr) *g.Template {
@@ -228,8 +217,8 @@ func (c *compiler) Visit(node ast.Node) {
 	case *ast.InvokeExpr:
 		c.visitInvoke(t)
 
-	case *ast.Spawn:
-		c.visitSpawn(t)
+	case *ast.Go:
+		c.visitGo(t)
 
 	case *ast.StructExpr:
 		c.visitStructExpr(t)
@@ -336,7 +325,7 @@ func (c *compiler) visitNamedFn(nf *ast.NamedFn) {
 	c.Visit(nf.Func)
 
 	v := nf.Ident.Variable
-	g.Assert(!v.IsCapture, "invalid named function")
+	assert(!v.IsCapture)
 	c.pushIndex(nf.Ident.Begin(), g.STORE_LOCAL, v.Index)
 }
 
@@ -665,7 +654,7 @@ func (c *compiler) visitTry(t *ast.Try) {
 
 		// store the exception that the interpreter has put on the stack for us
 		v := t.CatchIdent.Variable
-		g.Assert(!v.IsCapture, "invalid catch block")
+		assert(!v.IsCapture)
 		c.pushIndex(t.CatchIdent.Begin(), g.STORE_LOCAL, v.Index)
 
 		// compile the catch
@@ -701,7 +690,7 @@ func (c *compiler) visitTry(t *ast.Try) {
 	// done
 
 	// sanity check
-	g.Assert(!(catch == -1 && finally == -1), "invalid try block")
+	assert(!(catch == -1 && finally == -1))
 	c.handlers = append(c.handlers, g.ExceptionHandler{begin, end, catch, finally})
 }
 
@@ -912,27 +901,7 @@ func (c *compiler) visitIdentExpr(ident *ast.IdentExpr) {
 
 func (c *compiler) visitBuiltinExpr(blt *ast.BuiltinExpr) {
 
-	switch blt.Fn.Kind {
-	case ast.FN_PRINT:
-		c.pushIndex(blt.Fn.Position, g.LOAD_BUILTIN, g.PRINT)
-	case ast.FN_PRINTLN:
-		c.pushIndex(blt.Fn.Position, g.LOAD_BUILTIN, g.PRINTLN)
-	case ast.FN_STR:
-		c.pushIndex(blt.Fn.Position, g.LOAD_BUILTIN, g.STR)
-	case ast.FN_LEN:
-		c.pushIndex(blt.Fn.Position, g.LOAD_BUILTIN, g.LEN)
-	case ast.FN_RANGE:
-		c.pushIndex(blt.Fn.Position, g.LOAD_BUILTIN, g.RANGE)
-	case ast.FN_ASSERT:
-		c.pushIndex(blt.Fn.Position, g.LOAD_BUILTIN, g.ASSERT)
-	case ast.FN_MERGE:
-		c.pushIndex(blt.Fn.Position, g.LOAD_BUILTIN, g.MERGE)
-	case ast.FN_CHAN:
-		c.pushIndex(blt.Fn.Position, g.LOAD_BUILTIN, g.CHAN)
-
-	default:
-		panic("unknown builtin function")
-	}
+	c.pushIndex(blt.Fn.Position, g.LOAD_BUILTIN, c.builtInMgr.IndexOf(blt.Fn.Text))
 }
 
 func (c *compiler) visitFunc(fe *ast.FnExpr) {
@@ -958,22 +927,22 @@ func (c *compiler) visitInvoke(inv *ast.InvokeExpr) {
 	c.pushIndex(inv.Begin(), g.INVOKE, len(inv.Params))
 }
 
-func (c *compiler) visitSpawn(spawn *ast.Spawn) {
+func (c *compiler) visitGo(spawn *ast.Go) {
 
 	inv := spawn.Invocation
 	c.Visit(inv.Operand)
 	for _, n := range inv.Params {
 		c.Visit(n)
 	}
-	c.pushIndex(inv.Begin(), g.SPAWN, len(inv.Params))
+	c.pushIndex(inv.Begin(), g.GO, len(inv.Params))
 }
 
 func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 
 	// create def and entries
-	def := []*g.StructEntryDef{}
+	def := []g.Field{}
 	for _, k := range stc.Keys {
-		def = append(def, &g.StructEntryDef{k.Text, false, false})
+		def = append(def, g.NewField(k.Text, false, g.NULL))
 	}
 	defIdx := len(c.structDefs)
 	c.structDefs = append(c.structDefs, def)
@@ -1132,21 +1101,21 @@ type instPtr struct {
 }
 
 func index(n int) (byte, byte) {
-	g.Assert(n < (2<<16), "TODO wide index")
+	assert(n < (2 << 16))
 	return byte((n >> 8) & 0xFF), byte(n & 0xFF)
 }
 
 func parseInt(text string) int64 {
 	i, err := strconv.ParseInt(text, 10, 64)
-	g.Assert(err == nil, "unreachable")
-	g.Assert(i >= 0, "unreachable")
+	assert(err == nil)
+	assert(i >= 0)
 	return int64(i)
 }
 
 func parseFloat(text string) float64 {
 	f, err := strconv.ParseFloat(text, 64)
-	g.Assert(err == nil, "unreachable")
-	g.Assert(f >= 0, "unreachable")
+	assert(err == nil)
+	assert(f >= 0)
 	return float64(f)
 }
 
@@ -1155,20 +1124,24 @@ func parseFloat(text string) float64 {
 
 func poolIndex(pool *g.HashMap, key g.Basic) int {
 
-	b, err := pool.ContainsKey(key)
-	g.Assert(err == nil, "unreachable")
+	// Its OK for the Context to be nil here
+	// The key is always Basic, so the Context will never be used.
+	var cx g.Context = nil
+
+	b, err := pool.ContainsKey(cx, key)
+	assert(err == nil)
 
 	if b.BoolVal() {
-		v, err := pool.Get(key)
-		g.Assert(err == nil, "unreachable")
+		v, err := pool.Get(cx, key)
+		assert(err == nil)
 
 		i, ok := v.(g.Int)
-		g.Assert(ok, "unreachable")
+		assert(ok)
 		return int(i.IntVal())
 	} else {
 		i := pool.Len()
-		err := pool.Put(key, i)
-		g.Assert(err == nil, "unreachable")
+		err := pool.Put(cx, key, i)
+		assert(err == nil)
 		return int(i.IntVal())
 	}
 }
@@ -1182,10 +1155,10 @@ func (items PoolItems) Len() int {
 func (items PoolItems) Less(i, j int) bool {
 
 	x, ok := items[i].Value.(g.Int)
-	g.Assert(ok, "unreachable")
+	assert(ok)
 
 	y, ok := items[j].Value.(g.Int)
-	g.Assert(ok, "unreachable")
+	assert(ok)
 
 	return x.IntVal() < y.IntVal()
 }
@@ -1209,9 +1182,15 @@ func makePoolSlice(pool *g.HashMap) []g.Basic {
 	slice := make([]g.Basic, n, n)
 	for i, e := range entries {
 		b, ok := e.Key.(g.Basic)
-		g.Assert(ok, "unreachable")
+		assert(ok)
 		slice[i] = b
 	}
 
 	return slice
+}
+
+func assert(flag bool) {
+	if !flag {
+		panic("assertion failure")
+	}
 }

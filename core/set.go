@@ -16,28 +16,37 @@ package core
 
 import (
 	"bytes"
-	"reflect"
 )
 
 type set struct {
 	hashMap *HashMap
+	frozen  bool
 }
 
-func NewSet(values []Value) Set {
+func NewSet(cx Context, values []Value) Set {
 
 	hashMap := EmptyHashMap()
 	for _, v := range values {
-		hashMap.Put(v, TRUE)
+		hashMap.Put(cx, v, TRUE)
 	}
 
-	return &set{hashMap}
+	return &set{hashMap, false}
 }
 
 func (s *set) compositeMarker() {}
 
-func (s *set) TypeOf() Type { return TDICT }
+func (s *set) Type() Type { return TSET }
 
-func (s *set) ToStr() Str {
+func (s *set) Freeze() (Value, Error) {
+	s.frozen = true
+	return s, nil
+}
+
+func (s *set) Frozen() (Bool, Error) {
+	return MakeBool(s.frozen), nil
+}
+
+func (s *set) ToStr(cx Context) Str {
 
 	var buf bytes.Buffer
 	buf.WriteString("set {")
@@ -52,7 +61,7 @@ func (s *set) ToStr() Str {
 		idx++
 
 		buf.WriteString(" ")
-		s := entry.Key.ToStr()
+		s := entry.Key.ToStr(cx)
 		buf.WriteString(s.String())
 	}
 
@@ -60,51 +69,59 @@ func (s *set) ToStr() Str {
 	return MakeStr(buf.String())
 }
 
-func (s *set) HashCode() (Int, Error) {
+func (s *set) HashCode(cx Context) (Int, Error) {
 	return nil, TypeMismatchError("Expected Hashable Type")
 }
 
-func (s *set) Eq(v Value) Bool {
+func (s *set) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *set:
-		return MakeBool(reflect.DeepEqual(s.hashMap, t.hashMap))
+		return s.hashMap.Eq(cx, t.hashMap)
 	default:
-		return FALSE
+		return FALSE, nil
 	}
 }
 
-func (s *set) Cmp(v Value) (Int, Error) {
+func (s *set) Cmp(cx Context, v Value) (Int, Error) {
 	return nil, TypeMismatchError("Expected Comparable Type")
-}
-
-func (s *set) Plus(v Value) (Value, Error) {
-	switch t := v.(type) {
-
-	case Str:
-		return strcat(s, t), nil
-
-	default:
-		return nil, TypeMismatchError("Expected Number Type")
-	}
 }
 
 func (s *set) Len() Int {
 	return s.hashMap.Len()
 }
 
-func (s *set) Add(val Value) Error {
-	return s.hashMap.Put(val, TRUE)
+func (s *set) IsEmpty() Bool {
+	return MakeBool(s.hashMap.Len().IntVal() == 0)
 }
 
-func (s *set) AddAll(val Value) Error {
+func (s *set) Contains(cx Context, key Value) (Bool, Error) {
+	return s.hashMap.ContainsKey(cx, key)
+}
+
+//---------------------------------------------------------------
+// Mutation
+
+func (s *set) Add(cx Context, val Value) Error {
+	if s.frozen {
+		return ImmutableValueError()
+	}
+
+	return s.hashMap.Put(cx, val, TRUE)
+}
+
+func (s *set) AddAll(cx Context, val Value) Error {
+	if s.frozen {
+		return ImmutableValueError()
+	}
+
 	if ibl, ok := val.(Iterable); ok {
-		itr := ibl.NewIterator()
+		itr := ibl.NewIterator(cx)
 		for itr.IterNext().BoolVal() {
 			v, err := itr.IterGet()
 			if err != nil {
 				return err
 			}
-			s.hashMap.Put(v, TRUE)
+			s.hashMap.Put(cx, v, TRUE)
 		}
 		return nil
 	} else {
@@ -112,16 +129,21 @@ func (s *set) AddAll(val Value) Error {
 	}
 }
 
-func (s *set) Clear() {
+func (s *set) Clear() Error {
+	if s.frozen {
+		return ImmutableValueError()
+	}
+
 	s.hashMap = EmptyHashMap()
+	return nil
 }
 
-func (s *set) IsEmpty() Bool {
-	return MakeBool(s.hashMap.Len().IntVal() == 0)
-}
+func (s *set) Remove(cx Context, key Value) (Bool, Error) {
+	if s.frozen {
+		return nil, ImmutableValueError()
+	}
 
-func (s *set) Contains(key Value) (Bool, Error) {
-	return s.hashMap.ContainsKey(key)
+	return s.hashMap.Remove(cx, key)
 }
 
 //---------------------------------------------------------------
@@ -134,27 +156,9 @@ type setIterator struct {
 	hasNext bool
 }
 
-func (s *set) NewIterator() Iterator {
-
-	stc, err := NewStruct([]*StructEntry{
-		{"nextValue", true, false, NULL},
-		{"getValue", true, false, NULL}})
-	if err != nil {
-		panic("invalid struct")
-	}
-
-	itr := &setIterator{stc, s, s.hashMap.Iterator(), false}
-
-	stc.InitField(MakeStr("nextValue"), &nativeFunc{
-		func(values []Value) (Value, Error) {
-			return itr.IterNext(), nil
-		}})
-	stc.InitField(MakeStr("getValue"), &nativeFunc{
-		func(values []Value) (Value, Error) {
-			return itr.IterGet()
-		}})
-
-	return itr
+func (s *set) NewIterator(cx Context) Iterator {
+	return initIteratorStruct(cx,
+		&setIterator{newIteratorStruct(), s, s.hashMap.Iterator(), false})
 }
 
 func (i *setIterator) IterNext() Bool {
@@ -175,16 +179,14 @@ func (i *setIterator) IterGet() (Value, Error) {
 //--------------------------------------------------------------
 // intrinsic functions
 
-func (s *set) GetField(key Str) (Value, Error) {
-	switch key.String() {
+func (s *set) GetField(cx Context, key Str) (Value, Error) {
+	switch sn := key.String(); sn {
 
 	case "add":
-		return &intrinsicFunc{s, "add", &nativeFunc{
-			func(values []Value) (Value, Error) {
-				if len(values) != 1 {
-					return nil, ArityMismatchError("1", len(values))
-				}
-				err := s.Add(values[0])
+		return &intrinsicFunc{s, sn, &nativeFunc{
+			1, 1,
+			func(cx Context, values []Value) (Value, Error) {
+				err := s.Add(cx, values[0])
 				if err != nil {
 					return nil, err
 				} else {
@@ -193,12 +195,10 @@ func (s *set) GetField(key Str) (Value, Error) {
 			}}}, nil
 
 	case "addAll":
-		return &intrinsicFunc{s, "addAll", &nativeFunc{
-			func(values []Value) (Value, Error) {
-				if len(values) != 1 {
-					return nil, ArityMismatchError("1", len(values))
-				}
-				err := s.AddAll(values[0])
+		return &intrinsicFunc{s, sn, &nativeFunc{
+			1, 1,
+			func(cx Context, values []Value) (Value, Error) {
+				err := s.AddAll(cx, values[0])
 				if err != nil {
 					return nil, err
 				} else {
@@ -207,31 +207,36 @@ func (s *set) GetField(key Str) (Value, Error) {
 			}}}, nil
 
 	case "clear":
-		return &intrinsicFunc{s, "clear", &nativeFunc{
-			func(values []Value) (Value, Error) {
-				if len(values) != 0 {
-					return nil, ArityMismatchError("0", len(values))
+		return &intrinsicFunc{s, sn, &nativeFunc{
+			0, 0,
+			func(cx Context, values []Value) (Value, Error) {
+				err := s.Clear()
+				if err != nil {
+					return nil, err
+				} else {
+					return s, nil
 				}
-				s.Clear()
-				return s, nil
 			}}}, nil
 
 	case "isEmpty":
-		return &intrinsicFunc{s, "isEmpty", &nativeFunc{
-			func(values []Value) (Value, Error) {
-				if len(values) != 0 {
-					return nil, ArityMismatchError("0", len(values))
-				}
+		return &intrinsicFunc{s, sn, &nativeFunc{
+			0, 0,
+			func(cx Context, values []Value) (Value, Error) {
 				return s.IsEmpty(), nil
 			}}}, nil
 
 	case "contains":
-		return &intrinsicFunc{s, "contains", &nativeFunc{
-			func(values []Value) (Value, Error) {
-				if len(values) != 1 {
-					return nil, ArityMismatchError("1", len(values))
-				}
-				return s.Contains(values[0])
+		return &intrinsicFunc{s, sn, &nativeFunc{
+			1, 1,
+			func(cx Context, values []Value) (Value, Error) {
+				return s.Contains(cx, values[0])
+			}}}, nil
+
+	case "remove":
+		return &intrinsicFunc{s, sn, &nativeFunc{
+			1, 1,
+			func(cx Context, values []Value) (Value, Error) {
+				return s.Remove(cx, values[0])
 			}}}, nil
 
 	default:

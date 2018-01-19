@@ -41,97 +41,60 @@ func NewRange(from int64, to int64, step int64) (Range, Error) {
 		return &rng{from, to, step, 0}, nil
 
 	default:
-		count := int64(math.Floor(float64(to-from) / float64(step)))
+		count := int64(math.Ceil(float64(to-from) / float64(step)))
 		return &rng{from, to, step, count}, nil
 	}
 }
 
 func (r *rng) compositeMarker() {}
 
-func (r *rng) TypeOf() Type { return TRANGE }
+func (r *rng) Type() Type { return TRANGE }
 
-func (r *rng) ToStr() Str {
+func (r *rng) Freeze() (Value, Error) {
+	return r, nil
+}
+
+func (r *rng) Frozen() (Bool, Error) {
+	return TRUE, nil
+}
+
+func (r *rng) ToStr(cx Context) Str {
 	return MakeStr(fmt.Sprintf("range<%d, %d, %d>", r.from, r.to, r.step))
 }
 
-func (r *rng) HashCode() (Int, Error) {
+func (r *rng) HashCode(cx Context) (Int, Error) {
 	return nil, TypeMismatchError("Expected Hashable Type")
 }
 
-func (r *rng) Eq(v Value) Bool {
+func (r *rng) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *rng:
-		return MakeBool(reflect.DeepEqual(r, t))
+		return MakeBool(reflect.DeepEqual(r, t)), nil
 	default:
-		return FALSE
+		return FALSE, nil
 	}
 }
 
-func (r *rng) GetField(key Str) (Value, Error) {
-	return nil, NoSuchFieldError(key.String())
-}
-
-func (r *rng) Cmp(v Value) (Int, Error) {
+func (r *rng) Cmp(cx Context, v Value) (Int, Error) {
 	return nil, TypeMismatchError("Expected Comparable Type")
 }
 
-func (r *rng) Plus(v Value) (Value, Error) {
-	switch t := v.(type) {
-
-	case Str:
-		return strcat(r, t), nil
-
-	default:
-		return nil, TypeMismatchError("Expected Number Type")
-	}
-}
-
-func (r *rng) Get(index Value) (Value, Error) {
-	idx, err := validateIndex(index, int(r.count))
+func (r *rng) Get(cx Context, index Value) (Value, Error) {
+	idx, err := boundedIndex(index, int(r.count))
 	if err != nil {
 		return nil, err
 	}
-	return MakeInt(r.from + idx.IntVal()*r.step), nil
+	return MakeInt(r.from + int64(idx)*r.step), nil
 }
 
 func (r *rng) Len() Int {
 	return MakeInt(r.count)
 }
 
-func (r *rng) Slice(from Value, to Value) (Value, Error) {
-
-	f, err := validateIndex(from, int(r.count))
-	if err != nil {
-		return nil, err
-	}
-
-	t, err := validateIndex(to, int(r.count+1))
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO do we want a different error here?
-	if t.IntVal() < f.IntVal() {
-		return nil, IndexOutOfBoundsError()
-	}
-
-	return NewRange(
-		r.from+f.IntVal()*r.step,
-		r.from+t.IntVal()*r.step,
-		r.step)
-}
-
-func (r *rng) SliceFrom(from Value) (Value, Error) {
-	return r.Slice(from, MakeInt(int64(r.count)))
-}
-
-func (r *rng) SliceTo(to Value) (Value, Error) {
-	return r.Slice(ZERO, to)
-}
-
-func (r *rng) From() Int { return MakeInt(r.from) }
-func (r *rng) To() Int   { return MakeInt(r.to) }
-func (r *rng) Step() Int { return MakeInt(r.step) }
+func (r *rng) From() Int  { return MakeInt(r.from) }
+func (r *rng) To() Int    { return MakeInt(r.to) }
+func (r *rng) Step() Int  { return MakeInt(r.step) }
+func (r *rng) Count() Int { return MakeInt(r.count) }
 
 //---------------------------------------------------------------
 // Iterator
@@ -142,27 +105,9 @@ type rangeIterator struct {
 	n int64
 }
 
-func (r *rng) NewIterator() Iterator {
-
-	stc, err := NewStruct([]*StructEntry{
-		{"nextValue", true, false, NULL},
-		{"getValue", true, false, NULL}})
-	if err != nil {
-		panic("invalid struct")
-	}
-
-	itr := &rangeIterator{stc, r, -1}
-
-	stc.InitField(MakeStr("nextValue"), &nativeFunc{
-		func(values []Value) (Value, Error) {
-			return itr.IterNext(), nil
-		}})
-	stc.InitField(MakeStr("getValue"), &nativeFunc{
-		func(values []Value) (Value, Error) {
-			return itr.IterGet()
-		}})
-
-	return itr
+func (r *rng) NewIterator(cx Context) Iterator {
+	return initIteratorStruct(cx,
+		&rangeIterator{newIteratorStruct(), r, -1})
 }
 
 func (i *rangeIterator) IterNext() Bool {
@@ -176,5 +121,44 @@ func (i *rangeIterator) IterGet() (Value, Error) {
 		return MakeInt(i.r.from + i.n*i.r.step), nil
 	} else {
 		return nil, NoSuchElementError()
+	}
+}
+
+//--------------------------------------------------------------
+// intrinsic functions
+
+func (r *rng) GetField(cx Context, key Str) (Value, Error) {
+	switch sn := key.String(); sn {
+
+	case "from":
+		return &intrinsicFunc{r, sn, &nativeFunc{
+			0, 0,
+			func(cx Context, values []Value) (Value, Error) {
+				return MakeInt(r.from), nil
+			}}}, nil
+
+	case "to":
+		return &intrinsicFunc{r, sn, &nativeFunc{
+			0, 0,
+			func(cx Context, values []Value) (Value, Error) {
+				return MakeInt(r.to), nil
+			}}}, nil
+
+	case "step":
+		return &intrinsicFunc{r, sn, &nativeFunc{
+			0, 0,
+			func(cx Context, values []Value) (Value, Error) {
+				return MakeInt(r.step), nil
+			}}}, nil
+
+	case "count":
+		return &intrinsicFunc{r, sn, &nativeFunc{
+			0, 0,
+			func(cx Context, values []Value) (Value, Error) {
+				return MakeInt(r.count), nil
+			}}}, nil
+
+	default:
+		return nil, NoSuchFieldError(key.String())
 	}
 }

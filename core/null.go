@@ -14,7 +14,7 @@
 
 package core
 
-// NOTE: 'null' cannot be an empty struct, because empty structs have
+// NOTE: the type 'null' cannot be an empty struct, because empty structs have
 // unusual semantics in Go, insofar as they all point to the same address.
 //
 // https://golang.org/ref/spec#Size_and_alignment_guarantees
@@ -31,32 +31,29 @@ var NULL Null = &null{0}
 
 func (n *null) basicMarker() {}
 
-func (n *null) TypeOf() Type { return TNULL }
+func (n *null) Type() Type { return TNULL }
 
-func (n *null) ToStr() Str { return MakeStr("null") }
+func (n *null) ToStr(cx Context) Str { return MakeStr("null") }
 
-func (n *null) HashCode() (Int, Error) { return nil, NullValueError() }
+func (n *null) HashCode(cx Context) (Int, Error) { return nil, NullValueError() }
 
-func (n *null) GetField(key Str) (Value, Error) { return nil, NullValueError() }
+func (n *null) GetField(cx Context, key Str) (Value, Error) { return nil, NullValueError() }
 
-func (n *null) Eq(v Value) Bool {
+func (n *null) Eq(cx Context, v Value) (Bool, Error) {
 	switch v.(type) {
 	case *null:
-		return TRUE
+		return TRUE, nil
 	default:
-		return FALSE
+		return FALSE, nil
 	}
 }
 
-func (n *null) Cmp(v Value) (Int, Error) { return nil, NullValueError() }
+func (n *null) Cmp(cx Context, v Value) (Int, Error) { return nil, NullValueError() }
 
-func (n *null) Plus(v Value) (Value, Error) {
-	switch t := v.(type) {
+func (n *null) Freeze() (Value, Error) {
+	return nil, NullValueError()
+}
 
-	case Str:
-		return strcat(n, t), nil
-
-	default:
-		return nil, NullValueError()
-	}
+func (n *null) Frozen() (Bool, Error) {
+	return nil, NullValueError()
 }

@@ -120,6 +120,7 @@ const (
 	SWITCH
 	CASE
 	DEFAULT
+	PROP
 
 	STRUCT
 	THIS
@@ -132,20 +133,12 @@ const (
 	FINALLY
 	THROW
 
-	SPAWN
+	GO
 
-	PUB
 	MODULE
 	IMPORT
 
-	FN_PRINT
-	FN_PRINTLN
-	FN_STR
-	FN_LEN
-	FN_RANGE
-	FN_ASSERT
-	FN_MERGE
-	FN_CHAN
+	RESERVED
 )
 
 func (t TokenKind) String() string {
@@ -271,6 +264,8 @@ func (t TokenKind) String() string {
 		return "CASE"
 	case DEFAULT:
 		return "DEFAULT"
+	case PROP:
+		return "PROP"
 
 	case STRUCT:
 		return "STRUCT"
@@ -292,32 +287,16 @@ func (t TokenKind) String() string {
 	case THROW:
 		return "THROW"
 
-	case SPAWN:
-		return "SPAWN"
+	case GO:
+		return "GO"
 
-	case PUB:
-		return "PUB"
 	case MODULE:
 		return "MODULE"
 	case IMPORT:
 		return "IMPORT"
 
-	case FN_PRINT:
-		return "FN_PRINT"
-	case FN_PRINTLN:
-		return "FN_PRINTLN"
-	case FN_STR:
-		return "FN_STR"
-	case FN_LEN:
-		return "FN_LEN"
-	case FN_RANGE:
-		return "FN_RANGE"
-	case FN_ASSERT:
-		return "FN_ASSERT"
-	case FN_MERGE:
-		return "FN_MERGE"
-	case FN_CHAN:
-		return "FN_CHAN"
+	case RESERVED:
+		return "RESERVED"
 
 	default:
 		panic("unreachable")

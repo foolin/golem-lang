@@ -45,37 +45,41 @@ func (i _int) basicMarker() {}
 //--------------------------------------------------------------
 // Value
 
-func (i _int) TypeOf() Type { return TINT }
+func (i _int) Type() Type { return TINT }
 
-func (i _int) ToStr() Str {
-	return MakeStr(fmt.Sprintf("%d", i))
-}
-
-func (i _int) HashCode() (Int, Error) {
+func (i _int) Freeze() (Value, Error) {
 	return i, nil
 }
 
-func (i _int) Eq(v Value) Bool {
+func (i _int) Frozen() (Bool, Error) {
+	return TRUE, nil
+}
+
+func (i _int) ToStr(cx Context) Str {
+	return MakeStr(fmt.Sprintf("%d", i))
+}
+
+func (i _int) HashCode(cx Context) (Int, Error) {
+	return i, nil
+}
+
+func (i _int) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
 
 	case _int:
-		return MakeBool(i == t)
+		return MakeBool(i == t), nil
 
 	case _float:
 		a := float64(i)
 		b := t.FloatVal()
-		return MakeBool(a == b)
+		return MakeBool(a == b), nil
 
 	default:
-		return FALSE
+		return FALSE, nil
 	}
 }
 
-func (i _int) GetField(key Str) (Value, Error) {
-	return nil, NoSuchFieldError(key.String())
-}
-
-func (i _int) Cmp(v Value) (Int, Error) {
+func (i _int) Cmp(cx Context, v Value) (Int, Error) {
 	switch t := v.(type) {
 
 	case _int:
@@ -103,11 +107,8 @@ func (i _int) Cmp(v Value) (Int, Error) {
 	}
 }
 
-func (i _int) Plus(v Value) (Value, Error) {
+func (i _int) Add(v Value) (Number, Error) {
 	switch t := v.(type) {
-
-	case Str:
-		return strcat(i, t), nil
 
 	case _int:
 		return i + t, nil
@@ -252,4 +253,11 @@ func (i _int) RightShift(v Value) (Int, Error) {
 
 func (i _int) Complement() Int {
 	return ^i
+}
+
+//--------------------------------------------------------------
+// intrinsic functions
+
+func (i _int) GetField(cx Context, key Str) (Value, Error) {
+	return nil, NoSuchFieldError(key.String())
 }

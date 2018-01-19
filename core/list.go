@@ -16,6 +16,7 @@ package core
 
 import (
 	"bytes"
+	_ "fmt"
 	"strings"
 )
 
@@ -23,18 +24,28 @@ import (
 // list
 
 type list struct {
-	array []Value
+	array  []Value
+	frozen bool
 }
 
 func NewList(values []Value) List {
-	return &list{values}
+	return &list{values, false}
 }
 
 func (ls *list) compositeMarker() {}
 
-func (ls *list) TypeOf() Type { return TLIST }
+func (ls *list) Type() Type { return TLIST }
 
-func (ls *list) ToStr() Str {
+func (ls *list) Freeze() (Value, Error) {
+	ls.frozen = true
+	return ls, nil
+}
+
+func (ls *list) Frozen() (Bool, Error) {
+	return MakeBool(ls.frozen), nil
+}
+
+func (ls *list) ToStr(cx Context) Str {
 
 	var buf bytes.Buffer
 	buf.WriteString("[")
@@ -43,66 +54,197 @@ func (ls *list) ToStr() Str {
 			buf.WriteString(",")
 		}
 		buf.WriteString(" ")
-		buf.WriteString(v.ToStr().String())
+		buf.WriteString(v.ToStr(cx).String())
 	}
 	buf.WriteString(" ]")
 	return MakeStr(buf.String())
 }
 
-func (ls *list) HashCode() (Int, Error) {
+func (ls *list) HashCode(cx Context) (Int, Error) {
 	return nil, TypeMismatchError("Expected Hashable Type")
 }
 
-func (ls *list) Eq(v Value) Bool {
+func (ls *list) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *list:
-		return valuesEq(ls.array, t.array)
+		return valuesEq(cx, ls.array, t.array)
 	default:
-		return FALSE
+		return FALSE, nil
 	}
 }
 
-func (ls *list) Cmp(v Value) (Int, Error) {
+func (ls *list) Cmp(cx Context, v Value) (Int, Error) {
 	return nil, TypeMismatchError("Expected Comparable Type")
 }
 
-func (ls *list) Plus(v Value) (Value, Error) {
-	switch t := v.(type) {
-
-	case Str:
-		return strcat(ls, t), nil
-
-	default:
-		return nil, TypeMismatchError("Expected Number Type")
-	}
-}
-
-func (ls *list) Get(index Value) (Value, Error) {
-	idx, err := validateIndex(index, len(ls.array))
+func (ls *list) Get(cx Context, index Value) (Value, Error) {
+	idx, err := boundedIndex(index, len(ls.array))
 	if err != nil {
 		return nil, err
 	}
-	return ls.array[idx.IntVal()], nil
+	return ls.array[idx], nil
 }
 
-func (ls *list) Set(index Value, val Value) Error {
-	idx, err := validateIndex(index, len(ls.array))
+func (ls *list) Contains(cx Context, val Value) (Bool, Error) {
+
+	idx, err := ls.IndexOf(cx, val)
+	if err != nil {
+		return nil, err
+	}
+
+	eq, err := idx.Eq(cx, NEG_ONE)
+	if err != nil {
+		return nil, err
+	}
+
+	return MakeBool(!eq.BoolVal()), nil
+}
+
+func (ls *list) IndexOf(cx Context, val Value) (Int, Error) {
+	for i, v := range ls.array {
+		eq, err := val.Eq(cx, v)
+		if err != nil {
+			return nil, err
+		}
+		if eq.BoolVal() {
+			return MakeInt(int64(i)), nil
+		}
+	}
+	return NEG_ONE, nil
+}
+
+func (ls *list) IsEmpty() Bool {
+	return MakeBool(len(ls.array) == 0)
+}
+
+func (ls *list) Len() Int {
+	return MakeInt(int64(len(ls.array)))
+}
+
+func (ls *list) Slice(cx Context, from Value, to Value) (Value, Error) {
+
+	f, t, err := sliceIndices(from, to, len(ls.array))
+	if err != nil {
+		return nil, err
+	}
+
+	a := ls.array[f:t]
+	b := make([]Value, len(a))
+	copy(b, a)
+	return NewList(b), nil
+}
+
+func (ls *list) SliceFrom(cx Context, from Value) (Value, Error) {
+	return ls.Slice(cx, from, MakeInt(int64(len(ls.array))))
+}
+
+func (ls *list) SliceTo(cx Context, to Value) (Value, Error) {
+	return ls.Slice(cx, ZERO, to)
+}
+
+func (ls *list) Values() []Value {
+	return ls.array
+}
+
+func (ls *list) Join(cx Context, delim Str) Str {
+
+	s := make([]string, len(ls.array), len(ls.array))
+	for i, v := range ls.array {
+		s[i] = v.ToStr(cx).String()
+	}
+
+	return MakeStr(strings.Join(s, delim.ToStr(cx).String()))
+}
+
+func (ls *list) Map(cx Context, mapper func(Value) (Value, Error)) (Value, Error) {
+
+	vals := make([]Value, len(ls.array), len(ls.array))
+
+	var err Error
+	for i, v := range ls.array {
+		vals[i], err = mapper(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return NewList(vals), nil
+}
+
+func (ls *list) Reduce(cx Context, initial Value, reducer func(Value, Value) (Value, Error)) (Value, Error) {
+
+	acc := initial
+	var err Error
+
+	for _, v := range ls.array {
+		acc, err = reducer(acc, v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return acc, nil
+}
+
+func (ls *list) Filter(cx Context, filterer func(Value) (Value, Error)) (Value, Error) {
+
+	vals := []Value{}
+
+	for _, v := range ls.array {
+		flt, err := filterer(v)
+		if err != nil {
+			return nil, err
+		}
+		pred, ok := flt.(Bool)
+		if !ok {
+			return nil, TypeMismatchError("Expected Bool")
+		}
+
+		eq, err := pred.Eq(cx, TRUE)
+		if err != nil {
+			return nil, err
+		}
+		if eq.BoolVal() {
+			vals = append(vals, v)
+		}
+	}
+
+	return NewList(vals), nil
+}
+
+//---------------------------------------------------------------
+// Mutation
+
+func (ls *list) Set(cx Context, index Value, val Value) Error {
+	if ls.frozen {
+		return ImmutableValueError()
+	}
+
+	idx, err := boundedIndex(index, len(ls.array))
 	if err != nil {
 		return err
 	}
 
-	ls.array[idx.IntVal()] = val
+	ls.array[idx] = val
 	return nil
 }
 
-func (ls *list) Add(val Value) Error {
+func (ls *list) Add(cx Context, val Value) Error {
+	if ls.frozen {
+		return ImmutableValueError()
+	}
+
 	ls.array = append(ls.array, val)
 	return nil
 }
 
-func (ls *list) AddAll(val Value) Error {
+func (ls *list) AddAll(cx Context, val Value) Error {
+	if ls.frozen {
+		return ImmutableValueError()
+	}
+
 	if ibl, ok := val.(Iterable); ok {
-		itr := ibl.NewIterator()
+		itr := ibl.NewIterator(cx)
 		for itr.IterNext().BoolVal() {
 			v, err := itr.IterGet()
 			if err != nil {
@@ -116,74 +258,26 @@ func (ls *list) AddAll(val Value) Error {
 	}
 }
 
-func (ls *list) Contains(val Value) (Bool, Error) {
-	return MakeBool(!ls.IndexOf(val).Eq(NEG_ONE).BoolVal()), nil
-}
-
-func (ls *list) IndexOf(val Value) Int {
-	for i, v := range ls.array {
-		if val.Eq(v).BoolVal() {
-			return MakeInt(int64(i))
-		}
+func (ls *list) Remove(cx Context, index Int) Error {
+	if ls.frozen {
+		return ImmutableValueError()
 	}
-	return NEG_ONE
+
+	n := int(index.IntVal())
+	if n < 0 || n >= len(ls.array) {
+		return IndexOutOfBoundsError(n)
+	}
+	ls.array = append(ls.array[:n], ls.array[n+1:]...)
+	return nil
 }
 
-func (ls *list) Clear() {
+func (ls *list) Clear() Error {
+	if ls.frozen {
+		return ImmutableValueError()
+	}
+
 	ls.array = []Value{}
-}
-
-func (ls *list) IsEmpty() Bool {
-	return MakeBool(len(ls.array) == 0)
-}
-
-func (ls *list) Join(delim Str) Str {
-
-	s := make([]string, len(ls.array), len(ls.array))
-	for i, v := range ls.array {
-		s[i] = v.ToStr().String()
-	}
-
-	return MakeStr(strings.Join(s, delim.ToStr().String()))
-}
-
-func (ls *list) Len() Int {
-	return MakeInt(int64(len(ls.array)))
-}
-
-func (ls *list) Slice(from Value, to Value) (Value, Error) {
-
-	f, err := validateIndex(from, len(ls.array))
-	if err != nil {
-		return nil, err
-	}
-
-	t, err := validateIndex(to, len(ls.array)+1)
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO do we want a different error here?
-	if t.IntVal() < f.IntVal() {
-		return nil, IndexOutOfBoundsError()
-	}
-
-	a := ls.array[f.IntVal():t.IntVal()]
-	b := make([]Value, len(a))
-	copy(b, a)
-	return NewList(b), nil
-}
-
-func (ls *list) SliceFrom(from Value) (Value, Error) {
-	return ls.Slice(from, MakeInt(int64(len(ls.array))))
-}
-
-func (ls *list) SliceTo(to Value) (Value, Error) {
-	return ls.Slice(ZERO, to)
-}
-
-func (ls *list) Values() []Value {
-	return ls.array
+	return nil
 }
 
 //---------------------------------------------------------------
@@ -195,27 +289,9 @@ type listIterator struct {
 	n  int
 }
 
-func (ls *list) NewIterator() Iterator {
-
-	stc, err := NewStruct([]*StructEntry{
-		{"nextValue", true, false, NULL},
-		{"getValue", true, false, NULL}})
-	if err != nil {
-		panic("invalid struct")
-	}
-
-	itr := &listIterator{stc, ls, -1}
-
-	stc.InitField(MakeStr("nextValue"), &nativeFunc{
-		func(values []Value) (Value, Error) {
-			return itr.IterNext(), nil
-		}})
-	stc.InitField(MakeStr("getValue"), &nativeFunc{
-		func(values []Value) (Value, Error) {
-			return itr.IterGet()
-		}})
-
-	return itr
+func (ls *list) NewIterator(cx Context) Iterator {
+	return initIteratorStruct(cx,
+		&listIterator{newIteratorStruct(), ls, -1})
 }
 
 func (i *listIterator) IterNext() Bool {
@@ -234,16 +310,14 @@ func (i *listIterator) IterGet() (Value, Error) {
 //--------------------------------------------------------------
 // intrinsic functions
 
-func (ls *list) GetField(key Str) (Value, Error) {
-	switch key.String() {
+func (ls *list) GetField(cx Context, key Str) (Value, Error) {
+	switch sn := key.String(); sn {
 
 	case "add":
-		return &intrinsicFunc{ls, "add", &nativeFunc{
-			func(values []Value) (Value, Error) {
-				if len(values) != 1 {
-					return nil, ArityMismatchError("1", len(values))
-				}
-				err := ls.Add(values[0])
+		return &intrinsicFunc{ls, sn, &nativeFunc{
+			1, 1,
+			func(cx Context, values []Value) (Value, Error) {
+				err := ls.Add(cx, values[0])
 				if err != nil {
 					return nil, err
 				} else {
@@ -252,12 +326,27 @@ func (ls *list) GetField(key Str) (Value, Error) {
 			}}}, nil
 
 	case "addAll":
-		return &intrinsicFunc{ls, "addAll", &nativeFunc{
-			func(values []Value) (Value, Error) {
-				if len(values) != 1 {
-					return nil, ArityMismatchError("1", len(values))
+		return &intrinsicFunc{ls, sn, &nativeFunc{
+			1, 1,
+			func(cx Context, values []Value) (Value, Error) {
+				err := ls.AddAll(cx, values[0])
+				if err != nil {
+					return nil, err
+				} else {
+					return ls, nil
 				}
-				err := ls.AddAll(values[0])
+			}}}, nil
+
+	case "remove":
+		return &intrinsicFunc{ls, sn, &nativeFunc{
+			1, 1,
+			func(cx Context, values []Value) (Value, Error) {
+				index, ok := values[0].(Int)
+				if !ok {
+					return nil, TypeMismatchError("Expected Iterable Type")
+				}
+
+				err := ls.Remove(cx, index)
 				if err != nil {
 					return nil, err
 				} else {
@@ -266,45 +355,42 @@ func (ls *list) GetField(key Str) (Value, Error) {
 			}}}, nil
 
 	case "clear":
-		return &intrinsicFunc{ls, "clear", &nativeFunc{
-			func(values []Value) (Value, Error) {
-				if len(values) != 0 {
-					return nil, ArityMismatchError("0", len(values))
+		return &intrinsicFunc{ls, sn, &nativeFunc{
+			0, 0,
+			func(cx Context, values []Value) (Value, Error) {
+				err := ls.Clear()
+				if err != nil {
+					return nil, err
+				} else {
+					return ls, nil
 				}
-				ls.Clear()
-				return ls, nil
 			}}}, nil
 
 	case "isEmpty":
-		return &intrinsicFunc{ls, "isEmpty", &nativeFunc{
-			func(values []Value) (Value, Error) {
-				if len(values) != 0 {
-					return nil, ArityMismatchError("0", len(values))
-				}
+		return &intrinsicFunc{ls, sn, &nativeFunc{
+			0, 0,
+			func(cx Context, values []Value) (Value, Error) {
 				return ls.IsEmpty(), nil
 			}}}, nil
 
 	case "contains":
-		return &intrinsicFunc{ls, "contains", &nativeFunc{
-			func(values []Value) (Value, Error) {
-				if len(values) != 1 {
-					return nil, ArityMismatchError("1", len(values))
-				}
-				return ls.Contains(values[0])
+		return &intrinsicFunc{ls, sn, &nativeFunc{
+			1, 1,
+			func(cx Context, values []Value) (Value, Error) {
+				return ls.Contains(cx, values[0])
 			}}}, nil
 
 	case "indexOf":
-		return &intrinsicFunc{ls, "indexOf", &nativeFunc{
-			func(values []Value) (Value, Error) {
-				if len(values) != 1 {
-					return nil, ArityMismatchError("1", len(values))
-				}
-				return ls.IndexOf(values[0]), nil
+		return &intrinsicFunc{ls, sn, &nativeFunc{
+			1, 1,
+			func(cx Context, values []Value) (Value, Error) {
+				return ls.IndexOf(cx, values[0])
 			}}}, nil
 
 	case "join":
-		return &intrinsicFunc{ls, "join", &nativeFunc{
-			func(values []Value) (Value, Error) {
+		return &intrinsicFunc{ls, sn, &nativeFunc{
+			0, 1,
+			func(cx Context, values []Value) (Value, Error) {
 				var delim Str
 				switch len(values) {
 				case 0:
@@ -316,10 +402,55 @@ func (ls *list) GetField(key Str) (Value, Error) {
 						return nil, TypeMismatchError("Expected Str")
 					}
 				default:
-					return nil, ArityMismatchError("0 or 1", len(values))
+					panic("arity mismatch")
 				}
 
-				return ls.Join(delim), nil
+				return ls.Join(cx, delim), nil
+			}}}, nil
+
+	case "map":
+		return &intrinsicFunc{ls, sn, &nativeFunc{
+			1, 1,
+			func(cx Context, values []Value) (Value, Error) {
+
+				if f, ok := values[0].(Func); ok {
+					return ls.Map(cx, func(v Value) (Value, Error) {
+						return f.Invoke(cx, []Value{v})
+					})
+				} else {
+					return nil, TypeMismatchError("Expected Func")
+				}
+
+			}}}, nil
+
+	case "reduce":
+		return &intrinsicFunc{ls, sn, &nativeFunc{
+			2, 2,
+			func(cx Context, values []Value) (Value, Error) {
+
+				initial := values[0]
+				if f, ok := values[1].(Func); ok {
+					return ls.Reduce(cx, initial, func(acc Value, v Value) (Value, Error) {
+						return f.Invoke(cx, []Value{acc, v})
+					})
+				} else {
+					return nil, TypeMismatchError("Expected Func")
+				}
+			}}}, nil
+
+	case "filter":
+		return &intrinsicFunc{ls, sn, &nativeFunc{
+			1, 1,
+			func(cx Context, values []Value) (Value, Error) {
+
+				if f, ok := values[0].(Func); ok {
+					return ls.Filter(cx, func(v Value) (Value, Error) {
+						return f.Invoke(cx, []Value{v})
+					})
+				} else {
+					return nil, TypeMismatchError("Expected Func")
+				}
+
 			}}}, nil
 
 	default:

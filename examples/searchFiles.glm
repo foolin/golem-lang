@@ -30,7 +30,7 @@ fn traverse(pattern, file) {
     }
 }
 
-pub fn main(args) {
+fn main(args) {
 
     if len(args) != 2 {
         println("Expected 2 arguments, got ", len(args));

@@ -1,5 +1,0 @@
-
-pub fn main(args) {
-    println("Hello: " + args);
-}
-

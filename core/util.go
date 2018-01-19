@@ -16,52 +16,76 @@ package core
 
 import ()
 
-// The value must be between 0 (inclusive) and max (exclusive).
-func validateIndex(val Value, max int) (Int, Error) {
+func posIndex(val Value, length int) (int, Error) {
+	i, ok := val.(Int)
+	if !ok {
+		return -1, TypeMismatchError("Expected 'Int'")
+	}
 
-	if i, ok := val.(Int); ok {
-		n := int(i.IntVal())
-		switch {
-		case n < 0:
-			return nil, IndexOutOfBoundsError()
-		case n >= max:
-			return nil, IndexOutOfBoundsError()
-		default:
-			return i, nil
-		}
-	} else {
-		return nil, TypeMismatchError("Expected 'Int'")
+	n := int(i.IntVal())
+	if n < 0 {
+		n = length + n
+	}
+	return n, nil
+}
+
+func boundedIndex(val Value, length int) (int, Error) {
+	n, err := posIndex(val, length)
+	if err != nil {
+		return -1, err
+	}
+
+	switch {
+	case n < 0:
+		return -1, IndexOutOfBoundsError(n)
+	case n >= length:
+		return -1, IndexOutOfBoundsError(n)
+	default:
+		return n, nil
 	}
 }
 
-func valuesEq(as []Value, bs []Value) Bool {
+func sliceBounds(n int, length int) int {
+	switch {
+	case n < 0:
+		return 0
+	case n > length:
+		return length
+	default:
+		return n
+	}
+}
+
+func sliceIndices(from Value, to Value, length int) (int, int, Error) {
+	f, err := posIndex(from, length)
+	if err != nil {
+		return 0, 0, TypeMismatchError("Expected 'Int'")
+	}
+	t, err := posIndex(to, length)
+	if err != nil {
+		return 0, 0, TypeMismatchError("Expected 'Int'")
+	}
+
+	return sliceBounds(f, length), sliceBounds(t, length), nil
+}
+
+func valuesEq(cx Context, as []Value, bs []Value) (Bool, Error) {
 
 	if len(as) != len(bs) {
-		return FALSE
+		return FALSE, nil
 	}
 
 	for i, a := range as {
-		if a.Eq(bs[i]) == FALSE {
-			return FALSE
+		eq, err := a.Eq(cx, bs[i])
+		if err != nil {
+			return nil, err
+		}
+		if eq == FALSE {
+			return FALSE, nil
 		}
 	}
 
-	return TRUE
-}
-
-func strcat(a Value, b Value) Str {
-
-	sa := a.ToStr().String()
-	sb := b.ToStr().String()
-
-	return str(strcpy(sa) + strcpy(sb))
-}
-
-// copy to avoid memory leaks
-func strcpy(s string) string {
-	c := make([]byte, len(s))
-	copy(c, s)
-	return string(c)
+	return TRUE, nil
 }
 
 func strHash(s string) int {
@@ -80,8 +104,36 @@ func strHash(s string) int {
 	return hash
 }
 
-func Assert(flag bool, msg string) {
+func newIteratorStruct() Struct {
+
+	// create a struct with fields that have placeholder NULL values
+	stc, err := NewStruct([]Field{
+		NewField("nextValue", true, NULL),
+		NewField("getValue", true, NULL)}, true)
+	if err != nil {
+		panic("invalid struct")
+	}
+	return stc
+}
+
+func initIteratorStruct(cx Context, itr Iterator) Iterator {
+
+	// initialize the struct fields with functions that refer back to the iterator
+	itr.InitField(cx, MakeStr("nextValue"), &nativeFunc{
+		0, 0,
+		func(cx Context, values []Value) (Value, Error) {
+			return itr.IterNext(), nil
+		}})
+	itr.InitField(cx, MakeStr("getValue"), &nativeFunc{
+		0, 0,
+		func(cx Context, values []Value) (Value, Error) {
+			return itr.IterGet()
+		}})
+	return itr
+}
+
+func assert(flag bool) {
 	if !flag {
-		panic(msg)
+		panic("assertion failure")
 	}
 }

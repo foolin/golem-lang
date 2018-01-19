@@ -15,10 +15,10 @@
 package core
 
 import (
-//"fmt"
+	"fmt"
 )
 
-// The hash map implementation that is used by Dict.
+// The hash map implementation that is used by Dict and Set.
 
 type (
 	HashMap struct {
@@ -33,21 +33,49 @@ type (
 )
 
 func EmptyHashMap() *HashMap {
-	return NewHashMap([]*HEntry{})
+	return NewHashMap(nil, []*HEntry{})
 }
 
-func NewHashMap(entries []*HEntry) *HashMap {
+func NewHashMap(cx Context, entries []*HEntry) *HashMap {
 	capacity := 5
 	buckets := make([][]*HEntry, capacity, capacity)
 	hm := &HashMap{buckets, 0}
 
 	for _, e := range entries {
-		hm.Put(e.Key, e.Value)
+		hm.Put(cx, e.Key, e.Value)
 	}
 	return hm
 }
 
-func (hm *HashMap) Get(key Value) (value Value, err Error) {
+func (hm *HashMap) Eq(cx Context, that *HashMap) (Bool, Error) {
+
+	if hm.size != that.size {
+		return FALSE, nil
+	}
+
+	itr := hm.Iterator()
+	for itr.Next() {
+		entry := itr.Get()
+
+		v, err := that.Get(cx, entry.Key)
+		if err != nil {
+			return nil, err
+		}
+
+		eq, err := entry.Value.Eq(cx, v)
+		if err != nil {
+			return nil, err
+		}
+
+		if !eq.BoolVal() {
+			return FALSE, nil
+		}
+	}
+
+	return TRUE, nil
+}
+
+func (hm *HashMap) Get(cx Context, key Value) (value Value, err Error) {
 
 	// recover from an un-hashable value
 	defer func() {
@@ -61,8 +89,8 @@ func (hm *HashMap) Get(key Value) (value Value, err Error) {
 		}
 	}()
 
-	b := hm.buckets[hm.lookupBucket(key)]
-	n := hm.indexOf(b, key)
+	b := hm.buckets[hm._lookupBucket(cx, key)]
+	n := hm._indexOf(cx, b, key)
 	if n == -1 {
 		return NULL, nil
 	} else {
@@ -70,7 +98,7 @@ func (hm *HashMap) Get(key Value) (value Value, err Error) {
 	}
 }
 
-func (hm *HashMap) ContainsKey(key Value) (flag Bool, err Error) {
+func (hm *HashMap) ContainsKey(cx Context, key Value) (flag Bool, err Error) {
 
 	// recover from an un-hashable value
 	defer func() {
@@ -84,8 +112,8 @@ func (hm *HashMap) ContainsKey(key Value) (flag Bool, err Error) {
 		}
 	}()
 
-	b := hm.buckets[hm.lookupBucket(key)]
-	n := hm.indexOf(b, key)
+	b := hm.buckets[hm._lookupBucket(cx, key)]
+	n := hm._indexOf(cx, b, key)
 	if n == -1 {
 		return FALSE, nil
 	} else {
@@ -93,7 +121,33 @@ func (hm *HashMap) ContainsKey(key Value) (flag Bool, err Error) {
 	}
 }
 
-func (hm *HashMap) Put(key Value, value Value) (err Error) {
+func (hm *HashMap) Remove(cx Context, key Value) (flag Bool, err Error) {
+
+	// recover from an un-hashable value
+	defer func() {
+		if r := recover(); r != nil {
+			if e, ok := r.(Error); ok {
+				flag = nil
+				err = e
+			} else {
+				panic(r)
+			}
+		}
+	}()
+
+	h := hm._lookupBucket(cx, key)
+	b := hm.buckets[h]
+	n := hm._indexOf(cx, b, key)
+	if n == -1 {
+		return FALSE, nil
+	} else {
+		hm.buckets[h] = append(b[:n], b[n+1:]...)
+		hm.size--
+		return TRUE, nil
+	}
+}
+
+func (hm *HashMap) Put(cx Context, key Value, value Value) (err Error) {
 
 	// recover from an un-hashable value
 	defer func() {
@@ -106,12 +160,12 @@ func (hm *HashMap) Put(key Value, value Value) (err Error) {
 		}
 	}()
 
-	h := hm.lookupBucket(key)
-	n := hm.indexOf(hm.buckets[h], key)
+	h := hm._lookupBucket(cx, key)
+	n := hm._indexOf(cx, hm.buckets[h], key)
 	if n == -1 {
-		if hm.tooFull() {
-			hm.rehash()
-			h = hm.lookupBucket(key)
+		if hm._tooFull() {
+			hm._rehash(cx)
+			h = hm._lookupBucket(cx, key)
 		}
 		hm.buckets[h] = append(hm.buckets[h], &HEntry{key, value})
 		hm.size++
@@ -128,39 +182,45 @@ func (hm *HashMap) Len() Int {
 }
 
 //--------------------------------------------------------------
+// these are internal methods -- don't call them directly
 
-func (hm *HashMap) indexOf(b []*HEntry, key Value) int {
+func (hm *HashMap) _indexOf(cx Context, b []*HEntry, key Value) int {
 	for i, e := range b {
 
-		if e.Key.Eq(key).BoolVal() {
+		eq, err := e.Key.Eq(cx, key)
+		if err != nil {
+			panic(err)
+		}
+
+		if eq.BoolVal() {
 			return i
 		}
 	}
 	return -1
 }
 
-func (hm *HashMap) tooFull() bool {
+func (hm *HashMap) _tooFull() bool {
 	headroom := (hm.size + 1) << 1
 	return headroom > len(hm.buckets)
 }
 
-func (hm *HashMap) rehash() {
+func (hm *HashMap) _rehash(cx Context) {
 	oldBuckets := hm.buckets
 
 	capacity := len(hm.buckets)<<1 + 1
 	hm.buckets = make([][]*HEntry, capacity, capacity)
 	for _, b := range oldBuckets {
 		for _, e := range b {
-			h := hm.lookupBucket(e.Key)
+			h := hm._lookupBucket(cx, e.Key)
 			hm.buckets[h] = append(hm.buckets[h], e)
 		}
 	}
 }
 
-func (hm *HashMap) lookupBucket(key Value) int {
+func (hm *HashMap) _lookupBucket(cx Context, key Value) int {
 
 	// panic on an un-hashable value
-	hc, err := key.HashCode()
+	hc, err := key.HashCode(cx)
 	if err != nil {
 		panic(err)
 	}
@@ -171,6 +231,24 @@ func (hm *HashMap) lookupBucket(key Value) int {
 	}
 
 	return hv % len(hm.buckets)
+}
+
+//--------------------------------------------------------------
+
+func (hm *HashMap) dump() {
+	fmt.Println("--------------------------")
+	fmt.Printf("size: %d\n", hm.size)
+	for i, b := range hm.buckets {
+		fmt.Printf("%d, %d: [", i, len(b))
+		for j, e := range b {
+			if j > 0 {
+				fmt.Print(", ")
+			}
+			fmt.Printf("(%v:%v)", e.Key, e.Value)
+		}
+		fmt.Println("]")
+	}
+	fmt.Println("--------------------------")
 }
 
 //--------------------------------------------------------------

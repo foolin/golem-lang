@@ -138,7 +138,7 @@ func (t *Try) Traverse(v Visitor) {
 	}
 }
 
-func (sp *Spawn) Traverse(v Visitor) {
+func (sp *Go) Traverse(v Visitor) {
 	v.Visit(sp.Invocation)
 }
 
@@ -178,7 +178,7 @@ func (ident *BuiltinExpr) Traverse(v Visitor) {
 
 func (fn *FnExpr) Traverse(v Visitor) {
 	for _, n := range fn.FormalParams {
-		v.Visit(n)
+		v.Visit(n.Ident)
 	}
 	v.Visit(fn.Body)
 }
@@ -305,8 +305,8 @@ func (p *dump) Visit(node Node) {
 		p.buf.WriteString("Throw\n")
 	case *Try:
 		p.buf.WriteString("Try\n")
-	case *Spawn:
-		p.buf.WriteString("Spawn\n")
+	case *Go:
+		p.buf.WriteString("Go\n")
 
 	case *BinaryExpr:
 		p.buf.WriteString(fmt.Sprintf("BinaryExpr(%q)\n", t.Op.Text))

@@ -33,9 +33,17 @@ func (b _bool) BoolVal() bool {
 
 func (b _bool) basicMarker() {}
 
-func (b _bool) TypeOf() Type { return TBOOL }
+func (b _bool) Type() Type { return TBOOL }
 
-func (b _bool) ToStr() Str {
+func (b _bool) Freeze() (Value, Error) {
+	return b, nil
+}
+
+func (b _bool) Frozen() (Bool, Error) {
+	return TRUE, nil
+}
+
+func (b _bool) ToStr(cx Context) Str {
 	if b {
 		return MakeStr("true")
 	} else {
@@ -43,7 +51,7 @@ func (b _bool) ToStr() Str {
 	}
 }
 
-func (b _bool) HashCode() (Int, Error) {
+func (b _bool) HashCode(cx Context) (Int, Error) {
 	if b {
 		return MakeInt(1009), nil
 	} else {
@@ -51,24 +59,24 @@ func (b _bool) HashCode() (Int, Error) {
 	}
 }
 
-func (b _bool) Eq(v Value) Bool {
+func (b _bool) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case _bool:
 		if b == t {
-			return _bool(true)
+			return _bool(true), nil
 		} else {
-			return _bool(false)
+			return _bool(false), nil
 		}
 	default:
-		return _bool(false)
+		return _bool(false), nil
 	}
 }
 
-func (b _bool) GetField(key Str) (Value, Error) {
+func (b _bool) GetField(cx Context, key Str) (Value, Error) {
 	return nil, NoSuchFieldError(key.String())
 }
 
-func (b _bool) Cmp(v Value) (Int, Error) {
+func (b _bool) Cmp(cx Context, v Value) (Int, Error) {
 	switch t := v.(type) {
 
 	case _bool:
@@ -82,17 +90,6 @@ func (b _bool) Cmp(v Value) (Int, Error) {
 
 	default:
 		return nil, TypeMismatchError("Expected Comparable Type")
-	}
-}
-
-func (b _bool) Plus(v Value) (Value, Error) {
-	switch t := v.(type) {
-
-	case Str:
-		return strcat(b, t), nil
-
-	default:
-		return nil, TypeMismatchError("Expected Number Type")
 	}
 }
 

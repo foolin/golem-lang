@@ -283,11 +283,12 @@ func TestIdentOrKeyword(t *testing.T) {
 	ok(t, s, ast.IN, "in", 1, 25)
 	ok(t, s, ast.EOF, "", 1, 27)
 
-	s = NewScanner("switch case default")
+	s = NewScanner("switch case default prop")
 	ok(t, s, ast.SWITCH, "switch", 1, 1)
 	ok(t, s, ast.CASE, "case", 1, 8)
 	ok(t, s, ast.DEFAULT, "default", 1, 13)
-	ok(t, s, ast.EOF, "", 1, 20)
+	ok(t, s, ast.PROP, "prop", 1, 21)
+	ok(t, s, ast.EOF, "", 1, 25)
 
 	s = NewScanner("try catch finally throw")
 	ok(t, s, ast.TRY, "try", 1, 1)
@@ -296,12 +297,11 @@ func TestIdentOrKeyword(t *testing.T) {
 	ok(t, s, ast.THROW, "throw", 1, 19)
 	ok(t, s, ast.EOF, "", 1, 24)
 
-	s = NewScanner("spawn pub module import")
-	ok(t, s, ast.SPAWN, "spawn", 1, 1)
-	ok(t, s, ast.PUB, "pub", 1, 7)
-	ok(t, s, ast.MODULE, "module", 1, 11)
-	ok(t, s, ast.IMPORT, "import", 1, 18)
-	ok(t, s, ast.EOF, "", 1, 24)
+	s = NewScanner("go module import")
+	ok(t, s, ast.GO, "go", 1, 1)
+	ok(t, s, ast.MODULE, "module", 1, 4)
+	ok(t, s, ast.IMPORT, "import", 1, 11)
+	ok(t, s, ast.EOF, "", 1, 17)
 
 	s = NewScanner("struct this has dict set")
 	ok(t, s, ast.STRUCT, "struct", 1, 1)
@@ -310,19 +310,6 @@ func TestIdentOrKeyword(t *testing.T) {
 	ok(t, s, ast.DICT, "dict", 1, 17)
 	ok(t, s, ast.SET, "set", 1, 22)
 	ok(t, s, ast.EOF, "", 1, 25)
-
-	s = NewScanner("print println str len range assert")
-	ok(t, s, ast.FN_PRINT, "print", 1, 1)
-	ok(t, s, ast.FN_PRINTLN, "println", 1, 7)
-	ok(t, s, ast.FN_STR, "str", 1, 15)
-	ok(t, s, ast.FN_LEN, "len", 1, 19)
-	ok(t, s, ast.FN_RANGE, "range", 1, 23)
-	ok(t, s, ast.FN_ASSERT, "assert", 1, 29)
-	ok(t, s, ast.EOF, "", 1, 35)
-
-	s = NewScanner("chan")
-	ok(t, s, ast.FN_CHAN, "chan", 1, 1)
-	ok(t, s, ast.EOF, "", 1, 5)
 }
 
 func TestComments(t *testing.T) {

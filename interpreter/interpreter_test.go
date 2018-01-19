@@ -25,7 +25,7 @@ import (
 	"testing"
 )
 
-func assert(t *testing.T, flag bool) {
+func tassert(t *testing.T, flag bool) {
 	if !flag {
 		t.Error("assertion failure")
 	}
@@ -33,22 +33,28 @@ func assert(t *testing.T, flag bool) {
 
 func ok_expr(t *testing.T, source string, expect g.Value) {
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod)
+	intp := NewInterpreter(mod, builtInMgr)
 
-	result, errTrace := intp.Init()
-	if errTrace != nil {
-		panic(errTrace)
+	result, err := intp.Init()
+	if err != nil {
+		panic(err)
 	}
 
-	b := result.Eq(expect)
+	b, err := result.Eq(intp, expect)
+	if err != nil {
+		panic("ok_expr")
+	}
 	if !b.BoolVal() {
 		t.Error(result, " != ", expect)
 		panic("ok_expr")
 	}
 }
 
-func ok_ref(t *testing.T, ref *g.Ref, expect g.Value) {
-	b := ref.Val.Eq(expect)
+func ok_ref(t *testing.T, intp *Interpreter, ref *g.Ref, expect g.Value) {
+	b, err := ref.Val.Eq(intp, expect)
+	if err != nil {
+		panic("ok_ref")
+	}
 	if !b.BoolVal() {
 		t.Error(ref.Val, " != ", expect)
 	}
@@ -56,14 +62,17 @@ func ok_ref(t *testing.T, ref *g.Ref, expect g.Value) {
 
 func ok_mod(t *testing.T, source string, expectResult g.Value, expectRefs []*g.Ref) {
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod)
+	intp := NewInterpreter(mod, builtInMgr)
 
-	result, errTrace := intp.Init()
-	if errTrace != nil {
-		panic(errTrace)
+	result, err := intp.Init()
+	if err != nil {
+		panic(err)
 	}
 
-	b := result.Eq(expectResult)
+	b, err := result.Eq(intp, expectResult)
+	if err != nil {
+		panic("ok_mod")
+	}
 	if !b.BoolVal() {
 		t.Error(result, " != ", expectResult)
 	}
@@ -76,34 +85,32 @@ func ok_mod(t *testing.T, source string, expectResult g.Value, expectRefs []*g.R
 func fail_expr(t *testing.T, source string, expect string) {
 
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod)
+	intp := NewInterpreter(mod, builtInMgr)
 
-	result, errTrace := intp.Init()
+	result, err := intp.Init()
 	if result != nil {
 		panic(result)
 	}
 
-	if errTrace.Error.Error() != expect {
-		t.Error(errTrace.Error.Error(), " != ", expect)
+	if err.Error() != expect {
+		t.Error(err.Error(), " != ", expect)
 	}
 }
 
-func fail(t *testing.T, source string, expectErr g.Error, expectErrTrace []string) *g.BytecodeModule {
+func fail(t *testing.T, source string, err g.Error, stack []string) *g.BytecodeModule {
 
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod)
+	intp := NewInterpreter(mod, builtInMgr)
 
-	result, errTrace := intp.Init()
+	expect := intp.makeErrorTrace(err, stack)
+
+	result, err := intp.Init()
 	if result != nil {
 		panic(result)
 	}
 
-	if !reflect.DeepEqual(errTrace.Error, expectErr) {
-		t.Error(errTrace.Error, " != ", expectErr)
-	}
-
-	if !reflect.DeepEqual(errTrace.StackTrace, expectErrTrace) {
-		t.Error(errTrace.StackTrace, " != ", expectErrTrace)
+	if err.Error() != expect.Error() {
+		t.Error(err, " != ", expect)
 	}
 
 	return mod
@@ -112,30 +119,33 @@ func fail(t *testing.T, source string, expectErr g.Error, expectErrTrace []strin
 func failErr(t *testing.T, source string, expect g.Error) {
 
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod)
+	intp := NewInterpreter(mod, builtInMgr)
 
-	result, errTrace := intp.Init()
+	result, err := intp.Init()
 	if result != nil {
 		panic(result)
 	}
 
-	if errTrace.Error.Error() != expect.Error() {
-		t.Error(errTrace.Error, " != ", expect)
+	if err.Error() != expect.Error() {
+		panic("sadfdfadf")
+		t.Error(err, " != ", expect)
 	}
 }
 
-func newStruct(entries []*g.StructEntry) g.Struct {
+func newStruct(entries []g.Field) g.Struct {
 
-	stc, err := g.NewStruct(entries)
+	stc, err := g.NewStruct(entries, false)
 	if err != nil {
 		panic("invalid struct")
 	}
 	return stc
 }
 
+var builtInMgr = g.NewBuiltinManager(g.CommandLineBuiltins)
+
 func newCompiler(source string) compiler.Compiler {
 	scanner := scanner.NewScanner(source)
-	parser := parser.NewParser(scanner)
+	parser := parser.NewParser(scanner, builtInMgr.Contains)
 	mod, err := parser.ParseModule()
 	if err != nil {
 		panic(err.Error())
@@ -146,17 +156,17 @@ func newCompiler(source string) compiler.Compiler {
 		panic(fmt.Sprintf("%v", errors))
 	}
 
-	return compiler.NewCompiler(anl)
+	return compiler.NewCompiler(anl, builtInMgr)
 }
 
-func interpret(mod *g.BytecodeModule) {
-	intp := NewInterpreter(mod)
-	_, errTrace := intp.Init()
-	if errTrace != nil {
-		fmt.Printf("%v\n", errTrace.Error)
-		fmt.Printf("%v\n", errTrace.StackTrace)
+func interpret(mod *g.BytecodeModule) *Interpreter {
+	intp := NewInterpreter(mod, builtInMgr)
+	_, err := intp.Init()
+	if err != nil {
+		fmt.Printf("%v\n", err)
 		panic("interpreter failed")
 	}
+	return intp
 }
 
 func TestExpressions(t *testing.T) {
@@ -167,10 +177,12 @@ func TestExpressions(t *testing.T) {
 
 	ok_expr(t, "true + 'a';", g.MakeStr("truea"))
 	ok_expr(t, "'a' + true;", g.MakeStr("atrue"))
+	ok_expr(t, "'a' + null;", g.MakeStr("anull"))
+	ok_expr(t, "null + 'a';", g.MakeStr("nulla"))
 
 	fail_expr(t, "true + null;", "TypeMismatch: Expected Number Type")
 	fail_expr(t, "1 + null;", "TypeMismatch: Expected Number Type")
-	fail_expr(t, "null + 1;", "NullValue")
+	fail_expr(t, "null + 1;", "TypeMismatch: Expected Number Type")
 
 	ok_expr(t, "true == 'a';", g.FALSE)
 	ok_expr(t, "3 * 7 + 4 == 5 * 5;", g.TRUE)
@@ -223,8 +235,8 @@ func TestExpressions(t *testing.T) {
 
 	ok_expr(t, "[true][0];", g.TRUE)
 	ok_expr(t, "'abc'[1];", g.MakeStr("b"))
-	fail_expr(t, "[true][2];", "IndexOutOfBounds")
-	fail_expr(t, "'abc'[-1];", "IndexOutOfBounds")
+	ok_expr(t, "'abc'[-1];", g.MakeStr("c"))
+	fail_expr(t, "[true][2];", "IndexOutOfBounds: 2")
 
 	ok_expr(t, "'abc'[1:];", g.MakeStr("bc"))
 	ok_expr(t, "'abc'[:1];", g.MakeStr("a"))
@@ -236,11 +248,8 @@ func TestExpressions(t *testing.T) {
 	ok_expr(t, "[6,7,8,9][1:3];", g.NewList([]g.Value{g.MakeInt(7), g.MakeInt(8)}))
 	ok_expr(t, "[6,7,8,9][1:1];", g.NewList([]g.Value{}))
 
-	ok_expr(t, "struct{a: 1}['a'];", g.ONE)
 	ok_expr(t, "struct{a: 1} has 'a';", g.TRUE)
 	ok_expr(t, "struct{a: 1} has 'b';", g.FALSE)
-
-	fail_expr(t, "struct{a: 1}[0];", "TypeMismatch: Expected 'Str'")
 
 	fail_expr(t, "struct{a: 1, a: 2};", "DuplicateField: Field 'a' is a duplicate")
 
@@ -386,8 +395,8 @@ let b = a(1);
 `
 	mod := newCompiler(source).Compile()
 
-	interpret(mod)
-	ok_ref(t, mod.Refs[1], g.ONE)
+	i := interpret(mod)
+	ok_ref(t, i, mod.Refs[1], g.ONE)
 
 	source = `
 let a = fn() { };
@@ -400,9 +409,9 @@ let f = c(b(2), 3);
 	mod = newCompiler(source).Compile()
 
 	interpret(mod)
-	ok_ref(t, mod.Refs[3], g.NULL)
-	ok_ref(t, mod.Refs[4], g.ONE)
-	ok_ref(t, mod.Refs[5], g.MakeInt(24))
+	ok_ref(t, i, mod.Refs[3], g.NULL)
+	ok_ref(t, i, mod.Refs[4], g.ONE)
+	ok_ref(t, i, mod.Refs[5], g.MakeInt(24))
 
 	source = `
 let fibonacci = fn(n) {
@@ -425,13 +434,13 @@ let e = fibonacci(5);
 let f = fibonacci(6);
 `
 	mod = newCompiler(source).Compile()
-	interpret(mod)
-	ok_ref(t, mod.Refs[1], g.ONE)
-	ok_ref(t, mod.Refs[2], g.ONE)
-	ok_ref(t, mod.Refs[3], g.MakeInt(2))
-	ok_ref(t, mod.Refs[4], g.MakeInt(3))
-	ok_ref(t, mod.Refs[5], g.MakeInt(5))
-	ok_ref(t, mod.Refs[6], g.MakeInt(8))
+	i = interpret(mod)
+	ok_ref(t, i, mod.Refs[1], g.ONE)
+	ok_ref(t, i, mod.Refs[2], g.ONE)
+	ok_ref(t, i, mod.Refs[3], g.MakeInt(2))
+	ok_ref(t, i, mod.Refs[4], g.MakeInt(3))
+	ok_ref(t, i, mod.Refs[5], g.MakeInt(5))
+	ok_ref(t, i, mod.Refs[6], g.MakeInt(8))
 
 	source = `
 let foo = fn(n) {
@@ -443,8 +452,8 @@ let foo = fn(n) {
 let a = foo(5);
 `
 	mod = newCompiler(source).Compile()
-	interpret(mod)
-	ok_ref(t, mod.Refs[1], g.MakeInt(32))
+	i = interpret(mod)
+	ok_ref(t, i, mod.Refs[1], g.MakeInt(32))
 }
 
 func TestCapture(t *testing.T) {
@@ -461,14 +470,14 @@ let x = a(2);
 let y = a(7);
 `
 	mod := newCompiler(source).Compile()
-	interpret(mod)
+	i := interpret(mod)
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	ok_ref(t, mod.Refs[2], g.MakeInt(5))
-	ok_ref(t, mod.Refs[3], g.MakeInt(12))
+	ok_ref(t, i, mod.Refs[2], g.MakeInt(5))
+	ok_ref(t, i, mod.Refs[3], g.MakeInt(12))
 
 	source = `
 let z = 2;
@@ -486,11 +495,11 @@ let y = a(1);
 `
 	mod = newCompiler(source).Compile()
 
-	interpret(mod)
+	i = interpret(mod)
 
-	ok_ref(t, mod.Refs[0], g.ZERO)
-	ok_ref(t, mod.Refs[3], g.MakeInt(7))
-	ok_ref(t, mod.Refs[4], g.MakeInt(8))
+	ok_ref(t, i, mod.Refs[0], g.ZERO)
+	ok_ref(t, i, mod.Refs[3], g.MakeInt(7))
+	ok_ref(t, i, mod.Refs[4], g.MakeInt(8))
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
@@ -507,7 +516,7 @@ fn foo() {
 foo();
 `
 	mod = newCompiler(source).Compile()
-	interpret(mod)
+	i = interpret(mod)
 }
 
 func TestStruct(t *testing.T) {
@@ -519,19 +528,19 @@ let y = struct { a: 1, b: 2 };
 let z = struct { a: 3, b: 4, c: struct { d: 5 } };
 `
 	mod := newCompiler(source).Compile()
-	interpret(mod)
+	i := interpret(mod)
 
-	ok_ref(t, mod.Refs[0], newStruct([]*g.StructEntry{}))
-	ok_ref(t, mod.Refs[1], newStruct([]*g.StructEntry{
-		{"a", false, false, g.ZERO}}))
-	ok_ref(t, mod.Refs[2], newStruct([]*g.StructEntry{
-		{"a", false, false, g.ONE},
-		{"b", false, false, g.MakeInt(2)}}))
-	ok_ref(t, mod.Refs[3], newStruct([]*g.StructEntry{
-		{"a", false, false, g.MakeInt(3)},
-		{"b", false, false, g.MakeInt(4)},
-		{"c", false, false, newStruct([]*g.StructEntry{
-			{"d", false, false, g.MakeInt(5)}})}}))
+	ok_ref(t, i, mod.Refs[0], newStruct([]g.Field{}))
+	ok_ref(t, i, mod.Refs[1], newStruct([]g.Field{
+		g.NewField("a", false, g.ZERO)}))
+	ok_ref(t, i, mod.Refs[2], newStruct([]g.Field{
+		g.NewField("a", false, g.ONE),
+		g.NewField("b", false, g.MakeInt(2))}))
+	ok_ref(t, i, mod.Refs[3], newStruct([]g.Field{
+		g.NewField("a", false, g.MakeInt(3)),
+		g.NewField("b", false, g.MakeInt(4)),
+		g.NewField("c", false, newStruct([]g.Field{
+			g.NewField("d", false, g.MakeInt(5))}))}))
 
 	source = `
 let x = struct { a: 5 };
@@ -539,15 +548,15 @@ let y = x.a;
 x.a = 6;
 `
 	mod = newCompiler(source).Compile()
-	interpret(mod)
+	i = interpret(mod)
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	ok_ref(t, mod.Refs[0], newStruct([]*g.StructEntry{
-		{"a", false, false, g.MakeInt(6)}}))
-	ok_ref(t, mod.Refs[1], g.MakeInt(5))
+	ok_ref(t, i, mod.Refs[0], newStruct([]g.Field{
+		g.NewField("a", false, g.MakeInt(6))}))
+	ok_ref(t, i, mod.Refs[1], g.MakeInt(5))
 
 	source = `
 let a = struct {
@@ -560,37 +569,19 @@ let b = a.plus();
 let c = a.minus();
 `
 	mod = newCompiler(source).Compile()
-	interpret(mod)
+	i = interpret(mod)
 
-	ok_ref(t, mod.Refs[2], g.MakeInt(13))
-	ok_ref(t, mod.Refs[3], g.MakeInt(3))
+	ok_ref(t, i, mod.Refs[2], g.MakeInt(13))
+	ok_ref(t, i, mod.Refs[3], g.MakeInt(3))
 
 	source = `
 let a = null;
 a = struct { x: 8 }.x = 5;
 `
 	mod = newCompiler(source).Compile()
-	interpret(mod)
+	i = interpret(mod)
 
-	ok_ref(t, mod.Refs[0], g.MakeInt(5))
-
-	source = `
-let a = struct { x: 8 };
-a['x'] = 3;
-let b = a['x']++;
-let c = a['x'];
-`
-	mod = newCompiler(source).Compile()
-	interpret(mod)
-
-	//fmt.Println("----------------------------")
-	//fmt.Println(source)
-	//fmt.Println(mod)
-
-	ok_ref(t, mod.Refs[0], newStruct([]*g.StructEntry{
-		{"x", false, false, g.MakeInt(4)}}))
-	ok_ref(t, mod.Refs[1], g.MakeInt(3))
-	ok_ref(t, mod.Refs[2], g.MakeInt(4))
+	ok_ref(t, i, mod.Refs[0], g.MakeInt(5))
 
 	source = `
 let a = struct { x: 8 };
@@ -602,7 +593,7 @@ assert(b.x);
 assert(!b.y);
 `
 	mod = newCompiler(source).Compile()
-	interpret(mod)
+	i = interpret(mod)
 }
 
 func TestMerge(t *testing.T) {
@@ -671,12 +662,12 @@ let c = a++;
 let d = b--;
 `
 	mod := newCompiler(source).Compile()
-	interpret(mod)
+	i := interpret(mod)
 
-	ok_ref(t, mod.Refs[0], g.MakeInt(11))
-	ok_ref(t, mod.Refs[1], g.MakeInt(19))
-	ok_ref(t, mod.Refs[2], g.MakeInt(10))
-	ok_ref(t, mod.Refs[3], g.MakeInt(20))
+	ok_ref(t, i, mod.Refs[0], g.MakeInt(11))
+	ok_ref(t, i, mod.Refs[1], g.MakeInt(19))
+	ok_ref(t, i, mod.Refs[2], g.MakeInt(10))
+	ok_ref(t, i, mod.Refs[3], g.MakeInt(20))
 
 	source = `
 let a = struct { x: 10 };
@@ -685,18 +676,18 @@ let c = a.x++;
 let d = b.y--;
 `
 	mod = newCompiler(source).Compile()
-	interpret(mod)
+	i = interpret(mod)
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	ok_ref(t, mod.Refs[0], newStruct([]*g.StructEntry{
-		{"x", false, false, g.MakeInt(11)}}))
-	ok_ref(t, mod.Refs[1], newStruct([]*g.StructEntry{
-		{"y", false, false, g.MakeInt(19)}}))
-	ok_ref(t, mod.Refs[2], g.MakeInt(10))
-	ok_ref(t, mod.Refs[3], g.MakeInt(20))
+	ok_ref(t, i, mod.Refs[0], newStruct([]g.Field{
+		g.NewField("x", false, g.MakeInt(11))}))
+	ok_ref(t, i, mod.Refs[1], newStruct([]g.Field{
+		g.NewField("y", false, g.MakeInt(19))}))
+	ok_ref(t, i, mod.Refs[2], g.MakeInt(10))
+	ok_ref(t, i, mod.Refs[3], g.MakeInt(20))
 }
 
 func TestTernaryIf(t *testing.T) {
@@ -706,14 +697,14 @@ let a = true ? 3 : 4;
 let b = false ? 5 : 6;
 `
 	mod := newCompiler(source).Compile()
-	interpret(mod)
+	i := interpret(mod)
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	ok_ref(t, mod.Refs[0], g.MakeInt(3))
-	ok_ref(t, mod.Refs[1], g.MakeInt(6))
+	ok_ref(t, i, mod.Refs[0], g.MakeInt(3))
+	ok_ref(t, i, mod.Refs[1], g.MakeInt(6))
 }
 
 func TestList(t *testing.T) {
@@ -727,17 +718,17 @@ b[0] = 33;
 let e = c[1]++;
 `
 	mod := newCompiler(source).Compile()
-	interpret(mod)
+	i := interpret(mod)
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	ok_ref(t, mod.Refs[0], g.NewList([]g.Value{}))
-	ok_ref(t, mod.Refs[1], g.NewList([]g.Value{g.MakeInt(33)}))
-	ok_ref(t, mod.Refs[2], g.NewList([]g.Value{g.FALSE, g.MakeInt(23)}))
-	ok_ref(t, mod.Refs[3], g.TRUE)
-	ok_ref(t, mod.Refs[4], g.MakeInt(22))
+	ok_ref(t, i, mod.Refs[0], g.NewList([]g.Value{}))
+	ok_ref(t, i, mod.Refs[1], g.NewList([]g.Value{g.MakeInt(33)}))
+	ok_ref(t, i, mod.Refs[2], g.NewList([]g.Value{g.FALSE, g.MakeInt(23)}))
+	ok_ref(t, i, mod.Refs[3], g.TRUE)
+	ok_ref(t, i, mod.Refs[4], g.MakeInt(22))
 
 	source = `
 let a = [];
@@ -754,7 +745,7 @@ assert(a.add != b.add);
 assert(b.add != a.add);
 `
 	mod = newCompiler(source).Compile()
-	interpret(mod)
+	i = interpret(mod)
 
 	source = `
 let a = [];
@@ -762,8 +753,8 @@ a.addAll([1,2]).addAll('bc');
 assert(a == [1,2,'b','c']);
 let b = [];
 b.addAll(range(0,3));
-b.addAll(dict { 'x': 1, 'y': 2 });
-assert(b == [ 0, 1, 2, ('x', 1), ('y', 2)]);
+b.addAll(dict { (true,false): 1, 'y': 2 });
+assert(b == [ 0, 1, 2, ((true,false), 1), ('y', 2)]);
 assert(a.addAll == a.addAll);
 assert(b.addAll == b.addAll);
 assert(a.addAll != b.addAll);
@@ -771,7 +762,7 @@ assert(b.addAll != a.addAll);
 assert(a.add != a.addAll);
 `
 	mod = newCompiler(source).Compile()
-	interpret(mod)
+	i = interpret(mod)
 
 	source = "let a = []; a.addAll(false);"
 	failErr(t, source, g.TypeMismatchError("Expected Iterable Type"))
@@ -788,7 +779,7 @@ a.clear();
 assert(a.isEmpty());
 `
 	mod = newCompiler(source).Compile()
-	interpret(mod)
+	i = interpret(mod)
 
 	source = `
 let a = [];
@@ -799,7 +790,7 @@ assert(a.contains('x'));
 assert(a.indexOf('x') == 1);
 `
 	mod = newCompiler(source).Compile()
-	interpret(mod)
+	i = interpret(mod)
 
 	source = `
 let a = [];
@@ -816,28 +807,82 @@ assert(a.join() == '12abc');
 assert(a.join(',') == '1,2,abc');
 `
 	mod = newCompiler(source).Compile()
-	interpret(mod)
+	i = interpret(mod)
+
+	source = `
+let ls = [true, 0, 'abc'];
+let types = ls.map(type);
+assert(types == ['Bool', 'Int', 'Str']);
+	`
+	mod = newCompiler(source).Compile()
+	i = interpret(mod)
+
+	source = `
+let ls = [1, 2, 3, 4, 5];
+let squares = ls.map(x => x * x);
+let addedUp = ls.reduce(0, |acc, x| => acc + x);
+let even = ls.filter(x => (x % 2 == 0));
+
+assert(squares == [1, 4, 9, 16, 25]);
+assert(addedUp == 15);
+assert(even == [2, 4]);
+
+ls.remove(2);
+assert(ls == [1, 2, 4, 5]);
+	`
+	mod = newCompiler(source).Compile()
+	i = interpret(mod)
+
+	source = "['a'].remove(-1);"
+	failErr(t, source, g.IndexOutOfBoundsError(-1))
+	source = "['a'].remove(1);"
+	failErr(t, source, g.IndexOutOfBoundsError(1))
+
+	source = `
+let ls = [3, 4, 5];
+assert(ls[0] == 3);
+assert(ls[2] == 5);
+assert(ls[0:3] == [3, 4, 5]);
+assert(ls[2:3] == [5]);
+let a = [1, 2, 3];
+let n = 0;
+let b = a.map(fn(x) { n += x; x*x; });
+assert(b == [1, 4, 9] && n == 6);
+`
+	mod = newCompiler(source).Compile()
+	i = interpret(mod)
+
+	source = "[3, 4, 5][-4];"
+	failErr(t, source, g.IndexOutOfBoundsError(-1))
 }
 
 func TestDict(t *testing.T) {
 
 	source := `
+let d = dict {'x': 1, 'y': 2};
+d['x'] = 0;
+assert(d == dict {'y': 2, 'x': 0});
+`
+	mod := newCompiler(source).Compile()
+	i := interpret(mod)
+
+	source = `
 let a = dict { 'x': 1, 'y': 2 };
 let b = a['x'];
 let c = a['z'];
 a['x'] = -1;
 let d = a['x'];
 `
-	mod := newCompiler(source).Compile()
-	interpret(mod)
+	mod = newCompiler(source).Compile()
+	i = interpret(mod)
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	ok_ref(t, mod.Refs[1], g.ONE)
-	ok_ref(t, mod.Refs[2], g.NULL)
-	ok_ref(t, mod.Refs[3], g.NEG_ONE)
+	ok_ref(t, i, mod.Refs[1], g.ONE)
+	ok_ref(t, i, mod.Refs[2], g.NULL)
+	ok_ref(t, i, mod.Refs[3], g.NEG_ONE)
 
 	source = `
 let a = dict {};
@@ -851,7 +896,7 @@ assert(b.addAll != a.addAll);
 assert(a.clear != a.addAll);
 `
 	mod = newCompiler(source).Compile()
-	interpret(mod)
+	i = interpret(mod)
 
 	source = "let a = dict{}; a.addAll(false);"
 	failErr(t, source, g.TypeMismatchError("Expected Iterable Type"))
@@ -878,7 +923,7 @@ a.clear();
 assert(a.isEmpty());
 `
 	mod = newCompiler(source).Compile()
-	interpret(mod)
+	i = interpret(mod)
 
 	source = `
 let a = dict {'z': 3};
@@ -886,7 +931,31 @@ assert(a.containsKey('z'));
 assert(!a.containsKey('x'));
 `
 	mod = newCompiler(source).Compile()
-	interpret(mod)
+	i = interpret(mod)
+
+	source = `
+let d = dict {'a': 1, 'b': 2};
+assert(!d.remove('z'));
+assert(d.remove('a'));
+assert(d == dict {'b': 2});
+assert(d.remove('b'));
+assert(d == dict {});
+assert(len(d) == 0);
+`
+	mod = newCompiler(source).Compile()
+	i = interpret(mod)
+
+	source = `
+let d = dict {'a': 1, 'b': 2};
+assert(!d.remove('z'));
+assert(d.remove('a'));
+assert(d == dict {'b': 2});
+assert(d.remove('b'));
+assert(d == dict {});
+assert(len(d) == 0);
+`
+	mod = newCompiler(source).Compile()
+	i = interpret(mod)
 }
 
 func TestSet(t *testing.T) {
@@ -897,6 +966,8 @@ a.add(1);
 assert(a == set {1});
 a.add(2).add(3).add(2);
 assert(a == set {1,2,3});
+assert(set {3,1,2} == set {1,2,3});
+assert(set {1,2} != set {1,2,3});
 let b = set { 4 };
 b.add(4);
 assert(b == set { 4 });
@@ -955,6 +1026,21 @@ assert(a.contains('x'));
 `
 	mod = newCompiler(source).Compile()
 	interpret(mod)
+
+	source = `
+let s = set {'a', 'b', 'c'};
+assert(!s.remove('z'));
+assert(s.remove('a'));
+assert(s == set {'c', 'b'});
+assert(s.remove('b'));
+assert(s == set {'c'});
+assert(len(s) == 1);
+assert(s.remove('c'));
+assert(s == set {});
+assert(len(s) == 0);
+`
+	mod = newCompiler(source).Compile()
+	interpret(mod)
 }
 
 func newRange(from int64, to int64, step int64) g.Range {
@@ -982,23 +1068,23 @@ assert(print == print);
 assert(print != println);
 `
 	mod := newCompiler(source).Compile()
-	interpret(mod)
+	i := interpret(mod)
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	ok_ref(t, mod.Refs[0], g.MakeInt(3))
-	ok_ref(t, mod.Refs[1], g.MakeStr("[ 4, 5, 6 ]"))
-	ok_ref(t, mod.Refs[2], newRange(0, 5, 1))
-	ok_ref(t, mod.Refs[3], newRange(0, 5, 2))
+	ok_ref(t, i, mod.Refs[0], g.MakeInt(3))
+	ok_ref(t, i, mod.Refs[1], g.MakeStr("[ 4, 5, 6 ]"))
+	ok_ref(t, i, mod.Refs[2], newRange(0, 5, 1))
+	ok_ref(t, i, mod.Refs[3], newRange(0, 5, 2))
 
 	source = `
 let a = assert(true);
 `
 	mod = newCompiler(source).Compile()
-	interpret(mod)
-	ok_ref(t, mod.Refs[0], g.TRUE)
+	i = interpret(mod)
+	ok_ref(t, i, mod.Refs[0], g.TRUE)
 
 	fail(t, "assert(1, 2);",
 		g.ArityMismatchError("1", 2),
@@ -1024,15 +1110,15 @@ let b = a[0];
 let c = a[1];
 `
 	mod := newCompiler(source).Compile()
-	interpret(mod)
+	i := interpret(mod)
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	ok_ref(t, mod.Refs[0], g.NewTuple([]g.Value{g.MakeInt(4), g.MakeInt(5)}))
-	ok_ref(t, mod.Refs[1], g.MakeInt(4))
-	ok_ref(t, mod.Refs[2], g.MakeInt(5))
+	ok_ref(t, i, mod.Refs[0], g.NewTuple([]g.Value{g.MakeInt(4), g.MakeInt(5)}))
+	ok_ref(t, i, mod.Refs[1], g.MakeInt(4))
+	ok_ref(t, i, mod.Refs[2], g.MakeInt(5))
 }
 
 func TestDecl(t *testing.T) {
@@ -1042,16 +1128,16 @@ let a, b = 0;
 const c = 1, d;
 `
 	mod := newCompiler(source).Compile()
-	interpret(mod)
+	i := interpret(mod)
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	ok_ref(t, mod.Refs[0], g.NULL)
-	ok_ref(t, mod.Refs[1], g.ZERO)
-	ok_ref(t, mod.Refs[2], g.ONE)
-	ok_ref(t, mod.Refs[3], g.NULL)
+	ok_ref(t, i, mod.Refs[0], g.NULL)
+	ok_ref(t, i, mod.Refs[1], g.ZERO)
+	ok_ref(t, i, mod.Refs[2], g.ONE)
+	ok_ref(t, i, mod.Refs[3], g.NULL)
 }
 
 func TestFor(t *testing.T) {
@@ -1209,7 +1295,6 @@ try {
 		g.DivideByZeroError(),
 		[]string{
 			"    at line 4"})
-	ok_ref(t, mod.Refs[0], g.MakeInt(2))
 
 	source = `
 let a = 1;
@@ -1227,7 +1312,6 @@ try {
 		g.DivideByZeroError(),
 		[]string{
 			"    at line 5"})
-	ok_ref(t, mod.Refs[0], g.MakeInt(3))
 
 	source = `
 let a = 1;
@@ -1247,7 +1331,6 @@ try {
 		g.DivideByZeroError(),
 		[]string{
 			"    at line 6"})
-	ok_ref(t, mod.Refs[0], g.MakeInt(4))
 
 	source = `
 let a = 1;
@@ -1278,7 +1361,6 @@ try {
 		[]string{
 			"    at line 6",
 			"    at line 15"})
-	ok_ref(t, mod.Refs[0], g.MakeInt(4))
 
 	source = `
 let b = fn() { 
@@ -1485,7 +1567,7 @@ assert(c(1, 2) == 15);
 	interpret(mod)
 }
 
-func TestSpawn(t *testing.T) {
+func TestGo(t *testing.T) {
 
 	source := `
 fn sum(a, c) {
@@ -1500,8 +1582,8 @@ let a = [7, 2, 8, -9, 4, 0];
 let n = len(a) / 2;
 let c = chan();
 
-spawn sum(a[:n], c);
-spawn sum(a[n:], c);
+go sum(a[:n], c);
+go sum(a[n:], c);
 let x = c.recv();
 let y = c.recv();
 assert([x, y] == [-5, 17]);
@@ -1555,38 +1637,38 @@ func failVal(t *testing.T, val g.Value, err g.Error, expect string) {
 	}
 }
 
-func TestPub(t *testing.T) {
+func TestModuleContents(t *testing.T) {
 
 	source := `
-pub let a = 0;
-pub const b = 1;
-pub fn main(args) {}
+let a = 0;
+const b = 1;
+fn main(args) {}
 `
 	mod := newCompiler(source).Compile()
-	interpret(mod)
-	assert(t, reflect.DeepEqual(mod.Contents.Keys(), []string{"b", "a", "main"}))
+	i := interpret(mod)
+	tassert(t, reflect.DeepEqual(mod.Contents.FieldNames(), []string{"b", "a", "main"}))
 
-	v, err := mod.Contents.GetField(g.MakeStr("a"))
+	v, err := mod.Contents.GetField(i, g.MakeStr("a"))
 	okVal(t, v, err, g.ZERO)
 
-	v, err = mod.Contents.GetField(g.MakeStr("b"))
+	v, err = mod.Contents.GetField(i, g.MakeStr("b"))
 	okVal(t, v, err, g.ONE)
 
-	v, err = mod.Contents.GetField(g.MakeStr("main"))
-	assert(t, err == nil)
+	v, err = mod.Contents.GetField(i, g.MakeStr("main"))
+	tassert(t, err == nil)
 	f, ok := v.(g.BytecodeFunc)
-	assert(t, ok)
-	assert(t, f.Template().Arity == 1)
+	tassert(t, ok)
+	tassert(t, f.Template().Arity == 1)
 
-	err = mod.Contents.SetField(g.MakeStr("a"), g.NEG_ONE)
-	assert(t, err == nil)
-	v, err = mod.Contents.GetField(g.MakeStr("a"))
+	err = mod.Contents.SetField(i, g.MakeStr("a"), g.NEG_ONE)
+	tassert(t, err == nil)
+	v, err = mod.Contents.GetField(i, g.MakeStr("a"))
 	okVal(t, v, err, g.NEG_ONE)
 
-	err = mod.Contents.SetField(g.MakeStr("b"), g.NEG_ONE)
+	err = mod.Contents.SetField(i, g.MakeStr("b"), g.NEG_ONE)
 	failVal(t, nil, err, "ReadonlyField: Field 'b' is readonly")
 
-	err = mod.Contents.SetField(g.MakeStr("main"), g.NEG_ONE)
+	err = mod.Contents.SetField(i, g.MakeStr("main"), g.NEG_ONE)
 	failVal(t, nil, err, "ReadonlyField: Field 'main' is readonly")
 }
 
@@ -1596,6 +1678,327 @@ func TestImport(t *testing.T) {
 import regex;
 let pattern = regex.compile("abc");
 assert([pattern.match("xyzabcdef"), pattern.match("123")] == [true, false]);
+`
+	mod := newCompiler(source).Compile()
+	interpret(mod)
+}
+
+func TestTypeOf(t *testing.T) {
+
+	source := `
+assert(
+    [type(true), type(""), type(0), type(0.0)] == 
+    ["Bool", "Str", "Int", "Float"]);
+assert(
+    [type(fn(){}), type([]), type(range(0,1)), type((0,1))] == 
+    ["Func", "List", "Range", "Tuple"]);
+assert(
+    [type(dict{}), type(set{}), type(struct{}), type(chan())] == 
+    ["Dict", "Set", "Struct", "Chan"]);
+`
+	mod := newCompiler(source).Compile()
+	interpret(mod)
+}
+
+func TestStr(t *testing.T) {
+
+	source := `
+assert('abc'.contains('b'));
+assert(!'abc'.contains('z'));
+assert('abc'.index('b') == 1);
+assert('abc'.index('z') == -1);
+assert('abc'.startsWith('a'));
+assert(!'abc'.startsWith('z'));
+assert('abc'.endsWith('c'));
+assert(!'abc'.endsWith('z'));
+assert('aaa'.replace('a', 'z') == 'zzz');
+assert('aaa'.replace('a', 'z', 2) == 'zza');
+assert('aaa'.replace('a', 'z', 0) == 'aaa');
+assert('aaa'.replace('a', 'z', -1) == 'zzz');
+`
+	mod := newCompiler(source).Compile()
+	interpret(mod)
+
+	fail(t, "'abc'.contains();", g.ArityMismatchError("1", 0), []string{"    at line 1"})
+	fail(t, "'abc'.contains(1);", g.TypeMismatchError("Expected Str"), []string{"    at line 1"})
+
+	fail(t, "'abc'.index();", g.ArityMismatchError("1", 0), []string{"    at line 1"})
+	fail(t, "'abc'.index(1);", g.TypeMismatchError("Expected Str"), []string{"    at line 1"})
+
+	fail(t, "'abc'.startsWith();", g.ArityMismatchError("1", 0), []string{"    at line 1"})
+	fail(t, "'abc'.startsWith(1);", g.TypeMismatchError("Expected Str"), []string{"    at line 1"})
+
+	fail(t, "'abc'.endsWith();", g.ArityMismatchError("1", 0), []string{"    at line 1"})
+	fail(t, "'abc'.endsWith(1);", g.TypeMismatchError("Expected Str"), []string{"    at line 1"})
+
+	fail(t, "'abc'.replace();", g.ArityMismatchError("at least 2", 0), []string{"    at line 1"})
+	fail(t, "'abc'.replace(1,2,3,4);", g.ArityMismatchError("at most 3", 4), []string{"    at line 1"})
+	fail(t, "'abc'.replace(0, 'a');", g.TypeMismatchError("Expected Str"), []string{"    at line 1"})
+	fail(t, "'abc'.replace('a', 0);", g.TypeMismatchError("Expected Str"), []string{"    at line 1"})
+	fail(t, "'abc'.replace('a', 'b', 'c');", g.TypeMismatchError("Expected Int"), []string{"    at line 1"})
+}
+
+func TestFreeze(t *testing.T) {
+
+	fail(t, "freeze(null);", g.NullValueError(), []string{"    at line 1"})
+	fail(t, "frozen(null);", g.NullValueError(), []string{"    at line 1"})
+
+	source := `
+assert(frozen(true));
+assert(frozen('a'));
+assert(frozen(1));
+assert(frozen(1.0));
+assert(frozen(range(1,2)));
+assert(frozen(chan()));
+assert(frozen(fn(){}));
+assert(frozen((1,2)));
+
+freeze(true);
+freeze('a');
+freeze(1);
+freeze(1.0);
+freeze(range(1,2));
+freeze(chan());
+freeze(fn(){});
+freeze((1,2));
+`
+	mod := newCompiler(source).Compile()
+	interpret(mod)
+
+	source = `
+fn fail(f) {
+    try {
+        f();
+        assert(false);
+    } catch e {
+        assert(e.kind == 'ImmutableValue');
+    }
+}
+
+let ls = [1,2,3];
+assert(!frozen(ls));
+
+ls.clear();
+ls.add('a');
+ls.addAll(['b', 'c']);
+ls.remove(1);
+ls[1] = 'z';
+
+assert(ls == ['a', 'z']);
+
+freeze(ls);
+assert(frozen(ls));
+assert(ls == ['a', 'z']);
+
+fail(|| => ls.clear());
+fail(|| => ls.add('a'));
+fail(|| => ls.addAll(['b', 'c']));
+fail(|| => ls.remove(1));
+fail(|| => ls[1] = 'z');
+`
+	mod = newCompiler(source).Compile()
+	interpret(mod)
+
+	source = `
+fn fail(f) {
+    try {
+        f();
+        assert(false);
+    } catch e {
+        assert(e.kind == 'ImmutableValue');
+    }
+}
+
+let d = dict {'x': 1, 'y': 2};
+assert(!frozen(d));
+
+d.clear();
+d.addAll([('a', 1), ('b', 2), ('c', 3)]);
+d.remove('c');
+d['a'] = 0;
+assert(d == dict {'a': 0, 'b': 2});
+
+freeze(d);
+assert(frozen(d));
+assert(d == dict {'a': 0, 'b': 2});
+
+fail(|| => d.clear());
+fail(|| => d.addAll([('a', 1), ('b', 2), ('c', 3)]));
+fail(|| => d.remove('c'));
+fail(|| => d['a'] = 0);
+`
+	mod = newCompiler(source).Compile()
+	interpret(mod)
+
+	source = `
+fn fail(f) {
+    try {
+        f();
+        assert(false);
+    } catch e {
+        assert(e.kind == 'ImmutableValue');
+    }
+}
+
+let s = set {'x', 'y'};
+assert(!frozen(s));
+
+s.clear();
+s.addAll('a');
+s.addAll(['a', 'b', 'c']);
+s.remove('c');
+assert(s == set {'a', 'b'});
+
+freeze(s);
+assert(frozen(s));
+assert(s == set {'a', 'b'});
+
+fail(|| => s.clear());
+fail(|| => s.addAll('a'));
+fail(|| => s.addAll(['a', 'b', 'c']));
+fail(|| => s.remove('c'));
+`
+	mod = newCompiler(source).Compile()
+	interpret(mod)
+
+	source = `
+fn fail(f) {
+    try {
+        f();
+        assert(false);
+    } catch e {
+        assert(e.kind == 'ImmutableValue');
+    }
+}
+
+let s = struct {x: 1, y: 2};
+s.y = 3;
+
+freeze(s);
+assert(frozen(s));
+assert(s == struct {x: 1, y: 3});
+
+fail(|| => s.y = 3);
+
+assert(!frozen(merge(struct {}, struct{})));
+assert(frozen(merge(s, struct{})));
+assert(frozen(merge(struct {}, s)));
+`
+	mod = newCompiler(source).Compile()
+	interpret(mod)
+}
+
+func TestFields(t *testing.T) {
+
+	source := `
+fn fail(f, kind) {
+    try {
+        f();
+        assert(false);
+    } catch e {
+        assert(e.kind == kind);
+    }
+}
+
+let s = struct {a: 1, b: 2};
+assert(fields(s) == set {'a', 'b'});
+assert(getval(s, 'a') == 1);
+assert(setval(s, 'a', 3) == 3);
+
+fail(|| => fields(0), 'TypeMismatch');
+fail(|| => fields(0, 1), 'ArityMismatch');
+
+fail(|| => getval(0, 1), 'TypeMismatch');
+fail(|| => getval(s, 1), 'TypeMismatch');
+fail(|| => getval(0), 'ArityMismatch');
+
+fail(|| => setval(0, 1, 2), 'TypeMismatch');
+fail(|| => setval(s, 1, 2), 'TypeMismatch');
+fail(|| => setval(0), 'ArityMismatch');
+fail(|| => setval(0, 1), 'ArityMismatch');
+`
+	mod := newCompiler(source).Compile()
+	interpret(mod)
+}
+
+func TestArity(t *testing.T) {
+
+	source := `
+fn fail(f, kind) {
+    try {
+        f();
+        assert(false);
+    } catch e {
+        assert(e.kind == kind);
+    }
+}
+assert(arity(type) == struct { min: 1, max: 1 });
+assert(arity(print) == struct { min: 0, max: -1 });
+assert(arity(|x,y| => x + y) == struct { min: 2, max: 2 });
+
+fail(|| => arity(0), 'TypeMismatch');
+`
+	mod := newCompiler(source).Compile()
+	interpret(mod)
+}
+
+func TestRange(t *testing.T) {
+
+	source := `
+fn listify(r) {
+    let ls = [];
+    for n in r {
+        ls.add(n);
+    }
+    return ls;
+}
+let a = range(0, 5);
+let b = range(0, 5, 2);
+let c = range(2, 14, 3);
+let d = range(-1, -8, -3);
+let e = range(2, 2);
+let f = range(-1, -1, -1);
+assert(listify(a) == [ 0, 1, 2, 3, 4 ]);
+assert(listify(b) == [ 0, 2, 4 ]);
+assert(listify(c) == [ 2, 5, 8, 11 ]);
+assert(listify(d) == [ -1, -4, -7 ]);
+assert(listify(e) == []);
+assert(listify(f) == []);
+assert([a.from(), a.to(), a.step(), a.count()] == [0, 5, 1, 5]);
+assert([b.from(), b.to(), b.step(), b.count()] == [0, 5, 2, 3]);
+assert([c.from(), c.to(), c.step(), c.count()] == [2, 14, 3, 4]);
+assert([d.from(), d.to(), d.step(), d.count()] == [-1, -8, -3, 3]);
+assert([e.from(), e.to(), e.step(), e.count()] == [2, 2, 1, 0]);
+
+let i = 0;
+while i < a.count() {
+    assert(a[i] == i);
+    i++;
+} 
+`
+	mod := newCompiler(source).Compile()
+	interpret(mod)
+
+	//fmt.Println("----------------------------")
+	//fmt.Println(source)
+	//fmt.Println(mod)
+}
+
+func TestSlice(t *testing.T) {
+
+	source := `
+let ls = [3,4,5];
+assert(ls[0:1] == [3]);
+assert(ls[1:3] == [4,5]);
+assert(ls[-2:-1] == [4]);
+assert(ls[-5:-4] == []);
+assert(ls[3:4] == []);
+let s = '345';
+assert(s[0:1] == '3');
+assert(s[1:3] == '45');
+assert(s[-2:-1] == '4');
+assert(s[-5:-4] == '');
+assert(s[3:4] == '');
 `
 	mod := newCompiler(source).Compile()
 	interpret(mod)

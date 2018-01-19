@@ -26,13 +26,14 @@ import (
 
 type Parser struct {
 	scn       *scanner.Scanner
+	isBuiltIn func(string) bool
 	cur       *ast.Token
 	next      *ast.Token
 	synthetic int
 }
 
-func NewParser(scn *scanner.Scanner) *Parser {
-	return &Parser{scn, nil, nil, 0}
+func NewParser(scn *scanner.Scanner, isBuiltIn func(string) bool) *Parser {
+	return &Parser{scn, isBuiltIn, nil, nil, 0}
 }
 
 func (p *Parser) ParseModule() (fn *ast.FnExpr, err error) {
@@ -57,10 +58,10 @@ func (p *Parser) ParseModule() (fn *ast.FnExpr, err error) {
 	nodes := p.imports()
 
 	// parse the module
-	nodes = append(nodes, p.nodeSequence(ast.EOF, true)...)
+	nodes = append(nodes, p.nodeSequence(ast.EOF)...)
 	p.expect(ast.EOF)
 
-	params := []*ast.IdentExpr{}
+	params := []*ast.FormalParam{}
 	block := &ast.Block{nil, nodes, nil}
 	return &ast.FnExpr{nil, params, block, 0, 0, nil}, err
 }
@@ -112,44 +113,19 @@ func (p *Parser) imports() []ast.Node {
 
 // Parse a statement, or return nil if there is no statement
 // waiting to be parsed.
-func (p *Parser) statement(allowPub bool) ast.Stmt {
+func (p *Parser) statement() ast.Stmt {
 
 	switch p.cur.Kind {
 
-	case ast.PUB:
-		if allowPub {
-			p.consume()
-			switch p.cur.Kind {
-
-			case ast.CONST:
-				return p.constStmt(true)
-
-			case ast.LET:
-				return p.letStmt(true)
-
-			case ast.FN:
-				if p.next.Kind == ast.IDENT {
-					return p.namedFn(true)
-				} else {
-					p.expect(ast.FN)
-					panic(p.unexpected())
-				}
-			default:
-				panic(p.unexpected())
-			}
-		} else {
-			panic(p.unexpected())
-		}
-
 	case ast.CONST:
-		return p.constStmt(false)
+		return p.constStmt()
 
 	case ast.LET:
-		return p.letStmt(false)
+		return p.letStmt()
 
 	case ast.FN:
 		if p.next.Kind == ast.IDENT {
-			return p.namedFn(false)
+			return p.namedFn()
 		} else {
 			// returning nil here means that the FN token
 			// is assumed to be the beginning of an expression.
@@ -183,24 +159,23 @@ func (p *Parser) statement(allowPub bool) ast.Stmt {
 	case ast.TRY:
 		return p.tryStmt()
 
-	case ast.SPAWN:
-		return p.spawnStmt()
+	case ast.GO:
+		return p.goStmt()
 
 	default:
 		return nil
 	}
 }
 
-func (p *Parser) namedFn(isPub bool) *ast.NamedFn {
+func (p *Parser) namedFn() *ast.NamedFn {
 	token := p.expect(ast.FN)
 	return &ast.NamedFn{
 		token,
 		&ast.IdentExpr{p.expect(ast.IDENT), nil},
-		p.fnExpr(token),
-		isPub}
+		p.fnExpr(token)}
 }
 
-func (p *Parser) constStmt(isPub bool) *ast.Const {
+func (p *Parser) constStmt() *ast.Const {
 
 	token := p.expect(ast.CONST)
 
@@ -211,14 +186,14 @@ func (p *Parser) constStmt(isPub bool) *ast.Const {
 			p.consume()
 			decls = append(decls, p.decl())
 		case ast.SEMICOLON:
-			return &ast.Const{token, decls, p.consume(), isPub}
+			return &ast.Const{token, decls, p.consume()}
 		default:
 			panic(p.unexpected())
 		}
 	}
 }
 
-func (p *Parser) letStmt(isPub bool) *ast.Let {
+func (p *Parser) letStmt() *ast.Let {
 
 	token := p.expect(ast.LET)
 
@@ -229,7 +204,7 @@ func (p *Parser) letStmt(isPub bool) *ast.Let {
 			p.consume()
 			decls = append(decls, p.decl())
 		case ast.SEMICOLON:
-			return &ast.Let{token, decls, p.consume(), isPub}
+			return &ast.Let{token, decls, p.consume()}
 		default:
 			panic(p.unexpected())
 		}
@@ -406,7 +381,7 @@ func (p *Parser) defaultStmt() *ast.Default {
 	token := p.expect(ast.DEFAULT)
 	colon := p.expect(ast.COLON)
 
-	body := p.nodeSequence(ast.RBRACE, false)
+	body := p.nodeSequence(ast.RBRACE)
 	if len(body) == 0 {
 		panic(&parserError{INVALID_SWITCH, colon})
 	}
@@ -483,9 +458,9 @@ func (p *Parser) tryStmt() *ast.Try {
 		finallyToken, finallyBlock}
 }
 
-func (p *Parser) spawnStmt() *ast.Spawn {
+func (p *Parser) goStmt() *ast.Go {
 
-	token := p.expect(ast.SPAWN)
+	token := p.expect(ast.GO)
 
 	prm := p.primary()
 	if p.cur.Kind != ast.LPAREN {
@@ -494,20 +469,20 @@ func (p *Parser) spawnStmt() *ast.Spawn {
 	lparen, actual, rparen := p.actualParams()
 	invocation := &ast.InvokeExpr{prm, lparen, actual, rparen}
 
-	return &ast.Spawn{token, invocation, p.expect(ast.SEMICOLON)}
+	return &ast.Go{token, invocation, p.expect(ast.SEMICOLON)}
 }
 
 // parse a sequence of nodes that are wrapped in curly braces
 func (p *Parser) block() *ast.Block {
 
 	lbrace := p.expect(ast.LBRACE)
-	nodes := p.nodeSequence(ast.RBRACE, false)
+	nodes := p.nodeSequence(ast.RBRACE)
 	rbrace := p.expect(ast.RBRACE)
 	return &ast.Block{lbrace, nodes, rbrace}
 }
 
 // Parse a sequence of statements or expressions.
-func (p *Parser) nodeSequence(endKind ast.TokenKind, allowPub bool) []ast.Node {
+func (p *Parser) nodeSequence(endKind ast.TokenKind) []ast.Node {
 
 	nodes := []ast.Node{}
 
@@ -517,7 +492,7 @@ func (p *Parser) nodeSequence(endKind ast.TokenKind, allowPub bool) []ast.Node {
 		}
 
 		// see if there is a statement on tap
-		var node ast.Node = p.statement(allowPub)
+		var node ast.Node = p.statement()
 
 		// if there isn't, read an expression instead
 		if node == nil {
@@ -543,7 +518,7 @@ func (p *Parser) nodeSequenceAny(endKinds ...ast.TokenKind) []ast.Node {
 		}
 
 		// see if there is a statement on tap
-		var node ast.Node = p.statement(false)
+		var node ast.Node = p.statement()
 
 		// if there isn't, read an expression instead
 		if node == nil {
@@ -776,14 +751,16 @@ func (p *Parser) primary() ast.Expr {
 		}
 
 	case p.cur.Kind == ast.IDENT:
-		if p.next.Kind == ast.EQ_GT {
+
+		switch {
+		case p.isBuiltIn(p.cur.Text):
+			return &ast.BuiltinExpr{p.consume()}
+
+		case p.next.Kind == ast.EQ_GT:
 			return p.lambdaOne()
-		} else {
+		default:
 			return p.identExpr()
 		}
-
-	case isBuiltIn(p.cur):
-		return &ast.BuiltinExpr{p.consume()}
 
 	case p.cur.Kind == ast.THIS:
 		return &ast.ThisExpr{p.consume(), nil}
@@ -823,37 +800,34 @@ func (p *Parser) identExpr() *ast.IdentExpr {
 func (p *Parser) fnExpr(token *ast.Token) *ast.FnExpr {
 
 	p.expect(ast.LPAREN)
+	if p.accept(ast.RPAREN) {
+		return &ast.FnExpr{token, nil, p.block(), 0, 0, nil}
+	} else {
+		params := []*ast.FormalParam{}
 
-	params := []*ast.IdentExpr{}
-	switch p.cur.Kind {
-
-	case ast.IDENT:
-		params = append(params, p.identExpr())
-	loop:
 		for {
-			switch p.cur.Kind {
 
+			switch p.cur.Kind {
+			case ast.CONST:
+				p.consume()
+				params = append(params, &ast.FormalParam{p.identExpr(), true})
+			case ast.IDENT:
+				params = append(params, &ast.FormalParam{p.identExpr(), false})
+			default:
+				panic(p.unexpected())
+			}
+
+			switch p.cur.Kind {
 			case ast.COMMA:
 				p.consume()
-				params = append(params, p.identExpr())
-
 			case ast.RPAREN:
 				p.consume()
-				break loop
-
+				return &ast.FnExpr{token, params, p.block(), 0, 0, nil}
 			default:
 				panic(p.unexpected())
 			}
 		}
-
-	case ast.RPAREN:
-		p.consume()
-
-	default:
-		panic(p.unexpected())
 	}
-
-	return &ast.FnExpr{token, params, p.block(), 0, 0, nil}
 }
 
 func (p *Parser) lambdaZero() *ast.FnExpr {
@@ -861,7 +835,7 @@ func (p *Parser) lambdaZero() *ast.FnExpr {
 	token := p.expect(ast.DBL_PIPE)
 
 	p.expect(ast.EQ_GT)
-	params := []*ast.IdentExpr{}
+	params := []*ast.FormalParam{}
 	expr := p.expression()
 	block := &ast.Block{nil, []ast.Node{expr}, nil}
 	return &ast.FnExpr{token, params, block, 0, 0, nil}
@@ -870,7 +844,7 @@ func (p *Parser) lambdaZero() *ast.FnExpr {
 func (p *Parser) lambdaOne() *ast.FnExpr {
 	token := p.expect(ast.IDENT)
 	p.expect(ast.EQ_GT)
-	params := []*ast.IdentExpr{&ast.IdentExpr{token, nil}}
+	params := []*ast.FormalParam{{&ast.IdentExpr{token, nil}, false}}
 	expr := p.expression()
 	block := &ast.Block{nil, []ast.Node{expr}, nil}
 	return &ast.FnExpr{token, params, block, 0, 0, nil}
@@ -880,18 +854,18 @@ func (p *Parser) lambda() *ast.FnExpr {
 
 	token := p.expect(ast.PIPE)
 
-	params := []*ast.IdentExpr{}
+	params := []*ast.FormalParam{}
 	switch p.cur.Kind {
 
 	case ast.IDENT:
-		params = append(params, p.identExpr())
+		params = append(params, &ast.FormalParam{p.identExpr(), false})
 	loop:
 		for {
 			switch p.cur.Kind {
 
 			case ast.COMMA:
 				p.consume()
-				params = append(params, p.identExpr())
+				params = append(params, &ast.FormalParam{p.identExpr(), false})
 
 			case ast.PIPE:
 				p.consume()
@@ -917,8 +891,15 @@ func (p *Parser) lambda() *ast.FnExpr {
 }
 
 func (p *Parser) structExpr() ast.Expr {
+	return p.structBody(p.expect(ast.STRUCT))
+}
 
-	structToken := p.expect(ast.STRUCT)
+//func (p *Parser) propExpr() ast.Expr {
+//	token := p.expect(ast.PROP)
+//	return p.structBody(token)
+//}
+
+func (p *Parser) structBody(token *ast.Token) ast.Expr {
 
 	// key-value pairs
 	keys := []*ast.Token{}
@@ -961,7 +942,7 @@ func (p *Parser) structExpr() ast.Expr {
 	}
 
 	// done
-	return &ast.StructExpr{structToken, lbrace, keys, values, rbrace, -1}
+	return &ast.StructExpr{token, lbrace, keys, values, rbrace, -1}
 }
 
 func (p *Parser) dictExpr() ast.Expr {
@@ -1171,6 +1152,9 @@ func (p *Parser) unexpected() error {
 	case ast.EOF:
 		return &parserError{UNEXPECTED_EOF, p.cur}
 
+	case ast.RESERVED:
+		return &parserError{UNEXPECTED_RESERVED_WORD, p.cur}
+
 	default:
 		return &parserError{UNEXPECTED_TOKEN, p.cur}
 	}
@@ -1279,23 +1263,6 @@ func isAssignOp(t *ast.Token) bool {
 	}
 }
 
-func isBuiltIn(t *ast.Token) bool {
-	switch t.Kind {
-	case
-		ast.FN_PRINT,
-		ast.FN_PRINTLN,
-		ast.FN_STR,
-		ast.FN_LEN,
-		ast.FN_RANGE,
-		ast.FN_ASSERT,
-		ast.FN_MERGE,
-		ast.FN_CHAN:
-		return true
-	default:
-		return false
-	}
-}
-
 func fromAssignOp(t *ast.Token) *ast.Token {
 
 	switch t.Kind {
@@ -1333,6 +1300,7 @@ type parserErrorKind int
 const (
 	UNEXPECTED_CHAR parserErrorKind = iota
 	UNEXPECTED_TOKEN
+	UNEXPECTED_RESERVED_WORD
 	UNEXPECTED_EOF
 	INVALID_POSTFIX
 	INVALID_FOR
@@ -1354,6 +1322,9 @@ func (e *parserError) Error() string {
 
 	case UNEXPECTED_TOKEN:
 		return fmt.Sprintf("Unexpected Token '%v' at %v", e.token.Text, e.token.Position)
+
+	case UNEXPECTED_RESERVED_WORD:
+		return fmt.Sprintf("Unexpected Reserved Word '%v' at %v", e.token.Text, e.token.Position)
 
 	case UNEXPECTED_EOF:
 		return fmt.Sprintf("Unexpected EOF at %v", e.token.Position)

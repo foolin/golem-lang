@@ -56,7 +56,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		case g.NativeFunc:
 
-			val, err := fn.Invoke(params)
+			val, err := fn.Invoke(i, params)
 			if err != nil {
 				return nil, err
 			}
@@ -85,13 +85,13 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get result from top of stack
 		result := f.stack[n]
 
+		// pop the old frame
+		i.frames = i.frames[:frameIndex]
+
+		// If we are on the last frame, then we are done.
 		if frameIndex == lastFrame {
-			// If we are on the last frame, then we are done. Note that lastFrame
-			// can be non-zero, if we are advancing a 'catch' or 'finally' clause.
 			return result, nil
 		} else {
-			// pop the old frame
-			i.frames = i.frames[:frameIndex]
 
 			// push the result onto the new top frame
 			f = i.frames[len(i.frames)-1]
@@ -104,7 +104,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case g.DONE:
 		panic("DONE cannot be executed directly")
 
-	case g.SPAWN:
+	case g.GO:
 
 		idx := index(opc, f.ip)
 		params := f.stack[n-idx+1:]
@@ -114,13 +114,12 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			f.stack = f.stack[:n-idx]
 			f.ip += 3
 
-			intp := NewInterpreter(i.mod)
+			intp := &Interpreter{i.mod, i.builtInMgr, []*frame{}}
 			locals := newLocals(fn.Template().NumLocals, params)
 			go (func() {
-				_, errTrace := intp.run(fn, locals)
+				_, errTrace := intp.eval(fn, locals)
 				if errTrace != nil {
 					fmt.Printf("%v\n", errTrace.Error)
-					fmt.Printf("%v\n", errTrace.StackTrace)
 				}
 			})()
 
@@ -129,7 +128,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			f.ip += 3
 
 			go (func() {
-				_, err := fn.Invoke(params)
+				_, err := fn.Invoke(i, params)
 				if err != nil {
 					fmt.Printf("%v\n", err)
 				}
@@ -147,8 +146,8 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			return nil, g.TypeMismatchError("Expected 'Struct'")
 		}
 
-		// throw a generic error
-		return nil, g.GenericError(stc)
+		// throw an error
+		return nil, g.MakeErrorFromStruct(i, stc)
 
 	case g.NEW_FUNC:
 
@@ -188,7 +187,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case g.NEW_STRUCT:
 
 		def := i.mod.StructDefs[index(opc, f.ip)]
-		stc, err := g.BlankStruct(def)
+		stc, err := g.NewStruct(def, false)
 		if err != nil {
 			return nil, err
 		}
@@ -213,7 +212,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		copy(vals, f.stack[n-size+1:])
 
 		f.stack = f.stack[:n-size+1]
-		f.stack = append(f.stack, g.NewSet(vals))
+		f.stack = append(f.stack, g.NewSet(i, vals))
 		f.ip += 3
 
 	case g.NEW_TUPLE:
@@ -250,7 +249,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// make sure the top of the stack is of the given type
 		vtype := g.Type(index(opc, f.ip))
 		v := f.stack[n]
-		if v.TypeOf() != vtype {
+		if v.Type() != vtype {
 			return nil, g.TypeMismatchError(fmt.Sprintf("Expected '%s'", vtype.String()))
 		}
 
@@ -268,16 +267,16 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		}
 
 		f.stack = f.stack[:n-numVals+1]
-		f.stack = append(f.stack, g.NewDict(entries))
+		f.stack = append(f.stack, g.NewDict(i, entries))
 		f.ip += 3
 
 	case g.GET_FIELD:
 
 		idx := index(opc, f.ip)
 		key, ok := pool[idx].(g.Str)
-		g.Assert(ok, "Invalid Field Key")
+		assert(ok)
 
-		result, err := f.stack[n].GetField(key)
+		result, err := f.stack[n].GetField(i, key)
 		if err != nil {
 			return nil, err
 		}
@@ -289,7 +288,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		idx := index(opc, f.ip)
 		key, ok := pool[idx].(g.Str)
-		g.Assert(ok, "Invalid Field Key")
+		assert(ok)
 
 		// get struct from stack
 		stc, ok := f.stack[n-1].(g.Struct)
@@ -302,12 +301,12 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		// init or set
 		if opc[f.ip] == g.INIT_FIELD {
-			err := stc.InitField(key, value)
+			err := stc.InitField(i, key, value)
 			if err != nil {
 				return nil, err
 			}
 		} else {
-			err := stc.SetField(key, value)
+			err := stc.SetField(i, key, value)
 			if err != nil {
 				return nil, err
 			}
@@ -321,7 +320,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		idx := index(opc, f.ip)
 		key, ok := pool[idx].(g.Str)
-		g.Assert(ok, "Invalid GET_FIELD Key")
+		assert(ok)
 
 		// get struct from stack
 		stc, ok := f.stack[n-1].(g.Struct)
@@ -332,17 +331,17 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get value from stack
 		value := f.stack[n]
 
-		before, err := stc.GetField(key)
+		before, err := stc.GetField(i, key)
 		if err != nil {
 			return nil, err
 		}
 
-		after, err := before.Plus(value)
+		after, err := plus(i, before, value)
 		if err != nil {
 			return nil, err
 		}
 
-		err = stc.SetField(key, after)
+		err = stc.SetField(i, key, after)
 		if err != nil {
 			return nil, err
 		}
@@ -362,7 +361,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get index from stack
 		idx := f.stack[n]
 
-		result, err := gtb.Get(idx)
+		result, err := gtb.Get(i, idx)
 		if err != nil {
 			return nil, err
 		}
@@ -385,7 +384,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get value from stack
 		val := f.stack[n]
 
-		err := ibl.Set(idx, val)
+		err := ibl.Set(i, idx, val)
 		if err != nil {
 			return nil, err
 		}
@@ -408,17 +407,17 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get value from stack
 		val := f.stack[n]
 
-		before, err := ibl.Get(idx)
+		before, err := ibl.Get(i, idx)
 		if err != nil {
 			return nil, err
 		}
 
-		after, err := before.Plus(val)
+		after, err := plus(i, before, val)
 		if err != nil {
 			return nil, err
 		}
 
-		err = ibl.Set(idx, after)
+		err = ibl.Set(i, idx, after)
 		if err != nil {
 			return nil, err
 		}
@@ -439,7 +438,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		from := f.stack[n-1]
 		to := f.stack[n]
 
-		result, err := slb.Slice(from, to)
+		result, err := slb.Slice(i, from, to)
 		if err != nil {
 			return nil, err
 		}
@@ -459,7 +458,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get index from stack
 		from := f.stack[n]
 
-		result, err := slb.SliceFrom(from)
+		result, err := slb.SliceFrom(i, from)
 		if err != nil {
 			return nil, err
 		}
@@ -479,7 +478,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get index from stack
 		to := f.stack[n]
 
-		result, err := slb.SliceTo(to)
+		result, err := slb.SliceTo(i, to)
 		if err != nil {
 			return nil, err
 		}
@@ -515,11 +514,11 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get the module name from the pool
 		idx := index(opc, f.ip)
 		name, ok := pool[idx].(g.Str)
-		g.Assert(ok, "invalid module name")
+		assert(ok)
 
 		// Lookup the module.
 		mod, err := lib.LookupModule(name.String())
-		g.Assert(err == nil, "missing module")
+		assert(err == nil)
 
 		// Push the module's contents onto the stack
 		f.stack = append(f.stack, mod.GetContents())
@@ -527,7 +526,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 	case g.LOAD_BUILTIN:
 		idx := index(opc, f.ip)
-		f.stack = append(f.stack, g.Builtins[idx])
+		f.stack = append(f.stack, i.builtInMgr.Builtins()[idx])
 		f.ip += 3
 
 	case g.LOAD_CONST:
@@ -587,19 +586,25 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		}
 
 	case g.EQ:
-		b := f.stack[n-1].Eq(f.stack[n])
+		b, err := f.stack[n-1].Eq(i, f.stack[n])
+		if err != nil {
+			return nil, err
+		}
 		f.stack = f.stack[:n]
 		f.stack[n-1] = b
 		f.ip++
 
 	case g.NE:
-		b := f.stack[n-1].Eq(f.stack[n])
+		b, err := f.stack[n-1].Eq(i, f.stack[n])
+		if err != nil {
+			return nil, err
+		}
 		f.stack = f.stack[:n]
 		f.stack[n-1] = b.Not()
 		f.ip++
 
 	case g.LT:
-		val, err := f.stack[n-1].Cmp(f.stack[n])
+		val, err := f.stack[n-1].Cmp(i, f.stack[n])
 		if err != nil {
 			return nil, err
 		}
@@ -608,7 +613,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.ip++
 
 	case g.LTE:
-		val, err := f.stack[n-1].Cmp(f.stack[n])
+		val, err := f.stack[n-1].Cmp(i, f.stack[n])
 		if err != nil {
 			return nil, err
 		}
@@ -617,7 +622,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.ip++
 
 	case g.GT:
-		val, err := f.stack[n-1].Cmp(f.stack[n])
+		val, err := f.stack[n-1].Cmp(i, f.stack[n])
 		if err != nil {
 			return nil, err
 		}
@@ -626,7 +631,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.ip++
 
 	case g.GTE:
-		val, err := f.stack[n-1].Cmp(f.stack[n])
+		val, err := f.stack[n-1].Cmp(i, f.stack[n])
 		if err != nil {
 			return nil, err
 		}
@@ -635,7 +640,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.ip++
 
 	case g.CMP:
-		val, err := f.stack[n-1].Cmp(f.stack[n])
+		val, err := f.stack[n-1].Cmp(i, f.stack[n])
 		if err != nil {
 			return nil, err
 		}
@@ -660,7 +665,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.ip++
 
 	case g.PLUS:
-		val, err := f.stack[n-1].Plus(f.stack[n])
+		val, err := plus(i, f.stack[n-1], f.stack[n])
 		if err != nil {
 			return nil, err
 		}
@@ -826,15 +831,15 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case g.ITER:
 
 		ibl, ok := f.stack[n].(g.Iterable)
-		g.Assert(ok, "Expected Iterable")
+		assert(ok)
 
-		f.stack[n] = ibl.NewIterator()
+		f.stack[n] = ibl.NewIterator(i)
 		f.ip++
 
 	case g.ITER_NEXT:
 
 		itr, ok := f.stack[n].(g.Iterator)
-		g.Assert(ok, "Expected Iterator")
+		assert(ok)
 
 		f.stack[n] = itr.IterNext()
 		f.ip++
@@ -842,7 +847,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case g.ITER_GET:
 
 		itr, ok := f.stack[n].(g.Iterator)
-		g.Assert(ok, "Expected Iterator")
+		assert(ok)
 
 		val, err := itr.IterGet()
 		if err != nil {
@@ -865,6 +870,26 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	}
 
 	return nil, nil
+}
+
+func plus(cx g.Context, a g.Value, b g.Value) (g.Value, g.Error) {
+
+	// if either is a Str, return concatenated strings
+	_, ia := a.(g.Str)
+	_, ib := b.(g.Str)
+	if ia || ib {
+		return a.ToStr(cx).Concat(b.ToStr(cx)), nil
+	}
+
+	// if both are Numbers, add them together
+	na, ia := a.(g.Number)
+	nb, ib := b.(g.Number)
+	if ia && ib {
+		return na.Add(nb)
+	}
+
+	// error
+	return nil, g.TypeMismatchError("Expected Number Type")
 }
 
 func index(opcodes []byte, ip int) int {

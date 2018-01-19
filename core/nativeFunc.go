@@ -23,60 +23,78 @@ import (
 
 type NativeFunc interface {
 	Func
-	Invoke([]Value) (Value, Error)
 }
 
 type nativeFunc struct {
-	invoke func([]Value) (Value, Error)
+	minArity int
+	maxArity int
+	invoke   func(Context, []Value) (Value, Error)
 }
 
-func NewNativeFunc(f func([]Value) (Value, Error)) NativeFunc {
-	return &nativeFunc{f}
+func NewNativeFunc(minArity int, maxArity int, f func(Context, []Value) (Value, Error)) NativeFunc {
+	return &nativeFunc{minArity, maxArity, f}
 }
 
 func (f *nativeFunc) funcMarker() {}
 
-func (f *nativeFunc) TypeOf() Type { return TFUNC }
+func (f *nativeFunc) Type() Type { return TFUNC }
 
-func (f *nativeFunc) Eq(v Value) Bool {
+func (f *nativeFunc) Freeze() (Value, Error) {
+	return f, nil
+}
+
+func (f *nativeFunc) Frozen() (Bool, Error) {
+	return TRUE, nil
+}
+
+func (f *nativeFunc) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case NativeFunc:
 		// equality is based on identity
-		return MakeBool(f == t)
+		return MakeBool(f == t), nil
 	default:
-		return FALSE
+		return FALSE, nil
 	}
 }
 
-func (f *nativeFunc) HashCode() (Int, Error) {
+func (f *nativeFunc) HashCode(cx Context) (Int, Error) {
 	return nil, TypeMismatchError("Expected Hashable Type")
 }
 
-func (f *nativeFunc) GetField(key Str) (Value, Error) {
+func (f *nativeFunc) GetField(cx Context, key Str) (Value, Error) {
 	return nil, NoSuchFieldError(key.String())
 }
 
-func (f *nativeFunc) Cmp(v Value) (Int, Error) {
+func (f *nativeFunc) Cmp(cx Context, v Value) (Int, Error) {
 	return nil, TypeMismatchError("Expected Comparable Type")
 }
 
-func (f *nativeFunc) Plus(v Value) (Value, Error) {
-	switch t := v.(type) {
-
-	case Str:
-		return strcat(f, t), nil
-
-	default:
-		return nil, TypeMismatchError("Expected Number Type")
-	}
-}
-
-func (f *nativeFunc) ToStr() Str {
+func (f *nativeFunc) ToStr(cx Context) Str {
 	return MakeStr(fmt.Sprintf("nativeFunc<%p>", f))
 }
 
-func (f *nativeFunc) Invoke(values []Value) (Value, Error) {
-	return f.invoke(values)
+func (f *nativeFunc) MinArity() int { return f.minArity }
+func (f *nativeFunc) MaxArity() int { return f.maxArity }
+
+func (f *nativeFunc) Invoke(cx Context, values []Value) (Value, Error) {
+
+	arity := len(values)
+	min := f.MinArity()
+	max := f.MaxArity()
+
+	if min == max {
+		if arity != min {
+			return nil, ArityMismatchError(fmt.Sprintf("%d", min), arity)
+		}
+	} else {
+		if arity < min {
+			return nil, ArityMismatchError(fmt.Sprintf("at least %d", min), arity)
+		} else if (max != -1) && (arity > max) {
+			return nil, ArityMismatchError(fmt.Sprintf("at most %d", max), arity)
+		}
+	}
+
+	return f.invoke(cx, values)
 }
 
 //---------------------------------------------------------------
@@ -90,150 +108,17 @@ type intrinsicFunc struct {
 	*nativeFunc
 }
 
-func (f *intrinsicFunc) Eq(v Value) Bool {
+func (f *intrinsicFunc) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *intrinsicFunc:
 		// equality for intrinsic functions is based on whether
 		// they have the same owner, and the same name
-		return MakeBool(f.owner.Eq(t.owner).BoolVal() && (f.name == t.name))
+		ownerEq, err := f.owner.Eq(cx, t.owner)
+		if err != nil {
+			return nil, err
+		}
+		return MakeBool(ownerEq.BoolVal() && (f.name == t.name)), nil
 	default:
-		return FALSE
-	}
-}
-
-//---------------------------------------------------------------
-// Builtins
-
-const (
-	PRINT = iota
-	PRINTLN
-	STR
-	LEN
-	RANGE
-	ASSERT
-	MERGE
-	CHAN
-)
-
-var Builtins = []NativeFunc{
-	&nativeFunc{builtinPrint},
-	&nativeFunc{builtinPrintln},
-	&nativeFunc{builtinStr},
-	&nativeFunc{builtinLen},
-	&nativeFunc{builtinRange},
-	&nativeFunc{builtinAssert},
-	&nativeFunc{builtinMerge},
-	&nativeFunc{builtinChan}}
-
-var builtinPrint = func(values []Value) (Value, Error) {
-	for _, v := range values {
-		fmt.Print(v.ToStr().String())
-	}
-
-	return NULL, nil
-}
-
-var builtinPrintln = func(values []Value) (Value, Error) {
-	for _, v := range values {
-		fmt.Print(v.ToStr().String())
-	}
-	fmt.Println()
-
-	return NULL, nil
-}
-
-var builtinStr = func(values []Value) (Value, Error) {
-	if len(values) != 1 {
-		return nil, ArityMismatchError("1", len(values))
-	}
-
-	return values[0].ToStr(), nil
-}
-
-var builtinLen = func(values []Value) (Value, Error) {
-	if len(values) != 1 {
-		return nil, ArityMismatchError("1", len(values))
-	}
-
-	if ln, ok := values[0].(Lenable); ok {
-		return ln.Len(), nil
-	} else {
-		return nil, TypeMismatchError("Expected Lenable Type")
-	}
-}
-
-var builtinRange = func(values []Value) (Value, Error) {
-	if len(values) < 2 || len(values) > 3 {
-		return nil, ArityMismatchError("2 or 3", len(values))
-	}
-
-	from, ok := values[0].(Int)
-	if !ok {
-		return nil, TypeMismatchError("Expected 'Int'")
-	}
-
-	to, ok := values[1].(Int)
-	if !ok {
-		return nil, TypeMismatchError("Expected 'Int'")
-	}
-
-	step := ONE
-	if len(values) == 3 {
-		step, ok = values[2].(Int)
-		if !ok {
-			return nil, TypeMismatchError("Expected 'Int'")
-		}
-	}
-
-	return NewRange(from.IntVal(), to.IntVal(), step.IntVal())
-}
-
-var builtinAssert = func(values []Value) (Value, Error) {
-	if len(values) != 1 {
-		return nil, ArityMismatchError("1", len(values))
-	}
-
-	b, ok := values[0].(Bool)
-	if !ok {
-		return nil, TypeMismatchError("Expected 'Bool'")
-	}
-
-	if b.BoolVal() {
-		return TRUE, nil
-	} else {
-		return nil, AssertionFailedError()
-	}
-}
-
-var builtinMerge = func(values []Value) (Value, Error) {
-	if len(values) < 2 {
-		return nil, ArityMismatchError("at least 2", len(values))
-	}
-
-	structs := make([]Struct, len(values), len(values))
-	for i, v := range values {
-		if s, ok := v.(Struct); ok {
-			structs[i] = s
-		} else {
-			return nil, TypeMismatchError("Expected 'Struct'")
-		}
-	}
-
-	return MergeStructs(structs), nil
-}
-
-var builtinChan = func(values []Value) (Value, Error) {
-	switch len(values) {
-	case 0:
-		return NewChan(), nil
-	case 1:
-		size, ok := values[0].(Int)
-		if !ok {
-			return nil, TypeMismatchError("Expected 'Int'")
-		}
-		return NewBufferedChan(int(size.IntVal())), nil
-
-	default:
-		return nil, ArityMismatchError("0 or 1", len(values))
+		return FALSE, nil
 	}
 }
