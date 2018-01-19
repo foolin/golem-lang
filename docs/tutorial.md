@@ -1,14 +1,3 @@
-let s = '';
-for i in range(0, 4) {
-    switch i {
-    case 0, 1:
-        s += 'a';
-
-    case 2:
-        s += 'b';
-    }
-}
-assert(s == 'aab');
 # Golem Tutorial
 
 Golem is a general purpose, interpreted language, with first-class functions and a 
