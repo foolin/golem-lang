@@ -515,6 +515,8 @@ can use the `has` operator to test whether a struct contains a given key.
 let s = struct { a: 1, b: 2 };
 assert(s has 'a');
 assert(s.a == 1);
+s.a = 3;
+assert(s.a == 3);
 ```
 
 There are three builtin functions that you can use to inspect and modify a struct: 
@@ -523,9 +525,10 @@ There are three builtin functions that you can use to inspect and modify a struc
 ```
 let s = struct { a: 1, b: 2 };
 assert(fields(s) == set { 'a', 'b' });
-assert(getval(s, 'a') == 1);
-assert(setval(s, 'a', 3) == 3);
-assert(getval(s, 'a') == 3);
+let fieldName = 'a';
+assert(getval(s, fieldName) == 1);
+assert(setval(s, fieldName, 3) == 3);
+assert(getval(s, fieldName) == 3);
 ```
 
 Onnce a struct is created, it cannot have new keys added
@@ -705,7 +708,7 @@ are already immutable, so calling `freeze()` on them has no effect
 
 An import caveat regarding immutability is that even though closures, like all functions, 
 are immutable, they can still have enclosed state that can be modified.  There
-is no way in Golem to freeze a closure after the fact sot that it can no longer modify 
+is no way in Golem to freeze a closure after the fact so that it can no longer modify 
 any of its captured variables.  It is up to you to manage state properly if you are 
 using closures.  Here is the "accumulator generator" from a previous example.  
 We freeze it this time, but it still has mutable state via the enclosed variable 'n':
@@ -721,7 +724,7 @@ Using the `const` keyword, in conjuction with `freeze()`, is a good way to lock
 down your code so that inadvertent immutablity does not creep in.
 
 Immutabilty and concurrency go hand in hand.  By using immutable values whenever 
-possible, you can greatly reduce the likelyhood of bugs in your concurrency code, 
+possible, you can reduce the likelyhood of bugs in your concurrency code, 
 and make it much easier to reason about as well.
     
 ## Type Introspection
