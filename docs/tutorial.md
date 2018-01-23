@@ -4,10 +4,9 @@ Golem is a general purpose, interpreted language, with first-class functions and
 dynamic type system.  Golem aims to combine the clean semantics of Python, 
 the concurrency of Go, the flexibility of Javascript, and the embeddability of Lua.
 
-Golem doesn't yet have a [REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop)
-environment.  So, follow along with this tutorial by typing code into a 
-text file ('tutorial.glm', for example), and then running the file
-from the command line to look at the results.
+Golem doesn't have a [REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop).  
+So, follow along with this tutorial by typing code into a text file ('tutorial.glm', for example), 
+and then running the file from the command line to look at the results.
 
 First, build a golem executable via:
 
@@ -34,7 +33,7 @@ in Golem.
 ## Basic Types
 
 Golem has a simple, straightforward type system.  The basic primitive types 
-include boolean, string, int and float.  There is also 'null', which 
+include boolean, string, int and float.  There is also `null`, which 
 represents the absence of a value.  Basic values are immutable.
 
 Golem has the usual set of c-syntax-family operators that you would 
@@ -111,6 +110,8 @@ a = b + 3;
 println(a);
 ```
 
+As you might expect, the value of a const variable cannot be changed.
+
 `let` and `const` are statements -- they do not return a value.  Assignments, on the
 other, *are* expressions:
 
@@ -164,7 +165,6 @@ assert('abc'[:-1] == 'ab');
 
 Golem's `dict` type is similar to Python's 'dict', or 'HashMap' in java.  The
 keys can be any value that supports hashing (currently str, int, float, bool, or tuple). 
-A future version of Golem will probably allow for more types to act as a dict key.
 
 ```
 let a = dict {'x': 1, 'y': 2};
@@ -570,7 +570,7 @@ next section that this behaviour has some quite useful ramifications.
 
 ## Combining Structs Together
 
-The combination of closures, structs and merge() is very powerful.  With these tools, it
+By using closures, structs and merge() together, it
 is possible to simulate various features from other languages, including 
 inheritance, multiple-inheritance, prototype chains, and the like.
 
@@ -636,13 +636,12 @@ try {
     let z = 4 / 0;
 }
 catch e {
-    println(e);
-    assert(e.kind == 'DivideByZero');
+    println(e); 
+    assert(e.kind == 'DivideByZero'); // e is a struct
 }
 ```
 
-Exceptions are structs.  You can throw an exception by using a struct literal with the
-`throw` keyword.
+You can throw an exception by using a struct literal with the `throw` keyword.
 
 ```
 try {

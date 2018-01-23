@@ -31,7 +31,7 @@ func (s *structMap) put(field *field) {
 	h := s._lookupBucket(field.name)
 	n := s._indexOf(s.buckets[h], field.name)
 	if n == -1 {
-		if s._tooFul() {
+		if s._tooFull() {
 			s._rehash()
 			h = s._lookupBucket(field.name)
 		}
@@ -74,7 +74,7 @@ func (s *structMap) _indexOf(b []*field, name string) int {
 	return -1
 }
 
-func (s *structMap) _tooFul() bool {
+func (s *structMap) _tooFull() bool {
 	headroom := (s.size + 1) << 1
 	return headroom > len(s.buckets)
 }

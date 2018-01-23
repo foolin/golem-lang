@@ -1,14 +1,13 @@
 
 -----------------------------------------------------------
-Things to do before the embeddable version is releasable
+Things to do before Golem is releasable
 -----------------------------------------------------------
 
-'has' becomes 'in', and apply it to all the composite types
-
-string unicode escape -- JSON style
 make the semicolons optional
+multiline strings
+string unicode escape -- JSON style
 
-create a separate repo to demonstrate how to embed
+create an example separate repo to demonstrate how to embed/sandbox.
 
 complete all documentation:
     should we use the wiki? ghpages?
@@ -124,12 +123,6 @@ all the time.  This may not be possible.
 try with resources
 
 documentation generator
-
-REPL
-
------------------------------------------------------------
-Full-fledged command line interpreter
------------------------------------------------------------
 
 modules:
     json, xml, io, sys, regex, net, http, time, bytes, random, yaml, etc

@@ -41,6 +41,7 @@ func (i *Interpreter) Init() (g.Value, g.Error) {
 	return i.eval(fn, i.mod.Refs)
 }
 
+// core.Context
 func (i *Interpreter) Eval(fn g.BytecodeFunc, params []g.Value) (g.Value, g.Error) {
 	return i.eval(fn, newLocals(fn.Template().NumLocals, params))
 }

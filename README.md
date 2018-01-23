@@ -6,9 +6,9 @@ the concurrency of Go, the flexibility of Javascript, and the embeddability of L
 
 **Golem has not yet been officially released.  Its not yet ready for production use.**  
 
-Please read the [Tutorial](https://github.com/mjarmy/golem/blob/master/docs/tutorial.md) 
+Please read the [Tutorial](https://github.com/mjarmy/golem-lang/blob/master/docs/tutorial.md) 
 to learn about Golem.
 
-Consult the [Language Reference](https://github.com/mjarmy/golem/blob/master/docs/reference.md) 
+Consult the [Language Reference](https://github.com/mjarmy/golem-lang/blob/master/docs/reference.md) 
 for a thorough description of Golem's features.
 
