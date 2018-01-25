@@ -25,7 +25,7 @@ type (
 	Scanner struct {
 		source    string
 		reader    io.RuneReader
-		cr        curRune
+		cur       curRune
 		pos       ast.Pos
 		isDone    bool
 		doneToken *ast.Token
@@ -50,7 +50,7 @@ func (s *Scanner) Next() *ast.Token {
 
 	for {
 		pos := s.pos
-		r, _ := s.cur()
+		r := s.cur.r
 
 		switch {
 
@@ -59,30 +59,30 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == '/':
 			s.consume()
-			r, _ = s.cur()
+			r = s.cur.r
 
 			switch r {
 
 			// line comment
 			case '/':
 				s.consume()
-				r, _ = s.cur()
+				r = s.cur.r
 				for (r != '\n') && (r != eof) {
 					s.consume()
-					r, _ = s.cur()
+					r = s.cur.r
 				}
 
 			// block comment
 			case '*':
 				s.consume()
-				r, _ = s.cur()
+				r = s.cur.r
 
 			loop:
 				for {
 					switch r {
 					case '*':
 						s.consume()
-						r, _ = s.cur()
+						r = s.cur.r
 
 						switch r {
 						case '/':
@@ -92,13 +92,13 @@ func (s *Scanner) Next() *ast.Token {
 							return s.unexpectedChar(r, s.pos)
 						default:
 							s.consume()
-							r, _ = s.cur()
+							r = s.cur.r
 						}
 					case eof:
 						return s.unexpectedChar(r, s.pos)
 					default:
 						s.consume()
-						r, _ = s.cur()
+						r = s.cur.r
 					}
 				}
 
@@ -112,7 +112,7 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == '+':
 			s.consume()
-			r, _ = s.cur()
+			r = s.cur.r
 			if r == '+' {
 				s.consume()
 				return &ast.Token{ast.DBL_PLUS, "++", pos}
@@ -125,7 +125,7 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == '-':
 			s.consume()
-			r, _ = s.cur()
+			r = s.cur.r
 			if r == '-' {
 				s.consume()
 				return &ast.Token{ast.DBL_MINUS, "--", pos}
@@ -138,7 +138,7 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == '*':
 			s.consume()
-			r, _ = s.cur()
+			r = s.cur.r
 			if r == '=' {
 				s.consume()
 				return &ast.Token{ast.STAR_EQ, "*=", pos}
@@ -182,7 +182,7 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == '%':
 			s.consume()
-			r, _ := s.cur()
+			r := s.cur.r
 			if r == '=' {
 				s.consume()
 				return &ast.Token{ast.PERCENT_EQ, "%=", pos}
@@ -192,7 +192,7 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == '^':
 			s.consume()
-			r, _ := s.cur()
+			r := s.cur.r
 			if r == '=' {
 				s.consume()
 				return &ast.Token{ast.CARET_EQ, "^=", pos}
@@ -206,7 +206,7 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == '=':
 			s.consume()
-			r, _ := s.cur()
+			r := s.cur.r
 			if r == '=' {
 				s.consume()
 				return &ast.Token{ast.DBL_EQ, "==", pos}
@@ -219,7 +219,7 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == '!':
 			s.consume()
-			r, _ := s.cur()
+			r := s.cur.r
 			if r == '=' {
 				s.consume()
 				return &ast.Token{ast.NOT_EQ, "!=", pos}
@@ -228,13 +228,13 @@ func (s *Scanner) Next() *ast.Token {
 			}
 		case r == '>':
 			s.consume()
-			r, _ := s.cur()
+			r := s.cur.r
 			if r == '=' {
 				s.consume()
 				return &ast.Token{ast.GT_EQ, ">=", pos}
 			} else if r == '>' {
 				s.consume()
-				r, _ := s.cur()
+				r := s.cur.r
 				if r == '=' {
 					s.consume()
 					return &ast.Token{ast.DBL_GT_EQ, ">>=", pos}
@@ -246,10 +246,10 @@ func (s *Scanner) Next() *ast.Token {
 			}
 		case r == '<':
 			s.consume()
-			r, _ := s.cur()
+			r := s.cur.r
 			if r == '=' {
 				s.consume()
-				r, _ := s.cur()
+				r := s.cur.r
 				if r == '>' {
 					s.consume()
 					return &ast.Token{ast.CMP, "<=>", pos}
@@ -258,7 +258,7 @@ func (s *Scanner) Next() *ast.Token {
 				}
 			} else if r == '<' {
 				s.consume()
-				r, _ := s.cur()
+				r := s.cur.r
 				if r == '=' {
 					s.consume()
 					return &ast.Token{ast.DBL_LT_EQ, "<<=", pos}
@@ -271,7 +271,7 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == '|':
 			s.consume()
-			r, _ := s.cur()
+			r := s.cur.r
 			if r == '|' {
 				s.consume()
 				return &ast.Token{ast.DBL_PIPE, "||", pos}
@@ -283,7 +283,7 @@ func (s *Scanner) Next() *ast.Token {
 			}
 		case r == '&':
 			s.consume()
-			r, _ := s.cur()
+			r := s.cur.r
 			if r == '&' {
 				s.consume()
 				return &ast.Token{ast.DBL_AMP, "&&", pos}
@@ -320,12 +320,12 @@ func (s *Scanner) Next() *ast.Token {
 func (s *Scanner) nextIdentOrKeyword() *ast.Token {
 
 	pos := s.pos
-	_, begin := s.cur()
+	begin := s.cur.idx
 	s.consume()
 
 	s.acceptWhile(isIdentContinue)
 
-	text := s.source[begin:s.cr.idx]
+	text := s.source[begin:s.cur.idx]
 	switch text {
 
 	case "_":
@@ -413,7 +413,7 @@ func (s *Scanner) nextStr(delim rune) *ast.Token {
 	// TODO multiline
 	// TODO \u
 	for {
-		r, _ := s.cur()
+		r := s.cur.r
 
 		switch {
 
@@ -425,7 +425,7 @@ func (s *Scanner) nextStr(delim rune) *ast.Token {
 		case r == '\\':
 			// escaped character
 			s.consume()
-			r, _ = s.cur()
+			r = s.cur.r
 			switch r {
 			case '\\':
 				buf.WriteRune('\\')
@@ -464,11 +464,12 @@ func (s *Scanner) nextStr(delim rune) *ast.Token {
 func (s *Scanner) nextNumber() *ast.Token {
 
 	pos := s.pos
-	r, begin := s.cur()
+	r := s.cur.r
+	begin := s.cur.idx
 	s.consume()
 
 	if r == '0' {
-		r, _ := s.cur()
+		r := s.cur.r
 
 		switch {
 
@@ -487,11 +488,11 @@ func (s *Scanner) nextNumber() *ast.Token {
 
 	} else {
 		s.acceptWhile(isDigit)
-		r, _ := s.cur()
+		r := s.cur.r
 		if r == '.' || isExp(r) {
 			return s.nextFloat(begin, pos)
 		} else {
-			return &ast.Token{ast.INT, s.source[begin:s.cr.idx], pos}
+			return &ast.Token{ast.INT, s.source[begin:s.cur.idx], pos}
 		}
 	}
 
@@ -507,7 +508,7 @@ func (s *Scanner) nextHexInt(begin int, pos ast.Pos) *ast.Token {
 	}
 	s.acceptWhile(isHexDigit)
 
-	return &ast.Token{ast.INT, s.source[begin:s.cr.idx], pos}
+	return &ast.Token{ast.INT, s.source[begin:s.cur.idx], pos}
 }
 
 func (s *Scanner) nextFloat(begin int, pos ast.Pos) *ast.Token {
@@ -530,13 +531,13 @@ func (s *Scanner) nextFloat(begin int, pos ast.Pos) *ast.Token {
 		s.acceptWhile(isDigit)
 	}
 
-	return &ast.Token{ast.FLOAT, s.source[begin:s.cr.idx], pos}
+	return &ast.Token{ast.FLOAT, s.source[begin:s.cur.idx], pos}
 }
 
 // accept a rune that matches the given function
 func (s *Scanner) accept(fn func(rune) bool) bool {
 
-	r, _ := s.cur()
+	r := s.cur.r
 	if fn(r) {
 		s.consume()
 		return true
@@ -549,7 +550,7 @@ func (s *Scanner) accept(fn func(rune) bool) bool {
 func (s *Scanner) acceptWhile(fn func(rune) bool) {
 
 	for {
-		r, _ := s.cur()
+		r := s.cur.r
 		if fn(r) {
 			s.consume()
 		} else {
@@ -562,7 +563,7 @@ func (s *Scanner) acceptWhile(fn func(rune) bool) {
 func (s *Scanner) expect(fn func(rune) bool) *ast.Token {
 
 	pos := s.pos
-	r, _ := s.cur()
+	r := s.cur.r
 
 	if fn(r) {
 		s.consume()
@@ -582,25 +583,20 @@ func (s *Scanner) unexpectedChar(r rune, pos ast.Pos) *ast.Token {
 	return s.doneToken
 }
 
-// get the current rune
-func (s *Scanner) cur() (rune, int) {
-	return s.cr.r, s.cr.idx
-}
-
 // consume the current rune
 func (s *Scanner) consume() {
 
-	lastSize := s.cr.size
+	lastSize := s.cur.size
 
 	r, size, err := s.reader.ReadRune()
-	s.cr.size = size
-	s.cr.idx += lastSize
+	s.cur.size = size
+	s.cur.idx += lastSize
 
 	// set eof if there was an error
 	if err == nil {
-		s.cr.r = r
+		s.cur.r = r
 	} else {
-		s.cr.r = eof
+		s.cur.r = eof
 	}
 
 	// advance position
