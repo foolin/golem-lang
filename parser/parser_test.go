@@ -327,8 +327,8 @@ func TestStatement(t *testing.T) {
 	p = newParser("let a = 3; const b = 4;")
 	ok(t, p, "fn() { let a = 3; const b = 4; }")
 
-	p = newParser("let a = 3, b; const x, y, z = 5; ")
-	ok(t, p, "fn() { let a = 3, b; const x, y, z = 5; }")
+	p = newParser("let a = 3, b;; const x, y, z = 5; ")
+	ok(t, p, "fn() { let a = 3, b; ; const x, y, z = 5; }")
 }
 
 func TestFor(t *testing.T) {

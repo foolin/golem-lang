@@ -107,6 +107,9 @@ func (p *Parser) statement() ast.Stmt {
 
 	switch p.cur.Kind {
 
+	case ast.SEMICOLON:
+		return &ast.Empty{p.consume()}
+
 	case ast.CONST:
 		return p.constStmt()
 

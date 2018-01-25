@@ -49,6 +49,10 @@ type (
 	//---------------------
 	// statement
 
+	Empty struct {
+		Semicolon *Token
+	}
+
 	Block struct {
 		LBrace *Token
 		Nodes  []Node
@@ -317,6 +321,7 @@ type (
 //--------------------------------------------------------------
 // markers
 
+func (*Empty) stmtMarker()    {}
 func (*Block) stmtMarker()    {}
 func (*Import) stmtMarker()   {}
 func (*Const) stmtMarker()    {}
@@ -368,6 +373,9 @@ func (*IndexExpr) assignableMarker()   {}
 
 //--------------------------------------------------------------
 // Begin, End
+
+func (n *Empty) Begin() Pos { return n.Semicolon.Position }
+func (n *Empty) End() Pos   { return n.Semicolon.Position }
 
 func (n *Block) Begin() Pos { return n.LBrace.Position }
 func (n *Block) End() Pos {
@@ -520,6 +528,10 @@ func (n *SliceToExpr) End() Pos     { return n.RBracket.Position }
 
 //--------------------------------------------------------------
 // string
+
+func (n *Empty) String() string {
+	return ";"
+}
 
 func (blk *Block) String() string {
 	var buf bytes.Buffer

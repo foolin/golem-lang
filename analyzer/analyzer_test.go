@@ -71,7 +71,7 @@ func newAnalyzer(source string) Analyzer {
 
 func TestFlat(t *testing.T) {
 
-	anl := newAnalyzer("let a = 1; const b = 2; a = b + 3;")
+	anl := newAnalyzer("let a = 1; const b = 2; a = b + 3;;")
 	errors := anl.Analyze()
 	ok(t, anl, errors, `
 FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
@@ -87,6 +87,7 @@ FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
 .   .   .   BinaryExpr("+")
 .   .   .   .   IdentExpr(b,(1,true,false))
 .   .   .   .   BasicExpr(INT,"3")
+.   .   Empty
 `)
 
 	errors = newAnalyzer("a;").Analyze()
