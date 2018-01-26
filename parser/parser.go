@@ -103,7 +103,7 @@ func (p *Parser) imports() []ast.Node {
 
 // Parse a statement, or return nil if there is no statement
 // waiting to be parsed.
-func (p *Parser) statement() ast.Stmt {
+func (p *Parser) statement() ast.Statement {
 
 	switch p.cur.Kind {
 
@@ -533,13 +533,13 @@ func (p *Parser) expression() ast.Expr {
 
 			// assignment
 			eq := p.expect(ast.EQ)
-			exp = &ast.Assignment{asn, eq, p.expression()}
+			exp = &ast.AssignmentExpr{asn, eq, p.expression()}
 
 		} else if isAssignOp(p.cur) {
 
 			// assignment operation
 			op := p.consume()
-			exp = &ast.Assignment{
+			exp = &ast.AssignmentExpr{
 				asn,
 				op,
 				&ast.BinaryExpr{

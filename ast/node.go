@@ -22,13 +22,13 @@ type (
 		End() Pos
 	}
 
-	Stmt interface {
+	Statement interface {
 		Node
 		stmtMarker()
 	}
 
 	Loop interface {
-		Stmt
+		Statement
 		loopMarker()
 	}
 
@@ -47,16 +47,10 @@ type (
 type (
 
 	//---------------------
-	// statement
+	// statement ndoes
 
 	Empty struct {
 		Semicolon *Token
-	}
-
-	Block struct {
-		LBrace *Token
-		Nodes  []Node
-		RBrace *Token
 	}
 
 	Import struct {
@@ -77,11 +71,6 @@ type (
 		Semicolon *Token
 	}
 
-	Decl struct {
-		Ident *IdentExpr
-		Val   Expr
-	}
-
 	NamedFn struct {
 		Token *Token
 		Ident *IdentExpr
@@ -92,7 +81,7 @@ type (
 		Token *Token
 		Cond  Expr
 		Then  *Block
-		Else  Stmt
+		Else  Node // either a Block, or another If
 	}
 
 	While struct {
@@ -116,17 +105,6 @@ type (
 		Cases   []*Case
 		Default *Default
 		RBrace  *Token
-	}
-
-	Case struct {
-		Token   *Token
-		Matches []Expr
-		Body    []Node
-	}
-
-	Default struct {
-		Token *Token
-		Body  []Node
 	}
 
 	Break struct {
@@ -167,10 +145,35 @@ type (
 		Semicolon  *Token
 	}
 
-	//---------------------
-	// expression
+	//--------------------------------------
+	// nodes that are parts of a statement
 
-	Assignment struct {
+	Block struct {
+		LBrace *Token
+		Nodes  []Node
+		RBrace *Token
+	}
+
+	Decl struct {
+		Ident *IdentExpr
+		Val   Expr
+	}
+
+	Case struct {
+		Token   *Token
+		Matches []Expr
+		Body    []Node
+	}
+
+	Default struct {
+		Token *Token
+		Body  []Node
+	}
+
+	//---------------------
+	// expression nodes
+
+	AssignmentExpr struct {
 		Assignee Assignable
 		Eq       *Token
 		Val      Expr
@@ -322,7 +325,6 @@ type (
 // markers
 
 func (*Empty) stmtMarker()    {}
-func (*Block) stmtMarker()    {}
 func (*Import) stmtMarker()   {}
 func (*Const) stmtMarker()    {}
 func (*Let) stmtMarker()      {}
@@ -331,8 +333,6 @@ func (*If) stmtMarker()       {}
 func (*While) stmtMarker()    {}
 func (*For) stmtMarker()      {}
 func (*Switch) stmtMarker()   {}
-func (*Case) stmtMarker()     {}
-func (*Default) stmtMarker()  {}
 func (*Break) stmtMarker()    {}
 func (*Continue) stmtMarker() {}
 func (*Return) stmtMarker()   {}
@@ -343,28 +343,28 @@ func (*Go) stmtMarker()       {}
 func (*While) loopMarker() {}
 func (*For) loopMarker()   {}
 
-func (*Assignment) exprMarker()    {}
-func (*TernaryExpr) exprMarker()   {}
-func (*BinaryExpr) exprMarker()    {}
-func (*UnaryExpr) exprMarker()     {}
-func (*PostfixExpr) exprMarker()   {}
-func (*BasicExpr) exprMarker()     {}
-func (*IdentExpr) exprMarker()     {}
-func (*BuiltinExpr) exprMarker()   {}
-func (*FnExpr) exprMarker()        {}
-func (*InvokeExpr) exprMarker()    {}
-func (*ListExpr) exprMarker()      {}
-func (*SetExpr) exprMarker()       {}
-func (*TupleExpr) exprMarker()     {}
-func (*StructExpr) exprMarker()    {}
-func (*ThisExpr) exprMarker()      {}
-func (*FieldExpr) exprMarker()     {}
-func (*DictExpr) exprMarker()      {}
-func (*DictEntryExpr) exprMarker() {}
-func (*IndexExpr) exprMarker()     {}
-func (*SliceExpr) exprMarker()     {}
-func (*SliceFromExpr) exprMarker() {}
-func (*SliceToExpr) exprMarker()   {}
+func (*AssignmentExpr) exprMarker() {}
+func (*TernaryExpr) exprMarker()    {}
+func (*BinaryExpr) exprMarker()     {}
+func (*UnaryExpr) exprMarker()      {}
+func (*PostfixExpr) exprMarker()    {}
+func (*BasicExpr) exprMarker()      {}
+func (*IdentExpr) exprMarker()      {}
+func (*BuiltinExpr) exprMarker()    {}
+func (*FnExpr) exprMarker()         {}
+func (*InvokeExpr) exprMarker()     {}
+func (*ListExpr) exprMarker()       {}
+func (*SetExpr) exprMarker()        {}
+func (*TupleExpr) exprMarker()      {}
+func (*StructExpr) exprMarker()     {}
+func (*ThisExpr) exprMarker()       {}
+func (*FieldExpr) exprMarker()      {}
+func (*DictExpr) exprMarker()       {}
+func (*DictEntryExpr) exprMarker()  {}
+func (*IndexExpr) exprMarker()      {}
+func (*SliceExpr) exprMarker()      {}
+func (*SliceFromExpr) exprMarker()  {}
+func (*SliceToExpr) exprMarker()    {}
 
 func (*IdentExpr) assignableMarker()   {}
 func (*BuiltinExpr) assignableMarker() {}
@@ -446,8 +446,8 @@ func (n *Try) End() Pos {
 func (n *Go) Begin() Pos { return n.Token.Position }
 func (n *Go) End() Pos   { return n.Semicolon.Position }
 
-func (n *Assignment) Begin() Pos { return n.Assignee.Begin() }
-func (n *Assignment) End() Pos   { return n.Val.End() }
+func (n *AssignmentExpr) Begin() Pos { return n.Assignee.Begin() }
+func (n *AssignmentExpr) End() Pos   { return n.Val.End() }
 
 func (n *TernaryExpr) Begin() Pos { return n.Cond.Begin() }
 func (n *TernaryExpr) End() Pos   { return n.Else.End() }
@@ -589,7 +589,7 @@ func stringDecls(decls []*Decl) string {
 	return buf.String()
 }
 
-func (asn *Assignment) String() string {
+func (asn *AssignmentExpr) String() string {
 	return fmt.Sprintf("(%v = %v)", asn.Assignee, asn.Val)
 }
 

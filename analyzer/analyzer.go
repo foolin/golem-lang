@@ -81,7 +81,7 @@ func (a *analyzer) Visit(node ast.Node) {
 	case *ast.Let:
 		a.visitDecls(t.Decls, false)
 
-	case *ast.Assignment:
+	case *ast.AssignmentExpr:
 		a.visitAssignment(t)
 
 	case *ast.Try:
@@ -260,7 +260,7 @@ func (a *analyzer) makeParentCaptures() []*ast.Variable {
 	return parentCaps
 }
 
-func (a *analyzer) visitAssignment(asn *ast.Assignment) {
+func (a *analyzer) visitAssignment(asn *ast.AssignmentExpr) {
 
 	switch t := asn.Assignee.(type) {
 

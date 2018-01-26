@@ -47,7 +47,7 @@ func (nf *NamedFn) Traverse(v Visitor) {
 	v.Visit(nf.Func)
 }
 
-func (asn *Assignment) Traverse(v Visitor) {
+func (asn *AssignmentExpr) Traverse(v Visitor) {
 	v.Visit(asn.Assignee)
 	v.Visit(asn.Val)
 }
@@ -282,8 +282,6 @@ func (p *dump) Visit(node Node) {
 		p.buf.WriteString("Let\n")
 	case *NamedFn:
 		p.buf.WriteString("NamedFn\n")
-	case *Assignment:
-		p.buf.WriteString("Assignment\n")
 
 	case *If:
 		p.buf.WriteString("If\n")
@@ -304,6 +302,8 @@ func (p *dump) Visit(node Node) {
 	case *Go:
 		p.buf.WriteString("Go\n")
 
+	case *AssignmentExpr:
+		p.buf.WriteString("AssignmentExpr\n")
 	case *BinaryExpr:
 		p.buf.WriteString(fmt.Sprintf("BinaryExpr(%q)\n", t.Op.Text))
 	case *UnaryExpr:

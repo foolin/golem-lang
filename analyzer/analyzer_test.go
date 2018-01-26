@@ -82,7 +82,7 @@ FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
 .   .   Const
 .   .   .   IdentExpr(b,(1,true,false))
 .   .   .   BasicExpr(INT,"2")
-.   .   Assignment
+.   .   AssignmentExpr
 .   .   .   IdentExpr(a,(0,false,false))
 .   .   .   BinaryExpr("+")
 .   .   .   .   IdentExpr(b,(1,true,false))
@@ -130,14 +130,14 @@ FnExpr(numLocals:3 numCaptures:0 parentCaptures:[])
 .   .   If
 .   .   .   BasicExpr(TRUE,"true")
 .   .   .   Block
-.   .   .   .   Assignment
+.   .   .   .   AssignmentExpr
 .   .   .   .   .   IdentExpr(a,(0,false,false))
 .   .   .   .   .   BasicExpr(INT,"2")
 .   .   .   .   Const
 .   .   .   .   .   IdentExpr(b,(1,true,false))
 .   .   .   .   .   BasicExpr(INT,"2")
 .   .   .   Block
-.   .   .   .   Assignment
+.   .   .   .   AssignmentExpr
 .   .   .   .   .   IdentExpr(a,(0,false,false))
 .   .   .   .   .   BasicExpr(INT,"3")
 .   .   .   .   Let
@@ -326,7 +326,7 @@ FnExpr(numLocals:1 numCaptures:0 parentCaptures:[])
 .   .   .   .   .   .   FnExpr(numLocals:1 numCaptures:1 parentCaptures:[(0,false,false)])
 .   .   .   .   .   .   .   IdentExpr(i,(0,false,false))
 .   .   .   .   .   .   .   Block
-.   .   .   .   .   .   .   .   Assignment
+.   .   .   .   .   .   .   .   AssignmentExpr
 .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
 .   .   .   .   .   .   .   .   .   BinaryExpr("+")
 .   .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
@@ -367,12 +367,12 @@ FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
 .   .   .   .   .   .   FnExpr(numLocals:1 numCaptures:2 parentCaptures:[(0,false,false), (0,false,true)])
 .   .   .   .   .   .   .   IdentExpr(i,(0,false,false))
 .   .   .   .   .   .   .   Block
-.   .   .   .   .   .   .   .   Assignment
+.   .   .   .   .   .   .   .   AssignmentExpr
 .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
 .   .   .   .   .   .   .   .   .   BinaryExpr("+")
 .   .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
 .   .   .   .   .   .   .   .   .   .   IdentExpr(i,(0,false,false))
-.   .   .   .   .   .   .   .   Assignment
+.   .   .   .   .   .   .   .   AssignmentExpr
 .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
 .   .   .   .   .   .   .   .   .   BinaryExpr("+")
 .   .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
@@ -605,7 +605,7 @@ FnExpr(numLocals:6 numCaptures:0 parentCaptures:[])
 .   .   .   IdentExpr(y,(1,false,false))
 .   .   .   FieldExpr(a)
 .   .   .   .   IdentExpr(x,(0,false,false))
-.   .   Assignment
+.   .   AssignmentExpr
 .   .   .   FieldExpr(a)
 .   .   .   .   IdentExpr(x,(0,false,false))
 .   .   .   BasicExpr(INT,"3")
@@ -614,12 +614,12 @@ FnExpr(numLocals:6 numCaptures:0 parentCaptures:[])
 .   .   .   .   IdentExpr(x,(0,false,false))
 .   .   PostfixExpr("--")
 .   .   .   IdentExpr(y,(1,false,false))
-.   .   Assignment
+.   .   AssignmentExpr
 .   .   .   IndexExpr
 .   .   .   .   IdentExpr(x,(0,false,false))
 .   .   .   .   IdentExpr(y,(1,false,false))
 .   .   .   BasicExpr(INT,"42")
-.   .   Assignment
+.   .   AssignmentExpr
 .   .   .   IdentExpr(y,(1,false,false))
 .   .   .   IndexExpr
 .   .   .   .   IdentExpr(x,(0,false,false))
@@ -628,7 +628,7 @@ FnExpr(numLocals:6 numCaptures:0 parentCaptures:[])
 .   .   .   IndexExpr
 .   .   .   .   IdentExpr(x,(0,false,false))
 .   .   .   .   BasicExpr(INT,"2")
-.   .   Assignment
+.   .   AssignmentExpr
 .   .   .   FieldExpr(z)
 .   .   .   .   IdentExpr(y,(1,false,false))
 .   .   .   PostfixExpr("++")
@@ -674,7 +674,7 @@ FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
 .   .   .   IdentExpr(b,(1,false,false))
 .   .   .   ListExpr
 .   .   .   .   BasicExpr(STR,"x")
-.   .   Assignment
+.   .   AssignmentExpr
 .   .   .   IndexExpr
 .   .   .   .   IdentExpr(b,(1,false,false))
 .   .   .   .   BasicExpr(INT,"0")

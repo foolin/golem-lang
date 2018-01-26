@@ -153,7 +153,7 @@ func (c *compiler) Visit(node ast.Node) {
 	case *ast.NamedFn:
 		c.visitNamedFn(t)
 
-	case *ast.Assignment:
+	case *ast.AssignmentExpr:
 		c.visitAssignment(t)
 
 	case *ast.If:
@@ -325,7 +325,7 @@ func (c *compiler) visitNamedFn(nf *ast.NamedFn) {
 	c.pushIndex(nf.Ident.Begin(), g.STORE_LOCAL, v.Index)
 }
 
-func (c *compiler) visitAssignment(asn *ast.Assignment) {
+func (c *compiler) visitAssignment(asn *ast.AssignmentExpr) {
 
 	switch t := asn.Assignee.(type) {
 
