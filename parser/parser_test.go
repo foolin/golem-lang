@@ -12,7 +12,7 @@ import (
 	"github.com/mjarmy/golem-lang/scanner"
 )
 
-func parseExpression(p *Parser) (expr ast.Expr, err error) {
+func parseExpression(p *Parser) (expr ast.Expression, err error) {
 
 	// In a recursive descent parser, errors can be generated deep
 	// in the call stack.  We are going to use panic-recover to handle them.

@@ -355,7 +355,7 @@ func (p *Parser) switchStmt() *ast.Switch {
 
 	token := p.expect(ast.SWITCH)
 
-	var item ast.Expr = nil
+	var item ast.Expression = nil
 	if p.cur.Kind != ast.LBRACE {
 		item = p.expression()
 	}
@@ -383,7 +383,7 @@ func (p *Parser) caseStmt() *ast.Case {
 
 	token := p.expect(ast.CASE)
 
-	matches := []ast.Expr{p.expression()}
+	matches := []ast.Expression{p.expression()}
 	for {
 		switch p.cur.Kind {
 
@@ -517,7 +517,7 @@ func (p *Parser) block() *ast.Block {
 	return &ast.Block{lbrace, nodes, rbrace}
 }
 
-func (p *Parser) expression() ast.Expr {
+func (p *Parser) expression() ast.Expression {
 
 	exp := p.ternaryExpr()
 
@@ -546,7 +546,7 @@ func (p *Parser) expression() ast.Expr {
 	return exp
 }
 
-func (p *Parser) ternaryExpr() ast.Expr {
+func (p *Parser) ternaryExpr() ast.Expression {
 
 	lhs := p.orExpr()
 
@@ -563,7 +563,7 @@ func (p *Parser) ternaryExpr() ast.Expr {
 	}
 }
 
-func (p *Parser) orExpr() ast.Expr {
+func (p *Parser) orExpr() ast.Expression {
 
 	lhs := p.andExpr()
 	for p.cur.Kind == ast.DBL_PIPE {
@@ -574,7 +574,7 @@ func (p *Parser) orExpr() ast.Expr {
 	return lhs
 }
 
-func (p *Parser) andExpr() ast.Expr {
+func (p *Parser) andExpr() ast.Expression {
 
 	lhs := p.comparativeExpr()
 	for p.cur.Kind == ast.DBL_AMP {
@@ -585,7 +585,7 @@ func (p *Parser) andExpr() ast.Expr {
 	return lhs
 }
 
-func (p *Parser) comparativeExpr() ast.Expr {
+func (p *Parser) comparativeExpr() ast.Expression {
 
 	lhs := p.additiveExpr()
 	for isComparative(p.cur) {
@@ -596,7 +596,7 @@ func (p *Parser) comparativeExpr() ast.Expr {
 	return lhs
 }
 
-func (p *Parser) additiveExpr() ast.Expr {
+func (p *Parser) additiveExpr() ast.Expression {
 
 	lhs := p.multiplicativeExpr()
 	for isAdditive(p.cur) {
@@ -607,7 +607,7 @@ func (p *Parser) additiveExpr() ast.Expr {
 	return lhs
 }
 
-func (p *Parser) multiplicativeExpr() ast.Expr {
+func (p *Parser) multiplicativeExpr() ast.Expression {
 
 	lhs := p.unaryExpr()
 	for isMultiplicative(p.cur) {
@@ -618,7 +618,7 @@ func (p *Parser) multiplicativeExpr() ast.Expr {
 	return lhs
 }
 
-func (p *Parser) unaryExpr() ast.Expr {
+func (p *Parser) unaryExpr() ast.Expression {
 
 	if isUnary(p.cur) {
 		tok := p.cur
@@ -630,7 +630,7 @@ func (p *Parser) unaryExpr() ast.Expr {
 	}
 }
 
-func (p *Parser) postfixExpr() ast.Expr {
+func (p *Parser) postfixExpr() ast.Expression {
 
 	exp := p.primaryExpr()
 
@@ -648,7 +648,7 @@ func (p *Parser) postfixExpr() ast.Expr {
 	return exp
 }
 
-func (p *Parser) primaryExpr() ast.Expr {
+func (p *Parser) primaryExpr() ast.Expression {
 	prm := p.primary()
 
 	for {
@@ -716,7 +716,7 @@ func (p *Parser) primaryExpr() ast.Expr {
 	}
 }
 
-func (p *Parser) primary() ast.Expr {
+func (p *Parser) primary() ast.Expression {
 
 	switch {
 
@@ -877,20 +877,20 @@ func (p *Parser) lambda() *ast.FnExpr {
 	return &ast.FnExpr{token, params, block, 0, 0, nil}
 }
 
-func (p *Parser) structExpr() ast.Expr {
+func (p *Parser) structExpr() ast.Expression {
 	return p.structBody(p.expect(ast.STRUCT))
 }
 
-//func (p *Parser) propExpr() ast.Expr {
+//func (p *Parser) propExpr() ast.Expression {
 //	token := p.expect(ast.PROP)
 //	return p.structBody(token)
 //}
 
-func (p *Parser) structBody(token *ast.Token) ast.Expr {
+func (p *Parser) structBody(token *ast.Token) ast.Expression {
 
 	// key-value pairs
 	keys := []*ast.Token{}
-	values := []ast.Expr{}
+	values := []ast.Expression{}
 	var rbrace *ast.Token
 	lbrace := p.expect(ast.LBRACE)
 
@@ -932,7 +932,7 @@ func (p *Parser) structBody(token *ast.Token) ast.Expr {
 	return &ast.StructExpr{token, lbrace, keys, values, rbrace, -1}
 }
 
-func (p *Parser) dictExpr() ast.Expr {
+func (p *Parser) dictExpr() ast.Expression {
 
 	dictToken := p.expect(ast.DICT)
 
@@ -977,16 +977,16 @@ func (p *Parser) dictExpr() ast.Expr {
 	return &ast.DictExpr{dictToken, lbrace, entries, rbrace}
 }
 
-func (p *Parser) setExpr() ast.Expr {
+func (p *Parser) setExpr() ast.Expression {
 
 	setToken := p.expect(ast.SET)
 	lbrace := p.expect(ast.LBRACE)
 
 	if p.cur.Kind == ast.RBRACE {
-		return &ast.SetExpr{setToken, lbrace, []ast.Expr{}, p.consume()}
+		return &ast.SetExpr{setToken, lbrace, []ast.Expression{}, p.consume()}
 	} else {
 
-		elems := []ast.Expr{p.expression()}
+		elems := []ast.Expression{p.expression()}
 		for {
 			switch p.cur.Kind {
 			case ast.RBRACE:
@@ -1001,15 +1001,15 @@ func (p *Parser) setExpr() ast.Expr {
 	}
 }
 
-func (p *Parser) listExpr() ast.Expr {
+func (p *Parser) listExpr() ast.Expression {
 
 	lbracket := p.expect(ast.LBRACKET)
 
 	if p.cur.Kind == ast.RBRACKET {
-		return &ast.ListExpr{lbracket, []ast.Expr{}, p.consume()}
+		return &ast.ListExpr{lbracket, []ast.Expression{}, p.consume()}
 	} else {
 
-		elems := []ast.Expr{p.expression()}
+		elems := []ast.Expression{p.expression()}
 		for {
 			switch p.cur.Kind {
 			case ast.RBRACKET:
@@ -1024,9 +1024,9 @@ func (p *Parser) listExpr() ast.Expr {
 	}
 }
 
-func (p *Parser) tupleExpr(lparen *ast.Token, expr ast.Expr) ast.Expr {
+func (p *Parser) tupleExpr(lparen *ast.Token, expr ast.Expression) ast.Expression {
 
-	elems := []ast.Expr{expr, p.expression()}
+	elems := []ast.Expression{expr, p.expression()}
 
 	for {
 		switch p.cur.Kind {
@@ -1041,7 +1041,7 @@ func (p *Parser) tupleExpr(lparen *ast.Token, expr ast.Expr) ast.Expr {
 	}
 }
 
-func (p *Parser) basicExpr() ast.Expr {
+func (p *Parser) basicExpr() ast.Expression {
 
 	tok := p.cur
 
@@ -1056,11 +1056,11 @@ func (p *Parser) basicExpr() ast.Expr {
 	}
 }
 
-func (p *Parser) actualParams() (*ast.Token, []ast.Expr, *ast.Token) {
+func (p *Parser) actualParams() (*ast.Token, []ast.Expression, *ast.Token) {
 
 	lparen := p.expect(ast.LPAREN)
 
-	params := []ast.Expr{}
+	params := []ast.Expression{}
 	switch p.cur.Kind {
 
 	case ast.RPAREN:

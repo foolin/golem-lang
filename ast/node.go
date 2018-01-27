@@ -32,13 +32,13 @@ type (
 		loopMarker()
 	}
 
-	Expr interface {
+	Expression interface {
 		Node
 		exprMarker()
 	}
 
 	Assignable interface {
-		Expr
+		Expression
 		assignableMarker()
 	}
 )
@@ -72,14 +72,14 @@ type (
 
 	If struct {
 		Token *Token
-		Cond  Expr
+		Cond  Expression
 		Then  *Block
 		Else  Node // either a Block, or another If
 	}
 
 	While struct {
 		Token *Token
-		Cond  Expr
+		Cond  Expression
 		Body  *Block
 	}
 
@@ -87,13 +87,13 @@ type (
 		Token         *Token
 		Idents        []*IdentExpr
 		IterableIdent *IdentExpr
-		Iterable      Expr
+		Iterable      Expression
 		Body          *Block
 	}
 
 	Switch struct {
 		Token   *Token
-		Item    Expr
+		Item    Expression
 		LBrace  *Token
 		Cases   []*Case
 		Default *Default
@@ -110,12 +110,12 @@ type (
 
 	Return struct {
 		Token *Token
-		Val   Expr
+		Val   Expression
 	}
 
 	Throw struct {
 		Token *Token
-		Val   Expr
+		Val   Expression
 	}
 
 	Try struct {
@@ -144,12 +144,12 @@ type (
 
 	Decl struct {
 		Ident *IdentExpr
-		Val   Expr
+		Val   Expression
 	}
 
 	Case struct {
 		Token   *Token
-		Matches []Expr
+		Matches []Expression
 		Body    []Node
 	}
 
@@ -164,24 +164,24 @@ type (
 	AssignmentExpr struct {
 		Assignee Assignable
 		Eq       *Token
-		Val      Expr
+		Val      Expression
 	}
 
 	TernaryExpr struct {
-		Cond Expr
-		Then Expr
-		Else Expr
+		Cond Expression
+		Then Expression
+		Else Expression
 	}
 
 	BinaryExpr struct {
-		Lhs Expr
+		Lhs Expression
 		Op  *Token
-		Rhs Expr
+		Rhs Expression
 	}
 
 	UnaryExpr struct {
 		Op      *Token
-		Operand Expr
+		Operand Expression
 	}
 
 	PostfixExpr struct {
@@ -219,28 +219,28 @@ type (
 	}
 
 	InvokeExpr struct {
-		Operand Expr
+		Operand Expression
 		LParen  *Token
-		Params  []Expr
+		Params  []Expression
 		RParen  *Token
 	}
 
 	ListExpr struct {
 		LBracket *Token
-		Elems    []Expr
+		Elems    []Expression
 		RBracket *Token
 	}
 
 	SetExpr struct {
 		SetToken *Token
 		LBrace   *Token
-		Elems    []Expr
+		Elems    []Expression
 		RBrace   *Token
 	}
 
 	TupleExpr struct {
 		LParen *Token
-		Elems  []Expr
+		Elems  []Expression
 		RParen *Token
 	}
 
@@ -248,7 +248,7 @@ type (
 		StructToken *Token
 		LBrace      *Token
 		Keys        []*Token
-		Values      []Expr
+		Values      []Expression
 		RBrace      *Token
 
 		// The index of the struct expression in the local variable array.
@@ -263,7 +263,7 @@ type (
 	}
 
 	FieldExpr struct {
-		Operand Expr
+		Operand Expression
 		Key     *Token
 	}
 
@@ -275,36 +275,36 @@ type (
 	}
 
 	DictEntryExpr struct {
-		Key   Expr
-		Value Expr
+		Key   Expression
+		Value Expression
 	}
 
 	IndexExpr struct {
-		Operand  Expr
+		Operand  Expression
 		LBracket *Token
-		Index    Expr
+		Index    Expression
 		RBracket *Token
 	}
 
 	SliceExpr struct {
-		Operand  Expr
+		Operand  Expression
 		LBracket *Token
-		From     Expr
-		To       Expr
+		From     Expression
+		To       Expression
 		RBracket *Token
 	}
 
 	SliceFromExpr struct {
-		Operand  Expr
+		Operand  Expression
 		LBracket *Token
-		From     Expr
+		From     Expression
 		RBracket *Token
 	}
 
 	SliceToExpr struct {
-		Operand  Expr
+		Operand  Expression
 		LBracket *Token
-		To       Expr
+		To       Expression
 		RBracket *Token
 	}
 )
@@ -930,7 +930,7 @@ func writeNodes(nodes []Node, buf *bytes.Buffer) {
 			buf.WriteString(" ")
 		}
 		buf.WriteString(n.String())
-		if _, ok := n.(Expr); ok {
+		if _, ok := n.(Expression); ok {
 			buf.WriteString(";")
 		}
 	}
