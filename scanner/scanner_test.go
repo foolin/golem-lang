@@ -19,6 +19,7 @@ func ok(t *testing.T, s *Scanner, tokenKind ast.TokenKind, text string, line int
 
 	if !reflect.DeepEqual(*nextToken, *token) {
 		t.Error(nextToken, " != ", token)
+		panic("ok")
 	}
 }
 
@@ -41,6 +42,7 @@ func TestDelimiter(t *testing.T) {
 
 	s = NewScanner("-\n/")
 	ok(t, s, ast.MINUS, "-", 1, 1)
+	ok(t, s, ast.LINE_FEED, "\n", 2, 0)
 	ok(t, s, ast.SLASH, "/", 2, 1)
 	ok(t, s, ast.EOF, "", 2, 2)
 
@@ -306,6 +308,7 @@ func TestComments(t *testing.T) {
 
 	s := NewScanner("1 //foo\n2")
 	ok(t, s, ast.INT, "1", 1, 1)
+	ok(t, s, ast.LINE_FEED, "\n", 2, 0)
 	ok(t, s, ast.INT, "2", 2, 1)
 	ok(t, s, ast.EOF, "", 2, 2)
 

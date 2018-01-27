@@ -57,6 +57,10 @@ func (s *Scanner) Next() *ast.Token {
 		case isWhitespace(r):
 			s.consume()
 
+		case r == '\n':
+			s.consume()
+			return &ast.Token{ast.LINE_FEED, "\n", pos}
+
 		case r == '/':
 			s.consume()
 			r = s.cur.r
@@ -610,7 +614,7 @@ func (s *Scanner) consume() {
 }
 
 func isWhitespace(r rune) bool {
-	return r == ' ' || r == '\t' || r == '\r' || r == '\n'
+	return r == ' ' || r == '\t' || r == '\r'
 }
 
 func isDigit(r rune) bool {

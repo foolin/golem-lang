@@ -35,6 +35,7 @@ const (
 	badKind
 
 	EOF
+	LINE_FEED
 
 	PLUS
 	DBL_PLUS
@@ -141,8 +142,11 @@ func (t TokenKind) String() string {
 		return "UNEXPECTED_CHAR"
 	case UNEXPECTED_EOF:
 		return "UNEXPECTED_EOF"
+
 	case EOF:
 		return "EOF"
+	case LINE_FEED:
+		return "LINE_FEED"
 
 	case PLUS:
 		return "PLUS"

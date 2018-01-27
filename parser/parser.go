@@ -1103,6 +1103,13 @@ func (p *Parser) consume() *ast.Token {
 func (p *Parser) advance() *ast.Token {
 
 	tok := p.scn.Next()
+
+	// skip over line_feed
+	for tok.Kind == ast.LINE_FEED {
+		tok = p.scn.Next()
+	}
+
+	// look for errors from the scanner
 	if tok.IsBad() {
 		switch tok.Kind {
 
@@ -1116,6 +1123,8 @@ func (p *Parser) advance() *ast.Token {
 			panic("unreachable")
 		}
 	}
+
+	// done
 	return tok
 }
 
