@@ -69,7 +69,7 @@ func (p *Parser) imports() []ast.Statement {
 		imp := &ast.Import{
 			p.expect(ast.IMPORT),
 			&ast.IdentExpr{p.expect(ast.IDENT), nil}}
-		p.expect(ast.SEMICOLON)
+		p.expectStatementDelimiter()
 		stmts = append(stmts, imp)
 	}
 
@@ -126,7 +126,7 @@ func (p *Parser) statement() ast.Statement {
 		} else {
 			// anonymous function
 			expr := p.fnExpr(p.consume())
-			p.expect(ast.SEMICOLON)
+			p.expectStatementDelimiter()
 			return &ast.ExprStmt{expr}
 		}
 
@@ -163,7 +163,7 @@ func (p *Parser) statement() ast.Statement {
 	default:
 		// we couldn't find a statement to parse, so parse an expression instead
 		expr := p.expression()
-		p.expect(ast.SEMICOLON)
+		p.expectStatementDelimiter()
 		return &ast.ExprStmt{expr}
 	}
 }
@@ -174,7 +174,7 @@ func (p *Parser) namedFn() *ast.NamedFn {
 		token,
 		&ast.IdentExpr{p.expect(ast.IDENT), nil},
 		p.fnExpr(token)}
-	p.expect(ast.SEMICOLON)
+	p.expectStatementDelimiter()
 	return result
 }
 
@@ -184,12 +184,12 @@ func (p *Parser) constStmt() *ast.Const {
 
 	decls := []*ast.Decl{p.decl()}
 	for {
-		switch p.cur.Kind {
-		case ast.COMMA:
+		switch {
+		case p.cur.Kind == ast.COMMA:
 			p.consume()
 			decls = append(decls, p.decl())
-		case ast.SEMICOLON:
-			p.expect(ast.SEMICOLON)
+		case isStatementDelimiter(p.cur.Kind):
+			p.expectStatementDelimiter()
 			return &ast.Const{token, decls}
 		default:
 			panic(p.unexpected())
@@ -203,12 +203,12 @@ func (p *Parser) letStmt() *ast.Let {
 
 	decls := []*ast.Decl{p.decl()}
 	for {
-		switch p.cur.Kind {
-		case ast.COMMA:
+		switch {
+		case p.cur.Kind == ast.COMMA:
 			p.consume()
 			decls = append(decls, p.decl())
-		case ast.SEMICOLON:
-			p.expect(ast.SEMICOLON)
+		case isStatementDelimiter(p.cur.Kind):
+			p.expectStatementDelimiter()
 			return &ast.Let{token, decls}
 		default:
 			panic(p.unexpected())
@@ -238,12 +238,12 @@ func (p *Parser) ifStmt() *ast.If {
 
 		case ast.LBRACE:
 			result := &ast.If{token, cond, then, p.block()}
-			p.expect(ast.SEMICOLON)
+			p.expectStatementDelimiter()
 			return result
 
 		case ast.IF:
 			result := &ast.If{token, cond, then, p.ifStmt()}
-			p.expect(ast.SEMICOLON)
+			p.expectStatementDelimiter()
 			return result
 
 		default:
@@ -251,7 +251,7 @@ func (p *Parser) ifStmt() *ast.If {
 		}
 
 	} else {
-		p.expect(ast.SEMICOLON)
+		p.expectStatementDelimiter()
 		return &ast.If{token, cond, then, nil}
 	}
 }
@@ -259,7 +259,7 @@ func (p *Parser) ifStmt() *ast.If {
 func (p *Parser) whileStmt() *ast.While {
 
 	result := &ast.While{p.expect(ast.WHILE), p.expression(), p.block()}
-	p.expect(ast.SEMICOLON)
+	p.expectStatementDelimiter()
 	return result
 }
 
@@ -292,7 +292,7 @@ func (p *Parser) forStmt() *ast.For {
 	body := p.block()
 
 	// done
-	p.expect(ast.SEMICOLON)
+	p.expectStatementDelimiter()
 	return &ast.For{token, idents, iblIdent, iterable, body}
 }
 
@@ -361,7 +361,7 @@ func (p *Parser) switchStmt() *ast.Switch {
 
 	// done
 	result := &ast.Switch{token, item, lbrace, cases, def, p.expect(ast.RBRACE)}
-	p.expect(ast.SEMICOLON)
+	p.expectStatementDelimiter()
 	return result
 }
 
@@ -407,14 +407,14 @@ func (p *Parser) defaultStmt() *ast.Default {
 func (p *Parser) breakStmt() *ast.Break {
 	result := &ast.Break{
 		p.expect(ast.BREAK)}
-	p.expect(ast.SEMICOLON)
+	p.expectStatementDelimiter()
 	return result
 }
 
 func (p *Parser) continueStmt() *ast.Continue {
 	result := &ast.Continue{
 		p.expect(ast.CONTINUE)}
-	p.expect(ast.SEMICOLON)
+	p.expectStatementDelimiter()
 	return result
 }
 
@@ -422,12 +422,12 @@ func (p *Parser) returnStmt() *ast.Return {
 
 	token := p.expect(ast.RETURN)
 
-	if p.cur.Kind == ast.SEMICOLON {
-		p.expect(ast.SEMICOLON)
+	if isStatementDelimiter(p.cur.Kind) {
+		p.expectStatementDelimiter()
 		return &ast.Return{token, nil}
 	} else {
 		val := p.expression()
-		p.expect(ast.SEMICOLON)
+		p.expectStatementDelimiter()
 		return &ast.Return{token, val}
 	}
 }
@@ -437,7 +437,7 @@ func (p *Parser) throwStmt() *ast.Throw {
 	result := &ast.Throw{
 		p.expect(ast.THROW),
 		p.expression()}
-	p.expect(ast.SEMICOLON)
+	p.expectStatementDelimiter()
 	return result
 }
 
@@ -472,7 +472,7 @@ func (p *Parser) tryStmt() *ast.Try {
 	}
 
 	// done
-	p.expect(ast.SEMICOLON)
+	p.expectStatementDelimiter()
 	return &ast.Try{
 		tryToken, tryBlock,
 		catchToken, catchIdent, catchBlock,
@@ -490,7 +490,7 @@ func (p *Parser) goStmt() *ast.Go {
 	lparen, actual, rparen := p.actualParams()
 	invocation := &ast.InvokeExpr{prm, lparen, actual, rparen}
 
-	p.expect(ast.SEMICOLON)
+	p.expectStatementDelimiter()
 	return &ast.Go{token, invocation}
 }
 
@@ -515,7 +515,7 @@ func (p *Parser) expression() ast.Expression {
 			eq := p.expect(ast.EQ)
 			exp = &ast.AssignmentExpr{asn, eq, p.expression()}
 
-		} else if isAssignOp(p.cur) {
+		} else if isAssignOp(p.cur.Kind) {
 
 			// assignment operation
 			op := p.consume()
@@ -574,7 +574,7 @@ func (p *Parser) andExpr() ast.Expression {
 func (p *Parser) comparativeExpr() ast.Expression {
 
 	lhs := p.additiveExpr()
-	for isComparative(p.cur) {
+	for isComparative(p.cur.Kind) {
 		tok := p.cur
 		p.consume()
 		lhs = &ast.BinaryExpr{lhs, tok, p.additiveExpr()}
@@ -585,7 +585,7 @@ func (p *Parser) comparativeExpr() ast.Expression {
 func (p *Parser) additiveExpr() ast.Expression {
 
 	lhs := p.multiplicativeExpr()
-	for isAdditive(p.cur) {
+	for isAdditive(p.cur.Kind) {
 		tok := p.cur
 		p.consume()
 		lhs = &ast.BinaryExpr{lhs, tok, p.multiplicativeExpr()}
@@ -596,7 +596,7 @@ func (p *Parser) additiveExpr() ast.Expression {
 func (p *Parser) multiplicativeExpr() ast.Expression {
 
 	lhs := p.unaryExpr()
-	for isMultiplicative(p.cur) {
+	for isMultiplicative(p.cur.Kind) {
 		tok := p.cur
 		p.consume()
 		lhs = &ast.BinaryExpr{lhs, tok, p.unaryExpr()}
@@ -606,7 +606,7 @@ func (p *Parser) multiplicativeExpr() ast.Expression {
 
 func (p *Parser) unaryExpr() ast.Expression {
 
-	if isUnary(p.cur) {
+	if isUnary(p.cur.Kind) {
 		tok := p.cur
 		p.consume()
 		return &ast.UnaryExpr{tok, p.unaryExpr()}
@@ -620,7 +620,7 @@ func (p *Parser) postfixExpr() ast.Expression {
 
 	exp := p.primaryExpr()
 
-	for isPostfix(p.cur) {
+	for isPostfix(p.cur.Kind) {
 
 		if asn, ok := exp.(ast.Assignable); ok {
 			tok := p.cur
@@ -1093,6 +1093,14 @@ func (p *Parser) expect(kind ast.TokenKind) *ast.Token {
 	}
 }
 
+func (p *Parser) expectStatementDelimiter() {
+	if isStatementDelimiter(p.cur.Kind) {
+		p.consume()
+	} else {
+		panic(p.unexpected())
+	}
+}
+
 // consume the current token
 func (p *Parser) consume() *ast.Token {
 	result := p.cur
@@ -1150,8 +1158,20 @@ func (p *Parser) makeSyntheticIdent(pos ast.Pos) *ast.IdentExpr {
 		&ast.Token{ast.IDENT, sym, pos}, nil}
 }
 
-func isComparative(t *ast.Token) bool {
-	switch t.Kind {
+func isStatementDelimiter(kind ast.TokenKind) bool {
+
+	switch kind {
+	case
+		ast.SEMICOLON:
+
+		return true
+	default:
+		return false
+	}
+}
+
+func isComparative(kind ast.TokenKind) bool {
+	switch kind {
 	case
 		ast.DBL_EQ,
 		ast.NOT_EQ,
@@ -1168,8 +1188,8 @@ func isComparative(t *ast.Token) bool {
 	}
 }
 
-func isAdditive(t *ast.Token) bool {
-	switch t.Kind {
+func isAdditive(kind ast.TokenKind) bool {
+	switch kind {
 	case
 		ast.PLUS,
 		ast.MINUS,
@@ -1182,8 +1202,8 @@ func isAdditive(t *ast.Token) bool {
 	}
 }
 
-func isMultiplicative(t *ast.Token) bool {
-	switch t.Kind {
+func isMultiplicative(kind ast.TokenKind) bool {
+	switch kind {
 	case
 		ast.STAR,
 		ast.SLASH,
@@ -1198,9 +1218,9 @@ func isMultiplicative(t *ast.Token) bool {
 	}
 }
 
-func isUnary(t *ast.Token) bool {
+func isUnary(kind ast.TokenKind) bool {
 
-	switch t.Kind {
+	switch kind {
 	case
 		ast.MINUS,
 		ast.NOT,
@@ -1212,9 +1232,9 @@ func isUnary(t *ast.Token) bool {
 	}
 }
 
-func isPostfix(t *ast.Token) bool {
+func isPostfix(kind ast.TokenKind) bool {
 
-	switch t.Kind {
+	switch kind {
 	case
 		ast.DBL_PLUS,
 		ast.DBL_MINUS:
@@ -1225,8 +1245,8 @@ func isPostfix(t *ast.Token) bool {
 	}
 }
 
-func isAssignOp(t *ast.Token) bool {
-	switch t.Kind {
+func isAssignOp(kind ast.TokenKind) bool {
+	switch kind {
 	case
 		ast.PLUS_EQ,
 		ast.MINUS_EQ,
