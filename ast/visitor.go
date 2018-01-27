@@ -128,12 +128,16 @@ func (t *Try) Traverse(v Visitor) {
 	}
 }
 
-func (sp *Go) Traverse(v Visitor) {
-	v.Visit(sp.Invocation)
+func (g *Go) Traverse(v Visitor) {
+	v.Visit(g.Invocation)
+}
+
+func (n *ExprStmt) Traverse(v Visitor) {
+	v.Visit(n.Expr)
 }
 
 func (blk *Block) Traverse(v Visitor) {
-	for _, n := range blk.Nodes {
+	for _, n := range blk.Statements {
 		v.Visit(n)
 	}
 }

@@ -133,13 +133,18 @@ type (
 		Invocation *InvokeExpr
 	}
 
+	// ExprStmt is a Statement that contains an Expression
+	ExprStmt struct {
+		Expr Expression
+	}
+
 	//--------------------------------------
 	// nodes that are parts of a statement
 
 	Block struct {
-		LBrace *Token
-		Nodes  []Node
-		RBrace *Token
+		LBrace     *Token
+		Statements []Statement
+		RBrace     *Token
 	}
 
 	Decl struct {
@@ -150,12 +155,12 @@ type (
 	Case struct {
 		Token   *Token
 		Matches []Expression
-		Body    []Node
+		Body    []Statement
 	}
 
 	Default struct {
 		Token *Token
-		Body  []Node
+		Body  []Statement
 	}
 
 	//---------------------
@@ -326,6 +331,7 @@ func (*Return) stmtMarker()   {}
 func (*Throw) stmtMarker()    {}
 func (*Try) stmtMarker()      {}
 func (*Go) stmtMarker()       {}
+func (*ExprStmt) stmtMarker() {}
 
 func (*While) loopMarker() {}
 func (*For) loopMarker()   {}
@@ -364,7 +370,7 @@ func (*IndexExpr) assignableMarker()   {}
 func (n *Block) Begin() Pos { return n.LBrace.Position }
 func (n *Block) End() Pos {
 	if n.RBrace == nil {
-		return n.Nodes[len(n.Nodes)-1].End()
+		return n.Statements[len(n.Statements)-1].End()
 	} else {
 		return n.RBrace.Position
 	}
@@ -444,6 +450,9 @@ func (n *Try) End() Pos {
 
 func (n *Go) Begin() Pos { return n.Token.Position }
 func (n *Go) End() Pos   { return n.Invocation.End() }
+
+func (n *ExprStmt) Begin() Pos { return n.Expr.Begin() }
+func (n *ExprStmt) End() Pos   { return n.Expr.End() }
 
 func (n *AssignmentExpr) Begin() Pos { return n.Assignee.Begin() }
 func (n *AssignmentExpr) End() Pos   { return n.Val.End() }
@@ -531,7 +540,7 @@ func (n *SliceToExpr) End() Pos     { return n.RBracket.Position }
 func (blk *Block) String() string {
 	var buf bytes.Buffer
 	buf.WriteString("{ ")
-	writeNodes(blk.Nodes, &buf)
+	writeStatements(blk.Statements, &buf)
 	buf.WriteString(" }")
 	return buf.String()
 }
@@ -660,7 +669,7 @@ func (cs *Case) String() string {
 	}
 
 	buf.WriteString(": ")
-	writeNodes(cs.Body, &buf)
+	writeStatements(cs.Body, &buf)
 
 	return buf.String()
 }
@@ -669,7 +678,7 @@ func (def *Default) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString(" default: ")
-	writeNodes(def.Body, &buf)
+	writeStatements(def.Body, &buf)
 
 	return buf.String()
 }
@@ -717,8 +726,12 @@ func (t *Try) String() string {
 	return buf.String()
 }
 
-func (sp *Go) String() string {
-	return fmt.Sprintf("go %v;", sp.Invocation)
+func (g *Go) String() string {
+	return fmt.Sprintf("go %v;", g.Invocation)
+}
+
+func (es *ExprStmt) String() string {
+	return fmt.Sprintf("%v;", es.Expr)
 }
 
 func (trn *TernaryExpr) String() string {
@@ -924,8 +937,8 @@ func (s *SliceToExpr) String() string {
 	return buf.String()
 }
 
-func writeNodes(nodes []Node, buf *bytes.Buffer) {
-	for idx, n := range nodes {
+func writeStatements(stmts []Statement, buf *bytes.Buffer) {
+	for idx, n := range stmts {
 		if idx > 0 {
 			buf.WriteString(" ")
 		}

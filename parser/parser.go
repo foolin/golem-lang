@@ -6,9 +6,10 @@ package parser
 
 import (
 	"fmt"
+	"runtime"
+
 	"github.com/mjarmy/golem-lang/ast"
 	"github.com/mjarmy/golem-lang/scanner"
-	"runtime"
 )
 
 //--------------------------------------------------------------
@@ -45,21 +46,20 @@ func (p *Parser) ParseModule() (fn *ast.FnExpr, err error) {
 	p.next = p.advance()
 
 	// parse imports
-	nodes := p.imports()
+	stmts := p.imports()
 
 	// parse the module
-	nodes = append(nodes, p.nodeSequence(ast.EOF)...)
+	stmts = append(stmts, p.statements(ast.EOF)...)
 	p.expect(ast.EOF)
 
 	params := []*ast.FormalParam{}
-	block := &ast.Block{nil, nodes, nil}
+	block := &ast.Block{nil, stmts, nil}
 	return &ast.FnExpr{nil, params, block, 0, 0, nil}, err
 }
 
-// Parse a sequence of statements or expressions.
-func (p *Parser) imports() []ast.Node {
+func (p *Parser) imports() []ast.Statement {
 
-	nodes := []ast.Node{}
+	stmts := []ast.Statement{}
 
 	for {
 		if p.cur.Kind != ast.IMPORT {
@@ -70,58 +70,40 @@ func (p *Parser) imports() []ast.Node {
 			p.expect(ast.IMPORT),
 			&ast.IdentExpr{p.expect(ast.IDENT), nil}}
 		p.expect(ast.SEMICOLON)
-		nodes = append(nodes, imp)
+		stmts = append(stmts, imp)
 	}
 
-	return nodes
+	return stmts
 }
 
 // Parse a sequence of statements or expressions.
-func (p *Parser) nodeSequence(endKind ast.TokenKind) []ast.Node {
+func (p *Parser) statements(endKind ast.TokenKind) []ast.Statement {
 
-	nodes := []ast.Node{}
+	stmts := []ast.Statement{}
 
 	for {
 		if p.cur.Kind == endKind {
-			return nodes
+			return stmts
 		}
 
-		// parse a statement, if there is one
-		var node ast.Node = p.statement()
-
-		// if there isn't, read an expression instead
-		if node == nil {
-			node = p.expression()
-			p.expect(ast.SEMICOLON)
-		}
-
-		nodes = append(nodes, node)
+		stmts = append(stmts, p.statement())
 	}
 
 }
 
-// Parse a sequence of statements or expressions.
-func (p *Parser) nodeSequenceAny(endKinds ...ast.TokenKind) []ast.Node {
+// Parse a sequence of statements or expressions, ending with any of the provided tokens.
+func (p *Parser) statementsAny(endKinds ...ast.TokenKind) []ast.Statement {
 
-	nodes := []ast.Node{}
+	stmts := []ast.Statement{}
 
 	for {
 		for _, e := range endKinds {
 			if p.cur.Kind == e {
-				return nodes
+				return stmts
 			}
 		}
 
-		// parse a statement, if there is one
-		var node ast.Node = p.statement()
-
-		// if there isn't, read an expression instead
-		if node == nil {
-			node = p.expression()
-			p.expect(ast.SEMICOLON)
-		}
-
-		nodes = append(nodes, node)
+		stmts = append(stmts, p.statement())
 	}
 }
 
@@ -139,11 +121,13 @@ func (p *Parser) statement() ast.Statement {
 
 	case ast.FN:
 		if p.next.Kind == ast.IDENT {
+			// named function
 			return p.namedFn()
 		} else {
-			// returning nil here means that the FN token
-			// is assumed to be the beginning of an expression.
-			return nil
+			// anonymous function
+			expr := p.fnExpr(p.consume())
+			p.expect(ast.SEMICOLON)
+			return &ast.ExprStmt{expr}
 		}
 
 	case ast.IF:
@@ -177,8 +161,10 @@ func (p *Parser) statement() ast.Statement {
 		return p.goStmt()
 
 	default:
-		// its OK for there not to be a statement ready
-		return nil
+		// we couldn't find a statement to parse, so parse an expression instead
+		expr := p.expression()
+		p.expect(ast.SEMICOLON)
+		return &ast.ExprStmt{expr}
 	}
 }
 
@@ -393,7 +379,7 @@ func (p *Parser) caseStmt() *ast.Case {
 
 		case ast.COLON:
 			colon := p.expect(ast.COLON)
-			body := p.nodeSequenceAny(ast.CASE, ast.DEFAULT, ast.RBRACE)
+			body := p.statementsAny(ast.CASE, ast.DEFAULT, ast.RBRACE)
 			if len(body) == 0 {
 				panic(&parserError{INVALID_SWITCH, colon})
 			}
@@ -410,7 +396,7 @@ func (p *Parser) defaultStmt() *ast.Default {
 	token := p.expect(ast.DEFAULT)
 	colon := p.expect(ast.COLON)
 
-	body := p.nodeSequence(ast.RBRACE)
+	body := p.statements(ast.RBRACE)
 	if len(body) == 0 {
 		panic(&parserError{INVALID_SWITCH, colon})
 	}
@@ -508,13 +494,13 @@ func (p *Parser) goStmt() *ast.Go {
 	return &ast.Go{token, invocation}
 }
 
-// parse a sequence of nodes that are wrapped in curly braces
+// parse a sequence of stmts that are wrapped in curly braces
 func (p *Parser) block() *ast.Block {
 
 	lbrace := p.expect(ast.LBRACE)
-	nodes := p.nodeSequence(ast.RBRACE)
+	stmts := p.statements(ast.RBRACE)
 	rbrace := p.expect(ast.RBRACE)
-	return &ast.Block{lbrace, nodes, rbrace}
+	return &ast.Block{lbrace, stmts, rbrace}
 }
 
 func (p *Parser) expression() ast.Expression {
@@ -823,8 +809,8 @@ func (p *Parser) lambdaZero() *ast.FnExpr {
 
 	p.expect(ast.EQ_GT)
 	params := []*ast.FormalParam{}
-	expr := p.expression()
-	block := &ast.Block{nil, []ast.Node{expr}, nil}
+	expr := &ast.ExprStmt{p.expression()}
+	block := &ast.Block{nil, []ast.Statement{expr}, nil}
 	return &ast.FnExpr{token, params, block, 0, 0, nil}
 }
 
@@ -832,8 +818,8 @@ func (p *Parser) lambdaOne() *ast.FnExpr {
 	token := p.expect(ast.IDENT)
 	p.expect(ast.EQ_GT)
 	params := []*ast.FormalParam{{&ast.IdentExpr{token, nil}, false}}
-	expr := p.expression()
-	block := &ast.Block{nil, []ast.Node{expr}, nil}
+	expr := &ast.ExprStmt{p.expression()}
+	block := &ast.Block{nil, []ast.Statement{expr}, nil}
 	return &ast.FnExpr{token, params, block, 0, 0, nil}
 }
 
@@ -872,8 +858,8 @@ func (p *Parser) lambda() *ast.FnExpr {
 
 	p.expect(ast.EQ_GT)
 
-	expr := p.expression()
-	block := &ast.Block{nil, []ast.Node{expr}, nil}
+	expr := &ast.ExprStmt{p.expression()}
+	block := &ast.Block{nil, []ast.Statement{expr}, nil}
 	return &ast.FnExpr{token, params, block, 0, 0, nil}
 }
 

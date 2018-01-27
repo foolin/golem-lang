@@ -12,31 +12,6 @@ import (
 	"github.com/mjarmy/golem-lang/scanner"
 )
 
-func parseExpression(p *Parser) (expr ast.Expression, err error) {
-
-	// In a recursive descent parser, errors can be generated deep
-	// in the call stack.  We are going to use panic-recover to handle them.
-	defer func() {
-		if r := recover(); r != nil {
-			if _, ok := r.(runtime.Error); ok {
-				panic(r)
-			}
-			expr = nil
-			err = r.(error)
-		}
-	}()
-
-	// read the first two tokens
-	p.cur = p.advance()
-	p.next = p.advance()
-
-	// parse the expression
-	expr = p.expression()
-	p.expect(ast.EOF)
-
-	return expr, err
-}
-
 func ok(t *testing.T, p *Parser, expect string) {
 
 	mod, err := p.ParseModule()
@@ -106,6 +81,31 @@ func newParser(source string) *Parser {
 	}
 
 	return NewParser(scanner.NewScanner(source), isBuiltIn)
+}
+
+func parseExpression(p *Parser) (expr ast.Expression, err error) {
+
+	// In a recursive descent parser, errors can be generated deep
+	// in the call stack.  We are going to use panic-recover to handle them.
+	defer func() {
+		if r := recover(); r != nil {
+			if _, ok := r.(runtime.Error); ok {
+				panic(r)
+			}
+			expr = nil
+			err = r.(error)
+		}
+	}()
+
+	// read the first two tokens
+	p.cur = p.advance()
+	p.next = p.advance()
+
+	// parse the expression
+	expr = p.expression()
+	p.expect(ast.EOF)
+
+	return expr, err
 }
 
 func TestPrimary(t *testing.T) {
@@ -583,12 +583,12 @@ func okPos(t *testing.T, p *Parser, expectBegin ast.Pos, expectEnd ast.Pos) {
 		panic("okPos")
 	}
 
-	if len(mod.Body.Nodes) != 1 {
-		t.Error("node count", len(mod.Body.Nodes))
+	if len(mod.Body.Statements) != 1 {
+		t.Error("node count", len(mod.Body.Statements))
 		panic("okPos")
 	}
 
-	n := mod.Body.Nodes[0]
+	n := mod.Body.Statements[0]
 	if n.Begin() != expectBegin {
 		t.Error(n.Begin(), " != ", expectBegin)
 		panic("okPos")
@@ -635,8 +635,8 @@ func TestPos(t *testing.T) {
 	okExprPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 7})
 
 	p = newParser(`
-fn() { 
-    return x; 
+fn() {
+    return x;
 }`)
 	okExprPos(t, p, ast.Pos{2, 1}, ast.Pos{4, 1})
 
@@ -810,4 +810,13 @@ func TestImport(t *testing.T) {
 
 	p = newParser("let z = 3; import a;")
 	fail(t, p, "Unexpected Token 'import' at (1, 12)")
+}
+
+func TestExprStmt(t *testing.T) {
+
+	p := newParser("fn() {}")
+	ok_expr(t, p, "fn() {  }")
+
+	p = newParser("fn() {};")
+	ok(t, p, "fn() { fn() {  }; }")
 }
