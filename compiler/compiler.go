@@ -135,9 +135,6 @@ func (c *compiler) compileFunc(fe *ast.FnExpr) *g.Template {
 func (c *compiler) Visit(node ast.Node) {
 	switch t := node.(type) {
 
-	case *ast.Empty:
-		c.visitEmpty(t)
-
 	case *ast.Block:
 		c.visitBlock(t)
 
@@ -249,9 +246,6 @@ func (c *compiler) Visit(node ast.Node) {
 	default:
 		panic(fmt.Sprintf("cannot compile %v\n", node))
 	}
-}
-
-func (c *compiler) visitEmpty(e *ast.Empty) {
 }
 
 func (c *compiler) visitBlock(blk *ast.Block) {

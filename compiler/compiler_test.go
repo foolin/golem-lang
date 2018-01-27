@@ -322,7 +322,7 @@ func TestExpression(t *testing.T) {
 
 func TestAssignment(t *testing.T) {
 
-	mod := newCompiler(newAnalyzer("let a = 1;\nconst b = \n2;;;a = 3;")).Compile()
+	mod := newCompiler(newAnalyzer("let a = 1;\nconst b = \n2;a = 3;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.MakeInt(2),

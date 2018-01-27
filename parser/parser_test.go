@@ -42,6 +42,7 @@ func ok(t *testing.T, p *Parser, expect string) {
 	mod, err := p.ParseModule()
 	if err != nil {
 		t.Error(err, " != nil")
+		panic("ok")
 	} else if mod.String() != expect {
 		t.Error(mod, " != ", expect)
 	}
@@ -353,8 +354,8 @@ func TestStatement(t *testing.T) {
 	p = newParser("let a = 3; const b = 4;")
 	ok(t, p, "fn() { let a = 3; const b = 4; }")
 
-	p = newParser("let a = 3, b;; const x, y, z = 5; ")
-	ok(t, p, "fn() { let a = 3, b; ; const x, y, z = 5; }")
+	p = newParser("let a = 3, b; const x, y, z = 5; ")
+	ok(t, p, "fn() { let a = 3, b; const x, y, z = 5; }")
 }
 
 func TestFor(t *testing.T) {

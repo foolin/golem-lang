@@ -17,9 +17,6 @@ type Visitor interface {
 	Visit(node Node)
 }
 
-func (n *Empty) Traverse(v Visitor) {
-}
-
 func (imp *Import) Traverse(v Visitor) {
 	v.Visit(imp.Ident)
 }
@@ -267,9 +264,6 @@ func (p *dump) Visit(node Node) {
 	}
 
 	switch t := node.(type) {
-
-	case *Empty:
-		p.buf.WriteString("Empty\n")
 
 	case *Block:
 		p.buf.WriteString("Block\n")
