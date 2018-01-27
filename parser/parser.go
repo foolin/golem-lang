@@ -93,8 +93,8 @@ func (p *Parser) imports() []ast.Node {
 
 		imp := &ast.Import{
 			p.expect(ast.IMPORT),
-			&ast.IdentExpr{p.expect(ast.IDENT), nil},
-			p.expect(ast.SEMICOLON)}
+			&ast.IdentExpr{p.expect(ast.IDENT), nil}}
+		p.expect(ast.SEMICOLON)
 		nodes = append(nodes, imp)
 	}
 
@@ -179,7 +179,8 @@ func (p *Parser) constStmt() *ast.Const {
 			p.consume()
 			decls = append(decls, p.decl())
 		case ast.SEMICOLON:
-			return &ast.Const{token, decls, p.consume()}
+			p.consume()
+			return &ast.Const{token, decls}
 		default:
 			panic(p.unexpected())
 		}
@@ -197,7 +198,8 @@ func (p *Parser) letStmt() *ast.Let {
 			p.consume()
 			decls = append(decls, p.decl())
 		case ast.SEMICOLON:
-			return &ast.Let{token, decls, p.consume()}
+			p.consume()
+			return &ast.Let{token, decls}
 		default:
 			panic(p.unexpected())
 		}
@@ -383,15 +385,17 @@ func (p *Parser) defaultStmt() *ast.Default {
 }
 
 func (p *Parser) breakStmt() *ast.Break {
-	return &ast.Break{
-		p.expect(ast.BREAK),
-		p.expect(ast.SEMICOLON)}
+	result := &ast.Break{
+		p.expect(ast.BREAK)}
+	p.expect(ast.SEMICOLON)
+	return result
 }
 
 func (p *Parser) continueStmt() *ast.Continue {
-	return &ast.Continue{
-		p.expect(ast.CONTINUE),
-		p.expect(ast.SEMICOLON)}
+	result := &ast.Continue{
+		p.expect(ast.CONTINUE)}
+	p.expect(ast.SEMICOLON)
+	return result
 }
 
 func (p *Parser) returnStmt() *ast.Return {
@@ -399,19 +403,22 @@ func (p *Parser) returnStmt() *ast.Return {
 	token := p.expect(ast.RETURN)
 
 	if p.cur.Kind == ast.SEMICOLON {
-		return &ast.Return{token, nil, p.expect(ast.SEMICOLON)}
+		p.expect(ast.SEMICOLON)
+		return &ast.Return{token, nil}
 	} else {
 		val := p.expression()
-		return &ast.Return{token, val, p.expect(ast.SEMICOLON)}
+		p.expect(ast.SEMICOLON)
+		return &ast.Return{token, val}
 	}
 }
 
 func (p *Parser) throwStmt() *ast.Throw {
 
-	return &ast.Throw{
+	result := &ast.Throw{
 		p.expect(ast.THROW),
-		p.expression(),
-		p.expect(ast.SEMICOLON)}
+		p.expression()}
+	p.expect(ast.SEMICOLON)
+	return result
 }
 
 func (p *Parser) tryStmt() *ast.Try {
@@ -462,7 +469,8 @@ func (p *Parser) goStmt() *ast.Go {
 	lparen, actual, rparen := p.actualParams()
 	invocation := &ast.InvokeExpr{prm, lparen, actual, rparen}
 
-	return &ast.Go{token, invocation, p.expect(ast.SEMICOLON)}
+	p.expect(ast.SEMICOLON)
+	return &ast.Go{token, invocation}
 }
 
 // parse a sequence of nodes that are wrapped in curly braces

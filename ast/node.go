@@ -54,21 +54,18 @@ type (
 	}
 
 	Import struct {
-		Token     *Token
-		Ident     *IdentExpr
-		Semicolon *Token
+		Token *Token
+		Ident *IdentExpr
 	}
 
 	Const struct {
-		Token     *Token
-		Decls     []*Decl
-		Semicolon *Token
+		Token *Token
+		Decls []*Decl
 	}
 
 	Let struct {
-		Token     *Token
-		Decls     []*Decl
-		Semicolon *Token
+		Token *Token
+		Decls []*Decl
 	}
 
 	NamedFn struct {
@@ -108,25 +105,21 @@ type (
 	}
 
 	Break struct {
-		Token     *Token
-		Semicolon *Token
+		Token *Token
 	}
 
 	Continue struct {
-		Token     *Token
-		Semicolon *Token
+		Token *Token
 	}
 
 	Return struct {
-		Token     *Token
-		Val       Expr
-		Semicolon *Token
+		Token *Token
+		Val   Expr
 	}
 
 	Throw struct {
-		Token     *Token
-		Val       Expr
-		Semicolon *Token
+		Token *Token
+		Val   Expr
 	}
 
 	Try struct {
@@ -142,7 +135,6 @@ type (
 	Go struct {
 		Token      *Token
 		Invocation *InvokeExpr
-		Semicolon  *Token
 	}
 
 	//--------------------------------------
@@ -387,13 +379,22 @@ func (n *Block) End() Pos {
 }
 
 func (n *Import) Begin() Pos { return n.Token.Position }
-func (n *Import) End() Pos   { return n.Semicolon.Position }
+func (n *Import) End() Pos   { return n.Ident.End() }
+
+func (n *Decl) Begin() Pos { return n.Ident.Begin() }
+func (n *Decl) End() Pos {
+	if n.Val == nil {
+		return n.Ident.End()
+	} else {
+		return n.Val.End()
+	}
+}
 
 func (n *Const) Begin() Pos { return n.Token.Position }
-func (n *Const) End() Pos   { return n.Semicolon.Position }
+func (n *Const) End() Pos   { return n.Decls[len(n.Decls)-1].End() }
 
 func (n *Let) Begin() Pos { return n.Token.Position }
-func (n *Let) End() Pos   { return n.Semicolon.Position }
+func (n *Let) End() Pos   { return n.Decls[len(n.Decls)-1].End() }
 
 func (n *NamedFn) Begin() Pos { return n.Token.Position }
 func (n *NamedFn) End() Pos   { return n.Func.End() }
@@ -423,16 +424,22 @@ func (n *Default) Begin() Pos { return n.Token.Position }
 func (n *Default) End() Pos   { return n.Body[len(n.Body)-1].End() }
 
 func (n *Break) Begin() Pos { return n.Token.Position }
-func (n *Break) End() Pos   { return n.Semicolon.Position }
+func (n *Break) End() Pos   { return n.Token.Position.Advance(len("break") - 1) }
 
 func (n *Continue) Begin() Pos { return n.Token.Position }
-func (n *Continue) End() Pos   { return n.Semicolon.Position }
+func (n *Continue) End() Pos   { return n.Token.Position.Advance(len("continue") - 1) }
 
 func (n *Return) Begin() Pos { return n.Token.Position }
-func (n *Return) End() Pos   { return n.Semicolon.Position }
+func (n *Return) End() Pos {
+	if n.Val == nil {
+		return n.Token.Position.Advance(len("return") - 1)
+	} else {
+		return n.Val.End()
+	}
+}
 
 func (n *Throw) Begin() Pos { return n.Token.Position }
-func (n *Throw) End() Pos   { return n.Semicolon.Position }
+func (n *Throw) End() Pos   { return n.Val.End() }
 
 func (n *Try) Begin() Pos { return n.TryToken.Position }
 func (n *Try) End() Pos {
@@ -444,7 +451,7 @@ func (n *Try) End() Pos {
 }
 
 func (n *Go) Begin() Pos { return n.Token.Position }
-func (n *Go) End() Pos   { return n.Semicolon.Position }
+func (n *Go) End() Pos   { return n.Invocation.End() }
 
 func (n *AssignmentExpr) Begin() Pos { return n.Assignee.Begin() }
 func (n *AssignmentExpr) End() Pos   { return n.Val.End() }

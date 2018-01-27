@@ -20,6 +20,10 @@ func (p Pos) String() string {
 	return fmt.Sprintf("(%d, %d)", p.Line, p.Col)
 }
 
+func (p Pos) Advance(len int) Pos {
+	return Pos{p.Line, p.Col + len}
+}
+
 //-------------------------------------
 // Token
 

@@ -549,19 +549,23 @@ func okPos(t *testing.T, p *Parser, expectBegin ast.Pos, expectEnd ast.Pos) {
 	mod, err := p.ParseModule()
 	if err != nil {
 		t.Error(err, " != nil")
+		panic("okPos")
 	}
 
 	if len(mod.Body.Nodes) != 1 {
 		t.Error("node count", len(mod.Body.Nodes))
+		panic("okPos")
 	}
 
 	n := mod.Body.Nodes[0]
 	if n.Begin() != expectBegin {
 		t.Error(n.Begin(), " != ", expectBegin)
+		panic("okPos")
 	}
 
 	if n.End() != expectEnd {
 		t.Error(n.End(), " != ", expectEnd)
+		panic("okPos")
 	}
 }
 
@@ -606,19 +610,19 @@ fn() {
 	okExprPos(t, p, ast.Pos{2, 1}, ast.Pos{4, 1})
 
 	p = newParser("const a = 1;")
-	okPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 12})
+	okPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 11})
 
 	p = newParser("let a = 1\n;")
-	okPos(t, p, ast.Pos{1, 1}, ast.Pos{2, 1})
+	okPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 9})
 
 	p = newParser("break;")
-	okPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 6})
+	okPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 5})
 
 	p = newParser("\n  continue;")
-	okPos(t, p, ast.Pos{2, 3}, ast.Pos{2, 11})
+	okPos(t, p, ast.Pos{2, 3}, ast.Pos{2, 10})
 
 	p = newParser("return;")
-	okPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 7})
+	okPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 6})
 
 	p = newParser("while true { 42; \n}")
 	okPos(t, p, ast.Pos{1, 1}, ast.Pos{2, 1})
