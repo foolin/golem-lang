@@ -18,13 +18,18 @@ import (
 type Parser struct {
 	scn       *scanner.Scanner
 	isBuiltIn func(string) bool
-	cur       *ast.Token
-	next      *ast.Token
+	cur       tokenInfo
+	next      tokenInfo
 	synthetic int
 }
 
+type tokenInfo struct {
+	token  *ast.Token
+	skipLF bool // whether or not we skipped and linefeeds while advancing to this token
+}
+
 func NewParser(scn *scanner.Scanner, isBuiltIn func(string) bool) *Parser {
-	return &Parser{scn, isBuiltIn, nil, nil, 0}
+	return &Parser{scn, isBuiltIn, tokenInfo{}, tokenInfo{}, 0}
 }
 
 func (p *Parser) ParseModule() (fn *ast.FnExpr, err error) {
@@ -62,7 +67,7 @@ func (p *Parser) imports() []ast.Statement {
 	stmts := []ast.Statement{}
 
 	for {
-		if p.cur.Kind != ast.IMPORT {
+		if p.cur.token.Kind != ast.IMPORT {
 			break
 		}
 
@@ -82,7 +87,7 @@ func (p *Parser) statements(endKind ast.TokenKind) []ast.Statement {
 	stmts := []ast.Statement{}
 
 	for {
-		if p.cur.Kind == endKind {
+		if p.cur.token.Kind == endKind {
 			return stmts
 		}
 
@@ -98,7 +103,7 @@ func (p *Parser) statementsAny(endKinds ...ast.TokenKind) []ast.Statement {
 
 	for {
 		for _, e := range endKinds {
-			if p.cur.Kind == e {
+			if p.cur.token.Kind == e {
 				return stmts
 			}
 		}
@@ -111,7 +116,7 @@ func (p *Parser) statementsAny(endKinds ...ast.TokenKind) []ast.Statement {
 // waiting to be parsed.
 func (p *Parser) statement() ast.Statement {
 
-	switch p.cur.Kind {
+	switch p.cur.token.Kind {
 
 	case ast.CONST:
 		return p.constStmt()
@@ -120,12 +125,12 @@ func (p *Parser) statement() ast.Statement {
 		return p.letStmt()
 
 	case ast.FN:
-		if p.next.Kind == ast.IDENT {
+		if p.next.token.Kind == ast.IDENT {
 			// named function
 			return p.namedFn()
 		} else {
 			// anonymous function
-			expr := p.fnExpr(p.consume())
+			expr := p.fnExpr(p.consume().token)
 			p.expectStatementDelimiter()
 			return &ast.ExprStmt{expr}
 		}
@@ -181,14 +186,14 @@ func (p *Parser) namedFn() *ast.NamedFn {
 func (p *Parser) constStmt() *ast.Const {
 
 	token := p.expect(ast.CONST)
-
 	decls := []*ast.Decl{p.decl()}
+
 	for {
 		switch {
-		case p.cur.Kind == ast.COMMA:
+		case p.cur.token.Kind == ast.COMMA:
 			p.consume()
 			decls = append(decls, p.decl())
-		case isStatementDelimiter(p.cur.Kind):
+		case p.atStatementDelimiter():
 			p.expectStatementDelimiter()
 			return &ast.Const{token, decls}
 		default:
@@ -200,14 +205,14 @@ func (p *Parser) constStmt() *ast.Const {
 func (p *Parser) letStmt() *ast.Let {
 
 	token := p.expect(ast.LET)
-
 	decls := []*ast.Decl{p.decl()}
+
 	for {
 		switch {
-		case p.cur.Kind == ast.COMMA:
+		case p.cur.token.Kind == ast.COMMA:
 			p.consume()
 			decls = append(decls, p.decl())
-		case isStatementDelimiter(p.cur.Kind):
+		case p.atStatementDelimiter():
 			p.expectStatementDelimiter()
 			return &ast.Let{token, decls}
 		default:
@@ -234,7 +239,7 @@ func (p *Parser) ifStmt() *ast.If {
 
 	if p.accept(ast.ELSE) {
 
-		switch p.cur.Kind {
+		switch p.cur.token.Kind {
 
 		case ast.LBRACE:
 			result := &ast.If{token, cond, then, p.block()}
@@ -269,7 +274,7 @@ func (p *Parser) forStmt() *ast.For {
 
 	// parse identifers -- either single ident, or 'tuple' of idents
 	var idents []*ast.IdentExpr
-	switch p.cur.Kind {
+	switch p.cur.token.Kind {
 
 	case ast.IDENT:
 		idents = []*ast.IdentExpr{p.identExpr()}
@@ -302,13 +307,13 @@ func (p *Parser) tupleIdents() []*ast.IdentExpr {
 
 	idents := []*ast.IdentExpr{}
 
-	switch p.cur.Kind {
+	switch p.cur.token.Kind {
 
 	case ast.IDENT:
 		idents = append(idents, p.identExpr())
 	loop:
 		for {
-			switch p.cur.Kind {
+			switch p.cur.token.Kind {
 
 			case ast.COMMA:
 				p.consume()
@@ -342,20 +347,20 @@ func (p *Parser) switchStmt() *ast.Switch {
 	token := p.expect(ast.SWITCH)
 
 	var item ast.Expression = nil
-	if p.cur.Kind != ast.LBRACE {
+	if p.cur.token.Kind != ast.LBRACE {
 		item = p.expression()
 	}
 	lbrace := p.expect(ast.LBRACE)
 
 	// cases
 	cases := []*ast.Case{p.caseStmt()}
-	for p.cur.Kind == ast.CASE {
+	for p.cur.token.Kind == ast.CASE {
 		cases = append(cases, p.caseStmt())
 	}
 
 	// default
 	var def *ast.Default = nil
-	if p.cur.Kind == ast.DEFAULT {
+	if p.cur.token.Kind == ast.DEFAULT {
 		def = p.defaultStmt()
 	}
 
@@ -371,7 +376,7 @@ func (p *Parser) caseStmt() *ast.Case {
 
 	matches := []ast.Expression{p.expression()}
 	for {
-		switch p.cur.Kind {
+		switch p.cur.token.Kind {
 
 		case ast.COMMA:
 			p.expect(ast.COMMA)
@@ -422,14 +427,9 @@ func (p *Parser) returnStmt() *ast.Return {
 
 	token := p.expect(ast.RETURN)
 
-	if isStatementDelimiter(p.cur.Kind) {
-		p.expectStatementDelimiter()
-		return &ast.Return{token, nil}
-	} else {
-		val := p.expression()
-		p.expectStatementDelimiter()
-		return &ast.Return{token, val}
-	}
+	val := p.expression()
+	p.expectStatementDelimiter()
+	return &ast.Return{token, val}
 }
 
 func (p *Parser) throwStmt() *ast.Throw {
@@ -451,7 +451,7 @@ func (p *Parser) tryStmt() *ast.Try {
 	var catchIdent *ast.IdentExpr = nil
 	var catchBlock *ast.Block = nil
 
-	if p.cur.Kind == ast.CATCH {
+	if p.cur.token.Kind == ast.CATCH {
 		catchToken = p.expect(ast.CATCH)
 		catchIdent = p.identExpr()
 		catchBlock = p.block()
@@ -461,7 +461,7 @@ func (p *Parser) tryStmt() *ast.Try {
 	var finallyToken *ast.Token = nil
 	var finallyBlock *ast.Block = nil
 
-	if p.cur.Kind == ast.FINALLY {
+	if p.cur.token.Kind == ast.FINALLY {
 		finallyToken = p.expect(ast.FINALLY)
 		finallyBlock = p.block()
 	}
@@ -484,7 +484,7 @@ func (p *Parser) goStmt() *ast.Go {
 	token := p.expect(ast.GO)
 
 	prm := p.primary()
-	if p.cur.Kind != ast.LPAREN {
+	if p.cur.token.Kind != ast.LPAREN {
 		panic(p.unexpected())
 	}
 	lparen, actual, rparen := p.actualParams()
@@ -509,16 +509,16 @@ func (p *Parser) expression() ast.Expression {
 
 	if asn, ok := exp.(ast.Assignable); ok {
 
-		if p.cur.Kind == ast.EQ {
+		if p.cur.token.Kind == ast.EQ {
 
 			// assignment
 			eq := p.expect(ast.EQ)
 			exp = &ast.AssignmentExpr{asn, eq, p.expression()}
 
-		} else if isAssignOp(p.cur.Kind) {
+		} else if isAssignOp(p.cur.token.Kind) {
 
 			// assignment operation
-			op := p.consume()
+			op := p.consume().token
 			exp = &ast.AssignmentExpr{
 				asn,
 				op,
@@ -536,7 +536,7 @@ func (p *Parser) ternaryExpr() ast.Expression {
 
 	lhs := p.orExpr()
 
-	if p.cur.Kind == ast.HOOK {
+	if p.cur.token.Kind == ast.HOOK {
 
 		p.consume()
 		then := p.expression()
@@ -552,8 +552,8 @@ func (p *Parser) ternaryExpr() ast.Expression {
 func (p *Parser) orExpr() ast.Expression {
 
 	lhs := p.andExpr()
-	for p.cur.Kind == ast.DBL_PIPE {
-		tok := p.cur
+	for p.cur.token.Kind == ast.DBL_PIPE {
+		tok := p.cur.token
 		p.consume()
 		lhs = &ast.BinaryExpr{lhs, tok, p.andExpr()}
 	}
@@ -563,8 +563,8 @@ func (p *Parser) orExpr() ast.Expression {
 func (p *Parser) andExpr() ast.Expression {
 
 	lhs := p.comparativeExpr()
-	for p.cur.Kind == ast.DBL_AMP {
-		tok := p.cur
+	for p.cur.token.Kind == ast.DBL_AMP {
+		tok := p.cur.token
 		p.consume()
 		lhs = &ast.BinaryExpr{lhs, tok, p.comparativeExpr()}
 	}
@@ -574,8 +574,8 @@ func (p *Parser) andExpr() ast.Expression {
 func (p *Parser) comparativeExpr() ast.Expression {
 
 	lhs := p.additiveExpr()
-	for isComparative(p.cur.Kind) {
-		tok := p.cur
+	for isComparative(p.cur.token.Kind) {
+		tok := p.cur.token
 		p.consume()
 		lhs = &ast.BinaryExpr{lhs, tok, p.additiveExpr()}
 	}
@@ -585,8 +585,8 @@ func (p *Parser) comparativeExpr() ast.Expression {
 func (p *Parser) additiveExpr() ast.Expression {
 
 	lhs := p.multiplicativeExpr()
-	for isAdditive(p.cur.Kind) {
-		tok := p.cur
+	for isAdditive(p.cur.token.Kind) {
+		tok := p.cur.token
 		p.consume()
 		lhs = &ast.BinaryExpr{lhs, tok, p.multiplicativeExpr()}
 	}
@@ -596,8 +596,8 @@ func (p *Parser) additiveExpr() ast.Expression {
 func (p *Parser) multiplicativeExpr() ast.Expression {
 
 	lhs := p.unaryExpr()
-	for isMultiplicative(p.cur.Kind) {
-		tok := p.cur
+	for isMultiplicative(p.cur.token.Kind) {
+		tok := p.cur.token
 		p.consume()
 		lhs = &ast.BinaryExpr{lhs, tok, p.unaryExpr()}
 	}
@@ -606,8 +606,8 @@ func (p *Parser) multiplicativeExpr() ast.Expression {
 
 func (p *Parser) unaryExpr() ast.Expression {
 
-	if isUnary(p.cur.Kind) {
-		tok := p.cur
+	if isUnary(p.cur.token.Kind) {
+		tok := p.cur.token
 		p.consume()
 		return &ast.UnaryExpr{tok, p.unaryExpr()}
 
@@ -620,14 +620,14 @@ func (p *Parser) postfixExpr() ast.Expression {
 
 	exp := p.primaryExpr()
 
-	for isPostfix(p.cur.Kind) {
+	for isPostfix(p.cur.token.Kind) {
 
 		if asn, ok := exp.(ast.Assignable); ok {
-			tok := p.cur
+			tok := p.cur.token
 			p.consume()
 			exp = &ast.PostfixExpr{asn, tok}
 		} else {
-			panic(&parserError{INVALID_POSTFIX, p.cur})
+			panic(&parserError{INVALID_POSTFIX, p.cur.token})
 		}
 	}
 
@@ -639,16 +639,16 @@ func (p *Parser) primaryExpr() ast.Expression {
 
 	for {
 		// look for suffixes: Invoke, Select, Index, Slice
-		switch p.cur.Kind {
+		switch p.cur.token.Kind {
 
 		case ast.LPAREN:
 			lparen, actual, rparen := p.actualParams()
 			prm = &ast.InvokeExpr{prm, lparen, actual, rparen}
 
 		case ast.LBRACKET:
-			lbracket := p.consume()
+			lbracket := p.consume().token
 
-			switch p.cur.Kind {
+			switch p.cur.token.Kind {
 			case ast.COLON:
 				p.consume()
 				prm = &ast.SliceToExpr{
@@ -660,7 +660,7 @@ func (p *Parser) primaryExpr() ast.Expression {
 			default:
 				exp := p.expression()
 
-				switch p.cur.Kind {
+				switch p.cur.token.Kind {
 				case ast.RBRACKET:
 					prm = &ast.IndexExpr{
 						prm,
@@ -671,7 +671,7 @@ func (p *Parser) primaryExpr() ast.Expression {
 				case ast.COLON:
 					p.consume()
 
-					switch p.cur.Kind {
+					switch p.cur.token.Kind {
 					case ast.RBRACKET:
 						prm = &ast.SliceFromExpr{
 							prm,
@@ -706,11 +706,11 @@ func (p *Parser) primary() ast.Expression {
 
 	switch {
 
-	case p.cur.Kind == ast.LPAREN:
-		lparen := p.consume()
+	case p.cur.token.Kind == ast.LPAREN:
+		lparen := p.consume().token
 		expr := p.expression()
 
-		switch p.cur.Kind {
+		switch p.cur.token.Kind {
 		case ast.RPAREN:
 			p.expect(ast.RPAREN)
 			return expr
@@ -723,40 +723,40 @@ func (p *Parser) primary() ast.Expression {
 			panic(p.unexpected())
 		}
 
-	case p.cur.Kind == ast.IDENT:
+	case p.cur.token.Kind == ast.IDENT:
 
 		switch {
-		case p.isBuiltIn(p.cur.Text):
-			return &ast.BuiltinExpr{p.consume()}
+		case p.isBuiltIn(p.cur.token.Text):
+			return &ast.BuiltinExpr{p.consume().token}
 
-		case p.next.Kind == ast.EQ_GT:
+		case p.next.token.Kind == ast.EQ_GT:
 			return p.lambdaOne()
 		default:
 			return p.identExpr()
 		}
 
-	case p.cur.Kind == ast.THIS:
-		return &ast.ThisExpr{p.consume(), nil}
+	case p.cur.token.Kind == ast.THIS:
+		return &ast.ThisExpr{p.consume().token, nil}
 
-	case p.cur.Kind == ast.FN:
-		return p.fnExpr(p.consume())
+	case p.cur.token.Kind == ast.FN:
+		return p.fnExpr(p.consume().token)
 
-	case p.cur.Kind == ast.PIPE:
+	case p.cur.token.Kind == ast.PIPE:
 		return p.lambda()
 
-	case p.cur.Kind == ast.DBL_PIPE:
+	case p.cur.token.Kind == ast.DBL_PIPE:
 		return p.lambdaZero()
 
-	case p.cur.Kind == ast.STRUCT:
+	case p.cur.token.Kind == ast.STRUCT:
 		return p.structExpr()
 
-	case p.cur.Kind == ast.DICT:
+	case p.cur.token.Kind == ast.DICT:
 		return p.dictExpr()
 
-	case p.cur.Kind == ast.SET:
+	case p.cur.token.Kind == ast.SET:
 		return p.setExpr()
 
-	case p.cur.Kind == ast.LBRACKET:
+	case p.cur.token.Kind == ast.LBRACKET:
 		return p.listExpr()
 
 	default:
@@ -765,7 +765,7 @@ func (p *Parser) primary() ast.Expression {
 }
 
 func (p *Parser) identExpr() *ast.IdentExpr {
-	tok := p.cur
+	tok := p.cur.token
 	p.expect(ast.IDENT)
 	return &ast.IdentExpr{tok, nil}
 }
@@ -780,7 +780,7 @@ func (p *Parser) fnExpr(token *ast.Token) *ast.FnExpr {
 
 		for {
 
-			switch p.cur.Kind {
+			switch p.cur.token.Kind {
 			case ast.CONST:
 				p.consume()
 				params = append(params, &ast.FormalParam{p.identExpr(), true})
@@ -790,7 +790,7 @@ func (p *Parser) fnExpr(token *ast.Token) *ast.FnExpr {
 				panic(p.unexpected())
 			}
 
-			switch p.cur.Kind {
+			switch p.cur.token.Kind {
 			case ast.COMMA:
 				p.consume()
 			case ast.RPAREN:
@@ -828,13 +828,13 @@ func (p *Parser) lambda() *ast.FnExpr {
 	token := p.expect(ast.PIPE)
 
 	params := []*ast.FormalParam{}
-	switch p.cur.Kind {
+	switch p.cur.token.Kind {
 
 	case ast.IDENT:
 		params = append(params, &ast.FormalParam{p.identExpr(), false})
 	loop:
 		for {
-			switch p.cur.Kind {
+			switch p.cur.token.Kind {
 
 			case ast.COMMA:
 				p.consume()
@@ -880,26 +880,26 @@ func (p *Parser) structBody(token *ast.Token) ast.Expression {
 	var rbrace *ast.Token
 	lbrace := p.expect(ast.LBRACE)
 
-	switch p.cur.Kind {
+	switch p.cur.token.Kind {
 
 	case ast.IDENT:
-		keys = append(keys, p.cur)
+		keys = append(keys, p.cur.token)
 		p.consume()
 		p.expect(ast.COLON)
 		values = append(values, p.expression())
 	loop:
 		for {
-			switch p.cur.Kind {
+			switch p.cur.token.Kind {
 
 			case ast.COMMA:
 				p.consume()
-				keys = append(keys, p.cur)
+				keys = append(keys, p.cur.token)
 				p.consume()
 				p.expect(ast.COLON)
 				values = append(values, p.expression())
 
 			case ast.RBRACE:
-				rbrace = p.consume()
+				rbrace = p.consume().token
 				break loop
 
 			default:
@@ -908,7 +908,7 @@ func (p *Parser) structBody(token *ast.Token) ast.Expression {
 		}
 
 	case ast.RBRACE:
-		rbrace = p.consume()
+		rbrace = p.consume().token
 
 	default:
 		panic(p.unexpected())
@@ -927,10 +927,10 @@ func (p *Parser) dictExpr() ast.Expression {
 
 	lbrace := p.expect(ast.LBRACE)
 
-	switch p.cur.Kind {
+	switch p.cur.token.Kind {
 
 	case ast.RBRACE:
-		rbrace = p.consume()
+		rbrace = p.consume().token
 
 	default:
 		key := p.expression()
@@ -940,7 +940,7 @@ func (p *Parser) dictExpr() ast.Expression {
 
 	loop:
 		for {
-			switch p.cur.Kind {
+			switch p.cur.token.Kind {
 
 			case ast.COMMA:
 				p.consume()
@@ -951,7 +951,7 @@ func (p *Parser) dictExpr() ast.Expression {
 				entries = append(entries, &ast.DictEntryExpr{key, value})
 
 			case ast.RBRACE:
-				rbrace = p.consume()
+				rbrace = p.consume().token
 				break loop
 
 			default:
@@ -968,15 +968,15 @@ func (p *Parser) setExpr() ast.Expression {
 	setToken := p.expect(ast.SET)
 	lbrace := p.expect(ast.LBRACE)
 
-	if p.cur.Kind == ast.RBRACE {
-		return &ast.SetExpr{setToken, lbrace, []ast.Expression{}, p.consume()}
+	if p.cur.token.Kind == ast.RBRACE {
+		return &ast.SetExpr{setToken, lbrace, []ast.Expression{}, p.consume().token}
 	} else {
 
 		elems := []ast.Expression{p.expression()}
 		for {
-			switch p.cur.Kind {
+			switch p.cur.token.Kind {
 			case ast.RBRACE:
-				return &ast.SetExpr{setToken, lbrace, elems, p.consume()}
+				return &ast.SetExpr{setToken, lbrace, elems, p.consume().token}
 			case ast.COMMA:
 				p.consume()
 				elems = append(elems, p.expression())
@@ -991,15 +991,15 @@ func (p *Parser) listExpr() ast.Expression {
 
 	lbracket := p.expect(ast.LBRACKET)
 
-	if p.cur.Kind == ast.RBRACKET {
-		return &ast.ListExpr{lbracket, []ast.Expression{}, p.consume()}
+	if p.cur.token.Kind == ast.RBRACKET {
+		return &ast.ListExpr{lbracket, []ast.Expression{}, p.consume().token}
 	} else {
 
 		elems := []ast.Expression{p.expression()}
 		for {
-			switch p.cur.Kind {
+			switch p.cur.token.Kind {
 			case ast.RBRACKET:
-				return &ast.ListExpr{lbracket, elems, p.consume()}
+				return &ast.ListExpr{lbracket, elems, p.consume().token}
 			case ast.COMMA:
 				p.consume()
 				elems = append(elems, p.expression())
@@ -1015,9 +1015,9 @@ func (p *Parser) tupleExpr(lparen *ast.Token, expr ast.Expression) ast.Expressio
 	elems := []ast.Expression{expr, p.expression()}
 
 	for {
-		switch p.cur.Kind {
+		switch p.cur.token.Kind {
 		case ast.RPAREN:
-			return &ast.TupleExpr{lparen, elems, p.consume()}
+			return &ast.TupleExpr{lparen, elems, p.consume().token}
 		case ast.COMMA:
 			p.consume()
 			elems = append(elems, p.expression())
@@ -1029,7 +1029,7 @@ func (p *Parser) tupleExpr(lparen *ast.Token, expr ast.Expression) ast.Expressio
 
 func (p *Parser) basicExpr() ast.Expression {
 
-	tok := p.cur
+	tok := p.cur.token
 
 	switch {
 
@@ -1047,22 +1047,22 @@ func (p *Parser) actualParams() (*ast.Token, []ast.Expression, *ast.Token) {
 	lparen := p.expect(ast.LPAREN)
 
 	params := []ast.Expression{}
-	switch p.cur.Kind {
+	switch p.cur.token.Kind {
 
 	case ast.RPAREN:
-		return lparen, params, p.consume()
+		return lparen, params, p.consume().token
 
 	default:
 		params = append(params, p.expression())
 		for {
-			switch p.cur.Kind {
+			switch p.cur.token.Kind {
 
 			case ast.COMMA:
 				p.consume()
 				params = append(params, p.expression())
 
 			case ast.RPAREN:
-				return lparen, params, p.consume()
+				return lparen, params, p.consume().token
 
 			default:
 				panic(p.unexpected())
@@ -1074,7 +1074,7 @@ func (p *Parser) actualParams() (*ast.Token, []ast.Expression, *ast.Token) {
 
 // consume the current token if it has the given kind
 func (p *Parser) accept(kind ast.TokenKind) bool {
-	if p.cur.Kind == kind {
+	if p.cur.token.Kind == kind {
 		p.consume()
 		return true
 	} else {
@@ -1084,8 +1084,8 @@ func (p *Parser) accept(kind ast.TokenKind) bool {
 
 // consume the current token if it has the given kind, else panic
 func (p *Parser) expect(kind ast.TokenKind) *ast.Token {
-	if p.cur.Kind == kind {
-		result := p.cur
+	if p.cur.token.Kind == kind {
+		result := p.cur.token
 		p.consume()
 		return result
 	} else {
@@ -1094,38 +1094,60 @@ func (p *Parser) expect(kind ast.TokenKind) *ast.Token {
 }
 
 func (p *Parser) expectStatementDelimiter() {
-	if isStatementDelimiter(p.cur.Kind) {
+	switch {
+	case
+		p.cur.token.Kind == ast.SEMICOLON,
+		p.cur.token.Kind == ast.EOF:
 		p.consume()
-	} else {
+	case p.cur.skipLF:
+		// nothing to do
+		return
+	default:
 		panic(p.unexpected())
 	}
 }
 
+func (p *Parser) atStatementDelimiter() bool {
+
+	switch {
+	case
+		p.cur.token.Kind == ast.SEMICOLON,
+		p.cur.token.Kind == ast.EOF:
+		return true
+	case p.cur.skipLF:
+		return true
+	default:
+		return false
+	}
+}
+
 // consume the current token
-func (p *Parser) consume() *ast.Token {
+func (p *Parser) consume() tokenInfo {
 	result := p.cur
 	p.cur, p.next = p.next, p.advance()
 	return result
 }
 
-func (p *Parser) advance() *ast.Token {
+func (p *Parser) advance() tokenInfo {
 
-	tok := p.scn.Next()
+	token := p.scn.Next()
+	skipLF := false
 
 	// skip over line_feed
-	for tok.Kind == ast.LINE_FEED {
-		tok = p.scn.Next()
+	for token.Kind == ast.LINE_FEED {
+		skipLF = true
+		token = p.scn.Next()
 	}
 
 	// look for errors from the scanner
-	if tok.IsBad() {
-		switch tok.Kind {
+	if token.IsBad() {
+		switch token.Kind {
 
 		case ast.UNEXPECTED_CHAR:
-			panic(&parserError{UNEXPECTED_CHAR, tok})
+			panic(&parserError{UNEXPECTED_CHAR, token})
 
 		case ast.UNEXPECTED_EOF:
-			panic(&parserError{UNEXPECTED_EOF, tok})
+			panic(&parserError{UNEXPECTED_EOF, token})
 
 		default:
 			panic("unreachable")
@@ -1133,20 +1155,20 @@ func (p *Parser) advance() *ast.Token {
 	}
 
 	// done
-	return tok
+	return tokenInfo{token, skipLF}
 }
 
 // create a error that we will panic with
 func (p *Parser) unexpected() error {
-	switch p.cur.Kind {
+	switch p.cur.token.Kind {
 	case ast.EOF:
-		return &parserError{UNEXPECTED_EOF, p.cur}
+		return &parserError{UNEXPECTED_EOF, p.cur.token}
 
 	case ast.RESERVED:
-		return &parserError{UNEXPECTED_RESERVED_WORD, p.cur}
+		return &parserError{UNEXPECTED_RESERVED_WORD, p.cur.token}
 
 	default:
-		return &parserError{UNEXPECTED_TOKEN, p.cur}
+		return &parserError{UNEXPECTED_TOKEN, p.cur.token}
 	}
 }
 
@@ -1156,19 +1178,6 @@ func (p *Parser) makeSyntheticIdent(pos ast.Pos) *ast.IdentExpr {
 	p.synthetic++
 	return &ast.IdentExpr{
 		&ast.Token{ast.IDENT, sym, pos}, nil}
-}
-
-func isStatementDelimiter(kind ast.TokenKind) bool {
-
-	switch kind {
-	case
-		ast.SEMICOLON,
-		ast.EOF:
-
-		return true
-	default:
-		return false
-	}
 }
 
 func isComparative(kind ast.TokenKind) bool {

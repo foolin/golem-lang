@@ -405,7 +405,7 @@ assert(a(6) == 42);
 
 Functions do not have to have an explicit `return` statement. If there is no `return`,
 they will return the last expression that was evaluated.  If no expression is 
-evaluated, `null` is returned.
+evaluated in the function, `null` is returned.
 
 ```
 let a = fn() {};
@@ -413,6 +413,9 @@ let b = fn(x) { x * x; };
 assert(a() == null);
 assert(b(3) == 9);
 ```
+
+A `return` statement without a value is syntactically invalid.  All return statements
+must include a value to return.
 
 Golem supports closures as well -- in fact closures are a fundamental mechanism
 in Golem for managing state.  Here is an example of a closure that acts as a
@@ -462,9 +465,6 @@ assert(c(1, 2) == 15);
 a given scope, before any other declarations are processed by the compiler.  Using 
 named function syntax allows for forward references -- you 
 can refer to functions that have not been defined yet.
-
-Note that named functions do not have a semicolon at the end of the closing 
-curly brace.
 
 ```
 fn a() {
@@ -641,7 +641,8 @@ catch e {
 }
 ```
 
-You can throw an exception by using a struct literal with the `throw` keyword.
+You can throw an exception using the `throw` keyword, followed by an expression that
+evaluates to a `struct`.
 
 ```
 try {

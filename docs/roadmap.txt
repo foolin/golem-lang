@@ -93,7 +93,13 @@ concurrency improvements:
     select waitGroup 
     sync{}
 
-label: for, while
+break, continue to label: for, while
+    note that to avoid linefeed ambiguity, we will have to include syntax 
+    between break (or continue) and the label, e.g. :
+        break(foo)
+        break { foo }
+        break -> foo
+        break #foo
 
 'like' keyword for comparing structs
 

@@ -618,9 +618,7 @@ func (c *compiler) visitCase(cs *ast.Case, hasItem bool) int {
 }
 
 func (c *compiler) visitReturn(rt *ast.Return) {
-	if rt.Val != nil {
-		c.Visit(rt.Val)
-	}
+	c.Visit(rt.Val)
 	c.push(rt.Begin(), g.RETURN)
 }
 

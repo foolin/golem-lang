@@ -408,9 +408,6 @@ func TestFn(t *testing.T) {
 	p = newParser("fn(x) { let a = fn(y) { return x + y; }; }")
 	ok_expr(t, p, "fn(x) { let a = fn(y) { return (x + y); }; }")
 
-	p = newParser("return;")
-	ok(t, p, "fn() { return; }")
-
 	p = newParser("z = fn(x) { a = 2; return b; c = 3; };")
 	ok(t, p, "fn() { (z = fn(x) { (a = 2); return b; (c = 3); }); }")
 
@@ -428,6 +425,10 @@ func TestFn(t *testing.T) {
 
 	p = newParser("fn(const a,b) { a=1; };")
 	ok(t, p, "fn() { fn(const a, b) { (a = 1); }; }")
+
+	p = newParser("return;")
+	fail(t, p, "Unexpected Token ';' at (1, 7)")
+
 }
 
 func TestTry(t *testing.T) {
@@ -658,9 +659,6 @@ fn() {
 	p = newParser("\n  continue;")
 	okPos(t, p, ast.Pos{2, 3}, ast.Pos{2, 10})
 
-	p = newParser("return;")
-	okPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 6})
-
 	p = newParser("while true { 42; \n};")
 	okPos(t, p, ast.Pos{1, 1}, ast.Pos{2, 1})
 
@@ -829,4 +827,92 @@ a
 
 => a*a`)
 	ok(t, p, "fn() { fn(a) { (a * a); }; }")
+}
+
+func parse(t *testing.T, source string) {
+	p := newParser(source)
+	_, err := p.ParseModule()
+	if err != nil {
+		t.Error(err, " != nil")
+		panic("ok")
+	}
+}
+
+func TestSemicolons(t *testing.T) {
+	parse(t, `
+let a
+const b`)
+
+	parse(t, `
+let a = struct {
+    x: 8,
+    y: 5,
+    plus:  fn() { return this.x + this.y; },
+    minus: || => this.x - this.y, 
+    plus:  fn() { return this.x + this.y 
+	}
+}
+let b = a.plus()
+let c = a.minus()
+`)
+
+	parse(t, `
+let x = struct { a: 0 }
+let y = x.a
+x.a = 3
+x.a++
+y--
+x[y] = 42
+y = x[3]
+x[2]++
+y.z = x[2]++
+let g, h = 5
+const i = 6, j
+`)
+
+	parse(t, `
+let fibonacciGenerator = fn() {
+    let x = 1
+    let y = 1
+    return fn() {
+        let z = x
+        x = y
+        y = x + z
+        return z
+    }
+}
+
+println("Fibonacci series:")
+let nextFib = fibonacciGenerator()
+for i in range(0, 10) {
+    println(i, " == ", nextFib())
+}
+`)
+
+	p := newParser(`
+let a
+let b
+= 1;
+const c = 
+1; const d
+`)
+	ok(t, p, "fn() { let a; let b = 1; const c = 1; const d; }")
+
+	p = newParser(`
+a
+++`)
+	ok(t, p, "fn() { a++; }")
+
+	p = newParser(`
+break
+throw
+z
+continue`)
+	ok(t, p, "fn() { break; throw z; continue; }")
+
+	p = newParser(`
+return
+z
+`)
+	ok(t, p, "fn() { return z; }")
 }
