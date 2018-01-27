@@ -45,6 +45,7 @@ func ok(t *testing.T, p *Parser, expect string) {
 		panic("ok")
 	} else if mod.String() != expect {
 		t.Error(mod, " != ", expect)
+		panic("ok")
 	}
 }
 
@@ -330,23 +331,23 @@ func TestModule(t *testing.T) {
 }
 
 func TestStatement(t *testing.T) {
-	p := newParser("if a { b;let c=12; }")
-	ok(t, p, "fn() { if a { b; let c = 12; } }")
+	p := newParser("if a { b;let c=12; };")
+	ok(t, p, "fn() { if a { b; let c = 12; }; }")
 
-	p = newParser("if a { b; } else { c; }")
-	ok(t, p, "fn() { if a { b; } else { c; } }")
+	p = newParser("if a { b; } else { c; };")
+	ok(t, p, "fn() { if a { b; } else { c; }; }")
 
-	p = newParser("if a { b; } else { if(12 == 3) { z+5; }}")
-	ok(t, p, "fn() { if a { b; } else { if (12 == 3) { (z + 5); } } }")
+	p = newParser("if a { b; } else { if(12 == 3) { z+5; };};")
+	ok(t, p, "fn() { if a { b; } else { if (12 == 3) { (z + 5); }; }; }")
 
-	p = newParser("if a {} else if b {} else {}")
-	ok(t, p, "fn() { if a {  } else if b {  } else {  } }")
+	p = newParser("if a {} else if b {} else {};;")
+	ok(t, p, "fn() { if a {  } else if b {  } else {  };; }")
 
-	p = newParser("while a { b; }")
-	ok(t, p, "fn() { while a { b; } }")
+	p = newParser("while a { b; };")
+	ok(t, p, "fn() { while a { b; }; }")
 
-	p = newParser("break; continue; while a { b; continue; break; }")
-	ok(t, p, "fn() { break; continue; while a { b; continue; break; } }")
+	p = newParser("break; continue; while a { b; continue; break; };")
+	ok(t, p, "fn() { break; continue; while a { b; continue; break; }; }")
 
 	p = newParser("a = b;")
 	ok(t, p, "fn() { (a = b); }")
@@ -360,14 +361,14 @@ func TestStatement(t *testing.T) {
 
 func TestFor(t *testing.T) {
 
-	p := newParser("for a in b {}")
-	ok(t, p, "fn() { for a in b {  } }")
+	p := newParser("for a in b {};")
+	ok(t, p, "fn() { for a in b {  }; }")
 
-	p = newParser("for (a,b) in c {}")
-	ok(t, p, "fn() { for (a, b) in c {  } }")
+	p = newParser("for (a,b) in c {};")
+	ok(t, p, "fn() { for (a, b) in c {  }; }")
 
-	p = newParser("for (a,b,c) in d {}")
-	ok(t, p, "fn() { for (a, b, c) in d {  } }")
+	p = newParser("for (a,b,c) in d {};")
+	ok(t, p, "fn() { for (a, b, c) in d {  }; }")
 
 	p = newParser("for a b")
 	fail(t, p, "Unexpected Token 'b' at (1, 7)")
@@ -407,8 +408,8 @@ func TestFn(t *testing.T) {
 	p = newParser("z = fn(x) { a = 2; return b; c = 3; };")
 	ok(t, p, "fn() { (z = fn(x) { (a = 2); return b; (c = 3); }); }")
 
-	p = newParser("fn a(x) {return x*x; } fn b() { }")
-	ok(t, p, "fn() { fn a(x) { return (x * x); } fn b() {  } }")
+	p = newParser("fn a(x) {return x*x; }; fn b() { };")
+	ok(t, p, "fn() { fn a(x) { return (x * x); }; fn b() {  }; }")
 
 	p = newParser("fn(const x, y) {  }")
 	ok_expr(t, p, "fn(const x, y) {  }")
@@ -418,6 +419,9 @@ func TestFn(t *testing.T) {
 
 	p = newParser("fn(const x, const y) {  }")
 	ok_expr(t, p, "fn(const x, const y) {  }")
+
+	p = newParser("fn(const a,b) { a=1; };")
+	ok(t, p, "fn() { fn(const a, b) { (a = 1); }; }")
 }
 
 func TestTry(t *testing.T) {
@@ -428,14 +432,14 @@ func TestTry(t *testing.T) {
 	p = newParser("throw;")
 	fail(t, p, "Unexpected Token ';' at (1, 6)")
 
-	p = newParser("try { a; } catch e { b; }")
-	ok(t, p, "fn() { try { a; } catch e { b; } }")
+	p = newParser("try { a; } catch e { b; };")
+	ok(t, p, "fn() { try { a; } catch e { b; }; }")
 
-	p = newParser("try { a; } catch e { b; } finally { c; }")
-	ok(t, p, "fn() { try { a; } catch e { b; } finally { c; } }")
+	p = newParser("try { a; } catch e { b; } finally { c; };")
+	ok(t, p, "fn() { try { a; } catch e { b; } finally { c; }; }")
 
-	p = newParser("try { a; } finally { c; }")
-	ok(t, p, "fn() { try { a; } finally { c; } }")
+	p = newParser("try { a; } finally { c; };")
+	ok(t, p, "fn() { try { a; } finally { c; }; }")
 
 	p = newParser("try;")
 	fail(t, p, "Unexpected Token ';' at (1, 4)")
@@ -651,13 +655,13 @@ fn() {
 	p = newParser("return;")
 	okPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 6})
 
-	p = newParser("while true { 42; \n}")
+	p = newParser("while true { 42; \n};")
 	okPos(t, p, ast.Pos{1, 1}, ast.Pos{2, 1})
 
-	p = newParser("if 0 {}")
+	p = newParser("if 0 {};")
 	okPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 7})
 
-	p = newParser("if 0 {} else {}")
+	p = newParser("if 0 {} else {};")
 	okPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 15})
 }
 
@@ -727,20 +731,20 @@ func TestTuple(t *testing.T) {
 
 func TestSwitch(t *testing.T) {
 
-	p := newParser("switch { case a: x; }")
-	ok(t, p, "fn() { switch { case a: x; } }")
+	p := newParser("switch { case a: x; };")
+	ok(t, p, "fn() { switch { case a: x; }; }")
 
-	p = newParser("switch { case a, b: x; y; }")
-	ok(t, p, "fn() { switch { case a, b: x; y; } }")
+	p = newParser("switch { case a, b: x; y; };")
+	ok(t, p, "fn() { switch { case a, b: x; y; }; }")
 
-	p = newParser("switch { case a: x; case b: y; }")
-	ok(t, p, "fn() { switch { case a: x; case b: y; } }")
+	p = newParser("switch { case a: x; case b: y; };")
+	ok(t, p, "fn() { switch { case a: x; case b: y; }; }")
 
-	p = newParser("switch true { case a: x; default: false; y; }")
-	ok(t, p, "fn() { switch true { case a: x; default: false; y; } }")
+	p = newParser("switch true { case a: x; default: false; y; };")
+	ok(t, p, "fn() { switch true { case a: x; default: false; y; }; }")
 
-	p = newParser("switch { case a: x; case b: y; default: z; }")
-	ok(t, p, "fn() { switch { case a: x; case b: y; default: z; } }")
+	p = newParser("switch { case a: x; case b: y; default: z; };")
+	ok(t, p, "fn() { switch { case a: x; case b: y; default: z; }; }")
 
 	p = newParser("switch { }")
 	fail(t, p, "Unexpected Token '}' at (1, 10)")

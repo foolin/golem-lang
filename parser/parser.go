@@ -76,6 +76,55 @@ func (p *Parser) imports() []ast.Node {
 	return nodes
 }
 
+// Parse a sequence of statements or expressions.
+func (p *Parser) nodeSequence(endKind ast.TokenKind) []ast.Node {
+
+	nodes := []ast.Node{}
+
+	for {
+		if p.cur.Kind == endKind {
+			return nodes
+		}
+
+		// parse a statement, if there is one
+		var node ast.Node = p.statement()
+
+		// if there isn't, read an expression instead
+		if node == nil {
+			node = p.expression()
+			p.expect(ast.SEMICOLON)
+		}
+
+		nodes = append(nodes, node)
+	}
+
+}
+
+// Parse a sequence of statements or expressions.
+func (p *Parser) nodeSequenceAny(endKinds ...ast.TokenKind) []ast.Node {
+
+	nodes := []ast.Node{}
+
+	for {
+		for _, e := range endKinds {
+			if p.cur.Kind == e {
+				return nodes
+			}
+		}
+
+		// parse a statement, if there is one
+		var node ast.Node = p.statement()
+
+		// if there isn't, read an expression instead
+		if node == nil {
+			node = p.expression()
+			p.expect(ast.SEMICOLON)
+		}
+
+		nodes = append(nodes, node)
+	}
+}
+
 // Parse a statement, or return nil if there is no statement
 // waiting to be parsed.
 func (p *Parser) statement() ast.Statement {
@@ -128,16 +177,19 @@ func (p *Parser) statement() ast.Statement {
 		return p.goStmt()
 
 	default:
+		// its OK for there not to be a statement ready
 		return nil
 	}
 }
 
 func (p *Parser) namedFn() *ast.NamedFn {
 	token := p.expect(ast.FN)
-	return &ast.NamedFn{
+	result := &ast.NamedFn{
 		token,
 		&ast.IdentExpr{p.expect(ast.IDENT), nil},
 		p.fnExpr(token)}
+	p.expect(ast.SEMICOLON)
+	return result
 }
 
 func (p *Parser) constStmt() *ast.Const {
@@ -151,7 +203,7 @@ func (p *Parser) constStmt() *ast.Const {
 			p.consume()
 			decls = append(decls, p.decl())
 		case ast.SEMICOLON:
-			p.consume()
+			p.expect(ast.SEMICOLON)
 			return &ast.Const{token, decls}
 		default:
 			panic(p.unexpected())
@@ -170,7 +222,7 @@ func (p *Parser) letStmt() *ast.Let {
 			p.consume()
 			decls = append(decls, p.decl())
 		case ast.SEMICOLON:
-			p.consume()
+			p.expect(ast.SEMICOLON)
 			return &ast.Let{token, decls}
 		default:
 			panic(p.unexpected())
@@ -199,23 +251,30 @@ func (p *Parser) ifStmt() *ast.If {
 		switch p.cur.Kind {
 
 		case ast.LBRACE:
-			return &ast.If{token, cond, then, p.block()}
+			result := &ast.If{token, cond, then, p.block()}
+			p.expect(ast.SEMICOLON)
+			return result
 
 		case ast.IF:
-			return &ast.If{token, cond, then, p.ifStmt()}
+			result := &ast.If{token, cond, then, p.ifStmt()}
+			p.expect(ast.SEMICOLON)
+			return result
 
 		default:
 			panic(p.unexpected())
 		}
 
 	} else {
+		p.expect(ast.SEMICOLON)
 		return &ast.If{token, cond, then, nil}
 	}
 }
 
 func (p *Parser) whileStmt() *ast.While {
 
-	return &ast.While{p.expect(ast.WHILE), p.expression(), p.block()}
+	result := &ast.While{p.expect(ast.WHILE), p.expression(), p.block()}
+	p.expect(ast.SEMICOLON)
+	return result
 }
 
 func (p *Parser) forStmt() *ast.For {
@@ -247,6 +306,7 @@ func (p *Parser) forStmt() *ast.For {
 	body := p.block()
 
 	// done
+	p.expect(ast.SEMICOLON)
 	return &ast.For{token, idents, iblIdent, iterable, body}
 }
 
@@ -314,7 +374,9 @@ func (p *Parser) switchStmt() *ast.Switch {
 	}
 
 	// done
-	return &ast.Switch{token, item, lbrace, cases, def, p.expect(ast.RBRACE)}
+	result := &ast.Switch{token, item, lbrace, cases, def, p.expect(ast.RBRACE)}
+	p.expect(ast.SEMICOLON)
+	return result
 }
 
 func (p *Parser) caseStmt() *ast.Case {
@@ -424,6 +486,7 @@ func (p *Parser) tryStmt() *ast.Try {
 	}
 
 	// done
+	p.expect(ast.SEMICOLON)
 	return &ast.Try{
 		tryToken, tryBlock,
 		catchToken, catchIdent, catchBlock,
@@ -452,55 +515,6 @@ func (p *Parser) block() *ast.Block {
 	nodes := p.nodeSequence(ast.RBRACE)
 	rbrace := p.expect(ast.RBRACE)
 	return &ast.Block{lbrace, nodes, rbrace}
-}
-
-// Parse a sequence of statements or expressions.
-func (p *Parser) nodeSequence(endKind ast.TokenKind) []ast.Node {
-
-	nodes := []ast.Node{}
-
-	for {
-		if p.cur.Kind == endKind {
-			return nodes
-		}
-
-		// see if there is a statement on tap
-		var node ast.Node = p.statement()
-
-		// if there isn't, read an expression instead
-		if node == nil {
-			node = p.expression()
-			p.expect(ast.SEMICOLON)
-		}
-
-		nodes = append(nodes, node)
-	}
-
-}
-
-// Parse a sequence of statements or expressions.
-func (p *Parser) nodeSequenceAny(endKinds ...ast.TokenKind) []ast.Node {
-
-	nodes := []ast.Node{}
-
-	for {
-		for _, e := range endKinds {
-			if p.cur.Kind == e {
-				return nodes
-			}
-		}
-
-		// see if there is a statement on tap
-		var node ast.Node = p.statement()
-
-		// if there isn't, read an expression instead
-		if node == nil {
-			node = p.expression()
-			p.expect(ast.SEMICOLON)
-		}
-
-		nodes = append(nodes, node)
-	}
 }
 
 func (p *Parser) expression() ast.Expr {

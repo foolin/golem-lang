@@ -567,6 +567,7 @@ func (nf *NamedFn) String() string {
 	buf.WriteString(stringFormalParams(nf.Func.FormalParams))
 	buf.WriteString(" ")
 	buf.WriteString(nf.Func.Body.String())
+	buf.WriteString(";")
 	return buf.String()
 }
 
@@ -590,21 +591,21 @@ func (asn *AssignmentExpr) String() string {
 
 func (ifn *If) String() string {
 	if ifn.Else == nil {
-		return fmt.Sprintf("if %v %v", ifn.Cond, ifn.Then)
+		return fmt.Sprintf("if %v %v;", ifn.Cond, ifn.Then)
 	} else {
-		return fmt.Sprintf("if %v %v else %v", ifn.Cond, ifn.Then, ifn.Else)
+		return fmt.Sprintf("if %v %v else %v;", ifn.Cond, ifn.Then, ifn.Else)
 	}
 }
 
 func (wh *While) String() string {
-	return fmt.Sprintf("while %v %v", wh.Cond, wh.Body)
+	return fmt.Sprintf("while %v %v;", wh.Cond, wh.Body)
 }
 
 func (fr *For) String() string {
 	if len(fr.Idents) == 1 {
-		return fmt.Sprintf("for %v in %v %v", fr.Idents[0], fr.Iterable, fr.Body)
+		return fmt.Sprintf("for %v in %v %v;", fr.Idents[0], fr.Iterable, fr.Body)
 	} else {
-		return fmt.Sprintf("for %s in %v %v", stringIdents(fr.Idents), fr.Iterable, fr.Body)
+		return fmt.Sprintf("for %s in %v %v;", stringIdents(fr.Idents), fr.Iterable, fr.Body)
 	}
 }
 
@@ -642,7 +643,7 @@ func (sw *Switch) String() string {
 	if sw.Default != nil {
 		buf.WriteString(fmt.Sprintf("%v", sw.Default))
 	}
-	buf.WriteString(" }")
+	buf.WriteString(" };")
 
 	return buf.String()
 }
@@ -711,6 +712,7 @@ func (t *Try) String() string {
 		buf.WriteString(" finally ")
 		buf.WriteString(t.FinallyBlock.String())
 	}
+	buf.WriteString(";")
 
 	return buf.String()
 }
