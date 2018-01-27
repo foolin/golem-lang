@@ -1162,7 +1162,8 @@ func isStatementDelimiter(kind ast.TokenKind) bool {
 
 	switch kind {
 	case
-		ast.SEMICOLON:
+		ast.SEMICOLON,
+		ast.EOF:
 
 		return true
 	default:

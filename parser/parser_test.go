@@ -357,6 +357,12 @@ func TestStatement(t *testing.T) {
 
 	p = newParser("let a = 3, b; const x, y, z = 5; ")
 	ok(t, p, "fn() { let a = 3, b; const x, y, z = 5; }")
+
+	p = newParser("fn() {}")
+	ok_expr(t, p, "fn() {  }")
+
+	p = newParser("fn() {};")
+	ok(t, p, "fn() { fn() {  }; }")
 }
 
 func TestFor(t *testing.T) {
@@ -812,11 +818,15 @@ func TestImport(t *testing.T) {
 	fail(t, p, "Unexpected Token 'import' at (1, 12)")
 }
 
-func TestExprStmt(t *testing.T) {
+func TestLookaheadLF(t *testing.T) {
+	p := newParser(`
+fn
+a() {}`)
+	ok(t, p, "fn() { fn a() {  }; }")
 
-	p := newParser("fn() {}")
-	ok_expr(t, p, "fn() {  }")
+	p = newParser(`
+a
 
-	p = newParser("fn() {};")
-	ok(t, p, "fn() { fn() {  }; }")
+=> a*a`)
+	ok(t, p, "fn() { fn(a) { (a * a); }; }")
 }
