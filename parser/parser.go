@@ -56,31 +56,6 @@ func (p *Parser) ParseModule() (fn *ast.FnExpr, err error) {
 	return &ast.FnExpr{nil, params, block, 0, 0, nil}, err
 }
 
-func (p *Parser) parseExpression() (expr ast.Expr, err error) {
-
-	// In a recursive descent parser, errors can be generated deep
-	// in the call stack.  We are going to use panic-recover to handle them.
-	defer func() {
-		if r := recover(); r != nil {
-			if _, ok := r.(runtime.Error); ok {
-				panic(r)
-			}
-			expr = nil
-			err = r.(error)
-		}
-	}()
-
-	// read the first two tokens
-	p.cur = p.advance()
-	p.next = p.advance()
-
-	// parse the expression
-	expr = p.expression()
-	p.expect(ast.EOF)
-
-	return expr, err
-}
-
 // Parse a sequence of statements or expressions.
 func (p *Parser) imports() []ast.Node {
 

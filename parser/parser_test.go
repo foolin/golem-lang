@@ -5,11 +5,37 @@
 package parser
 
 import (
-	//"fmt"
+	"runtime"
+	"testing"
+
 	"github.com/mjarmy/golem-lang/ast"
 	"github.com/mjarmy/golem-lang/scanner"
-	"testing"
 )
+
+func parseExpression(p *Parser) (expr ast.Expr, err error) {
+
+	// In a recursive descent parser, errors can be generated deep
+	// in the call stack.  We are going to use panic-recover to handle them.
+	defer func() {
+		if r := recover(); r != nil {
+			if _, ok := r.(runtime.Error); ok {
+				panic(r)
+			}
+			expr = nil
+			err = r.(error)
+		}
+	}()
+
+	// read the first two tokens
+	p.cur = p.advance()
+	p.next = p.advance()
+
+	// parse the expression
+	expr = p.expression()
+	p.expect(ast.EOF)
+
+	return expr, err
+}
 
 func ok(t *testing.T, p *Parser, expect string) {
 
@@ -35,7 +61,7 @@ func fail(t *testing.T, p *Parser, expect string) {
 
 func ok_expr(t *testing.T, p *Parser, expect string) {
 
-	expr, err := p.parseExpression()
+	expr, err := parseExpression(p)
 	if err != nil {
 		panic(err)
 		t.Error(err, " != nil")
@@ -48,7 +74,7 @@ func ok_expr(t *testing.T, p *Parser, expect string) {
 
 func fail_expr(t *testing.T, p *Parser, expect string) {
 
-	expr, err := p.parseExpression()
+	expr, err := parseExpression(p)
 	if expr != nil {
 		t.Error(expr, " != nil")
 	}
@@ -530,7 +556,7 @@ func TestPrimarySuffix(t *testing.T) {
 
 func okExprPos(t *testing.T, p *Parser, expectBegin ast.Pos, expectEnd ast.Pos) {
 
-	expr, err := p.parseExpression()
+	expr, err := parseExpression(p)
 	if err != nil {
 		t.Error(err, " != nil")
 	}
