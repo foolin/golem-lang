@@ -173,14 +173,14 @@ func (a *analyzer) visitBlock(blk *ast.Block) {
 	a.curScope = newBlockScope(a.curScope)
 
 	// visit named funcs identifiers
-	for _, n := range blk.Nodes {
+	for _, n := range blk.Statements {
 		if nf, ok := n.(*ast.NamedFn); ok {
 			a.defineIdent(nf.Ident, true)
 		}
 	}
 
 	// visit everything, skipping named func identifiers
-	for _, n := range blk.Nodes {
+	for _, n := range blk.Statements {
 		if nf, ok := n.(*ast.NamedFn); ok {
 			a.Visit(nf.Func)
 		} else {

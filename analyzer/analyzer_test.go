@@ -82,11 +82,12 @@ FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
 .   .   Const
 .   .   .   IdentExpr(b,(1,true,false))
 .   .   .   BasicExpr(INT,"2")
-.   .   AssignmentExpr
-.   .   .   IdentExpr(a,(0,false,false))
-.   .   .   BinaryExpr("+")
-.   .   .   .   IdentExpr(b,(1,true,false))
-.   .   .   .   BasicExpr(INT,"3")
+.   .   ExprStmt
+.   .   .   AssignmentExpr
+.   .   .   .   IdentExpr(a,(0,false,false))
+.   .   .   .   BinaryExpr("+")
+.   .   .   .   .   IdentExpr(b,(1,true,false))
+.   .   .   .   .   BasicExpr(INT,"3")
 `)
 
 	errors = newAnalyzer("a;").Analyze()
@@ -105,13 +106,13 @@ FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
 func TestNested(t *testing.T) {
 
 	source := `
-let a = 1;
+let a = 1
 if (true) {
-    a = 2;
-    const b = 2;
+    a = 2
+    const b = 2
 } else {
-    a = 3;
-    let b = 3;
+    a = 3
+    let b = 3
 }`
 	anl := newAnalyzer(source)
 	//errors := anl.Analyze()
@@ -129,16 +130,18 @@ FnExpr(numLocals:3 numCaptures:0 parentCaptures:[])
 .   .   If
 .   .   .   BasicExpr(TRUE,"true")
 .   .   .   Block
-.   .   .   .   AssignmentExpr
-.   .   .   .   .   IdentExpr(a,(0,false,false))
-.   .   .   .   .   BasicExpr(INT,"2")
+.   .   .   .   ExprStmt
+.   .   .   .   .   AssignmentExpr
+.   .   .   .   .   .   IdentExpr(a,(0,false,false))
+.   .   .   .   .   .   BasicExpr(INT,"2")
 .   .   .   .   Const
 .   .   .   .   .   IdentExpr(b,(1,true,false))
 .   .   .   .   .   BasicExpr(INT,"2")
 .   .   .   Block
-.   .   .   .   AssignmentExpr
-.   .   .   .   .   IdentExpr(a,(0,false,false))
-.   .   .   .   .   BasicExpr(INT,"3")
+.   .   .   .   ExprStmt
+.   .   .   .   .   AssignmentExpr
+.   .   .   .   .   .   IdentExpr(a,(0,false,false))
+.   .   .   .   .   .   BasicExpr(INT,"3")
 .   .   .   .   Let
 .   .   .   .   .   IdentExpr(b,(2,false,false))
 .   .   .   .   .   BasicExpr(INT,"3")
@@ -155,9 +158,10 @@ FnExpr(numLocals:0 numCaptures:0 parentCaptures:[])
 .   .   While
 .   .   .   BasicExpr(TRUE,"true")
 .   .   .   Block
-.   .   .   .   BinaryExpr("+")
-.   .   .   .   .   BasicExpr(INT,"1")
-.   .   .   .   .   BasicExpr(INT,"2")
+.   .   .   .   ExprStmt
+.   .   .   .   .   BinaryExpr("+")
+.   .   .   .   .   .   BasicExpr(INT,"1")
+.   .   .   .   .   .   BasicExpr(INT,"2")
 `)
 
 	anl = newAnalyzer("while true { 1 + 2; break; continue; }")
@@ -168,9 +172,10 @@ FnExpr(numLocals:0 numCaptures:0 parentCaptures:[])
 .   .   While
 .   .   .   BasicExpr(TRUE,"true")
 .   .   .   Block
-.   .   .   .   BinaryExpr("+")
-.   .   .   .   .   BasicExpr(INT,"1")
-.   .   .   .   .   BasicExpr(INT,"2")
+.   .   .   .   ExprStmt
+.   .   .   .   .   BinaryExpr("+")
+.   .   .   .   .   .   BasicExpr(INT,"1")
+.   .   .   .   .   .   BasicExpr(INT,"2")
 .   .   .   .   Break
 .   .   .   .   Continue
 `)
@@ -212,8 +217,8 @@ FnExpr(numLocals:3 numCaptures:0 parentCaptures:[])
 
 	anl = newAnalyzer(`
 for a in [] {
-    for b in [] {
-    }
+	for b in [] {
+	}
 }
 `)
 	errors = anl.Analyze()
@@ -238,17 +243,17 @@ FnExpr(numLocals:4 numCaptures:0 parentCaptures:[])
 
 func TestPureFunction(t *testing.T) {
 	source := `
-let a = 1;
+let a = 1
 let b = fn(x) {
     let c = fn(y, z) {
         if (y < 33) {
-            return y + z + 5;
+            return y + z + 5
         } else {
-            let b = 42;
+            let b = 42
         }
-    };
-    return c(3);
-};`
+    }
+    return c(3)
+}`
 
 	anl := newAnalyzer(source)
 	errors := anl.Analyze()
@@ -301,10 +306,10 @@ func TestCaptureFunction(t *testing.T) {
 	source := `
 const accumGen = fn(n) {
     return fn(i) {
-        n = n + i;
-        return n;
-    };
-};
+        n = n + i
+        return n
+    }
+}
 `
 	anl := newAnalyzer(source)
 	errors := anl.Analyze()
@@ -325,24 +330,25 @@ FnExpr(numLocals:1 numCaptures:0 parentCaptures:[])
 .   .   .   .   .   .   FnExpr(numLocals:1 numCaptures:1 parentCaptures:[(0,false,false)])
 .   .   .   .   .   .   .   IdentExpr(i,(0,false,false))
 .   .   .   .   .   .   .   Block
-.   .   .   .   .   .   .   .   AssignmentExpr
-.   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
-.   .   .   .   .   .   .   .   .   BinaryExpr("+")
+.   .   .   .   .   .   .   .   ExprStmt
+.   .   .   .   .   .   .   .   .   AssignmentExpr
 .   .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
-.   .   .   .   .   .   .   .   .   .   IdentExpr(i,(0,false,false))
+.   .   .   .   .   .   .   .   .   .   BinaryExpr("+")
+.   .   .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
+.   .   .   .   .   .   .   .   .   .   .   IdentExpr(i,(0,false,false))
 .   .   .   .   .   .   .   .   Return
 .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
 `)
 
 	source = `
-let z = 2;
+let z = 2
 const accumGen = fn(n) {
-    return fn(i) {
-        n = n + i;
-        n = n + z;
-        return n;
-    };
-};
+	return fn(i) {
+		n = n + i
+		n = n + z
+		return n
+	}
+}
 `
 	anl = newAnalyzer(source)
 	errors = anl.Analyze()
@@ -366,29 +372,31 @@ FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
 .   .   .   .   .   .   FnExpr(numLocals:1 numCaptures:2 parentCaptures:[(0,false,false), (0,false,true)])
 .   .   .   .   .   .   .   IdentExpr(i,(0,false,false))
 .   .   .   .   .   .   .   Block
-.   .   .   .   .   .   .   .   AssignmentExpr
-.   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
-.   .   .   .   .   .   .   .   .   BinaryExpr("+")
+.   .   .   .   .   .   .   .   ExprStmt
+.   .   .   .   .   .   .   .   .   AssignmentExpr
 .   .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
-.   .   .   .   .   .   .   .   .   .   IdentExpr(i,(0,false,false))
-.   .   .   .   .   .   .   .   AssignmentExpr
-.   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
-.   .   .   .   .   .   .   .   .   BinaryExpr("+")
+.   .   .   .   .   .   .   .   .   .   BinaryExpr("+")
+.   .   .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
+.   .   .   .   .   .   .   .   .   .   .   IdentExpr(i,(0,false,false))
+.   .   .   .   .   .   .   .   ExprStmt
+.   .   .   .   .   .   .   .   .   AssignmentExpr
 .   .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
-.   .   .   .   .   .   .   .   .   .   IdentExpr(z,(1,false,true))
+.   .   .   .   .   .   .   .   .   .   BinaryExpr("+")
+.   .   .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
+.   .   .   .   .   .   .   .   .   .   .   IdentExpr(z,(1,false,true))
 .   .   .   .   .   .   .   .   Return
 .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
 `)
 
 	source = `
-const a = 123;
-const b = 456;
+const a = 123
+const b = 456
 
 fn foo() {
-    assert(b == 456);
-    assert(a == 123);
+	assert(b == 456)
+	assert(a == 123)
 }
-foo();
+foo()
 `
 	anl = newAnalyzer(source)
 	errors = anl.Analyze()
@@ -406,18 +414,21 @@ FnExpr(numLocals:3 numCaptures:0 parentCaptures:[])
 .   .   .   IdentExpr(foo,(0,true,false))
 .   .   .   FnExpr(numLocals:0 numCaptures:2 parentCaptures:[(2,true,false), (1,true,false)])
 .   .   .   .   Block
-.   .   .   .   .   InvokeExpr
-.   .   .   .   .   .   BuiltinExpr("assert")
-.   .   .   .   .   .   BinaryExpr("==")
-.   .   .   .   .   .   .   IdentExpr(b,(0,true,true))
-.   .   .   .   .   .   .   BasicExpr(INT,"456")
-.   .   .   .   .   InvokeExpr
-.   .   .   .   .   .   BuiltinExpr("assert")
-.   .   .   .   .   .   BinaryExpr("==")
-.   .   .   .   .   .   .   IdentExpr(a,(1,true,true))
-.   .   .   .   .   .   .   BasicExpr(INT,"123")
-.   .   InvokeExpr
-.   .   .   IdentExpr(foo,(0,true,false))
+.   .   .   .   .   ExprStmt
+.   .   .   .   .   .   InvokeExpr
+.   .   .   .   .   .   .   BuiltinExpr("assert")
+.   .   .   .   .   .   .   BinaryExpr("==")
+.   .   .   .   .   .   .   .   IdentExpr(b,(0,true,true))
+.   .   .   .   .   .   .   .   BasicExpr(INT,"456")
+.   .   .   .   .   ExprStmt
+.   .   .   .   .   .   InvokeExpr
+.   .   .   .   .   .   .   BuiltinExpr("assert")
+.   .   .   .   .   .   .   BinaryExpr("==")
+.   .   .   .   .   .   .   .   IdentExpr(a,(1,true,true))
+.   .   .   .   .   .   .   .   BasicExpr(INT,"123")
+.   .   ExprStmt
+.   .   .   InvokeExpr
+.   .   .   .   IdentExpr(foo,(0,true,false))
 `)
 
 	//println(source)
@@ -427,109 +438,116 @@ FnExpr(numLocals:3 numCaptures:0 parentCaptures:[])
 
 func TestStruct(t *testing.T) {
 
-	errors := newAnalyzer("this;").Analyze()
+	errors := newAnalyzer("this").Analyze()
 	fail(t, errors, "['this' outside of loop]")
 
 	source := `
-struct{ };
+struct{ }
 `
 	anl := newAnalyzer(source)
 	errors = anl.Analyze()
 	ok(t, anl, errors, `
 FnExpr(numLocals:0 numCaptures:0 parentCaptures:[])
 .   Block
-.   .   StructExpr([],-1)
+.   .   ExprStmt
+.   .   .   StructExpr([],-1)
 `)
 
 	source = `
-struct{ a: 1 };
+struct{ a: 1 }
 `
 	anl = newAnalyzer(source)
 	errors = anl.Analyze()
 	ok(t, anl, errors, `
 FnExpr(numLocals:0 numCaptures:0 parentCaptures:[])
 .   Block
-.   .   StructExpr([a],-1)
-.   .   .   BasicExpr(INT,"1")
-`)
-
-	source = `
-struct{ a: this };
-`
-	anl = newAnalyzer(source)
-	errors = anl.Analyze()
-	ok(t, anl, errors, `
-FnExpr(numLocals:1 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   StructExpr([a],0)
-.   .   .   ThisExpr((0,true,false))
-`)
-
-	source = `
-struct{ a: struct { b: this } };
-`
-	anl = newAnalyzer(source)
-	errors = anl.Analyze()
-	ok(t, anl, errors, `
-FnExpr(numLocals:1 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   StructExpr([a],-1)
-.   .   .   StructExpr([b],0)
-.   .   .   .   ThisExpr((0,true,false))
-`)
-
-	source = `
-struct{ a: struct { b: 1 }, c: this.a };
-`
-	anl = newAnalyzer(source)
-	errors = anl.Analyze()
-	ok(t, anl, errors, `
-FnExpr(numLocals:1 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   StructExpr([a, c],0)
-.   .   .   StructExpr([b],-1)
+.   .   ExprStmt
+.   .   .   StructExpr([a],-1)
 .   .   .   .   BasicExpr(INT,"1")
-.   .   .   FieldExpr(a)
+`)
+
+	source = `
+struct{ a: this }
+`
+	anl = newAnalyzer(source)
+	errors = anl.Analyze()
+	ok(t, anl, errors, `
+FnExpr(numLocals:1 numCaptures:0 parentCaptures:[])
+.   Block
+.   .   ExprStmt
+.   .   .   StructExpr([a],0)
 .   .   .   .   ThisExpr((0,true,false))
 `)
 
 	source = `
-struct{ a: struct { b: this }, c: this };
+struct{ a: struct { b: this } }
+`
+	anl = newAnalyzer(source)
+	errors = anl.Analyze()
+	ok(t, anl, errors, `
+FnExpr(numLocals:1 numCaptures:0 parentCaptures:[])
+.   Block
+.   .   ExprStmt
+.   .   .   StructExpr([a],-1)
+.   .   .   .   StructExpr([b],0)
+.   .   .   .   .   ThisExpr((0,true,false))
+`)
+
+	source = `
+struct{ a: struct { b: 1 }, c: this.a }
+`
+	anl = newAnalyzer(source)
+	errors = anl.Analyze()
+	ok(t, anl, errors, `
+FnExpr(numLocals:1 numCaptures:0 parentCaptures:[])
+.   Block
+.   .   ExprStmt
+.   .   .   StructExpr([a, c],0)
+.   .   .   .   StructExpr([b],-1)
+.   .   .   .   .   BasicExpr(INT,"1")
+.   .   .   .   FieldExpr(a)
+.   .   .   .   .   ThisExpr((0,true,false))
+`)
+
+	source = `
+struct{ a: struct { b: this }, c: this }
 `
 	anl = newAnalyzer(source)
 	errors = anl.Analyze()
 	ok(t, anl, errors, `
 FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
 .   Block
-.   .   StructExpr([a, c],1)
-.   .   .   StructExpr([b],0)
-.   .   .   .   ThisExpr((0,true,false))
-.   .   .   ThisExpr((1,true,false))
-`)
-
-	source = `
-struct{ a: this, b: struct { c: this } };
-`
-	anl = newAnalyzer(source)
-	errors = anl.Analyze()
-	ok(t, anl, errors, `
-FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   StructExpr([a, b],0)
-.   .   .   ThisExpr((0,true,false))
-.   .   .   StructExpr([c],1)
+.   .   ExprStmt
+.   .   .   StructExpr([a, c],1)
+.   .   .   .   StructExpr([b],0)
+.   .   .   .   .   ThisExpr((0,true,false))
 .   .   .   .   ThisExpr((1,true,false))
 `)
 
 	source = `
+struct{ a: this, b: struct { c: this } }
+`
+	anl = newAnalyzer(source)
+	errors = anl.Analyze()
+	ok(t, anl, errors, `
+FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
+.   Block
+.   .   ExprStmt
+.   .   .   StructExpr([a, b],0)
+.   .   .   .   ThisExpr((0,true,false))
+.   .   .   .   StructExpr([c],1)
+.   .   .   .   .   ThisExpr((1,true,false))
+`)
+
+	source = `
 let a = struct {
-    x: 8,
-    y: 5,
-    plus:  fn() { return this.x + this.y; },
-    minus: fn() { return this.x - this.y; }
-};
-let b = a.plus();
-let c = a.minus();
+	x: 8,
+	y: 5,
+	plus:  fn() { return this.x + this.y; },
+	minus: fn() { return this.x - this.y; }
+}
+let b = a.plus()
+let c = a.minus()
 `
 	anl = newAnalyzer(source)
 	errors = anl.Analyze()
@@ -574,17 +592,17 @@ FnExpr(numLocals:4 numCaptures:0 parentCaptures:[])
 func TestAssignment(t *testing.T) {
 
 	source := `
-let x = struct { a: 0 };
-let y = x.a;
-x.a = 3;
-x.a++;
-y--;
-x[y] = 42;
-y = x[3];
-x[2]++;
-y.z = x[2]++;
-let g, h = 5;
-const i = 6, j;
+let x = struct { a: 0 }
+let y = x.a
+x.a = 3
+x.a++
+y--
+x[y] = 42
+y = x[3]
+x[2]++
+y.z = x[2]++
+let g, h = 5
+const i = 6, j
 `
 	anl := newAnalyzer(source)
 	errors := anl.Analyze()
@@ -604,36 +622,43 @@ FnExpr(numLocals:6 numCaptures:0 parentCaptures:[])
 .   .   .   IdentExpr(y,(1,false,false))
 .   .   .   FieldExpr(a)
 .   .   .   .   IdentExpr(x,(0,false,false))
-.   .   AssignmentExpr
-.   .   .   FieldExpr(a)
-.   .   .   .   IdentExpr(x,(0,false,false))
-.   .   .   BasicExpr(INT,"3")
-.   .   PostfixExpr("++")
-.   .   .   FieldExpr(a)
-.   .   .   .   IdentExpr(x,(0,false,false))
-.   .   PostfixExpr("--")
-.   .   .   IdentExpr(y,(1,false,false))
-.   .   AssignmentExpr
-.   .   .   IndexExpr
-.   .   .   .   IdentExpr(x,(0,false,false))
-.   .   .   .   IdentExpr(y,(1,false,false))
-.   .   .   BasicExpr(INT,"42")
-.   .   AssignmentExpr
-.   .   .   IdentExpr(y,(1,false,false))
-.   .   .   IndexExpr
-.   .   .   .   IdentExpr(x,(0,false,false))
+.   .   ExprStmt
+.   .   .   AssignmentExpr
+.   .   .   .   FieldExpr(a)
+.   .   .   .   .   IdentExpr(x,(0,false,false))
 .   .   .   .   BasicExpr(INT,"3")
-.   .   PostfixExpr("++")
-.   .   .   IndexExpr
-.   .   .   .   IdentExpr(x,(0,false,false))
-.   .   .   .   BasicExpr(INT,"2")
-.   .   AssignmentExpr
-.   .   .   FieldExpr(z)
+.   .   ExprStmt
+.   .   .   PostfixExpr("++")
+.   .   .   .   FieldExpr(a)
+.   .   .   .   .   IdentExpr(x,(0,false,false))
+.   .   ExprStmt
+.   .   .   PostfixExpr("--")
 .   .   .   .   IdentExpr(y,(1,false,false))
+.   .   ExprStmt
+.   .   .   AssignmentExpr
+.   .   .   .   IndexExpr
+.   .   .   .   .   IdentExpr(x,(0,false,false))
+.   .   .   .   .   IdentExpr(y,(1,false,false))
+.   .   .   .   BasicExpr(INT,"42")
+.   .   ExprStmt
+.   .   .   AssignmentExpr
+.   .   .   .   IdentExpr(y,(1,false,false))
+.   .   .   .   IndexExpr
+.   .   .   .   .   IdentExpr(x,(0,false,false))
+.   .   .   .   .   BasicExpr(INT,"3")
+.   .   ExprStmt
 .   .   .   PostfixExpr("++")
 .   .   .   .   IndexExpr
 .   .   .   .   .   IdentExpr(x,(0,false,false))
 .   .   .   .   .   BasicExpr(INT,"2")
+.   .   ExprStmt
+.   .   .   AssignmentExpr
+.   .   .   .   FieldExpr(z)
+.   .   .   .   .   IdentExpr(y,(1,false,false))
+.   .   .   .   PostfixExpr("++")
+.   .   .   .   .   IndexExpr
+.   .   .   .   .   .   IdentExpr(x,(0,false,false))
+.   .   .   .   .   .   BasicExpr(INT,"2")
 .   .   Let
 .   .   .   IdentExpr(g,(2,false,false))
 .   .   .   IdentExpr(h,(3,false,false))
@@ -648,10 +673,10 @@ FnExpr(numLocals:6 numCaptures:0 parentCaptures:[])
 func TestList(t *testing.T) {
 
 	source := `
-let a = ['x'][0];
-let b = ['x'];
-b[0] = 3;
-b[0]++;
+let a = ['x'][0]
+let b = ['x']
+b[0] = 3
+b[0]++
 `
 	anl := newAnalyzer(source)
 	errors := anl.Analyze()
@@ -673,15 +698,17 @@ FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
 .   .   .   IdentExpr(b,(1,false,false))
 .   .   .   ListExpr
 .   .   .   .   BasicExpr(STR,"x")
-.   .   AssignmentExpr
-.   .   .   IndexExpr
-.   .   .   .   IdentExpr(b,(1,false,false))
-.   .   .   .   BasicExpr(INT,"0")
-.   .   .   BasicExpr(INT,"3")
-.   .   PostfixExpr("++")
-.   .   .   IndexExpr
-.   .   .   .   IdentExpr(b,(1,false,false))
-.   .   .   .   BasicExpr(INT,"0")
+.   .   ExprStmt
+.   .   .   AssignmentExpr
+.   .   .   .   IndexExpr
+.   .   .   .   .   IdentExpr(b,(1,false,false))
+.   .   .   .   .   BasicExpr(INT,"0")
+.   .   .   .   BasicExpr(INT,"3")
+.   .   ExprStmt
+.   .   .   PostfixExpr("++")
+.   .   .   .   IndexExpr
+.   .   .   .   .   IdentExpr(b,(1,false,false))
+.   .   .   .   .   BasicExpr(INT,"0")
 `)
 }
 
@@ -714,10 +741,10 @@ func TestNamedFunc(t *testing.T) {
 
 	source := `
 fn a() {
-    return b();
+    return b()
 }
 fn b() {
-    return 42;
+    return 42
 }
 `
 	anl := newAnalyzer(source)
@@ -745,7 +772,7 @@ FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
 .   .   .   .   .   .   BasicExpr(INT,"42")
 `)
 
-	errors = newAnalyzer("fn a() {} const a = 1;").Analyze()
+	errors = newAnalyzer("fn a() {}; const a = 1;").Analyze()
 	fail(t, errors, "[Symbol 'a' is already defined]")
 }
 

@@ -300,6 +300,9 @@ func (p *dump) Visit(node Node) {
 	case *Go:
 		p.buf.WriteString("Go\n")
 
+	case *ExprStmt:
+		p.buf.WriteString("ExprStmt\n")
+
 	case *AssignmentExpr:
 		p.buf.WriteString("AssignmentExpr\n")
 	case *BinaryExpr:

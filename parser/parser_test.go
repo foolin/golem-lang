@@ -915,4 +915,14 @@ return
 z
 `)
 	ok(t, p, "fn() { return z; }")
+
+	p = newParser(`
+fn a() {
+    return b();
+}
+fn b() {
+    return 42;
+}
+`)
+	ok(t, p, "fn() { fn a() { return b(); }; fn b() { return 42; }; }")
 }
