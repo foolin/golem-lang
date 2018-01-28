@@ -365,8 +365,8 @@ for i in range(0, len(list)) {
 }
 ```
 
-Note that ranges do not actually contain a list of all the specified integers.  
-They simply represent a sequence that can be iterated over.
+Note that ranges do not actually contain a list of all the specified integers.  They 
+simply represent a sequence that can be iterated over.
 
 ## Operators and Expressions
 
@@ -397,7 +397,8 @@ Golem also supports 'assignment operators`, which perform an operation and
 do an assignment at the same time, e.g.:
 
 ```
-a += b; // is the same as a = a + b
+let a = 1, b = 2
+a += b // is the same as a = a + b
 ```
 
 Here are the assignment operators:
@@ -431,7 +432,8 @@ assert(b(3) == 9)
 A `return` statement without a value is syntactically invalid.  All return statements
 must include a value to return.
 
-Golem supports closures as well -- in fact closures are a fundamental mechanism
+Golem supports [closures](https://en.wikipedia.org/wiki/Closure_(computer_programming)) as 
+well -- in fact closures are a fundamental mechanism
 in Golem for managing state.  Here is an example of a closure that acts as a
 [accumulator generator](http://www.paulgraham.com/accgen.html):
 
