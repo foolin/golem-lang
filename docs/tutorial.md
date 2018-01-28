@@ -547,7 +547,7 @@ assert(setval(s, fieldName, 3) == 3)
 assert(getval(s, fieldName) == 3)
 ```
 
-Onnce a struct is created, it cannot have new keys added
+Once a struct is created, it cannot have new keys added
 to it, or existing keys removed.  The _values_ associated with the keys can be changed
 though, as we saw in the previous example.
 
@@ -611,10 +611,12 @@ fn Box(rect, d) {
 }
 
 let r = Rectangle(2, 3)
-
 let b = Box(r, 4)
-assert([b.width, b.height, b.depth, b.area(), b.volume()] == [2, 3, 4, 6, 24])
 
+assert(fields(r) == set { 'width', 'height', 'area' })
+assert(fields(b) == set { 'width', 'depth', 'height', 'volume', 'area' })
+
+assert([b.width, b.height, b.depth, b.area(), b.volume()] == [2, 3, 4, 6, 24])
 r.width = 5
 assert([b.width, b.height, b.depth, b.area(), b.volume()] == [5, 3, 4, 15, 60])
 
