@@ -344,3 +344,28 @@ func TestComments(t *testing.T) {
 	ok(t, s, ast.UNEXPECTED_EOF, "", 1, 7)
 
 }
+
+func TestUnicode(t *testing.T) {
+
+	s := NewScanner("'\\u'")
+	ok(t, s, ast.UNEXPECTED_CHAR, "'", 1, 4)
+	s = NewScanner("'\\u['")
+	ok(t, s, ast.UNEXPECTED_CHAR, "[", 1, 4)
+	s = NewScanner("'\\u{z'")
+	ok(t, s, ast.UNEXPECTED_CHAR, "z", 1, 5)
+	s = NewScanner("'\\u{a'")
+	ok(t, s, ast.UNEXPECTED_CHAR, "'", 1, 6)
+	s = NewScanner("'\\u{a]'")
+	ok(t, s, ast.UNEXPECTED_CHAR, "]", 1, 6)
+	s = NewScanner("'\\u{1234567}'")
+	ok(t, s, ast.UNEXPECTED_CHAR, "7", 1, 11)
+
+	s = NewScanner("'\\u{24}'")
+	ok(t, s, ast.STR, "$", 1, 1)
+	s = NewScanner("'\\u{2665}'")
+	ok(t, s, ast.STR, "♥", 1, 1)
+	s = NewScanner("'\\u{1F496}'")
+	ok(t, s, ast.STR, "💖", 1, 1)
+	s = NewScanner("'\\u{1f496}\\u{2665}\\u{24}'")
+	ok(t, s, ast.STR, "💖♥$", 1, 1)
+}

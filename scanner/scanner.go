@@ -5,10 +5,10 @@
 package scanner
 
 import (
-	//"fmt"
 	"bytes"
 	"github.com/mjarmy/golem-lang/ast"
 	"io"
+	"strconv"
 	"strings"
 	"unicode"
 )
@@ -417,7 +417,6 @@ func (s *Scanner) nextStr(delim rune) *ast.Token {
 
 	var buf bytes.Buffer
 
-	// TODO \u
 	for {
 		r := s.cur.r
 
@@ -434,20 +433,27 @@ func (s *Scanner) nextStr(delim rune) *ast.Token {
 			r = s.cur.r
 			switch r {
 			case '\\':
+				s.consume()
 				buf.WriteRune('\\')
-				s.consume()
 			case 'n':
+				s.consume()
 				buf.WriteRune('\n')
-				s.consume()
 			case 'r':
+				s.consume()
 				buf.WriteRune('\r')
-				s.consume()
 			case 't':
+				s.consume()
 				buf.WriteRune('\t')
+			case 'u':
 				s.consume()
+				u, err := s.unicodeRune()
+				if err != nil {
+					return err
+				}
+				buf.WriteRune(u)
 			case delim:
-				buf.WriteRune(delim)
 				s.consume()
+				buf.WriteRune(delim)
 			default:
 				return s.unexpectedChar(r, s.pos)
 			}
@@ -465,6 +471,41 @@ func (s *Scanner) nextStr(delim rune) *ast.Token {
 			s.consume()
 		}
 	}
+}
+
+func (s *Scanner) unicodeRune() (rune, *ast.Token) {
+
+	if s.cur.r != '{' {
+		return 0, s.unexpectedChar(s.cur.r, s.pos)
+	}
+	s.consume()
+
+	begin := s.cur.idx
+	pos := s.pos
+	t := s.expect(isHexDigit)
+	if t != nil {
+		return 0, t
+	}
+	s.acceptWhile(isHexDigit)
+	end := s.cur.idx
+
+	text := s.source[begin:end]
+	if len(text) > 6 {
+		// too long
+		runes := []rune(text)
+		return 0, s.unexpectedChar(runes[len(runes)-1], pos.Advance(6))
+	}
+
+	if s.cur.r != '}' {
+		return 0, s.unexpectedChar(s.cur.r, s.pos)
+	}
+	s.consume()
+
+	n, err := strconv.ParseInt(text, 16, 32)
+	if err != nil {
+		panic("unreachable")
+	}
+	return rune(int32(n)), nil
 }
 
 func (s *Scanner) nextMultilineStr() *ast.Token {

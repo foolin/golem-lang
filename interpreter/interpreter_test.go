@@ -2009,3 +2009,15 @@ func TestMultilineString(t *testing.T) {
 	mod := newCompiler(source).Compile()
 	interpret(mod)
 }
+
+func TestUnicodeEscape(t *testing.T) {
+	source := `
+let s = '\u{1f496}\u{2665}\u{24}'
+assert(s[0] == '💖')
+assert(s[1] == '♥')
+assert(s[2] == '$')
+`
+
+	mod := newCompiler(source).Compile()
+	interpret(mod)
+}
