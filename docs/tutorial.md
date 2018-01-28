@@ -681,7 +681,7 @@ Golem uses the Go Language's [concurrency system](https://tour.golang.org/concur
 means that Golem has 'goroutines', channels and the ability to send and 
 receive messages.  Go's concurrency capabilities are quite powerful, and Golem is capable
 of using them all (**TODO** well, just not yet.  We need to figure out how to provide
-access to mutexes and lots of other lower level things)
+access to `select`, mutexes and quite a few other things)
 
 ```
 fn sum(a, c) {
@@ -728,18 +728,16 @@ An import caveat regarding immutability is that even though closures, like all f
 are immutable, they can still have enclosed state that can be modified.  There
 is no way in Golem to freeze a closure after the fact so that it can no longer modify 
 any of its captured variables.  It is up to you to manage state properly if you are 
-using closures.  Here is the "accumulator generator" from a previous example.  
-We freeze it this time, but it still has mutable state via the enclosed variable 'n':
+using closures.  Here is the "accumulator generator" from a previous example.  We 
+freeze it this time, but it still has mutable state via the enclosed variable 'n':
 
 ```
-let foo = fn(n) { return fn(i) { return n += i; }; }
-freeze(foo)
+let foo = freeze(fn(n) { 
+    return |i| => n += i
+})
 let f = foo(4)
 assert([f(1), f(2), f(3)] == [5, 7, 10])
 ```
-
-Using the `const` keyword, in conjuction with `freeze()`, is a good way to lock 
-down your code so that inadvertent immutablity does not creep in.
 
 Immutabilty and concurrency go hand in hand.  By using immutable values whenever 
 possible, you can reduce the likelyhood of bugs in your concurrency code, 
