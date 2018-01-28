@@ -1993,3 +1993,19 @@ assert(s[3:4] == '');
 	mod := newCompiler(source).Compile()
 	interpret(mod)
 }
+
+func TestMultilineString(t *testing.T) {
+
+	source :=
+		"let s = `\n" +
+			"ab\n" +
+			"cd\n" +
+			"efgh\n" +
+			"`\n" +
+			"\tassert(s[1:3] == 'ab')\n" +
+			"\tassert(s[4:6] == 'cd')\n" +
+			"\tassert(s[7:-1] == 'efgh')"
+
+	mod := newCompiler(source).Compile()
+	interpret(mod)
+}

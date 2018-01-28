@@ -236,6 +236,14 @@ func TestStr(t *testing.T) {
 	s = NewScanner("'\\'\\n\\r\\t\\\\'")
 	ok(t, s, ast.STR, "'\n\r\t\\", 1, 1)
 	ok(t, s, ast.EOF, "", 1, 13)
+
+	s = NewScanner("`a`")
+	ok(t, s, ast.STR, "a", 1, 1)
+	ok(t, s, ast.EOF, "", 1, 4)
+
+	s = NewScanner("`a\nb`")
+	ok(t, s, ast.STR, "a\nb", 1, 1)
+	ok(t, s, ast.EOF, "", 2, 3)
 }
 
 func TestIdentOrKeyword(t *testing.T) {

@@ -304,6 +304,9 @@ func (s *Scanner) Next() *ast.Token {
 		case r == '"':
 			return s.nextStr('"')
 
+		case r == '`':
+			return s.nextMultilineStr()
+
 		case isDigit(r):
 			return s.nextNumber()
 
@@ -414,7 +417,6 @@ func (s *Scanner) nextStr(delim rune) *ast.Token {
 
 	var buf bytes.Buffer
 
-	// TODO multiline
 	// TODO \u
 	for {
 		r := s.cur.r
@@ -455,6 +457,38 @@ func (s *Scanner) nextStr(delim rune) *ast.Token {
 			return s.unexpectedChar(r, s.pos)
 
 		case r < ' ':
+			// disallow embedded control characters
+			return s.unexpectedChar(r, s.pos)
+
+		default:
+			buf.WriteRune(r)
+			s.consume()
+		}
+	}
+}
+
+func (s *Scanner) nextMultilineStr() *ast.Token {
+
+	pos := s.pos
+	s.consume()
+
+	var buf bytes.Buffer
+
+	for {
+		r := s.cur.r
+
+		switch {
+
+		case r == '`':
+			// end of string
+			s.consume()
+			return &ast.Token{ast.STR, buf.String(), pos}
+
+		case r == eof:
+			// unterminated string literal
+			return s.unexpectedChar(r, s.pos)
+
+		case r < ' ' && !(r == '\n' || r == '\t' || r == '\r'):
 			// disallow embedded control characters
 			return s.unexpectedChar(r, s.pos)
 

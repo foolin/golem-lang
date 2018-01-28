@@ -3,14 +3,17 @@
 Things to do before Golem is releasable
 -----------------------------------------------------------
 
-make the semicolons optional
-multiline strings
 string unicode escape -- JSON style
 
-create an example separate repo to demonstrate how to embed/sandbox.
+golint and go vet
+
+create an example to demonstrate how to embed/sandbox.
 
 complete all documentation:
-    should we use the wiki? ghpages?
+
+    source code
+
+    move to wiki
     tutorial
     language reference
         BNF
