@@ -18,7 +18,7 @@
 
     A Str is a sequence of unicode characters, a.k.a 'runes'.  
 
-    Multiline strings can be created by using the backtick charcter '\`' as the delimiter.
+    Multiline strings can be created by using the backtick charcter '`' as the delimiter.
 
     Unicode escape sequences are declared using a `\u`.  For example, to encode "💖",
     you would use `\u{1F496}`.
