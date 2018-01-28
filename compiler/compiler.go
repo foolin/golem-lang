@@ -60,9 +60,9 @@ func (c *compiler) Compile() *g.BytecodeModule {
 func (c *compiler) makeModuleContents(mod *g.BytecodeModule) g.Struct {
 
 	entries := []g.Field{}
-	nodes := c.funcs[0].Body.Nodes
-	for _, n := range nodes {
-		switch t := n.(type) {
+	stmts := c.funcs[0].Body.Statements
+	for _, st := range stmts {
+		switch t := st.(type) {
 		case *ast.Let:
 			for _, d := range t.Decls {
 				vbl := d.Ident.Variable
@@ -210,6 +210,9 @@ func (c *compiler) Visit(node ast.Node) {
 	case *ast.Go:
 		c.visitGo(t)
 
+	case *ast.ExprStmt:
+		c.visitExprStmt(t)
+
 	case *ast.StructExpr:
 		c.visitStructExpr(t)
 
@@ -261,11 +264,11 @@ func (c *compiler) visitBlock(blk *ast.Block) {
 	// have no way of knowing which expressions should be popped.
 	// So we need to write the Control Flow Graph to fix this problem.
 
-	for _, node := range blk.Nodes {
-		c.Visit(node)
+	for _, stmt := range blk.Statements {
+		c.Visit(stmt)
 
 		// TODO
-		//if (node is ast.Expr) && someControlFlowGraphCheck() {
+		//if (node is ast.Expression) && someControlFlowGraphCheck() {
 		//	c.push(node.End(), g.POP)
 		//}
 	}
@@ -759,7 +762,7 @@ func (c *compiler) visitBinaryExpr(b *ast.BinaryExpr) {
 	}
 }
 
-func (c *compiler) visitOr(lhs ast.Expr, rhs ast.Expr) {
+func (c *compiler) visitOr(lhs ast.Expression, rhs ast.Expression) {
 
 	c.Visit(lhs)
 	j0 := c.push(lhs.End(), g.JUMP_TRUE, 0xFF, 0xFF)
@@ -777,7 +780,7 @@ func (c *compiler) visitOr(lhs ast.Expr, rhs ast.Expr) {
 	c.setJump(j2, c.opcLen())
 }
 
-func (c *compiler) visitAnd(lhs ast.Expr, rhs ast.Expr) {
+func (c *compiler) visitAnd(lhs ast.Expression, rhs ast.Expression) {
 
 	c.Visit(lhs)
 	j0 := c.push(lhs.End(), g.JUMP_FALSE, 0xFF, 0xFF)
@@ -915,14 +918,18 @@ func (c *compiler) visitInvoke(inv *ast.InvokeExpr) {
 	c.pushIndex(inv.Begin(), g.INVOKE, len(inv.Params))
 }
 
-func (c *compiler) visitGo(spawn *ast.Go) {
+func (c *compiler) visitGo(gw *ast.Go) {
 
-	inv := spawn.Invocation
+	inv := gw.Invocation
 	c.Visit(inv.Operand)
 	for _, n := range inv.Params {
 		c.Visit(n)
 	}
 	c.pushIndex(inv.Begin(), g.GO, len(inv.Params))
+}
+
+func (c *compiler) visitExprStmt(es *ast.ExprStmt) {
+	c.Visit(es.Expr)
 }
 
 func (c *compiler) visitStructExpr(stc *ast.StructExpr) {

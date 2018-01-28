@@ -83,7 +83,7 @@ func contents() g.Struct {
 
 func TestExpression(t *testing.T) {
 
-	mod := newCompiler(newAnalyzer("-2 + -1 + -0 + 0 + 1 + 2;")).Compile()
+	mod := newCompiler(newAnalyzer("-2 + -1 + -0 + 0 + 1 + 2")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.MakeInt(int64(-2)),
@@ -113,7 +113,7 @@ func TestExpression(t *testing.T) {
 					{16, 0}},
 				nil}}, contents()})
 
-	mod = newCompiler(newAnalyzer("(2 + 3) * -4 / 10;")).Compile()
+	mod = newCompiler(newAnalyzer("(2 + 3) * -4 / 10")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.MakeInt(int64(2)),
@@ -141,7 +141,7 @@ func TestExpression(t *testing.T) {
 					{16, 0}},
 				nil}}, contents()})
 
-	mod = newCompiler(newAnalyzer("null / true + \nfalse;")).Compile()
+	mod = newCompiler(newAnalyzer("null / true + \nfalse")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{},
 		nil,
@@ -165,7 +165,7 @@ func TestExpression(t *testing.T) {
 					{6, 0}},
 				nil}}, contents()})
 
-	mod = newCompiler(newAnalyzer("'a' * 1.23e4;")).Compile()
+	mod = newCompiler(newAnalyzer("'a' * 1.23e4")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.MakeStr("a"),
@@ -187,7 +187,7 @@ func TestExpression(t *testing.T) {
 					{8, 0}},
 				nil}}, contents()})
 
-	mod = newCompiler(newAnalyzer("'a' == true;")).Compile()
+	mod = newCompiler(newAnalyzer("'a' == true")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.MakeStr("a")},
@@ -208,7 +208,7 @@ func TestExpression(t *testing.T) {
 					{6, 0}},
 				nil}}, contents()})
 
-	mod = newCompiler(newAnalyzer("true != false;")).Compile()
+	mod = newCompiler(newAnalyzer("true != false")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{},
 		nil,
@@ -226,7 +226,7 @@ func TestExpression(t *testing.T) {
 					{4, 0}},
 				nil}}, contents()})
 
-	mod = newCompiler(newAnalyzer("true > false; true >= false;")).Compile()
+	mod = newCompiler(newAnalyzer("true > false; true >= false")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{},
 		nil,
@@ -397,13 +397,13 @@ func TestIf(t *testing.T) {
 					{17, 0}},
 				nil}}, contents()})
 
-	source = `let a = 1;
+	source = `let a = 1
 		if (false) {
-		    let b = 2;
+		    let b = 2
 		} else {
-		    let c = 3;
+		    let c = 3
 		}
-		let d = 4;`
+		let d = 4`
 
 	anl = newAnalyzer(source)
 	mod = newCompiler(anl).Compile()
@@ -473,7 +473,7 @@ func TestWhile(t *testing.T) {
 					{20, 0}},
 				nil}}, contents()})
 
-	source = "let a = 'z'; while (0 < 1) \n{ break; continue; let b = 2; } let c = 3;"
+	source = "let a = 'z'; while (0 < 1) \n{ break; continue; let b = 2; }; let c = 3;"
 	mod = newCompiler(newAnalyzer(source)).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
@@ -511,30 +511,9 @@ func TestWhile(t *testing.T) {
 
 func TestReturn(t *testing.T) {
 
-	source := "return;"
+	source := "let a = 1; return a \n- 2; a = 3;"
 	anl := newAnalyzer(source)
 	mod := newCompiler(anl).Compile()
-
-	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{},
-		nil,
-		[][]g.Field{},
-		[]*g.Template{
-			&g.Template{
-				0, 0, 0,
-				[]byte{
-					g.LOAD_NULL,
-					g.RETURN,
-					g.RETURN},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 1},
-					{2, 0}},
-				nil}}, contents()})
-
-	source = "let a = 1; return a \n- 2; a = 3;"
-	anl = newAnalyzer(source)
-	mod = newCompiler(anl).Compile()
 
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
@@ -570,13 +549,13 @@ func TestReturn(t *testing.T) {
 func TestFunc(t *testing.T) {
 
 	source := `
-let a = fn() { 42; };
+let a = fn() { 42; }
 let b = fn(x) {
     let c = fn(y) {
-        y * 7;
-    };
-    x * x + c(x);
-};
+        y * 7
+    }
+    x * x + c(x)
+}
 `
 	anl := newAnalyzer(source)
 	mod := newCompiler(anl).Compile()
@@ -651,12 +630,12 @@ let b = fn(x) {
 				nil}}, contents()})
 
 	source = `
-let a = fn() { };
-let b = fn(x) { x; };
-let c = fn(x, y) { let z = 4; x * y * z; };
-a();
-b(1);
-c(2, 3);
+let a = fn() { }
+let b = fn(x) { x; }
+let c = fn(x, y) { let z = 4; x * y * z; }
+a()
+b(1)
+c(2, 3)
 `
 	anl = newAnalyzer(source)
 	mod = newCompiler(anl).Compile()
@@ -747,10 +726,10 @@ func TestCapture(t *testing.T) {
 	source := `
 const accumGen = fn(n) {
     return fn(i) {
-        n = n + i;
-        return n;
-    };
-};`
+        n = n + i
+        return n
+    }
+}`
 
 	anl := newAnalyzer(source)
 	mod := newCompiler(anl).Compile()
@@ -802,13 +781,13 @@ const accumGen = fn(n) {
 				nil}}, contents()})
 
 	source = `
-let z = 2;
+let z = 2
 const accumGen = fn(n) {
     return fn(i) {
-        n = n + i + z;
-        return n;
-    };
-};`
+        n = n + i + z
+        return n
+    }
+}`
 
 	anl = newAnalyzer(source)
 	mod = newCompiler(anl).Compile()
@@ -876,10 +855,10 @@ const accumGen = fn(n) {
 func TestPostfix(t *testing.T) {
 
 	source := `
-let a = 10;
-let b = 20;
-let c = a++;
-let d = b--;
+let a = 10
+let b = 20
+let c = a++
+let d = b--
 `
 	anl := newAnalyzer(source)
 	mod := newCompiler(anl).Compile()
@@ -948,14 +927,14 @@ func TestPool(t *testing.T) {
 func TestTry(t *testing.T) {
 
 	source := `
-let a = 1;
+let a = 1
 try {
-    a++;
+    a++
 }
 finally {
-    a++;
+    a++
 }
-assert(a == 2);
+assert(a == 2)
 `
 	anl := newAnalyzer(source)
 	mod := newCompiler(anl).Compile()
@@ -965,12 +944,12 @@ assert(a == 2);
 	source = `
 try {
     try {
-        3 / 0;
+        3 / 0
     } catch e2 {
-        assert(1,2);
+        assert(1,2)
     }
 } catch e {
-    println(e);
+    println(e)
 }
 `
 	anl = newAnalyzer(source)

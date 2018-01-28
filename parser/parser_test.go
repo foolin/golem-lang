@@ -925,4 +925,14 @@ fn b() {
 }
 `)
 	ok(t, p, "fn() { fn a() { return b(); }; fn b() { return 42; }; }")
+
+	parse(t, `
+let a = fn() { 42; }
+let b = fn(x) {
+    let c = fn(y) {
+        y * 7
+    }
+    x * x + c(x)
+}
+`)
 }
