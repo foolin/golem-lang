@@ -95,11 +95,11 @@
         reduce(initial, func)
             Reduce the list to a single value, which is the accumulated result of 
             applying the given function to each element in the existing list.  Each 
-            successive invocation is supplied the return value of the previous invocation.
-            The given function must take 2 parameters.
+            successive invocation of the function is supplied the return value 
+            of the previous invocation.  The given function must take 2 parameters.
             For example:
-                let ls = [1, 2, 3, 4, 5];
-                let sum = ls.reduce(0, |acc, x| => acc + x);
+                let ls = [1, 2, 3, 4, 5]
+                let sum = ls.reduce(0, |acc, x| => acc + x)
 
         filter(predFunc)
             Create a new list which is the result of applying the given predicate function

@@ -18,7 +18,7 @@ Then, fire up your text editor of choice, and type the following program into
 a file named 'tutorial.glm':
 
 ```
-println('Hello, world.');
+println('Hello, world.')
 ```
 
 and then run it like so:
@@ -30,6 +30,20 @@ and then run it like so:
 The function `println` is built in to Golem.  There are several of these builtin functions
 in Golem.
 
+You may have noticed that there is a semicolon at the end of the println 
+statement.  Semicolons are optional in Golem --  you are not required to include a
+semicolon after each statement in your code, although you can do so if you 
+wish. 
+
+However, semicolons are required if you want to write multiple separate statements 
+on a single line:
+
+```
+print('Hello, '); println('world.')
+```
+
+We will omit any optional semicolons in the rest of this tutorial.
+
 ## Basic Types
 
 Golem has a simple, straightforward type system.  The basic primitive types 
@@ -40,8 +54,8 @@ Golem has the usual set of c-syntax-family operators that you would
 expect: `==`, `!=`, `||`, `&&`, `<`, `>`, `+`, `-`, and so forth.  
 
 ```
-assert(1 + 2 == 3);
-assert(42 / 7 == 8 - 2);
+assert(1 + 2 == 3)
+assert(42 / 7 == 8 - 2)
 ```
 
 We will cover the operators in more detail later.  Note that we used another builtin 
@@ -52,20 +66,20 @@ Integer values in Golem are signed 64 bit integers.  Float values are 64-bit.  I
 are coerced to Floats during arithmetic and checks for equality:
 
 ```
-assert(12 / 4.0 == 3.0);
-assert(12 / 4.0 == 3);
+assert(12 / 4.0 == 3.0)
+assert(12 / 4.0 == 3)
 ```
 
 Another builtin function, `str`, returns  the string representation of a value:
 
 ```
-assert(str(3) == '3');
+assert(str(3) == '3')
 ```
 
 Strings can be delimited either with a single quote or a double quote:
 
 ```
-assert('abc\n' == "abc\n");
+assert('abc\n' == "abc\n")
 ```
 
 During addition, if one of the values is a string, and the other is not, then
@@ -73,15 +87,15 @@ the other value is converted to a string, and the two strings are then
 concatenated together:
 
 ```
-assert('a' + 1 == 'a1');
+assert('a' + 1 == 'a1')
 ```
 
 Unlike many other dynamic languages, Golem has no concept of 'truthiness'.  The only 
 things that are true or false are boolean values:
 
 ```
-assert(true);
-assert(!false);
+assert(true)
+assert(!false)
 ```
 
 So, the empty string, zero, null, etc. are *not* boolean, and will throw a
@@ -89,7 +103,7 @@ TypeMismatch error if you attempt to evaluate them in a place where a boolean va
 expected.
 
 ```
-assert('');
+assert('')
 ```
 
 ## Comments
@@ -104,10 +118,10 @@ or `const` keyword.  It is an error to refer to a variable before it has been
 declared.
 
 ```
-let a = 1;
-const b = 2;
-a = b + 3;
-println(a);
+let a = 1
+const b = 2
+a = b + 3
+println(a)
 ```
 
 As you might expect, the value of a const variable cannot be changed.
@@ -116,9 +130,9 @@ As you might expect, the value of a const variable cannot be changed.
 other, *are* expressions:
 
 ```
-let a = 1;
-let b = (a = 2);
-assert(a == b && b == 2);
+let a = 1
+let b = (a = 2)
+assert(a == b && b == 2)
 ```
 
 ## Collections
@@ -130,17 +144,17 @@ square brackets.  Once you've created a list, you can use square brackets to acc
 individual elements of a list (this is called the 'index operator').  
 
 ```
-let a = [];
-let b = [3,4,5];
-assert(a.isEmpty());
-assert(b[0] == 3);
+let a = []
+let b = [3,4,5]
+assert(a.isEmpty())
+assert(b[0] == 3)
 ```
 
 If the index value is negative, values will be indexed from the beginning of the list.
 This is a really handy way to get the last element of a list.
 ```
-let a = [1,2,3];
-assert(a[-1] == 3);
+let a = [1,2,3]
+assert(a[-1] == 3)
 ```
 
 Use the 'slice operator' to create a new list from part of an existing list or string.
@@ -149,53 +163,53 @@ will start at the beginning or end.  Negative values work with slices in the sam
 way that they do with lists.
 
 ```
-let c = [4,5,6,7,8];
-assert(c[1:3] == [5,6]);
-assert(c[:3] == [4,5,6]);
-assert(c[2:] == [6,7,8]);
-assert(c[1:-1] == [5,6,7]);
+let c = [4,5,6,7,8]
+assert(c[1:3] == [5,6])
+assert(c[:3] == [4,5,6])
+assert(c[2:] == [6,7,8])
+assert(c[1:-1] == [5,6,7])
 ```
 
 Indexing and slicing works on strings too:
 
 ```
-assert('abc'[1] == 'b');
-assert('abc'[:-1] == 'ab');
+assert('abc'[1] == 'b')
+assert('abc'[:-1] == 'ab')
 ```
 
 Golem's `dict` type is similar to Python's 'dict', or 'HashMap' in java.  The
 keys can be any value that supports hashing (currently str, int, float, bool, or tuple). 
 
 ```
-let a = dict {'x': 1, 'y': 2};
-assert(a['x'] == 1);
+let a = dict {'x': 1, 'y': 2}
+assert(a['x'] == 1)
 ```
 
 A `set` is a collection of distinct values.  Any value that can act as a key in a dict
 can be a member of a set.
 
 ```
-let a = set {'x', 'y'};
-assert(a.contains('x'));
+let a = set {'x', 'y'}
+assert(a.contains('x'))
 ```
 
 A `tuple` is similar to a Python tuple.  It is an immutable list-like data structure.
 Tuples must have at least two values.
 
 ```
-let a = (1, 2);
-assert(a[0] == 1);
+let a = (1, 2)
+assert(a[0] == 1)
 ```
 
 The builtin function `len` can be used to get the length of any of the collections.
 `len` will also return the length of a string.
 
 ```
-let a = [1, 2, 3];
-let b = 'lmnop';
-let c = dict {"x": 3};
+let a = [1, 2, 3]
+let b = 'lmnop'
+let c = dict {"x": 3}
 
-assert([len(a), len(b), len(c)] == [3,5,1]);
+assert([len(a), len(b), len(c)] == [3,5,1])
 ```
 
 ## Intrinsic Functions
@@ -208,23 +222,23 @@ itself.
 Here's an example of how to use some of the intrinsic functions that a list has:
 
 ```
-let ls = [];
-assert(ls.isEmpty());
-ls.add('a');
-ls.addAll(['b', 'c']);
-assert(ls == ['a', 'b', 'c']);
-assert(ls.contains('c'));
-assert(ls.indexOf('b') == 1);
-assert(ls.join(',') == 'a,b,c');
+let ls = []
+assert(ls.isEmpty())
+ls.add('a')
+ls.addAll(['b', 'c'])
+assert(ls == ['a', 'b', 'c'])
+assert(ls.contains('c'))
+assert(ls.indexOf('b') == 1)
+assert(ls.join(',') == 'a,b,c')
 
-ls = [1, 2, 3, 4, 5];
-let squares = ls.map(x => x * x);
-let addedUp = ls.reduce(0, |acc, x| => acc + x);
-let even = ls.filter(x => (x % 2 == 0));
+ls = [1, 2, 3, 4, 5]
+let squares = ls.map(x => x * x)
+let addedUp = ls.reduce(0, |acc, x| => acc + x)
+let even = ls.filter(x => (x % 2 == 0))
 
-assert(squares == [1, 4, 9, 16, 25]);
-assert(addedUp == 15);
-assert(even == [2, 4]);
+assert(squares == [1, 4, 9, 16, 25])
+assert(addedUp == 15)
+assert(even == [2, 4])
 
 ```
 
@@ -240,15 +254,15 @@ for a complete description of all the intrinsic functions on the various types.
 Golem has a familiar set of control structures: `if`, `while`, `switch`, and `for`.
 
 ```
-let a = 1;
+let a = 1
 while a < 12 {
     if a < 3 {
-        a = a + 2;
+        a = a + 2
     } else {
-        a = 15;
+        a = 15
     }
 }
-assert(a == 15);
+assert(a == 15)
 ```
 
 Golem also has `break` and `continue`, which will break out of a `while` or `for` loop,
@@ -257,9 +271,9 @@ or continue at the top of the loop, as in other languages.
 Golem has 'ternary-if' expressions as well:
 
 ```
-const a = 10;
-let b = a < 3 ? 4 : 5;
-assert(b == 5);
+const a = 10
+let b = a < 3 ? 4 : 5
+assert(b == 5)
 ```
 
 `switch` works roughly the same way as it does in other languages, except that you 
@@ -268,35 +282,35 @@ only one case will be executed.  Therefore the `break` keyword is not applicable
 switches.
 
 ```
-let a = 'abc';
-let b = 0;
+let a = 'abc'
+let b = 0
 switch a {
     case 0:
-        b = 1;
+        b = 1
     case 'abc':
-        b = 2;
+        b = 2
     default:
-        b = 3;
+        b = 3
 }
-assert(b == 2);
+assert(b == 2)
 ```
 
 You can have multiple expressions in a case statement.  The body of the case
 will be executed if at least on of the expressions matches:
 
 ```
-let s = '';
-let i = 0;
+let s = ''
+let i = 0
 while i < 4 {
     switch i {
     case 0, 1:
-        s += 'a';
+        s += 'a'
     case 2:
-        s += 'b';
+        s += 'b'
     }
-    i++;
+    i++
 }
-assert(s == 'aab');
+assert(s == 'aab')
 ```
 
 You can leave the expression out after the `switch` keyword. This lets you switch
@@ -304,26 +318,26 @@ on a sequence of boolean case statements, which is sometimes easier to read than
 a cascade of 'if, else-if, else-if' statmements:
 
 ```
-let b = 0;
+let b = 0
 switch {
     case 1 < 2:
-        b = 1;
+        b = 1
     default:
-        b = 2;
+        b = 2
 }
-assert(b == 1);
+assert(b == 1)
 ```
 
 Golem's `for` statement is much like python's `for` statement (and therefore unlike
 `for` in C-family langauges like Java, JS, C#, etc).
 
 ```
-let a = [1, 2, 3];
-let z = 0;
+let a = [1, 2, 3]
+let z = 0
 for e in a {
-    z += e;
+    z += e
 }
-assert(z == 6);
+assert(z == 6)
 ```
 
 `for` iterates over a sequence of values derived from an 'iterable' value.  Lists, dicts,
@@ -332,9 +346,9 @@ sets, and strings are iterable.
 Use a tuple to capture the values iterated from a dict:
 
 ```
-let d = dict { "x": 1, "y": 2, "z": 3 };
+let d = dict { "x": 1, "y": 2, "z": 3 }
 for (k, v) in d {
-    println("key: ", k, ", value: ", v);
+    println("key: ", k, ", value: ", v)
 }
 ```
 
@@ -342,11 +356,11 @@ There is actually one more iterable type -- ranges.  Ranges are created via the 
 builtin function.  A range is an immutable value that represents a sequence of integers.  
 
 ```
-let list = ["frog", "cow", "rabbit"];
+let list = ["frog", "cow", "rabbit"]
 for i in range(0, len(list)) {
     if list[i] == "cow" {
-        println("The cow is at element ", i);
-        break;
+        println("The cow is at element ", i)
+        break
     }
 }
 ```
@@ -372,7 +386,7 @@ The 'spaceship' operator, `<=>`, returns -1, 0, or 1 if the left-hand operator i
 less than, equal to, or greater than the right-hand operator: 
 
 ```
-assert((5 <=> 10) == -1);
+assert((5 <=> 10) == -1)
 ```
 
 We will discuss the `has` operator later on when we talk about structs.
@@ -383,7 +397,7 @@ Golem also supports 'assignment operators`, which perform an operation and
 do an assignment at the same time, e.g.:
 
 ```
-a += b; // is the same as a = a + b;
+a += b; // is the same as a = a + b
 ```
 
 Here are the assignment operators:
@@ -398,9 +412,9 @@ evaluates to a function:
 
 ```
 let a = fn(x) {
-    return x * 7;
-};
-assert(a(6) == 42);
+    return x * 7
+}
+assert(a(6) == 42)
 ```
 
 Functions do not have to have an explicit `return` statement. If there is no `return`,
@@ -408,10 +422,10 @@ they will return the last expression that was evaluated.  If no expression is
 evaluated in the function, `null` is returned.
 
 ```
-let a = fn() {};
-let b = fn(x) { x * x; };
-assert(a() == null);
-assert(b(3) == 9);
+let a = fn() {}
+let b = fn(x) { x * x; }
+assert(a() == null)
+assert(b(3) == 9)
 ```
 
 A `return` statement without a value is syntactically invalid.  All return statements
@@ -424,11 +438,11 @@ in Golem for managing state.  Here is an example of a closure that acts as a
 ```
 let foo = fn(n) {
     return fn(i) {
-        return n += i;
+        return n += i
     }; 
-};
-let f = foo(4);
-assert([f(1), f(2), f(3)] == [5, 7, 10]);
+}
+let f = foo(4)
+assert([f(1), f(2), f(3)] == [5, 7, 10])
 ```
 
 You can declare the formal parameters of a function to be constant.  In the following
@@ -436,15 +450,15 @@ example, the formal parameter 'b' is constant, so it cannot be changed inside th
 function:
 
 ```
-let a = 1;
+let a = 1
 
 fn foo(const b) {
-    return a += b;
+    return a += b
 }
 
-foo(2);
-foo(3);
-assert(a == 6);
+foo(2)
+foo(3)
+assert(a == 6)
 ```
 
 Golem also supports 'lambda' syntax, via the `=>` operator.  Lambdas provide a 
@@ -452,13 +466,13 @@ lightweight way to define a function on the fly. The body of a lambda function i
 single expression. A lambda that takes only one parameter can omit the surrounding pipes.
 
 ```
-let a = || => 3;
-let b = x => x * x;
-let c = |x, y| => (x + y)*5;
+let a = || => 3
+let b = x => x * x
+let c = |x, y| => (x + y)*5
 
-assert(a() == 3);
-assert(b(2) == 4);
-assert(c(1, 2) == 15);
+assert(a() == 3)
+assert(b(2) == 4)
+assert(c(1, 2) == 15)
 ```
 
 'Named functions' in Golem are functions that are declared at the beginning of
@@ -468,12 +482,12 @@ can refer to functions that have not been defined yet.
 
 ```
 fn a() {
-    return b();
+    return b()
 }
 fn b() {
-    return 42;
+    return 42
 }
-assert(a() == 42);
+assert(a() == 42)
 ```
 
 **TODO** arity()
@@ -488,7 +502,7 @@ command line arguments.
 ```
 fn main(args) {
     for i in range(0, len(args)) {
-        println('argument ', i, ' is "', args[i], '"');
+        println('argument ', i, ' is "', args[i], '"')
     }
 }
 ```
@@ -501,7 +515,7 @@ which we call 'structs'.
 
 Structs are created via the `struct` keyword.  
 ```
-let s = struct { a: 1, b: 2 };
+let s = struct { a: 1, b: 2 }
 ```
 
 Structs are similar to dicts in some ways, but quite different in others.  The keys of
@@ -512,23 +526,23 @@ The dot operator, `.`, is used on structs to get or set the value associated wit
 can use the `has` operator to test whether a struct contains a given key.  
 
 ```
-let s = struct { a: 1, b: 2 };
-assert(s has 'a');
-assert(s.a == 1);
-s.a = 3;
-assert(s.a == 3);
+let s = struct { a: 1, b: 2 }
+assert(s has 'a')
+assert(s.a == 1)
+s.a = 3
+assert(s.a == 3)
 ```
 
 There are three builtin functions that you can use to inspect and modify a struct: 
 `fields()`, `getval()`, and `setval()`.
 
 ```
-let s = struct { a: 1, b: 2 };
-assert(fields(s) == set { 'a', 'b' });
-let fieldName = 'a';
-assert(getval(s, fieldName) == 1);
-assert(setval(s, fieldName, 3) == 3);
-assert(getval(s, fieldName) == 3);
+let s = struct { a: 1, b: 2 }
+assert(fields(s) == set { 'a', 'b' })
+let fieldName = 'a'
+assert(getval(s, fieldName) == 1)
+assert(setval(s, fieldName, 3) == 3)
+assert(getval(s, fieldName) == 3)
 ```
 
 Onnce a struct is created, it cannot have new keys added
@@ -541,22 +555,22 @@ the innermost enclosing struct. (Note: this is **very** different than the seman
 of `this` in javascript.)
 
 ```
-let s = struct { a: 1, b: 2, c: this.a + this.b };
-println(s);
-assert(s.c == 3);
+let s = struct { a: 1, b: 2, c: this.a + this.b }
+println(s)
+assert(s.c == 3)
 ```
 
 The builtin-function `merge()` can be used to combine an arbitrary number of 
 existing structs into a new struct.
 
 ```
-let a = struct { x: 1, y: 2};
-let b = struct { y: 3, z: 4};
-let c = merge(a, b);
-assert(c.x == 1);
-assert(c.y == 2);
-assert(c.z == 4);
-a.x = 10;
+let a = struct { x: 1, y: 2}
+let b = struct { y: 3, z: 4}
+let c = merge(a, b)
+assert(c.x == 1)
+assert(c.y == 2)
+assert(c.z == 4)
+a.x = 10
 assert(c.x == 10); // x is changed here too!
 ```
 
@@ -582,7 +596,7 @@ fn Rectangle(w, h) {
         width: w,
         height: h,
         area: fn() { return this.width * this.height; }
-    };
+    }
 }
 
 fn Box(rect, d) {
@@ -591,16 +605,16 @@ fn Box(rect, d) {
         struct {
             depth: d,
             volume: fn() { return rect.area() * this.depth; }
-        });
+        })
 }
 
-let r = Rectangle(2, 3);
+let r = Rectangle(2, 3)
 
-let b = Box(r, 4);
-assert([b.width, b.height, b.depth, b.area(), b.volume()] == [2, 3, 4, 6, 24]);
+let b = Box(r, 4)
+assert([b.width, b.height, b.depth, b.area(), b.volume()] == [2, 3, 4, 6, 24])
 
-r.width = 5;
-assert([b.width, b.height, b.depth, b.area(), b.volume()] == [5, 3, 4, 15, 60]);
+r.width = 5
+assert([b.width, b.height, b.depth, b.area(), b.volume()] == [5, 3, 4, 15, 60])
 
 ```
 
@@ -633,7 +647,7 @@ languages.
 
 ```
 try {
-    let z = 4 / 0;
+    let z = 4 / 0
 }
 catch e {
     println(e); 
@@ -646,12 +660,12 @@ evaluates to a `struct`.
 
 ```
 try {
-    throw struct { msg: 'foo' };
+    throw struct { msg: 'foo' }
     assert(false); // can't get here
 }
 catch e {
-    println(e);
-    assert(e.msg == 'foo');
+    println(e)
+    assert(e.msg == 'foo')
 }
 ```
 
@@ -667,22 +681,22 @@ access to mutexes and lots of other lower level things)
 
 ```
 fn sum(a, c) {
-    let total = 0;
+    let total = 0
     for v in a {
-        total += v;
+        total += v
     }
-    c.send(total);
+    c.send(total)
 }
 
-let a = [7, 2, 8, -9, 4, 0];
-let n = len(a) / 2;
-let c = chan();
+let a = [7, 2, 8, -9, 4, 0]
+let n = len(a) / 2
+let c = chan()
 
-go sum(a[:n], c);
-go sum(a[n:], c);
-let x = c.recv();
-let y = c.recv();
-assert([x, y] == [-5, 17]);
+go sum(a[:n], c)
+go sum(a[n:], c)
+let x = c.recv()
+let y = c.recv()
+assert([x, y] == [-5, 17])
 ```
 
 ## Immutabilty
@@ -692,14 +706,14 @@ value become immutable.  You can check if a value is immutable via the `frozen()
 builtin function. `freeze()` always returns the value that you pass into it.
 
 ```
-let s = freeze(struct { a: 1, b: 2 });
-assert(frozen(s));
+let s = freeze(struct { a: 1, b: 2 })
+assert(frozen(s))
 
 try {
     s.a = 0;       // This will throw an ImmutableValue error.
     assert(false); // We can't reach this statement.
 } catch e {
-    assert(e.kind == 'ImmutableValue');
+    assert(e.kind == 'ImmutableValue')
 }
 ```
 
@@ -714,10 +728,10 @@ using closures.  Here is the "accumulator generator" from a previous example.
 We freeze it this time, but it still has mutable state via the enclosed variable 'n':
 
 ```
-let foo = fn(n) { return fn(i) { return n += i; }; };
-freeze(foo);
-let f = foo(4);
-assert([f(1), f(2), f(3)] == [5, 7, 10]);
+let foo = fn(n) { return fn(i) { return n += i; }; }
+freeze(foo)
+let f = foo(4)
+assert([f(1), f(2), f(3)] == [5, 7, 10])
 ```
 
 Using the `const` keyword, in conjuction with `freeze()`, is a good way to lock 
@@ -737,11 +751,11 @@ of every possible type:
 let values = [
     true, "", 0, 0.0, fn(){}, 
     [], range(0,1), (0,1), dict{}, set{}, 
-    struct{}, chan()];
+    struct{}, chan()]
 
-let types = values.map(type);
+let types = values.map(type)
 
-println(types);
+println(types)
 ```
 
 ## Standard Library
@@ -754,9 +768,9 @@ As a final example, here is a  program that finds strings inside a text file or
 files.  This program can be found in the 'examples' directory of the github repo.
 
 ```
-import io;
-import regex;
-import sys;
+import io
+import regex
+import sys
 
 /*
  * To run this program, do the following from the parent directory:
@@ -774,13 +788,13 @@ import sys;
 fn traverse(pattern, file) {
     if file.isDir() {
         for child in file.items() {
-            traverse(pattern, child);
+            traverse(pattern, child)
         }
     } else {
-        let lines = file.readLines();
+        let lines = file.readLines()
         for i in range(0, len(lines)) {
             if pattern.match(lines[i]) {
-                println([file.name, i, lines[i]].join(':'));
+                println([file.name, i, lines[i]].join(':'))
             } 
         }
     }
@@ -789,14 +803,14 @@ fn traverse(pattern, file) {
 fn main(args) {
 
     if len(args) != 2 {
-        println("Expected 2 arguments, got ", len(args));
-        sys.exit(-1);
+        println("Expected 2 arguments, got ", len(args))
+        sys.exit(-1)
     }
 
-    let pattern = regex.compile(args[0]);
-    let file = io.File(args[1]);
+    let pattern = regex.compile(args[0])
+    let file = io.File(args[1])
 
-    traverse(pattern, file);
+    traverse(pattern, file)
 }
 
 ```
