@@ -253,9 +253,9 @@ func TestExpressions(t *testing.T) {
 
 func TestAssignment(t *testing.T) {
 	ok_mod(t, `
-let a = 1;
-const B = 2;
-a = a + B;
+let a = 1
+const B = 2
+a = a + B
 `,
 		g.MakeInt(3),
 		[]*g.Ref{
@@ -263,11 +263,11 @@ a = a + B;
 			&g.Ref{g.MakeInt(2)}})
 
 	ok_mod(t, `
-let a = 1;
-a = a + 41;
-const B = a / 6;
-let c = B + 3;
-c = (c + a)/13;
+let a = 1
+a = a + 41
+const B = a / 6
+let c = B + 3
+c = (c + a)/13
 `,
 		g.MakeInt(4),
 		[]*g.Ref{
@@ -276,12 +276,12 @@ c = (c + a)/13;
 			&g.Ref{g.MakeInt(4)}})
 
 	ok_mod(t, `
-let a = 1;
-let b = a += 3;
-let c = ~0;
-c -= -2;
-c <<= 4;
-b *= 2;
+let a = 1
+let b = a += 3
+let c = ~0
+c -= -2
+c <<= 4
+b *= 2
 `,
 		g.MakeInt(8),
 		[]*g.Ref{
@@ -290,10 +290,10 @@ b *= 2;
 			&g.Ref{g.MakeInt(16)}})
 
 	ok_mod(t, `
-let a = 1;
-let b = 2;
-a = b = 11;
-b = a %= 4;
+let a = 1
+let b = 2
+a = b = 11
+b = a %= 4
 `,
 		g.MakeInt(3),
 		[]*g.Ref{
@@ -311,13 +311,13 @@ func TestIf(t *testing.T) {
 		g.NULL,
 		[]*g.Ref{&g.Ref{g.ONE}})
 
-	ok_mod(t, "let a = 1; if (1 == 1) { a = 2; } else { a = 3; } let b = 4;",
+	ok_mod(t, "let a = 1; if (1 == 1) { a = 2; } else { a = 3; }; let b = 4;",
 		g.MakeInt(2),
 		[]*g.Ref{
 			&g.Ref{g.MakeInt(2)},
 			&g.Ref{g.MakeInt(4)}})
 
-	ok_mod(t, "let a = 1; if (1 == 2) { a = 2; } else { a = 3; } const b = 4;",
+	ok_mod(t, "let a = 1; if (1 == 2) { a = 2; } else { a = 3; }; const b = 4;",
 		g.MakeInt(3),
 		[]*g.Ref{
 			&g.Ref{g.MakeInt(3)},
@@ -338,29 +338,29 @@ func TestWhile(t *testing.T) {
 	//	fmt.Println(mod)
 
 	ok_mod(t, `
-let a = 1;
+let a = 1
 while (a < 3) {
-    a = a + 1;
+    a = a + 1
 }`,
 		g.MakeInt(3),
 		[]*g.Ref{&g.Ref{g.MakeInt(3)}})
 
 	ok_mod(t, `
-let a = 1;
+let a = 1
 while (a < 11) {
     if (a == 4) { a = a + 2; break; }
-    a = a + 1;
+    a = a + 1
 }`,
 		g.MakeInt(6),
 		[]*g.Ref{&g.Ref{g.MakeInt(6)}})
 
 	ok_mod(t, `
-let a = 1;
-let b = 0;
+let a = 1
+let b = 0
 while (a < 11) {
-    a = a + 1;
+    a = a + 1
     if (a > 5) { continue; }
-    b = b + 1;
+    b = b + 1
 }`,
 		g.MakeInt(11),
 		[]*g.Ref{
@@ -368,9 +368,9 @@ while (a < 11) {
 			&g.Ref{g.MakeInt(4)}})
 
 	ok_mod(t, `
-let a = 1;
-return a + 2;
-let b = 5;`,
+let a = 1
+return a + 2
+let b = 5`,
 		g.MakeInt(3),
 		[]*g.Ref{
 			&g.Ref{g.ONE},
@@ -380,8 +380,8 @@ let b = 5;`,
 func TestFunc(t *testing.T) {
 
 	source := `
-let a = fn(x) { x; };
-let b = a(1);
+let a = fn(x) { x; }
+let b = a(1)
 `
 	mod := newCompiler(source).Compile()
 
@@ -389,12 +389,12 @@ let b = a(1);
 	ok_ref(t, i, mod.Refs[1], g.ONE)
 
 	source = `
-let a = fn() { };
-let b = fn(x) { x; };
-let c = fn(x, y) { let z = 4; x * y * z; };
-let d = a();
-let e = b(1);
-let f = c(b(2), 3);
+let a = fn() { }
+let b = fn(x) { x; }
+let c = fn(x, y) { let z = 4; x * y * z; }
+let d = a()
+let e = b(1)
+let f = c(b(2), 3)
 `
 	mod = newCompiler(source).Compile()
 
@@ -405,23 +405,23 @@ let f = c(b(2), 3);
 
 	source = `
 let fibonacci = fn(n) {
-    let x = 0;
-    let y = 1;
-    let i = 1;
+    let x = 0
+    let y = 1
+    let i = 1
     while i < n {
-        let z = x + y;
-        x = y;
-        y = z;
-        i = i + 1;
+        let z = x + y
+        x = y
+        y = z
+        i = i + 1
     }
-    return y;
-};
-let a = fibonacci(1);
-let b = fibonacci(2);
-let c = fibonacci(3);
-let d = fibonacci(4);
-let e = fibonacci(5);
-let f = fibonacci(6);
+    return y
+}
+let a = fibonacci(1)
+let b = fibonacci(2)
+let c = fibonacci(3)
+let d = fibonacci(4)
+let e = fibonacci(5)
+let f = fibonacci(6)
 `
 	mod = newCompiler(source).Compile()
 	i = interpret(mod)
@@ -435,11 +435,11 @@ let f = fibonacci(6);
 	source = `
 let foo = fn(n) {
     let bar = fn(x) {
-        return x * (x - 1);
-    };
-    return bar(n) + bar(n-1);
-};
-let a = foo(5);
+        return x * (x - 1)
+    }
+    return bar(n) + bar(n-1)
+}
+let a = foo(5)
 `
 	mod = newCompiler(source).Compile()
 	i = interpret(mod)
@@ -451,13 +451,13 @@ func TestCapture(t *testing.T) {
 	source := `
 const accumGen = fn(n) {
     return fn(i) {
-        n = n + i;
-        return n;
-    };
-};
-const a = accumGen(3);
-let x = a(2);
-let y = a(7);
+        n = n + i
+        return n
+    }
+}
+const a = accumGen(3)
+let x = a(2)
+let y = a(7)
 `
 	mod := newCompiler(source).Compile()
 	i := interpret(mod)
@@ -470,18 +470,18 @@ let y = a(7);
 	ok_ref(t, i, mod.Refs[3], g.MakeInt(12))
 
 	source = `
-let z = 2;
+let z = 2
 const accumGen = fn(n) {
     return fn(i) {
-        n = n + i;
-        n = n + z;
-        return n;
-    };
-};
-const a = accumGen(3);
-let x = a(2);
-z = 0;
-let y = a(1);
+        n = n + i
+        n = n + z
+        return n
+    }
+}
+const a = accumGen(3)
+let x = a(2)
+z = 0
+let y = a(1)
 `
 	mod = newCompiler(source).Compile()
 
@@ -496,14 +496,14 @@ let y = a(1);
 	//fmt.Println(mod)
 
 	source = `
-const a = 123;
-const b = 456;
+const a = 123
+const b = 456
 
 fn foo() {
-    assert(b == 456);
-    assert(a == 123);
+    assert(b == 456)
+    assert(a == 123)
 }
-foo();
+foo()
 `
 	mod = newCompiler(source).Compile()
 	i = interpret(mod)
@@ -512,10 +512,10 @@ foo();
 func TestStruct(t *testing.T) {
 
 	source := `
-let w = struct {};
-let x = struct { a: 0 };
-let y = struct { a: 1, b: 2 };
-let z = struct { a: 3, b: 4, c: struct { d: 5 } };
+let w = struct {}
+let x = struct { a: 0 }
+let y = struct { a: 1, b: 2 }
+let z = struct { a: 3, b: 4, c: struct { d: 5 } }
 `
 	mod := newCompiler(source).Compile()
 	i := interpret(mod)
@@ -533,9 +533,9 @@ let z = struct { a: 3, b: 4, c: struct { d: 5 } };
 			g.NewField("d", false, g.MakeInt(5))}))}))
 
 	source = `
-let x = struct { a: 5 };
-let y = x.a;
-x.a = 6;
+let x = struct { a: 5 }
+let y = x.a
+x.a = 6
 `
 	mod = newCompiler(source).Compile()
 	i = interpret(mod)
@@ -554,9 +554,9 @@ let a = struct {
     y: 5,
     plus:  fn() { return this.x + this.y; },
     minus: fn() { return this.x - this.y; }
-};
-let b = a.plus();
-let c = a.minus();
+}
+let b = a.plus()
+let c = a.minus()
 `
 	mod = newCompiler(source).Compile()
 	i = interpret(mod)
@@ -565,8 +565,8 @@ let c = a.minus();
 	ok_ref(t, i, mod.Refs[3], g.MakeInt(3))
 
 	source = `
-let a = null;
-a = struct { x: 8 }.x = 5;
+let a = null
+a = struct { x: 8 }.x = 5
 `
 	mod = newCompiler(source).Compile()
 	i = interpret(mod)
@@ -574,13 +574,13 @@ a = struct { x: 8 }.x = 5;
 	ok_ref(t, i, mod.Refs[0], g.MakeInt(5))
 
 	source = `
-let a = struct { x: 8 };
-assert(a has 'x');
-assert(!(a has 'z'));
-assert(a has 'x');
-let b = struct { x: this has 'x', y: this has 'z' };
-assert(b.x);
-assert(!b.y);
+let a = struct { x: 8 }
+assert(a has 'x')
+assert(!(a has 'z'))
+assert(a has 'x')
+let b = struct { x: this has 'x', y: this has 'z' }
+assert(b.x)
+assert(!b.y)
 `
 	mod = newCompiler(source).Compile()
 	i = interpret(mod)
@@ -593,27 +593,27 @@ func TestMerge(t *testing.T) {
 	fail_expr(t, "merge(struct{}, false);", "TypeMismatch: Expected 'Struct'")
 
 	source := `
-let a = struct { x: 1, y: 2};
-let b = merge(struct { y: 3, z: 4}, a);
-assert(b.x == 1);
-assert(b.y == 3);
-assert(b.z == 4);
-a.x = 5;
-a.y = 6;
-assert(b.x == 5);
-assert(b.y == 3);
-assert(b.z == 4);
-let c = merge(struct { w: 10}, b);
-assert(c.w == 10);
-assert(c.x == 5);
-assert(c.y == 3);
-assert(c.z == 4);
-a.x = 7;
-b.z = 11;
-assert(c.w == 10);
-assert(c.x == 7);
-assert(c.y == 3);
-assert(c.z == 11);
+let a = struct { x: 1, y: 2}
+let b = merge(struct { y: 3, z: 4}, a)
+assert(b.x == 1)
+assert(b.y == 3)
+assert(b.z == 4)
+a.x = 5
+a.y = 6
+assert(b.x == 5)
+assert(b.y == 3)
+assert(b.z == 4)
+let c = merge(struct { w: 10}, b)
+assert(c.w == 10)
+assert(c.x == 5)
+assert(c.y == 3)
+assert(c.z == 4)
+a.x = 7
+b.z = 11
+assert(c.w == 10)
+assert(c.x == 7)
+assert(c.y == 3)
+assert(c.z == 11)
 `
 	mod := newCompiler(source).Compile()
 	interpret(mod)
@@ -623,9 +623,9 @@ func TestErrStack(t *testing.T) {
 
 	source := `
 let divide = fn(x, y) {
-    return x / y;
-};
-let a = divide(3, 0);
+    return x / y
+}
+let a = divide(3, 0)
 `
 	fail(t, source,
 		g.DivideByZeroError(),
@@ -634,8 +634,8 @@ let a = divide(3, 0);
 			"    at line 5"})
 
 	source = `
-let foo = fn(n) { n + n; };
-let a = foo(5, 6);
+let foo = fn(n) { n + n; }
+let a = foo(5, 6)
 	`
 	fail(t, source,
 		g.ArityMismatchError("1", 2),
@@ -646,10 +646,10 @@ let a = foo(5, 6);
 func TestPostfix(t *testing.T) {
 
 	source := `
-let a = 10;
-let b = 20;
-let c = a++;
-let d = b--;
+let a = 10
+let b = 20
+let c = a++
+let d = b--
 `
 	mod := newCompiler(source).Compile()
 	i := interpret(mod)
@@ -660,10 +660,10 @@ let d = b--;
 	ok_ref(t, i, mod.Refs[3], g.MakeInt(20))
 
 	source = `
-let a = struct { x: 10 };
-let b = struct { y: 20 };
-let c = a.x++;
-let d = b.y--;
+let a = struct { x: 10 }
+let b = struct { y: 20 }
+let c = a.x++
+let d = b.y--
 `
 	mod = newCompiler(source).Compile()
 	i = interpret(mod)
@@ -1192,52 +1192,52 @@ assert(values == 6);
 func TestSwitch(t *testing.T) {
 
 	source := `
-let s = '';
+let s = ''
 for i in range(0, 4) {
     switch {
     case i == 0:
-        s += 'a';
+        s += 'a'
 
     case i == 1, i == 2:
-        s += 'b';
+        s += 'b'
 
     default:
-        s += 'c';
+        s += 'c'
     }
 }
-assert(s == 'abbc');
+assert(s == 'abbc')
 `
 	mod := newCompiler(source).Compile()
 	interpret(mod)
 
 	source = `
-let s = '';
+let s = ''
 for i in range(0, 4) {
     switch {
     case i == 0, i == 1:
-        s += 'a';
+        s += 'a'
 
     case i == 2:
-        s += 'b';
+        s += 'b'
     }
 }
-assert(s == 'aab');
+assert(s == 'aab')
 `
 	mod = newCompiler(source).Compile()
 	interpret(mod)
 
 	source = `
-let s = '';
+let s = ''
 for i in range(0, 4) {
     switch i {
     case 0, 1:
-        s += 'a';
+        s += 'a'
 
     case 2:
-        s += 'b';
+        s += 'b'
     }
 }
-assert(s == 'aab');
+assert(s == 'aab')
 `
 	mod = newCompiler(source).Compile()
 	interpret(mod)
@@ -1269,16 +1269,16 @@ func TestGetField(t *testing.T) {
 func TestFinally(t *testing.T) {
 
 	source := `
-let a = 1;
+let a = 1
 try {
-    3 / 0;
+    3 / 0
 } finally {
-    a = 2;
+    a = 2
 }
 try {
-    3 / 0;
+    3 / 0
 } finally {
-    a = 3;
+    a = 3
 }
 `
 	mod := fail(t, source,
@@ -1323,22 +1323,22 @@ try {
 			"    at line 6"})
 
 	source = `
-let a = 1;
+let a = 1
 let b = fn() { 
     try {
         try {
-            3 / 0;
+            3 / 0
         } finally {
-            a++;
+            a++
         }
     } finally {
-        a++;
+        a++
     }
-};
+}
 try {
-    b();
+    b()
 } finally {
-    a++;
+    a++
 }
 `
 	//mod = newCompiler(source).Compile()
@@ -1493,21 +1493,21 @@ assert(a == 2);
 	interpret(mod)
 
 	source = `
-let a = 0;
-let b = 0;
+let a = 0
+let b = 0
 try {
     try {
-        3 / 0;
+        3 / 0
     } catch e {
-        assert(1,2,3);
+        assert(1,2,3)
     } finally {
-        a = 1;
+        a = 1
     }
 } catch e {
-    b = 2;
+    b = 2
 }
-assert(a == 1);
-assert(b == 2);
+assert(a == 1)
+assert(b == 2)
 `
 	mod = newCompiler(source).Compile()
 	interpret(mod)
@@ -1545,13 +1545,13 @@ assert(a() == 42);
 func TestLambda(t *testing.T) {
 
 	source := `
-let z = 5;
-let a = || => 3;
-let b = x => x * x;
-let c = |x, y| => (x + y)*z;
-assert(a() == 3);
-assert(b(2) == 4);
-assert(c(1, 2) == 15);
+let z = 5
+let a = || => 3
+let b = x => x * x
+let c = |x, y| => (x + y)*z
+assert(a() == 3)
+assert(b(2) == 4)
+assert(c(1, 2) == 15)
 `
 	mod := newCompiler(source).Compile()
 	interpret(mod)
