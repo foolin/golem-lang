@@ -18,7 +18,7 @@ Then, fire up your text editor of choice, and type the following program into
 a file named 'tutorial.glm':
 
 ```
-println('Hello, world.')
+println('Hello, world.');
 ```
 
 and then run it like so:
