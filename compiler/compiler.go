@@ -6,11 +6,13 @@ package compiler
 
 import (
 	"fmt"
+	"sort"
+	"strconv"
+
 	"github.com/mjarmy/golem-lang/analyzer"
 	"github.com/mjarmy/golem-lang/ast"
 	g "github.com/mjarmy/golem-lang/core"
-	"sort"
-	"strconv"
+	o "github.com/mjarmy/golem-lang/core/opcodes"
 )
 
 type Compiler interface {
@@ -121,9 +123,9 @@ func (c *compiler) compileFunc(fe *ast.FnExpr) *g.Template {
 
 	// TODO LOAD_NULL and RETURN are workarounds for the fact that
 	// we have not yet written a Control Flow Graph
-	c.push(ast.Pos{}, g.LOAD_NULL)
+	c.push(ast.Pos{}, o.LOAD_NULL)
 	c.Visit(fe.Body)
-	c.push(ast.Pos{}, g.RETURN)
+	c.push(ast.Pos{}, o.RETURN)
 
 	tpl.OpCodes = c.opc
 	tpl.LineNumberTable = c.lnum
@@ -278,7 +280,7 @@ func (c *compiler) visitDecls(decls []*ast.Decl) {
 
 	for _, d := range decls {
 		if d.Val == nil {
-			c.push(d.Ident.Begin(), g.LOAD_NULL)
+			c.push(d.Ident.Begin(), o.LOAD_NULL)
 		} else {
 			c.Visit(d.Val)
 		}
@@ -295,21 +297,21 @@ func (c *compiler) visitImport(imp *ast.Import) {
 	sym := ident.Symbol.Text
 	c.pushIndex(
 		ident.Begin(),
-		g.IMPORT_MODULE,
+		o.IMPORT_MODULE,
 		poolIndex(c.pool, g.NewStr(sym)))
 
 	// store module in identifer
 	v := ident.Variable
-	c.pushIndex(ident.Begin(), g.STORE_LOCAL, v.Index)
+	c.pushIndex(ident.Begin(), o.STORE_LOCAL, v.Index)
 }
 
 func (c *compiler) assignIdent(ident *ast.IdentExpr) {
 
 	v := ident.Variable
 	if v.IsCapture {
-		c.pushIndex(ident.Begin(), g.STORE_CAPTURE, v.Index)
+		c.pushIndex(ident.Begin(), o.STORE_CAPTURE, v.Index)
 	} else {
-		c.pushIndex(ident.Begin(), g.STORE_LOCAL, v.Index)
+		c.pushIndex(ident.Begin(), o.STORE_LOCAL, v.Index)
 	}
 }
 
@@ -319,7 +321,7 @@ func (c *compiler) visitNamedFn(nf *ast.NamedFn) {
 
 	v := nf.Ident.Variable
 	assert(!v.IsCapture)
-	c.pushIndex(nf.Ident.Begin(), g.STORE_LOCAL, v.Index)
+	c.pushIndex(nf.Ident.Begin(), o.STORE_LOCAL, v.Index)
 }
 
 func (c *compiler) visitAssignment(asn *ast.AssignmentExpr) {
@@ -329,7 +331,7 @@ func (c *compiler) visitAssignment(asn *ast.AssignmentExpr) {
 	case *ast.IdentExpr:
 
 		c.Visit(asn.Val)
-		c.push(asn.Eq.Position, g.DUP)
+		c.push(asn.Eq.Position, o.DUP)
 		c.assignIdent(t)
 
 	case *ast.FieldExpr:
@@ -338,7 +340,7 @@ func (c *compiler) visitAssignment(asn *ast.AssignmentExpr) {
 		c.Visit(asn.Val)
 		c.pushIndex(
 			t.Key.Position,
-			g.SET_FIELD,
+			o.SET_FIELD,
 			poolIndex(c.pool, g.NewStr(t.Key.Text)))
 
 	case *ast.IndexExpr:
@@ -346,7 +348,7 @@ func (c *compiler) visitAssignment(asn *ast.AssignmentExpr) {
 		c.Visit(t.Operand)
 		c.Visit(t.Index)
 		c.Visit(asn.Val)
-		c.push(t.Index.Begin(), g.SET_INDEX)
+		c.push(t.Index.Begin(), o.SET_INDEX)
 
 	default:
 		panic("invalid assignee type")
@@ -360,18 +362,18 @@ func (c *compiler) visitPostfixExpr(pe *ast.PostfixExpr) {
 	case *ast.IdentExpr:
 
 		c.visitIdentExpr(t)
-		c.push(t.Begin(), g.DUP)
+		c.push(t.Begin(), o.DUP)
 
 		switch pe.Op.Text {
 		case "++":
-			c.push(pe.Op.Position, g.LOAD_ONE)
+			c.push(pe.Op.Position, o.LOAD_ONE)
 		case "--":
-			c.push(pe.Op.Position, g.LOAD_NEG_ONE)
+			c.push(pe.Op.Position, o.LOAD_NEG_ONE)
 		default:
 			panic("invalid postfix operator")
 		}
 
-		c.push(pe.Op.Position, g.PLUS)
+		c.push(pe.Op.Position, o.PLUS)
 		c.assignIdent(t)
 
 	case *ast.FieldExpr:
@@ -380,16 +382,16 @@ func (c *compiler) visitPostfixExpr(pe *ast.PostfixExpr) {
 
 		switch pe.Op.Text {
 		case "++":
-			c.push(pe.Op.Position, g.LOAD_ONE)
+			c.push(pe.Op.Position, o.LOAD_ONE)
 		case "--":
-			c.push(pe.Op.Position, g.LOAD_NEG_ONE)
+			c.push(pe.Op.Position, o.LOAD_NEG_ONE)
 		default:
 			panic("invalid postfix operator")
 		}
 
 		c.pushIndex(
 			t.Key.Position,
-			g.INC_FIELD,
+			o.INC_FIELD,
 			poolIndex(c.pool, g.NewStr(t.Key.Text)))
 
 	case *ast.IndexExpr:
@@ -399,14 +401,14 @@ func (c *compiler) visitPostfixExpr(pe *ast.PostfixExpr) {
 
 		switch pe.Op.Text {
 		case "++":
-			c.push(pe.Op.Position, g.LOAD_ONE)
+			c.push(pe.Op.Position, o.LOAD_ONE)
 		case "--":
-			c.push(pe.Op.Position, g.LOAD_NEG_ONE)
+			c.push(pe.Op.Position, o.LOAD_NEG_ONE)
 		default:
 			panic("invalid postfix operator")
 		}
 
-		c.push(t.Index.Begin(), g.INC_INDEX)
+		c.push(t.Index.Begin(), o.INC_INDEX)
 
 	default:
 		panic("invalid assignee type")
@@ -417,7 +419,7 @@ func (c *compiler) visitIf(f *ast.If) {
 
 	c.Visit(f.Cond)
 
-	j0 := c.push(f.Cond.End(), g.JUMP_FALSE, 0xFF, 0xFF)
+	j0 := c.push(f.Cond.End(), o.JUMP_FALSE, 0xFF, 0xFF)
 	c.Visit(f.Then)
 
 	if f.Else == nil {
@@ -426,7 +428,7 @@ func (c *compiler) visitIf(f *ast.If) {
 
 	} else {
 
-		j1 := c.push(f.Else.Begin(), g.JUMP, 0xFF, 0xFF)
+		j1 := c.push(f.Else.Begin(), o.JUMP, 0xFF, 0xFF)
 		c.setJump(j0, c.opcLen())
 
 		c.Visit(f.Else)
@@ -437,10 +439,10 @@ func (c *compiler) visitIf(f *ast.If) {
 func (c *compiler) visitTernaryExpr(f *ast.TernaryExpr) {
 
 	c.Visit(f.Cond)
-	j0 := c.push(f.Cond.End(), g.JUMP_FALSE, 0xFF, 0xFF)
+	j0 := c.push(f.Cond.End(), o.JUMP_FALSE, 0xFF, 0xFF)
 
 	c.Visit(f.Then)
-	j1 := c.push(f.Else.Begin(), g.JUMP, 0xFF, 0xFF)
+	j1 := c.push(f.Else.Begin(), o.JUMP, 0xFF, 0xFF)
 	c.setJump(j0, c.opcLen())
 
 	c.Visit(f.Else)
@@ -451,11 +453,11 @@ func (c *compiler) visitWhile(w *ast.While) {
 
 	begin := c.opcLen()
 	c.Visit(w.Cond)
-	j0 := c.push(w.Cond.End(), g.JUMP_FALSE, 0xFF, 0xFF)
+	j0 := c.push(w.Cond.End(), o.JUMP_FALSE, 0xFF, 0xFF)
 
 	body := c.opcLen()
 	c.Visit(w.Body)
-	c.push(w.Body.End(), g.JUMP, begin.high, begin.low)
+	c.push(w.Body.End(), o.JUMP, begin.high, begin.low)
 
 	end := c.opcLen()
 	c.setJump(j0, end)
@@ -472,46 +474,46 @@ func (c *compiler) visitFor(f *ast.For) {
 	c.Visit(f.Iterable)
 
 	// call NewIterator()
-	c.push(tok, g.ITER)
+	c.push(tok, o.ITER)
 
 	// store iterator
-	c.pushIndex(tok, g.STORE_LOCAL, idx)
+	c.pushIndex(tok, o.STORE_LOCAL, idx)
 
 	// top of loop: load iterator and call IterNext()
 	begin := c.opcLen()
-	c.pushIndex(tok, g.LOAD_LOCAL, idx)
-	c.push(tok, g.ITER_NEXT)
-	j0 := c.push(tok, g.JUMP_FALSE, 0xFF, 0xFF)
+	c.pushIndex(tok, o.LOAD_LOCAL, idx)
+	c.push(tok, o.ITER_NEXT)
+	j0 := c.push(tok, o.JUMP_FALSE, 0xFF, 0xFF)
 
 	// load iterator and call IterGet()
-	c.pushIndex(tok, g.LOAD_LOCAL, idx)
-	c.push(tok, g.ITER_GET)
+	c.pushIndex(tok, o.LOAD_LOCAL, idx)
+	c.push(tok, o.ITER_GET)
 
 	if len(f.Idents) == 1 {
 		// perform STORE_LOCAL on the current item
 		ident := f.Idents[0]
-		c.pushIndex(ident.Begin(), g.STORE_LOCAL, ident.Variable.Index)
+		c.pushIndex(ident.Begin(), o.STORE_LOCAL, ident.Variable.Index)
 	} else {
 		// make sure the current item is really a tuple,
 		// and is of the proper length
-		c.pushIndex(tok, g.CHECK_TUPLE, len(f.Idents))
+		c.pushIndex(tok, o.CHECK_TUPLE, len(f.Idents))
 
 		// perform STORE_LOCAL on each tuple element
 		for i, ident := range f.Idents {
-			c.push(tok, g.DUP)
+			c.push(tok, o.DUP)
 			c.loadInt(tok, int64(i))
-			c.push(tok, g.GET_INDEX)
-			c.pushIndex(ident.Begin(), g.STORE_LOCAL, ident.Variable.Index)
+			c.push(tok, o.GET_INDEX)
+			c.pushIndex(ident.Begin(), o.STORE_LOCAL, ident.Variable.Index)
 		}
 
 		// pop the tuple
-		c.push(tok, g.POP)
+		c.push(tok, o.POP)
 	}
 
 	// compile the body
 	body := c.opcLen()
 	c.Visit(f.Body)
-	c.push(f.Body.End(), g.JUMP, begin.high, begin.low)
+	c.push(f.Body.End(), o.JUMP, begin.high, begin.low)
 
 	// jump to top of loop
 	end := c.opcLen()
@@ -525,25 +527,25 @@ func (c *compiler) fixBreakContinue(begin *instPtr, body *instPtr, end *instPtr)
 	// replace BREAK and CONTINUE with JUMP
 	for i := body.ip; i < end.ip; {
 		switch c.opc[i] {
-		case g.BREAK:
-			c.opc[i] = g.JUMP
+		case o.BREAK:
+			c.opc[i] = o.JUMP
 			c.opc[i+1] = end.high
 			c.opc[i+2] = end.low
-		case g.CONTINUE:
-			c.opc[i] = g.JUMP
+		case o.CONTINUE:
+			c.opc[i] = o.JUMP
 			c.opc[i+1] = begin.high
 			c.opc[i+2] = begin.low
 		}
-		i += g.OpCodeSize(c.opc[i])
+		i += o.OpCodeSize(c.opc[i])
 	}
 }
 
 func (c *compiler) visitBreak(br *ast.Break) {
-	c.push(br.Begin(), g.BREAK, 0xFF, 0xFF)
+	c.push(br.Begin(), o.BREAK, 0xFF, 0xFF)
 }
 
 func (c *compiler) visitContinue(cn *ast.Continue) {
-	c.push(cn.Begin(), g.CONTINUE, 0xFF, 0xFF)
+	c.push(cn.Begin(), o.CONTINUE, 0xFF, 0xFF)
 }
 
 func (c *compiler) visitSwitch(sw *ast.Switch) {
@@ -570,7 +572,7 @@ func (c *compiler) visitSwitch(sw *ast.Switch) {
 
 	// if there is an item, pop it
 	if hasItem {
-		c.push(sw.End(), g.POP)
+		c.push(sw.End(), o.POP)
 	}
 
 	// set all the end jumps
@@ -588,19 +590,19 @@ func (c *compiler) visitCase(cs *ast.Case, hasItem bool) int {
 
 		if hasItem {
 			// if there is an item, DUP it and do an EQ comparison against the match
-			c.push(m.Begin(), g.DUP)
+			c.push(m.Begin(), o.DUP)
 			c.Visit(m)
-			c.push(m.Begin(), g.EQ)
+			c.push(m.Begin(), o.EQ)
 		} else {
 			// otherwise, evaluate the match and assume its a Bool
 			c.Visit(m)
 		}
 
-		bodyJumps = append(bodyJumps, c.push(m.End(), g.JUMP_TRUE, 0xFF, 0xFF))
+		bodyJumps = append(bodyJumps, c.push(m.End(), o.JUMP_TRUE, 0xFF, 0xFF))
 	}
 
 	// no match -- jump to the end of the case
-	caseEndJump := c.push(cs.End(), g.JUMP, 0xFF, 0xFF)
+	caseEndJump := c.push(cs.End(), o.JUMP, 0xFF, 0xFF)
 
 	// set all the body jumps
 	for _, j := range bodyJumps {
@@ -611,7 +613,7 @@ func (c *compiler) visitCase(cs *ast.Case, hasItem bool) int {
 	for _, n := range cs.Body {
 		c.Visit(n)
 	}
-	endJump := c.push(cs.End(), g.JUMP, 0xFF, 0xFF)
+	endJump := c.push(cs.End(), o.JUMP, 0xFF, 0xFF)
 
 	// set the jump to the end of the case
 	c.setJump(caseEndJump, c.opcLen())
@@ -622,7 +624,7 @@ func (c *compiler) visitCase(cs *ast.Case, hasItem bool) int {
 
 func (c *compiler) visitReturn(rt *ast.Return) {
 	c.Visit(rt.Val)
-	c.push(rt.Begin(), g.RETURN)
+	c.push(rt.Begin(), o.RETURN)
 }
 
 func (c *compiler) visitTry(t *ast.Try) {
@@ -638,7 +640,7 @@ func (c *compiler) visitTry(t *ast.Try) {
 	if t.CatchBlock != nil {
 
 		// push a jump, so we'll skip the catch block during normal execution
-		end := c.push(t.TryBlock.End(), g.JUMP, 0xFF, 0xFF)
+		end := c.push(t.TryBlock.End(), o.JUMP, 0xFF, 0xFF)
 
 		// save the beginning of the catch
 		catch = len(c.opc)
@@ -646,16 +648,16 @@ func (c *compiler) visitTry(t *ast.Try) {
 		// store the exception that the interpreter has put on the stack for us
 		v := t.CatchIdent.Variable
 		assert(!v.IsCapture)
-		c.pushIndex(t.CatchIdent.Begin(), g.STORE_LOCAL, v.Index)
+		c.pushIndex(t.CatchIdent.Begin(), o.STORE_LOCAL, v.Index)
 
 		// compile the catch
 		c.Visit(t.CatchBlock)
 
 		// pop the exception
-		c.push(t.CatchBlock.End(), g.POP)
+		c.push(t.CatchBlock.End(), o.POP)
 
 		// add a DONE to mark the end of the catch block
-		c.push(t.CatchBlock.End(), g.DONE)
+		c.push(t.CatchBlock.End(), o.DONE)
 
 		// fix the jump
 		c.setJump(end, c.opcLen())
@@ -674,7 +676,7 @@ func (c *compiler) visitTry(t *ast.Try) {
 		c.Visit(t.FinallyBlock)
 
 		// add a DONE to mark the end of the finally block
-		c.push(t.FinallyBlock.End(), g.DONE)
+		c.push(t.FinallyBlock.End(), o.DONE)
 	}
 
 	//////////////////////////
@@ -687,7 +689,7 @@ func (c *compiler) visitTry(t *ast.Try) {
 
 func (c *compiler) visitThrow(t *ast.Throw) {
 	c.Visit(t.Val)
-	c.push(t.End(), g.THROW)
+	c.push(t.End(), o.THROW)
 }
 
 func (c *compiler) visitBinaryExpr(b *ast.BinaryExpr) {
@@ -701,61 +703,61 @@ func (c *compiler) visitBinaryExpr(b *ast.BinaryExpr) {
 
 	case ast.DBL_EQ:
 		b.Traverse(c)
-		c.push(b.Op.Position, g.EQ)
+		c.push(b.Op.Position, o.EQ)
 	case ast.NOT_EQ:
 		b.Traverse(c)
-		c.push(b.Op.Position, g.NE)
+		c.push(b.Op.Position, o.NE)
 
 	case ast.GT:
 		b.Traverse(c)
-		c.push(b.Op.Position, g.GT)
+		c.push(b.Op.Position, o.GT)
 	case ast.GT_EQ:
 		b.Traverse(c)
-		c.push(b.Op.Position, g.GTE)
+		c.push(b.Op.Position, o.GTE)
 	case ast.LT:
 		b.Traverse(c)
-		c.push(b.Op.Position, g.LT)
+		c.push(b.Op.Position, o.LT)
 	case ast.LT_EQ:
 		b.Traverse(c)
-		c.push(b.Op.Position, g.LTE)
+		c.push(b.Op.Position, o.LTE)
 	case ast.CMP:
 		b.Traverse(c)
-		c.push(b.Op.Position, g.CMP)
+		c.push(b.Op.Position, o.CMP)
 	case ast.HAS:
 		b.Traverse(c)
-		c.push(b.Op.Position, g.HAS)
+		c.push(b.Op.Position, o.HAS)
 
 	case ast.PLUS:
 		b.Traverse(c)
-		c.push(b.Op.Position, g.PLUS)
+		c.push(b.Op.Position, o.PLUS)
 	case ast.MINUS:
 		b.Traverse(c)
-		c.push(b.Op.Position, g.SUB)
+		c.push(b.Op.Position, o.SUB)
 	case ast.STAR:
 		b.Traverse(c)
-		c.push(b.Op.Position, g.MUL)
+		c.push(b.Op.Position, o.MUL)
 	case ast.SLASH:
 		b.Traverse(c)
-		c.push(b.Op.Position, g.DIV)
+		c.push(b.Op.Position, o.DIV)
 
 	case ast.PERCENT:
 		b.Traverse(c)
-		c.push(b.Op.Position, g.REM)
+		c.push(b.Op.Position, o.REM)
 	case ast.AMP:
 		b.Traverse(c)
-		c.push(b.Op.Position, g.BIT_AND)
+		c.push(b.Op.Position, o.BIT_AND)
 	case ast.PIPE:
 		b.Traverse(c)
-		c.push(b.Op.Position, g.BIT_OR)
+		c.push(b.Op.Position, o.BIT_OR)
 	case ast.CARET:
 		b.Traverse(c)
-		c.push(b.Op.Position, g.BIT_XOR)
+		c.push(b.Op.Position, o.BIT_XOR)
 	case ast.DBL_LT:
 		b.Traverse(c)
-		c.push(b.Op.Position, g.LEFT_SHIFT)
+		c.push(b.Op.Position, o.LEFT_SHIFT)
 	case ast.DBL_GT:
 		b.Traverse(c)
-		c.push(b.Op.Position, g.RIGHT_SHIFT)
+		c.push(b.Op.Position, o.RIGHT_SHIFT)
 
 	default:
 		panic("unreachable")
@@ -765,17 +767,17 @@ func (c *compiler) visitBinaryExpr(b *ast.BinaryExpr) {
 func (c *compiler) visitOr(lhs ast.Expression, rhs ast.Expression) {
 
 	c.Visit(lhs)
-	j0 := c.push(lhs.End(), g.JUMP_TRUE, 0xFF, 0xFF)
+	j0 := c.push(lhs.End(), o.JUMP_TRUE, 0xFF, 0xFF)
 
 	c.Visit(rhs)
-	j1 := c.push(rhs.End(), g.JUMP_FALSE, 0xFF, 0xFF)
+	j1 := c.push(rhs.End(), o.JUMP_FALSE, 0xFF, 0xFF)
 
 	c.setJump(j0, c.opcLen())
-	c.push(rhs.End(), g.LOAD_TRUE)
-	j2 := c.push(rhs.End(), g.JUMP, 0xFF, 0xFF)
+	c.push(rhs.End(), o.LOAD_TRUE)
+	j2 := c.push(rhs.End(), o.JUMP, 0xFF, 0xFF)
 
 	c.setJump(j1, c.opcLen())
-	c.push(rhs.End(), g.LOAD_FALSE)
+	c.push(rhs.End(), o.LOAD_FALSE)
 
 	c.setJump(j2, c.opcLen())
 }
@@ -783,17 +785,17 @@ func (c *compiler) visitOr(lhs ast.Expression, rhs ast.Expression) {
 func (c *compiler) visitAnd(lhs ast.Expression, rhs ast.Expression) {
 
 	c.Visit(lhs)
-	j0 := c.push(lhs.End(), g.JUMP_FALSE, 0xFF, 0xFF)
+	j0 := c.push(lhs.End(), o.JUMP_FALSE, 0xFF, 0xFF)
 
 	c.Visit(rhs)
-	j1 := c.push(rhs.End(), g.JUMP_FALSE, 0xFF, 0xFF)
+	j1 := c.push(rhs.End(), o.JUMP_FALSE, 0xFF, 0xFF)
 
-	c.push(rhs.End(), g.LOAD_TRUE)
-	j2 := c.push(rhs.End(), g.JUMP, 0xFF, 0xFF)
+	c.push(rhs.End(), o.LOAD_TRUE)
+	j2 := c.push(rhs.End(), o.JUMP, 0xFF, 0xFF)
 
 	c.setJump(j0, c.opcLen())
 	c.setJump(j1, c.opcLen())
-	c.push(rhs.End(), g.LOAD_FALSE)
+	c.push(rhs.End(), o.LOAD_FALSE)
 
 	c.setJump(j2, c.opcLen())
 }
@@ -812,32 +814,32 @@ func (c *compiler) visitUnaryExpr(u *ast.UnaryExpr) {
 				i := parseInt(t.Token.Text)
 				switch i {
 				case 0:
-					c.push(u.Op.Position, g.LOAD_ZERO)
+					c.push(u.Op.Position, o.LOAD_ZERO)
 				case 1:
-					c.push(u.Op.Position, g.LOAD_NEG_ONE)
+					c.push(u.Op.Position, o.LOAD_NEG_ONE)
 				default:
 					c.pushIndex(
 						u.Op.Position,
-						g.LOAD_CONST,
+						o.LOAD_CONST,
 						poolIndex(c.pool, g.MakeInt(-i)))
 				}
 
 			default:
 				c.Visit(u.Operand)
-				c.push(u.Op.Position, g.NEGATE)
+				c.push(u.Op.Position, o.NEGATE)
 			}
 		default:
 			c.Visit(u.Operand)
-			c.push(u.Op.Position, g.NEGATE)
+			c.push(u.Op.Position, o.NEGATE)
 		}
 
 	case ast.NOT:
 		c.Visit(u.Operand)
-		c.push(u.Op.Position, g.NOT)
+		c.push(u.Op.Position, o.NOT)
 
 	case ast.TILDE:
 		c.Visit(u.Operand)
-		c.push(u.Op.Position, g.COMPLEMENT)
+		c.push(u.Op.Position, o.COMPLEMENT)
 
 	default:
 		panic("unreachable")
@@ -849,18 +851,18 @@ func (c *compiler) visitBasicExpr(basic *ast.BasicExpr) {
 	switch basic.Token.Kind {
 
 	case ast.NULL:
-		c.push(basic.Token.Position, g.LOAD_NULL)
+		c.push(basic.Token.Position, o.LOAD_NULL)
 
 	case ast.TRUE:
-		c.push(basic.Token.Position, g.LOAD_TRUE)
+		c.push(basic.Token.Position, o.LOAD_TRUE)
 
 	case ast.FALSE:
-		c.push(basic.Token.Position, g.LOAD_FALSE)
+		c.push(basic.Token.Position, o.LOAD_FALSE)
 
 	case ast.STR:
 		c.pushIndex(
 			basic.Token.Position,
-			g.LOAD_CONST,
+			o.LOAD_CONST,
 			poolIndex(c.pool, g.NewStr(basic.Token.Text)))
 
 	case ast.INT:
@@ -872,7 +874,7 @@ func (c *compiler) visitBasicExpr(basic *ast.BasicExpr) {
 		f := parseFloat(basic.Token.Text)
 		c.pushIndex(
 			basic.Token.Position,
-			g.LOAD_CONST,
+			o.LOAD_CONST,
 			poolIndex(c.pool, g.MakeFloat(f)))
 
 	default:
@@ -884,25 +886,25 @@ func (c *compiler) visitBasicExpr(basic *ast.BasicExpr) {
 func (c *compiler) visitIdentExpr(ident *ast.IdentExpr) {
 	v := ident.Variable
 	if v.IsCapture {
-		c.pushIndex(ident.Begin(), g.LOAD_CAPTURE, v.Index)
+		c.pushIndex(ident.Begin(), o.LOAD_CAPTURE, v.Index)
 	} else {
-		c.pushIndex(ident.Begin(), g.LOAD_LOCAL, v.Index)
+		c.pushIndex(ident.Begin(), o.LOAD_LOCAL, v.Index)
 	}
 }
 
 func (c *compiler) visitBuiltinExpr(blt *ast.BuiltinExpr) {
 
-	c.pushIndex(blt.Fn.Position, g.LOAD_BUILTIN, c.builtInMgr.IndexOf(blt.Fn.Text))
+	c.pushIndex(blt.Fn.Position, o.LOAD_BUILTIN, c.builtInMgr.IndexOf(blt.Fn.Text))
 }
 
 func (c *compiler) visitFunc(fe *ast.FnExpr) {
 
-	c.pushIndex(fe.Begin(), g.NEW_FUNC, len(c.funcs))
+	c.pushIndex(fe.Begin(), o.NEW_FUNC, len(c.funcs))
 	for _, pc := range fe.ParentCaptures {
 		if pc.IsCapture {
-			c.pushIndex(fe.Begin(), g.FUNC_CAPTURE, pc.Index)
+			c.pushIndex(fe.Begin(), o.FUNC_CAPTURE, pc.Index)
 		} else {
-			c.pushIndex(fe.Begin(), g.FUNC_LOCAL, pc.Index)
+			c.pushIndex(fe.Begin(), o.FUNC_LOCAL, pc.Index)
 		}
 	}
 
@@ -915,7 +917,7 @@ func (c *compiler) visitInvoke(inv *ast.InvokeExpr) {
 	for _, n := range inv.Params {
 		c.Visit(n)
 	}
-	c.pushIndex(inv.Begin(), g.INVOKE, len(inv.Params))
+	c.pushIndex(inv.Begin(), o.INVOKE, len(inv.Params))
 }
 
 func (c *compiler) visitGo(gw *ast.Go) {
@@ -925,7 +927,7 @@ func (c *compiler) visitGo(gw *ast.Go) {
 	for _, n := range inv.Params {
 		c.Visit(n)
 	}
-	c.pushIndex(inv.Begin(), g.GO, len(inv.Params))
+	c.pushIndex(inv.Begin(), o.GO, len(inv.Params))
 }
 
 func (c *compiler) visitExprStmt(es *ast.ExprStmt) {
@@ -943,33 +945,33 @@ func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 	c.structDefs = append(c.structDefs, def)
 
 	// create new struct
-	c.pushIndex(stc.Begin(), g.NEW_STRUCT, defIdx)
+	c.pushIndex(stc.Begin(), o.NEW_STRUCT, defIdx)
 
 	// if the struct is referenced by a 'this', then store local
 	if stc.LocalThisIndex != -1 {
-		c.push(stc.Begin(), g.DUP)
-		c.pushIndex(stc.Begin(), g.STORE_LOCAL, stc.LocalThisIndex)
+		c.push(stc.Begin(), o.DUP)
+		c.pushIndex(stc.Begin(), o.STORE_LOCAL, stc.LocalThisIndex)
 	}
 
 	// init each value
 	for i, k := range stc.Keys {
 		v := stc.Values[i]
-		c.push(k.Position, g.DUP)
+		c.push(k.Position, o.DUP)
 		c.Visit(v)
 		c.pushIndex(
 			v.Begin(),
-			g.INIT_FIELD,
+			o.INIT_FIELD,
 			poolIndex(c.pool, g.NewStr(k.Text)))
-		c.push(k.Position, g.POP)
+		c.push(k.Position, o.POP)
 	}
 }
 
 func (c *compiler) visitThisExpr(this *ast.ThisExpr) {
 	v := this.Variable
 	if v.IsCapture {
-		c.pushIndex(this.Begin(), g.LOAD_CAPTURE, v.Index)
+		c.pushIndex(this.Begin(), o.LOAD_CAPTURE, v.Index)
 	} else {
-		c.pushIndex(this.Begin(), g.LOAD_LOCAL, v.Index)
+		c.pushIndex(this.Begin(), o.LOAD_LOCAL, v.Index)
 	}
 }
 
@@ -977,33 +979,33 @@ func (c *compiler) visitFieldExpr(fe *ast.FieldExpr) {
 	c.Visit(fe.Operand)
 	c.pushIndex(
 		fe.Key.Position,
-		g.GET_FIELD,
+		o.GET_FIELD,
 		poolIndex(c.pool, g.NewStr(fe.Key.Text)))
 }
 
 func (c *compiler) visitIndexExpr(ie *ast.IndexExpr) {
 	c.Visit(ie.Operand)
 	c.Visit(ie.Index)
-	c.push(ie.Index.Begin(), g.GET_INDEX)
+	c.push(ie.Index.Begin(), o.GET_INDEX)
 }
 
 func (c *compiler) visitSliceExpr(s *ast.SliceExpr) {
 	c.Visit(s.Operand)
 	c.Visit(s.From)
 	c.Visit(s.To)
-	c.push(s.From.Begin(), g.SLICE)
+	c.push(s.From.Begin(), o.SLICE)
 }
 
 func (c *compiler) visitSliceFromExpr(s *ast.SliceFromExpr) {
 	c.Visit(s.Operand)
 	c.Visit(s.From)
-	c.push(s.From.Begin(), g.SLICE_FROM)
+	c.push(s.From.Begin(), o.SLICE_FROM)
 }
 
 func (c *compiler) visitSliceToExpr(s *ast.SliceToExpr) {
 	c.Visit(s.Operand)
 	c.Visit(s.To)
-	c.push(s.To.Begin(), g.SLICE_TO)
+	c.push(s.To.Begin(), o.SLICE_TO)
 }
 
 func (c *compiler) visitListExpr(ls *ast.ListExpr) {
@@ -1011,7 +1013,7 @@ func (c *compiler) visitListExpr(ls *ast.ListExpr) {
 	for _, v := range ls.Elems {
 		c.Visit(v)
 	}
-	c.pushIndex(ls.Begin(), g.NEW_LIST, len(ls.Elems))
+	c.pushIndex(ls.Begin(), o.NEW_LIST, len(ls.Elems))
 }
 
 func (c *compiler) visitSetExpr(s *ast.SetExpr) {
@@ -1019,7 +1021,7 @@ func (c *compiler) visitSetExpr(s *ast.SetExpr) {
 	for _, v := range s.Elems {
 		c.Visit(v)
 	}
-	c.pushIndex(s.Begin(), g.NEW_SET, len(s.Elems))
+	c.pushIndex(s.Begin(), o.NEW_SET, len(s.Elems))
 }
 
 func (c *compiler) visitTupleExpr(tp *ast.TupleExpr) {
@@ -1027,7 +1029,7 @@ func (c *compiler) visitTupleExpr(tp *ast.TupleExpr) {
 	for _, v := range tp.Elems {
 		c.Visit(v)
 	}
-	c.pushIndex(tp.Begin(), g.NEW_TUPLE, len(tp.Elems))
+	c.pushIndex(tp.Begin(), o.NEW_TUPLE, len(tp.Elems))
 }
 
 func (c *compiler) visitDictExpr(d *ast.DictExpr) {
@@ -1037,19 +1039,19 @@ func (c *compiler) visitDictExpr(d *ast.DictExpr) {
 		c.Visit(de.Value)
 	}
 
-	c.pushIndex(d.Begin(), g.NEW_DICT, len(d.Entries))
+	c.pushIndex(d.Begin(), o.NEW_DICT, len(d.Entries))
 }
 
 func (c *compiler) loadInt(pos ast.Pos, i int64) {
 	switch i {
 	case 0:
-		c.push(pos, g.LOAD_ZERO)
+		c.push(pos, o.LOAD_ZERO)
 	case 1:
-		c.push(pos, g.LOAD_ONE)
+		c.push(pos, o.LOAD_ONE)
 	default:
 		c.pushIndex(
 			pos,
-			g.LOAD_CONST,
+			o.LOAD_CONST,
 			poolIndex(c.pool, g.MakeInt(i)))
 	}
 }

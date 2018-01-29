@@ -6,7 +6,9 @@ package interpreter
 
 import (
 	"fmt"
+
 	g "github.com/mjarmy/golem-lang/core"
+	o "github.com/mjarmy/golem-lang/core/opcodes"
 )
 
 //---------------------------------------------------------------
@@ -148,7 +150,7 @@ func (i *Interpreter) walkStack(errTrace g.Error) (g.Value, g.Error) {
 func (i *Interpreter) runTryClause(f *frame, frameIndex int) (g.Value, g.Error) {
 
 	opc := f.fn.Template().OpCodes
-	for opc[f.ip] != g.DONE {
+	for opc[f.ip] != o.DONE {
 
 		result, err := i.advance(frameIndex)
 		if result != nil || err != nil {
@@ -193,7 +195,7 @@ func (i *Interpreter) dump() {
 
 	f := i.frames[len(i.frames)-1]
 	opc := f.fn.Template().OpCodes
-	print(g.FmtOpcode(opc, f.ip))
+	print(o.FmtOpcode(opc, f.ip))
 
 	for j, f := range i.frames {
 		fmt.Printf("frame %d\n", j)

@@ -7,6 +7,8 @@ package core
 import (
 	"bytes"
 	"fmt"
+
+	"github.com/mjarmy/golem-lang/core/opcodes"
 )
 
 //---------------------------------------------------------------
@@ -68,10 +70,10 @@ func (m *BytecodeModule) String() string {
 
 		buf.WriteString("        OpCodes:\n")
 		for i := 0; i < len(t.OpCodes); {
-			text := FmtOpcode(t.OpCodes, i)
+			text := opcodes.FmtOpcode(t.OpCodes, i)
 			buf.WriteString("            ")
 			buf.WriteString(text)
-			i += OpCodeSize(t.OpCodes[i])
+			i += opcodes.OpCodeSize(t.OpCodes[i])
 		}
 
 		buf.WriteString("        LineNumberTable:\n")
