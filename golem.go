@@ -61,7 +61,7 @@ func main() {
 	}
 
 	// run main
-	mainVal, mainErr := mod.Contents.GetField(intp, g.MakeStr("main"))
+	mainVal, mainErr := mod.Contents.GetField(intp, g.NewStr("main"))
 	if mainErr == nil {
 		mainFn, ok := mainVal.(g.BytecodeFunc)
 		if !ok {
@@ -74,7 +74,7 @@ func main() {
 			osArgs := os.Args[2:]
 			args := make([]g.Value, len(osArgs), len(osArgs))
 			for i, a := range osArgs {
-				args[i] = g.MakeStr(a)
+				args[i] = g.NewStr(a)
 			}
 			params = append(params, g.NewList(args))
 		} else if arity > 1 {
@@ -92,7 +92,7 @@ func main() {
 func dumpError(cx g.Context, err g.Error) {
 	fmt.Printf("Error: %s\n", err.Error())
 
-	v, e := err.Struct().GetField(cx, g.MakeStr("stackTrace"))
+	v, e := err.Struct().GetField(cx, g.NewStr("stackTrace"))
 	if e != nil {
 		return
 	}

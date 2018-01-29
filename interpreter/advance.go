@@ -81,15 +81,14 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// If we are on the last frame, then we are done.
 		if frameIndex == lastFrame {
 			return result, nil
-		} else {
-
-			// push the result onto the new top frame
-			f = i.frames[len(i.frames)-1]
-			f.stack = append(f.stack, result)
-
-			// advance the instruction pointer now that we are done invoking
-			f.ip += 3
 		}
+
+		// push the result onto the new top frame
+		f = i.frames[len(i.frames)-1]
+		f.stack = append(f.stack, result)
+
+		// advance the instruction pointer now that we are done invoking
+		f.ip += 3
 
 	case g.DONE:
 		panic("DONE cannot be executed directly")

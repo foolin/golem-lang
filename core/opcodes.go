@@ -8,6 +8,7 @@ import (
 	"fmt"
 )
 
+// Define all the various opcodes
 const (
 	LOAD_NULL byte = iota
 	LOAD_TRUE
@@ -98,6 +99,7 @@ const (
 	CONTINUE = 0xFE
 )
 
+// OpCodeSize returns how 'wide' an opcode is.  Opcodes are always either 1 or 3 bytes.
 func OpCodeSize(opc byte) int {
 
 	switch opc {
@@ -116,6 +118,7 @@ func OpCodeSize(opc byte) int {
 	}
 }
 
+// FmtOpcode formats an opcode into a string
 func FmtOpcode(opcodes []byte, i int) string {
 
 	switch opcodes[i] {

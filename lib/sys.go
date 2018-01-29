@@ -13,6 +13,7 @@ type sysModule struct {
 	contents g.Struct
 }
 
+// InitSysModule initializes the 'sys' module.
 func InitSysModule() g.Module {
 
 	exit := g.NewNativeFunc(

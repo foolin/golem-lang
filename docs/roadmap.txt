@@ -3,8 +3,6 @@
 Things to do before Golem is releasable
 -----------------------------------------------------------
 
-string unicode escape -- JSON style
-
 golint and go vet
 
 create an example to demonstrate how to embed/sandbox.

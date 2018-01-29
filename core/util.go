@@ -81,7 +81,7 @@ func valuesEq(cx Context, as []Value, bs []Value) (Bool, Error) {
 func strHash(s string) int {
 
 	// https://en.wikipedia.org/wiki/Jenkins_hash_function
-	var hash int = 0
+	var hash int
 	bytes := []byte(s)
 	for _, b := range bytes {
 		hash += int(b)
@@ -109,12 +109,12 @@ func newIteratorStruct() Struct {
 func initIteratorStruct(cx Context, itr Iterator) Iterator {
 
 	// initialize the struct fields with functions that refer back to the iterator
-	itr.InitField(cx, MakeStr("nextValue"), &nativeFunc{
+	itr.InitField(cx, NewStr("nextValue"), &nativeFunc{
 		0, 0,
 		func(cx Context, values []Value) (Value, Error) {
 			return itr.IterNext(), nil
 		}})
-	itr.InitField(cx, MakeStr("getValue"), &nativeFunc{
+	itr.InitField(cx, NewStr("getValue"), &nativeFunc{
 		0, 0,
 		func(cx Context, values []Value) (Value, Error) {
 			return itr.IterGet()

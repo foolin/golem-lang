@@ -54,7 +54,7 @@ func (d *dict) ToStr(cx Context) Str {
 	}
 
 	buf.WriteString(" }")
-	return MakeStr(buf.String())
+	return NewStr(buf.String())
 }
 
 func (d *dict) HashCode(cx Context) (Int, Error) {

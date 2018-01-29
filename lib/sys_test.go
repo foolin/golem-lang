@@ -11,7 +11,7 @@ import (
 
 func TestSys(t *testing.T) {
 	sys := InitSysModule()
-	exit, err := sys.GetContents().GetField(nil, g.MakeStr("exit"))
+	exit, err := sys.GetContents().GetField(nil, g.NewStr("exit"))
 	tassert(t, exit != nil)
 	tassert(t, err == nil)
 }

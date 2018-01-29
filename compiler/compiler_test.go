@@ -168,7 +168,7 @@ func TestExpression(t *testing.T) {
 	mod = newCompiler(newAnalyzer("'a' * 1.23e4")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
-			g.MakeStr("a"),
+			g.NewStr("a"),
 			g.MakeFloat(float64(12300))},
 		nil,
 		[][]g.Field{},
@@ -190,7 +190,7 @@ func TestExpression(t *testing.T) {
 	mod = newCompiler(newAnalyzer("'a' == true")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
-			g.MakeStr("a")},
+			g.NewStr("a")},
 		nil,
 		[][]g.Field{},
 		[]*g.Template{
@@ -477,7 +477,7 @@ func TestWhile(t *testing.T) {
 	mod = newCompiler(newAnalyzer(source)).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
-			g.MakeStr("z"),
+			g.NewStr("z"),
 			g.MakeInt(2),
 			g.MakeInt(3)},
 		nil,
@@ -910,9 +910,9 @@ func TestPool(t *testing.T) {
 	pool := g.EmptyHashMap()
 
 	tassert(t, poolIndex(pool, g.MakeInt(4)) == 0)
-	tassert(t, poolIndex(pool, g.MakeStr("a")) == 1)
+	tassert(t, poolIndex(pool, g.NewStr("a")) == 1)
 	tassert(t, poolIndex(pool, g.MakeFloat(1.0)) == 2)
-	tassert(t, poolIndex(pool, g.MakeStr("a")) == 1)
+	tassert(t, poolIndex(pool, g.NewStr("a")) == 1)
 	tassert(t, poolIndex(pool, g.MakeInt(4)) == 0)
 
 	slice := makePoolSlice(pool)
@@ -920,7 +920,7 @@ func TestPool(t *testing.T) {
 		slice,
 		[]g.Basic{
 			g.MakeInt(4),
-			g.MakeStr("a"),
+			g.NewStr("a"),
 			g.MakeFloat(1.0)}))
 }
 

@@ -17,6 +17,7 @@ type _struct struct {
 	frozen bool
 }
 
+// NewStruct creates a new Struct
 func NewStruct(fields []Field, frozen bool) (Struct, Error) {
 
 	smap := newStructMap()
@@ -31,6 +32,10 @@ func NewStruct(fields []Field, frozen bool) (Struct, Error) {
 	return &_struct{smap, frozen}, nil
 }
 
+// MergeStructs merges Structs together into one Struct.
+// Field name that are defined in more than one of the structs are combined so
+// that the value of the field is taken only from the first such Struct.
+// If any of the structs are frozen, then the resulting struct is also frozen.
 func MergeStructs(structs []Struct) Struct {
 	if len(structs) < 2 {
 		panic("invalid struct merge")
@@ -38,13 +43,6 @@ func MergeStructs(structs []Struct) Struct {
 
 	smap := newStructMap()
 	frozen := false
-
-	// FieldNames that are defined in more
-	// than one of the structs are combined so that the value
-	// is taken only from the first such struct
-
-	// If any of the structs are frozen,
-	// then the resulting struct is also frozen.
 
 	for _, s := range structs {
 		st := s.(*_struct)
@@ -91,7 +89,7 @@ func (st *_struct) ToStr(cx Context) Str {
 		buf.WriteString(v.ToStr(cx).String())
 	}
 	buf.WriteString(" }")
-	return MakeStr(buf.String())
+	return NewStr(buf.String())
 }
 
 func (st *_struct) HashCode(cx Context) (Int, Error) {
@@ -146,12 +144,10 @@ func (st *_struct) GetField(cx Context, name Str) (Value, Error) {
 		if f.isProperty {
 			fn := ((f.value.(tuple))[0]).(Func)
 			return fn.Invoke(cx, nil)
-		} else {
-			return f.value, nil
 		}
-	} else {
-		return nil, NoSuchFieldError(name.String())
+		return f.value, nil
 	}
+	return nil, NoSuchFieldError(name.String())
 }
 
 func (st *_struct) FieldNames() []string {
@@ -162,9 +158,8 @@ func (st *_struct) Has(name Value) (Bool, Error) {
 	if s, ok := name.(Str); ok {
 		_, has := st.smap.get(s.String())
 		return MakeBool(has), nil
-	} else {
-		return nil, TypeMismatchError("Expected 'Str'")
 	}
+	return nil, TypeMismatchError("Expected 'Str'")
 }
 
 //---------------------------------------------------------------
@@ -187,13 +182,11 @@ func (st *_struct) InitField(cx Context, name Str, val Value) Error {
 			//return err
 
 			return nil
-		} else {
-			f.value = val
-			return nil
 		}
-	} else {
-		return NoSuchFieldError(name.String())
+		f.value = val
+		return nil
 	}
+	return NoSuchFieldError(name.String())
 }
 
 func (st *_struct) SetField(cx Context, name Str, val Value) Error {
@@ -204,19 +197,19 @@ func (st *_struct) SetField(cx Context, name Str, val Value) Error {
 
 	f, has := st.smap.get(name.String())
 	if has {
-		if f.isConst {
+		switch {
+		case f.isConst:
 			return ReadonlyFieldError(name.String())
-		} else {
-			if f.isProperty {
-				// The value for a property is always a tuple
-				// containing two functions: the getter, and the setter.
-				fn := ((f.value.(tuple))[1]).(Func)
-				_, err := fn.Invoke(cx, []Value{val})
-				return err
-			} else {
-				f.value = val
-				return nil
-			}
+		case f.isProperty:
+			// The value for a property is always a tuple
+			// containing two functions: the getter, and the setter.
+			fn := ((f.value.(tuple))[1]).(Func)
+			_, err := fn.Invoke(cx, []Value{val})
+			return err
+		default:
+
+			f.value = val
+			return nil
 		}
 	} else {
 		return NoSuchFieldError(name.String())

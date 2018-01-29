@@ -20,6 +20,7 @@ type rng struct {
 	count int64
 }
 
+// NewRange creates a new Range
 func NewRange(from int64, to int64, step int64) (Range, Error) {
 
 	switch {
@@ -49,7 +50,7 @@ func (r *rng) Frozen() (Bool, Error) {
 }
 
 func (r *rng) ToStr(cx Context) Str {
-	return MakeStr(fmt.Sprintf("range<%d, %d, %d>", r.from, r.to, r.step))
+	return NewStr(fmt.Sprintf("range<%d, %d, %d>", r.from, r.to, r.step))
 }
 
 func (r *rng) HashCode(cx Context) (Int, Error) {
@@ -109,9 +110,8 @@ func (i *rangeIterator) IterGet() (Value, Error) {
 
 	if (i.n >= 0) && (i.n < i.r.count) {
 		return MakeInt(i.r.from + i.n*i.r.step), nil
-	} else {
-		return nil, NoSuchElementError()
 	}
+	return nil, NoSuchElementError()
 }
 
 //--------------------------------------------------------------

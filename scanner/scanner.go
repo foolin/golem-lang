@@ -22,6 +22,7 @@ type (
 		idx  int
 	}
 
+	// Scanner scans Golem source code and produces a stream of tokens.
 	Scanner struct {
 		source    string
 		reader    io.RuneReader
@@ -32,6 +33,7 @@ type (
 	}
 )
 
+// NewScanner creates a new Scanner
 func NewScanner(source string) *Scanner {
 	reader := strings.NewReader(source)
 	s := &Scanner{source, reader, curRune{0, 1, -1}, ast.Pos{1, 0}, false, nil}
@@ -39,6 +41,8 @@ func NewScanner(source string) *Scanner {
 	return s
 }
 
+// Next produces the next token in the stream.  By convention, if the stream is
+// finished, the last token is produced over and over again.
 func (s *Scanner) Next() *ast.Token {
 
 	// If we are already finished, then by convention we return
@@ -146,9 +150,8 @@ func (s *Scanner) Next() *ast.Token {
 			if r == '=' {
 				s.consume()
 				return &ast.Token{ast.STAR_EQ, "*=", pos}
-			} else {
-				return &ast.Token{ast.STAR, "*", pos}
 			}
+			return &ast.Token{ast.STAR, "*", pos}
 
 		case r == '(':
 			s.consume()
@@ -190,9 +193,8 @@ func (s *Scanner) Next() *ast.Token {
 			if r == '=' {
 				s.consume()
 				return &ast.Token{ast.PERCENT_EQ, "%=", pos}
-			} else {
-				return &ast.Token{ast.PERCENT, "%", pos}
 			}
+			return &ast.Token{ast.PERCENT, "%", pos}
 
 		case r == '^':
 			s.consume()
@@ -200,9 +202,8 @@ func (s *Scanner) Next() *ast.Token {
 			if r == '=' {
 				s.consume()
 				return &ast.Token{ast.CARET_EQ, "^=", pos}
-			} else {
-				return &ast.Token{ast.CARET, "^", pos}
 			}
+			return &ast.Token{ast.CARET, "^", pos}
 
 		case r == '~':
 			s.consume()
@@ -227,9 +228,8 @@ func (s *Scanner) Next() *ast.Token {
 			if r == '=' {
 				s.consume()
 				return &ast.Token{ast.NOT_EQ, "!=", pos}
-			} else {
-				return &ast.Token{ast.NOT, "!", pos}
 			}
+			return &ast.Token{ast.NOT, "!", pos}
 		case r == '>':
 			s.consume()
 			r := s.cur.r
@@ -242,9 +242,8 @@ func (s *Scanner) Next() *ast.Token {
 				if r == '=' {
 					s.consume()
 					return &ast.Token{ast.DBL_GT_EQ, ">>=", pos}
-				} else {
-					return &ast.Token{ast.DBL_GT, ">>", pos}
 				}
+				return &ast.Token{ast.DBL_GT, ">>", pos}
 			} else {
 				return &ast.Token{ast.GT, ">", pos}
 			}
@@ -257,18 +256,16 @@ func (s *Scanner) Next() *ast.Token {
 				if r == '>' {
 					s.consume()
 					return &ast.Token{ast.CMP, "<=>", pos}
-				} else {
-					return &ast.Token{ast.LT_EQ, "<=", pos}
 				}
+				return &ast.Token{ast.LT_EQ, "<=", pos}
 			} else if r == '<' {
 				s.consume()
 				r := s.cur.r
 				if r == '=' {
 					s.consume()
 					return &ast.Token{ast.DBL_LT_EQ, "<<=", pos}
-				} else {
-					return &ast.Token{ast.DBL_LT, "<<", pos}
 				}
+				return &ast.Token{ast.DBL_LT, "<<", pos}
 			} else {
 				return &ast.Token{ast.LT, "<", pos}
 			}
@@ -570,9 +567,8 @@ func (s *Scanner) nextNumber() *ast.Token {
 		r := s.cur.r
 		if r == '.' || isExp(r) {
 			return s.nextFloat(begin, pos)
-		} else {
-			return &ast.Token{ast.INT, s.source[begin:s.cur.idx], pos}
 		}
+		return &ast.Token{ast.INT, s.source[begin:s.cur.idx], pos}
 	}
 
 }
@@ -620,9 +616,8 @@ func (s *Scanner) accept(fn func(rune) bool) bool {
 	if fn(r) {
 		s.consume()
 		return true
-	} else {
-		return false
 	}
+	return false
 }
 
 // accept a sequence of runes that match the given function
@@ -647,9 +642,8 @@ func (s *Scanner) expect(fn func(rune) bool) *ast.Token {
 	if fn(r) {
 		s.consume()
 		return nil
-	} else {
-		return s.unexpectedChar(r, pos)
 	}
+	return s.unexpectedChar(r, pos)
 }
 
 func (s *Scanner) unexpectedChar(r rune, pos ast.Pos) *ast.Token {

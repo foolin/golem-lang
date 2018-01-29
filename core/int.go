@@ -46,7 +46,7 @@ func (i _int) Frozen() (Bool, Error) {
 }
 
 func (i _int) ToStr(cx Context) Str {
-	return MakeStr(fmt.Sprintf("%d", i))
+	return NewStr(fmt.Sprintf("%d", i))
 }
 
 func (i _int) HashCode(cx Context) (Int, Error) {

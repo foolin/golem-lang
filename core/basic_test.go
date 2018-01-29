@@ -51,7 +51,7 @@ func TestNull(t *testing.T) {
 	var err Error
 
 	v = NULL.ToStr(cx)
-	ok(t, v, nil, MakeStr("null"))
+	ok(t, v, nil, NewStr("null"))
 
 	v, err = NULL.Eq(cx, NULL)
 	ok(t, v, err, TRUE)
@@ -65,9 +65,9 @@ func TestNull(t *testing.T) {
 func TestBool(t *testing.T) {
 
 	s := TRUE.ToStr(cx)
-	ok(t, s, nil, MakeStr("true"))
+	ok(t, s, nil, NewStr("true"))
 	s = FALSE.ToStr(cx)
-	ok(t, s, nil, MakeStr("false"))
+	ok(t, s, nil, NewStr("false"))
 
 	okType(t, TRUE, TBOOL)
 	okType(t, FALSE, TBOOL)
@@ -83,7 +83,7 @@ func TestBool(t *testing.T) {
 	ok(t, b, err, FALSE)
 	b, err = FALSE.Eq(cx, TRUE)
 	ok(t, b, err, FALSE)
-	b, err = FALSE.Eq(cx, MakeStr("a"))
+	b, err = FALSE.Eq(cx, NewStr("a"))
 	ok(t, b, err, FALSE)
 
 	i, err := TRUE.Cmp(cx, FALSE)
@@ -104,16 +104,16 @@ func TestBool(t *testing.T) {
 }
 
 func TestStr(t *testing.T) {
-	a := MakeStr("a")
-	b := MakeStr("b")
+	a := NewStr("a")
+	b := NewStr("b")
 
 	var v Value
 	var err Error
 
 	v = a.ToStr(cx)
-	ok(t, v, nil, MakeStr("a"))
+	ok(t, v, nil, NewStr("a"))
 	v = b.ToStr(cx)
-	ok(t, v, nil, MakeStr("b"))
+	ok(t, v, nil, NewStr("b"))
 
 	okType(t, a, TSTR)
 	v, err = a.Eq(cx, b)
@@ -122,7 +122,7 @@ func TestStr(t *testing.T) {
 	ok(t, v, err, FALSE)
 	v, err = a.Eq(cx, a)
 	ok(t, v, err, TRUE)
-	v, err = a.Eq(cx, MakeStr("a"))
+	v, err = a.Eq(cx, NewStr("a"))
 	ok(t, v, err, TRUE)
 
 	v, err = a.Cmp(cx, MakeInt(1))
@@ -134,7 +134,7 @@ func TestStr(t *testing.T) {
 	v, err = b.Cmp(cx, a)
 	ok(t, v, err, MakeInt(1))
 
-	ab := MakeStr("ab")
+	ab := NewStr("ab")
 	v, err = ab.Get(cx, MakeInt(0))
 	ok(t, v, err, a)
 	v, err = ab.Get(cx, MakeInt(1))
@@ -146,24 +146,24 @@ func TestStr(t *testing.T) {
 	v, err = ab.Get(cx, MakeInt(2))
 	fail(t, v, err, "IndexOutOfBounds: 2")
 
-	v = MakeStr("").Len()
+	v = NewStr("").Len()
 	ok(t, v, nil, ZERO)
 
-	v = MakeStr("a").Len()
+	v = NewStr("a").Len()
 	ok(t, v, nil, ONE)
 
-	v = MakeStr("abcde").Len()
+	v = NewStr("abcde").Len()
 	ok(t, v, nil, MakeInt(5))
 
 	//////////////////////////////
 	// unicode
 
-	a = MakeStr("日本語")
+	a = NewStr("日本語")
 	v = a.Len()
 	ok(t, v, nil, MakeInt(3))
 
 	v, err = a.Get(cx, MakeInt(2))
-	ok(t, v, err, MakeStr("語"))
+	ok(t, v, err, NewStr("語"))
 }
 
 func TestInt(t *testing.T) {
@@ -171,9 +171,9 @@ func TestInt(t *testing.T) {
 	b := MakeInt(1)
 
 	s := a.ToStr(cx)
-	ok(t, s, nil, MakeStr("0"))
+	ok(t, s, nil, NewStr("0"))
 	s = b.ToStr(cx)
-	ok(t, s, nil, MakeStr("1"))
+	ok(t, s, nil, NewStr("1"))
 
 	okType(t, a, TINT)
 
@@ -216,7 +216,7 @@ func TestInt(t *testing.T) {
 	ok(t, val, err, MakeInt(1))
 	val, err = MakeInt(3).Sub(MakeFloat(2.0))
 	ok(t, val, err, MakeFloat(1.0))
-	val, err = MakeInt(3).Sub(MakeStr("a"))
+	val, err = MakeInt(3).Sub(NewStr("a"))
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = MakeInt(3).Sub(FALSE)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
@@ -227,7 +227,7 @@ func TestInt(t *testing.T) {
 	ok(t, val, err, MakeInt(6))
 	val, err = MakeInt(3).Mul(MakeFloat(2.0))
 	ok(t, val, err, MakeFloat(6.0))
-	val, err = MakeInt(3).Mul(MakeStr("a"))
+	val, err = MakeInt(3).Mul(NewStr("a"))
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = MakeInt(3).Mul(FALSE)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
@@ -238,7 +238,7 @@ func TestInt(t *testing.T) {
 	ok(t, val, err, MakeInt(1))
 	val, err = MakeInt(3).Div(MakeFloat(2.0))
 	ok(t, val, err, MakeFloat(1.5))
-	val, err = MakeInt(3).Div(MakeStr("a"))
+	val, err = MakeInt(3).Div(NewStr("a"))
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = MakeInt(3).Div(FALSE)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
@@ -263,7 +263,7 @@ func TestInt(t *testing.T) {
 	v1, err = MakeInt(8).RightShift(MakeInt(3))
 	ok(t, v1, err, MakeInt(1))
 
-	v1, err = MakeInt(8).RightShift(MakeStr("a"))
+	v1, err = MakeInt(8).RightShift(NewStr("a"))
 	fail(t, v1, err, "TypeMismatch: Expected 'Int'")
 
 	v1, err = MakeInt(8).RightShift(MakeInt(-1))
@@ -280,9 +280,9 @@ func TestFloat(t *testing.T) {
 	b := MakeFloat(1.2)
 
 	s := a.ToStr(cx)
-	ok(t, s, nil, MakeStr("0.1"))
+	ok(t, s, nil, NewStr("0.1"))
 	s = b.ToStr(cx)
-	ok(t, s, nil, MakeStr("1.2"))
+	ok(t, s, nil, NewStr("1.2"))
 
 	okType(t, a, TFLOAT)
 	z, err := a.Eq(cx, b)
@@ -298,7 +298,7 @@ func TestFloat(t *testing.T) {
 	g := MakeFloat(1.0)
 	i := MakeInt(0)
 	j := MakeInt(1)
-	n, err := f.Cmp(cx, MakeStr("f"))
+	n, err := f.Cmp(cx, NewStr("f"))
 	fail(t, n, err, "TypeMismatch: Expected Comparable Type")
 	n, err = f.Cmp(cx, f)
 	ok(t, n, err, MakeInt(0))
@@ -323,7 +323,7 @@ func TestFloat(t *testing.T) {
 	ok(t, val, err, MakeFloat(float64(3.3)-float64(int64(2))))
 	val, err = MakeFloat(3.3).Sub(MakeFloat(2.0))
 	ok(t, val, err, MakeFloat(float64(3.3)-float64(2.0)))
-	val, err = MakeFloat(3.3).Sub(MakeStr("a"))
+	val, err = MakeFloat(3.3).Sub(NewStr("a"))
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = MakeFloat(3.3).Sub(FALSE)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
@@ -334,7 +334,7 @@ func TestFloat(t *testing.T) {
 	ok(t, val, err, MakeFloat(float64(3.3)*float64(int64(2))))
 	val, err = MakeFloat(3.3).Mul(MakeFloat(2.0))
 	ok(t, val, err, MakeFloat(float64(3.3)*float64(2.0)))
-	val, err = MakeFloat(3.3).Mul(MakeStr("a"))
+	val, err = MakeFloat(3.3).Mul(NewStr("a"))
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = MakeFloat(3.3).Mul(FALSE)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
@@ -345,7 +345,7 @@ func TestFloat(t *testing.T) {
 	ok(t, val, err, MakeFloat(float64(3.3)/float64(int64(2))))
 	val, err = MakeFloat(3.3).Div(MakeFloat(2.0))
 	ok(t, val, err, MakeFloat(float64(3.3)/float64(2.0)))
-	val, err = MakeFloat(3.3).Div(MakeStr("a"))
+	val, err = MakeFloat(3.3).Div(NewStr("a"))
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = MakeFloat(3.3).Div(FALSE)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
@@ -389,10 +389,10 @@ func TestBasicHashCode(t *testing.T) {
 	h, err = MakeFloat(-1.23e45).HashCode(cx)
 	ok(t, h, err, MakeInt(-3941894481896550236))
 
-	h, err = MakeStr("").HashCode(cx)
+	h, err = NewStr("").HashCode(cx)
 	ok(t, h, err, MakeInt(0))
 
-	h, err = MakeStr("abcdef").HashCode(cx)
+	h, err = NewStr("abcdef").HashCode(cx)
 	ok(t, h, err, MakeInt(1928994870288439732))
 }
 
@@ -421,26 +421,26 @@ func structInvokeBoolFunc(t *testing.T, stc Struct, name Str) Bool {
 
 func TestStrIterator(t *testing.T) {
 
-	var ibl Iterable = MakeStr("abc")
+	var ibl Iterable = NewStr("abc")
 
 	var itr Iterator = ibl.NewIterator(cx)
 	v, err := itr.IterGet()
 	fail(t, v, err, "NoSuchElement")
-	s := MakeStr("")
+	s := NewStr("")
 	for itr.IterNext().BoolVal() {
 		v, err = itr.IterGet()
 		tassert(t, err == nil)
 		s = s.Concat(v.ToStr(cx))
 	}
-	ok(t, s, nil, MakeStr("abc"))
+	ok(t, s, nil, NewStr("abc"))
 	v, err = itr.IterGet()
 	fail(t, v, err, "NoSuchElement")
 
 	itr = ibl.NewIterator(cx)
-	s = MakeStr("")
-	for structInvokeBoolFunc(t, itr, MakeStr("nextValue")).BoolVal() {
-		v := structInvokeFunc(t, itr, MakeStr("getValue"))
+	s = NewStr("")
+	for structInvokeBoolFunc(t, itr, NewStr("nextValue")).BoolVal() {
+		v := structInvokeFunc(t, itr, NewStr("getValue"))
 		s = s.Concat(v.ToStr(cx))
 	}
-	ok(t, s, nil, MakeStr("abc"))
+	ok(t, s, nil, NewStr("abc"))
 }

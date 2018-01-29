@@ -60,7 +60,7 @@ func (f *nativeFunc) Cmp(cx Context, v Value) (Int, Error) {
 }
 
 func (f *nativeFunc) ToStr(cx Context) Str {
-	return MakeStr(fmt.Sprintf("nativeFunc<%p>", f))
+	return NewStr(fmt.Sprintf("nativeFunc<%p>", f))
 }
 
 func (f *nativeFunc) MinArity() int { return f.minArity }

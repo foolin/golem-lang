@@ -36,7 +36,7 @@ func fail(t *testing.T, p *Parser, expect string) {
 	}
 }
 
-func ok_expr(t *testing.T, p *Parser, expect string) {
+func okExpr(t *testing.T, p *Parser, expect string) {
 
 	expr, err := parseExpression(p)
 	if err != nil {
@@ -49,7 +49,7 @@ func ok_expr(t *testing.T, p *Parser, expect string) {
 	}
 }
 
-func fail_expr(t *testing.T, p *Parser, expect string) {
+func failExpr(t *testing.T, p *Parser, expect string) {
 
 	expr, err := parseExpression(p)
 	if expr != nil {
@@ -111,218 +111,218 @@ func parseExpression(p *Parser) (expr ast.Expression, err error) {
 func TestPrimary(t *testing.T) {
 
 	p := newParser("")
-	fail_expr(t, p, "Unexpected EOF at (1, 1)")
+	failExpr(t, p, "Unexpected EOF at (1, 1)")
 
 	p = newParser("#")
-	fail_expr(t, p, "Unexpected Character '#' at (1, 1)")
+	failExpr(t, p, "Unexpected Character '#' at (1, 1)")
 
 	p = newParser("'")
-	fail_expr(t, p, "Unexpected EOF at (1, 2)")
+	failExpr(t, p, "Unexpected EOF at (1, 2)")
 
 	p = newParser("1 2")
-	fail_expr(t, p, "Unexpected Token '2' at (1, 3)")
+	failExpr(t, p, "Unexpected Token '2' at (1, 3)")
 
 	p = newParser("a == goto")
-	fail_expr(t, p, "Unexpected Reserved Word 'goto' at (1, 6)")
+	failExpr(t, p, "Unexpected Reserved Word 'goto' at (1, 6)")
 
 	p = newParser("1 #")
-	fail_expr(t, p, "Unexpected Character '#' at (1, 3)")
+	failExpr(t, p, "Unexpected Character '#' at (1, 3)")
 
 	p = newParser("1")
-	ok_expr(t, p, "1")
+	okExpr(t, p, "1")
 
 	p = newParser("0xa")
-	ok_expr(t, p, "0xa")
+	okExpr(t, p, "0xa")
 
 	p = newParser("1.2")
-	ok_expr(t, p, "1.2")
+	okExpr(t, p, "1.2")
 
 	p = newParser("null")
-	ok_expr(t, p, "null")
+	okExpr(t, p, "null")
 
 	p = newParser("true")
-	ok_expr(t, p, "true")
+	okExpr(t, p, "true")
 
 	p = newParser("false")
-	ok_expr(t, p, "false")
+	okExpr(t, p, "false")
 
 	p = newParser("'a'")
-	ok_expr(t, p, "'a'")
+	okExpr(t, p, "'a'")
 
 	p = newParser("('a')")
-	ok_expr(t, p, "'a'")
+	okExpr(t, p, "'a'")
 
 	p = newParser("bar")
-	ok_expr(t, p, "bar")
+	okExpr(t, p, "bar")
 
 	p = newParser("str")
-	ok_expr(t, p, "str")
+	okExpr(t, p, "str")
 }
 
 func TestUnary(t *testing.T) {
 	p := newParser("-1")
-	ok_expr(t, p, "-1")
+	okExpr(t, p, "-1")
 
 	p = newParser("- - 2")
-	ok_expr(t, p, "--2")
+	okExpr(t, p, "--2")
 
 	p = newParser("!a")
-	ok_expr(t, p, "!a")
+	okExpr(t, p, "!a")
 
 	p = newParser("~a")
-	ok_expr(t, p, "~a")
+	okExpr(t, p, "~a")
 }
 
 func TestPostfix(t *testing.T) {
 	p := newParser("a++")
-	ok_expr(t, p, "a++")
+	okExpr(t, p, "a++")
 
 	p = newParser("a.b++")
-	ok_expr(t, p, "a.b++")
+	okExpr(t, p, "a.b++")
 
 	p = newParser("3++")
-	fail_expr(t, p, "Invalid Postfix Expression at (1, 2)")
+	failExpr(t, p, "Invalid Postfix Expression at (1, 2)")
 }
 
 func TestTernary(t *testing.T) {
 	p := newParser("a ? b : c")
-	ok_expr(t, p, "(a ? b : c)")
+	okExpr(t, p, "(a ? b : c)")
 
 	p = newParser("a || b ? b = c : d ? e : f")
-	ok_expr(t, p, "((a || b) ? (b = c) : (d ? e : f))")
+	okExpr(t, p, "((a || b) ? (b = c) : (d ? e : f))")
 
 	p = newParser("a ?")
-	fail_expr(t, p, "Unexpected EOF at (1, 4)")
+	failExpr(t, p, "Unexpected EOF at (1, 4)")
 
 	p = newParser("a ? b")
-	fail_expr(t, p, "Unexpected EOF at (1, 6)")
+	failExpr(t, p, "Unexpected EOF at (1, 6)")
 
 	p = newParser("a ? b :")
-	fail_expr(t, p, "Unexpected EOF at (1, 8)")
+	failExpr(t, p, "Unexpected EOF at (1, 8)")
 }
 
 func TestMultiplicative(t *testing.T) {
 	p := newParser("1*2")
-	ok_expr(t, p, "(1 * 2)")
+	okExpr(t, p, "(1 * 2)")
 
 	p = newParser("-1*-2")
-	ok_expr(t, p, "(-1 * -2)")
+	okExpr(t, p, "(-1 * -2)")
 
 	p = newParser("1*2*3")
-	ok_expr(t, p, "((1 * 2) * 3)")
+	okExpr(t, p, "((1 * 2) * 3)")
 
 	p = newParser("1*2/3*4/5")
-	ok_expr(t, p, "((((1 * 2) / 3) * 4) / 5)")
+	okExpr(t, p, "((((1 * 2) / 3) * 4) / 5)")
 
 	p = newParser("1%2&3<<4>>5")
-	ok_expr(t, p, "((((1 % 2) & 3) << 4) >> 5)")
+	okExpr(t, p, "((((1 % 2) & 3) << 4) >> 5)")
 }
 
 func TestAdditive(t *testing.T) {
 	p := newParser("1*2+3")
-	ok_expr(t, p, "((1 * 2) + 3)")
+	okExpr(t, p, "((1 * 2) + 3)")
 
 	p = newParser("1+2*3")
-	ok_expr(t, p, "(1 + (2 * 3))")
+	okExpr(t, p, "(1 + (2 * 3))")
 
 	p = newParser("1+2*-3")
-	ok_expr(t, p, "(1 + (2 * -3))")
+	okExpr(t, p, "(1 + (2 * -3))")
 
 	p = newParser("1+2+-3")
-	ok_expr(t, p, "((1 + 2) + -3)")
+	okExpr(t, p, "((1 + 2) + -3)")
 
 	p = newParser("1+2*3+4")
-	ok_expr(t, p, "((1 + (2 * 3)) + 4)")
+	okExpr(t, p, "((1 + (2 * 3)) + 4)")
 
 	p = newParser("(1+2) * 3")
-	ok_expr(t, p, "((1 + 2) * 3)")
+	okExpr(t, p, "((1 + 2) * 3)")
 
 	p = newParser("(1*2) * 3")
-	ok_expr(t, p, "((1 * 2) * 3)")
+	okExpr(t, p, "((1 * 2) * 3)")
 
 	p = newParser("1 * (2 + 3)")
-	ok_expr(t, p, "(1 * (2 + 3))")
+	okExpr(t, p, "(1 * (2 + 3))")
 
 	p = newParser("1 ^ 2 | 3")
-	ok_expr(t, p, "((1 ^ 2) | 3)")
+	okExpr(t, p, "((1 ^ 2) | 3)")
 
 	p = newParser("1 ^ 2 % 3")
-	ok_expr(t, p, "(1 ^ (2 % 3))")
+	okExpr(t, p, "(1 ^ (2 % 3))")
 
 	p = newParser("1 +")
-	fail_expr(t, p, "Unexpected EOF at (1, 4)")
+	failExpr(t, p, "Unexpected EOF at (1, 4)")
 }
 
 func TestAssign(t *testing.T) {
 
 	p := newParser("a += 2")
-	ok_expr(t, p, "(a = (a + 2))")
+	okExpr(t, p, "(a = (a + 2))")
 
 	p = newParser("a -= 2")
-	ok_expr(t, p, "(a = (a - 2))")
+	okExpr(t, p, "(a = (a - 2))")
 
 	p = newParser("a *= 2")
-	ok_expr(t, p, "(a = (a * 2))")
+	okExpr(t, p, "(a = (a * 2))")
 
 	p = newParser("a /= 2")
-	ok_expr(t, p, "(a = (a / 2))")
+	okExpr(t, p, "(a = (a / 2))")
 
 	p = newParser("a %= 2")
-	ok_expr(t, p, "(a = (a % 2))")
+	okExpr(t, p, "(a = (a % 2))")
 
 	p = newParser("a |= 2")
-	ok_expr(t, p, "(a = (a | 2))")
+	okExpr(t, p, "(a = (a | 2))")
 
 	p = newParser("a &= 2")
-	ok_expr(t, p, "(a = (a & 2))")
+	okExpr(t, p, "(a = (a & 2))")
 
 	p = newParser("a ^= 2")
-	ok_expr(t, p, "(a = (a ^ 2))")
+	okExpr(t, p, "(a = (a ^ 2))")
 
 	p = newParser("a <<= 2")
-	ok_expr(t, p, "(a = (a << 2))")
+	okExpr(t, p, "(a = (a << 2))")
 
 	p = newParser("a >>= 2")
-	ok_expr(t, p, "(a = (a >> 2))")
+	okExpr(t, p, "(a = (a >> 2))")
 
 	p = newParser("a = b = c")
-	ok_expr(t, p, "(a = (b = c))")
+	okExpr(t, p, "(a = (b = c))")
 
 	p = newParser("a -= b += c")
-	ok_expr(t, p, "(a = (a - (b = (b + c))))")
+	okExpr(t, p, "(a = (a - (b = (b + c))))")
 }
 
 func TestComparitive(t *testing.T) {
 	p := newParser("1==3")
-	ok_expr(t, p, "(1 == 3)")
+	okExpr(t, p, "(1 == 3)")
 
 	p = newParser("1 ==2 +3 * - 4")
-	ok_expr(t, p, "(1 == (2 + (3 * -4)))")
+	okExpr(t, p, "(1 == (2 + (3 * -4)))")
 
 	p = newParser("(1== 2)+ 3")
-	ok_expr(t, p, "((1 == 2) + 3)")
+	okExpr(t, p, "((1 == 2) + 3)")
 
 	p = newParser("1!=3")
-	ok_expr(t, p, "(1 != 3)")
+	okExpr(t, p, "(1 != 3)")
 
-	ok_expr(t, newParser("1 < 3"), "(1 < 3)")
-	ok_expr(t, newParser("1 > 3"), "(1 > 3)")
-	ok_expr(t, newParser("1 <= 3"), "(1 <= 3)")
-	ok_expr(t, newParser("1 >= 3"), "(1 >= 3)")
-	ok_expr(t, newParser("1 <=> 3"), "(1 <=> 3)")
+	okExpr(t, newParser("1 < 3"), "(1 < 3)")
+	okExpr(t, newParser("1 > 3"), "(1 > 3)")
+	okExpr(t, newParser("1 <= 3"), "(1 <= 3)")
+	okExpr(t, newParser("1 >= 3"), "(1 >= 3)")
+	okExpr(t, newParser("1 <=> 3"), "(1 <=> 3)")
 
-	ok_expr(t, newParser("1 <=> 2 + 3 * 4"), "(1 <=> (2 + (3 * 4)))")
+	okExpr(t, newParser("1 <=> 2 + 3 * 4"), "(1 <=> (2 + (3 * 4)))")
 
-	ok_expr(t, newParser("1 has 3"), "(1 has 3)")
+	okExpr(t, newParser("1 has 3"), "(1 has 3)")
 }
 
 func TestAndOr(t *testing.T) {
 
-	ok_expr(t, newParser("1 || 2"), "(1 || 2)")
-	ok_expr(t, newParser("1 || 2 || 3"), "((1 || 2) || 3)")
+	okExpr(t, newParser("1 || 2"), "(1 || 2)")
+	okExpr(t, newParser("1 || 2 || 3"), "((1 || 2) || 3)")
 
-	ok_expr(t, newParser("1 || 2 && 3"), "(1 || (2 && 3))")
-	ok_expr(t, newParser("1 || 2 && 3 < 4"), "(1 || (2 && (3 < 4)))")
+	okExpr(t, newParser("1 || 2 && 3"), "(1 || (2 && 3))")
+	okExpr(t, newParser("1 || 2 && 3 < 4"), "(1 || (2 && (3 < 4)))")
 }
 
 func TestModule(t *testing.T) {
@@ -359,7 +359,7 @@ func TestStatement(t *testing.T) {
 	ok(t, p, "fn() { let a = 3, b; const x, y, z = 5; }")
 
 	p = newParser("fn() {}")
-	ok_expr(t, p, "fn() {  }")
+	okExpr(t, p, "fn() {  }")
 
 	p = newParser("fn() {};")
 	ok(t, p, "fn() { fn() {  }; }")
@@ -391,22 +391,22 @@ func TestFor(t *testing.T) {
 
 func TestFn(t *testing.T) {
 	p := newParser("fn() { }")
-	ok_expr(t, p, "fn() {  }")
+	okExpr(t, p, "fn() {  }")
 
 	p = newParser("fn() { a = 3; }")
-	ok_expr(t, p, "fn() { (a = 3); }")
+	okExpr(t, p, "fn() { (a = 3); }")
 
 	p = newParser("fn(x) { a = 3; }")
-	ok_expr(t, p, "fn(x) { (a = 3); }")
+	okExpr(t, p, "fn(x) { (a = 3); }")
 
 	p = newParser("fn(x,y) { a = 3; }")
-	ok_expr(t, p, "fn(x, y) { (a = 3); }")
+	okExpr(t, p, "fn(x, y) { (a = 3); }")
 
 	p = newParser("fn(x,y,z) { a = 3; }")
-	ok_expr(t, p, "fn(x, y, z) { (a = 3); }")
+	okExpr(t, p, "fn(x, y, z) { (a = 3); }")
 
 	p = newParser("fn(x) { let a = fn(y) { return x + y; }; }")
-	ok_expr(t, p, "fn(x) { let a = fn(y) { return (x + y); }; }")
+	okExpr(t, p, "fn(x) { let a = fn(y) { return (x + y); }; }")
 
 	p = newParser("z = fn(x) { a = 2; return b; c = 3; };")
 	ok(t, p, "fn() { (z = fn(x) { (a = 2); return b; (c = 3); }); }")
@@ -415,13 +415,13 @@ func TestFn(t *testing.T) {
 	ok(t, p, "fn() { fn a(x) { return (x * x); }; fn b() {  }; }")
 
 	p = newParser("fn(const x, y) {  }")
-	ok_expr(t, p, "fn(const x, y) {  }")
+	okExpr(t, p, "fn(const x, y) {  }")
 
 	p = newParser("fn(x, const y) {  }")
-	ok_expr(t, p, "fn(x, const y) {  }")
+	okExpr(t, p, "fn(x, const y) {  }")
 
 	p = newParser("fn(const x, const y) {  }")
-	ok_expr(t, p, "fn(const x, const y) {  }")
+	okExpr(t, p, "fn(const x, const y) {  }")
 
 	p = newParser("fn(const a,b) { a=1; };")
 	ok(t, p, "fn() { fn(const a, b) { (a = 1); }; }")
@@ -457,75 +457,75 @@ func TestTry(t *testing.T) {
 
 func TestInvoke(t *testing.T) {
 	p := newParser("a()")
-	ok_expr(t, p, "a()")
+	okExpr(t, p, "a()")
 
 	p = newParser("a(1)")
-	ok_expr(t, p, "a(1)")
+	okExpr(t, p, "a(1)")
 
 	p = newParser("a(1, 2, 3)")
-	ok_expr(t, p, "a(1, 2, 3)")
+	okExpr(t, p, "a(1, 2, 3)")
 }
 
 func TestStruct(t *testing.T) {
 	p := newParser("struct{}")
-	ok_expr(t, p, "struct {  }")
+	okExpr(t, p, "struct {  }")
 
 	p = newParser("struct{a:1}")
-	ok_expr(t, p, "struct { a: 1 }")
+	okExpr(t, p, "struct { a: 1 }")
 
 	p = newParser("struct{a:1,b:2}")
-	ok_expr(t, p, "struct { a: 1, b: 2 }")
+	okExpr(t, p, "struct { a: 1, b: 2 }")
 
 	p = newParser("struct{a:1,b:2,c:3}")
-	ok_expr(t, p, "struct { a: 1, b: 2, c: 3 }")
+	okExpr(t, p, "struct { a: 1, b: 2, c: 3 }")
 
 	p = newParser("struct{a:1,b:2,c:struct{d:3}}")
-	ok_expr(t, p, "struct { a: 1, b: 2, c: struct { d: 3 } }")
+	okExpr(t, p, "struct { a: 1, b: 2, c: struct { d: 3 } }")
 
 	p = newParser("struct{a:1, b: fn(x) { y + x;} }")
-	ok_expr(t, p, "struct { a: 1, b: fn(x) { (y + x); } }")
+	okExpr(t, p, "struct { a: 1, b: fn(x) { (y + x); } }")
 
 	p = newParser("struct{a:1, b: fn(x) { y + x;}, c: struct {d:3} }")
-	ok_expr(t, p, "struct { a: 1, b: fn(x) { (y + x); }, c: struct { d: 3 } }")
+	okExpr(t, p, "struct { a: 1, b: fn(x) { (y + x); }, c: struct { d: 3 } }")
 
 	p = newParser("a.b")
-	ok_expr(t, p, "a.b")
+	okExpr(t, p, "a.b")
 
 	p = newParser("a.b = 3")
-	ok_expr(t, p, "(a.b = 3)")
+	okExpr(t, p, "(a.b = 3)")
 
 	p = newParser("let a.b = 3;")
 	fail(t, p, "Unexpected Token '.' at (1, 6)")
 
 	p = newParser("this")
-	ok_expr(t, p, "this")
+	okExpr(t, p, "this")
 
 	p = newParser("struct{a:this + true, b: this}")
-	ok_expr(t, p, "struct { a: (this + true), b: this }")
+	okExpr(t, p, "struct { a: (this + true), b: this }")
 
 	p = newParser("a = this")
-	ok_expr(t, p, "(a = this)")
+	okExpr(t, p, "(a = this)")
 
 	p = newParser("struct{ a: this }")
-	ok_expr(t, p, "struct { a: this }")
+	okExpr(t, p, "struct { a: this }")
 
 	p = newParser("struct{ a: this == 2 }")
-	ok_expr(t, p, "struct { a: (this == 2) }")
+	okExpr(t, p, "struct { a: (this == 2) }")
 
 	p = newParser("a = this.b = 3")
-	ok_expr(t, p, "(a = (this.b = 3))")
+	okExpr(t, p, "(a = (this.b = 3))")
 
 	p = newParser("struct { a: this.b = 3 }")
-	ok_expr(t, p, "struct { a: (this.b = 3) }")
+	okExpr(t, p, "struct { a: (this.b = 3) }")
 
 	p = newParser("b = this")
-	ok_expr(t, p, "(b = this)")
+	okExpr(t, p, "(b = this)")
 
 	p = newParser("struct { a: b = this }")
-	ok_expr(t, p, "struct { a: (b = this) }")
+	okExpr(t, p, "struct { a: (b = this) }")
 
 	p = newParser("a = struct { x: 8 }.x = 5")
-	ok_expr(t, p, "(a = (struct { x: 8 }.x = 5))")
+	okExpr(t, p, "(a = (struct { x: 8 }.x = 5))")
 
 	p = newParser("this = b")
 	fail(t, p, "Unexpected Token '=' at (1, 6)")
@@ -533,37 +533,37 @@ func TestStruct(t *testing.T) {
 
 func TestPrimarySuffix(t *testing.T) {
 	p := newParser("a.b()")
-	ok_expr(t, p, "a.b()")
+	okExpr(t, p, "a.b()")
 
 	p = newParser("a.b.c")
-	ok_expr(t, p, "a.b.c")
+	okExpr(t, p, "a.b.c")
 
 	p = newParser("a.b().c")
-	ok_expr(t, p, "a.b().c")
+	okExpr(t, p, "a.b().c")
 
 	p = newParser("['a'][0]")
-	ok_expr(t, p, "[ 'a' ][0]")
+	okExpr(t, p, "[ 'a' ][0]")
 
 	p = newParser("a[[]]")
-	ok_expr(t, p, "a[[  ]]")
+	okExpr(t, p, "a[[  ]]")
 
 	p = newParser("a[:b]")
-	ok_expr(t, p, "a[:b]")
+	okExpr(t, p, "a[:b]")
 	p = newParser("a[:]")
 	fail(t, p, "Unexpected Token ']' at (1, 4)")
 
 	p = newParser("a[b:]")
-	ok_expr(t, p, "a[b:]")
+	okExpr(t, p, "a[b:]")
 	p = newParser("a[b:}")
 	fail(t, p, "Unexpected Token '}' at (1, 5)")
 
 	p = newParser("a[b:c]")
-	ok_expr(t, p, "a[b:c]")
+	okExpr(t, p, "a[b:c]")
 	p = newParser("a[b:c:]")
 	fail(t, p, "Unexpected Token ':' at (1, 6)")
 
 	p = newParser("a[b][c[:x]].d[y:].e().f[g[i:j]]")
-	ok_expr(t, p, "a[b][c[:x]].d[y:].e().f[g[i:j]]")
+	okExpr(t, p, "a[b][c[:x]].d[y:].e().f[g[i:j]]")
 }
 
 func okExprPos(t *testing.T, p *Parser, expectBegin ast.Pos, expectEnd ast.Pos) {
@@ -671,66 +671,66 @@ fn() {
 
 func TestList(t *testing.T) {
 	p := newParser("[]")
-	ok_expr(t, p, "[  ]")
+	okExpr(t, p, "[  ]")
 
 	p = newParser("[a]")
-	ok_expr(t, p, "[ a ]")
+	okExpr(t, p, "[ a ]")
 
 	p = newParser("[a, b]")
-	ok_expr(t, p, "[ a, b ]")
+	okExpr(t, p, "[ a, b ]")
 
 	p = newParser("[a, b, [], struct{z:1   }]")
-	ok_expr(t, p, "[ a, b, [  ], struct { z: 1 } ]")
+	okExpr(t, p, "[ a, b, [  ], struct { z: 1 } ]")
 }
 
 func TestSet(t *testing.T) {
 	p := newParser("set {}")
-	ok_expr(t, p, "set {  }")
+	okExpr(t, p, "set {  }")
 
 	p = newParser("set { a }")
-	ok_expr(t, p, "set { a }")
+	okExpr(t, p, "set { a }")
 
 	p = newParser("set { a, b }")
-	ok_expr(t, p, "set { a, b }")
+	okExpr(t, p, "set { a, b }")
 
 	p = newParser("set { a, b, dict {c: 1} }")
-	ok_expr(t, p, "set { a, b, dict { c: 1 } }")
+	okExpr(t, p, "set { a, b, dict { c: 1 } }")
 }
 
 func TestDict(t *testing.T) {
 	p := newParser("dict{}")
-	ok_expr(t, p, "dict {  }")
+	okExpr(t, p, "dict {  }")
 
 	p = newParser("dict{'a': 1}")
-	ok_expr(t, p, "dict { 'a': 1 }")
+	okExpr(t, p, "dict { 'a': 1 }")
 
 	p = newParser("dict { 'a': 1, null: [  ], [  ]: dict {  } }")
-	ok_expr(t, p, "dict { 'a': 1, null: [  ], [  ]: dict {  } }")
+	okExpr(t, p, "dict { 'a': 1, null: [  ], [  ]: dict {  } }")
 }
 
 func TestBuiltin(t *testing.T) {
 	p := newParser("print(12)")
-	ok_expr(t, p, "print(12)")
+	okExpr(t, p, "print(12)")
 
 	p = newParser("str([])")
-	ok_expr(t, p, "str([  ])")
+	okExpr(t, p, "str([  ])")
 
 	p = newParser("a = println")
-	ok_expr(t, p, "(a = println)")
+	okExpr(t, p, "(a = println)")
 
 	p = newParser("len - null")
-	ok_expr(t, p, "(len - null)")
+	okExpr(t, p, "(len - null)")
 
 	p = newParser("ch = chan()")
-	ok_expr(t, p, "(ch = chan())")
+	okExpr(t, p, "(ch = chan())")
 }
 
 func TestTuple(t *testing.T) {
 	p := newParser("(a, b)")
-	ok_expr(t, p, "(a, b)")
+	okExpr(t, p, "(a, b)")
 
 	p = newParser("(a, b, struct { z: 1 })[2]")
-	ok_expr(t, p, "(a, b, struct { z: 1 })[2]")
+	okExpr(t, p, "(a, b, struct { z: 1 })[2]")
 }
 
 func TestSwitch(t *testing.T) {
@@ -775,22 +775,22 @@ func TestSwitch(t *testing.T) {
 func TestLambda(t *testing.T) {
 
 	p := newParser("x => true")
-	ok_expr(t, p, "fn(x) { true; }")
+	okExpr(t, p, "fn(x) { true; }")
 
 	p = newParser("|| => true")
-	ok_expr(t, p, "fn() { true; }")
+	okExpr(t, p, "fn() { true; }")
 
 	p = newParser("| | => true")
-	ok_expr(t, p, "fn() { true; }")
+	okExpr(t, p, "fn() { true; }")
 
 	p = newParser("|x| => true")
-	ok_expr(t, p, "fn(x) { true; }")
+	okExpr(t, p, "fn(x) { true; }")
 
 	p = newParser("|x, y| => true")
-	ok_expr(t, p, "fn(x, y) { true; }")
+	okExpr(t, p, "fn(x, y) { true; }")
 
 	p = newParser("|x, y, z| => true")
-	ok_expr(t, p, "fn(x, y, z) { true; }")
+	okExpr(t, p, "fn(x, y, z) { true; }")
 }
 
 func TestSpawn(t *testing.T) {

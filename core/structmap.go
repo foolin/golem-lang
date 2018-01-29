@@ -45,9 +45,8 @@ func (s *structMap) get(name string) (*field, bool) {
 	n := s._indexOf(b, name)
 	if n == -1 {
 		return nil, false
-	} else {
-		return b[n], true
 	}
+	return b[n], true
 }
 
 func (s *structMap) fieldNames() []string {

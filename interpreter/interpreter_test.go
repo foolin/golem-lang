@@ -21,7 +21,7 @@ func tassert(t *testing.T, flag bool) {
 	}
 }
 
-func ok_expr(t *testing.T, source string, expect g.Value) {
+func okExpr(t *testing.T, source string, expect g.Value) {
 	mod := newCompiler(source).Compile()
 	intp := NewInterpreter(mod, builtInMgr)
 
@@ -32,25 +32,25 @@ func ok_expr(t *testing.T, source string, expect g.Value) {
 
 	b, err := result.Eq(intp, expect)
 	if err != nil {
-		panic("ok_expr")
+		panic("okExpr")
 	}
 	if !b.BoolVal() {
 		t.Error(result, " != ", expect)
-		panic("ok_expr")
+		panic("okExpr")
 	}
 }
 
-func ok_ref(t *testing.T, intp *Interpreter, ref *g.Ref, expect g.Value) {
+func okRef(t *testing.T, intp *Interpreter, ref *g.Ref, expect g.Value) {
 	b, err := ref.Val.Eq(intp, expect)
 	if err != nil {
-		panic("ok_ref")
+		panic("okRef")
 	}
 	if !b.BoolVal() {
 		t.Error(ref.Val, " != ", expect)
 	}
 }
 
-func ok_mod(t *testing.T, source string, expectResult g.Value, expectRefs []*g.Ref) {
+func okMod(t *testing.T, source string, expectResult g.Value, expectRefs []*g.Ref) {
 	mod := newCompiler(source).Compile()
 	intp := NewInterpreter(mod, builtInMgr)
 
@@ -61,7 +61,7 @@ func ok_mod(t *testing.T, source string, expectResult g.Value, expectRefs []*g.R
 
 	b, err := result.Eq(intp, expectResult)
 	if err != nil {
-		panic("ok_mod")
+		panic("okMod")
 	}
 	if !b.BoolVal() {
 		t.Error(result, " != ", expectResult)
@@ -72,7 +72,7 @@ func ok_mod(t *testing.T, source string, expectResult g.Value, expectRefs []*g.R
 	}
 }
 
-func fail_expr(t *testing.T, source string, expect string) {
+func failExpr(t *testing.T, source string, expect string) {
 
 	mod := newCompiler(source).Compile()
 	intp := NewInterpreter(mod, builtInMgr)
@@ -161,98 +161,98 @@ func interpret(mod *g.BytecodeModule) *Interpreter {
 
 func TestExpressions(t *testing.T) {
 
-	ok_expr(t, "(2 + 3) * -4 / 10;", g.MakeInt(-2))
+	okExpr(t, "(2 + 3) * -4 / 10;", g.MakeInt(-2))
 
-	ok_expr(t, "(2*2*2*2 + 2*3*(8 - 1) + 2) / (17 - 2*2*2 - -1);", g.MakeInt(6))
+	okExpr(t, "(2*2*2*2 + 2*3*(8 - 1) + 2) / (17 - 2*2*2 - -1);", g.MakeInt(6))
 
-	ok_expr(t, "true + 'a';", g.MakeStr("truea"))
-	ok_expr(t, "'a' + true;", g.MakeStr("atrue"))
-	ok_expr(t, "'a' + null;", g.MakeStr("anull"))
-	ok_expr(t, "null + 'a';", g.MakeStr("nulla"))
+	okExpr(t, "true + 'a';", g.NewStr("truea"))
+	okExpr(t, "'a' + true;", g.NewStr("atrue"))
+	okExpr(t, "'a' + null;", g.NewStr("anull"))
+	okExpr(t, "null + 'a';", g.NewStr("nulla"))
 
-	fail_expr(t, "true + null;", "TypeMismatch: Expected Number Type")
-	fail_expr(t, "1 + null;", "TypeMismatch: Expected Number Type")
-	fail_expr(t, "null + 1;", "TypeMismatch: Expected Number Type")
+	failExpr(t, "true + null;", "TypeMismatch: Expected Number Type")
+	failExpr(t, "1 + null;", "TypeMismatch: Expected Number Type")
+	failExpr(t, "null + 1;", "TypeMismatch: Expected Number Type")
 
-	ok_expr(t, "true == 'a';", g.FALSE)
-	ok_expr(t, "3 * 7 + 4 == 5 * 5;", g.TRUE)
-	ok_expr(t, "1 != 1;", g.FALSE)
-	ok_expr(t, "1 != 2;", g.TRUE)
+	okExpr(t, "true == 'a';", g.FALSE)
+	okExpr(t, "3 * 7 + 4 == 5 * 5;", g.TRUE)
+	okExpr(t, "1 != 1;", g.FALSE)
+	okExpr(t, "1 != 2;", g.TRUE)
 
-	ok_expr(t, "!false;", g.TRUE)
-	ok_expr(t, "!true;", g.FALSE)
-	fail_expr(t, "!null;", "TypeMismatch: Expected 'Bool'")
+	okExpr(t, "!false;", g.TRUE)
+	okExpr(t, "!true;", g.FALSE)
+	failExpr(t, "!null;", "TypeMismatch: Expected 'Bool'")
 
-	fail_expr(t, "!'a';", "TypeMismatch: Expected 'Bool'")
-	fail_expr(t, "!1;", "TypeMismatch: Expected 'Bool'")
-	fail_expr(t, "!1.0;", "TypeMismatch: Expected 'Bool'")
+	failExpr(t, "!'a';", "TypeMismatch: Expected 'Bool'")
+	failExpr(t, "!1;", "TypeMismatch: Expected 'Bool'")
+	failExpr(t, "!1.0;", "TypeMismatch: Expected 'Bool'")
 
-	ok_expr(t, "1 < 2;", g.TRUE)
-	ok_expr(t, "1 <= 2;", g.TRUE)
-	ok_expr(t, "1 > 2;", g.FALSE)
-	ok_expr(t, "1 >= 2;", g.FALSE)
+	okExpr(t, "1 < 2;", g.TRUE)
+	okExpr(t, "1 <= 2;", g.TRUE)
+	okExpr(t, "1 > 2;", g.FALSE)
+	okExpr(t, "1 >= 2;", g.FALSE)
 
-	ok_expr(t, "2 < 2;", g.FALSE)
-	ok_expr(t, "2 <= 2;", g.TRUE)
-	ok_expr(t, "2 > 2;", g.FALSE)
-	ok_expr(t, "2 >= 2;", g.TRUE)
+	okExpr(t, "2 < 2;", g.FALSE)
+	okExpr(t, "2 <= 2;", g.TRUE)
+	okExpr(t, "2 > 2;", g.FALSE)
+	okExpr(t, "2 >= 2;", g.TRUE)
 
-	ok_expr(t, "1 <=> 2;", g.MakeInt(-1))
-	ok_expr(t, "2 <=> 2;", g.ZERO)
-	ok_expr(t, "2 <=> 1;", g.ONE)
+	okExpr(t, "1 <=> 2;", g.MakeInt(-1))
+	okExpr(t, "2 <=> 2;", g.ZERO)
+	okExpr(t, "2 <=> 1;", g.ONE)
 
-	ok_expr(t, "true  && true;", g.TRUE)
-	ok_expr(t, "true  && false;", g.FALSE)
-	ok_expr(t, "false && true;", g.FALSE)
-	ok_expr(t, "false && 12;", g.FALSE)
-	fail_expr(t, "12  && false;", "TypeMismatch: Expected 'Bool'")
+	okExpr(t, "true  && true;", g.TRUE)
+	okExpr(t, "true  && false;", g.FALSE)
+	okExpr(t, "false && true;", g.FALSE)
+	okExpr(t, "false && 12;", g.FALSE)
+	failExpr(t, "12  && false;", "TypeMismatch: Expected 'Bool'")
 
-	ok_expr(t, "true  || true;", g.TRUE)
-	ok_expr(t, "true  || false;", g.TRUE)
-	ok_expr(t, "false || true;", g.TRUE)
-	ok_expr(t, "false || false;", g.FALSE)
-	ok_expr(t, "true  || 12;", g.TRUE)
-	fail_expr(t, "12  || true;", "TypeMismatch: Expected 'Bool'")
+	okExpr(t, "true  || true;", g.TRUE)
+	okExpr(t, "true  || false;", g.TRUE)
+	okExpr(t, "false || true;", g.TRUE)
+	okExpr(t, "false || false;", g.FALSE)
+	okExpr(t, "true  || 12;", g.TRUE)
+	failExpr(t, "12  || true;", "TypeMismatch: Expected 'Bool'")
 
-	ok_expr(t, "~0;", g.MakeInt(-1))
+	okExpr(t, "~0;", g.MakeInt(-1))
 
-	ok_expr(t, "8 % 2;", g.MakeInt(8%2))
-	ok_expr(t, "8 & 2;", g.MakeInt(int64(8)&int64(2)))
-	ok_expr(t, "8 | 2;", g.MakeInt(8|2))
-	ok_expr(t, "8 ^ 2;", g.MakeInt(8^2))
-	ok_expr(t, "8 << 2;", g.MakeInt(8<<2))
-	ok_expr(t, "8 >> 2;", g.MakeInt(8>>2))
+	okExpr(t, "8 % 2;", g.MakeInt(8%2))
+	okExpr(t, "8 & 2;", g.MakeInt(int64(8)&int64(2)))
+	okExpr(t, "8 | 2;", g.MakeInt(8|2))
+	okExpr(t, "8 ^ 2;", g.MakeInt(8^2))
+	okExpr(t, "8 << 2;", g.MakeInt(8<<2))
+	okExpr(t, "8 >> 2;", g.MakeInt(8>>2))
 
-	ok_expr(t, "[true][0];", g.TRUE)
-	ok_expr(t, "'abc'[1];", g.MakeStr("b"))
-	ok_expr(t, "'abc'[-1];", g.MakeStr("c"))
-	fail_expr(t, "[true][2];", "IndexOutOfBounds: 2")
+	okExpr(t, "[true][0];", g.TRUE)
+	okExpr(t, "'abc'[1];", g.NewStr("b"))
+	okExpr(t, "'abc'[-1];", g.NewStr("c"))
+	failExpr(t, "[true][2];", "IndexOutOfBounds: 2")
 
-	ok_expr(t, "'abc'[1:];", g.MakeStr("bc"))
-	ok_expr(t, "'abc'[:1];", g.MakeStr("a"))
-	ok_expr(t, "'abcd'[1:3];", g.MakeStr("bc"))
-	ok_expr(t, "'abcd'[1:1];", g.MakeStr(""))
+	okExpr(t, "'abc'[1:];", g.NewStr("bc"))
+	okExpr(t, "'abc'[:1];", g.NewStr("a"))
+	okExpr(t, "'abcd'[1:3];", g.NewStr("bc"))
+	okExpr(t, "'abcd'[1:1];", g.NewStr(""))
 
-	ok_expr(t, "[6,7,8][1:];", g.NewList([]g.Value{g.MakeInt(7), g.MakeInt(8)}))
-	ok_expr(t, "[6,7,8][:1];", g.NewList([]g.Value{g.MakeInt(6)}))
-	ok_expr(t, "[6,7,8,9][1:3];", g.NewList([]g.Value{g.MakeInt(7), g.MakeInt(8)}))
-	ok_expr(t, "[6,7,8,9][1:1];", g.NewList([]g.Value{}))
+	okExpr(t, "[6,7,8][1:];", g.NewList([]g.Value{g.MakeInt(7), g.MakeInt(8)}))
+	okExpr(t, "[6,7,8][:1];", g.NewList([]g.Value{g.MakeInt(6)}))
+	okExpr(t, "[6,7,8,9][1:3];", g.NewList([]g.Value{g.MakeInt(7), g.MakeInt(8)}))
+	okExpr(t, "[6,7,8,9][1:1];", g.NewList([]g.Value{}))
 
-	ok_expr(t, "struct{a: 1} has 'a';", g.TRUE)
-	ok_expr(t, "struct{a: 1} has 'b';", g.FALSE)
+	okExpr(t, "struct{a: 1} has 'a';", g.TRUE)
+	okExpr(t, "struct{a: 1} has 'b';", g.FALSE)
 
-	fail_expr(t, "struct{a: 1, a: 2};", "DuplicateField: Field 'a' is a duplicate")
+	failExpr(t, "struct{a: 1, a: 2};", "DuplicateField: Field 'a' is a duplicate")
 
-	ok_expr(t, "struct{} == struct{};", g.TRUE)
-	ok_expr(t, "struct{a:1} == struct{a:1};", g.TRUE)
-	ok_expr(t, "struct{a:1,b:2} == struct{a:1,b:2};", g.TRUE)
-	ok_expr(t, "struct{a:1} != struct{a:1,b:2};", g.TRUE)
-	ok_expr(t, "struct{a:1,b:2} != struct{b:2};", g.TRUE)
-	ok_expr(t, "struct{a:1,b:2} != struct{a:3,b:2};", g.TRUE)
+	okExpr(t, "struct{} == struct{};", g.TRUE)
+	okExpr(t, "struct{a:1} == struct{a:1};", g.TRUE)
+	okExpr(t, "struct{a:1,b:2} == struct{a:1,b:2};", g.TRUE)
+	okExpr(t, "struct{a:1} != struct{a:1,b:2};", g.TRUE)
+	okExpr(t, "struct{a:1,b:2} != struct{b:2};", g.TRUE)
+	okExpr(t, "struct{a:1,b:2} != struct{a:3,b:2};", g.TRUE)
 }
 
 func TestAssignment(t *testing.T) {
-	ok_mod(t, `
+	okMod(t, `
 let a = 1
 const B = 2
 a = a + B
@@ -262,7 +262,7 @@ a = a + B
 			&g.Ref{g.MakeInt(3)},
 			&g.Ref{g.MakeInt(2)}})
 
-	ok_mod(t, `
+	okMod(t, `
 let a = 1
 a = a + 41
 const B = a / 6
@@ -275,7 +275,7 @@ c = (c + a)/13
 			&g.Ref{g.MakeInt(7)},
 			&g.Ref{g.MakeInt(4)}})
 
-	ok_mod(t, `
+	okMod(t, `
 let a = 1
 let b = a += 3
 let c = ~0
@@ -289,7 +289,7 @@ b *= 2
 			&g.Ref{g.MakeInt(8)},
 			&g.Ref{g.MakeInt(16)}})
 
-	ok_mod(t, `
+	okMod(t, `
 let a = 1
 let b = 2
 a = b = 11
@@ -303,21 +303,21 @@ b = a %= 4
 
 func TestIf(t *testing.T) {
 
-	ok_mod(t, "let a = 1; if (true) { a = 2; }",
+	okMod(t, "let a = 1; if (true) { a = 2; }",
 		g.MakeInt(2),
 		[]*g.Ref{&g.Ref{g.MakeInt(2)}})
 
-	ok_mod(t, "let a = 1; if (false) { a = 2; }",
+	okMod(t, "let a = 1; if (false) { a = 2; }",
 		g.NULL,
 		[]*g.Ref{&g.Ref{g.ONE}})
 
-	ok_mod(t, "let a = 1; if (1 == 1) { a = 2; } else { a = 3; }; let b = 4;",
+	okMod(t, "let a = 1; if (1 == 1) { a = 2; } else { a = 3; }; let b = 4;",
 		g.MakeInt(2),
 		[]*g.Ref{
 			&g.Ref{g.MakeInt(2)},
 			&g.Ref{g.MakeInt(4)}})
 
-	ok_mod(t, "let a = 1; if (1 == 2) { a = 2; } else { a = 3; }; const b = 4;",
+	okMod(t, "let a = 1; if (1 == 2) { a = 2; } else { a = 3; }; const b = 4;",
 		g.MakeInt(3),
 		[]*g.Ref{
 			&g.Ref{g.MakeInt(3)},
@@ -337,7 +337,7 @@ func TestWhile(t *testing.T) {
 	//	fmt.Println(source)
 	//	fmt.Println(mod)
 
-	ok_mod(t, `
+	okMod(t, `
 let a = 1
 while (a < 3) {
     a = a + 1
@@ -345,7 +345,7 @@ while (a < 3) {
 		g.MakeInt(3),
 		[]*g.Ref{&g.Ref{g.MakeInt(3)}})
 
-	ok_mod(t, `
+	okMod(t, `
 let a = 1
 while (a < 11) {
     if (a == 4) { a = a + 2; break; }
@@ -354,7 +354,7 @@ while (a < 11) {
 		g.MakeInt(6),
 		[]*g.Ref{&g.Ref{g.MakeInt(6)}})
 
-	ok_mod(t, `
+	okMod(t, `
 let a = 1
 let b = 0
 while (a < 11) {
@@ -367,7 +367,7 @@ while (a < 11) {
 			&g.Ref{g.MakeInt(11)},
 			&g.Ref{g.MakeInt(4)}})
 
-	ok_mod(t, `
+	okMod(t, `
 let a = 1
 return a + 2
 let b = 5`,
@@ -386,7 +386,7 @@ let b = a(1)
 	mod := newCompiler(source).Compile()
 
 	i := interpret(mod)
-	ok_ref(t, i, mod.Refs[1], g.ONE)
+	okRef(t, i, mod.Refs[1], g.ONE)
 
 	source = `
 let a = fn() { }
@@ -399,9 +399,9 @@ let f = c(b(2), 3)
 	mod = newCompiler(source).Compile()
 
 	interpret(mod)
-	ok_ref(t, i, mod.Refs[3], g.NULL)
-	ok_ref(t, i, mod.Refs[4], g.ONE)
-	ok_ref(t, i, mod.Refs[5], g.MakeInt(24))
+	okRef(t, i, mod.Refs[3], g.NULL)
+	okRef(t, i, mod.Refs[4], g.ONE)
+	okRef(t, i, mod.Refs[5], g.MakeInt(24))
 
 	source = `
 let fibonacci = fn(n) {
@@ -425,12 +425,12 @@ let f = fibonacci(6)
 `
 	mod = newCompiler(source).Compile()
 	i = interpret(mod)
-	ok_ref(t, i, mod.Refs[1], g.ONE)
-	ok_ref(t, i, mod.Refs[2], g.ONE)
-	ok_ref(t, i, mod.Refs[3], g.MakeInt(2))
-	ok_ref(t, i, mod.Refs[4], g.MakeInt(3))
-	ok_ref(t, i, mod.Refs[5], g.MakeInt(5))
-	ok_ref(t, i, mod.Refs[6], g.MakeInt(8))
+	okRef(t, i, mod.Refs[1], g.ONE)
+	okRef(t, i, mod.Refs[2], g.ONE)
+	okRef(t, i, mod.Refs[3], g.MakeInt(2))
+	okRef(t, i, mod.Refs[4], g.MakeInt(3))
+	okRef(t, i, mod.Refs[5], g.MakeInt(5))
+	okRef(t, i, mod.Refs[6], g.MakeInt(8))
 
 	source = `
 let foo = fn(n) {
@@ -443,7 +443,7 @@ let a = foo(5)
 `
 	mod = newCompiler(source).Compile()
 	i = interpret(mod)
-	ok_ref(t, i, mod.Refs[1], g.MakeInt(32))
+	okRef(t, i, mod.Refs[1], g.MakeInt(32))
 }
 
 func TestCapture(t *testing.T) {
@@ -466,8 +466,8 @@ let y = a(7)
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	ok_ref(t, i, mod.Refs[2], g.MakeInt(5))
-	ok_ref(t, i, mod.Refs[3], g.MakeInt(12))
+	okRef(t, i, mod.Refs[2], g.MakeInt(5))
+	okRef(t, i, mod.Refs[3], g.MakeInt(12))
 
 	source = `
 let z = 2
@@ -487,9 +487,9 @@ let y = a(1)
 
 	i = interpret(mod)
 
-	ok_ref(t, i, mod.Refs[0], g.ZERO)
-	ok_ref(t, i, mod.Refs[3], g.MakeInt(7))
-	ok_ref(t, i, mod.Refs[4], g.MakeInt(8))
+	okRef(t, i, mod.Refs[0], g.ZERO)
+	okRef(t, i, mod.Refs[3], g.MakeInt(7))
+	okRef(t, i, mod.Refs[4], g.MakeInt(8))
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
@@ -520,13 +520,13 @@ let z = struct { a: 3, b: 4, c: struct { d: 5 } }
 	mod := newCompiler(source).Compile()
 	i := interpret(mod)
 
-	ok_ref(t, i, mod.Refs[0], newStruct([]g.Field{}))
-	ok_ref(t, i, mod.Refs[1], newStruct([]g.Field{
+	okRef(t, i, mod.Refs[0], newStruct([]g.Field{}))
+	okRef(t, i, mod.Refs[1], newStruct([]g.Field{
 		g.NewField("a", false, g.ZERO)}))
-	ok_ref(t, i, mod.Refs[2], newStruct([]g.Field{
+	okRef(t, i, mod.Refs[2], newStruct([]g.Field{
 		g.NewField("a", false, g.ONE),
 		g.NewField("b", false, g.MakeInt(2))}))
-	ok_ref(t, i, mod.Refs[3], newStruct([]g.Field{
+	okRef(t, i, mod.Refs[3], newStruct([]g.Field{
 		g.NewField("a", false, g.MakeInt(3)),
 		g.NewField("b", false, g.MakeInt(4)),
 		g.NewField("c", false, newStruct([]g.Field{
@@ -544,9 +544,9 @@ x.a = 6
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	ok_ref(t, i, mod.Refs[0], newStruct([]g.Field{
+	okRef(t, i, mod.Refs[0], newStruct([]g.Field{
 		g.NewField("a", false, g.MakeInt(6))}))
-	ok_ref(t, i, mod.Refs[1], g.MakeInt(5))
+	okRef(t, i, mod.Refs[1], g.MakeInt(5))
 
 	source = `
 let a = struct {
@@ -561,8 +561,8 @@ let c = a.minus()
 	mod = newCompiler(source).Compile()
 	i = interpret(mod)
 
-	ok_ref(t, i, mod.Refs[2], g.MakeInt(13))
-	ok_ref(t, i, mod.Refs[3], g.MakeInt(3))
+	okRef(t, i, mod.Refs[2], g.MakeInt(13))
+	okRef(t, i, mod.Refs[3], g.MakeInt(3))
 
 	source = `
 let a = null
@@ -571,7 +571,7 @@ a = struct { x: 8 }.x = 5
 	mod = newCompiler(source).Compile()
 	i = interpret(mod)
 
-	ok_ref(t, i, mod.Refs[0], g.MakeInt(5))
+	okRef(t, i, mod.Refs[0], g.MakeInt(5))
 
 	source = `
 let a = struct { x: 8 }
@@ -588,9 +588,9 @@ assert(!b.y)
 
 func TestMerge(t *testing.T) {
 
-	fail_expr(t, "merge();", "ArityMismatch: Expected at least 2 params, got 0")
-	fail_expr(t, "merge(true);", "ArityMismatch: Expected at least 2 params, got 1")
-	fail_expr(t, "merge(struct{}, false);", "TypeMismatch: Expected 'Struct'")
+	failExpr(t, "merge();", "ArityMismatch: Expected at least 2 params, got 0")
+	failExpr(t, "merge(true);", "ArityMismatch: Expected at least 2 params, got 1")
+	failExpr(t, "merge(struct{}, false);", "TypeMismatch: Expected 'Struct'")
 
 	source := `
 let a = struct { x: 1, y: 2}
@@ -654,10 +654,10 @@ let d = b--
 	mod := newCompiler(source).Compile()
 	i := interpret(mod)
 
-	ok_ref(t, i, mod.Refs[0], g.MakeInt(11))
-	ok_ref(t, i, mod.Refs[1], g.MakeInt(19))
-	ok_ref(t, i, mod.Refs[2], g.MakeInt(10))
-	ok_ref(t, i, mod.Refs[3], g.MakeInt(20))
+	okRef(t, i, mod.Refs[0], g.MakeInt(11))
+	okRef(t, i, mod.Refs[1], g.MakeInt(19))
+	okRef(t, i, mod.Refs[2], g.MakeInt(10))
+	okRef(t, i, mod.Refs[3], g.MakeInt(20))
 
 	source = `
 let a = struct { x: 10 }
@@ -672,12 +672,12 @@ let d = b.y--
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	ok_ref(t, i, mod.Refs[0], newStruct([]g.Field{
+	okRef(t, i, mod.Refs[0], newStruct([]g.Field{
 		g.NewField("x", false, g.MakeInt(11))}))
-	ok_ref(t, i, mod.Refs[1], newStruct([]g.Field{
+	okRef(t, i, mod.Refs[1], newStruct([]g.Field{
 		g.NewField("y", false, g.MakeInt(19))}))
-	ok_ref(t, i, mod.Refs[2], g.MakeInt(10))
-	ok_ref(t, i, mod.Refs[3], g.MakeInt(20))
+	okRef(t, i, mod.Refs[2], g.MakeInt(10))
+	okRef(t, i, mod.Refs[3], g.MakeInt(20))
 }
 
 func TestTernaryIf(t *testing.T) {
@@ -693,8 +693,8 @@ let b = false ? 5 : 6;
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	ok_ref(t, i, mod.Refs[0], g.MakeInt(3))
-	ok_ref(t, i, mod.Refs[1], g.MakeInt(6))
+	okRef(t, i, mod.Refs[0], g.MakeInt(3))
+	okRef(t, i, mod.Refs[1], g.MakeInt(6))
 }
 
 func TestList(t *testing.T) {
@@ -714,11 +714,11 @@ let e = c[1]++;
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	ok_ref(t, i, mod.Refs[0], g.NewList([]g.Value{}))
-	ok_ref(t, i, mod.Refs[1], g.NewList([]g.Value{g.MakeInt(33)}))
-	ok_ref(t, i, mod.Refs[2], g.NewList([]g.Value{g.FALSE, g.MakeInt(23)}))
-	ok_ref(t, i, mod.Refs[3], g.TRUE)
-	ok_ref(t, i, mod.Refs[4], g.MakeInt(22))
+	okRef(t, i, mod.Refs[0], g.NewList([]g.Value{}))
+	okRef(t, i, mod.Refs[1], g.NewList([]g.Value{g.MakeInt(33)}))
+	okRef(t, i, mod.Refs[2], g.NewList([]g.Value{g.FALSE, g.MakeInt(23)}))
+	okRef(t, i, mod.Refs[3], g.TRUE)
+	okRef(t, i, mod.Refs[4], g.MakeInt(22))
 
 	source = `
 let a = [];
@@ -870,9 +870,9 @@ let d = a['x'];
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	ok_ref(t, i, mod.Refs[1], g.ONE)
-	ok_ref(t, i, mod.Refs[2], g.NULL)
-	ok_ref(t, i, mod.Refs[3], g.NEG_ONE)
+	okRef(t, i, mod.Refs[1], g.ONE)
+	okRef(t, i, mod.Refs[2], g.NULL)
+	okRef(t, i, mod.Refs[3], g.NEG_ONE)
 
 	source = `
 let a = dict {};
@@ -1064,17 +1064,17 @@ assert(print != println);
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	ok_ref(t, i, mod.Refs[0], g.MakeInt(3))
-	ok_ref(t, i, mod.Refs[1], g.MakeStr("[ 4, 5, 6 ]"))
-	ok_ref(t, i, mod.Refs[2], newRange(0, 5, 1))
-	ok_ref(t, i, mod.Refs[3], newRange(0, 5, 2))
+	okRef(t, i, mod.Refs[0], g.MakeInt(3))
+	okRef(t, i, mod.Refs[1], g.NewStr("[ 4, 5, 6 ]"))
+	okRef(t, i, mod.Refs[2], newRange(0, 5, 1))
+	okRef(t, i, mod.Refs[3], newRange(0, 5, 2))
 
 	source = `
 let a = assert(true);
 `
 	mod = newCompiler(source).Compile()
 	i = interpret(mod)
-	ok_ref(t, i, mod.Refs[0], g.TRUE)
+	okRef(t, i, mod.Refs[0], g.TRUE)
 
 	fail(t, "assert(1, 2);",
 		g.ArityMismatchError("1", 2),
@@ -1106,9 +1106,9 @@ let c = a[1];
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	ok_ref(t, i, mod.Refs[0], g.NewTuple([]g.Value{g.MakeInt(4), g.MakeInt(5)}))
-	ok_ref(t, i, mod.Refs[1], g.MakeInt(4))
-	ok_ref(t, i, mod.Refs[2], g.MakeInt(5))
+	okRef(t, i, mod.Refs[0], g.NewTuple([]g.Value{g.MakeInt(4), g.MakeInt(5)}))
+	okRef(t, i, mod.Refs[1], g.MakeInt(4))
+	okRef(t, i, mod.Refs[2], g.MakeInt(5))
 }
 
 func TestDecl(t *testing.T) {
@@ -1124,10 +1124,10 @@ const c = 1, d;
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	ok_ref(t, i, mod.Refs[0], g.NULL)
-	ok_ref(t, i, mod.Refs[1], g.ZERO)
-	ok_ref(t, i, mod.Refs[2], g.ONE)
-	ok_ref(t, i, mod.Refs[3], g.NULL)
+	okRef(t, i, mod.Refs[0], g.NULL)
+	okRef(t, i, mod.Refs[1], g.ZERO)
+	okRef(t, i, mod.Refs[2], g.ONE)
+	okRef(t, i, mod.Refs[3], g.NULL)
 }
 
 func TestFor(t *testing.T) {
@@ -1638,27 +1638,27 @@ fn main(args) {}
 	i := interpret(mod)
 	tassert(t, reflect.DeepEqual(mod.Contents.FieldNames(), []string{"b", "a", "main"}))
 
-	v, err := mod.Contents.GetField(i, g.MakeStr("a"))
+	v, err := mod.Contents.GetField(i, g.NewStr("a"))
 	okVal(t, v, err, g.ZERO)
 
-	v, err = mod.Contents.GetField(i, g.MakeStr("b"))
+	v, err = mod.Contents.GetField(i, g.NewStr("b"))
 	okVal(t, v, err, g.ONE)
 
-	v, err = mod.Contents.GetField(i, g.MakeStr("main"))
+	v, err = mod.Contents.GetField(i, g.NewStr("main"))
 	tassert(t, err == nil)
 	f, ok := v.(g.BytecodeFunc)
 	tassert(t, ok)
 	tassert(t, f.Template().Arity == 1)
 
-	err = mod.Contents.SetField(i, g.MakeStr("a"), g.NEG_ONE)
+	err = mod.Contents.SetField(i, g.NewStr("a"), g.NEG_ONE)
 	tassert(t, err == nil)
-	v, err = mod.Contents.GetField(i, g.MakeStr("a"))
+	v, err = mod.Contents.GetField(i, g.NewStr("a"))
 	okVal(t, v, err, g.NEG_ONE)
 
-	err = mod.Contents.SetField(i, g.MakeStr("b"), g.NEG_ONE)
+	err = mod.Contents.SetField(i, g.NewStr("b"), g.NEG_ONE)
 	failVal(t, nil, err, "ReadonlyField: Field 'b' is readonly")
 
-	err = mod.Contents.SetField(i, g.MakeStr("main"), g.NEG_ONE)
+	err = mod.Contents.SetField(i, g.NewStr("main"), g.NEG_ONE)
 	failVal(t, nil, err, "ReadonlyField: Field 'main' is readonly")
 }
 

@@ -296,7 +296,7 @@ func (c *compiler) visitImport(imp *ast.Import) {
 	c.pushIndex(
 		ident.Begin(),
 		g.IMPORT_MODULE,
-		poolIndex(c.pool, g.MakeStr(sym)))
+		poolIndex(c.pool, g.NewStr(sym)))
 
 	// store module in identifer
 	v := ident.Variable
@@ -339,7 +339,7 @@ func (c *compiler) visitAssignment(asn *ast.AssignmentExpr) {
 		c.pushIndex(
 			t.Key.Position,
 			g.SET_FIELD,
-			poolIndex(c.pool, g.MakeStr(t.Key.Text)))
+			poolIndex(c.pool, g.NewStr(t.Key.Text)))
 
 	case *ast.IndexExpr:
 
@@ -390,7 +390,7 @@ func (c *compiler) visitPostfixExpr(pe *ast.PostfixExpr) {
 		c.pushIndex(
 			t.Key.Position,
 			g.INC_FIELD,
-			poolIndex(c.pool, g.MakeStr(t.Key.Text)))
+			poolIndex(c.pool, g.NewStr(t.Key.Text)))
 
 	case *ast.IndexExpr:
 
@@ -861,7 +861,7 @@ func (c *compiler) visitBasicExpr(basic *ast.BasicExpr) {
 		c.pushIndex(
 			basic.Token.Position,
 			g.LOAD_CONST,
-			poolIndex(c.pool, g.MakeStr(basic.Token.Text)))
+			poolIndex(c.pool, g.NewStr(basic.Token.Text)))
 
 	case ast.INT:
 		c.loadInt(
@@ -959,7 +959,7 @@ func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 		c.pushIndex(
 			v.Begin(),
 			g.INIT_FIELD,
-			poolIndex(c.pool, g.MakeStr(k.Text)))
+			poolIndex(c.pool, g.NewStr(k.Text)))
 		c.push(k.Position, g.POP)
 	}
 }
@@ -978,7 +978,7 @@ func (c *compiler) visitFieldExpr(fe *ast.FieldExpr) {
 	c.pushIndex(
 		fe.Key.Position,
 		g.GET_FIELD,
-		poolIndex(c.pool, g.MakeStr(fe.Key.Text)))
+		poolIndex(c.pool, g.NewStr(fe.Key.Text)))
 }
 
 func (c *compiler) visitIndexExpr(ie *ast.IndexExpr) {

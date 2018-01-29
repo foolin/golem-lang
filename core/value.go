@@ -11,6 +11,7 @@ import (
 //---------------------------------------------------------------
 // Value
 
+// Value is the base interface for every value in the Golem Language
 type Value interface {
 	Type() Type
 
@@ -28,25 +29,30 @@ type Value interface {
 // Shared Interfaces
 
 type (
+	// Getable is a value that supports the dot operator
 	Getable interface {
 		Get(Context, Value) (Value, Error)
 	}
 
+	// Indexable is a value that supports the index operator
 	Indexable interface {
 		Getable
 		Set(Context, Value, Value) Error
 	}
 
+	// Lenable is a value that has a length
 	Lenable interface {
 		Len() Int
 	}
 
+	// Sliceable is a value that can be sliced
 	Sliceable interface {
 		Slice(Context, Value, Value) (Value, Error)
 		SliceFrom(Context, Value) (Value, Error)
 		SliceTo(Context, Value) (Value, Error)
 	}
 
+	// Iterable is a value that can be iterated
 	Iterable interface {
 		NewIterator(Context) Iterator
 	}
@@ -56,15 +62,18 @@ type (
 // Basic
 
 type (
+	// Basic represents the immutable types null, bool, str, int and float
 	Basic interface {
 		Value
 		basicMarker()
 	}
 
+	// Null is the null value
 	Null interface {
 		Basic
 	}
 
+	// Bool is the boolean value -- true or false
 	Bool interface {
 		Basic
 		BoolVal() bool
@@ -72,6 +81,7 @@ type (
 		Not() Bool
 	}
 
+	// Str is a string -- defined in golem as a sequence of runes
 	Str interface {
 		Basic
 		fmt.Stringer
@@ -84,6 +94,7 @@ type (
 		Concat(Str) Str
 	}
 
+	// Number is a number
 	Number interface {
 		Basic
 		FloatVal() float64
@@ -96,10 +107,12 @@ type (
 		Negate() Number
 	}
 
+	// Float is a float64
 	Float interface {
 		Number
 	}
 
+	// Int is an int64
 	Int interface {
 		Number
 
@@ -117,11 +130,14 @@ type (
 // Composite
 
 type (
+	// Composite is a Value that is composed of other values -- List, Range, Tuple,
+	// Dict, Set, Struct
 	Composite interface {
 		Value
 		compositeMarker()
 	}
 
+	// List is an indexable sequence of values
 	List interface {
 		Composite
 		Indexable
@@ -147,6 +163,7 @@ type (
 		Filter(Context, func(Value) (Value, Error)) (Value, Error)
 	}
 
+	// Range is an immutable, iterable representation of a  sequence of integers
 	Range interface {
 		Composite
 		Getable
@@ -159,12 +176,14 @@ type (
 		Count() Int
 	}
 
+	// Tuple is an immutable sequence of two or more values
 	Tuple interface {
 		Composite
 		Getable
 		Lenable
 	}
 
+	// Dict is an associative array, a.k.a Hash Map
 	Dict interface {
 		Composite
 		Indexable
@@ -179,6 +198,7 @@ type (
 		Remove(Context, Value) (Bool, Error)
 	}
 
+	// Set is a set of unique values
 	Set interface {
 		Composite
 		Lenable
@@ -193,6 +213,7 @@ type (
 		Remove(Context, Value) (Bool, Error)
 	}
 
+	// Struct is a composite collection of names values
 	Struct interface {
 		Composite
 
@@ -203,6 +224,7 @@ type (
 		SetField(Context, Str, Value) Error
 	}
 
+	// Iterator iterates over a sequence of values
 	Iterator interface {
 		Struct
 		IterNext() Bool
@@ -213,7 +235,7 @@ type (
 //---------------------------------------------------------------
 // Func
 
-// Func represents an instance of a function
+// Func is a function
 type Func interface {
 	Value
 	MinArity() int
@@ -227,7 +249,7 @@ type Func interface {
 //---------------------------------------------------------------
 // Chan
 
-// Chan represents a channel
+// Chan is a goroutine channel
 type Chan interface {
 	Value
 	chanMarker()
@@ -236,8 +258,10 @@ type Chan interface {
 //---------------------------------------------------------------
 // Type
 
+// Type represents all of the possible types of a Golem Value
 type Type int
 
+// All possible kinds of Type
 const (
 	TNULL Type = iota
 	TBOOL

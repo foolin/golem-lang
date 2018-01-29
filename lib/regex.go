@@ -13,6 +13,7 @@ type regexModule struct {
 	contents g.Struct
 }
 
+// InitRegexModule initializes the 'regex' module.
 func InitRegexModule() g.Module {
 
 	compile := g.NewNativeFunc(

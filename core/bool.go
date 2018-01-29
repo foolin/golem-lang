@@ -35,9 +35,9 @@ func (b _bool) Frozen() (Bool, Error) {
 
 func (b _bool) ToStr(cx Context) Str {
 	if b {
-		return MakeStr("true")
+		return NewStr("true")
 	} else {
-		return MakeStr("false")
+		return NewStr("false")
 	}
 }
 

@@ -109,12 +109,12 @@ func makeError(kind ErrorKind, msg string) Error {
 
 	if msg == "" {
 		st, err = NewStruct([]Field{
-			NewField("kind", true, MakeStr(kind.String()))}, true)
+			NewField("kind", true, NewStr(kind.String()))}, true)
 		str = kind.String()
 	} else {
 		st, err = NewStruct([]Field{
-			NewField("kind", true, MakeStr(kind.String())),
-			NewField("msg", true, MakeStr(msg))}, true)
+			NewField("kind", true, NewStr(kind.String())),
+			NewField("msg", true, NewStr(msg))}, true)
 
 		str = strings.Join([]string{kind.String(), ": ", msg}, "")
 	}
@@ -133,12 +133,12 @@ func MakeError(kind string, msg string) Error {
 
 	if msg == "" {
 		st, err = NewStruct([]Field{
-			NewField("kind", true, MakeStr(kind))}, true)
+			NewField("kind", true, NewStr(kind))}, true)
 		str = kind
 	} else {
 		st, err = NewStruct([]Field{
-			NewField("kind", true, MakeStr(kind)),
-			NewField("msg", true, MakeStr(msg))}, true)
+			NewField("kind", true, NewStr(kind)),
+			NewField("msg", true, NewStr(msg))}, true)
 
 		str = strings.Join([]string{kind, ": ", msg}, "")
 	}
@@ -152,8 +152,8 @@ func MakeError(kind string, msg string) Error {
 func MakeErrorFromStruct(cx Context, st Struct) Error {
 
 	var str string
-	kind, kerr := st.GetField(cx, MakeStr("kind"))
-	msg, merr := st.GetField(cx, MakeStr("msg"))
+	kind, kerr := st.GetField(cx, NewStr("kind"))
+	msg, merr := st.GetField(cx, NewStr("msg"))
 
 	if kerr == nil {
 		if merr == nil {

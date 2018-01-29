@@ -104,7 +104,7 @@ func mapString(m map[string]*ast.Variable) string {
 
 	keys := make([]string, len(m))
 	i := 0
-	for k, _ := range m {
+	for k := range m {
 		keys[i] = k
 		i++
 	}
@@ -171,14 +171,13 @@ func incrementNumLocals(s *scope) int {
 	for {
 		if s.scopeType == funcType {
 			idx := s.funcScope.numLocals
-			s.funcScope.numLocals += 1
+			s.funcScope.numLocals++
 			if s.funcScope.numLocals >= (2 << 16) {
 				panic("TODO wide index")
 			}
 			return idx
-		} else {
-			s = s.parent
 		}
+		s = s.parent
 	}
 }
 
@@ -208,9 +207,8 @@ func (s *scope) get(sym string) (*ast.Variable, bool) {
 		// Still can't find it.  Go to the parent, or return false.
 		if z.parent == nil {
 			return nil, false
-		} else {
-			z = z.parent
 		}
+		z = z.parent
 	}
 }
 

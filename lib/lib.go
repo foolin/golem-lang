@@ -5,34 +5,34 @@
 package lib
 
 import (
-	"errors"
 	"fmt"
 	g "github.com/mjarmy/golem-lang/core"
 )
 
 var libModules = make(map[string]g.Module)
 
+// LookupModule looks up the module with the given name.
 func LookupModule(name string) (g.Module, error) {
 
 	mod, ok := libModules[name]
 	if ok {
 		return mod, nil
-	} else {
-		switch name {
-		case "io":
-			io := InitIoModule()
-			libModules[name] = io
-			return io, nil
-		case "regex":
-			rgx := InitRegexModule()
-			libModules[name] = rgx
-			return rgx, nil
-		case "sys":
-			sys := InitSysModule()
-			libModules[name] = sys
-			return sys, nil
-		default:
-			return nil, errors.New(fmt.Sprintf("Module '%s' is not defined", name))
-		}
+	}
+
+	switch name {
+	case "io":
+		io := InitIoModule()
+		libModules[name] = io
+		return io, nil
+	case "regex":
+		rgx := InitRegexModule()
+		libModules[name] = rgx
+		return rgx, nil
+	case "sys":
+		sys := InitSysModule()
+		libModules[name] = sys
+		return sys, nil
+	default:
+		return nil, fmt.Errorf("Module '%s' is not defined", name)
 	}
 }

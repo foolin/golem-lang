@@ -29,24 +29,24 @@ func ok(t *testing.T, val g.Value, err g.Error, expect g.Value) {
 func TestRegex(t *testing.T) {
 	regex := InitRegexModule()
 
-	compile, err := regex.GetContents().GetField(nil, g.MakeStr("compile"))
+	compile, err := regex.GetContents().GetField(nil, g.NewStr("compile"))
 	tassert(t, compile != nil && err == nil)
 	fnCompile := compile.(g.NativeFunc)
 
-	pattern, err := fnCompile.Invoke(nil, []g.Value{g.MakeStr(`^[a-z]+\[[0-9]+\]$`)})
+	pattern, err := fnCompile.Invoke(nil, []g.Value{g.NewStr(`^[a-z]+\[[0-9]+\]$`)})
 	tassert(t, pattern != nil && err == nil)
 
-	match, err := pattern.GetField(nil, g.MakeStr("match"))
+	match, err := pattern.GetField(nil, g.NewStr("match"))
 	tassert(t, match != nil && err == nil)
 	fnMatch := match.(g.NativeFunc)
 
-	result, err := fnMatch.Invoke(nil, []g.Value{g.MakeStr("foo[123]")})
+	result, err := fnMatch.Invoke(nil, []g.Value{g.NewStr("foo[123]")})
 	ok(t, result, err, g.TRUE)
 
-	result, err = fnMatch.Invoke(nil, []g.Value{g.MakeStr("456")})
+	result, err = fnMatch.Invoke(nil, []g.Value{g.NewStr("456")})
 	ok(t, result, err, g.FALSE)
 
-	pattern, err = fnCompile.Invoke(nil, []g.Value{g.MakeStr("\\")})
+	pattern, err = fnCompile.Invoke(nil, []g.Value{g.NewStr("\\")})
 	tassert(t, pattern == nil && err.Error() ==
 		"RegexError: error parsing regexp: trailing backslash at end of expression: ``")
 }

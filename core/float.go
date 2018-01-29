@@ -37,7 +37,7 @@ func (f _float) Frozen() (Bool, Error) {
 }
 
 func (f _float) ToStr(cx Context) Str {
-	return MakeStr(fmt.Sprintf("%g", f))
+	return NewStr(fmt.Sprintf("%g", f))
 }
 
 func (f _float) HashCode(cx Context) (Int, Error) {

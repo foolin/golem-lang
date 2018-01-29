@@ -12,19 +12,22 @@ import (
 //---------------------------------------------------------------
 // The Golem Interpreter
 
+// Interpreter interprets Golem bytecode.
 type Interpreter struct {
 	mod        *g.BytecodeModule
 	builtInMgr g.BuiltinManager
 	frames     []*frame
 }
 
+// NewInterpreter creates a new Interpreter
 func NewInterpreter(mod *g.BytecodeModule, builtInMgr g.BuiltinManager) *Interpreter {
 	return &Interpreter{mod, builtInMgr, []*frame{}}
 }
 
+// Init initializes an interpreter, by interpreting its "init" function.
 func (i *Interpreter) Init() (g.Value, g.Error) {
 
-	// use the zeroth template
+	// the init function is always the zeroth template
 	tpl := i.mod.Templates[0]
 	//tpl := mod.Templates[0]
 	if tpl.Arity != 0 || tpl.NumCaptures != 0 {
@@ -41,7 +44,8 @@ func (i *Interpreter) Init() (g.Value, g.Error) {
 	return i.eval(fn, i.mod.Refs)
 }
 
-// core.Context
+// Eval evaluates a given BytecodeFunc.  Note that this function has the same
+// signature as core.Context.Eval()
 func (i *Interpreter) Eval(fn g.BytecodeFunc, params []g.Value) (g.Value, g.Error) {
 	return i.eval(fn, newLocals(fn.Template().NumLocals, params))
 }
@@ -226,7 +230,7 @@ func (i *Interpreter) makeErrorTrace(err g.Error, stackTrace []string) g.Error {
 	// make list-of-str
 	vals := make([]g.Value, len(stackTrace), len(stackTrace))
 	for i, s := range stackTrace {
-		vals[i] = g.MakeStr(s)
+		vals[i] = g.NewStr(s)
 	}
 	list := g.NewList(vals)
 	list.Freeze()

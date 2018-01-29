@@ -23,7 +23,7 @@ func (n *null) basicMarker() {}
 
 func (n *null) Type() Type { return TNULL }
 
-func (n *null) ToStr(cx Context) Str { return MakeStr("null") }
+func (n *null) ToStr(cx Context) Str { return NewStr("null") }
 
 func (n *null) HashCode(cx Context) (Int, Error) { return nil, NullValueError() }
 

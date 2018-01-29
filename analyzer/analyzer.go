@@ -12,6 +12,7 @@ import (
 	"sort"
 )
 
+// Analyzer analyzes an AST.
 type Analyzer interface {
 	ast.Visitor
 	Module() *ast.FnExpr
@@ -28,6 +29,7 @@ type analyzer struct {
 	errors    []error
 }
 
+// NewAnalyzer creates a new Analyzer
 func NewAnalyzer(mod *ast.FnExpr) Analyzer {
 
 	rootScope := newFuncScope(nil)
@@ -39,6 +41,7 @@ func (a *analyzer) scope() *scope {
 	return a.rootScope
 }
 
+// Analyze analyzes an AST.
 func (a *analyzer) Analyze() []error {
 
 	// visit module block
@@ -162,7 +165,7 @@ func (a *analyzer) defineIdent(ident *ast.IdentExpr, isConst bool) {
 	sym := ident.Symbol.Text
 	if _, ok := a.curScope.get(sym); ok {
 		a.errors = append(a.errors,
-			errors.New(fmt.Sprintf("Symbol '%s' is already defined", sym)))
+			fmt.Errorf("Symbol '%s' is already defined", sym))
 	} else {
 		ident.Variable = a.curScope.put(sym, isConst)
 	}
@@ -307,12 +310,12 @@ func (a *analyzer) doVisitAssignIdent(ident *ast.IdentExpr) {
 	if v, ok := a.curScope.get(sym); ok {
 		if v.IsConst {
 			a.errors = append(a.errors,
-				errors.New(fmt.Sprintf("Symbol '%s' is constant", sym)))
+				fmt.Errorf("Symbol '%s' is constant", sym))
 		}
 		ident.Variable = v
 	} else {
 		a.errors = append(a.errors,
-			errors.New(fmt.Sprintf("Symbol '%s' is not defined", sym)))
+			fmt.Errorf("Symbol '%s' is not defined", sym))
 	}
 }
 
@@ -324,7 +327,7 @@ func (a *analyzer) visitIdentExpr(ident *ast.IdentExpr) {
 		ident.Variable = v
 	} else {
 		a.errors = append(a.errors,
-			errors.New(fmt.Sprintf("Symbol '%s' is not defined", sym)))
+			fmt.Errorf("Symbol '%s' is not defined", sym))
 	}
 }
 

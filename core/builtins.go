@@ -206,7 +206,7 @@ var BuiltinType = &nativeFunc{
 			return nil, NullValueError()
 		} else {
 			_type := values[0].Type()
-			return MakeStr(_type.String()), nil
+			return NewStr(_type.String()), nil
 		}
 	}}
 
@@ -233,7 +233,7 @@ var BuiltinFields = &nativeFunc{
 		fields := st.smap.fieldNames()
 		result := make([]Value, len(fields), len(fields))
 		for i, k := range fields {
-			result[i] = MakeStr(k)
+			result[i] = NewStr(k)
 		}
 		return NewSet(cx, result), nil
 	}}

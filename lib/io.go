@@ -16,6 +16,7 @@ type ioModule struct {
 	contents g.Struct
 }
 
+// InitIoModule initializes the 'io' module.
 func InitIoModule() g.Module {
 
 	file := g.NewNativeFunc(
@@ -68,7 +69,7 @@ func makeFile(name g.Str) g.Struct {
 			list := []g.Value{}
 			for _, f := range files {
 				itemName := name.String() + sep + f.Name()
-				list = append(list, makeFile(g.MakeStr(itemName)))
+				list = append(list, makeFile(g.NewStr(itemName)))
 			}
 
 			return g.NewList(list), nil
@@ -86,7 +87,7 @@ func makeFile(name g.Str) g.Struct {
 			scanner := bufio.NewScanner(f)
 			list := []g.Value{}
 			for scanner.Scan() {
-				list = append(list, g.MakeStr(scanner.Text()))
+				list = append(list, g.NewStr(scanner.Text()))
 			}
 
 			if err := scanner.Err(); err != nil {

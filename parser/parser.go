@@ -15,6 +15,7 @@ import (
 //--------------------------------------------------------------
 // Parser
 
+// Parser parses Golem source code, and creates an Abstract Syntax Tree.
 type Parser struct {
 	scn       *scanner.Scanner
 	isBuiltIn func(string) bool
@@ -28,10 +29,12 @@ type tokenInfo struct {
 	skipLF bool // whether or not we skipped and linefeeds while advancing to this token
 }
 
+// NewParser creates a new Parser
 func NewParser(scn *scanner.Scanner, isBuiltIn func(string) bool) *Parser {
 	return &Parser{scn, isBuiltIn, tokenInfo{}, tokenInfo{}, 0}
 }
 
+// ParseModule parses a Golem module
 func (p *Parser) ParseModule() (fn *ast.FnExpr, err error) {
 
 	// In a recursive descent parser, errors can be generated deep
@@ -128,12 +131,11 @@ func (p *Parser) statement() ast.Statement {
 		if p.next.token.Kind == ast.IDENT {
 			// named function
 			return p.namedFn()
-		} else {
-			// anonymous function
-			expr := p.fnExpr(p.consume().token)
-			p.expectStatementDelimiter()
-			return &ast.ExprStmt{expr}
 		}
+		// anonymous function
+		expr := p.fnExpr(p.consume().token)
+		p.expectStatementDelimiter()
+		return &ast.ExprStmt{expr}
 
 	case ast.IF:
 		return p.ifStmt()
@@ -226,9 +228,8 @@ func (p *Parser) decl() *ast.Decl {
 	ident := &ast.IdentExpr{p.expect(ast.IDENT), nil}
 	if p.accept(ast.EQ) {
 		return &ast.Decl{ident, p.expression()}
-	} else {
-		return &ast.Decl{ident, nil}
 	}
+	return &ast.Decl{ident, nil}
 }
 
 func (p *Parser) ifStmt() *ast.If {
@@ -336,7 +337,7 @@ func (p *Parser) tupleIdents() []*ast.IdentExpr {
 	}
 
 	if len(idents) < 2 {
-		panic(&parserError{INVALID_FOR, lparen})
+		panic(&parserError{InvalidFor, lparen})
 	}
 
 	return idents
@@ -346,7 +347,7 @@ func (p *Parser) switchStmt() *ast.Switch {
 
 	token := p.expect(ast.SWITCH)
 
-	var item ast.Expression = nil
+	var item ast.Expression
 	if p.cur.token.Kind != ast.LBRACE {
 		item = p.expression()
 	}
@@ -359,7 +360,7 @@ func (p *Parser) switchStmt() *ast.Switch {
 	}
 
 	// default
-	var def *ast.Default = nil
+	var def *ast.Default
 	if p.cur.token.Kind == ast.DEFAULT {
 		def = p.defaultStmt()
 	}
@@ -386,7 +387,7 @@ func (p *Parser) caseStmt() *ast.Case {
 			colon := p.expect(ast.COLON)
 			body := p.statementsAny(ast.CASE, ast.DEFAULT, ast.RBRACE)
 			if len(body) == 0 {
-				panic(&parserError{INVALID_SWITCH, colon})
+				panic(&parserError{InvalidSwitch, colon})
 			}
 			return &ast.Case{token, matches, body}
 
@@ -403,7 +404,7 @@ func (p *Parser) defaultStmt() *ast.Default {
 
 	body := p.statements(ast.RBRACE)
 	if len(body) == 0 {
-		panic(&parserError{INVALID_SWITCH, colon})
+		panic(&parserError{InvalidSwitch, colon})
 	}
 
 	return &ast.Default{token, body}
@@ -447,9 +448,9 @@ func (p *Parser) tryStmt() *ast.Try {
 	tryBlock := p.block()
 
 	// catch
-	var catchToken *ast.Token = nil
-	var catchIdent *ast.IdentExpr = nil
-	var catchBlock *ast.Block = nil
+	var catchToken *ast.Token
+	var catchIdent *ast.IdentExpr
+	var catchBlock *ast.Block
 
 	if p.cur.token.Kind == ast.CATCH {
 		catchToken = p.expect(ast.CATCH)
@@ -458,8 +459,8 @@ func (p *Parser) tryStmt() *ast.Try {
 	}
 
 	// finally
-	var finallyToken *ast.Token = nil
-	var finallyBlock *ast.Block = nil
+	var finallyToken *ast.Token
+	var finallyBlock *ast.Block
 
 	if p.cur.token.Kind == ast.FINALLY {
 		finallyToken = p.expect(ast.FINALLY)
@@ -468,7 +469,7 @@ func (p *Parser) tryStmt() *ast.Try {
 
 	// make sure we got at least one of try or catch
 	if catchToken == nil && finallyToken == nil {
-		panic(&parserError{INVALID_TRY, tryToken})
+		panic(&parserError{InvalidTry, tryToken})
 	}
 
 	// done
@@ -544,9 +545,8 @@ func (p *Parser) ternaryExpr() ast.Expression {
 		_else := p.ternaryExpr()
 		return &ast.TernaryExpr{lhs, then, _else}
 
-	} else {
-		return lhs
 	}
+	return lhs
 }
 
 func (p *Parser) orExpr() ast.Expression {
@@ -611,9 +611,8 @@ func (p *Parser) unaryExpr() ast.Expression {
 		p.consume()
 		return &ast.UnaryExpr{tok, p.unaryExpr()}
 
-	} else {
-		return p.postfixExpr()
 	}
+	return p.postfixExpr()
 }
 
 func (p *Parser) postfixExpr() ast.Expression {
@@ -627,7 +626,7 @@ func (p *Parser) postfixExpr() ast.Expression {
 			p.consume()
 			exp = &ast.PostfixExpr{asn, tok}
 		} else {
-			panic(&parserError{INVALID_POSTFIX, p.cur.token})
+			panic(&parserError{InvalidPostfix, p.cur.token})
 		}
 	}
 
@@ -775,32 +774,32 @@ func (p *Parser) fnExpr(token *ast.Token) *ast.FnExpr {
 	p.expect(ast.LPAREN)
 	if p.accept(ast.RPAREN) {
 		return &ast.FnExpr{token, nil, p.block(), 0, 0, nil}
-	} else {
-		params := []*ast.FormalParam{}
+	}
+	params := []*ast.FormalParam{}
 
-		for {
+	for {
 
-			switch p.cur.token.Kind {
-			case ast.CONST:
-				p.consume()
-				params = append(params, &ast.FormalParam{p.identExpr(), true})
-			case ast.IDENT:
-				params = append(params, &ast.FormalParam{p.identExpr(), false})
-			default:
-				panic(p.unexpected())
-			}
+		switch p.cur.token.Kind {
+		case ast.CONST:
+			p.consume()
+			params = append(params, &ast.FormalParam{p.identExpr(), true})
+		case ast.IDENT:
+			params = append(params, &ast.FormalParam{p.identExpr(), false})
+		default:
+			panic(p.unexpected())
+		}
 
-			switch p.cur.token.Kind {
-			case ast.COMMA:
-				p.consume()
-			case ast.RPAREN:
-				p.consume()
-				return &ast.FnExpr{token, params, p.block(), 0, 0, nil}
-			default:
-				panic(p.unexpected())
-			}
+		switch p.cur.token.Kind {
+		case ast.COMMA:
+			p.consume()
+		case ast.RPAREN:
+			p.consume()
+			return &ast.FnExpr{token, params, p.block(), 0, 0, nil}
+		default:
+			panic(p.unexpected())
 		}
 	}
+
 }
 
 func (p *Parser) lambdaZero() *ast.FnExpr {
@@ -970,19 +969,18 @@ func (p *Parser) setExpr() ast.Expression {
 
 	if p.cur.token.Kind == ast.RBRACE {
 		return &ast.SetExpr{setToken, lbrace, []ast.Expression{}, p.consume().token}
-	} else {
+	}
 
-		elems := []ast.Expression{p.expression()}
-		for {
-			switch p.cur.token.Kind {
-			case ast.RBRACE:
-				return &ast.SetExpr{setToken, lbrace, elems, p.consume().token}
-			case ast.COMMA:
-				p.consume()
-				elems = append(elems, p.expression())
-			default:
-				panic(p.unexpected())
-			}
+	elems := []ast.Expression{p.expression()}
+	for {
+		switch p.cur.token.Kind {
+		case ast.RBRACE:
+			return &ast.SetExpr{setToken, lbrace, elems, p.consume().token}
+		case ast.COMMA:
+			p.consume()
+			elems = append(elems, p.expression())
+		default:
+			panic(p.unexpected())
 		}
 	}
 }
@@ -993,19 +991,18 @@ func (p *Parser) listExpr() ast.Expression {
 
 	if p.cur.token.Kind == ast.RBRACKET {
 		return &ast.ListExpr{lbracket, []ast.Expression{}, p.consume().token}
-	} else {
+	}
 
-		elems := []ast.Expression{p.expression()}
-		for {
-			switch p.cur.token.Kind {
-			case ast.RBRACKET:
-				return &ast.ListExpr{lbracket, elems, p.consume().token}
-			case ast.COMMA:
-				p.consume()
-				elems = append(elems, p.expression())
-			default:
-				panic(p.unexpected())
-			}
+	elems := []ast.Expression{p.expression()}
+	for {
+		switch p.cur.token.Kind {
+		case ast.RBRACKET:
+			return &ast.ListExpr{lbracket, elems, p.consume().token}
+		case ast.COMMA:
+			p.consume()
+			elems = append(elems, p.expression())
+		default:
+			panic(p.unexpected())
 		}
 	}
 }
@@ -1077,9 +1074,8 @@ func (p *Parser) accept(kind ast.TokenKind) bool {
 	if p.cur.token.Kind == kind {
 		p.consume()
 		return true
-	} else {
-		return false
 	}
+	return false
 }
 
 // consume the current token if it has the given kind, else panic
@@ -1088,9 +1084,8 @@ func (p *Parser) expect(kind ast.TokenKind) *ast.Token {
 		result := p.cur.token
 		p.consume()
 		return result
-	} else {
-		panic(p.unexpected())
 	}
+	panic(p.unexpected())
 }
 
 func (p *Parser) expectStatementDelimiter() {
@@ -1144,10 +1139,10 @@ func (p *Parser) advance() tokenInfo {
 		switch token.Kind {
 
 		case ast.UNEXPECTED_CHAR:
-			panic(&parserError{UNEXPECTED_CHAR, token})
+			panic(&parserError{UnexpectedChar, token})
 
 		case ast.UNEXPECTED_EOF:
-			panic(&parserError{UNEXPECTED_EOF, token})
+			panic(&parserError{UnexpectedEOF, token})
 
 		default:
 			panic("unreachable")
@@ -1162,13 +1157,13 @@ func (p *Parser) advance() tokenInfo {
 func (p *Parser) unexpected() error {
 	switch p.cur.token.Kind {
 	case ast.EOF:
-		return &parserError{UNEXPECTED_EOF, p.cur.token}
+		return &parserError{UnexpectedEOF, p.cur.token}
 
 	case ast.RESERVED:
-		return &parserError{UNEXPECTED_RESERVED_WORD, p.cur.token}
+		return &parserError{UnexpectedReservedWork, p.cur.token}
 
 	default:
-		return &parserError{UNEXPECTED_TOKEN, p.cur.token}
+		return &parserError{UnexpectedToken, p.cur.token}
 	}
 }
 
@@ -1309,15 +1304,16 @@ func fromAssignOp(t *ast.Token) *ast.Token {
 
 type parserErrorKind int
 
+// Parser Errors
 const (
-	UNEXPECTED_CHAR parserErrorKind = iota
-	UNEXPECTED_TOKEN
-	UNEXPECTED_RESERVED_WORD
-	UNEXPECTED_EOF
-	INVALID_POSTFIX
-	INVALID_FOR
-	INVALID_SWITCH
-	INVALID_TRY
+	UnexpectedChar parserErrorKind = iota
+	UnexpectedToken
+	UnexpectedReservedWork
+	UnexpectedEOF
+	InvalidPostfix
+	InvalidFor
+	InvalidSwitch
+	InvalidTry
 )
 
 type parserError struct {
@@ -1329,28 +1325,28 @@ func (e *parserError) Error() string {
 
 	switch e.kind {
 
-	case UNEXPECTED_CHAR:
+	case UnexpectedChar:
 		return fmt.Sprintf("Unexpected Character '%v' at %v", e.token.Text, e.token.Position)
 
-	case UNEXPECTED_TOKEN:
+	case UnexpectedToken:
 		return fmt.Sprintf("Unexpected Token '%v' at %v", e.token.Text, e.token.Position)
 
-	case UNEXPECTED_RESERVED_WORD:
+	case UnexpectedReservedWork:
 		return fmt.Sprintf("Unexpected Reserved Word '%v' at %v", e.token.Text, e.token.Position)
 
-	case UNEXPECTED_EOF:
+	case UnexpectedEOF:
 		return fmt.Sprintf("Unexpected EOF at %v", e.token.Position)
 
-	case INVALID_POSTFIX:
+	case InvalidPostfix:
 		return fmt.Sprintf("Invalid Postfix Expression at %v", e.token.Position)
 
-	case INVALID_FOR:
+	case InvalidFor:
 		return fmt.Sprintf("Invalid For Expression at %v", e.token.Position)
 
-	case INVALID_SWITCH:
+	case InvalidSwitch:
 		return fmt.Sprintf("Invalid Switch Expression at %v", e.token.Position)
 
-	case INVALID_TRY:
+	case InvalidTry:
 		return fmt.Sprintf("Invalid TRY Expression at %v", e.token.Position)
 
 	default:

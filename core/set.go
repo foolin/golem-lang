@@ -13,6 +13,7 @@ type set struct {
 	frozen  bool
 }
 
+// NewSet creates a new Set
 func NewSet(cx Context, values []Value) Set {
 
 	hashMap := EmptyHashMap()
@@ -56,7 +57,7 @@ func (s *set) ToStr(cx Context) Str {
 	}
 
 	buf.WriteString(" }")
-	return MakeStr(buf.String())
+	return NewStr(buf.String())
 }
 
 func (s *set) HashCode(cx Context) (Int, Error) {
@@ -114,9 +115,8 @@ func (s *set) AddAll(cx Context, val Value) Error {
 			s.hashMap.Put(cx, v, TRUE)
 		}
 		return nil
-	} else {
-		return TypeMismatchError("Expected Iterable Type")
 	}
+	return TypeMismatchError("Expected Iterable Type")
 }
 
 func (s *set) Clear() Error {
@@ -161,9 +161,8 @@ func (i *setIterator) IterGet() (Value, Error) {
 	if i.hasNext {
 		entry := i.itr.Get()
 		return entry.Key, nil
-	} else {
-		return nil, NoSuchElementError()
 	}
+	return nil, NoSuchElementError()
 }
 
 //--------------------------------------------------------------
@@ -179,9 +178,8 @@ func (s *set) GetField(cx Context, key Str) (Value, Error) {
 				err := s.Add(cx, values[0])
 				if err != nil {
 					return nil, err
-				} else {
-					return s, nil
 				}
+				return s, nil
 			}}}, nil
 
 	case "addAll":
@@ -191,9 +189,8 @@ func (s *set) GetField(cx Context, key Str) (Value, Error) {
 				err := s.AddAll(cx, values[0])
 				if err != nil {
 					return nil, err
-				} else {
-					return s, nil
 				}
+				return s, nil
 			}}}, nil
 
 	case "clear":
@@ -203,9 +200,8 @@ func (s *set) GetField(cx Context, key Str) (Value, Error) {
 				err := s.Clear()
 				if err != nil {
 					return nil, err
-				} else {
-					return s, nil
 				}
+				return s, nil
 			}}}, nil
 
 	case "isEmpty":

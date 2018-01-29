@@ -16,7 +16,8 @@ func (s str) String() string {
 	return string(s)
 }
 
-func MakeStr(s string) Str {
+// NewStr creates a new String
+func NewStr(s string) Str {
 	return str(s)
 }
 
@@ -148,9 +149,8 @@ func (i *strIterator) IterGet() (Value, Error) {
 
 	if (i.n >= 0) && (i.n < len(i.runes)) {
 		return str([]rune{i.runes[i.n]}), nil
-	} else {
-		return nil, NoSuchElementError()
 	}
+	return nil, NoSuchElementError()
 }
 
 //--------------------------------------------------------------
@@ -219,7 +219,7 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 					}
 					n = int(z)
 				}
-				return MakeStr(strings.Replace(string(s), string(a), string(b), n)), nil
+				return NewStr(strings.Replace(string(s), string(a), string(b), n)), nil
 			}}}, nil
 	default:
 		return nil, NoSuchFieldError(key.String())

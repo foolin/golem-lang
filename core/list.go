@@ -47,7 +47,7 @@ func (ls *list) ToStr(cx Context) Str {
 		buf.WriteString(v.ToStr(cx).String())
 	}
 	buf.WriteString(" ]")
-	return MakeStr(buf.String())
+	return NewStr(buf.String())
 }
 
 func (ls *list) HashCode(cx Context) (Int, Error) {
@@ -143,7 +143,7 @@ func (ls *list) Join(cx Context, delim Str) Str {
 		s[i] = v.ToStr(cx).String()
 	}
 
-	return MakeStr(strings.Join(s, delim.ToStr(cx).String()))
+	return NewStr(strings.Join(s, delim.ToStr(cx).String()))
 }
 
 func (ls *list) Map(cx Context, mapper func(Value) (Value, Error)) (Value, Error) {
@@ -384,7 +384,7 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 				var delim Str
 				switch len(values) {
 				case 0:
-					delim = MakeStr("")
+					delim = NewStr("")
 				case 1:
 					if s, ok := values[0].(Str); ok {
 						delim = s

@@ -51,7 +51,7 @@ func (ch *channel) Cmp(cx Context, v Value) (Int, Error) {
 }
 
 func (ch *channel) ToStr(cx Context) Str {
-	return MakeStr(fmt.Sprintf("channel<%p>", ch))
+	return NewStr(fmt.Sprintf("channel<%p>", ch))
 }
 
 //--------------------------------------------------------------

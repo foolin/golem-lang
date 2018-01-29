@@ -31,7 +31,7 @@ func TestNative(t *testing.T) {
 	ls := NewList([]Value{ONE, ZERO})
 
 	v, err := a.Invoke(nil, []Value{ls})
-	ok(t, v, err, MakeStr("[ 1, 0 ]"))
+	ok(t, v, err, NewStr("[ 1, 0 ]"))
 
 	v, err = b.Invoke(nil, []Value{ls})
 	ok(t, v, err, MakeInt(2))

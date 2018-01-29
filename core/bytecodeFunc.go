@@ -54,7 +54,7 @@ func (f *bytecodeFunc) Cmp(cx Context, v Value) (Int, Error) {
 }
 
 func (f *bytecodeFunc) ToStr(cx Context) Str {
-	return MakeStr(fmt.Sprintf("func<%p>", f))
+	return NewStr(fmt.Sprintf("func<%p>", f))
 }
 
 func (f *bytecodeFunc) Eq(cx Context, v Value) (Bool, Error) {

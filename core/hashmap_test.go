@@ -60,17 +60,17 @@ func TestHashMap(t *testing.T) {
 func TestRemove(t *testing.T) {
 
 	d := NewHashMap(cx, []*HEntry{
-		{MakeStr("a"), MakeInt(1)},
-		{MakeStr("b"), MakeInt(2)}})
+		{NewStr("a"), MakeInt(1)},
+		{NewStr("b"), MakeInt(2)}})
 
-	v, err := d.Remove(cx, MakeStr("z"))
+	v, err := d.Remove(cx, NewStr("z"))
 	ok(t, v, err, FALSE)
 
-	v, err = d.Remove(cx, MakeStr("a"))
+	v, err = d.Remove(cx, NewStr("a"))
 	ok(t, v, err, TRUE)
 
 	e := NewHashMap(cx, []*HEntry{
-		{MakeStr("b"), MakeInt(2)}})
+		{NewStr("b"), MakeInt(2)}})
 
 	v, err = d.Eq(cx, e)
 	ok(t, v, err, TRUE)
@@ -80,16 +80,16 @@ func TestStrHashMap(t *testing.T) {
 
 	hm := NewHashMap(cx, nil)
 
-	err := hm.Put(cx, MakeStr("abc"), MakeStr("xyz"))
+	err := hm.Put(cx, NewStr("abc"), NewStr("xyz"))
 	ok(t, nil, err, nil)
 
-	v, err := hm.Get(cx, MakeStr("abc"))
-	ok(t, v, err, MakeStr("xyz"))
+	v, err := hm.Get(cx, NewStr("abc"))
+	ok(t, v, err, NewStr("xyz"))
 
-	v, err = hm.ContainsKey(cx, MakeStr("abc"))
+	v, err = hm.ContainsKey(cx, NewStr("abc"))
 	ok(t, v, err, TRUE)
 
-	v, err = hm.ContainsKey(cx, MakeStr("bogus"))
+	v, err = hm.ContainsKey(cx, NewStr("bogus"))
 	ok(t, v, err, FALSE)
 }
 
@@ -116,27 +116,27 @@ func TestHashMapIterator(t *testing.T) {
 
 	testIteratorEntries(t,
 		[]*HEntry{
-			{MakeStr("a"), MakeInt(1)}},
+			{NewStr("a"), MakeInt(1)}},
 		[]*HEntry{
-			{MakeStr("a"), MakeInt(1)}})
+			{NewStr("a"), MakeInt(1)}})
 
 	testIteratorEntries(t,
 		[]*HEntry{
-			{MakeStr("a"), MakeInt(1)},
-			{MakeStr("b"), MakeInt(2)}},
+			{NewStr("a"), MakeInt(1)},
+			{NewStr("b"), MakeInt(2)}},
 		[]*HEntry{
-			{MakeStr("b"), MakeInt(2)},
-			{MakeStr("a"), MakeInt(1)}})
+			{NewStr("b"), MakeInt(2)},
+			{NewStr("a"), MakeInt(1)}})
 
 	testIteratorEntries(t,
 		[]*HEntry{
-			{MakeStr("a"), MakeInt(1)},
-			{MakeStr("b"), MakeInt(2)},
-			{MakeStr("c"), MakeInt(3)}},
+			{NewStr("a"), MakeInt(1)},
+			{NewStr("b"), MakeInt(2)},
+			{NewStr("c"), MakeInt(3)}},
 		[]*HEntry{
-			{MakeStr("b"), MakeInt(2)},
-			{MakeStr("a"), MakeInt(1)},
-			{MakeStr("c"), MakeInt(3)}})
+			{NewStr("b"), MakeInt(2)},
+			{NewStr("a"), MakeInt(1)},
+			{NewStr("c"), MakeInt(3)}})
 }
 
 func TestBogusHashCode(t *testing.T) {

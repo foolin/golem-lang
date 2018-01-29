@@ -13,6 +13,7 @@ import (
 
 type tuple []Value
 
+// NewTuple creates a new Tuple
 func NewTuple(values []Value) Tuple {
 	if len(values) < 2 {
 		panic("invalid tuple size")
@@ -42,13 +43,13 @@ func (tp tuple) ToStr(cx Context) Str {
 		buf.WriteString(v.ToStr(cx).String())
 	}
 	buf.WriteString(")")
-	return MakeStr(buf.String())
+	return NewStr(buf.String())
 }
 
 func (tp tuple) HashCode(cx Context) (Int, Error) {
 
 	// https://en.wikipedia.org/wiki/Jenkins_hash_function
-	var hash int64 = 0
+	var hash int64
 	for _, v := range tp {
 		h, err := v.HashCode(cx)
 		if err != nil {
