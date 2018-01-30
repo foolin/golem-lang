@@ -9,7 +9,7 @@ type _bool bool
 var TRUE Bool = _bool(true)
 var FALSE Bool = _bool(false)
 
-func MakeBool(b bool) Bool {
+func NewBool(b bool) Bool {
 	if b {
 		return TRUE
 	} else {
@@ -43,9 +43,9 @@ func (b _bool) ToStr(cx Context) Str {
 
 func (b _bool) HashCode(cx Context) (Int, Error) {
 	if b {
-		return MakeInt(1009), nil
+		return NewInt(1009), nil
 	} else {
-		return MakeInt(1013), nil
+		return NewInt(1013), nil
 	}
 }
 

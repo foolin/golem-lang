@@ -41,7 +41,7 @@ func (f *nativeFunc) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case NativeFunc:
 		// equality is based on identity
-		return MakeBool(f == t), nil
+		return NewBool(f == t), nil
 	default:
 		return FALSE, nil
 	}
@@ -107,7 +107,7 @@ func (f *intrinsicFunc) Eq(cx Context, v Value) (Bool, Error) {
 		if err != nil {
 			return nil, err
 		}
-		return MakeBool(ownerEq.BoolVal() && (f.name == t.name)), nil
+		return NewBool(ownerEq.BoolVal() && (f.name == t.name)), nil
 	default:
 		return FALSE, nil
 	}

@@ -34,7 +34,7 @@ func (s *set) Freeze() (Value, Error) {
 }
 
 func (s *set) Frozen() (Bool, Error) {
-	return MakeBool(s.frozen), nil
+	return NewBool(s.frozen), nil
 }
 
 func (s *set) ToStr(cx Context) Str {
@@ -82,7 +82,7 @@ func (s *set) Len() Int {
 }
 
 func (s *set) IsEmpty() Bool {
-	return MakeBool(s.hashMap.Len().IntVal() == 0)
+	return NewBool(s.hashMap.Len().IntVal() == 0)
 }
 
 func (s *set) Contains(cx Context, key Value) (Bool, Error) {
@@ -153,7 +153,7 @@ func (s *set) NewIterator(cx Context) Iterator {
 
 func (i *setIterator) IterNext() Bool {
 	i.hasNext = i.itr.Next()
-	return MakeBool(i.hasNext)
+	return NewBool(i.hasNext)
 }
 
 func (i *setIterator) IterGet() (Value, Error) {

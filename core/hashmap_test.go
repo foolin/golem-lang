@@ -13,44 +13,44 @@ func TestHashMap(t *testing.T) {
 	hm := NewHashMap(cx, nil)
 
 	ok(t, hm.Len(), nil, ZERO)
-	v, err := hm.Get(cx, MakeInt(3))
+	v, err := hm.Get(cx, NewInt(3))
 	ok(t, v, err, NULL)
 
-	err = hm.Put(cx, MakeInt(3), MakeInt(33))
+	err = hm.Put(cx, NewInt(3), NewInt(33))
 	ok(t, nil, err, nil)
 
 	ok(t, hm.Len(), nil, ONE)
-	v, err = hm.Get(cx, MakeInt(3))
-	ok(t, v, err, MakeInt(33))
-	v, err = hm.Get(cx, MakeInt(5))
+	v, err = hm.Get(cx, NewInt(3))
+	ok(t, v, err, NewInt(33))
+	v, err = hm.Get(cx, NewInt(5))
 	ok(t, v, err, NULL)
 
-	err = hm.Put(cx, MakeInt(3), MakeInt(33))
+	err = hm.Put(cx, NewInt(3), NewInt(33))
 	ok(t, nil, err, nil)
 
 	ok(t, hm.Len(), nil, ONE)
-	v, err = hm.Get(cx, MakeInt(3))
-	ok(t, v, err, MakeInt(33))
-	v, err = hm.Get(cx, MakeInt(5))
+	v, err = hm.Get(cx, NewInt(3))
+	ok(t, v, err, NewInt(33))
+	v, err = hm.Get(cx, NewInt(5))
 	ok(t, v, err, NULL)
 
-	err = hm.Put(cx, MakeInt(int64(2)), MakeInt(int64(22)))
+	err = hm.Put(cx, NewInt(int64(2)), NewInt(int64(22)))
 	ok(t, nil, err, nil)
-	ok(t, hm.Len(), nil, MakeInt(2))
+	ok(t, hm.Len(), nil, NewInt(2))
 
-	err = hm.Put(cx, MakeInt(int64(1)), MakeInt(int64(11)))
+	err = hm.Put(cx, NewInt(int64(1)), NewInt(int64(11)))
 	ok(t, nil, err, nil)
-	ok(t, hm.Len(), nil, MakeInt(3))
+	ok(t, hm.Len(), nil, NewInt(3))
 
 	for i := 1; i <= 20; i++ {
-		err = hm.Put(cx, MakeInt(int64(i)), MakeInt(int64(i*10+i)))
+		err = hm.Put(cx, NewInt(int64(i)), NewInt(int64(i*10+i)))
 		ok(t, nil, err, nil)
 	}
 
 	for i := 1; i <= 40; i++ {
-		v, err = hm.Get(cx, MakeInt(int64(i)))
+		v, err = hm.Get(cx, NewInt(int64(i)))
 		if i <= 20 {
-			ok(t, v, err, MakeInt(int64(i*10+i)))
+			ok(t, v, err, NewInt(int64(i*10+i)))
 		} else {
 			ok(t, v, err, NULL)
 		}
@@ -60,8 +60,8 @@ func TestHashMap(t *testing.T) {
 func TestRemove(t *testing.T) {
 
 	d := NewHashMap(cx, []*HEntry{
-		{NewStr("a"), MakeInt(1)},
-		{NewStr("b"), MakeInt(2)}})
+		{NewStr("a"), NewInt(1)},
+		{NewStr("b"), NewInt(2)}})
 
 	v, err := d.Remove(cx, NewStr("z"))
 	ok(t, v, err, FALSE)
@@ -70,7 +70,7 @@ func TestRemove(t *testing.T) {
 	ok(t, v, err, TRUE)
 
 	e := NewHashMap(cx, []*HEntry{
-		{NewStr("b"), MakeInt(2)}})
+		{NewStr("b"), NewInt(2)}})
 
 	v, err = d.Eq(cx, e)
 	ok(t, v, err, TRUE)
@@ -116,27 +116,27 @@ func TestHashMapIterator(t *testing.T) {
 
 	testIteratorEntries(t,
 		[]*HEntry{
-			{NewStr("a"), MakeInt(1)}},
+			{NewStr("a"), NewInt(1)}},
 		[]*HEntry{
-			{NewStr("a"), MakeInt(1)}})
+			{NewStr("a"), NewInt(1)}})
 
 	testIteratorEntries(t,
 		[]*HEntry{
-			{NewStr("a"), MakeInt(1)},
-			{NewStr("b"), MakeInt(2)}},
+			{NewStr("a"), NewInt(1)},
+			{NewStr("b"), NewInt(2)}},
 		[]*HEntry{
-			{NewStr("b"), MakeInt(2)},
-			{NewStr("a"), MakeInt(1)}})
+			{NewStr("b"), NewInt(2)},
+			{NewStr("a"), NewInt(1)}})
 
 	testIteratorEntries(t,
 		[]*HEntry{
-			{NewStr("a"), MakeInt(1)},
-			{NewStr("b"), MakeInt(2)},
-			{NewStr("c"), MakeInt(3)}},
+			{NewStr("a"), NewInt(1)},
+			{NewStr("b"), NewInt(2)},
+			{NewStr("c"), NewInt(3)}},
 		[]*HEntry{
-			{NewStr("b"), MakeInt(2)},
-			{NewStr("a"), MakeInt(1)},
-			{NewStr("c"), MakeInt(3)}})
+			{NewStr("b"), NewInt(2)},
+			{NewStr("a"), NewInt(1)},
+			{NewStr("c"), NewInt(3)}})
 }
 
 func TestBogusHashCode(t *testing.T) {

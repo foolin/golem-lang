@@ -241,7 +241,7 @@ func (i *Interpreter) makeErrorTrace(err g.Error, stackTrace []string) g.Error {
 	assert(e == nil)
 
 	merge := g.MergeStructs([]g.Struct{err.Struct(), stc})
-	return g.MakeErrorFromStruct(i, merge)
+	return g.NewErrorFromStruct(i, merge)
 }
 
 func assert(flag bool) {

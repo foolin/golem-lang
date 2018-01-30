@@ -821,7 +821,7 @@ func (c *compiler) visitUnaryExpr(u *ast.UnaryExpr) {
 					c.pushIndex(
 						u.Op.Position,
 						o.LOAD_CONST,
-						poolIndex(c.pool, g.MakeInt(-i)))
+						poolIndex(c.pool, g.NewInt(-i)))
 				}
 
 			default:
@@ -875,7 +875,7 @@ func (c *compiler) visitBasicExpr(basic *ast.BasicExpr) {
 		c.pushIndex(
 			basic.Token.Position,
 			o.LOAD_CONST,
-			poolIndex(c.pool, g.MakeFloat(f)))
+			poolIndex(c.pool, g.NewFloat(f)))
 
 	default:
 		panic("unreachable")
@@ -1052,7 +1052,7 @@ func (c *compiler) loadInt(pos ast.Pos, i int64) {
 		c.pushIndex(
 			pos,
 			o.LOAD_CONST,
-			poolIndex(c.pool, g.MakeInt(i)))
+			poolIndex(c.pool, g.NewInt(i)))
 	}
 }
 

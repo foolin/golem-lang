@@ -27,7 +27,7 @@ func (d *dict) Freeze() (Value, Error) {
 }
 
 func (d *dict) Frozen() (Bool, Error) {
-	return MakeBool(d.frozen), nil
+	return NewBool(d.frozen), nil
 }
 
 func (d *dict) ToStr(cx Context) Str {
@@ -83,7 +83,7 @@ func (d *dict) Len() Int {
 }
 
 func (d *dict) IsEmpty() Bool {
-	return MakeBool(d.hashMap.Len().IntVal() == 0)
+	return NewBool(d.hashMap.Len().IntVal() == 0)
 }
 
 func (d *dict) ContainsKey(cx Context, key Value) (Bool, Error) {
@@ -163,7 +163,7 @@ func (d *dict) NewIterator(cx Context) Iterator {
 
 func (i *dictIterator) IterNext() Bool {
 	i.hasNext = i.itr.Next()
-	return MakeBool(i.hasNext)
+	return NewBool(i.hasNext)
 }
 
 func (i *dictIterator) IterGet() (Value, Error) {

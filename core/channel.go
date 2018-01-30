@@ -36,7 +36,7 @@ func (ch *channel) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *channel:
 		// equality is based on identity
-		return MakeBool(ch == t), nil
+		return NewBool(ch == t), nil
 	default:
 		return FALSE, nil
 	}

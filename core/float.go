@@ -20,7 +20,7 @@ func (f _float) FloatVal() float64 {
 	return float64(f)
 }
 
-func MakeFloat(f float64) Float {
+func NewFloat(f float64) Float {
 	return _float(f)
 }
 
@@ -56,17 +56,17 @@ func (f _float) HashCode(cx Context) (Int, Error) {
 		panic("Float.HashCode() read failed")
 	}
 
-	return MakeInt(hashCode), nil
+	return NewInt(hashCode), nil
 }
 
 func (f _float) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
 
 	case _float:
-		return MakeBool(f == t), nil
+		return NewBool(f == t), nil
 
 	case _int:
-		return MakeBool(f.FloatVal() == t.FloatVal()), nil
+		return NewBool(f.FloatVal() == t.FloatVal()), nil
 
 	default:
 		return FALSE, nil

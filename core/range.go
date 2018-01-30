@@ -60,7 +60,7 @@ func (r *rng) HashCode(cx Context) (Int, Error) {
 func (r *rng) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *rng:
-		return MakeBool(reflect.DeepEqual(r, t)), nil
+		return NewBool(reflect.DeepEqual(r, t)), nil
 	default:
 		return FALSE, nil
 	}
@@ -75,17 +75,17 @@ func (r *rng) Get(cx Context, index Value) (Value, Error) {
 	if err != nil {
 		return nil, err
 	}
-	return MakeInt(r.from + int64(idx)*r.step), nil
+	return NewInt(r.from + int64(idx)*r.step), nil
 }
 
 func (r *rng) Len() Int {
-	return MakeInt(r.count)
+	return NewInt(r.count)
 }
 
-func (r *rng) From() Int  { return MakeInt(r.from) }
-func (r *rng) To() Int    { return MakeInt(r.to) }
-func (r *rng) Step() Int  { return MakeInt(r.step) }
-func (r *rng) Count() Int { return MakeInt(r.count) }
+func (r *rng) From() Int  { return NewInt(r.from) }
+func (r *rng) To() Int    { return NewInt(r.to) }
+func (r *rng) Step() Int  { return NewInt(r.step) }
+func (r *rng) Count() Int { return NewInt(r.count) }
 
 //---------------------------------------------------------------
 // Iterator
@@ -103,13 +103,13 @@ func (r *rng) NewIterator(cx Context) Iterator {
 
 func (i *rangeIterator) IterNext() Bool {
 	i.n++
-	return MakeBool(i.n < i.r.count)
+	return NewBool(i.n < i.r.count)
 }
 
 func (i *rangeIterator) IterGet() (Value, Error) {
 
 	if (i.n >= 0) && (i.n < i.r.count) {
-		return MakeInt(i.r.from + i.n*i.r.step), nil
+		return NewInt(i.r.from + i.n*i.r.step), nil
 	}
 	return nil, NoSuchElementError()
 }
@@ -124,28 +124,28 @@ func (r *rng) GetField(cx Context, key Str) (Value, Error) {
 		return &intrinsicFunc{r, sn, &nativeFunc{
 			0, 0,
 			func(cx Context, values []Value) (Value, Error) {
-				return MakeInt(r.from), nil
+				return NewInt(r.from), nil
 			}}}, nil
 
 	case "to":
 		return &intrinsicFunc{r, sn, &nativeFunc{
 			0, 0,
 			func(cx Context, values []Value) (Value, Error) {
-				return MakeInt(r.to), nil
+				return NewInt(r.to), nil
 			}}}, nil
 
 	case "step":
 		return &intrinsicFunc{r, sn, &nativeFunc{
 			0, 0,
 			func(cx Context, values []Value) (Value, Error) {
-				return MakeInt(r.step), nil
+				return NewInt(r.step), nil
 			}}}, nil
 
 	case "count":
 		return &intrinsicFunc{r, sn, &nativeFunc{
 			0, 0,
 			func(cx Context, values []Value) (Value, Error) {
-				return MakeInt(r.count), nil
+				return NewInt(r.count), nil
 			}}}, nil
 
 	default:

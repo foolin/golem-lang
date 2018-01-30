@@ -11,9 +11,9 @@ import (
 
 type _int int64
 
-var ZERO Int = MakeInt(0)
-var ONE Int = MakeInt(1)
-var NEG_ONE Int = MakeInt(-1)
+var ZERO Int = NewInt(0)
+var ONE Int = NewInt(1)
+var NEG_ONE Int = NewInt(-1)
 
 func (i _int) IntVal() int64 {
 	return int64(i)
@@ -23,7 +23,7 @@ func (i _int) FloatVal() float64 {
 	return float64(i)
 }
 
-func MakeInt(i int64) Int {
+func NewInt(i int64) Int {
 	return _int(i)
 }
 
@@ -57,12 +57,12 @@ func (i _int) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
 
 	case _int:
-		return MakeBool(i == t), nil
+		return NewBool(i == t), nil
 
 	case _float:
 		a := float64(i)
 		b := t.FloatVal()
-		return MakeBool(a == b), nil
+		return NewBool(a == b), nil
 
 	default:
 		return FALSE, nil
@@ -106,7 +106,7 @@ func (i _int) Add(v Value) (Number, Error) {
 	case _float:
 		a := float64(i)
 		b := t.FloatVal()
-		return MakeFloat(a + b), nil
+		return NewFloat(a + b), nil
 
 	default:
 		return nil, TypeMismatchError("Expected Number Type")
@@ -125,7 +125,7 @@ func (i _int) Sub(v Value) (Number, Error) {
 	case _float:
 		a := float64(i)
 		b := t.FloatVal()
-		return MakeFloat(a - b), nil
+		return NewFloat(a - b), nil
 
 	default:
 		return nil, TypeMismatchError("Expected Number Type")
@@ -141,7 +141,7 @@ func (i _int) Mul(v Value) (Number, Error) {
 	case _float:
 		a := float64(i)
 		b := t.FloatVal()
-		return MakeFloat(a * b), nil
+		return NewFloat(a * b), nil
 
 	default:
 		return nil, TypeMismatchError("Expected Number Type")
@@ -164,7 +164,7 @@ func (i _int) Div(v Value) (Number, Error) {
 		if b == 0.0 {
 			return nil, DivideByZeroError()
 		} else {
-			return MakeFloat(a / b), nil
+			return NewFloat(a / b), nil
 		}
 
 	default:

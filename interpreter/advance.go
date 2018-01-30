@@ -137,7 +137,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		}
 
 		// throw an error
-		return nil, g.MakeErrorFromStruct(i, stc)
+		return nil, g.NewErrorFromStruct(i, stc)
 
 	case o.NEW_FUNC:
 
@@ -599,7 +599,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			return nil, err
 		}
 		f.stack = f.stack[:n]
-		f.stack[n-1] = g.MakeBool(val.IntVal() < 0)
+		f.stack[n-1] = g.NewBool(val.IntVal() < 0)
 		f.ip++
 
 	case o.LTE:
@@ -608,7 +608,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			return nil, err
 		}
 		f.stack = f.stack[:n]
-		f.stack[n-1] = g.MakeBool(val.IntVal() <= 0)
+		f.stack[n-1] = g.NewBool(val.IntVal() <= 0)
 		f.ip++
 
 	case o.GT:
@@ -617,7 +617,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			return nil, err
 		}
 		f.stack = f.stack[:n]
-		f.stack[n-1] = g.MakeBool(val.IntVal() > 0)
+		f.stack[n-1] = g.NewBool(val.IntVal() > 0)
 		f.ip++
 
 	case o.GTE:
@@ -626,7 +626,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			return nil, err
 		}
 		f.stack = f.stack[:n]
-		f.stack[n-1] = g.MakeBool(val.IntVal() >= 0)
+		f.stack[n-1] = g.NewBool(val.IntVal() >= 0)
 		f.ip++
 
 	case o.CMP:

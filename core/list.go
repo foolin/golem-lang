@@ -32,7 +32,7 @@ func (ls *list) Freeze() (Value, Error) {
 }
 
 func (ls *list) Frozen() (Bool, Error) {
-	return MakeBool(ls.frozen), nil
+	return NewBool(ls.frozen), nil
 }
 
 func (ls *list) ToStr(cx Context) Str {
@@ -87,7 +87,7 @@ func (ls *list) Contains(cx Context, val Value) (Bool, Error) {
 		return nil, err
 	}
 
-	return MakeBool(!eq.BoolVal()), nil
+	return NewBool(!eq.BoolVal()), nil
 }
 
 func (ls *list) IndexOf(cx Context, val Value) (Int, Error) {
@@ -97,18 +97,18 @@ func (ls *list) IndexOf(cx Context, val Value) (Int, Error) {
 			return nil, err
 		}
 		if eq.BoolVal() {
-			return MakeInt(int64(i)), nil
+			return NewInt(int64(i)), nil
 		}
 	}
 	return NEG_ONE, nil
 }
 
 func (ls *list) IsEmpty() Bool {
-	return MakeBool(len(ls.array) == 0)
+	return NewBool(len(ls.array) == 0)
 }
 
 func (ls *list) Len() Int {
-	return MakeInt(int64(len(ls.array)))
+	return NewInt(int64(len(ls.array)))
 }
 
 func (ls *list) Slice(cx Context, from Value, to Value) (Value, Error) {
@@ -125,7 +125,7 @@ func (ls *list) Slice(cx Context, from Value, to Value) (Value, Error) {
 }
 
 func (ls *list) SliceFrom(cx Context, from Value) (Value, Error) {
-	return ls.Slice(cx, from, MakeInt(int64(len(ls.array))))
+	return ls.Slice(cx, from, NewInt(int64(len(ls.array))))
 }
 
 func (ls *list) SliceTo(cx Context, to Value) (Value, Error) {
@@ -286,7 +286,7 @@ func (ls *list) NewIterator(cx Context) Iterator {
 
 func (i *listIterator) IterNext() Bool {
 	i.n++
-	return MakeBool(i.n < len(i.ls.array))
+	return NewBool(i.n < len(i.ls.array))
 }
 
 func (i *listIterator) IterGet() (Value, Error) {

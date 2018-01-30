@@ -85,8 +85,8 @@ func TestExpression(t *testing.T) {
 	mod := newCompiler(newAnalyzer("-2 + -1 + -0 + 0 + 1 + 2")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
-			g.MakeInt(int64(-2)),
-			g.MakeInt(int64(2))},
+			g.NewInt(int64(-2)),
+			g.NewInt(int64(2))},
 		nil,
 		[][]g.Field{},
 		[]*g.Template{
@@ -115,10 +115,10 @@ func TestExpression(t *testing.T) {
 	mod = newCompiler(newAnalyzer("(2 + 3) * -4 / 10")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
-			g.MakeInt(int64(2)),
-			g.MakeInt(int64(3)),
-			g.MakeInt(int64(-4)),
-			g.MakeInt(int64(10))},
+			g.NewInt(int64(2)),
+			g.NewInt(int64(3)),
+			g.NewInt(int64(-4)),
+			g.NewInt(int64(10))},
 		nil,
 		[][]g.Field{},
 		[]*g.Template{
@@ -168,7 +168,7 @@ func TestExpression(t *testing.T) {
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.NewStr("a"),
-			g.MakeFloat(float64(12300))},
+			g.NewFloat(float64(12300))},
 		nil,
 		[][]g.Field{},
 		[]*g.Template{
@@ -267,8 +267,8 @@ func TestExpression(t *testing.T) {
 	mod = newCompiler(newAnalyzer("let a = 2 && 3;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
-			g.MakeInt(int64(2)),
-			g.MakeInt(int64(3))},
+			g.NewInt(int64(2)),
+			g.NewInt(int64(3))},
 		nil,
 		[][]g.Field{},
 		[]*g.Template{
@@ -294,8 +294,8 @@ func TestExpression(t *testing.T) {
 	mod = newCompiler(newAnalyzer("let a = 2 || 3;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
-			g.MakeInt(int64(2)),
-			g.MakeInt(int64(3))},
+			g.NewInt(int64(2)),
+			g.NewInt(int64(3))},
 		nil,
 		[][]g.Field{},
 		[]*g.Template{
@@ -324,8 +324,8 @@ func TestAssignment(t *testing.T) {
 	mod := newCompiler(newAnalyzer("let a = 1;\nconst b = \n2;a = 3;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
-			g.MakeInt(2),
-			g.MakeInt(3)},
+			g.NewInt(2),
+			g.NewInt(3)},
 		nil,
 		[][]g.Field{},
 		[]*g.Template{
@@ -373,9 +373,9 @@ func TestIf(t *testing.T) {
 	mod := newCompiler(anl).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
-			g.MakeInt(3),
-			g.MakeInt(2),
-			g.MakeInt(42)},
+			g.NewInt(3),
+			g.NewInt(2),
+			g.NewInt(42)},
 		nil,
 		[][]g.Field{},
 		[]*g.Template{
@@ -408,9 +408,9 @@ func TestIf(t *testing.T) {
 	mod = newCompiler(anl).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
-			g.MakeInt(2),
-			g.MakeInt(3),
-			g.MakeInt(4)},
+			g.NewInt(2),
+			g.NewInt(3),
+			g.NewInt(4)},
 		nil,
 		[][]g.Field{},
 		[]*g.Template{
@@ -448,7 +448,7 @@ func TestWhile(t *testing.T) {
 	mod := newCompiler(newAnalyzer(source)).Compile()
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
-			g.MakeInt(2)},
+			g.NewInt(2)},
 		nil,
 		[][]g.Field{},
 		[]*g.Template{
@@ -477,8 +477,8 @@ func TestWhile(t *testing.T) {
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
 			g.NewStr("z"),
-			g.MakeInt(2),
-			g.MakeInt(3)},
+			g.NewInt(2),
+			g.NewInt(3)},
 		nil,
 		[][]g.Field{},
 		[]*g.Template{
@@ -516,8 +516,8 @@ func TestReturn(t *testing.T) {
 
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
-			g.MakeInt(2),
-			g.MakeInt(3)},
+			g.NewInt(2),
+			g.NewInt(3)},
 		nil,
 		[][]g.Field{},
 		[]*g.Template{
@@ -567,8 +567,8 @@ let b = fn(x) {
 
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
-			g.MakeInt(42),
-			g.MakeInt(7)},
+			g.NewInt(42),
+			g.NewInt(7)},
 		nil,
 		[][]g.Field{},
 		[]*g.Template{
@@ -647,9 +647,9 @@ c(2, 3)
 
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
-			g.MakeInt(2),
-			g.MakeInt(3),
-			g.MakeInt(4)},
+			g.NewInt(2),
+			g.NewInt(3),
+			g.NewInt(4)},
 		nil,
 		[][]g.Field{},
 		[]*g.Template{
@@ -798,7 +798,7 @@ const accumGen = fn(n) {
 
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
-			g.MakeInt(2)},
+			g.NewInt(2)},
 		nil,
 		[][]g.Field{},
 		[]*g.Template{
@@ -869,8 +869,8 @@ let d = b--
 
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{
-			g.MakeInt(int64(10)),
-			g.MakeInt(int64(20))},
+			g.NewInt(int64(10)),
+			g.NewInt(int64(20))},
 		nil,
 		[][]g.Field{},
 		[]*g.Template{
@@ -908,19 +908,19 @@ let d = b--
 func TestPool(t *testing.T) {
 	pool := g.EmptyHashMap()
 
-	tassert(t, poolIndex(pool, g.MakeInt(4)) == 0)
+	tassert(t, poolIndex(pool, g.NewInt(4)) == 0)
 	tassert(t, poolIndex(pool, g.NewStr("a")) == 1)
-	tassert(t, poolIndex(pool, g.MakeFloat(1.0)) == 2)
+	tassert(t, poolIndex(pool, g.NewFloat(1.0)) == 2)
 	tassert(t, poolIndex(pool, g.NewStr("a")) == 1)
-	tassert(t, poolIndex(pool, g.MakeInt(4)) == 0)
+	tassert(t, poolIndex(pool, g.NewInt(4)) == 0)
 
 	slice := makePoolSlice(pool)
 	tassert(t, reflect.DeepEqual(
 		slice,
 		[]g.Basic{
-			g.MakeInt(4),
+			g.NewInt(4),
 			g.NewStr("a"),
-			g.MakeFloat(1.0)}))
+			g.NewFloat(1.0)}))
 }
 
 func TestTry(t *testing.T) {

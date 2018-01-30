@@ -283,8 +283,8 @@ var BuiltinArity = &nativeFunc{
 		}
 
 		st, err := NewStruct([]Field{
-			NewField("min", true, MakeInt(int64(f.MinArity()))),
-			NewField("max", true, MakeInt(int64(f.MaxArity())))}, true)
+			NewField("min", true, NewInt(int64(f.MinArity()))),
+			NewField("max", true, NewInt(int64(f.MaxArity())))}, true)
 		if err != nil {
 			panic("invalid struct")
 		}

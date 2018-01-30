@@ -161,9 +161,9 @@ func interpret(mod *g.BytecodeModule) *Interpreter {
 
 func TestExpressions(t *testing.T) {
 
-	okExpr(t, "(2 + 3) * -4 / 10;", g.MakeInt(-2))
+	okExpr(t, "(2 + 3) * -4 / 10;", g.NewInt(-2))
 
-	okExpr(t, "(2*2*2*2 + 2*3*(8 - 1) + 2) / (17 - 2*2*2 - -1);", g.MakeInt(6))
+	okExpr(t, "(2*2*2*2 + 2*3*(8 - 1) + 2) / (17 - 2*2*2 - -1);", g.NewInt(6))
 
 	okExpr(t, "true + 'a';", g.NewStr("truea"))
 	okExpr(t, "'a' + true;", g.NewStr("atrue"))
@@ -197,7 +197,7 @@ func TestExpressions(t *testing.T) {
 	okExpr(t, "2 > 2;", g.FALSE)
 	okExpr(t, "2 >= 2;", g.TRUE)
 
-	okExpr(t, "1 <=> 2;", g.MakeInt(-1))
+	okExpr(t, "1 <=> 2;", g.NewInt(-1))
 	okExpr(t, "2 <=> 2;", g.ZERO)
 	okExpr(t, "2 <=> 1;", g.ONE)
 
@@ -214,14 +214,14 @@ func TestExpressions(t *testing.T) {
 	okExpr(t, "true  || 12;", g.TRUE)
 	failExpr(t, "12  || true;", "TypeMismatch: Expected 'Bool'")
 
-	okExpr(t, "~0;", g.MakeInt(-1))
+	okExpr(t, "~0;", g.NewInt(-1))
 
-	okExpr(t, "8 % 2;", g.MakeInt(8%2))
-	okExpr(t, "8 & 2;", g.MakeInt(int64(8)&int64(2)))
-	okExpr(t, "8 | 2;", g.MakeInt(8|2))
-	okExpr(t, "8 ^ 2;", g.MakeInt(8^2))
-	okExpr(t, "8 << 2;", g.MakeInt(8<<2))
-	okExpr(t, "8 >> 2;", g.MakeInt(8>>2))
+	okExpr(t, "8 % 2;", g.NewInt(8%2))
+	okExpr(t, "8 & 2;", g.NewInt(int64(8)&int64(2)))
+	okExpr(t, "8 | 2;", g.NewInt(8|2))
+	okExpr(t, "8 ^ 2;", g.NewInt(8^2))
+	okExpr(t, "8 << 2;", g.NewInt(8<<2))
+	okExpr(t, "8 >> 2;", g.NewInt(8>>2))
 
 	okExpr(t, "[true][0];", g.TRUE)
 	okExpr(t, "'abc'[1];", g.NewStr("b"))
@@ -233,9 +233,9 @@ func TestExpressions(t *testing.T) {
 	okExpr(t, "'abcd'[1:3];", g.NewStr("bc"))
 	okExpr(t, "'abcd'[1:1];", g.NewStr(""))
 
-	okExpr(t, "[6,7,8][1:];", g.NewList([]g.Value{g.MakeInt(7), g.MakeInt(8)}))
-	okExpr(t, "[6,7,8][:1];", g.NewList([]g.Value{g.MakeInt(6)}))
-	okExpr(t, "[6,7,8,9][1:3];", g.NewList([]g.Value{g.MakeInt(7), g.MakeInt(8)}))
+	okExpr(t, "[6,7,8][1:];", g.NewList([]g.Value{g.NewInt(7), g.NewInt(8)}))
+	okExpr(t, "[6,7,8][:1];", g.NewList([]g.Value{g.NewInt(6)}))
+	okExpr(t, "[6,7,8,9][1:3];", g.NewList([]g.Value{g.NewInt(7), g.NewInt(8)}))
 	okExpr(t, "[6,7,8,9][1:1];", g.NewList([]g.Value{}))
 
 	okExpr(t, "struct{a: 1} has 'a';", g.TRUE)
@@ -257,10 +257,10 @@ let a = 1
 const B = 2
 a = a + B
 `,
-		g.MakeInt(3),
+		g.NewInt(3),
 		[]*g.Ref{
-			&g.Ref{g.MakeInt(3)},
-			&g.Ref{g.MakeInt(2)}})
+			&g.Ref{g.NewInt(3)},
+			&g.Ref{g.NewInt(2)}})
 
 	okMod(t, `
 let a = 1
@@ -269,11 +269,11 @@ const B = a / 6
 let c = B + 3
 c = (c + a)/13
 `,
-		g.MakeInt(4),
+		g.NewInt(4),
 		[]*g.Ref{
-			&g.Ref{g.MakeInt(42)},
-			&g.Ref{g.MakeInt(7)},
-			&g.Ref{g.MakeInt(4)}})
+			&g.Ref{g.NewInt(42)},
+			&g.Ref{g.NewInt(7)},
+			&g.Ref{g.NewInt(4)}})
 
 	okMod(t, `
 let a = 1
@@ -283,11 +283,11 @@ c -= -2
 c <<= 4
 b *= 2
 `,
-		g.MakeInt(8),
+		g.NewInt(8),
 		[]*g.Ref{
-			&g.Ref{g.MakeInt(4)},
-			&g.Ref{g.MakeInt(8)},
-			&g.Ref{g.MakeInt(16)}})
+			&g.Ref{g.NewInt(4)},
+			&g.Ref{g.NewInt(8)},
+			&g.Ref{g.NewInt(16)}})
 
 	okMod(t, `
 let a = 1
@@ -295,33 +295,33 @@ let b = 2
 a = b = 11
 b = a %= 4
 `,
-		g.MakeInt(3),
+		g.NewInt(3),
 		[]*g.Ref{
-			&g.Ref{g.MakeInt(3)},
-			&g.Ref{g.MakeInt(3)}})
+			&g.Ref{g.NewInt(3)},
+			&g.Ref{g.NewInt(3)}})
 }
 
 func TestIf(t *testing.T) {
 
 	okMod(t, "let a = 1; if (true) { a = 2; }",
-		g.MakeInt(2),
-		[]*g.Ref{&g.Ref{g.MakeInt(2)}})
+		g.NewInt(2),
+		[]*g.Ref{&g.Ref{g.NewInt(2)}})
 
 	okMod(t, "let a = 1; if (false) { a = 2; }",
 		g.NULL,
 		[]*g.Ref{&g.Ref{g.ONE}})
 
 	okMod(t, "let a = 1; if (1 == 1) { a = 2; } else { a = 3; }; let b = 4;",
-		g.MakeInt(2),
+		g.NewInt(2),
 		[]*g.Ref{
-			&g.Ref{g.MakeInt(2)},
-			&g.Ref{g.MakeInt(4)}})
+			&g.Ref{g.NewInt(2)},
+			&g.Ref{g.NewInt(4)}})
 
 	okMod(t, "let a = 1; if (1 == 2) { a = 2; } else { a = 3; }; const b = 4;",
-		g.MakeInt(3),
+		g.NewInt(3),
 		[]*g.Ref{
-			&g.Ref{g.MakeInt(3)},
-			&g.Ref{g.MakeInt(4)}})
+			&g.Ref{g.NewInt(3)},
+			&g.Ref{g.NewInt(4)}})
 }
 
 func TestWhile(t *testing.T) {
@@ -342,8 +342,8 @@ let a = 1
 while (a < 3) {
     a = a + 1
 }`,
-		g.MakeInt(3),
-		[]*g.Ref{&g.Ref{g.MakeInt(3)}})
+		g.NewInt(3),
+		[]*g.Ref{&g.Ref{g.NewInt(3)}})
 
 	okMod(t, `
 let a = 1
@@ -351,8 +351,8 @@ while (a < 11) {
     if (a == 4) { a = a + 2; break; }
     a = a + 1
 }`,
-		g.MakeInt(6),
-		[]*g.Ref{&g.Ref{g.MakeInt(6)}})
+		g.NewInt(6),
+		[]*g.Ref{&g.Ref{g.NewInt(6)}})
 
 	okMod(t, `
 let a = 1
@@ -362,16 +362,16 @@ while (a < 11) {
     if (a > 5) { continue; }
     b = b + 1
 }`,
-		g.MakeInt(11),
+		g.NewInt(11),
 		[]*g.Ref{
-			&g.Ref{g.MakeInt(11)},
-			&g.Ref{g.MakeInt(4)}})
+			&g.Ref{g.NewInt(11)},
+			&g.Ref{g.NewInt(4)}})
 
 	okMod(t, `
 let a = 1
 return a + 2
 let b = 5`,
-		g.MakeInt(3),
+		g.NewInt(3),
 		[]*g.Ref{
 			&g.Ref{g.ONE},
 			&g.Ref{g.NULL}})
@@ -401,7 +401,7 @@ let f = c(b(2), 3)
 	interpret(mod)
 	okRef(t, i, mod.Refs[3], g.NULL)
 	okRef(t, i, mod.Refs[4], g.ONE)
-	okRef(t, i, mod.Refs[5], g.MakeInt(24))
+	okRef(t, i, mod.Refs[5], g.NewInt(24))
 
 	source = `
 let fibonacci = fn(n) {
@@ -427,10 +427,10 @@ let f = fibonacci(6)
 	i = interpret(mod)
 	okRef(t, i, mod.Refs[1], g.ONE)
 	okRef(t, i, mod.Refs[2], g.ONE)
-	okRef(t, i, mod.Refs[3], g.MakeInt(2))
-	okRef(t, i, mod.Refs[4], g.MakeInt(3))
-	okRef(t, i, mod.Refs[5], g.MakeInt(5))
-	okRef(t, i, mod.Refs[6], g.MakeInt(8))
+	okRef(t, i, mod.Refs[3], g.NewInt(2))
+	okRef(t, i, mod.Refs[4], g.NewInt(3))
+	okRef(t, i, mod.Refs[5], g.NewInt(5))
+	okRef(t, i, mod.Refs[6], g.NewInt(8))
 
 	source = `
 let foo = fn(n) {
@@ -443,7 +443,7 @@ let a = foo(5)
 `
 	mod = newCompiler(source).Compile()
 	i = interpret(mod)
-	okRef(t, i, mod.Refs[1], g.MakeInt(32))
+	okRef(t, i, mod.Refs[1], g.NewInt(32))
 }
 
 func TestCapture(t *testing.T) {
@@ -466,8 +466,8 @@ let y = a(7)
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	okRef(t, i, mod.Refs[2], g.MakeInt(5))
-	okRef(t, i, mod.Refs[3], g.MakeInt(12))
+	okRef(t, i, mod.Refs[2], g.NewInt(5))
+	okRef(t, i, mod.Refs[3], g.NewInt(12))
 
 	source = `
 let z = 2
@@ -488,8 +488,8 @@ let y = a(1)
 	i = interpret(mod)
 
 	okRef(t, i, mod.Refs[0], g.ZERO)
-	okRef(t, i, mod.Refs[3], g.MakeInt(7))
-	okRef(t, i, mod.Refs[4], g.MakeInt(8))
+	okRef(t, i, mod.Refs[3], g.NewInt(7))
+	okRef(t, i, mod.Refs[4], g.NewInt(8))
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
@@ -525,12 +525,12 @@ let z = struct { a: 3, b: 4, c: struct { d: 5 } }
 		g.NewField("a", false, g.ZERO)}))
 	okRef(t, i, mod.Refs[2], newStruct([]g.Field{
 		g.NewField("a", false, g.ONE),
-		g.NewField("b", false, g.MakeInt(2))}))
+		g.NewField("b", false, g.NewInt(2))}))
 	okRef(t, i, mod.Refs[3], newStruct([]g.Field{
-		g.NewField("a", false, g.MakeInt(3)),
-		g.NewField("b", false, g.MakeInt(4)),
+		g.NewField("a", false, g.NewInt(3)),
+		g.NewField("b", false, g.NewInt(4)),
 		g.NewField("c", false, newStruct([]g.Field{
-			g.NewField("d", false, g.MakeInt(5))}))}))
+			g.NewField("d", false, g.NewInt(5))}))}))
 
 	source = `
 let x = struct { a: 5 }
@@ -545,8 +545,8 @@ x.a = 6
 	//fmt.Println(mod)
 
 	okRef(t, i, mod.Refs[0], newStruct([]g.Field{
-		g.NewField("a", false, g.MakeInt(6))}))
-	okRef(t, i, mod.Refs[1], g.MakeInt(5))
+		g.NewField("a", false, g.NewInt(6))}))
+	okRef(t, i, mod.Refs[1], g.NewInt(5))
 
 	source = `
 let a = struct {
@@ -561,8 +561,8 @@ let c = a.minus()
 	mod = newCompiler(source).Compile()
 	i = interpret(mod)
 
-	okRef(t, i, mod.Refs[2], g.MakeInt(13))
-	okRef(t, i, mod.Refs[3], g.MakeInt(3))
+	okRef(t, i, mod.Refs[2], g.NewInt(13))
+	okRef(t, i, mod.Refs[3], g.NewInt(3))
 
 	source = `
 let a = null
@@ -571,7 +571,7 @@ a = struct { x: 8 }.x = 5
 	mod = newCompiler(source).Compile()
 	i = interpret(mod)
 
-	okRef(t, i, mod.Refs[0], g.MakeInt(5))
+	okRef(t, i, mod.Refs[0], g.NewInt(5))
 
 	source = `
 let a = struct { x: 8 }
@@ -654,10 +654,10 @@ let d = b--
 	mod := newCompiler(source).Compile()
 	i := interpret(mod)
 
-	okRef(t, i, mod.Refs[0], g.MakeInt(11))
-	okRef(t, i, mod.Refs[1], g.MakeInt(19))
-	okRef(t, i, mod.Refs[2], g.MakeInt(10))
-	okRef(t, i, mod.Refs[3], g.MakeInt(20))
+	okRef(t, i, mod.Refs[0], g.NewInt(11))
+	okRef(t, i, mod.Refs[1], g.NewInt(19))
+	okRef(t, i, mod.Refs[2], g.NewInt(10))
+	okRef(t, i, mod.Refs[3], g.NewInt(20))
 
 	source = `
 let a = struct { x: 10 }
@@ -673,11 +673,11 @@ let d = b.y--
 	//fmt.Println(mod)
 
 	okRef(t, i, mod.Refs[0], newStruct([]g.Field{
-		g.NewField("x", false, g.MakeInt(11))}))
+		g.NewField("x", false, g.NewInt(11))}))
 	okRef(t, i, mod.Refs[1], newStruct([]g.Field{
-		g.NewField("y", false, g.MakeInt(19))}))
-	okRef(t, i, mod.Refs[2], g.MakeInt(10))
-	okRef(t, i, mod.Refs[3], g.MakeInt(20))
+		g.NewField("y", false, g.NewInt(19))}))
+	okRef(t, i, mod.Refs[2], g.NewInt(10))
+	okRef(t, i, mod.Refs[3], g.NewInt(20))
 }
 
 func TestTernaryIf(t *testing.T) {
@@ -693,8 +693,8 @@ let b = false ? 5 : 6;
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	okRef(t, i, mod.Refs[0], g.MakeInt(3))
-	okRef(t, i, mod.Refs[1], g.MakeInt(6))
+	okRef(t, i, mod.Refs[0], g.NewInt(3))
+	okRef(t, i, mod.Refs[1], g.NewInt(6))
 }
 
 func TestList(t *testing.T) {
@@ -715,10 +715,10 @@ let e = c[1]++;
 	//fmt.Println(mod)
 
 	okRef(t, i, mod.Refs[0], g.NewList([]g.Value{}))
-	okRef(t, i, mod.Refs[1], g.NewList([]g.Value{g.MakeInt(33)}))
-	okRef(t, i, mod.Refs[2], g.NewList([]g.Value{g.FALSE, g.MakeInt(23)}))
+	okRef(t, i, mod.Refs[1], g.NewList([]g.Value{g.NewInt(33)}))
+	okRef(t, i, mod.Refs[2], g.NewList([]g.Value{g.FALSE, g.NewInt(23)}))
 	okRef(t, i, mod.Refs[3], g.TRUE)
-	okRef(t, i, mod.Refs[4], g.MakeInt(22))
+	okRef(t, i, mod.Refs[4], g.NewInt(22))
 
 	source = `
 let a = [];
@@ -1064,7 +1064,7 @@ assert(print != println);
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	okRef(t, i, mod.Refs[0], g.MakeInt(3))
+	okRef(t, i, mod.Refs[0], g.NewInt(3))
 	okRef(t, i, mod.Refs[1], g.NewStr("[ 4, 5, 6 ]"))
 	okRef(t, i, mod.Refs[2], newRange(0, 5, 1))
 	okRef(t, i, mod.Refs[3], newRange(0, 5, 2))
@@ -1106,9 +1106,9 @@ let c = a[1];
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	okRef(t, i, mod.Refs[0], g.NewTuple([]g.Value{g.MakeInt(4), g.MakeInt(5)}))
-	okRef(t, i, mod.Refs[1], g.MakeInt(4))
-	okRef(t, i, mod.Refs[2], g.MakeInt(5))
+	okRef(t, i, mod.Refs[0], g.NewTuple([]g.Value{g.NewInt(4), g.NewInt(5)}))
+	okRef(t, i, mod.Refs[1], g.NewInt(4))
+	okRef(t, i, mod.Refs[2], g.NewInt(5))
 }
 
 func TestDecl(t *testing.T) {

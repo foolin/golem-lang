@@ -37,14 +37,14 @@ func (s str) ToStr(cx Context) Str { return s }
 
 func (s str) HashCode(cx Context) (Int, Error) {
 	h := strHash(string(s))
-	return MakeInt(int64(h)), nil
+	return NewInt(int64(h)), nil
 }
 
 func (s str) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
 
 	case str:
-		return MakeBool(s == t), nil
+		return NewBool(s == t), nil
 
 	default:
 		return FALSE, nil
@@ -56,7 +56,7 @@ func (s str) Cmp(cx Context, v Value) (Int, Error) {
 
 	case str:
 		cmp := strings.Compare(string(s), string(t))
-		return MakeInt(int64(cmp)), nil
+		return NewInt(int64(cmp)), nil
 
 	default:
 		return nil, TypeMismatchError("Expected Comparable Type")
@@ -77,7 +77,7 @@ func (s str) Get(cx Context, index Value) (Value, Error) {
 
 func (s str) Len() Int {
 	n := utf8.RuneCountInString(string(s))
-	return MakeInt(int64(n))
+	return NewInt(int64(n))
 }
 
 func (s str) Slice(cx Context, from Value, to Value) (Value, Error) {
@@ -142,7 +142,7 @@ func (s str) NewIterator(cx Context) Iterator {
 
 func (i *strIterator) IterNext() Bool {
 	i.n++
-	return MakeBool(i.n < len(i.runes))
+	return NewBool(i.n < len(i.runes))
 }
 
 func (i *strIterator) IterGet() (Value, Error) {
@@ -167,7 +167,7 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 				if !ok {
 					return nil, TypeMismatchError("Expected Str")
 				}
-				return MakeBool(strings.Contains(string(s), string(z))), nil
+				return NewBool(strings.Contains(string(s), string(z))), nil
 			}}}, nil
 	case "index":
 		return &intrinsicFunc{s, sn, &nativeFunc{
@@ -177,7 +177,7 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 				if !ok {
 					return nil, TypeMismatchError("Expected Str")
 				}
-				return MakeInt(int64(strings.Index(string(s), string(z)))), nil
+				return NewInt(int64(strings.Index(string(s), string(z)))), nil
 			}}}, nil
 	case "startsWith":
 		return &intrinsicFunc{s, sn, &nativeFunc{
@@ -187,7 +187,7 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 				if !ok {
 					return nil, TypeMismatchError("Expected Str")
 				}
-				return MakeBool(strings.HasPrefix(string(s), string(z))), nil
+				return NewBool(strings.HasPrefix(string(s), string(z))), nil
 			}}}, nil
 	case "endsWith":
 		return &intrinsicFunc{s, sn, &nativeFunc{
@@ -197,7 +197,7 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 				if !ok {
 					return nil, TypeMismatchError("Expected Str")
 				}
-				return MakeBool(strings.HasSuffix(string(s), string(z))), nil
+				return NewBool(strings.HasSuffix(string(s), string(z))), nil
 			}}}, nil
 	case "replace":
 		return &intrinsicFunc{s, sn, &nativeFunc{

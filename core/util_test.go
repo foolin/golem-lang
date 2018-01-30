@@ -48,13 +48,13 @@ func TestIndex(t *testing.T) {
 	n, err := posIndex(ZERO, 3)
 	iok(t, n, err, 0)
 
-	n, err = posIndex(MakeInt(3), 3)
+	n, err = posIndex(NewInt(3), 3)
 	iok(t, n, err, 3)
 
 	n, err = posIndex(NEG_ONE, 3)
 	iok(t, n, err, 2)
 
-	n, err = posIndex(MakeInt(-3), 3)
+	n, err = posIndex(NewInt(-3), 3)
 	iok(t, n, err, 0)
 
 	_, err = posIndex(NewStr(""), 3)
@@ -68,16 +68,16 @@ func TestIndex(t *testing.T) {
 	n, err = boundedIndex(NEG_ONE, 3)
 	iok(t, n, err, 2)
 
-	n, err = boundedIndex(MakeInt(-3), 3)
+	n, err = boundedIndex(NewInt(-3), 3)
 	iok(t, n, err, 0)
 
 	_, err = boundedIndex(NewStr(""), 3)
 	ifail(t, err, "TypeMismatch: Expected 'Int'")
 
-	_, err = boundedIndex(MakeInt(-4), 3)
+	_, err = boundedIndex(NewInt(-4), 3)
 	ifail(t, err, "IndexOutOfBounds: -1")
 
-	n, err = boundedIndex(MakeInt(3), 3)
+	n, err = boundedIndex(NewInt(3), 3)
 	ifail(t, err, "IndexOutOfBounds: 3")
 
 	//--------------------------------------
@@ -86,7 +86,7 @@ func TestIndex(t *testing.T) {
 	iok(t, a, err, 0)
 	iok(t, b, err, 2)
 
-	a, b, err = sliceIndices(MakeInt(-3), MakeInt(3), 3)
+	a, b, err = sliceIndices(NewInt(-3), NewInt(3), 3)
 	iok(t, a, err, 0)
 	iok(t, b, err, 3)
 

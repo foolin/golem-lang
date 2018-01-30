@@ -69,7 +69,7 @@ func (st *_struct) Freeze() (Value, Error) {
 }
 
 func (st *_struct) Frozen() (Bool, Error) {
-	return MakeBool(st.frozen), nil
+	return NewBool(st.frozen), nil
 }
 
 func (st *_struct) ToStr(cx Context) Str {
@@ -157,7 +157,7 @@ func (st *_struct) FieldNames() []string {
 func (st *_struct) Has(name Value) (Bool, Error) {
 	if s, ok := name.(Str); ok {
 		_, has := st.smap.get(s.String())
-		return MakeBool(has), nil
+		return NewBool(has), nil
 	}
 	return nil, TypeMismatchError("Expected 'Str'")
 }

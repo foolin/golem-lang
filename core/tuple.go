@@ -62,7 +62,7 @@ func (tp tuple) HashCode(cx Context) (Int, Error) {
 	hash += hash << 3
 	hash ^= hash >> 11
 	hash += hash << 15
-	return MakeInt(hash), nil
+	return NewInt(hash), nil
 }
 
 func (tp tuple) Eq(cx Context, v Value) (Bool, Error) {
@@ -91,5 +91,5 @@ func (tp tuple) Get(cx Context, index Value) (Value, Error) {
 }
 
 func (tp tuple) Len() Int {
-	return MakeInt(int64(len(tp)))
+	return NewInt(int64(len(tp)))
 }

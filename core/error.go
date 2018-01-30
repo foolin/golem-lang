@@ -125,7 +125,7 @@ func makeError(kind ErrorKind, msg string) Error {
 	return &serror{kind, st, str}
 }
 
-func MakeError(kind string, msg string) Error {
+func NewError(kind string, msg string) Error {
 
 	var st Struct
 	var err Error
@@ -149,7 +149,7 @@ func MakeError(kind string, msg string) Error {
 	return &serror{ERROR, st, str}
 }
 
-func MakeErrorFromStruct(cx Context, st Struct) Error {
+func NewErrorFromStruct(cx Context, st Struct) Error {
 
 	var str string
 	kind, kerr := st.GetField(cx, NewStr("kind"))

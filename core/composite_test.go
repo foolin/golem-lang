@@ -12,10 +12,10 @@ import (
 func TestChain(t *testing.T) {
 	s0 := newStruct([]Field{
 		NewField("a", true, ONE),
-		NewField("b", true, MakeInt(2))})
+		NewField("b", true, NewInt(2))})
 	s1 := newStruct([]Field{
-		NewField("b", true, MakeInt(3)),
-		NewField("c", true, MakeInt(4))})
+		NewField("b", true, NewInt(3)),
+		NewField("c", true, NewInt(4))})
 
 	c := MergeStructs([]Struct{s0, s1})
 	//println(c.ToStr(cx).String())
@@ -25,9 +25,9 @@ func TestChain(t *testing.T) {
 	v, err := c.GetField(cx, NewStr("a"))
 	ok(t, v, err, ONE)
 	v, err = c.GetField(cx, NewStr("b"))
-	ok(t, v, err, MakeInt(2))
+	ok(t, v, err, NewInt(2))
 	v, err = c.GetField(cx, NewStr("c"))
-	ok(t, v, err, MakeInt(4))
+	ok(t, v, err, NewInt(4))
 }
 
 func newStruct(fields []Field) Struct {
@@ -73,21 +73,21 @@ func TestStruct(t *testing.T) {
 	val, err = stc.GetField(cx, NewStr("b"))
 	fail(t, val, err, "NoSuchField: Field 'b' not found")
 
-	err = stc.SetField(cx, NewStr("a"), MakeInt(123))
+	err = stc.SetField(cx, NewStr("a"), NewInt(123))
 	if err != nil {
 		panic("unexpected error")
 	}
 
 	val, err = stc.GetField(cx, NewStr("a"))
-	ok(t, val, err, MakeInt(123))
+	ok(t, val, err, NewInt(123))
 
-	err = stc.SetField(cx, NewStr("a"), MakeInt(456))
+	err = stc.SetField(cx, NewStr("a"), NewInt(456))
 	if err != nil {
 		panic("unexpected error")
 	}
 
 	val, err = stc.GetField(cx, NewStr("a"))
-	ok(t, val, err, MakeInt(456))
+	ok(t, val, err, NewInt(456))
 
 	val, err = stc.Has(NewStr("a"))
 	ok(t, val, err, TRUE)
@@ -257,11 +257,11 @@ func TestDict(t *testing.T) {
 	v = d.ToStr(cx)
 	ok(t, v, nil, NewStr("dict { a: 1 }"))
 
-	err = d.Set(cx, NewStr("b"), MakeInt(2))
+	err = d.Set(cx, NewStr("b"), NewInt(2))
 	tassert(t, err == nil)
 
 	v, err = d.Get(cx, NewStr("b"))
-	ok(t, v, err, MakeInt(2))
+	ok(t, v, err, NewInt(2))
 
 	v = d.ToStr(cx)
 	ok(t, v, nil, NewStr("dict { b: 2, a: 1 }"))
@@ -321,7 +321,7 @@ func TestSet(t *testing.T) {
 	ok(t, v, err, NewStr("set { 0, 1 }"))
 
 	v = s.Len()
-	ok(t, v, nil, MakeInt(2))
+	ok(t, v, nil, NewInt(2))
 }
 
 func TestTuple(t *testing.T) {
@@ -350,14 +350,14 @@ func TestTuple(t *testing.T) {
 	println("adfasfda", v.ToStr(cx))
 	ok(t, v, err, ZERO)
 
-	v, err = tp.Get(cx, MakeInt(2))
+	v, err = tp.Get(cx, NewInt(2))
 	fail(t, v, err, "IndexOutOfBounds: 2")
 
 	v = tp.ToStr(cx)
 	ok(t, v, nil, NewStr("(1, 0)"))
 
 	v = tp.Len()
-	ok(t, v, nil, MakeInt(2))
+	ok(t, v, nil, NewInt(2))
 }
 
 func newRange(from int64, to int64, step int64) Range {
@@ -385,41 +385,41 @@ func TestRange(t *testing.T) {
 	ok(t, v, err, FALSE)
 
 	v = r.Len()
-	ok(t, v, nil, MakeInt(5))
+	ok(t, v, nil, NewInt(5))
 
 	v = newRange(0, 6, 3).Len()
-	ok(t, v, nil, MakeInt(2))
+	ok(t, v, nil, NewInt(2))
 	v = newRange(0, 7, 3).Len()
-	ok(t, v, nil, MakeInt(3))
+	ok(t, v, nil, NewInt(3))
 	v = newRange(0, 8, 3).Len()
-	ok(t, v, nil, MakeInt(3))
+	ok(t, v, nil, NewInt(3))
 	v = newRange(0, 9, 3).Len()
-	ok(t, v, nil, MakeInt(3))
+	ok(t, v, nil, NewInt(3))
 
 	v = newRange(0, 0, 3).Len()
-	ok(t, v, nil, MakeInt(0))
+	ok(t, v, nil, NewInt(0))
 	v = newRange(1, 0, 1).Len()
-	ok(t, v, nil, MakeInt(0))
+	ok(t, v, nil, NewInt(0))
 
 	v, err = NewRange(1, 0, 0)
 	fail(t, v, err, "InvalidArgument: step cannot be 0")
 
 	v = newRange(0, -5, -1).Len()
-	ok(t, v, nil, MakeInt(5))
+	ok(t, v, nil, NewInt(5))
 	v = newRange(-1, -8, -3).Len()
-	ok(t, v, nil, MakeInt(3))
+	ok(t, v, nil, NewInt(3))
 
 	r = newRange(0, 5, 1)
 	v, err = r.Get(cx, ONE)
-	ok(t, v, err, MakeInt(1))
+	ok(t, v, err, NewInt(1))
 
 	r = newRange(3, 9, 2)
-	v, err = r.Get(cx, MakeInt(2))
-	ok(t, v, err, MakeInt(7))
+	v, err = r.Get(cx, NewInt(2))
+	ok(t, v, err, NewInt(7))
 
 	r = newRange(-9, -13, -1)
 	v, err = r.Get(cx, ONE)
-	ok(t, v, err, MakeInt(-10))
+	ok(t, v, err, NewInt(-10))
 }
 
 func TestRangeIterator(t *testing.T) {
@@ -457,7 +457,7 @@ func TestRangeIterator(t *testing.T) {
 func TestListIterator(t *testing.T) {
 
 	var ibl Iterable = NewList(
-		[]Value{MakeInt(1), MakeInt(2), MakeInt(3), MakeInt(4)})
+		[]Value{NewInt(1), NewInt(2), NewInt(3), NewInt(4)})
 
 	var itr Iterator = ibl.NewIterator(cx)
 	v, err := itr.IterGet()
@@ -497,8 +497,8 @@ func TestDictIterator(t *testing.T) {
 	var ibl Iterable = NewDict(cx,
 		[]*HEntry{
 			{NewStr("a"), ONE},
-			{NewStr("b"), MakeInt(2)},
-			{NewStr("c"), MakeInt(3)}})
+			{NewStr("b"), NewInt(2)},
+			{NewStr("c"), NewInt(3)}})
 
 	var itr Iterator = ibl.NewIterator(cx)
 	v, err := itr.IterGet()

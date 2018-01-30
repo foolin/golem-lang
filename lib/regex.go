@@ -26,7 +26,7 @@ func InitRegexModule() g.Module {
 
 			rgx, err := regexp.Compile(s.String())
 			if err != nil {
-				return nil, g.MakeError("RegexError", err.Error())
+				return nil, g.NewError("RegexError", err.Error())
 			}
 
 			return makePattern(rgx), nil
@@ -50,7 +50,7 @@ func makePattern(rgx *regexp.Regexp) g.Struct {
 				return nil, g.TypeMismatchError("Expected Str")
 			}
 
-			return g.MakeBool(rgx.MatchString(s.String())), nil
+			return g.NewBool(rgx.MatchString(s.String())), nil
 		})
 
 	pattern, err := g.NewStruct([]g.Field{g.NewField("match", true, match)}, true)

@@ -61,7 +61,7 @@ func (f *bytecodeFunc) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case BytecodeFunc:
 		// equality is based on identity
-		return MakeBool(f == t), nil
+		return NewBool(f == t), nil
 	default:
 		return FALSE, nil
 	}

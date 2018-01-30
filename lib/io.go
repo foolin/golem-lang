@@ -46,14 +46,14 @@ func makeFile(name g.Str) g.Struct {
 		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
 			fi, err := os.Stat(name.String())
 			if err != nil {
-				return nil, g.MakeError("IoError", err.Error())
+				return nil, g.NewError("IoError", err.Error())
 			}
 			isDir := false
 			if mode := fi.Mode(); mode.IsDir() {
 				isDir = true
 			}
 
-			return g.MakeBool(isDir), nil
+			return g.NewBool(isDir), nil
 		})
 
 	items := g.NewNativeFunc(
@@ -62,7 +62,7 @@ func makeFile(name g.Str) g.Struct {
 		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
 			files, err := ioutil.ReadDir(name.String())
 			if err != nil {
-				return nil, g.MakeError("IoError", err.Error())
+				return nil, g.NewError("IoError", err.Error())
 			}
 
 			sep := fmt.Sprintf("%c", os.PathSeparator)
@@ -80,7 +80,7 @@ func makeFile(name g.Str) g.Struct {
 		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
 			f, err := os.Open(name.String())
 			if err != nil {
-				return nil, g.MakeError("IoError", err.Error())
+				return nil, g.NewError("IoError", err.Error())
 			}
 			defer f.Close()
 
@@ -91,7 +91,7 @@ func makeFile(name g.Str) g.Struct {
 			}
 
 			if err := scanner.Err(); err != nil {
-				return nil, g.MakeError("IoError", err.Error())
+				return nil, g.NewError("IoError", err.Error())
 			}
 
 			return g.NewList(list), nil

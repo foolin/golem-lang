@@ -168,7 +168,7 @@ func (hm *HashMap) Put(cx Context, key Value, value Value) (err Error) {
 }
 
 func (hm *HashMap) Len() Int {
-	return MakeInt(int64(hm.size))
+	return NewInt(int64(hm.size))
 }
 
 //--------------------------------------------------------------
