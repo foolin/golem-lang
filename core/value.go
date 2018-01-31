@@ -263,48 +263,48 @@ type Type int
 
 // All possible kinds of Type
 const (
-	TNULL Type = iota
-	TBOOL
-	TSTR
-	TINT
-	TFLOAT
-	TFUNC
-	TLIST
-	TRANGE
-	TTUPLE
-	TDICT
-	TSET
-	TSTRUCT
-	TCHAN
+	NullType Type = iota
+	BoolType
+	StrType
+	IntType
+	FloatType
+	FuncType
+	ListType
+	RangeType
+	TupleType
+	DictType
+	SetType
+	StructType
+	ChanType
 )
 
 func (t Type) String() string {
 	switch t {
-	case TNULL:
+	case NullType:
 		return "Null"
-	case TBOOL:
+	case BoolType:
 		return "Bool"
-	case TSTR:
+	case StrType:
 		return "Str"
-	case TINT:
+	case IntType:
 		return "Int"
-	case TFLOAT:
+	case FloatType:
 		return "Float"
-	case TFUNC:
+	case FuncType:
 		return "Func"
-	case TLIST:
+	case ListType:
 		return "List"
-	case TRANGE:
+	case RangeType:
 		return "Range"
-	case TTUPLE:
+	case TupleType:
 		return "Tuple"
-	case TDICT:
+	case DictType:
 		return "Dict"
-	case TSET:
+	case SetType:
 		return "Set"
-	case TSTRUCT:
+	case StructType:
 		return "Struct"
-	case TCHAN:
+	case ChanType:
 		return "Chan"
 
 	default:

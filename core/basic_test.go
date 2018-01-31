@@ -45,7 +45,7 @@ func okType(t *testing.T, val Value, expected Type) {
 }
 
 func TestNull(t *testing.T) {
-	okType(t, NULL, TNULL)
+	okType(t, NULL, NullType)
 
 	var v Value
 	var err Error
@@ -69,8 +69,8 @@ func TestBool(t *testing.T) {
 	s = FALSE.ToStr(cx)
 	ok(t, s, nil, NewStr("false"))
 
-	okType(t, TRUE, TBOOL)
-	okType(t, FALSE, TBOOL)
+	okType(t, TRUE, BoolType)
+	okType(t, FALSE, BoolType)
 
 	tassert(t, TRUE.BoolVal())
 	tassert(t, !FALSE.BoolVal())
@@ -115,7 +115,7 @@ func TestStr(t *testing.T) {
 	v = b.ToStr(cx)
 	ok(t, v, nil, NewStr("b"))
 
-	okType(t, a, TSTR)
+	okType(t, a, StrType)
 	v, err = a.Eq(cx, b)
 	ok(t, v, err, FALSE)
 	v, err = b.Eq(cx, a)
@@ -175,7 +175,7 @@ func TestInt(t *testing.T) {
 	s = b.ToStr(cx)
 	ok(t, s, nil, NewStr("1"))
 
-	okType(t, a, TINT)
+	okType(t, a, IntType)
 
 	z, err := a.Eq(cx, b)
 	ok(t, z, err, FALSE)
@@ -284,7 +284,7 @@ func TestFloat(t *testing.T) {
 	s = b.ToStr(cx)
 	ok(t, s, nil, NewStr("1.2"))
 
-	okType(t, a, TFLOAT)
+	okType(t, a, FloatType)
 	z, err := a.Eq(cx, b)
 	ok(t, z, err, FALSE)
 	z, err = b.Eq(cx, a)

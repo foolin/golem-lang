@@ -21,7 +21,7 @@ var NULL Null = &null{0}
 
 func (n *null) basicMarker() {}
 
-func (n *null) Type() Type { return TNULL }
+func (n *null) Type() Type { return NullType }
 
 func (n *null) ToStr(cx Context) Str { return NewStr("null") }
 

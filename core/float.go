@@ -26,7 +26,7 @@ func NewFloat(f float64) Float {
 
 func (f _float) basicMarker() {}
 
-func (f _float) Type() Type { return TFLOAT }
+func (f _float) Type() Type { return FloatType }
 
 func (f _float) Freeze() (Value, Error) {
 	return f, nil

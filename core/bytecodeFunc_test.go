@@ -14,8 +14,8 @@ func TestBytecodeFunc(t *testing.T) {
 	a := NewBytecodeFunc(&Template{})
 	b := NewBytecodeFunc(&Template{})
 
-	okType(t, a, TFUNC)
-	okType(t, b, TFUNC)
+	okType(t, a, FuncType)
+	okType(t, b, FuncType)
 
 	v, err := a.Eq(cx, a)
 	ok(t, v, err, TRUE)

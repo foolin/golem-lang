@@ -23,7 +23,7 @@ func NewTuple(values []Value) Tuple {
 
 func (tp tuple) compositeMarker() {}
 
-func (tp tuple) Type() Type { return TTUPLE }
+func (tp tuple) Type() Type { return TupleType }
 
 func (tp tuple) Freeze() (Value, Error) {
 	return tp, nil

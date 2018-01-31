@@ -39,7 +39,7 @@ func NewRange(from int64, to int64, step int64) (Range, Error) {
 
 func (r *rng) compositeMarker() {}
 
-func (r *rng) Type() Type { return TRANGE }
+func (r *rng) Type() Type { return RangeType }
 
 func (r *rng) Freeze() (Value, Error) {
 	return r, nil

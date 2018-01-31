@@ -40,7 +40,7 @@ func newStruct(fields []Field) Struct {
 
 func TestStruct(t *testing.T) {
 	stc := newStruct([]Field{})
-	okType(t, stc, TSTRUCT)
+	okType(t, stc, StructType)
 	tassert(t, reflect.DeepEqual(stc.FieldNames(), []string{}))
 
 	s := stc.ToStr(cx)
@@ -57,7 +57,7 @@ func TestStruct(t *testing.T) {
 	//////////////////
 
 	stc = newStruct([]Field{NewField("a", false, ONE)})
-	okType(t, stc, TSTRUCT)
+	okType(t, stc, StructType)
 
 	s = stc.ToStr(cx)
 	ok(t, s, nil, NewStr("struct { a: 1 }"))
@@ -145,7 +145,7 @@ func TestNativeProp(t *testing.T) {
 
 func TestList(t *testing.T) {
 	ls := NewList([]Value{})
-	okType(t, ls, TLIST)
+	okType(t, ls, ListType)
 
 	var v Value
 	var err Error
@@ -219,7 +219,7 @@ func TestCompositeHashCode(t *testing.T) {
 
 func TestDict(t *testing.T) {
 	d := NewDict(cx, []*HEntry{})
-	okType(t, d, TDICT)
+	okType(t, d, DictType)
 
 	var v Value
 	var err Error
@@ -278,7 +278,7 @@ func TestDict(t *testing.T) {
 
 func TestSet(t *testing.T) {
 	s := NewSet(cx, []Value{})
-	okType(t, s, TSET)
+	okType(t, s, SetType)
 
 	var v Value
 	var err Error
@@ -329,7 +329,7 @@ func TestTuple(t *testing.T) {
 	var err Error
 
 	tp := NewTuple([]Value{ONE, ZERO})
-	okType(t, tp, TTUPLE)
+	okType(t, tp, TupleType)
 
 	v, err = tp.Eq(cx, NewTuple([]Value{ZERO, ZERO}))
 	ok(t, v, err, FALSE)
@@ -373,7 +373,7 @@ func TestRange(t *testing.T) {
 	var err Error
 
 	r := newRange(0, 5, 1)
-	okType(t, r, TRANGE)
+	okType(t, r, RangeType)
 
 	v, err = r.Eq(cx, newRange(0, 5, 2))
 	ok(t, v, err, FALSE)

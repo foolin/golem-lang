@@ -19,7 +19,7 @@ func NewDict(cx Context, entries []*HEntry) Dict {
 
 func (d *dict) compositeMarker() {}
 
-func (d *dict) Type() Type { return TDICT }
+func (d *dict) Type() Type { return DictType }
 
 func (d *dict) Freeze() (Value, Error) {
 	d.frozen = true

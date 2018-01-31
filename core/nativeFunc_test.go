@@ -13,8 +13,8 @@ func TestNative(t *testing.T) {
 	a := BuiltinStr
 	b := BuiltinLen
 
-	okType(t, a, TFUNC)
-	okType(t, b, TFUNC)
+	okType(t, a, FuncType)
+	okType(t, b, FuncType)
 
 	z, err := a.Eq(cx, a)
 	ok(t, z, err, TRUE)

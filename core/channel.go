@@ -22,7 +22,7 @@ func NewBufferedChan(size int) Chan {
 
 func (ch *channel) chanMarker() {}
 
-func (ch *channel) Type() Type { return TCHAN }
+func (ch *channel) Type() Type { return ChanType }
 
 func (ch *channel) Freeze() (Value, Error) {
 	return ch, nil

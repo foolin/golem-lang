@@ -23,7 +23,7 @@ func NewStr(s string) Str {
 
 func (s str) basicMarker() {}
 
-func (s str) Type() Type { return TSTR }
+func (s str) Type() Type { return StrType }
 
 func (s str) Freeze() (Value, Error) {
 	return s, nil

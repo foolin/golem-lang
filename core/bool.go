@@ -23,7 +23,7 @@ func (b _bool) BoolVal() bool {
 
 func (b _bool) basicMarker() {}
 
-func (b _bool) Type() Type { return TBOOL }
+func (b _bool) Type() Type { return BoolType }
 
 func (b _bool) Freeze() (Value, Error) {
 	return b, nil

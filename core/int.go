@@ -35,7 +35,7 @@ func (i _int) basicMarker() {}
 //--------------------------------------------------------------
 // Value
 
-func (i _int) Type() Type { return TINT }
+func (i _int) Type() Type { return IntType }
 
 func (i _int) Freeze() (Value, Error) {
 	return i, nil

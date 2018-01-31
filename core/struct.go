@@ -61,7 +61,7 @@ func MergeStructs(structs []Struct) Struct {
 
 func (st *_struct) compositeMarker() {}
 
-func (st *_struct) Type() Type { return TSTRUCT }
+func (st *_struct) Type() Type { return StructType }
 
 func (st *_struct) Freeze() (Value, Error) {
 	st.frozen = true

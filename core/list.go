@@ -24,7 +24,7 @@ func NewList(values []Value) List {
 
 func (ls *list) compositeMarker() {}
 
-func (ls *list) Type() Type { return TLIST }
+func (ls *list) Type() Type { return ListType }
 
 func (ls *list) Freeze() (Value, Error) {
 	ls.frozen = true

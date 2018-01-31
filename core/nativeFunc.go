@@ -27,7 +27,7 @@ func NewNativeFunc(minArity int, maxArity int, f func(Context, []Value) (Value, 
 
 func (f *nativeFunc) funcMarker() {}
 
-func (f *nativeFunc) Type() Type { return TFUNC }
+func (f *nativeFunc) Type() Type { return FuncType }
 
 func (f *nativeFunc) Freeze() (Value, Error) {
 	return f, nil

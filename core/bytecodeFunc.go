@@ -31,7 +31,7 @@ func NewBytecodeFunc(template *Template) BytecodeFunc {
 
 func (f *bytecodeFunc) funcMarker() {}
 
-func (f *bytecodeFunc) Type() Type { return TFUNC }
+func (f *bytecodeFunc) Type() Type { return FuncType }
 
 func (f *bytecodeFunc) Freeze() (Value, Error) {
 	return f, nil

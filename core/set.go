@@ -26,7 +26,7 @@ func NewSet(cx Context, values []Value) Set {
 
 func (s *set) compositeMarker() {}
 
-func (s *set) Type() Type { return TSET }
+func (s *set) Type() Type { return SetType }
 
 func (s *set) Freeze() (Value, Error) {
 	s.frozen = true
