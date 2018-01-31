@@ -150,7 +150,7 @@ func (i *Interpreter) walkStack(errTrace g.Error) (g.Value, g.Error) {
 func (i *Interpreter) runTryClause(f *frame, frameIndex int) (g.Value, g.Error) {
 
 	opc := f.fn.Template().OpCodes
-	for opc[f.ip] != o.DONE {
+	for opc[f.ip] != o.Done {
 
 		result, err := i.advance(frameIndex)
 		if result != nil || err != nil {

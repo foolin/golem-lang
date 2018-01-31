@@ -6,7 +6,6 @@ package core
 
 import (
 	"bytes"
-	_ "fmt"
 	"strings"
 )
 
@@ -18,6 +17,7 @@ type list struct {
 	frozen bool
 }
 
+// NewList creates a new List
 func NewList(values []Value) List {
 	return &list{values, false}
 }
@@ -243,9 +243,8 @@ func (ls *list) AddAll(cx Context, val Value) Error {
 			ls.array = append(ls.array, v)
 		}
 		return nil
-	} else {
-		return TypeMismatchError("Expected Iterable Type")
 	}
+	return TypeMismatchError("Expected Iterable Type")
 }
 
 func (ls *list) Remove(cx Context, index Int) Error {
@@ -292,9 +291,8 @@ func (i *listIterator) IterNext() Bool {
 func (i *listIterator) IterGet() (Value, Error) {
 	if (i.n >= 0) && (i.n < len(i.ls.array)) {
 		return i.ls.array[i.n], nil
-	} else {
-		return nil, NoSuchElementError()
 	}
+	return nil, NoSuchElementError()
 }
 
 //--------------------------------------------------------------
@@ -310,9 +308,8 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 				err := ls.Add(cx, values[0])
 				if err != nil {
 					return nil, err
-				} else {
-					return ls, nil
 				}
+				return ls, nil
 			}}}, nil
 
 	case "addAll":
@@ -322,9 +319,8 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 				err := ls.AddAll(cx, values[0])
 				if err != nil {
 					return nil, err
-				} else {
-					return ls, nil
 				}
+				return ls, nil
 			}}}, nil
 
 	case "remove":
@@ -339,9 +335,8 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 				err := ls.Remove(cx, index)
 				if err != nil {
 					return nil, err
-				} else {
-					return ls, nil
 				}
+				return ls, nil
 			}}}, nil
 
 	case "clear":
@@ -351,9 +346,8 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 				err := ls.Clear()
 				if err != nil {
 					return nil, err
-				} else {
-					return ls, nil
 				}
+				return ls, nil
 			}}}, nil
 
 	case "isEmpty":
@@ -407,9 +401,8 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 					return ls.Map(cx, func(v Value) (Value, Error) {
 						return f.Invoke(cx, []Value{v})
 					})
-				} else {
-					return nil, TypeMismatchError("Expected Func")
 				}
+				return nil, TypeMismatchError("Expected Func")
 
 			}}}, nil
 
@@ -423,9 +416,8 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 					return ls.Reduce(cx, initial, func(acc Value, v Value) (Value, Error) {
 						return f.Invoke(cx, []Value{acc, v})
 					})
-				} else {
-					return nil, TypeMismatchError("Expected Func")
 				}
+				return nil, TypeMismatchError("Expected Func")
 			}}}, nil
 
 	case "filter":
@@ -437,9 +429,8 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 					return ls.Filter(cx, func(v Value) (Value, Error) {
 						return f.Invoke(cx, []Value{v})
 					})
-				} else {
-					return nil, TypeMismatchError("Expected Func")
 				}
+				return nil, TypeMismatchError("Expected Func")
 
 			}}}, nil
 

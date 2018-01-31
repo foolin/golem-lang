@@ -14,6 +14,8 @@ import (
 //---------------------------------------------------------------
 // Module
 
+// Module defines a Golem Module, which is a named top-level
+// Struct that is analagous to a 'module' from e.g. python.
 type Module interface {
 	GetModuleName() string
 	GetContents() Struct
@@ -22,6 +24,7 @@ type Module interface {
 //---------------------------------------------------------------
 // BytecodeModule
 
+// BytecodeModule is a Module that is implemented in Golem
 type BytecodeModule struct {
 	Pool       []Basic
 	Refs       []*Ref
@@ -30,10 +33,12 @@ type BytecodeModule struct {
 	Contents   Struct
 }
 
+// GetModuleName for a BytecodeModule returns the empty string.
 func (m *BytecodeModule) GetModuleName() string {
 	return ""
 }
 
+// GetContents returns the contents of a Module.
 func (m *BytecodeModule) GetContents() Struct {
 	return m.Contents
 }
@@ -93,12 +98,14 @@ func (m *BytecodeModule) String() string {
 }
 
 //---------------------------------------------------------------
-// A Ref is a container for a value
 
+// Ref is a container for a Value.  Refs are used by the interpreter
+// as a place to store the value of a variable.
 type Ref struct {
 	Val Value
 }
 
+// NewRef creates a new Ref
 func NewRef(val Value) *Ref {
 	return &Ref{val}
 }

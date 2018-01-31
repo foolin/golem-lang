@@ -23,7 +23,7 @@ type bytecodeFunc struct {
 	captures []*Ref
 }
 
-// Called via NEW_FUNC opcode at runtime
+// Called via NewFunc opcode at runtime
 func NewBytecodeFunc(template *Template) BytecodeFunc {
 	captures := make([]*Ref, 0, template.NumCaptures)
 	return &bytecodeFunc{template, captures}

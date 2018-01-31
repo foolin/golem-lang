@@ -10,93 +10,93 @@ import (
 
 // Define all the various opcodes
 const (
-	LOAD_NULL byte = iota
-	LOAD_TRUE
-	LOAD_FALSE
-	LOAD_ZERO
-	LOAD_ONE
-	LOAD_NEG_ONE
+	LoadNull byte = iota
+	LoadTrue
+	LoadFalse
+	LoadZero
+	LoadOne
+	LoadNegOne
 
-	IMPORT_MODULE
-	LOAD_BUILTIN
-	LOAD_CONST
-	LOAD_LOCAL
-	STORE_LOCAL
-	LOAD_CAPTURE
-	STORE_CAPTURE
+	ImportModule
+	LoadBuiltin
+	LoadConst
+	LoadLocal
+	StoreLocal
+	LoadCapture
+	StoreCapture
 
-	JUMP
-	JUMP_TRUE
-	JUMP_FALSE
+	Jump
+	JumpTrue
+	JumpFalse
 
-	EQ
-	NE
-	GT
-	GTE
-	LT
-	LTE
-	CMP
-	HAS
+	Eq
+	Ne
+	Gt
+	Gte
+	Lt
+	Lte
+	Cmp
+	Has
 
-	PLUS
-	SUB
-	MUL
-	DIV
+	Plus
+	Sub
+	Mul
+	Div
 
-	REM
-	BIT_AND
-	BIT_OR
-	BIT_XOR
-	LEFT_SHIFT
-	RIGHT_SHIFT
+	Rem
+	BitAnd
+	BitOr
+	BitXor
+	LeftShift
+	RightShift
 
-	NEGATE
-	NOT
-	COMPLEMENT
+	Negate
+	Not
+	Complement
 
-	NEW_FUNC
-	FUNC_CAPTURE
-	FUNC_LOCAL
+	NewFunc
+	FuncCapture
+	FuncLocal
 
-	INVOKE
-	GO
-	RETURN
-	DONE
-	THROW
+	Invoke
+	Go
+	Return
+	Done
+	Throw
 
-	NEW_STRUCT
-	NEW_DICT
-	NEW_LIST
-	NEW_SET
-	NEW_TUPLE
+	NewStruct
+	NewDict
+	NewList
+	NewSet
+	NewTuple
 
-	GET_FIELD
-	INIT_FIELD
-	SET_FIELD
-	INC_FIELD
+	GetField
+	InitField
+	SetField
+	IncField
 
-	GET_INDEX
-	SET_INDEX
-	INC_INDEX
+	GetIndex
+	SetIndex
+	IncIndex
 
-	SLICE
-	SLICE_FROM
-	SLICE_TO
+	Slice
+	SliceFrom
+	SliceTo
 
-	ITER
-	ITER_NEXT
-	ITER_GET
+	Iter
+	IterNext
+	IterGet
 
-	CHECK_CAST
-	CHECK_TUPLE
+	CheckCast
+	CheckTuple
 
-	POP
-	DUP
+	Pop
+	Dup
 
 	// These are temporary values created during compilation.
 	// The interpreter will panic if it encounters them.
-	BREAK    = 0xFD
-	CONTINUE = 0xFE
+	Break    = 0xFD
+	Continue = 0xFE
 )
 
 // OpCodeSize returns how 'wide' an opcode is.  Opcodes are always either 1 or 3 bytes.
@@ -104,12 +104,12 @@ func OpCodeSize(opc byte) int {
 
 	switch opc {
 
-	case IMPORT_MODULE, LOAD_BUILTIN, LOAD_CONST,
-		LOAD_LOCAL, LOAD_CAPTURE, STORE_LOCAL, STORE_CAPTURE,
-		JUMP, JUMP_TRUE, JUMP_FALSE, BREAK, CONTINUE,
-		NEW_FUNC, FUNC_CAPTURE, FUNC_LOCAL, INVOKE, GO,
-		NEW_STRUCT, GET_FIELD, INIT_FIELD, SET_FIELD, INC_FIELD,
-		NEW_DICT, NEW_LIST, NEW_SET, NEW_TUPLE, CHECK_CAST, CHECK_TUPLE:
+	case ImportModule, LoadBuiltin, LoadConst,
+		LoadLocal, LoadCapture, StoreLocal, StoreCapture,
+		Jump, JumpTrue, JumpFalse, Break, Continue,
+		NewFunc, FuncCapture, FuncLocal, Invoke, Go,
+		NewStruct, GetField, InitField, SetField, IncField,
+		NewDict, NewList, NewSet, NewTuple, CheckCast, CheckTuple:
 
 		return 3
 
@@ -123,159 +123,159 @@ func FmtOpcode(opcodes []byte, i int) string {
 
 	switch opcodes[i] {
 
-	case LOAD_NULL:
-		return fmt.Sprintf("%d: LOAD_NULL\n", i)
-	case LOAD_TRUE:
-		return fmt.Sprintf("%d: LOAD_TRUE\n", i)
-	case LOAD_FALSE:
-		return fmt.Sprintf("%d: LOAD_FALSE\n", i)
-	case LOAD_ZERO:
-		return fmt.Sprintf("%d: LOAD_ZERO\n", i)
-	case LOAD_ONE:
-		return fmt.Sprintf("%d: LOAD_ONE\n", i)
-	case LOAD_NEG_ONE:
-		return fmt.Sprintf("%d: LOAD_NEG_ONE\n", i)
+	case LoadNull:
+		return fmt.Sprintf("%d: LoadNull\n", i)
+	case LoadTrue:
+		return fmt.Sprintf("%d: LoadTrue\n", i)
+	case LoadFalse:
+		return fmt.Sprintf("%d: LoadFalse\n", i)
+	case LoadZero:
+		return fmt.Sprintf("%d: LoadZero\n", i)
+	case LoadOne:
+		return fmt.Sprintf("%d: LoadOne\n", i)
+	case LoadNegOne:
+		return fmt.Sprintf("%d: LoadNegOne\n", i)
 
-	case IMPORT_MODULE:
-		return fmtIndex(opcodes, i, "IMPORT_MODULE")
-	case LOAD_BUILTIN:
-		return fmtIndex(opcodes, i, "LOAD_BUILTIN")
-	case LOAD_CONST:
-		return fmtIndex(opcodes, i, "LOAD_CONST")
-	case LOAD_LOCAL:
-		return fmtIndex(opcodes, i, "LOAD_LOCAL")
-	case STORE_LOCAL:
-		return fmtIndex(opcodes, i, "STORE_LOCAL")
-	case LOAD_CAPTURE:
-		return fmtIndex(opcodes, i, "LOAD_CAPTURE")
-	case STORE_CAPTURE:
-		return fmtIndex(opcodes, i, "STORE_CAPTURE")
+	case ImportModule:
+		return fmtIndex(opcodes, i, "ImportModule")
+	case LoadBuiltin:
+		return fmtIndex(opcodes, i, "LoadBuiltin")
+	case LoadConst:
+		return fmtIndex(opcodes, i, "LoadConst")
+	case LoadLocal:
+		return fmtIndex(opcodes, i, "LoadLocal")
+	case StoreLocal:
+		return fmtIndex(opcodes, i, "StoreLocal")
+	case LoadCapture:
+		return fmtIndex(opcodes, i, "LoadCapture")
+	case StoreCapture:
+		return fmtIndex(opcodes, i, "StoreCapture")
 
-	case JUMP:
-		return fmtIndex(opcodes, i, "JUMP")
-	case JUMP_TRUE:
-		return fmtIndex(opcodes, i, "JUMP_TRUE")
-	case JUMP_FALSE:
-		return fmtIndex(opcodes, i, "JUMP_FALSE")
+	case Jump:
+		return fmtIndex(opcodes, i, "Jump")
+	case JumpTrue:
+		return fmtIndex(opcodes, i, "JumpTrue")
+	case JumpFalse:
+		return fmtIndex(opcodes, i, "JumpFalse")
 
-	case EQ:
-		return fmt.Sprintf("%d: EQ\n", i)
-	case NE:
-		return fmt.Sprintf("%d: NE\n", i)
-	case GT:
-		return fmt.Sprintf("%d: GT\n", i)
-	case GTE:
-		return fmt.Sprintf("%d: GTE\n", i)
-	case LT:
-		return fmt.Sprintf("%d: LT\n", i)
-	case LTE:
-		return fmt.Sprintf("%d: LTE\n", i)
-	case CMP:
-		return fmt.Sprintf("%d: CMP\n", i)
-	case HAS:
-		return fmt.Sprintf("%d: HAS\n", i)
+	case Eq:
+		return fmt.Sprintf("%d: Eq\n", i)
+	case Ne:
+		return fmt.Sprintf("%d: Ne\n", i)
+	case Gt:
+		return fmt.Sprintf("%d: Gt\n", i)
+	case Gte:
+		return fmt.Sprintf("%d: Gte\n", i)
+	case Lt:
+		return fmt.Sprintf("%d: Lt\n", i)
+	case Lte:
+		return fmt.Sprintf("%d: Lte\n", i)
+	case Cmp:
+		return fmt.Sprintf("%d: Cmp\n", i)
+	case Has:
+		return fmt.Sprintf("%d: Has\n", i)
 
-	case PLUS:
-		return fmt.Sprintf("%d: PLUS\n", i)
-	case SUB:
-		return fmt.Sprintf("%d: SUB\n", i)
-	case MUL:
-		return fmt.Sprintf("%d: MUL\n", i)
-	case DIV:
-		return fmt.Sprintf("%d: DIV\n", i)
+	case Plus:
+		return fmt.Sprintf("%d: Plus\n", i)
+	case Sub:
+		return fmt.Sprintf("%d: Sub\n", i)
+	case Mul:
+		return fmt.Sprintf("%d: Mul\n", i)
+	case Div:
+		return fmt.Sprintf("%d: Div\n", i)
 
-	case REM:
-		return fmt.Sprintf("%d: REM\n", i)
-	case BIT_AND:
-		return fmt.Sprintf("%d: BIT_AND\n", i)
-	case BIT_OR:
-		return fmt.Sprintf("%d: BIT_OR\n", i)
-	case BIT_XOR:
-		return fmt.Sprintf("%d: BIT_XOR\n", i)
-	case LEFT_SHIFT:
-		return fmt.Sprintf("%d: LEFT_SHIFT\n", i)
-	case RIGHT_SHIFT:
-		return fmt.Sprintf("%d: RIGHT_SHIFT\n", i)
+	case Rem:
+		return fmt.Sprintf("%d: Rem\n", i)
+	case BitAnd:
+		return fmt.Sprintf("%d: BitAnd\n", i)
+	case BitOr:
+		return fmt.Sprintf("%d: BitOr\n", i)
+	case BitXor:
+		return fmt.Sprintf("%d: BitXor\n", i)
+	case LeftShift:
+		return fmt.Sprintf("%d: LeftShift\n", i)
+	case RightShift:
+		return fmt.Sprintf("%d: RightShift\n", i)
 
-	case NEGATE:
-		return fmt.Sprintf("%d: NEGATE\n", i)
-	case NOT:
-		return fmt.Sprintf("%d: NOT\n", i)
-	case COMPLEMENT:
-		return fmt.Sprintf("%d: COMPLEMENT\n", i)
+	case Negate:
+		return fmt.Sprintf("%d: Negate\n", i)
+	case Not:
+		return fmt.Sprintf("%d: Not\n", i)
+	case Complement:
+		return fmt.Sprintf("%d: Complement\n", i)
 
-	case NEW_FUNC:
-		return fmtIndex(opcodes, i, "NEW_FUNC")
-	case FUNC_CAPTURE:
-		return fmtIndex(opcodes, i, "FUNC_CAPTURE")
-	case FUNC_LOCAL:
-		return fmtIndex(opcodes, i, "FUNC_LOCAL")
+	case NewFunc:
+		return fmtIndex(opcodes, i, "NewFunc")
+	case FuncCapture:
+		return fmtIndex(opcodes, i, "FuncCapture")
+	case FuncLocal:
+		return fmtIndex(opcodes, i, "FuncLocal")
 
-	case INVOKE:
-		return fmtIndex(opcodes, i, "INVOKE")
-	case GO:
-		return fmtIndex(opcodes, i, "GO")
-	case RETURN:
-		return fmt.Sprintf("%d: RETURN\n", i)
-	case DONE:
-		return fmt.Sprintf("%d: DONE\n", i)
-	case THROW:
-		return fmt.Sprintf("%d: THROW\n", i)
+	case Invoke:
+		return fmtIndex(opcodes, i, "Invoke")
+	case Go:
+		return fmtIndex(opcodes, i, "Go")
+	case Return:
+		return fmt.Sprintf("%d: Return\n", i)
+	case Done:
+		return fmt.Sprintf("%d: Done\n", i)
+	case Throw:
+		return fmt.Sprintf("%d: Throw\n", i)
 
-	case NEW_STRUCT:
-		return fmtIndex(opcodes, i, "NEW_STRUCT")
-	case GET_FIELD:
-		return fmtIndex(opcodes, i, "GET_FIELD")
-	case INIT_FIELD:
-		return fmtIndex(opcodes, i, "INIT_FIELD")
-	case SET_FIELD:
-		return fmtIndex(opcodes, i, "SET_FIELD")
-	case INC_FIELD:
-		return fmtIndex(opcodes, i, "INC_FIELD")
-	case NEW_DICT:
-		return fmtIndex(opcodes, i, "NEW_DICT")
-	case NEW_LIST:
-		return fmtIndex(opcodes, i, "NEW_LIST")
-	case NEW_SET:
-		return fmtIndex(opcodes, i, "NEW_SET")
-	case NEW_TUPLE:
-		return fmtIndex(opcodes, i, "NEW_TUPLE")
+	case NewStruct:
+		return fmtIndex(opcodes, i, "NewStruct")
+	case GetField:
+		return fmtIndex(opcodes, i, "GetField")
+	case InitField:
+		return fmtIndex(opcodes, i, "InitField")
+	case SetField:
+		return fmtIndex(opcodes, i, "SetField")
+	case IncField:
+		return fmtIndex(opcodes, i, "IncField")
+	case NewDict:
+		return fmtIndex(opcodes, i, "NewDict")
+	case NewList:
+		return fmtIndex(opcodes, i, "NewList")
+	case NewSet:
+		return fmtIndex(opcodes, i, "NewSet")
+	case NewTuple:
+		return fmtIndex(opcodes, i, "NewTuple")
 
-	case GET_INDEX:
-		return fmt.Sprintf("%d: GET_INDEX\n", i)
-	case SET_INDEX:
-		return fmt.Sprintf("%d: SET_INDEX\n", i)
-	case INC_INDEX:
-		return fmt.Sprintf("%d: INC_INDEX\n", i)
+	case GetIndex:
+		return fmt.Sprintf("%d: GetIndex\n", i)
+	case SetIndex:
+		return fmt.Sprintf("%d: SetIndex\n", i)
+	case IncIndex:
+		return fmt.Sprintf("%d: IncIndex\n", i)
 
-	case SLICE:
-		return fmt.Sprintf("%d: SLICE\n", i)
-	case SLICE_FROM:
-		return fmt.Sprintf("%d: SLICE_FROM\n", i)
-	case SLICE_TO:
-		return fmt.Sprintf("%d: SLICE_TO\n", i)
+	case Slice:
+		return fmt.Sprintf("%d: Slice\n", i)
+	case SliceFrom:
+		return fmt.Sprintf("%d: SliceFrom\n", i)
+	case SliceTo:
+		return fmt.Sprintf("%d: SliceTo\n", i)
 
-	case ITER:
-		return fmt.Sprintf("%d: ITER\n", i)
-	case ITER_NEXT:
-		return fmt.Sprintf("%d: ITER_NEXT\n", i)
-	case ITER_GET:
-		return fmt.Sprintf("%d: ITER_GET\n", i)
+	case Iter:
+		return fmt.Sprintf("%d: Iter\n", i)
+	case IterNext:
+		return fmt.Sprintf("%d: IterNext\n", i)
+	case IterGet:
+		return fmt.Sprintf("%d: IterGet\n", i)
 
-	case CHECK_CAST:
-		return fmtIndex(opcodes, i, "CHECK_CAST")
-	case CHECK_TUPLE:
-		return fmtIndex(opcodes, i, "CHECK_TUPLE")
+	case CheckCast:
+		return fmtIndex(opcodes, i, "CheckCast")
+	case CheckTuple:
+		return fmtIndex(opcodes, i, "CheckTuple")
 
-	case POP:
-		return fmt.Sprintf("%d: POP\n", i)
-	case DUP:
-		return fmt.Sprintf("%d: DUP\n", i)
+	case Pop:
+		return fmt.Sprintf("%d: Pop\n", i)
+	case Dup:
+		return fmt.Sprintf("%d: Dup\n", i)
 
-	case BREAK:
-		return fmtIndex(opcodes, i, "BREAK")
-	case CONTINUE:
-		return fmtIndex(opcodes, i, "CONTINUE")
+	case Break:
+		return fmtIndex(opcodes, i, "Break")
+	case Continue:
+		return fmtIndex(opcodes, i, "Continue")
 
 	default:
 		panic(fmt.Sprintf("unreachable %d", opcodes[i]))

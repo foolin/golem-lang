@@ -22,7 +22,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 	switch opc[f.ip] {
 
-	case o.INVOKE:
+	case o.Invoke:
 
 		idx := index(opc, f.ip)
 		params := f.stack[n-idx+1:]
@@ -60,7 +60,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			return nil, g.TypeMismatchError("Expected 'Func'")
 		}
 
-	case o.RETURN:
+	case o.Return:
 
 		// TODO once we've written a Control Flow Graph
 		// turn this sanity check on to make sure we are managing
@@ -91,10 +91,10 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// advance the instruction pointer now that we are done invoking
 		f.ip += 3
 
-	case o.DONE:
-		panic("DONE cannot be executed directly")
+	case o.Done:
+		panic("Done cannot be executed directly")
 
-	case o.GO:
+	case o.Go:
 
 		idx := index(opc, f.ip)
 		params := f.stack[n-idx+1:]
@@ -128,7 +128,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			return nil, g.TypeMismatchError("Expected 'Func'")
 		}
 
-	case o.THROW:
+	case o.Throw:
 
 		// get struct from stack
 		stc, ok := f.stack[n].(g.Struct)
@@ -139,7 +139,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// throw an error
 		return nil, g.NewErrorFromStruct(i, stc)
 
-	case o.NEW_FUNC:
+	case o.NewFunc:
 
 		// push a function
 		idx := index(opc, f.ip)
@@ -148,7 +148,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = append(f.stack, nf)
 		f.ip += 3
 
-	case o.FUNC_LOCAL:
+	case o.FuncLocal:
 
 		// get function from stack
 		fn, ok := f.stack[n].(g.BytecodeFunc)
@@ -161,7 +161,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		fn.PushCapture(f.locals[idx])
 		f.ip += 3
 
-	case o.FUNC_CAPTURE:
+	case o.FuncCapture:
 
 		// get function from stack
 		fn, ok := f.stack[n].(g.BytecodeFunc)
@@ -174,7 +174,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		fn.PushCapture(f.fn.GetCapture(idx))
 		f.ip += 3
 
-	case o.NEW_STRUCT:
+	case o.NewStruct:
 
 		def := i.mod.StructDefs[index(opc, f.ip)]
 		stc, err := g.NewStruct(def, false)
@@ -185,7 +185,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = append(f.stack, stc)
 		f.ip += 3
 
-	case o.NEW_LIST:
+	case o.NewList:
 
 		size := index(opc, f.ip)
 		vals := make([]g.Value, size)
@@ -195,7 +195,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = append(f.stack, g.NewList(vals))
 		f.ip += 3
 
-	case o.NEW_SET:
+	case o.NewSet:
 
 		size := index(opc, f.ip)
 		vals := make([]g.Value, size)
@@ -205,7 +205,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = append(f.stack, g.NewSet(i, vals))
 		f.ip += 3
 
-	case o.NEW_TUPLE:
+	case o.NewTuple:
 
 		size := index(opc, f.ip)
 		vals := make([]g.Value, size)
@@ -215,7 +215,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = append(f.stack, g.NewTuple(vals))
 		f.ip += 3
 
-	case o.CHECK_TUPLE:
+	case o.CheckTuple:
 
 		// make sure the top of the stack is really a tuple
 		tp, ok := f.stack[n].(g.Tuple)
@@ -234,7 +234,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// do not alter stack
 		f.ip += 3
 
-	case o.CHECK_CAST:
+	case o.CheckCast:
 
 		// make sure the top of the stack is of the given type
 		vtype := g.Type(index(opc, f.ip))
@@ -246,7 +246,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// do not alter stack
 		f.ip += 3
 
-	case o.NEW_DICT:
+	case o.NewDict:
 
 		size := index(opc, f.ip)
 		entries := make([]*g.HEntry, 0, size)
@@ -260,7 +260,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = append(f.stack, g.NewDict(i, entries))
 		f.ip += 3
 
-	case o.GET_FIELD:
+	case o.GetField:
 
 		idx := index(opc, f.ip)
 		key, ok := pool[idx].(g.Str)
@@ -274,7 +274,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n] = result
 		f.ip += 3
 
-	case o.INIT_FIELD, o.SET_FIELD:
+	case o.InitField, o.SetField:
 
 		idx := index(opc, f.ip)
 		key, ok := pool[idx].(g.Str)
@@ -290,7 +290,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		value := f.stack[n]
 
 		// init or set
-		if opc[f.ip] == o.INIT_FIELD {
+		if opc[f.ip] == o.InitField {
 			err := stc.InitField(i, key, value)
 			if err != nil {
 				return nil, err
@@ -306,7 +306,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = f.stack[:n]
 		f.ip += 3
 
-	case o.INC_FIELD:
+	case o.IncField:
 
 		idx := index(opc, f.ip)
 		key, ok := pool[idx].(g.Str)
@@ -340,7 +340,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = f.stack[:n]
 		f.ip += 3
 
-	case o.GET_INDEX:
+	case o.GetIndex:
 
 		// get Getable from stack
 		gtb, ok := f.stack[n-1].(g.Getable)
@@ -360,7 +360,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = f.stack[:n]
 		f.ip++
 
-	case o.SET_INDEX:
+	case o.SetIndex:
 
 		// get Indexable from stack
 		ibl, ok := f.stack[n-2].(g.Indexable)
@@ -383,7 +383,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = f.stack[:n-1]
 		f.ip++
 
-	case o.INC_INDEX:
+	case o.IncIndex:
 
 		// get Indexable from stack
 		ibl, ok := f.stack[n-2].(g.Indexable)
@@ -416,7 +416,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = f.stack[:n-1]
 		f.ip++
 
-	case o.SLICE:
+	case o.Slice:
 
 		// get Sliceable from stack
 		slb, ok := f.stack[n-2].(g.Sliceable)
@@ -437,7 +437,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = f.stack[:n-1]
 		f.ip++
 
-	case o.SLICE_FROM:
+	case o.SliceFrom:
 
 		// get Sliceable from stack
 		slb, ok := f.stack[n-1].(g.Sliceable)
@@ -457,7 +457,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = f.stack[:n]
 		f.ip++
 
-	case o.SLICE_TO:
+	case o.SliceTo:
 
 		// get Sliceable from stack
 		slb, ok := f.stack[n-1].(g.Sliceable)
@@ -477,26 +477,26 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = f.stack[:n]
 		f.ip++
 
-	case o.LOAD_NULL:
+	case o.LoadNull:
 		f.stack = append(f.stack, g.NULL)
 		f.ip++
-	case o.LOAD_TRUE:
+	case o.LoadTrue:
 		f.stack = append(f.stack, g.TRUE)
 		f.ip++
-	case o.LOAD_FALSE:
+	case o.LoadFalse:
 		f.stack = append(f.stack, g.FALSE)
 		f.ip++
-	case o.LOAD_ZERO:
+	case o.LoadZero:
 		f.stack = append(f.stack, g.ZERO)
 		f.ip++
-	case o.LOAD_ONE:
+	case o.LoadOne:
 		f.stack = append(f.stack, g.ONE)
 		f.ip++
-	case o.LOAD_NEG_ONE:
+	case o.LoadNegOne:
 		f.stack = append(f.stack, g.NEG_ONE)
 		f.ip++
 
-	case o.IMPORT_MODULE:
+	case o.ImportModule:
 
 		// An error here is "impossible", because we already
 		// made sure the module really existed in the Analyzer.
@@ -514,42 +514,42 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = append(f.stack, mod.GetContents())
 		f.ip += 3
 
-	case o.LOAD_BUILTIN:
+	case o.LoadBuiltin:
 		idx := index(opc, f.ip)
 		f.stack = append(f.stack, i.builtInMgr.Builtins()[idx])
 		f.ip += 3
 
-	case o.LOAD_CONST:
+	case o.LoadConst:
 		idx := index(opc, f.ip)
 		f.stack = append(f.stack, pool[idx])
 		f.ip += 3
 
-	case o.LOAD_LOCAL:
+	case o.LoadLocal:
 		idx := index(opc, f.ip)
 		f.stack = append(f.stack, f.locals[idx].Val)
 		f.ip += 3
 
-	case o.LOAD_CAPTURE:
+	case o.LoadCapture:
 		idx := index(opc, f.ip)
 		f.stack = append(f.stack, f.fn.GetCapture(idx).Val)
 		f.ip += 3
 
-	case o.STORE_LOCAL:
+	case o.StoreLocal:
 		idx := index(opc, f.ip)
 		f.locals[idx].Val = f.stack[n]
 		f.stack = f.stack[:n]
 		f.ip += 3
 
-	case o.STORE_CAPTURE:
+	case o.StoreCapture:
 		idx := index(opc, f.ip)
 		f.fn.GetCapture(idx).Val = f.stack[n]
 		f.stack = f.stack[:n]
 		f.ip += 3
 
-	case o.JUMP:
+	case o.Jump:
 		f.ip = index(opc, f.ip)
 
-	case o.JUMP_TRUE:
+	case o.JumpTrue:
 		b, ok := f.stack[n].(g.Bool)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected 'Bool'")
@@ -562,7 +562,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			f.ip += 3
 		}
 
-	case o.JUMP_FALSE:
+	case o.JumpFalse:
 		b, ok := f.stack[n].(g.Bool)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected 'Bool'")
@@ -575,7 +575,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			f.ip = index(opc, f.ip)
 		}
 
-	case o.EQ:
+	case o.Eq:
 		b, err := f.stack[n-1].Eq(i, f.stack[n])
 		if err != nil {
 			return nil, err
@@ -584,7 +584,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = b
 		f.ip++
 
-	case o.NE:
+	case o.Ne:
 		b, err := f.stack[n-1].Eq(i, f.stack[n])
 		if err != nil {
 			return nil, err
@@ -593,7 +593,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = b.Not()
 		f.ip++
 
-	case o.LT:
+	case o.Lt:
 		val, err := f.stack[n-1].Cmp(i, f.stack[n])
 		if err != nil {
 			return nil, err
@@ -602,7 +602,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = g.NewBool(val.IntVal() < 0)
 		f.ip++
 
-	case o.LTE:
+	case o.Lte:
 		val, err := f.stack[n-1].Cmp(i, f.stack[n])
 		if err != nil {
 			return nil, err
@@ -611,7 +611,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = g.NewBool(val.IntVal() <= 0)
 		f.ip++
 
-	case o.GT:
+	case o.Gt:
 		val, err := f.stack[n-1].Cmp(i, f.stack[n])
 		if err != nil {
 			return nil, err
@@ -620,7 +620,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = g.NewBool(val.IntVal() > 0)
 		f.ip++
 
-	case o.GTE:
+	case o.Gte:
 		val, err := f.stack[n-1].Cmp(i, f.stack[n])
 		if err != nil {
 			return nil, err
@@ -629,7 +629,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = g.NewBool(val.IntVal() >= 0)
 		f.ip++
 
-	case o.CMP:
+	case o.Cmp:
 		val, err := f.stack[n-1].Cmp(i, f.stack[n])
 		if err != nil {
 			return nil, err
@@ -638,7 +638,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case o.HAS:
+	case o.Has:
 
 		// get struct from stack
 		stc, ok := f.stack[n-1].(g.Struct)
@@ -654,7 +654,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case o.PLUS:
+	case o.Plus:
 		val, err := plus(i, f.stack[n-1], f.stack[n])
 		if err != nil {
 			return nil, err
@@ -663,7 +663,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case o.NOT:
+	case o.Not:
 		b, ok := f.stack[n].(g.Bool)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected 'Bool'")
@@ -672,7 +672,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n] = b.Not()
 		f.ip++
 
-	case o.SUB:
+	case o.Sub:
 		z, ok := f.stack[n-1].(g.Number)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected Number Type")
@@ -686,7 +686,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case o.MUL:
+	case o.Mul:
 		z, ok := f.stack[n-1].(g.Number)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected Number Type")
@@ -700,7 +700,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case o.DIV:
+	case o.Div:
 		z, ok := f.stack[n-1].(g.Number)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected Number Type")
@@ -714,7 +714,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case o.NEGATE:
+	case o.Negate:
 		z, ok := f.stack[n].(g.Number)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected Number Type")
@@ -724,7 +724,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n] = val
 		f.ip++
 
-	case o.REM:
+	case o.Rem:
 		z, ok := f.stack[n-1].(g.Int)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected 'Int'")
@@ -738,7 +738,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case o.BIT_AND:
+	case o.BitAnd:
 		z, ok := f.stack[n-1].(g.Int)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected 'Int'")
@@ -752,7 +752,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case o.BIT_OR:
+	case o.BitOr:
 		z, ok := f.stack[n-1].(g.Int)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected 'Int'")
@@ -766,7 +766,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case o.BIT_XOR:
+	case o.BitXor:
 		z, ok := f.stack[n-1].(g.Int)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected 'Int'")
@@ -780,7 +780,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case o.LEFT_SHIFT:
+	case o.LeftShift:
 		z, ok := f.stack[n-1].(g.Int)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected 'Int'")
@@ -794,7 +794,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case o.RIGHT_SHIFT:
+	case o.RightShift:
 		z, ok := f.stack[n-1].(g.Int)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected 'Int'")
@@ -808,7 +808,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case o.COMPLEMENT:
+	case o.Complement:
 		z, ok := f.stack[n].(g.Int)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected 'Int'")
@@ -818,7 +818,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n] = val
 		f.ip++
 
-	case o.ITER:
+	case o.Iter:
 
 		ibl, ok := f.stack[n].(g.Iterable)
 		assert(ok)
@@ -826,7 +826,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n] = ibl.NewIterator(i)
 		f.ip++
 
-	case o.ITER_NEXT:
+	case o.IterNext:
 
 		itr, ok := f.stack[n].(g.Iterator)
 		assert(ok)
@@ -834,7 +834,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n] = itr.IterNext()
 		f.ip++
 
-	case o.ITER_GET:
+	case o.IterGet:
 
 		itr, ok := f.stack[n].(g.Iterator)
 		assert(ok)
@@ -847,11 +847,11 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n] = val
 		f.ip++
 
-	case o.DUP:
+	case o.Dup:
 		f.stack = append(f.stack, f.stack[n])
 		f.ip++
 
-	case o.POP:
+	case o.Pop:
 		f.stack = f.stack[:n]
 		f.ip++
 
