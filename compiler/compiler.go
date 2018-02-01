@@ -850,7 +850,7 @@ func (c *compiler) visitBasicExpr(basic *ast.BasicExpr) {
 
 	switch basic.Token.Kind {
 
-	case ast.NULL:
+	case ast.NullValue:
 		c.push(basic.Token.Position, o.LoadNull)
 
 	case ast.TRUE:
@@ -939,7 +939,7 @@ func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 	// create def and entries
 	def := []g.Field{}
 	for _, k := range stc.Keys {
-		def = append(def, g.NewField(k.Text, false, g.NULL))
+		def = append(def, g.NewField(k.Text, false, g.NullValue))
 	}
 	defIdx := len(c.structDefs)
 	c.structDefs = append(c.structDefs, def)

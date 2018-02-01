@@ -45,20 +45,20 @@ func okType(t *testing.T, val Value, expected Type) {
 }
 
 func TestNull(t *testing.T) {
-	okType(t, NULL, NullType)
+	okType(t, NullValue, NullType)
 
 	var v Value
 	var err Error
 
-	v = NULL.ToStr(cx)
+	v = NullValue.ToStr(cx)
 	ok(t, v, nil, NewStr("null"))
 
-	v, err = NULL.Eq(cx, NULL)
+	v, err = NullValue.Eq(cx, NullValue)
 	ok(t, v, err, TRUE)
-	v, err = NULL.Eq(cx, TRUE)
+	v, err = NullValue.Eq(cx, TRUE)
 	ok(t, v, err, FALSE)
 
-	v, err = NULL.Cmp(cx, TRUE)
+	v, err = NullValue.Cmp(cx, TRUE)
 	fail(t, v, err, "NullValue")
 }
 
@@ -87,13 +87,13 @@ func TestBool(t *testing.T) {
 	ok(t, b, err, FALSE)
 
 	i, err := TRUE.Cmp(cx, FALSE)
-	ok(t, i, err, ONE)
+	ok(t, i, err, One)
 	i, err = FALSE.Cmp(cx, TRUE)
-	ok(t, i, err, NEG_ONE)
+	ok(t, i, err, NegOne)
 	i, err = TRUE.Cmp(cx, TRUE)
-	ok(t, i, err, ZERO)
+	ok(t, i, err, Zero)
 	i, err = FALSE.Cmp(cx, FALSE)
-	ok(t, i, err, ZERO)
+	ok(t, i, err, Zero)
 	i, err = TRUE.Cmp(cx, NewInt(1))
 	fail(t, i, err, "TypeMismatch: Expected Comparable Type")
 
@@ -147,10 +147,10 @@ func TestStr(t *testing.T) {
 	fail(t, v, err, "IndexOutOfBounds: 2")
 
 	v = NewStr("").Len()
-	ok(t, v, nil, ZERO)
+	ok(t, v, nil, Zero)
 
 	v = NewStr("a").Len()
-	ok(t, v, nil, ONE)
+	ok(t, v, nil, One)
 
 	v = NewStr("abcde").Len()
 	ok(t, v, nil, NewInt(5))
@@ -220,7 +220,7 @@ func TestInt(t *testing.T) {
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = NewInt(3).Sub(FALSE)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
-	val, err = NewInt(3).Sub(NULL)
+	val, err = NewInt(3).Sub(NullValue)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 
 	val, err = NewInt(3).Mul(NewInt(2))
@@ -231,7 +231,7 @@ func TestInt(t *testing.T) {
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = NewInt(3).Mul(FALSE)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
-	val, err = NewInt(3).Mul(NULL)
+	val, err = NewInt(3).Mul(NullValue)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 
 	val, err = NewInt(3).Div(NewInt(2))
@@ -242,7 +242,7 @@ func TestInt(t *testing.T) {
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = NewInt(3).Div(FALSE)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
-	val, err = NewInt(3).Div(NULL)
+	val, err = NewInt(3).Div(NullValue)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 
 	val, err = NewInt(3).Div(NewInt(0))
@@ -327,7 +327,7 @@ func TestFloat(t *testing.T) {
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = NewFloat(3.3).Sub(FALSE)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
-	val, err = NewFloat(3.3).Sub(NULL)
+	val, err = NewFloat(3.3).Sub(NullValue)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 
 	val, err = NewFloat(3.3).Mul(NewInt(2))
@@ -338,7 +338,7 @@ func TestFloat(t *testing.T) {
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = NewFloat(3.3).Mul(FALSE)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
-	val, err = NewFloat(3.3).Mul(NULL)
+	val, err = NewFloat(3.3).Mul(NullValue)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 
 	val, err = NewFloat(3.3).Div(NewInt(2))
@@ -349,7 +349,7 @@ func TestFloat(t *testing.T) {
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = NewFloat(3.3).Div(FALSE)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
-	val, err = NewFloat(3.3).Div(NULL)
+	val, err = NewFloat(3.3).Div(NullValue)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 
 	val, err = NewFloat(3.3).Div(NewInt(0))
@@ -361,14 +361,14 @@ func TestFloat(t *testing.T) {
 func TestBasic(t *testing.T) {
 	// make sure all the Basic types can be used as hashmap key
 	entries := make(map[Basic]Value)
-	entries[NULL] = TRUE
-	entries[ZERO] = TRUE
+	entries[NullValue] = TRUE
+	entries[Zero] = TRUE
 	entries[NewFloat(0.123)] = TRUE
 	entries[FALSE] = TRUE
 }
 
 func TestBasicHashCode(t *testing.T) {
-	h, err := NULL.HashCode(cx)
+	h, err := NullValue.HashCode(cx)
 	fail(t, h, err, "NullValue")
 
 	h, err = TRUE.HashCode(cx)

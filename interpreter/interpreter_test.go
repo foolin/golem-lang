@@ -198,8 +198,8 @@ func TestExpressions(t *testing.T) {
 	okExpr(t, "2 >= 2;", g.TRUE)
 
 	okExpr(t, "1 <=> 2;", g.NewInt(-1))
-	okExpr(t, "2 <=> 2;", g.ZERO)
-	okExpr(t, "2 <=> 1;", g.ONE)
+	okExpr(t, "2 <=> 2;", g.Zero)
+	okExpr(t, "2 <=> 1;", g.One)
 
 	okExpr(t, "true  && true;", g.TRUE)
 	okExpr(t, "true  && false;", g.FALSE)
@@ -308,8 +308,8 @@ func TestIf(t *testing.T) {
 		[]*g.Ref{&g.Ref{g.NewInt(2)}})
 
 	okMod(t, "let a = 1; if (false) { a = 2; }",
-		g.NULL,
-		[]*g.Ref{&g.Ref{g.ONE}})
+		g.NullValue,
+		[]*g.Ref{&g.Ref{g.One}})
 
 	okMod(t, "let a = 1; if (1 == 1) { a = 2; } else { a = 3; }; let b = 4;",
 		g.NewInt(2),
@@ -373,8 +373,8 @@ return a + 2
 let b = 5`,
 		g.NewInt(3),
 		[]*g.Ref{
-			&g.Ref{g.ONE},
-			&g.Ref{g.NULL}})
+			&g.Ref{g.One},
+			&g.Ref{g.NullValue}})
 }
 
 func TestFunc(t *testing.T) {
@@ -386,7 +386,7 @@ let b = a(1)
 	mod := newCompiler(source).Compile()
 
 	i := interpret(mod)
-	okRef(t, i, mod.Refs[1], g.ONE)
+	okRef(t, i, mod.Refs[1], g.One)
 
 	source = `
 let a = fn() { }
@@ -399,8 +399,8 @@ let f = c(b(2), 3)
 	mod = newCompiler(source).Compile()
 
 	interpret(mod)
-	okRef(t, i, mod.Refs[3], g.NULL)
-	okRef(t, i, mod.Refs[4], g.ONE)
+	okRef(t, i, mod.Refs[3], g.NullValue)
+	okRef(t, i, mod.Refs[4], g.One)
 	okRef(t, i, mod.Refs[5], g.NewInt(24))
 
 	source = `
@@ -425,8 +425,8 @@ let f = fibonacci(6)
 `
 	mod = newCompiler(source).Compile()
 	i = interpret(mod)
-	okRef(t, i, mod.Refs[1], g.ONE)
-	okRef(t, i, mod.Refs[2], g.ONE)
+	okRef(t, i, mod.Refs[1], g.One)
+	okRef(t, i, mod.Refs[2], g.One)
 	okRef(t, i, mod.Refs[3], g.NewInt(2))
 	okRef(t, i, mod.Refs[4], g.NewInt(3))
 	okRef(t, i, mod.Refs[5], g.NewInt(5))
@@ -487,7 +487,7 @@ let y = a(1)
 
 	i = interpret(mod)
 
-	okRef(t, i, mod.Refs[0], g.ZERO)
+	okRef(t, i, mod.Refs[0], g.Zero)
 	okRef(t, i, mod.Refs[3], g.NewInt(7))
 	okRef(t, i, mod.Refs[4], g.NewInt(8))
 
@@ -522,9 +522,9 @@ let z = struct { a: 3, b: 4, c: struct { d: 5 } }
 
 	okRef(t, i, mod.Refs[0], newStruct([]g.Field{}))
 	okRef(t, i, mod.Refs[1], newStruct([]g.Field{
-		g.NewField("a", false, g.ZERO)}))
+		g.NewField("a", false, g.Zero)}))
 	okRef(t, i, mod.Refs[2], newStruct([]g.Field{
-		g.NewField("a", false, g.ONE),
+		g.NewField("a", false, g.One),
 		g.NewField("b", false, g.NewInt(2))}))
 	okRef(t, i, mod.Refs[3], newStruct([]g.Field{
 		g.NewField("a", false, g.NewInt(3)),
@@ -870,9 +870,9 @@ let d = a['x'];
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	okRef(t, i, mod.Refs[1], g.ONE)
-	okRef(t, i, mod.Refs[2], g.NULL)
-	okRef(t, i, mod.Refs[3], g.NEG_ONE)
+	okRef(t, i, mod.Refs[1], g.One)
+	okRef(t, i, mod.Refs[2], g.NullValue)
+	okRef(t, i, mod.Refs[3], g.NegOne)
 
 	source = `
 let a = dict {};
@@ -1124,10 +1124,10 @@ const c = 1, d;
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	okRef(t, i, mod.Refs[0], g.NULL)
-	okRef(t, i, mod.Refs[1], g.ZERO)
-	okRef(t, i, mod.Refs[2], g.ONE)
-	okRef(t, i, mod.Refs[3], g.NULL)
+	okRef(t, i, mod.Refs[0], g.NullValue)
+	okRef(t, i, mod.Refs[1], g.Zero)
+	okRef(t, i, mod.Refs[2], g.One)
+	okRef(t, i, mod.Refs[3], g.NullValue)
 }
 
 func TestFor(t *testing.T) {
@@ -1639,10 +1639,10 @@ fn main(args) {}
 	tassert(t, reflect.DeepEqual(mod.Contents.FieldNames(), []string{"b", "a", "main"}))
 
 	v, err := mod.Contents.GetField(i, g.NewStr("a"))
-	okVal(t, v, err, g.ZERO)
+	okVal(t, v, err, g.Zero)
 
 	v, err = mod.Contents.GetField(i, g.NewStr("b"))
-	okVal(t, v, err, g.ONE)
+	okVal(t, v, err, g.One)
 
 	v, err = mod.Contents.GetField(i, g.NewStr("main"))
 	tassert(t, err == nil)
@@ -1650,15 +1650,15 @@ fn main(args) {}
 	tassert(t, ok)
 	tassert(t, f.Template().Arity == 1)
 
-	err = mod.Contents.SetField(i, g.NewStr("a"), g.NEG_ONE)
+	err = mod.Contents.SetField(i, g.NewStr("a"), g.NegOne)
 	tassert(t, err == nil)
 	v, err = mod.Contents.GetField(i, g.NewStr("a"))
-	okVal(t, v, err, g.NEG_ONE)
+	okVal(t, v, err, g.NegOne)
 
-	err = mod.Contents.SetField(i, g.NewStr("b"), g.NEG_ONE)
+	err = mod.Contents.SetField(i, g.NewStr("b"), g.NegOne)
 	failVal(t, nil, err, "ReadonlyField: Field 'b' is readonly")
 
-	err = mod.Contents.SetField(i, g.NewStr("main"), g.NEG_ONE)
+	err = mod.Contents.SetField(i, g.NewStr("main"), g.NegOne)
 	failVal(t, nil, err, "ReadonlyField: Field 'main' is readonly")
 }
 

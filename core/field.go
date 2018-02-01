@@ -4,9 +4,7 @@
 
 package core
 
-//--------------------------------------------------------------
-// A Field is a name-value pair inside a Struct
-
+// Field is a name-value pair inside a Struct
 type Field interface {
 	Name() string
 }
@@ -18,16 +16,17 @@ type field struct {
 	value      Value
 }
 
+// Name returns the name of a field
 func (f *field) Name() string {
 	return f.name
 }
 
-// Create a name-value pair.
+// NewField a name-value pair.
 func NewField(name string, isConst bool, value Value) Field {
 	return &field{name, isConst, false, value}
 }
 
-// Create a Property using 'getter' and 'setter' functions
+// NewProperty creates a Property using 'getter' and 'setter' functions.
 // If the setter is nil, then the property is const.
 func NewProperty(name string, getter Func, setter Func) Field {
 
@@ -44,16 +43,3 @@ func NewProperty(name string, getter Func, setter Func) Field {
 	prop := NewTuple([]Value{getter, setter})
 	return &field{name, setter == nil, true, prop}
 }
-
-//fnGetter := NewNativeFunc(0, 0,
-//	func(cx Context, values []Value) (Value, Error) {
-//		return getter()
-//	})
-
-//var fnSetter NativeFunc = nil
-//if setter != nil {
-//	fnSetter = NewNativeFunc(1, 1,
-//		func(cx Context, values []Value) (Value, Error) {
-//			return nil, setter(values[0])
-//		})
-//}

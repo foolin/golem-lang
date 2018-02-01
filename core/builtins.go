@@ -93,7 +93,7 @@ var BuiltinPrint = &nativeFunc{
 			fmt.Print(v.ToStr(cx).String())
 		}
 
-		return NULL, nil
+		return NullValue, nil
 	}}
 
 var BuiltinPrintln = &nativeFunc{
@@ -104,7 +104,7 @@ var BuiltinPrintln = &nativeFunc{
 		}
 		fmt.Println()
 
-		return NULL, nil
+		return NullValue, nil
 	}}
 
 //-----------------------------------------------------------------
@@ -138,7 +138,7 @@ var BuiltinRange = &nativeFunc{
 			return nil, TypeMismatchError("Expected 'Int'")
 		}
 
-		step := ONE
+		step := One
 		if len(values) == 3 {
 			step, ok = values[2].(Int)
 			if !ok {
@@ -202,7 +202,7 @@ var BuiltinType = &nativeFunc{
 	func(cx Context, values []Value) (Value, Error) {
 		// Null has a type, but for the purposes of type()
 		// we are going to pretend it doesn't
-		if values[0] == NULL {
+		if values[0] == NullValue {
 			return nil, NullValueError()
 		} else {
 			_type := values[0].Type()

@@ -94,7 +94,7 @@ func (s str) Slice(cx Context, from Value, to Value) (Value, Error) {
 func (s str) SliceFrom(cx Context, from Value) (Value, Error) {
 	runes := []rune(string(s))
 
-	f, _, err := sliceIndices(from, NEG_ONE, len(runes))
+	f, _, err := sliceIndices(from, NegOne, len(runes))
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (s str) SliceFrom(cx Context, from Value) (Value, Error) {
 func (s str) SliceTo(cx Context, to Value) (Value, Error) {
 	runes := []rune(string(s))
 
-	_, t, err := sliceIndices(ZERO, to, len(runes))
+	_, t, err := sliceIndices(Zero, to, len(runes))
 	if err != nil {
 		return nil, err
 	}

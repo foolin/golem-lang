@@ -28,7 +28,7 @@ func TestNative(t *testing.T) {
 	z, err = b.Eq(cx, a)
 	ok(t, z, err, FALSE)
 
-	ls := NewList([]Value{ONE, ZERO})
+	ls := NewList([]Value{One, Zero})
 
 	v, err := a.Invoke(nil, []Value{ls})
 	ok(t, v, err, NewStr("[ 1, 0 ]"))

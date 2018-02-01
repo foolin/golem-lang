@@ -71,11 +71,11 @@ func (b _bool) Cmp(cx Context, v Value) (Int, Error) {
 
 	case _bool:
 		if b == t {
-			return ZERO, nil
+			return Zero, nil
 		} else if b {
-			return ONE, nil
+			return One, nil
 		} else {
-			return NEG_ONE, nil
+			return NegOne, nil
 		}
 
 	default:

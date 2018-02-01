@@ -20,6 +20,7 @@ func (f _float) FloatVal() float64 {
 	return float64(f)
 }
 
+// NewFloat creates a new Float
 func NewFloat(f float64) Float {
 	return _float(f)
 }
@@ -78,21 +79,21 @@ func (f _float) Cmp(cx Context, v Value) (Int, Error) {
 
 	case _float:
 		if f < t {
-			return NEG_ONE, nil
+			return NegOne, nil
 		} else if f > t {
-			return ONE, nil
+			return One, nil
 		} else {
-			return ZERO, nil
+			return Zero, nil
 		}
 
 	case _int:
 		g := _float(t)
 		if f < g {
-			return NEG_ONE, nil
+			return NegOne, nil
 		} else if f > g {
-			return ONE, nil
+			return One, nil
 		} else {
-			return ZERO, nil
+			return Zero, nil
 		}
 
 	default:
@@ -148,16 +149,14 @@ func (f _float) Div(v Value) (Number, Error) {
 	case _int:
 		if t == 0 {
 			return nil, DivideByZeroError()
-		} else {
-			return f / _float(t), nil
 		}
+		return f / _float(t), nil
 
 	case _float:
 		if t == 0.0 {
 			return nil, DivideByZeroError()
-		} else {
-			return f / t, nil
 		}
+		return f / t, nil
 
 	default:
 		return nil, TypeMismatchError("Expected Number Type")

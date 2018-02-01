@@ -82,7 +82,7 @@ func (ls *list) Contains(cx Context, val Value) (Bool, Error) {
 		return nil, err
 	}
 
-	eq, err := idx.Eq(cx, NEG_ONE)
+	eq, err := idx.Eq(cx, NegOne)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func (ls *list) IndexOf(cx Context, val Value) (Int, Error) {
 			return NewInt(int64(i)), nil
 		}
 	}
-	return NEG_ONE, nil
+	return NegOne, nil
 }
 
 func (ls *list) IsEmpty() Bool {
@@ -129,7 +129,7 @@ func (ls *list) SliceFrom(cx Context, from Value) (Value, Error) {
 }
 
 func (ls *list) SliceTo(cx Context, to Value) (Value, Error) {
-	return ls.Slice(cx, ZERO, to)
+	return ls.Slice(cx, Zero, to)
 }
 
 func (ls *list) Values() []Value {

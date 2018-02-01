@@ -90,7 +90,7 @@ const (
 	DBL_GT_EQ
 
 	basicBegin
-	NULL
+	NullValue
 	TRUE
 	FALSE
 	STR
@@ -218,8 +218,8 @@ func (t TokenKind) String() string {
 	case DBL_GT_EQ:
 		return "DBL_GT_EQ"
 
-	case NULL:
-		return "NULL"
+	case NullValue:
+		return "NullValue"
 	case TRUE:
 		return "TRUE"
 	case FALSE:

@@ -17,8 +17,8 @@ type null struct {
 	placeholder int
 }
 
-// NULL represents the null value
-var NULL Null = &null{0}
+// NullValue represents the null value
+var NullValue Null = &null{0}
 
 func (n *null) basicMarker() {}
 

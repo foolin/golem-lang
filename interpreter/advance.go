@@ -478,7 +478,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.ip++
 
 	case o.LoadNull:
-		f.stack = append(f.stack, g.NULL)
+		f.stack = append(f.stack, g.NullValue)
 		f.ip++
 	case o.LoadTrue:
 		f.stack = append(f.stack, g.TRUE)
@@ -487,13 +487,13 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = append(f.stack, g.FALSE)
 		f.ip++
 	case o.LoadZero:
-		f.stack = append(f.stack, g.ZERO)
+		f.stack = append(f.stack, g.Zero)
 		f.ip++
 	case o.LoadOne:
-		f.stack = append(f.stack, g.ONE)
+		f.stack = append(f.stack, g.One)
 		f.ip++
 	case o.LoadNegOne:
-		f.stack = append(f.stack, g.NEG_ONE)
+		f.stack = append(f.stack, g.NegOne)
 		f.ip++
 
 	case o.ImportModule:

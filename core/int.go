@@ -11,9 +11,14 @@ import (
 
 type _int int64
 
-var ZERO Int = NewInt(0)
-var ONE Int = NewInt(1)
-var NEG_ONE Int = NewInt(-1)
+// Zero is the integer 0
+var Zero = NewInt(0)
+
+// One is the integer 1
+var One = NewInt(1)
+
+// NegOne is the integer -1
+var NegOne = NewInt(-1)
 
 func (i _int) IntVal() int64 {
 	return int64(i)
@@ -23,6 +28,7 @@ func (i _int) FloatVal() float64 {
 	return float64(i)
 }
 
+// NewInt creates a new Int
 func NewInt(i int64) Int {
 	return _int(i)
 }
@@ -74,22 +80,22 @@ func (i _int) Cmp(cx Context, v Value) (Int, Error) {
 
 	case _int:
 		if i < t {
-			return NEG_ONE, nil
+			return NegOne, nil
 		} else if i > t {
-			return ONE, nil
+			return One, nil
 		} else {
-			return ZERO, nil
+			return Zero, nil
 		}
 
 	case _float:
 		a := float64(i)
 		b := t.FloatVal()
 		if a < b {
-			return NEG_ONE, nil
+			return NegOne, nil
 		} else if a > b {
-			return ONE, nil
+			return One, nil
 		} else {
-			return ZERO, nil
+			return Zero, nil
 		}
 
 	default:
@@ -154,18 +160,16 @@ func (i _int) Div(v Value) (Number, Error) {
 	case _int:
 		if t == 0 {
 			return nil, DivideByZeroError()
-		} else {
-			return i / t, nil
 		}
+		return i / t, nil
 
 	case _float:
 		a := float64(i)
 		b := t.FloatVal()
 		if b == 0.0 {
 			return nil, DivideByZeroError()
-		} else {
-			return NewFloat(a / b), nil
 		}
+		return NewFloat(a / b), nil
 
 	default:
 		return nil, TypeMismatchError("Expected Number Type")
@@ -220,9 +224,8 @@ func (i _int) LeftShift(v Value) (Int, Error) {
 	case _int:
 		if t < 0 {
 			return nil, InvalidArgumentError("Shift count cannot be less than zero")
-		} else {
-			return i << uint(t), nil
 		}
+		return i << uint(t), nil
 	default:
 		return nil, TypeMismatchError("Expected 'Int'")
 	}
@@ -233,9 +236,8 @@ func (i _int) RightShift(v Value) (Int, Error) {
 	case _int:
 		if t < 0 {
 			return nil, InvalidArgumentError("Shift count cannot be less than zero")
-		} else {
-			return i >> uint(t), nil
 		}
+		return i >> uint(t), nil
 	default:
 		return nil, TypeMismatchError("Expected 'Int'")
 	}

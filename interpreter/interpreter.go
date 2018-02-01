@@ -183,7 +183,7 @@ func newLocals(numLocals int, params []g.Value) []*g.Ref {
 		if j < p {
 			locals[j] = &g.Ref{params[j]}
 		} else {
-			locals[j] = &g.Ref{g.NULL}
+			locals[j] = &g.Ref{g.NullValue}
 		}
 	}
 	return locals

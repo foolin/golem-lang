@@ -335,7 +335,7 @@ func (s *Scanner) nextIdentOrKeyword() *ast.Token {
 	case "_":
 		return &ast.Token{ast.BLANK_IDENT, text, pos}
 	case "null":
-		return &ast.Token{ast.NULL, text, pos}
+		return &ast.Token{ast.NullValue, text, pos}
 	case "true":
 		return &ast.Token{ast.TRUE, text, pos}
 	case "false":

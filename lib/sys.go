@@ -33,7 +33,7 @@ func InitSysModule() g.Module {
 			}
 
 			// we will never actually get here
-			return g.NULL, nil
+			return g.NullValue, nil
 		})
 
 	contents, err := g.NewStruct([]g.Field{g.NewField("exit", true, exit)}, true)

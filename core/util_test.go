@@ -27,31 +27,31 @@ func ifail(t *testing.T, err Error, expect string) {
 
 func TestValuesEq(t *testing.T) {
 
-	v, err := valuesEq(cx, []Value{ONE}, []Value{ONE})
+	v, err := valuesEq(cx, []Value{One}, []Value{One})
 	ok(t, v, err, TRUE)
 
 	v, err = valuesEq(cx, []Value{}, []Value{})
 	ok(t, v, err, TRUE)
 
-	v, err = valuesEq(cx, []Value{ONE}, []Value{ZERO})
+	v, err = valuesEq(cx, []Value{One}, []Value{Zero})
 	ok(t, v, err, FALSE)
 
-	v, err = valuesEq(cx, []Value{ONE}, []Value{})
+	v, err = valuesEq(cx, []Value{One}, []Value{})
 	ok(t, v, err, FALSE)
 
-	v, err = valuesEq(cx, []Value{}, []Value{ZERO})
+	v, err = valuesEq(cx, []Value{}, []Value{Zero})
 	ok(t, v, err, FALSE)
 }
 
 func TestIndex(t *testing.T) {
 
-	n, err := posIndex(ZERO, 3)
+	n, err := posIndex(Zero, 3)
 	iok(t, n, err, 0)
 
 	n, err = posIndex(NewInt(3), 3)
 	iok(t, n, err, 3)
 
-	n, err = posIndex(NEG_ONE, 3)
+	n, err = posIndex(NegOne, 3)
 	iok(t, n, err, 2)
 
 	n, err = posIndex(NewInt(-3), 3)
@@ -62,10 +62,10 @@ func TestIndex(t *testing.T) {
 
 	//--------------------------------------
 
-	n, err = boundedIndex(ZERO, 3)
+	n, err = boundedIndex(Zero, 3)
 	iok(t, n, err, 0)
 
-	n, err = boundedIndex(NEG_ONE, 3)
+	n, err = boundedIndex(NegOne, 3)
 	iok(t, n, err, 2)
 
 	n, err = boundedIndex(NewInt(-3), 3)
@@ -82,7 +82,7 @@ func TestIndex(t *testing.T) {
 
 	//--------------------------------------
 
-	a, b, err := sliceIndices(ZERO, NEG_ONE, 3)
+	a, b, err := sliceIndices(Zero, NegOne, 3)
 	iok(t, a, err, 0)
 	iok(t, b, err, 2)
 
@@ -90,9 +90,9 @@ func TestIndex(t *testing.T) {
 	iok(t, a, err, 0)
 	iok(t, b, err, 3)
 
-	_, _, err = sliceIndices(NewStr(""), ZERO, 3)
+	_, _, err = sliceIndices(NewStr(""), Zero, 3)
 	ifail(t, err, "TypeMismatch: Expected 'Int'")
 
-	_, _, err = sliceIndices(ZERO, NewStr(""), 3)
+	_, _, err = sliceIndices(Zero, NewStr(""), 3)
 	ifail(t, err, "TypeMismatch: Expected 'Int'")
 }

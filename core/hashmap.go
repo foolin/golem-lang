@@ -8,24 +8,26 @@ import (
 	"fmt"
 )
 
-// The hash map implementation that is used by Dict and Set.
-
 type (
+	// HashMap is an associative array
 	HashMap struct {
 		buckets [][]*HEntry
 		size    int
 	}
 
+	// HEntry is an entry in a HashMap
 	HEntry struct {
 		Key   Value
 		Value Value
 	}
 )
 
+// EmptyHashMap creates an empty HashMap
 func EmptyHashMap() *HashMap {
 	return NewHashMap(nil, []*HEntry{})
 }
 
+// NewHashMap creates an empty HashMap
 func NewHashMap(cx Context, entries []*HEntry) *HashMap {
 	capacity := 5
 	buckets := make([][]*HEntry, capacity, capacity)
@@ -37,6 +39,7 @@ func NewHashMap(cx Context, entries []*HEntry) *HashMap {
 	return hm
 }
 
+// Eq tests whether two HashMaps are equal
 func (hm *HashMap) Eq(cx Context, that *HashMap) (Bool, Error) {
 
 	if hm.size != that.size {
@@ -65,6 +68,7 @@ func (hm *HashMap) Eq(cx Context, that *HashMap) (Bool, Error) {
 	return TRUE, nil
 }
 
+// Get retrieves a value, or returns NullValue if the value is not present
 func (hm *HashMap) Get(cx Context, key Value) (value Value, err Error) {
 
 	// recover from an un-hashable value
@@ -82,12 +86,12 @@ func (hm *HashMap) Get(cx Context, key Value) (value Value, err Error) {
 	b := hm.buckets[hm._lookupBucket(cx, key)]
 	n := hm._indexOf(cx, b, key)
 	if n == -1 {
-		return NULL, nil
-	} else {
-		return b[n].Value, nil
+		return NullValue, nil
 	}
+	return b[n].Value, nil
 }
 
+// ContainsKey returns whether the HashMap contains an Entry for the given key
 func (hm *HashMap) ContainsKey(cx Context, key Value) (flag Bool, err Error) {
 
 	// recover from an un-hashable value
@@ -106,11 +110,12 @@ func (hm *HashMap) ContainsKey(cx Context, key Value) (flag Bool, err Error) {
 	n := hm._indexOf(cx, b, key)
 	if n == -1 {
 		return FALSE, nil
-	} else {
-		return TRUE, nil
 	}
+	return TRUE, nil
 }
 
+// Remove removes the value associated with the given key, if the key
+// is present.  Remove returns whether or not the key was present.
 func (hm *HashMap) Remove(cx Context, key Value) (flag Bool, err Error) {
 
 	// recover from an un-hashable value
@@ -130,13 +135,13 @@ func (hm *HashMap) Remove(cx Context, key Value) (flag Bool, err Error) {
 	n := hm._indexOf(cx, b, key)
 	if n == -1 {
 		return FALSE, nil
-	} else {
-		hm.buckets[h] = append(b[:n], b[n+1:]...)
-		hm.size--
-		return TRUE, nil
 	}
+	hm.buckets[h] = append(b[:n], b[n+1:]...)
+	hm.size--
+	return TRUE, nil
 }
 
+// Put adds a new key-value pair to the HashMap
 func (hm *HashMap) Put(cx Context, key Value, value Value) (err Error) {
 
 	// recover from an un-hashable value
@@ -167,6 +172,7 @@ func (hm *HashMap) Put(cx Context, key Value, value Value) (err Error) {
 	return nil
 }
 
+// Len returns the number of entries in the HashMap
 func (hm *HashMap) Len() Int {
 	return NewInt(int64(hm.size))
 }
@@ -243,16 +249,20 @@ func (hm *HashMap) dump() {
 
 //--------------------------------------------------------------
 
+// Iterator returns an iterator over the entries in the HashMap
 func (hm *HashMap) Iterator() *HIterator {
 	return &HIterator{hm, -1, -1}
 }
 
+// HIterator is an iterator over the entries in the HashMap
 type HIterator struct {
 	hm        *HashMap
 	bucketIdx int
 	entryIdx  int
 }
 
+// Next advances to the next value in the iterator, if there is one.
+// Next returns whether or not there was a value to advance to.
 func (h *HIterator) Next() bool {
 
 	// advance to next entry in current []*HEntry
@@ -277,6 +287,7 @@ func (h *HIterator) Next() bool {
 	return true
 }
 
+// Get returns the current value in the iterator
 func (h *HIterator) Get() *HEntry {
 	return h.curBucket()[h.entryIdx]
 }

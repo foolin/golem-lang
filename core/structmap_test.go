@@ -25,41 +25,41 @@ func TestStructMap(t *testing.T) {
 	_, has = sm.get("b")
 	tassert(t, !has)
 
-	sm.put(newField("a", true, ZERO))
+	sm.put(newField("a", true, Zero))
 	tassert(t, sm.size == 1)
 	tassert(t, len(sm.buckets) == 5)
 	tassert(t, reflect.DeepEqual(sm.fieldNames(), []string{"a"}))
 
 	f, has := sm.get("a")
 	tassert(t, has)
-	ok(t, f.value, nil, ZERO)
+	ok(t, f.value, nil, Zero)
 	_, has = sm.get("b")
 	tassert(t, !has)
 
-	sm.put(newField("b", true, ONE))
+	sm.put(newField("b", true, One))
 	tassert(t, sm.size == 2)
 	tassert(t, len(sm.buckets) == 5)
 	tassert(t, reflect.DeepEqual(sm.fieldNames(), []string{"b", "a"}))
 
 	f, has = sm.get("a")
 	tassert(t, has)
-	ok(t, f.value, nil, ZERO)
+	ok(t, f.value, nil, Zero)
 	f, has = sm.get("b")
 	tassert(t, has)
-	ok(t, f.value, nil, ONE)
+	ok(t, f.value, nil, One)
 
-	sm.put(newField("c", true, NEG_ONE))
+	sm.put(newField("c", true, NegOne))
 	tassert(t, sm.size == 3)
 	tassert(t, len(sm.buckets) == 11)
 	tassert(t, reflect.DeepEqual(sm.fieldNames(), []string{"b", "a", "c"}))
 
 	f, has = sm.get("c")
 	tassert(t, has)
-	ok(t, f.value, nil, NEG_ONE)
+	ok(t, f.value, nil, NegOne)
 
-	sm.put(newField("c", true, ZERO))
+	sm.put(newField("c", true, Zero))
 
 	f, has = sm.get("c")
 	tassert(t, has)
-	ok(t, f.value, nil, NEG_ONE)
+	ok(t, f.value, nil, NegOne)
 }

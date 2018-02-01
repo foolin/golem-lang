@@ -118,7 +118,7 @@ func (st *_struct) Eq(cx Context, v Value) (Bool, Error) {
 
 		b, err := that.GetField(cx, str(n))
 		if err != nil {
-			assert(err.Kind() == NO_SUCH_FIELD)
+			return FALSE, nil
 		}
 
 		eq, err := a.Eq(cx, b)
