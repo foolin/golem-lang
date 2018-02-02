@@ -1,14 +1,14 @@
 
 default: build
 
+clean:
+	rm -f golem
+
 test:
 	go test ./...
 
 lint:
 	golint ./...
 
-clean:
-	rm -f golem
-
-build: test clean
+build: clean test
 	go build golem.go
