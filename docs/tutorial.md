@@ -8,10 +8,10 @@ Golem doesn't have a [REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%8
 follow along with this tutorial by typing code into a text file ('tutorial.glm', for example), 
 and then running the file from the command line to look at the results.
 
-First, build a golem executable via:
+First, build a golem executable via make:
 
 ```
-go build golem.go
+make
 ```
 
 Then, fire up your text editor of choice, and type the following program into 

@@ -18,7 +18,7 @@ func NewSet(cx Context, values []Value) Set {
 
 	hashMap := EmptyHashMap()
 	for _, v := range values {
-		hashMap.Put(cx, v, TRUE)
+		hashMap.Put(cx, v, True)
 	}
 
 	return &set{hashMap, false}
@@ -69,7 +69,7 @@ func (s *set) Eq(cx Context, v Value) (Bool, Error) {
 	case *set:
 		return s.hashMap.Eq(cx, t.hashMap)
 	default:
-		return FALSE, nil
+		return False, nil
 	}
 }
 
@@ -97,7 +97,7 @@ func (s *set) Add(cx Context, val Value) Error {
 		return ImmutableValueError()
 	}
 
-	return s.hashMap.Put(cx, val, TRUE)
+	return s.hashMap.Put(cx, val, True)
 }
 
 func (s *set) AddAll(cx Context, val Value) Error {
@@ -112,7 +112,7 @@ func (s *set) AddAll(cx Context, val Value) Error {
 			if err != nil {
 				return err
 			}
-			s.hashMap.Put(cx, v, TRUE)
+			s.hashMap.Put(cx, v, True)
 		}
 		return nil
 	}

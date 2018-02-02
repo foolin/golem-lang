@@ -17,16 +17,16 @@ func TestNative(t *testing.T) {
 	okType(t, b, FuncType)
 
 	z, err := a.Eq(cx, a)
-	ok(t, z, err, TRUE)
+	ok(t, z, err, True)
 
 	z, err = b.Eq(cx, b)
-	ok(t, z, err, TRUE)
+	ok(t, z, err, True)
 
 	z, err = a.Eq(cx, b)
-	ok(t, z, err, FALSE)
+	ok(t, z, err, False)
 
 	z, err = b.Eq(cx, a)
-	ok(t, z, err, FALSE)
+	ok(t, z, err, False)
 
 	ls := NewList([]Value{One, Zero})
 

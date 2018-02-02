@@ -30,7 +30,7 @@ func (s str) Freeze() (Value, Error) {
 }
 
 func (s str) Frozen() (Bool, Error) {
-	return TRUE, nil
+	return True, nil
 }
 
 func (s str) ToStr(cx Context) Str { return s }
@@ -47,7 +47,7 @@ func (s str) Eq(cx Context, v Value) (Bool, Error) {
 		return NewBool(s == t), nil
 
 	default:
-		return FALSE, nil
+		return False, nil
 	}
 }
 

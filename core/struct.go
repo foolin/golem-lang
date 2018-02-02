@@ -102,13 +102,13 @@ func (st *_struct) Eq(cx Context, v Value) (Bool, Error) {
 	// same type
 	that, ok := v.(Struct)
 	if !ok {
-		return FALSE, nil
+		return False, nil
 	}
 
 	// same number of fields
 	fields := st.FieldNames()
 	if len(fields) != len(that.FieldNames()) {
-		return FALSE, nil
+		return False, nil
 	}
 
 	// all fields have same value
@@ -118,20 +118,20 @@ func (st *_struct) Eq(cx Context, v Value) (Bool, Error) {
 
 		b, err := that.GetField(cx, str(n))
 		if err != nil {
-			return FALSE, nil
+			return False, nil
 		}
 
 		eq, err := a.Eq(cx, b)
 		if err != nil {
 			return nil, err
 		}
-		if eq != TRUE {
-			return FALSE, nil
+		if eq != True {
+			return False, nil
 		}
 	}
 
 	// done
-	return TRUE, nil
+	return True, nil
 }
 
 func (st *_struct) Cmp(cx Context, v Value) (Int, Error) {

@@ -59,7 +59,7 @@ func (ls *list) Eq(cx Context, v Value) (Bool, Error) {
 	case *list:
 		return valuesEq(cx, ls.array, t.array)
 	default:
-		return FALSE, nil
+		return False, nil
 	}
 }
 
@@ -190,7 +190,7 @@ func (ls *list) Filter(cx Context, filterer func(Value) (Value, Error)) (Value, 
 			return nil, TypeMismatchError("Expected Bool")
 		}
 
-		eq, err := pred.Eq(cx, TRUE)
+		eq, err := pred.Eq(cx, True)
 		if err != nil {
 			return nil, err
 		}

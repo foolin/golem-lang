@@ -41,10 +41,10 @@ func TestRegex(t *testing.T) {
 	fnMatch := match.(g.NativeFunc)
 
 	result, err := fnMatch.Invoke(nil, []g.Value{g.NewStr("foo[123]")})
-	ok(t, result, err, g.TRUE)
+	ok(t, result, err, g.True)
 
 	result, err = fnMatch.Invoke(nil, []g.Value{g.NewStr("456")})
-	ok(t, result, err, g.FALSE)
+	ok(t, result, err, g.False)
 
 	pattern, err = fnCompile.Invoke(nil, []g.Value{g.NewStr("\\")})
 	tassert(t, pattern == nil && err.Error() ==

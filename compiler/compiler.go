@@ -853,10 +853,10 @@ func (c *compiler) visitBasicExpr(basic *ast.BasicExpr) {
 	case ast.NullValue:
 		c.push(basic.Token.Position, o.LoadNull)
 
-	case ast.TRUE:
+	case ast.True:
 		c.push(basic.Token.Position, o.LoadTrue)
 
-	case ast.FALSE:
+	case ast.False:
 		c.push(basic.Token.Position, o.LoadFalse)
 
 	case ast.STR:

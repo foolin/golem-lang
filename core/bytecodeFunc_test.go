@@ -18,16 +18,16 @@ func TestBytecodeFunc(t *testing.T) {
 	okType(t, b, FuncType)
 
 	v, err := a.Eq(cx, a)
-	ok(t, v, err, TRUE)
+	ok(t, v, err, True)
 
 	v, err = b.Eq(cx, b)
-	ok(t, v, err, TRUE)
+	ok(t, v, err, True)
 
 	v, err = a.Eq(cx, b)
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 
 	v, err = b.Eq(cx, a)
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 }
 
 func TestLineNumber(t *testing.T) {

@@ -6,15 +6,18 @@ package core
 
 type _bool bool
 
-var TRUE Bool = _bool(true)
-var FALSE Bool = _bool(false)
+// True is true
+var True Bool = _bool(true)
 
+// False is false
+var False Bool = _bool(false)
+
+// NewBool returns True or False
 func NewBool(b bool) Bool {
 	if b {
-		return TRUE
-	} else {
-		return FALSE
+		return True
 	}
+	return False
 }
 
 func (b _bool) BoolVal() bool {
@@ -30,23 +33,21 @@ func (b _bool) Freeze() (Value, Error) {
 }
 
 func (b _bool) Frozen() (Bool, Error) {
-	return TRUE, nil
+	return True, nil
 }
 
 func (b _bool) ToStr(cx Context) Str {
 	if b {
 		return NewStr("true")
-	} else {
-		return NewStr("false")
 	}
+	return NewStr("false")
 }
 
 func (b _bool) HashCode(cx Context) (Int, Error) {
 	if b {
 		return NewInt(1009), nil
-	} else {
-		return NewInt(1013), nil
 	}
+	return NewInt(1013), nil
 }
 
 func (b _bool) Eq(cx Context, v Value) (Bool, Error) {
@@ -54,9 +55,8 @@ func (b _bool) Eq(cx Context, v Value) (Bool, Error) {
 	case _bool:
 		if b == t {
 			return _bool(true), nil
-		} else {
-			return _bool(false), nil
 		}
+		return _bool(false), nil
 	default:
 		return _bool(false), nil
 	}

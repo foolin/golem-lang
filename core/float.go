@@ -34,7 +34,7 @@ func (f _float) Freeze() (Value, Error) {
 }
 
 func (f _float) Frozen() (Bool, Error) {
-	return TRUE, nil
+	return True, nil
 }
 
 func (f _float) ToStr(cx Context) Str {
@@ -70,7 +70,7 @@ func (f _float) Eq(cx Context, v Value) (Bool, Error) {
 		return NewBool(f.FloatVal() == t.FloatVal()), nil
 
 	default:
-		return FALSE, nil
+		return False, nil
 	}
 }
 

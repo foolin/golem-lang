@@ -259,8 +259,8 @@ func TestIdentOrKeyword(t *testing.T) {
 
 	s = NewScanner("null true false")
 	ok(t, s, ast.NullValue, "null", 1, 1)
-	ok(t, s, ast.TRUE, "true", 1, 6)
-	ok(t, s, ast.FALSE, "false", 1, 11)
+	ok(t, s, ast.True, "true", 1, 6)
+	ok(t, s, ast.False, "false", 1, 11)
 	ok(t, s, ast.EOF, "", 1, 16)
 
 	s = NewScanner("if else")

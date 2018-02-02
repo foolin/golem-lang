@@ -67,7 +67,7 @@ func (d *dict) Eq(cx Context, v Value) (Bool, Error) {
 	case *dict:
 		return d.hashMap.Eq(cx, t.hashMap)
 	default:
-		return FALSE, nil
+		return False, nil
 	}
 }
 

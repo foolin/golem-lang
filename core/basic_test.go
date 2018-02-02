@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-var cx Context = nil
+var cx Context
 
 func tassert(t *testing.T, flag bool) {
 	if !flag {
@@ -54,53 +54,53 @@ func TestNull(t *testing.T) {
 	ok(t, v, nil, NewStr("null"))
 
 	v, err = NullValue.Eq(cx, NullValue)
-	ok(t, v, err, TRUE)
-	v, err = NullValue.Eq(cx, TRUE)
-	ok(t, v, err, FALSE)
+	ok(t, v, err, True)
+	v, err = NullValue.Eq(cx, True)
+	ok(t, v, err, False)
 
-	v, err = NullValue.Cmp(cx, TRUE)
+	v, err = NullValue.Cmp(cx, True)
 	fail(t, v, err, "NullValue")
 }
 
 func TestBool(t *testing.T) {
 
-	s := TRUE.ToStr(cx)
+	s := True.ToStr(cx)
 	ok(t, s, nil, NewStr("true"))
-	s = FALSE.ToStr(cx)
+	s = False.ToStr(cx)
 	ok(t, s, nil, NewStr("false"))
 
-	okType(t, TRUE, BoolType)
-	okType(t, FALSE, BoolType)
+	okType(t, True, BoolType)
+	okType(t, False, BoolType)
 
-	tassert(t, TRUE.BoolVal())
-	tassert(t, !FALSE.BoolVal())
+	tassert(t, True.BoolVal())
+	tassert(t, !False.BoolVal())
 
-	b, err := TRUE.Eq(cx, TRUE)
-	ok(t, b, err, TRUE)
-	b, err = FALSE.Eq(cx, FALSE)
-	ok(t, b, err, TRUE)
-	b, err = TRUE.Eq(cx, FALSE)
-	ok(t, b, err, FALSE)
-	b, err = FALSE.Eq(cx, TRUE)
-	ok(t, b, err, FALSE)
-	b, err = FALSE.Eq(cx, NewStr("a"))
-	ok(t, b, err, FALSE)
+	b, err := True.Eq(cx, True)
+	ok(t, b, err, True)
+	b, err = False.Eq(cx, False)
+	ok(t, b, err, True)
+	b, err = True.Eq(cx, False)
+	ok(t, b, err, False)
+	b, err = False.Eq(cx, True)
+	ok(t, b, err, False)
+	b, err = False.Eq(cx, NewStr("a"))
+	ok(t, b, err, False)
 
-	i, err := TRUE.Cmp(cx, FALSE)
+	i, err := True.Cmp(cx, False)
 	ok(t, i, err, One)
-	i, err = FALSE.Cmp(cx, TRUE)
+	i, err = False.Cmp(cx, True)
 	ok(t, i, err, NegOne)
-	i, err = TRUE.Cmp(cx, TRUE)
+	i, err = True.Cmp(cx, True)
 	ok(t, i, err, Zero)
-	i, err = FALSE.Cmp(cx, FALSE)
+	i, err = False.Cmp(cx, False)
 	ok(t, i, err, Zero)
-	i, err = TRUE.Cmp(cx, NewInt(1))
+	i, err = True.Cmp(cx, NewInt(1))
 	fail(t, i, err, "TypeMismatch: Expected Comparable Type")
 
-	val := TRUE.Not()
-	ok(t, val, nil, FALSE)
-	val = FALSE.Not()
-	ok(t, val, nil, TRUE)
+	val := True.Not()
+	ok(t, val, nil, False)
+	val = False.Not()
+	ok(t, val, nil, True)
 }
 
 func TestStr(t *testing.T) {
@@ -117,13 +117,13 @@ func TestStr(t *testing.T) {
 
 	okType(t, a, StrType)
 	v, err = a.Eq(cx, b)
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 	v, err = b.Eq(cx, a)
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 	v, err = a.Eq(cx, a)
-	ok(t, v, err, TRUE)
+	ok(t, v, err, True)
 	v, err = a.Eq(cx, NewStr("a"))
-	ok(t, v, err, TRUE)
+	ok(t, v, err, True)
 
 	v, err = a.Cmp(cx, NewInt(1))
 	fail(t, v, err, "TypeMismatch: Expected Comparable Type")
@@ -178,17 +178,17 @@ func TestInt(t *testing.T) {
 	okType(t, a, IntType)
 
 	z, err := a.Eq(cx, b)
-	ok(t, z, err, FALSE)
+	ok(t, z, err, False)
 	z, err = b.Eq(cx, a)
-	ok(t, z, err, FALSE)
+	ok(t, z, err, False)
 	z, err = a.Eq(cx, a)
-	ok(t, z, err, TRUE)
+	ok(t, z, err, True)
 	z, err = a.Eq(cx, NewInt(0))
-	ok(t, z, err, TRUE)
+	ok(t, z, err, True)
 	z, err = a.Eq(cx, NewFloat(0.0))
-	ok(t, z, err, TRUE)
+	ok(t, z, err, True)
 
-	n, err := a.Cmp(cx, TRUE)
+	n, err := a.Cmp(cx, True)
 	fail(t, n, err, "TypeMismatch: Expected Comparable Type")
 	n, err = a.Cmp(cx, a)
 	ok(t, n, err, NewInt(0))
@@ -218,7 +218,7 @@ func TestInt(t *testing.T) {
 	ok(t, val, err, NewFloat(1.0))
 	val, err = NewInt(3).Sub(NewStr("a"))
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
-	val, err = NewInt(3).Sub(FALSE)
+	val, err = NewInt(3).Sub(False)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = NewInt(3).Sub(NullValue)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
@@ -229,7 +229,7 @@ func TestInt(t *testing.T) {
 	ok(t, val, err, NewFloat(6.0))
 	val, err = NewInt(3).Mul(NewStr("a"))
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
-	val, err = NewInt(3).Mul(FALSE)
+	val, err = NewInt(3).Mul(False)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = NewInt(3).Mul(NullValue)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
@@ -240,7 +240,7 @@ func TestInt(t *testing.T) {
 	ok(t, val, err, NewFloat(1.5))
 	val, err = NewInt(3).Div(NewStr("a"))
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
-	val, err = NewInt(3).Div(FALSE)
+	val, err = NewInt(3).Div(False)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = NewInt(3).Div(NullValue)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
@@ -286,13 +286,13 @@ func TestFloat(t *testing.T) {
 
 	okType(t, a, FloatType)
 	z, err := a.Eq(cx, b)
-	ok(t, z, err, FALSE)
+	ok(t, z, err, False)
 	z, err = b.Eq(cx, a)
-	ok(t, z, err, FALSE)
+	ok(t, z, err, False)
 	z, err = a.Eq(cx, a)
-	ok(t, z, err, TRUE)
+	ok(t, z, err, True)
 	z, err = a.Eq(cx, NewFloat(0.1))
-	ok(t, z, err, TRUE)
+	ok(t, z, err, True)
 
 	f := NewFloat(0.0)
 	g := NewFloat(1.0)
@@ -314,7 +314,7 @@ func TestFloat(t *testing.T) {
 	ok(t, n, err, NewInt(1))
 
 	z, err = NewFloat(1.0).Eq(cx, NewInt(1))
-	ok(t, z, err, TRUE)
+	ok(t, z, err, True)
 
 	val := a.Negate()
 	ok(t, val, nil, NewFloat(-0.1))
@@ -325,7 +325,7 @@ func TestFloat(t *testing.T) {
 	ok(t, val, err, NewFloat(float64(3.3)-float64(2.0)))
 	val, err = NewFloat(3.3).Sub(NewStr("a"))
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
-	val, err = NewFloat(3.3).Sub(FALSE)
+	val, err = NewFloat(3.3).Sub(False)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = NewFloat(3.3).Sub(NullValue)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
@@ -336,7 +336,7 @@ func TestFloat(t *testing.T) {
 	ok(t, val, err, NewFloat(float64(3.3)*float64(2.0)))
 	val, err = NewFloat(3.3).Mul(NewStr("a"))
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
-	val, err = NewFloat(3.3).Mul(FALSE)
+	val, err = NewFloat(3.3).Mul(False)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = NewFloat(3.3).Mul(NullValue)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
@@ -347,7 +347,7 @@ func TestFloat(t *testing.T) {
 	ok(t, val, err, NewFloat(float64(3.3)/float64(2.0)))
 	val, err = NewFloat(3.3).Div(NewStr("a"))
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
-	val, err = NewFloat(3.3).Div(FALSE)
+	val, err = NewFloat(3.3).Div(False)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = NewFloat(3.3).Div(NullValue)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
@@ -361,20 +361,20 @@ func TestFloat(t *testing.T) {
 func TestBasic(t *testing.T) {
 	// make sure all the Basic types can be used as hashmap key
 	entries := make(map[Basic]Value)
-	entries[NullValue] = TRUE
-	entries[Zero] = TRUE
-	entries[NewFloat(0.123)] = TRUE
-	entries[FALSE] = TRUE
+	entries[NullValue] = True
+	entries[Zero] = True
+	entries[NewFloat(0.123)] = True
+	entries[False] = True
 }
 
 func TestBasicHashCode(t *testing.T) {
 	h, err := NullValue.HashCode(cx)
 	fail(t, h, err, "NullValue")
 
-	h, err = TRUE.HashCode(cx)
+	h, err = True.HashCode(cx)
 	ok(t, h, err, NewInt(1009))
 
-	h, err = FALSE.HashCode(cx)
+	h, err = False.HashCode(cx)
 	ok(t, h, err, NewInt(1013))
 
 	h, err = NewInt(123).HashCode(cx)
@@ -423,7 +423,7 @@ func TestStrIterator(t *testing.T) {
 
 	var ibl Iterable = NewStr("abc")
 
-	var itr Iterator = ibl.NewIterator(cx)
+	itr := ibl.NewIterator(cx)
 	v, err := itr.IterGet()
 	fail(t, v, err, "NoSuchElement")
 	s := NewStr("")

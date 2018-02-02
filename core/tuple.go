@@ -30,7 +30,7 @@ func (tp tuple) Freeze() (Value, Error) {
 }
 
 func (tp tuple) Frozen() (Bool, Error) {
-	return TRUE, nil
+	return True, nil
 }
 
 func (tp tuple) ToStr(cx Context) Str {
@@ -70,7 +70,7 @@ func (tp tuple) Eq(cx Context, v Value) (Bool, Error) {
 	case tuple:
 		return valuesEq(cx, tp, t)
 	default:
-		return FALSE, nil
+		return False, nil
 	}
 }
 

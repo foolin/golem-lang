@@ -337,9 +337,9 @@ func (s *Scanner) nextIdentOrKeyword() *ast.Token {
 	case "null":
 		return &ast.Token{ast.NullValue, text, pos}
 	case "true":
-		return &ast.Token{ast.TRUE, text, pos}
+		return &ast.Token{ast.True, text, pos}
 	case "false":
-		return &ast.Token{ast.FALSE, text, pos}
+		return &ast.Token{ast.False, text, pos}
 	case "if":
 		return &ast.Token{ast.IF, text, pos}
 	case "else":

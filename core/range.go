@@ -46,7 +46,7 @@ func (r *rng) Freeze() (Value, Error) {
 }
 
 func (r *rng) Frozen() (Bool, Error) {
-	return TRUE, nil
+	return True, nil
 }
 
 func (r *rng) ToStr(cx Context) Str {
@@ -62,7 +62,7 @@ func (r *rng) Eq(cx Context, v Value) (Bool, Error) {
 	case *rng:
 		return NewBool(reflect.DeepEqual(r, t)), nil
 	default:
-		return FALSE, nil
+		return False, nil
 	}
 }
 

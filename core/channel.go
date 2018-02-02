@@ -31,7 +31,7 @@ func (ch *channel) Freeze() (Value, Error) {
 }
 
 func (ch *channel) Frozen() (Bool, Error) {
-	return TRUE, nil
+	return True, nil
 }
 
 func (ch *channel) Eq(cx Context, v Value) (Bool, Error) {
@@ -40,7 +40,7 @@ func (ch *channel) Eq(cx Context, v Value) (Bool, Error) {
 		// equality is based on identity
 		return NewBool(ch == t), nil
 	default:
-		return FALSE, nil
+		return False, nil
 	}
 }
 

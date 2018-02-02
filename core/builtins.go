@@ -156,7 +156,7 @@ var BuiltinRange = &nativeFunc{
 		return NewRange(from.IntVal(), to.IntVal(), step.IntVal())
 	}}
 
-// BuiltinAssert asserts that a single Bool is TRUE
+// BuiltinAssert asserts that a single Bool is True
 var BuiltinAssert = &nativeFunc{
 	1, 1,
 	func(cx Context, values []Value) (Value, Error) {
@@ -166,7 +166,7 @@ var BuiltinAssert = &nativeFunc{
 		}
 
 		if b.BoolVal() {
-			return TRUE, nil
+			return True, nil
 		}
 		return nil, AssertionFailedError()
 	}}

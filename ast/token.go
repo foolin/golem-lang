@@ -91,8 +91,8 @@ const (
 
 	basicBegin
 	NullValue
-	TRUE
-	FALSE
+	True
+	False
 	STR
 	INT
 	FLOAT
@@ -220,10 +220,10 @@ func (t TokenKind) String() string {
 
 	case NullValue:
 		return "NullValue"
-	case TRUE:
-		return "TRUE"
-	case FALSE:
-		return "FALSE"
+	case True:
+		return "True"
+	case False:
+		return "False"
 	case STR:
 		return "STR"
 	case INT:

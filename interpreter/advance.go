@@ -481,10 +481,10 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = append(f.stack, g.NullValue)
 		f.ip++
 	case o.LoadTrue:
-		f.stack = append(f.stack, g.TRUE)
+		f.stack = append(f.stack, g.True)
 		f.ip++
 	case o.LoadFalse:
-		f.stack = append(f.stack, g.FALSE)
+		f.stack = append(f.stack, g.False)
 		f.ip++
 	case o.LoadZero:
 		f.stack = append(f.stack, g.Zero)

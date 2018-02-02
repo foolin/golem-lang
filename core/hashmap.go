@@ -43,7 +43,7 @@ func NewHashMap(cx Context, entries []*HEntry) *HashMap {
 func (hm *HashMap) Eq(cx Context, that *HashMap) (Bool, Error) {
 
 	if hm.size != that.size {
-		return FALSE, nil
+		return False, nil
 	}
 
 	itr := hm.Iterator()
@@ -61,11 +61,11 @@ func (hm *HashMap) Eq(cx Context, that *HashMap) (Bool, Error) {
 		}
 
 		if !eq.BoolVal() {
-			return FALSE, nil
+			return False, nil
 		}
 	}
 
-	return TRUE, nil
+	return True, nil
 }
 
 // Get retrieves a value, or returns NullValue if the value is not present
@@ -109,9 +109,9 @@ func (hm *HashMap) ContainsKey(cx Context, key Value) (flag Bool, err Error) {
 	b := hm.buckets[hm._lookupBucket(cx, key)]
 	n := hm._indexOf(cx, b, key)
 	if n == -1 {
-		return FALSE, nil
+		return False, nil
 	}
-	return TRUE, nil
+	return True, nil
 }
 
 // Remove removes the value associated with the given key, if the key
@@ -134,11 +134,11 @@ func (hm *HashMap) Remove(cx Context, key Value) (flag Bool, err Error) {
 	b := hm.buckets[h]
 	n := hm._indexOf(cx, b, key)
 	if n == -1 {
-		return FALSE, nil
+		return False, nil
 	}
 	hm.buckets[h] = append(b[:n], b[n+1:]...)
 	hm.size--
-	return TRUE, nil
+	return True, nil
 }
 
 // Put adds a new key-value pair to the HashMap

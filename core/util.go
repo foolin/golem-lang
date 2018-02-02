@@ -62,7 +62,7 @@ func sliceIndices(from Value, to Value, length int) (int, int, Error) {
 func valuesEq(cx Context, as []Value, bs []Value) (Bool, Error) {
 
 	if len(as) != len(bs) {
-		return FALSE, nil
+		return False, nil
 	}
 
 	for i, a := range as {
@@ -70,12 +70,12 @@ func valuesEq(cx Context, as []Value, bs []Value) (Bool, Error) {
 		if err != nil {
 			return nil, err
 		}
-		if eq == FALSE {
-			return FALSE, nil
+		if eq == False {
+			return False, nil
 		}
 	}
 
-	return TRUE, nil
+	return True, nil
 }
 
 func strHash(s string) int {

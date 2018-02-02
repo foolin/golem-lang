@@ -36,7 +36,7 @@ func (f *nativeFunc) Freeze() (Value, Error) {
 }
 
 func (f *nativeFunc) Frozen() (Bool, Error) {
-	return TRUE, nil
+	return True, nil
 }
 
 func (f *nativeFunc) Eq(cx Context, v Value) (Bool, Error) {
@@ -45,7 +45,7 @@ func (f *nativeFunc) Eq(cx Context, v Value) (Bool, Error) {
 		// equality is based on identity
 		return NewBool(f == t), nil
 	default:
-		return FALSE, nil
+		return False, nil
 	}
 }
 
@@ -111,6 +111,6 @@ func (f *intrinsicFunc) Eq(cx Context, v Value) (Bool, Error) {
 		}
 		return NewBool(ownerEq.BoolVal() && (f.name == t.name)), nil
 	default:
-		return FALSE, nil
+		return False, nil
 	}
 }

@@ -47,9 +47,9 @@ func TestStruct(t *testing.T) {
 	ok(t, s, nil, NewStr("struct { }"))
 
 	z, err := stc.Eq(cx, newStruct([]Field{}))
-	ok(t, z, err, TRUE)
+	ok(t, z, err, True)
 	z, err = stc.Eq(cx, newStruct([]Field{NewField("a", true, One)}))
-	ok(t, z, err, FALSE)
+	ok(t, z, err, False)
 
 	val, err := stc.GetField(cx, NewStr("a"))
 	fail(t, val, err, "NoSuchField: Field 'a' not found")
@@ -63,9 +63,9 @@ func TestStruct(t *testing.T) {
 	ok(t, s, nil, NewStr("struct { a: 1 }"))
 
 	z, err = stc.Eq(cx, newStruct([]Field{}))
-	ok(t, z, err, FALSE)
+	ok(t, z, err, False)
 	z, err = stc.Eq(cx, newStruct([]Field{NewField("a", true, One)}))
-	ok(t, z, err, TRUE)
+	ok(t, z, err, True)
 
 	val, err = stc.GetField(cx, NewStr("a"))
 	ok(t, val, err, One)
@@ -90,10 +90,10 @@ func TestStruct(t *testing.T) {
 	ok(t, val, err, NewInt(456))
 
 	val, err = stc.Has(NewStr("a"))
-	ok(t, val, err, TRUE)
+	ok(t, val, err, True)
 
 	val, err = stc.Has(NewStr("abc"))
-	ok(t, val, err, FALSE)
+	ok(t, val, err, False)
 
 	val, err = stc.Has(Zero)
 	fail(t, val, err, "TypeMismatch: Expected 'Str'")
@@ -154,13 +154,13 @@ func TestList(t *testing.T) {
 	ok(t, v, nil, NewStr("[ ]"))
 
 	v, err = ls.Eq(cx, NewList([]Value{}))
-	ok(t, v, err, TRUE)
+	ok(t, v, err, True)
 
 	v, err = ls.Eq(cx, NewList([]Value{NewStr("a")}))
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 
 	v, err = ls.Eq(cx, NullValue)
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 
 	v = ls.Len()
 	ok(t, v, nil, Zero)
@@ -168,10 +168,10 @@ func TestList(t *testing.T) {
 	ls.Add(cx, NewStr("a"))
 
 	v, err = ls.Eq(cx, NewList([]Value{}))
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 
 	v, err = ls.Eq(cx, NewList([]Value{NewStr("a")}))
-	ok(t, v, err, TRUE)
+	ok(t, v, err, True)
 
 	v = ls.Len()
 	ok(t, v, nil, One)
@@ -191,10 +191,10 @@ func TestList(t *testing.T) {
 	v, err = ls.Get(cx, One)
 	fail(t, v, err, "IndexOutOfBounds: 1")
 
-	err = ls.Set(cx, NegOne, TRUE)
+	err = ls.Set(cx, NegOne, True)
 	tassert(t, err == nil)
 
-	err = ls.Set(cx, One, TRUE)
+	err = ls.Set(cx, One, True)
 	fail(t, nil, err, "IndexOutOfBounds: 1")
 
 	v = ls.ToStr(cx)
@@ -228,10 +228,10 @@ func TestDict(t *testing.T) {
 	ok(t, v, err, NewStr("dict { }"))
 
 	v, err = d.Eq(cx, NewDict(cx, []*HEntry{}))
-	ok(t, v, err, TRUE)
+	ok(t, v, err, True)
 
 	v, err = d.Eq(cx, NullValue)
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 
 	v = d.Len()
 	ok(t, v, nil, Zero)
@@ -246,10 +246,10 @@ func TestDict(t *testing.T) {
 	ok(t, v, err, One)
 
 	v, err = d.Eq(cx, NewDict(cx, []*HEntry{}))
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 
 	v, err = d.Eq(cx, NewDict(cx, []*HEntry{{NewStr("a"), One}}))
-	ok(t, v, err, TRUE)
+	ok(t, v, err, True)
 
 	v = d.Len()
 	ok(t, v, nil, One)
@@ -267,13 +267,13 @@ func TestDict(t *testing.T) {
 	ok(t, v, nil, NewStr("dict { b: 2, a: 1 }"))
 
 	tp := NewTuple([]Value{One, Zero})
-	d = NewDict(cx, []*HEntry{{tp, TRUE}})
+	d = NewDict(cx, []*HEntry{{tp, True}})
 
 	v = d.ToStr(cx)
 	ok(t, v, nil, NewStr("dict { (1, 0): true }"))
 
 	v, err = d.Get(cx, tp)
-	ok(t, v, err, TRUE)
+	ok(t, v, err, True)
 }
 
 func TestSet(t *testing.T) {
@@ -287,13 +287,13 @@ func TestSet(t *testing.T) {
 	ok(t, v, err, NewStr("set { }"))
 
 	v, err = s.Eq(cx, NewSet(cx, []Value{}))
-	ok(t, v, err, TRUE)
+	ok(t, v, err, True)
 
 	v, err = s.Eq(cx, NewSet(cx, []Value{One}))
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 
 	v, err = s.Eq(cx, NullValue)
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 
 	v = s.Len()
 	ok(t, v, nil, Zero)
@@ -304,13 +304,13 @@ func TestSet(t *testing.T) {
 	ok(t, v, err, NewStr("set { 1 }"))
 
 	v, err = s.Eq(cx, NewSet(cx, []Value{}))
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 
 	v, err = s.Eq(cx, NewSet(cx, []Value{One, One, One}))
-	ok(t, v, err, TRUE)
+	ok(t, v, err, True)
 
 	v, err = s.Eq(cx, NullValue)
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 
 	v = s.Len()
 	ok(t, v, nil, One)
@@ -332,13 +332,13 @@ func TestTuple(t *testing.T) {
 	okType(t, tp, TupleType)
 
 	v, err = tp.Eq(cx, NewTuple([]Value{Zero, Zero}))
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 
 	v, err = tp.Eq(cx, NewTuple([]Value{One, Zero}))
-	ok(t, v, err, TRUE)
+	ok(t, v, err, True)
 
 	v, err = tp.Eq(cx, NullValue)
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 
 	v, err = tp.Get(cx, Zero)
 	ok(t, v, err, One)
@@ -376,13 +376,13 @@ func TestRange(t *testing.T) {
 	okType(t, r, RangeType)
 
 	v, err = r.Eq(cx, newRange(0, 5, 2))
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 
 	v, err = r.Eq(cx, newRange(0, 5, 1))
-	ok(t, v, err, TRUE)
+	ok(t, v, err, True)
 
 	v, err = r.Eq(cx, NullValue)
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 
 	v = r.Len()
 	ok(t, v, nil, NewInt(5))

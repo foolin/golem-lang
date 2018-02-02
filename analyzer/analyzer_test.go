@@ -128,7 +128,7 @@ FnExpr(numLocals:3 numCaptures:0 parentCaptures:[])
 .   .   .   IdentExpr(a,(0,false,false))
 .   .   .   BasicExpr(INT,"1")
 .   .   If
-.   .   .   BasicExpr(TRUE,"true")
+.   .   .   BasicExpr(True,"true")
 .   .   .   Block
 .   .   .   .   ExprStmt
 .   .   .   .   .   AssignmentExpr
@@ -156,7 +156,7 @@ func TestLoop(t *testing.T) {
 FnExpr(numLocals:0 numCaptures:0 parentCaptures:[])
 .   Block
 .   .   While
-.   .   .   BasicExpr(TRUE,"true")
+.   .   .   BasicExpr(True,"true")
 .   .   .   Block
 .   .   .   .   ExprStmt
 .   .   .   .   .   BinaryExpr("+")
@@ -170,7 +170,7 @@ FnExpr(numLocals:0 numCaptures:0 parentCaptures:[])
 FnExpr(numLocals:0 numCaptures:0 parentCaptures:[])
 .   Block
 .   .   While
-.   .   .   BasicExpr(TRUE,"true")
+.   .   .   BasicExpr(True,"true")
 .   .   .   Block
 .   .   .   .   ExprStmt
 .   .   .   .   .   BinaryExpr("+")

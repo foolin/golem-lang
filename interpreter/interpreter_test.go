@@ -174,44 +174,44 @@ func TestExpressions(t *testing.T) {
 	failExpr(t, "1 + null;", "TypeMismatch: Expected Number Type")
 	failExpr(t, "null + 1;", "TypeMismatch: Expected Number Type")
 
-	okExpr(t, "true == 'a';", g.FALSE)
-	okExpr(t, "3 * 7 + 4 == 5 * 5;", g.TRUE)
-	okExpr(t, "1 != 1;", g.FALSE)
-	okExpr(t, "1 != 2;", g.TRUE)
+	okExpr(t, "true == 'a';", g.False)
+	okExpr(t, "3 * 7 + 4 == 5 * 5;", g.True)
+	okExpr(t, "1 != 1;", g.False)
+	okExpr(t, "1 != 2;", g.True)
 
-	okExpr(t, "!false;", g.TRUE)
-	okExpr(t, "!true;", g.FALSE)
+	okExpr(t, "!false;", g.True)
+	okExpr(t, "!true;", g.False)
 	failExpr(t, "!null;", "TypeMismatch: Expected 'Bool'")
 
 	failExpr(t, "!'a';", "TypeMismatch: Expected 'Bool'")
 	failExpr(t, "!1;", "TypeMismatch: Expected 'Bool'")
 	failExpr(t, "!1.0;", "TypeMismatch: Expected 'Bool'")
 
-	okExpr(t, "1 < 2;", g.TRUE)
-	okExpr(t, "1 <= 2;", g.TRUE)
-	okExpr(t, "1 > 2;", g.FALSE)
-	okExpr(t, "1 >= 2;", g.FALSE)
+	okExpr(t, "1 < 2;", g.True)
+	okExpr(t, "1 <= 2;", g.True)
+	okExpr(t, "1 > 2;", g.False)
+	okExpr(t, "1 >= 2;", g.False)
 
-	okExpr(t, "2 < 2;", g.FALSE)
-	okExpr(t, "2 <= 2;", g.TRUE)
-	okExpr(t, "2 > 2;", g.FALSE)
-	okExpr(t, "2 >= 2;", g.TRUE)
+	okExpr(t, "2 < 2;", g.False)
+	okExpr(t, "2 <= 2;", g.True)
+	okExpr(t, "2 > 2;", g.False)
+	okExpr(t, "2 >= 2;", g.True)
 
 	okExpr(t, "1 <=> 2;", g.NewInt(-1))
 	okExpr(t, "2 <=> 2;", g.Zero)
 	okExpr(t, "2 <=> 1;", g.One)
 
-	okExpr(t, "true  && true;", g.TRUE)
-	okExpr(t, "true  && false;", g.FALSE)
-	okExpr(t, "false && true;", g.FALSE)
-	okExpr(t, "false && 12;", g.FALSE)
+	okExpr(t, "true  && true;", g.True)
+	okExpr(t, "true  && false;", g.False)
+	okExpr(t, "false && true;", g.False)
+	okExpr(t, "false && 12;", g.False)
 	failExpr(t, "12  && false;", "TypeMismatch: Expected 'Bool'")
 
-	okExpr(t, "true  || true;", g.TRUE)
-	okExpr(t, "true  || false;", g.TRUE)
-	okExpr(t, "false || true;", g.TRUE)
-	okExpr(t, "false || false;", g.FALSE)
-	okExpr(t, "true  || 12;", g.TRUE)
+	okExpr(t, "true  || true;", g.True)
+	okExpr(t, "true  || false;", g.True)
+	okExpr(t, "false || true;", g.True)
+	okExpr(t, "false || false;", g.False)
+	okExpr(t, "true  || 12;", g.True)
 	failExpr(t, "12  || true;", "TypeMismatch: Expected 'Bool'")
 
 	okExpr(t, "~0;", g.NewInt(-1))
@@ -223,7 +223,7 @@ func TestExpressions(t *testing.T) {
 	okExpr(t, "8 << 2;", g.NewInt(8<<2))
 	okExpr(t, "8 >> 2;", g.NewInt(8>>2))
 
-	okExpr(t, "[true][0];", g.TRUE)
+	okExpr(t, "[true][0];", g.True)
 	okExpr(t, "'abc'[1];", g.NewStr("b"))
 	okExpr(t, "'abc'[-1];", g.NewStr("c"))
 	failExpr(t, "[true][2];", "IndexOutOfBounds: 2")
@@ -238,17 +238,17 @@ func TestExpressions(t *testing.T) {
 	okExpr(t, "[6,7,8,9][1:3];", g.NewList([]g.Value{g.NewInt(7), g.NewInt(8)}))
 	okExpr(t, "[6,7,8,9][1:1];", g.NewList([]g.Value{}))
 
-	okExpr(t, "struct{a: 1} has 'a';", g.TRUE)
-	okExpr(t, "struct{a: 1} has 'b';", g.FALSE)
+	okExpr(t, "struct{a: 1} has 'a';", g.True)
+	okExpr(t, "struct{a: 1} has 'b';", g.False)
 
 	failExpr(t, "struct{a: 1, a: 2};", "DuplicateField: Field 'a' is a duplicate")
 
-	okExpr(t, "struct{} == struct{};", g.TRUE)
-	okExpr(t, "struct{a:1} == struct{a:1};", g.TRUE)
-	okExpr(t, "struct{a:1,b:2} == struct{a:1,b:2};", g.TRUE)
-	okExpr(t, "struct{a:1} != struct{a:1,b:2};", g.TRUE)
-	okExpr(t, "struct{a:1,b:2} != struct{b:2};", g.TRUE)
-	okExpr(t, "struct{a:1,b:2} != struct{a:3,b:2};", g.TRUE)
+	okExpr(t, "struct{} == struct{};", g.True)
+	okExpr(t, "struct{a:1} == struct{a:1};", g.True)
+	okExpr(t, "struct{a:1,b:2} == struct{a:1,b:2};", g.True)
+	okExpr(t, "struct{a:1} != struct{a:1,b:2};", g.True)
+	okExpr(t, "struct{a:1,b:2} != struct{b:2};", g.True)
+	okExpr(t, "struct{a:1,b:2} != struct{a:3,b:2};", g.True)
 }
 
 func TestAssignment(t *testing.T) {
@@ -716,8 +716,8 @@ let e = c[1]++;
 
 	okRef(t, i, mod.Refs[0], g.NewList([]g.Value{}))
 	okRef(t, i, mod.Refs[1], g.NewList([]g.Value{g.NewInt(33)}))
-	okRef(t, i, mod.Refs[2], g.NewList([]g.Value{g.FALSE, g.NewInt(23)}))
-	okRef(t, i, mod.Refs[3], g.TRUE)
+	okRef(t, i, mod.Refs[2], g.NewList([]g.Value{g.False, g.NewInt(23)}))
+	okRef(t, i, mod.Refs[3], g.True)
 	okRef(t, i, mod.Refs[4], g.NewInt(22))
 
 	source = `
@@ -1074,7 +1074,7 @@ let a = assert(true);
 `
 	mod = newCompiler(source).Compile()
 	i = interpret(mod)
-	okRef(t, i, mod.Refs[0], g.TRUE)
+	okRef(t, i, mod.Refs[0], g.True)
 
 	fail(t, "assert(1, 2);",
 		g.ArityMismatchError("1", 2),

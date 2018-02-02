@@ -39,7 +39,7 @@ func (f *bytecodeFunc) Freeze() (Value, Error) {
 }
 
 func (f *bytecodeFunc) Frozen() (Bool, Error) {
-	return TRUE, nil
+	return True, nil
 }
 
 func (f *bytecodeFunc) HashCode(cx Context) (Int, Error) {
@@ -64,7 +64,7 @@ func (f *bytecodeFunc) Eq(cx Context, v Value) (Bool, Error) {
 		// equality is based on identity
 		return NewBool(f == t), nil
 	default:
-		return FALSE, nil
+		return False, nil
 	}
 }
 

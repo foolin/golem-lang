@@ -33,9 +33,9 @@ func (n *null) GetField(cx Context, key Str) (Value, Error) { return nil, NullVa
 func (n *null) Eq(cx Context, v Value) (Bool, Error) {
 	switch v.(type) {
 	case *null:
-		return TRUE, nil
+		return True, nil
 	default:
-		return FALSE, nil
+		return False, nil
 	}
 }
 

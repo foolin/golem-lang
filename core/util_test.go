@@ -28,19 +28,19 @@ func ifail(t *testing.T, err Error, expect string) {
 func TestValuesEq(t *testing.T) {
 
 	v, err := valuesEq(cx, []Value{One}, []Value{One})
-	ok(t, v, err, TRUE)
+	ok(t, v, err, True)
 
 	v, err = valuesEq(cx, []Value{}, []Value{})
-	ok(t, v, err, TRUE)
+	ok(t, v, err, True)
 
 	v, err = valuesEq(cx, []Value{One}, []Value{Zero})
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 
 	v, err = valuesEq(cx, []Value{One}, []Value{})
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 
 	v, err = valuesEq(cx, []Value{}, []Value{Zero})
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 }
 
 func TestIndex(t *testing.T) {

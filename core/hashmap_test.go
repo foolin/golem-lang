@@ -64,16 +64,16 @@ func TestRemove(t *testing.T) {
 		{NewStr("b"), NewInt(2)}})
 
 	v, err := d.Remove(cx, NewStr("z"))
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 
 	v, err = d.Remove(cx, NewStr("a"))
-	ok(t, v, err, TRUE)
+	ok(t, v, err, True)
 
 	e := NewHashMap(cx, []*HEntry{
 		{NewStr("b"), NewInt(2)}})
 
 	v, err = d.Eq(cx, e)
-	ok(t, v, err, TRUE)
+	ok(t, v, err, True)
 }
 
 func TestStrHashMap(t *testing.T) {
@@ -87,10 +87,10 @@ func TestStrHashMap(t *testing.T) {
 	ok(t, v, err, NewStr("xyz"))
 
 	v, err = hm.ContainsKey(cx, NewStr("abc"))
-	ok(t, v, err, TRUE)
+	ok(t, v, err, True)
 
 	v, err = hm.ContainsKey(cx, NewStr("bogus"))
-	ok(t, v, err, FALSE)
+	ok(t, v, err, False)
 }
 
 func testIteratorEntries(t *testing.T, initial []*HEntry, expect []*HEntry) {
