@@ -360,7 +360,7 @@ func TestShift(t *testing.T) {
 		panic("shift")
 	}
 
-	var b int = int(high)<<8 + int(low)
+	var b = int(high)<<8 + int(low)
 	if b != a {
 		panic("shift")
 	}

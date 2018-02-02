@@ -15,6 +15,7 @@ import (
 	o "github.com/mjarmy/golem-lang/core/opcodes"
 )
 
+// Compiler compiles an AST into bytecode
 type Compiler interface {
 	ast.Visitor
 	Compile() *g.BytecodeModule
@@ -34,6 +35,7 @@ type compiler struct {
 	idx        int
 }
 
+// NewCompiler creates a new Compiler
 func NewCompiler(anl analyzer.Analyzer, builtInMgr g.BuiltinManager) Compiler {
 
 	funcs := []*ast.FnExpr{anl.Module()}
@@ -50,7 +52,7 @@ func (c *compiler) Compile() *g.BytecodeModule {
 		c.templates = append(
 			c.templates,
 			c.compileFunc(c.funcs[c.idx]))
-		c.idx += 1
+		c.idx++
 	}
 
 	// done
@@ -100,7 +102,7 @@ func (c *compiler) makeModuleProperty(
 			return mod.Refs[refIndex].Val, nil
 		})
 
-	var setter g.Func = nil
+	var setter g.Func
 	if !isConst {
 		setter = g.NewNativeFunc(1, 1,
 			func(cx g.Context, values []g.Value) (g.Value, g.Error) {
@@ -1123,7 +1125,7 @@ func poolIndex(pool *g.HashMap, key g.Basic) int {
 
 	// Its OK for the Context to be nil here
 	// The key is always Basic, so the Context will never be used.
-	var cx g.Context = nil
+	var cx g.Context
 
 	b, err := pool.ContainsKey(cx, key)
 	assert(err == nil)
@@ -1135,14 +1137,14 @@ func poolIndex(pool *g.HashMap, key g.Basic) int {
 		i, ok := v.(g.Int)
 		assert(ok)
 		return int(i.IntVal())
-	} else {
-		i := pool.Len()
-		err := pool.Put(cx, key, i)
-		assert(err == nil)
-		return int(i.IntVal())
 	}
+	i := pool.Len()
+	err = pool.Put(cx, key, i)
+	assert(err == nil)
+	return int(i.IntVal())
 }
 
+// PoolItems is the contstant pool created by the compiler
 type PoolItems []*g.HEntry
 
 func (items PoolItems) Len() int {

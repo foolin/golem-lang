@@ -10,17 +10,17 @@ import (
 	"reflect"
 )
 
-//--------------------------------------------------------------
-// Visitor
-
+// Visitor visits Nodes in an AST
 type Visitor interface {
 	Visit(node Node)
 }
 
+// Traverse Import
 func (imp *Import) Traverse(v Visitor) {
 	v.Visit(imp.Ident)
 }
 
+// Traverse Const
 func (cns *Const) Traverse(v Visitor) {
 	for _, d := range cns.Decls {
 		v.Visit(d.Ident)
@@ -30,6 +30,7 @@ func (cns *Const) Traverse(v Visitor) {
 	}
 }
 
+// Traverse Let
 func (let *Let) Traverse(v Visitor) {
 	for _, d := range let.Decls {
 		v.Visit(d.Ident)
@@ -39,16 +40,19 @@ func (let *Let) Traverse(v Visitor) {
 	}
 }
 
+// Traverse NamedFn
 func (nf *NamedFn) Traverse(v Visitor) {
 	v.Visit(nf.Ident)
 	v.Visit(nf.Func)
 }
 
+// Traverse AssignmentExpr
 func (asn *AssignmentExpr) Traverse(v Visitor) {
 	v.Visit(asn.Assignee)
 	v.Visit(asn.Val)
 }
 
+// Traverse If
 func (ifn *If) Traverse(v Visitor) {
 	v.Visit(ifn.Cond)
 	v.Visit(ifn.Then)
@@ -57,11 +61,13 @@ func (ifn *If) Traverse(v Visitor) {
 	}
 }
 
+// Traverse While
 func (wh *While) Traverse(v Visitor) {
 	v.Visit(wh.Cond)
 	v.Visit(wh.Body)
 }
 
+// Traverse For
 func (fr *For) Traverse(v Visitor) {
 	for _, n := range fr.Idents {
 		v.Visit(n)
@@ -71,6 +77,7 @@ func (fr *For) Traverse(v Visitor) {
 	v.Visit(fr.Body)
 }
 
+// Traverse Switch
 func (sw *Switch) Traverse(v Visitor) {
 	if sw.Item != nil {
 		v.Visit(sw.Item)
@@ -85,6 +92,7 @@ func (sw *Switch) Traverse(v Visitor) {
 	}
 }
 
+// Traverse Case
 func (cs *Case) Traverse(v Visitor) {
 	for _, n := range cs.Matches {
 		v.Visit(n)
@@ -95,28 +103,34 @@ func (cs *Case) Traverse(v Visitor) {
 	}
 }
 
+// Traverse Default
 func (def *Default) Traverse(v Visitor) {
 	for _, n := range def.Body {
 		v.Visit(n)
 	}
 }
 
+// Traverse Break
 func (br *Break) Traverse(v Visitor) {
 }
 
+// Traverse Continue
 func (cn *Continue) Traverse(v Visitor) {
 }
 
+// Traverse Return
 func (rt *Return) Traverse(v Visitor) {
 	if rt.Val != nil {
 		v.Visit(rt.Val)
 	}
 }
 
+// Traverse Throw
 func (t *Throw) Traverse(v Visitor) {
 	v.Visit(t.Val)
 }
 
+// Traverse Try
 func (t *Try) Traverse(v Visitor) {
 	v.Visit(t.TryBlock)
 	if t.CatchToken != nil {
@@ -128,48 +142,59 @@ func (t *Try) Traverse(v Visitor) {
 	}
 }
 
+// Traverse Go
 func (g *Go) Traverse(v Visitor) {
 	v.Visit(g.Invocation)
 }
 
+// Traverse ExprStmt
 func (n *ExprStmt) Traverse(v Visitor) {
 	v.Visit(n.Expr)
 }
 
+// Traverse Block
 func (blk *Block) Traverse(v Visitor) {
 	for _, n := range blk.Statements {
 		v.Visit(n)
 	}
 }
 
+// Traverse TernaryExpr
 func (trn *TernaryExpr) Traverse(v Visitor) {
 	v.Visit(trn.Cond)
 	v.Visit(trn.Then)
 	v.Visit(trn.Else)
 }
 
+// Traverse BinaryExpr
 func (bin *BinaryExpr) Traverse(v Visitor) {
 	v.Visit(bin.Lhs)
 	v.Visit(bin.Rhs)
 }
 
+// Traverse UnaryExpr
 func (un *UnaryExpr) Traverse(v Visitor) {
 	v.Visit(un.Operand)
 }
 
+// Traverse PostfixExpr
 func (pf *PostfixExpr) Traverse(v Visitor) {
 	v.Visit(pf.Assignee)
 }
 
+// Traverse BasicExpr
 func (basic *BasicExpr) Traverse(v Visitor) {
 }
 
+// Traverse IdentExpr
 func (ident *IdentExpr) Traverse(v Visitor) {
 }
 
+// Traverse BuiltinExpr
 func (ident *BuiltinExpr) Traverse(v Visitor) {
 }
 
+// Traverse FnExpr
 func (fn *FnExpr) Traverse(v Visitor) {
 	for _, n := range fn.FormalParams {
 		v.Visit(n.Ident)
@@ -177,6 +202,7 @@ func (fn *FnExpr) Traverse(v Visitor) {
 	v.Visit(fn.Body)
 }
 
+// Traverse InvokeExpr
 func (inv *InvokeExpr) Traverse(v Visitor) {
 	v.Visit(inv.Operand)
 	for _, n := range inv.Params {
@@ -184,64 +210,76 @@ func (inv *InvokeExpr) Traverse(v Visitor) {
 	}
 }
 
+// Traverse ListExpr
 func (ls *ListExpr) Traverse(v Visitor) {
 	for _, val := range ls.Elems {
 		v.Visit(val)
 	}
 }
 
+// Traverse SetExpr
 func (s *SetExpr) Traverse(v Visitor) {
 	for _, val := range s.Elems {
 		v.Visit(val)
 	}
 }
 
+// Traverse TupleExpr
 func (tp *TupleExpr) Traverse(v Visitor) {
 	for _, val := range tp.Elems {
 		v.Visit(val)
 	}
 }
 
+// Traverse StructExpr
 func (stc *StructExpr) Traverse(v Visitor) {
 	for _, val := range stc.Values {
 		v.Visit(val)
 	}
 }
 
+// Traverse DictExpr
 func (dict *DictExpr) Traverse(v Visitor) {
 	for _, e := range dict.Entries {
 		v.Visit(e)
 	}
 }
 
+// Traverse DictEntryExpr
 func (de *DictEntryExpr) Traverse(v Visitor) {
 	v.Visit(de.Key)
 	v.Visit(de.Value)
 }
 
-func (this *ThisExpr) Traverse(v Visitor) {
+// Traverse ThisExpr
+func (t *ThisExpr) Traverse(v Visitor) {
 }
 
+// Traverse FieldExpr
 func (f *FieldExpr) Traverse(v Visitor) {
 	v.Visit(f.Operand)
 }
 
+// Traverse IndexExpr
 func (i *IndexExpr) Traverse(v Visitor) {
 	v.Visit(i.Operand)
 	v.Visit(i.Index)
 }
 
+// Traverse SliceExpr
 func (i *SliceExpr) Traverse(v Visitor) {
 	v.Visit(i.Operand)
 	v.Visit(i.From)
 	v.Visit(i.To)
 }
 
+// Traverse SliceFromExpr
 func (i *SliceFromExpr) Traverse(v Visitor) {
 	v.Visit(i.Operand)
 	v.Visit(i.From)
 }
 
+// Traverse SliceToExpr
 func (i *SliceToExpr) Traverse(v Visitor) {
 	v.Visit(i.Operand)
 	v.Visit(i.To)
@@ -255,6 +293,8 @@ type dump struct {
 	indent int
 }
 
+// Dump creates a string representation of a Node and its
+// descendant Nodes.
 func Dump(node Node) string {
 	p := &dump{}
 	p.Visit(node)
