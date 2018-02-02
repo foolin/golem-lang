@@ -49,86 +49,86 @@ type (
 	//---------------------
 	// statement ndoes
 
-	Import struct {
+	ImportStmt struct {
 		Token *Token
 		Ident *IdentExpr
 	}
 
-	Const struct {
+	ConstStmt struct {
 		Token *Token
-		Decls []*Decl
+		Decls []*DeclNode
 	}
 
-	Let struct {
+	LetStmt struct {
 		Token *Token
-		Decls []*Decl
+		Decls []*DeclNode
 	}
 
-	NamedFn struct {
+	NamedFnStmt struct {
 		Token *Token
 		Ident *IdentExpr
 		Func  *FnExpr
 	}
 
-	If struct {
+	IfStmt struct {
 		Token *Token
 		Cond  Expression
-		Then  *Block
-		Else  Node // either a Block, or another If
+		Then  *BlockNode
+		Else  Node // either a BlockNode, or another IfStmt
 	}
 
-	While struct {
+	WhileStmt struct {
 		Token *Token
 		Cond  Expression
-		Body  *Block
+		Body  *BlockNode
 	}
 
-	For struct {
+	ForStmt struct {
 		Token         *Token
 		Idents        []*IdentExpr
 		IterableIdent *IdentExpr
 		Iterable      Expression
-		Body          *Block
+		Body          *BlockNode
 	}
 
-	Switch struct {
+	SwitchStmt struct {
 		Token   *Token
 		Item    Expression
 		LBrace  *Token
-		Cases   []*Case
-		Default *Default
+		Cases   []*CaseNode
+		DefaultNode *DefaultNode
 		RBrace  *Token
 	}
 
-	Break struct {
+	BreakStmt struct {
 		Token *Token
 	}
 
-	Continue struct {
+	ContinueStmt struct {
 		Token *Token
 	}
 
-	Return struct {
-		Token *Token
-		Val   Expression
-	}
-
-	Throw struct {
+	ReturnStmt struct {
 		Token *Token
 		Val   Expression
 	}
 
-	Try struct {
+	ThrowStmt struct {
+		Token *Token
+		Val   Expression
+	}
+
+	TryStmt struct {
 		TryToken     *Token
-		TryBlock     *Block
+		TryBlock     *BlockNode
 		CatchToken   *Token
 		CatchIdent   *IdentExpr
-		CatchBlock   *Block
+		CatchBlock   *BlockNode
 		FinallyToken *Token
-		FinallyBlock *Block
+		FinallyBlock *BlockNode
 	}
 
-	Go struct {
+	GoStmt struct {
 		Token      *Token
 		Invocation *InvokeExpr
 	}
@@ -141,24 +141,24 @@ type (
 	//--------------------------------------
 	// nodes that are parts of a statement
 
-	Block struct {
+	BlockNode struct {
 		LBrace     *Token
 		Statements []Statement
 		RBrace     *Token
 	}
 
-	Decl struct {
+	DeclNode struct {
 		Ident *IdentExpr
 		Val   Expression
 	}
 
-	Case struct {
+	CaseNode struct {
 		Token   *Token
 		Matches []Expression
 		Body    []Statement
 	}
 
-	Default struct {
+	DefaultNode struct {
 		Token *Token
 		Body  []Statement
 	}
@@ -210,7 +210,7 @@ type (
 	FnExpr struct {
 		Token        *Token
 		FormalParams []*FormalParam
-		Body         *Block
+		Body         *BlockNode
 
 		// set by analyzer
 		NumLocals      int
@@ -317,24 +317,24 @@ type (
 //--------------------------------------------------------------
 // markers
 
-func (*Import) stmtMarker()   {}
-func (*Const) stmtMarker()    {}
-func (*Let) stmtMarker()      {}
-func (*NamedFn) stmtMarker()  {}
-func (*If) stmtMarker()       {}
-func (*While) stmtMarker()    {}
-func (*For) stmtMarker()      {}
-func (*Switch) stmtMarker()   {}
-func (*Break) stmtMarker()    {}
-func (*Continue) stmtMarker() {}
-func (*Return) stmtMarker()   {}
-func (*Throw) stmtMarker()    {}
-func (*Try) stmtMarker()      {}
-func (*Go) stmtMarker()       {}
+func (*ImportStmt) stmtMarker()   {}
+func (*ConstStmt) stmtMarker()    {}
+func (*LetStmt) stmtMarker()      {}
+func (*NamedFnStmt) stmtMarker()  {}
+func (*IfStmt) stmtMarker()       {}
+func (*WhileStmt) stmtMarker()    {}
+func (*ForStmt) stmtMarker()      {}
+func (*SwitchStmt) stmtMarker()   {}
+func (*BreakStmt) stmtMarker()    {}
+func (*ContinueStmt) stmtMarker() {}
+func (*ReturnStmt) stmtMarker()   {}
+func (*ThrowStmt) stmtMarker()    {}
+func (*TryStmt) stmtMarker()      {}
+func (*GoStmt) stmtMarker()       {}
 func (*ExprStmt) stmtMarker() {}
 
-func (*While) loopMarker() {}
-func (*For) loopMarker()   {}
+func (*WhileStmt) loopMarker() {}
+func (*ForStmt) loopMarker()   {}
 
 func (*AssignmentExpr) exprMarker() {}
 func (*TernaryExpr) exprMarker()    {}
@@ -367,8 +367,8 @@ func (*IndexExpr) assignableMarker()   {}
 //--------------------------------------------------------------
 // Begin, End
 
-func (n *Block) Begin() Pos { return n.LBrace.Position }
-func (n *Block) End() Pos {
+func (n *BlockNode) Begin() Pos { return n.LBrace.Position }
+func (n *BlockNode) End() Pos {
 	if n.RBrace == nil {
 		return n.Statements[len(n.Statements)-1].End()
 	} else {
@@ -376,11 +376,11 @@ func (n *Block) End() Pos {
 	}
 }
 
-func (n *Import) Begin() Pos { return n.Token.Position }
-func (n *Import) End() Pos   { return n.Ident.End() }
+func (n *ImportStmt) Begin() Pos { return n.Token.Position }
+func (n *ImportStmt) End() Pos   { return n.Ident.End() }
 
-func (n *Decl) Begin() Pos { return n.Ident.Begin() }
-func (n *Decl) End() Pos {
+func (n *DeclNode) Begin() Pos { return n.Ident.Begin() }
+func (n *DeclNode) End() Pos {
 	if n.Val == nil {
 		return n.Ident.End()
 	} else {
@@ -388,17 +388,17 @@ func (n *Decl) End() Pos {
 	}
 }
 
-func (n *Const) Begin() Pos { return n.Token.Position }
-func (n *Const) End() Pos   { return n.Decls[len(n.Decls)-1].End() }
+func (n *ConstStmt) Begin() Pos { return n.Token.Position }
+func (n *ConstStmt) End() Pos   { return n.Decls[len(n.Decls)-1].End() }
 
-func (n *Let) Begin() Pos { return n.Token.Position }
-func (n *Let) End() Pos   { return n.Decls[len(n.Decls)-1].End() }
+func (n *LetStmt) Begin() Pos { return n.Token.Position }
+func (n *LetStmt) End() Pos   { return n.Decls[len(n.Decls)-1].End() }
 
-func (n *NamedFn) Begin() Pos { return n.Token.Position }
-func (n *NamedFn) End() Pos   { return n.Func.End() }
+func (n *NamedFnStmt) Begin() Pos { return n.Token.Position }
+func (n *NamedFnStmt) End() Pos   { return n.Func.End() }
 
-func (n *If) Begin() Pos { return n.Token.Position }
-func (n *If) End() Pos {
+func (n *IfStmt) Begin() Pos { return n.Token.Position }
+func (n *IfStmt) End() Pos {
 	if n.Else == nil {
 		return n.Then.End()
 	} else {
@@ -406,29 +406,29 @@ func (n *If) End() Pos {
 	}
 }
 
-func (n *While) Begin() Pos { return n.Token.Position }
-func (n *While) End() Pos   { return n.Body.End() }
+func (n *WhileStmt) Begin() Pos { return n.Token.Position }
+func (n *WhileStmt) End() Pos   { return n.Body.End() }
 
-func (n *For) Begin() Pos { return n.Token.Position }
-func (n *For) End() Pos   { return n.Body.End() }
+func (n *ForStmt) Begin() Pos { return n.Token.Position }
+func (n *ForStmt) End() Pos   { return n.Body.End() }
 
-func (n *Switch) Begin() Pos { return n.Token.Position }
-func (n *Switch) End() Pos   { return n.RBrace.Position }
+func (n *SwitchStmt) Begin() Pos { return n.Token.Position }
+func (n *SwitchStmt) End() Pos   { return n.RBrace.Position }
 
-func (n *Case) Begin() Pos { return n.Token.Position }
-func (n *Case) End() Pos   { return n.Body[len(n.Body)-1].End() }
+func (n *CaseNode) Begin() Pos { return n.Token.Position }
+func (n *CaseNode) End() Pos   { return n.Body[len(n.Body)-1].End() }
 
-func (n *Default) Begin() Pos { return n.Token.Position }
-func (n *Default) End() Pos   { return n.Body[len(n.Body)-1].End() }
+func (n *DefaultNode) Begin() Pos { return n.Token.Position }
+func (n *DefaultNode) End() Pos   { return n.Body[len(n.Body)-1].End() }
 
-func (n *Break) Begin() Pos { return n.Token.Position }
-func (n *Break) End() Pos   { return n.Token.Position.Advance(len("break") - 1) }
+func (n *BreakStmt) Begin() Pos { return n.Token.Position }
+func (n *BreakStmt) End() Pos   { return n.Token.Position.Advance(len("break") - 1) }
 
-func (n *Continue) Begin() Pos { return n.Token.Position }
-func (n *Continue) End() Pos   { return n.Token.Position.Advance(len("continue") - 1) }
+func (n *ContinueStmt) Begin() Pos { return n.Token.Position }
+func (n *ContinueStmt) End() Pos   { return n.Token.Position.Advance(len("continue") - 1) }
 
-func (n *Return) Begin() Pos { return n.Token.Position }
-func (n *Return) End() Pos {
+func (n *ReturnStmt) Begin() Pos { return n.Token.Position }
+func (n *ReturnStmt) End() Pos {
 	if n.Val == nil {
 		return n.Token.Position.Advance(len("return") - 1)
 	} else {
@@ -436,11 +436,11 @@ func (n *Return) End() Pos {
 	}
 }
 
-func (n *Throw) Begin() Pos { return n.Token.Position }
-func (n *Throw) End() Pos   { return n.Val.End() }
+func (n *ThrowStmt) Begin() Pos { return n.Token.Position }
+func (n *ThrowStmt) End() Pos   { return n.Val.End() }
 
-func (n *Try) Begin() Pos { return n.TryToken.Position }
-func (n *Try) End() Pos {
+func (n *TryStmt) Begin() Pos { return n.TryToken.Position }
+func (n *TryStmt) End() Pos {
 	if n.FinallyToken == nil {
 		return n.CatchBlock.End()
 	} else {
@@ -448,8 +448,8 @@ func (n *Try) End() Pos {
 	}
 }
 
-func (n *Go) Begin() Pos { return n.Token.Position }
-func (n *Go) End() Pos   { return n.Invocation.End() }
+func (n *GoStmt) Begin() Pos { return n.Token.Position }
+func (n *GoStmt) End() Pos   { return n.Invocation.End() }
 
 func (n *ExprStmt) Begin() Pos { return n.Expr.Begin() }
 func (n *ExprStmt) End() Pos   { return n.Expr.End() }
@@ -537,7 +537,7 @@ func (n *SliceToExpr) End() Pos     { return n.RBracket.Position }
 //--------------------------------------------------------------
 // string
 
-func (blk *Block) String() string {
+func (blk *BlockNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString("{ ")
 	writeStatements(blk.Statements, &buf)
@@ -545,7 +545,7 @@ func (blk *Block) String() string {
 	return buf.String()
 }
 
-func (imp *Import) String() string {
+func (imp *ImportStmt) String() string {
 	buf := new(bytes.Buffer)
 	buf.WriteString("import ")
 	buf.WriteString(imp.Ident.String())
@@ -553,7 +553,7 @@ func (imp *Import) String() string {
 	return buf.String()
 }
 
-func (cns *Const) String() string {
+func (cns *ConstStmt) String() string {
 	buf := new(bytes.Buffer)
 	buf.WriteString("const ")
 	buf.WriteString(stringDecls(cns.Decls))
@@ -561,7 +561,7 @@ func (cns *Const) String() string {
 	return buf.String()
 }
 
-func (let *Let) String() string {
+func (let *LetStmt) String() string {
 	buf := new(bytes.Buffer)
 	buf.WriteString("let ")
 	buf.WriteString(stringDecls(let.Decls))
@@ -569,7 +569,7 @@ func (let *Let) String() string {
 	return buf.String()
 }
 
-func (nf *NamedFn) String() string {
+func (nf *NamedFnStmt) String() string {
 	buf := new(bytes.Buffer)
 	buf.WriteString("fn ")
 	buf.WriteString(nf.Ident.String())
@@ -580,7 +580,7 @@ func (nf *NamedFn) String() string {
 	return buf.String()
 }
 
-func stringDecls(decls []*Decl) string {
+func stringDecls(decls []*DeclNode) string {
 	buf := new(bytes.Buffer)
 	for i, d := range decls {
 		if i > 0 {
@@ -598,7 +598,7 @@ func (asn *AssignmentExpr) String() string {
 	return fmt.Sprintf("(%v = %v)", asn.Assignee, asn.Val)
 }
 
-func (ifn *If) String() string {
+func (ifn *IfStmt) String() string {
 	if ifn.Else == nil {
 		return fmt.Sprintf("if %v %v;", ifn.Cond, ifn.Then)
 	} else {
@@ -606,11 +606,11 @@ func (ifn *If) String() string {
 	}
 }
 
-func (wh *While) String() string {
+func (wh *WhileStmt) String() string {
 	return fmt.Sprintf("while %v %v;", wh.Cond, wh.Body)
 }
 
-func (fr *For) String() string {
+func (fr *ForStmt) String() string {
 	if len(fr.Idents) == 1 {
 		return fmt.Sprintf("for %v in %v %v;", fr.Idents[0], fr.Iterable, fr.Body)
 	} else {
@@ -633,7 +633,7 @@ func stringIdents(idents []*IdentExpr) string {
 	return buf.String()
 }
 
-func (sw *Switch) String() string {
+func (sw *SwitchStmt) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString("switch ")
@@ -649,15 +649,15 @@ func (sw *Switch) String() string {
 		}
 		buf.WriteString(fmt.Sprintf("%v", c))
 	}
-	if sw.Default != nil {
-		buf.WriteString(fmt.Sprintf("%v", sw.Default))
+	if sw.DefaultNode != nil {
+		buf.WriteString(fmt.Sprintf("%v", sw.DefaultNode))
 	}
 	buf.WriteString(" };")
 
 	return buf.String()
 }
 
-func (cs *Case) String() string {
+func (cs *CaseNode) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString("case ")
@@ -674,7 +674,7 @@ func (cs *Case) String() string {
 	return buf.String()
 }
 
-func (def *Default) String() string {
+func (def *DefaultNode) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString(" default: ")
@@ -683,15 +683,15 @@ func (def *Default) String() string {
 	return buf.String()
 }
 
-func (br *Break) String() string {
+func (br *BreakStmt) String() string {
 	return "break;"
 }
 
-func (cn *Continue) String() string {
+func (cn *ContinueStmt) String() string {
 	return "continue;"
 }
 
-func (rt *Return) String() string {
+func (rt *ReturnStmt) String() string {
 	if rt.Val == nil {
 		return "return;"
 	} else {
@@ -699,11 +699,11 @@ func (rt *Return) String() string {
 	}
 }
 
-func (t *Throw) String() string {
+func (t *ThrowStmt) String() string {
 	return fmt.Sprintf("throw %v;", t.Val)
 }
 
-func (t *Try) String() string {
+func (t *TryStmt) String() string {
 
 	var buf bytes.Buffer
 
@@ -726,7 +726,7 @@ func (t *Try) String() string {
 	return buf.String()
 }
 
-func (g *Go) String() string {
+func (g *GoStmt) String() string {
 	return fmt.Sprintf("go %v;", g.Invocation)
 }
 
@@ -751,7 +751,7 @@ func (pf *PostfixExpr) String() string {
 }
 
 func (basic *BasicExpr) String() string {
-	if basic.Token.Kind == STR {
+	if basic.Token.Kind == Str {
 		// TODO escape embedded delim, \n, \r, \t, \u
 		return strings.Join([]string{"'", basic.Token.Text, "'"}, "")
 	} else {
@@ -951,7 +951,7 @@ func writeStatements(stmts []Statement, buf *bytes.Buffer) {
 
 //--------------------------------------------------------------
 // A Variable points to a Ref.  Variables are defined either
-// as formal params for a Function, or via Let or Const, or via
+// as formal params for a Function, or via LetStmt or ConstStmt, or via
 // the capture mechanism.
 
 type Variable struct {

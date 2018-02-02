@@ -11,7 +11,7 @@ import (
 //--------------------------------------------------------------
 // NativeFunc
 
-// NativeFunc is a Func that is implemented in Go rather than Golem
+// NativeFunc is a Func that is implemented in GoStmt rather than Golem
 type NativeFunc interface {
 	Func
 }

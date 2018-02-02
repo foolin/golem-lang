@@ -187,7 +187,7 @@ var BuiltinMerge = &nativeFunc{
 		return MergeStructs(structs), nil
 	}}
 
-// BuiltinChan creates a new Chan.  If an Int is passed in,
+// BuiltinChan creates a new Chan.  IfStmt an Int is passed in,
 // it is used to create a buffered Chan.
 var BuiltinChan = &nativeFunc{
 	0, 1,

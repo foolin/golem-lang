@@ -27,7 +27,7 @@ func NewField(name string, isConst bool, value Value) Field {
 }
 
 // NewProperty creates a Property using 'getter' and 'setter' functions.
-// If the setter is nil, then the property is const.
+// IfStmt the setter is nil, then the property is const.
 func NewProperty(name string, getter Func, setter Func) Field {
 
 	if getter.MinArity() != 0 || getter.MaxArity() != 0 {

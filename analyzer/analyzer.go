@@ -69,25 +69,25 @@ func (a *analyzer) Module() *ast.FnExpr {
 func (a *analyzer) Visit(node ast.Node) {
 	switch t := node.(type) {
 
-	case *ast.Block:
+	case *ast.BlockNode:
 		a.visitBlock(t)
 
 	case *ast.FnExpr:
 		a.visitFunc(t)
 
-	case *ast.Import:
+	case *ast.ImportStmt:
 		a.visitImport(t)
 
-	case *ast.Const:
+	case *ast.ConstStmt:
 		a.visitDecls(t.Decls, true)
 
-	case *ast.Let:
+	case *ast.LetStmt:
 		a.visitDecls(t.Decls, false)
 
 	case *ast.AssignmentExpr:
 		a.visitAssignment(t)
 
-	case *ast.Try:
+	case *ast.TryStmt:
 		a.visitTry(t)
 
 	case *ast.PostfixExpr:
@@ -96,22 +96,22 @@ func (a *analyzer) Visit(node ast.Node) {
 	case *ast.IdentExpr:
 		a.visitIdentExpr(t)
 
-	case *ast.While:
+	case *ast.WhileStmt:
 		a.loops = append(a.loops, t)
 		t.Traverse(a)
 		a.loops = a.loops[:len(a.loops)-1]
 
-	case *ast.For:
+	case *ast.ForStmt:
 		a.loops = append(a.loops, t)
 		a.visitFor(t)
 		a.loops = a.loops[:len(a.loops)-1]
 
-	case *ast.Break:
+	case *ast.BreakStmt:
 		if len(a.loops) == 0 {
 			a.errors = append(a.errors, errors.New("'break' outside of loop"))
 		}
 
-	case *ast.Continue:
+	case *ast.ContinueStmt:
 		if len(a.loops) == 0 {
 			a.errors = append(a.errors, errors.New("'continue' outside of loop"))
 		}
@@ -128,7 +128,7 @@ func (a *analyzer) Visit(node ast.Node) {
 	}
 }
 
-func (a *analyzer) visitDecls(decls []*ast.Decl, isConst bool) {
+func (a *analyzer) visitDecls(decls []*ast.DeclNode, isConst bool) {
 
 	for _, d := range decls {
 		if d.Val != nil {
@@ -138,7 +138,7 @@ func (a *analyzer) visitDecls(decls []*ast.Decl, isConst bool) {
 	}
 }
 
-func (a *analyzer) visitImport(imp *ast.Import) {
+func (a *analyzer) visitImport(imp *ast.ImportStmt) {
 	a.defineIdent(imp.Ident, true)
 
 	sym := imp.Ident.Symbol.Text
@@ -147,7 +147,7 @@ func (a *analyzer) visitImport(imp *ast.Import) {
 	}
 }
 
-func (a *analyzer) visitTry(t *ast.Try) {
+func (a *analyzer) visitTry(t *ast.TryStmt) {
 
 	a.Visit(t.TryBlock)
 	if t.CatchToken != nil {
@@ -171,20 +171,20 @@ func (a *analyzer) defineIdent(ident *ast.IdentExpr, isConst bool) {
 	}
 }
 
-func (a *analyzer) visitBlock(blk *ast.Block) {
+func (a *analyzer) visitBlock(blk *ast.BlockNode) {
 
 	a.curScope = newBlockScope(a.curScope)
 
 	// visit named funcs identifiers
 	for _, n := range blk.Statements {
-		if nf, ok := n.(*ast.NamedFn); ok {
+		if nf, ok := n.(*ast.NamedFnStmt); ok {
 			a.defineIdent(nf.Ident, true)
 		}
 	}
 
 	// visit everything, skipping named func identifiers
 	for _, n := range blk.Statements {
-		if nf, ok := n.(*ast.NamedFn); ok {
+		if nf, ok := n.(*ast.NamedFnStmt); ok {
 			a.Visit(nf.Func)
 		} else {
 			a.Visit(n)
@@ -194,7 +194,7 @@ func (a *analyzer) visitBlock(blk *ast.Block) {
 	a.curScope = a.curScope.parent
 }
 
-func (a *analyzer) visitFor(fr *ast.For) {
+func (a *analyzer) visitFor(fr *ast.ForStmt) {
 
 	// push block scope
 	a.curScope = newBlockScope(a.curScope)

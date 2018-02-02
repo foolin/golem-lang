@@ -30,271 +30,271 @@ func (p Pos) Advance(len int) Pos {
 type TokenKind int
 
 const (
-	UNEXPECTED_CHAR TokenKind = iota
-	UNEXPECTED_EOF
+	UnexpectedChar TokenKind = iota
+	UnexpectedEof
 	badKind
 
-	EOF
-	LINE_FEED
+	Eof
+	LineFeed
 
-	PLUS
-	DBL_PLUS
-	MINUS
-	DBL_MINUS
+	Plus
+	DblPlus
+	Minus
+	DblMinus
 
-	STAR
-	SLASH
-	LPAREN
-	RPAREN
-	LBRACE
-	RBRACE
-	LBRACKET
-	RBRACKET
-	SEMICOLON
-	COLON
-	COMMA
-	DOT
-	HOOK
+	Star
+	Slash
+	Lparen
+	Rparen
+	Lbrace
+	Rbrace
+	Lbracket
+	Rbracket
+	Semicolon
+	Colon
+	Comma
+	Dot
+	Hook
 
-	EQ
-	DBL_EQ
-	EQ_GT
-	NOT
-	NOT_EQ
-	GT
-	DBL_GT
-	GT_EQ
-	LT
-	DBL_LT
-	LT_EQ
-	CMP
+	Eq
+	DblEq
+	EqGt
+	Not
+	NotEq
+	Gt
+	DblGt
+	GtEq
+	Lt
+	DblLt
+	LtEq
+	Cmp
 
-	PIPE
-	DBL_PIPE
-	AMP
-	DBL_AMP
+	Pipe
+	DblPipe
+	Amp
+	DblAmp
 
-	PERCENT
-	CARET
-	TILDE
+	Percent
+	Caret
+	Tilde
 
-	PLUS_EQ
-	MINUS_EQ
-	STAR_EQ
-	SLASH_EQ
-	PERCENT_EQ
-	CARET_EQ
-	AMP_EQ
-	PIPE_EQ
-	DBL_LT_EQ
-	DBL_GT_EQ
+	PlusEq
+	MinusEq
+	StarEq
+	SlashEq
+	PercentEq
+	CaretEq
+	AmpEq
+	PipeEq
+	DblLtEq
+	DblGtEq
 
 	basicBegin
-	NULL
+	Null
 	True
 	False
-	STR
-	INT
-	FLOAT
+	Str
+	Int
+	Float
 	basicEnd
 
-	IDENT
+	Ident
 
-	BLANK_IDENT
-	IF
-	ELSE
-	WHILE
-	BREAK
-	CONTINUE
-	FN
-	RETURN
-	CONST
-	LET
-	FOR
-	IN
-	SWITCH
-	CASE
-	DEFAULT
-	PROP
+	BlankDent
+	If
+	Else
+	While
+	Break
+	Continue
+	Fn
+	Return
+	Const
+	Let
+	For
+	In
+	Switch
+	Case
+	Default
+	Prop
 
-	STRUCT
-	THIS
-	HAS
-	DICT
-	SET
+	Struct
+	This
+	Has
+	Dict
+	Set
 
-	TRY
-	CATCH
-	FINALLY
-	THROW
+	Try
+	Catch
+	Finally
+	Throw
 
-	GO
+	Go
 
-	MODULE
-	IMPORT
+	Module
+	Import
 
-	RESERVED
+	Reserved
 )
 
 func (t TokenKind) String() string {
 	switch t {
-	case UNEXPECTED_CHAR:
-		return "UNEXPECTED_CHAR"
-	case UNEXPECTED_EOF:
-		return "UNEXPECTED_EOF"
+	case UnexpectedChar:
+		return "UnexpectedChar"
+	case UnexpectedEof:
+		return "UnexpectedEof"
 
-	case EOF:
-		return "EOF"
-	case LINE_FEED:
-		return "LINE_FEED"
+	case Eof:
+		return "Eof"
+	case LineFeed:
+		return "LineFeed"
 
-	case PLUS:
-		return "PLUS"
-	case DBL_PLUS:
-		return "DBL_PLUS"
-	case MINUS:
-		return "MINUS"
-	case DBL_MINUS:
-		return "DBL_MINUS"
-	case STAR:
-		return "STAR"
-	case SLASH:
-		return "SLASH"
-	case LPAREN:
-		return "LPAREN"
-	case RPAREN:
-		return "RPAREN"
-	case LBRACE:
-		return "LBRACE"
-	case RBRACE:
-		return "RBRACE"
-	case LBRACKET:
-		return "LBRACKET"
-	case RBRACKET:
-		return "RBRACKET"
+	case Plus:
+		return "Plus"
+	case DblPlus:
+		return "DblPlus"
+	case Minus:
+		return "Minus"
+	case DblMinus:
+		return "DblMinus"
+	case Star:
+		return "Star"
+	case Slash:
+		return "Slash"
+	case Lparen:
+		return "Lparen"
+	case Rparen:
+		return "Rparen"
+	case Lbrace:
+		return "Lbrace"
+	case Rbrace:
+		return "Rbrace"
+	case Lbracket:
+		return "Lbracket"
+	case Rbracket:
+		return "Rbracket"
 
-	case EQ:
-		return "EQ"
-	case DBL_EQ:
-		return "DBL_EQ"
-	case EQ_GT:
-		return "EQ_GT"
-	case SEMICOLON:
-		return "SEMICOLON"
-	case COLON:
-		return "COLON"
-	case COMMA:
-		return "COMMA"
-	case DOT:
-		return "DOT"
-	case HOOK:
-		return "HOOK"
+	case Eq:
+		return "Eq"
+	case DblEq:
+		return "DblEq"
+	case EqGt:
+		return "EqGt"
+	case Semicolon:
+		return "Semicolon"
+	case Colon:
+		return "Colon"
+	case Comma:
+		return "Comma"
+	case Dot:
+		return "Dot"
+	case Hook:
+		return "Hook"
 
-	case PERCENT:
-		return "PERCENT"
-	case CARET:
-		return "CARET"
-	case TILDE:
-		return "TILDE"
+	case Percent:
+		return "Percent"
+	case Caret:
+		return "Caret"
+	case Tilde:
+		return "Tilde"
 
-	case PLUS_EQ:
-		return "PLUS_EQ"
-	case MINUS_EQ:
-		return "MINUS_EQ"
-	case STAR_EQ:
-		return "STAR_EQ"
-	case SLASH_EQ:
-		return "SLASH_EQ"
-	case PERCENT_EQ:
-		return "PERCENT_EQ"
-	case CARET_EQ:
-		return "CARET_EQ"
-	case AMP_EQ:
-		return "AMP_EQ"
-	case PIPE_EQ:
-		return "PIPE_EQ"
-	case DBL_LT_EQ:
-		return "DBL_LT_EQ"
-	case DBL_GT_EQ:
-		return "DBL_GT_EQ"
+	case PlusEq:
+		return "PlusEq"
+	case MinusEq:
+		return "MinusEq"
+	case StarEq:
+		return "StarEq"
+	case SlashEq:
+		return "SlashEq"
+	case PercentEq:
+		return "PercentEq"
+	case CaretEq:
+		return "CaretEq"
+	case AmpEq:
+		return "AmpEq"
+	case PipeEq:
+		return "PipeEq"
+	case DblLtEq:
+		return "DblLtEq"
+	case DblGtEq:
+		return "DblGtEq"
 
-	case NULL:
-		return "NULL"
+	case Null:
+		return "Null"
 	case True:
 		return "True"
 	case False:
 		return "False"
-	case STR:
-		return "STR"
-	case INT:
-		return "INT"
-	case FLOAT:
-		return "FLOAT"
+	case Str:
+		return "Str"
+	case Int:
+		return "Int"
+	case Float:
+		return "Float"
 
-	case IDENT:
-		return "IDENT"
+	case Ident:
+		return "Ident"
 
-	case IF:
-		return "IF"
-	case ELSE:
-		return "ELSE"
-	case WHILE:
-		return "WHILE"
-	case BREAK:
-		return "BREAK"
-	case CONTINUE:
-		return "CONTINUE"
-	case FN:
-		return "FN"
-	case RETURN:
-		return "RETURN"
-	case CONST:
-		return "CONST"
-	case LET:
-		return "LET"
-	case FOR:
-		return "FOR"
-	case IN:
-		return "IN"
-	case SWITCH:
-		return "SWITCH"
-	case CASE:
-		return "CASE"
-	case DEFAULT:
-		return "DEFAULT"
-	case PROP:
-		return "PROP"
+	case If:
+		return "If"
+	case Else:
+		return "Else"
+	case While:
+		return "While"
+	case Break:
+		return "Break"
+	case Continue:
+		return "Continue"
+	case Fn:
+		return "Fn"
+	case Return:
+		return "Return"
+	case Const:
+		return "Const"
+	case Let:
+		return "Let"
+	case For:
+		return "For"
+	case In:
+		return "In"
+	case Switch:
+		return "Switch"
+	case Case:
+		return "Case"
+	case Default:
+		return "Default"
+	case Prop:
+		return "Prop"
 
-	case STRUCT:
-		return "STRUCT"
-	case THIS:
-		return "THIS"
-	case HAS:
-		return "HAS"
-	case DICT:
-		return "DICT"
-	case SET:
-		return "SET"
+	case Struct:
+		return "Struct"
+	case This:
+		return "This"
+	case Has:
+		return "Has"
+	case Dict:
+		return "Dict"
+	case Set:
+		return "Set"
 
-	case TRY:
-		return "TRY"
-	case FINALLY:
-		return "FINALLY"
-	case CATCH:
-		return "CATCH"
-	case THROW:
-		return "THROW"
+	case Try:
+		return "Try"
+	case Finally:
+		return "Finally"
+	case Catch:
+		return "Catch"
+	case Throw:
+		return "Throw"
 
-	case GO:
-		return "GO"
+	case Go:
+		return "Go"
 
-	case MODULE:
-		return "MODULE"
-	case IMPORT:
-		return "IMPORT"
+	case Module:
+		return "Module"
+	case Import:
+		return "Import"
 
-	case RESERVED:
-		return "RESERVED"
+	case Reserved:
+		return "Reserved"
 
 	default:
 		panic("unreachable")

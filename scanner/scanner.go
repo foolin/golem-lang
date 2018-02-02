@@ -45,7 +45,7 @@ func NewScanner(source string) *Scanner {
 // finished, the last token is produced over and over again.
 func (s *Scanner) Next() *ast.Token {
 
-	// If we are already finished, then by convention we return
+	// IfStmt we are already finished, then by convention we return
 	// the last token again.  This makes it easier
 	// for the parser to implement lookahead.
 	if s.isDone {
@@ -63,7 +63,7 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == '\n':
 			s.consume()
-			return &ast.Token{ast.LINE_FEED, "\n", pos}
+			return &ast.Token{ast.LineFeed, "\n", pos}
 
 		case r == '/':
 			s.consume()
@@ -112,10 +112,10 @@ func (s *Scanner) Next() *ast.Token {
 
 			case '=':
 				s.consume()
-				return &ast.Token{ast.SLASH_EQ, "/=", pos}
+				return &ast.Token{ast.SlashEq, "/=", pos}
 
 			default:
-				return &ast.Token{ast.SLASH, "/", pos}
+				return &ast.Token{ast.Slash, "/", pos}
 			}
 
 		case r == '+':
@@ -123,12 +123,12 @@ func (s *Scanner) Next() *ast.Token {
 			r = s.cur.r
 			if r == '+' {
 				s.consume()
-				return &ast.Token{ast.DBL_PLUS, "++", pos}
+				return &ast.Token{ast.DblPlus, "++", pos}
 			} else if r == '=' {
 				s.consume()
-				return &ast.Token{ast.PLUS_EQ, "+=", pos}
+				return &ast.Token{ast.PlusEq, "+=", pos}
 			} else {
-				return &ast.Token{ast.PLUS, "+", pos}
+				return &ast.Token{ast.Plus, "+", pos}
 			}
 
 		case r == '-':
@@ -136,12 +136,12 @@ func (s *Scanner) Next() *ast.Token {
 			r = s.cur.r
 			if r == '-' {
 				s.consume()
-				return &ast.Token{ast.DBL_MINUS, "--", pos}
+				return &ast.Token{ast.DblMinus, "--", pos}
 			} else if r == '=' {
 				s.consume()
-				return &ast.Token{ast.MINUS_EQ, "-=", pos}
+				return &ast.Token{ast.MinusEq, "-=", pos}
 			} else {
-				return &ast.Token{ast.MINUS, "-", pos}
+				return &ast.Token{ast.Minus, "-", pos}
 			}
 
 		case r == '*':
@@ -149,77 +149,77 @@ func (s *Scanner) Next() *ast.Token {
 			r = s.cur.r
 			if r == '=' {
 				s.consume()
-				return &ast.Token{ast.STAR_EQ, "*=", pos}
+				return &ast.Token{ast.StarEq, "*=", pos}
 			}
-			return &ast.Token{ast.STAR, "*", pos}
+			return &ast.Token{ast.Star, "*", pos}
 
 		case r == '(':
 			s.consume()
-			return &ast.Token{ast.LPAREN, "(", pos}
+			return &ast.Token{ast.Lparen, "(", pos}
 		case r == ')':
 			s.consume()
-			return &ast.Token{ast.RPAREN, ")", pos}
+			return &ast.Token{ast.Rparen, ")", pos}
 		case r == '{':
 			s.consume()
-			return &ast.Token{ast.LBRACE, "{", pos}
+			return &ast.Token{ast.Lbrace, "{", pos}
 		case r == '}':
 			s.consume()
-			return &ast.Token{ast.RBRACE, "}", pos}
+			return &ast.Token{ast.Rbrace, "}", pos}
 		case r == '[':
 			s.consume()
-			return &ast.Token{ast.LBRACKET, "[", pos}
+			return &ast.Token{ast.Lbracket, "[", pos}
 		case r == ']':
 			s.consume()
-			return &ast.Token{ast.RBRACKET, "]", pos}
+			return &ast.Token{ast.Rbracket, "]", pos}
 		case r == ';':
 			s.consume()
-			return &ast.Token{ast.SEMICOLON, ";", pos}
+			return &ast.Token{ast.Semicolon, ";", pos}
 		case r == ':':
 			s.consume()
-			return &ast.Token{ast.COLON, ":", pos}
+			return &ast.Token{ast.Colon, ":", pos}
 		case r == ',':
 			s.consume()
-			return &ast.Token{ast.COMMA, ",", pos}
+			return &ast.Token{ast.Comma, ",", pos}
 		case r == '.':
 			s.consume()
-			return &ast.Token{ast.DOT, ".", pos}
+			return &ast.Token{ast.Dot, ".", pos}
 		case r == '?':
 			s.consume()
-			return &ast.Token{ast.HOOK, "?", pos}
+			return &ast.Token{ast.Hook, "?", pos}
 
 		case r == '%':
 			s.consume()
 			r := s.cur.r
 			if r == '=' {
 				s.consume()
-				return &ast.Token{ast.PERCENT_EQ, "%=", pos}
+				return &ast.Token{ast.PercentEq, "%=", pos}
 			}
-			return &ast.Token{ast.PERCENT, "%", pos}
+			return &ast.Token{ast.Percent, "%", pos}
 
 		case r == '^':
 			s.consume()
 			r := s.cur.r
 			if r == '=' {
 				s.consume()
-				return &ast.Token{ast.CARET_EQ, "^=", pos}
+				return &ast.Token{ast.CaretEq, "^=", pos}
 			}
-			return &ast.Token{ast.CARET, "^", pos}
+			return &ast.Token{ast.Caret, "^", pos}
 
 		case r == '~':
 			s.consume()
-			return &ast.Token{ast.TILDE, "~", pos}
+			return &ast.Token{ast.Tilde, "~", pos}
 
 		case r == '=':
 			s.consume()
 			r := s.cur.r
 			if r == '=' {
 				s.consume()
-				return &ast.Token{ast.DBL_EQ, "==", pos}
+				return &ast.Token{ast.DblEq, "==", pos}
 			} else if r == '>' {
 				s.consume()
-				return &ast.Token{ast.EQ_GT, "=>", pos}
+				return &ast.Token{ast.EqGt, "=>", pos}
 			} else {
-				return &ast.Token{ast.EQ, "=", pos}
+				return &ast.Token{ast.Eq, "=", pos}
 			}
 
 		case r == '!':
@@ -227,25 +227,25 @@ func (s *Scanner) Next() *ast.Token {
 			r := s.cur.r
 			if r == '=' {
 				s.consume()
-				return &ast.Token{ast.NOT_EQ, "!=", pos}
+				return &ast.Token{ast.NotEq, "!=", pos}
 			}
-			return &ast.Token{ast.NOT, "!", pos}
+			return &ast.Token{ast.Not, "!", pos}
 		case r == '>':
 			s.consume()
 			r := s.cur.r
 			if r == '=' {
 				s.consume()
-				return &ast.Token{ast.GT_EQ, ">=", pos}
+				return &ast.Token{ast.GtEq, ">=", pos}
 			} else if r == '>' {
 				s.consume()
 				r := s.cur.r
 				if r == '=' {
 					s.consume()
-					return &ast.Token{ast.DBL_GT_EQ, ">>=", pos}
+					return &ast.Token{ast.DblGtEq, ">>=", pos}
 				}
-				return &ast.Token{ast.DBL_GT, ">>", pos}
+				return &ast.Token{ast.DblGt, ">>", pos}
 			} else {
-				return &ast.Token{ast.GT, ">", pos}
+				return &ast.Token{ast.Gt, ">", pos}
 			}
 		case r == '<':
 			s.consume()
@@ -255,19 +255,19 @@ func (s *Scanner) Next() *ast.Token {
 				r := s.cur.r
 				if r == '>' {
 					s.consume()
-					return &ast.Token{ast.CMP, "<=>", pos}
+					return &ast.Token{ast.Cmp, "<=>", pos}
 				}
-				return &ast.Token{ast.LT_EQ, "<=", pos}
+				return &ast.Token{ast.LtEq, "<=", pos}
 			} else if r == '<' {
 				s.consume()
 				r := s.cur.r
 				if r == '=' {
 					s.consume()
-					return &ast.Token{ast.DBL_LT_EQ, "<<=", pos}
+					return &ast.Token{ast.DblLtEq, "<<=", pos}
 				}
-				return &ast.Token{ast.DBL_LT, "<<", pos}
+				return &ast.Token{ast.DblLt, "<<", pos}
 			} else {
-				return &ast.Token{ast.LT, "<", pos}
+				return &ast.Token{ast.Lt, "<", pos}
 			}
 
 		case r == '|':
@@ -275,24 +275,24 @@ func (s *Scanner) Next() *ast.Token {
 			r := s.cur.r
 			if r == '|' {
 				s.consume()
-				return &ast.Token{ast.DBL_PIPE, "||", pos}
+				return &ast.Token{ast.DblPipe, "||", pos}
 			} else if r == '=' {
 				s.consume()
-				return &ast.Token{ast.PIPE_EQ, "|=", pos}
+				return &ast.Token{ast.PipeEq, "|=", pos}
 			} else {
-				return &ast.Token{ast.PIPE, "|", pos}
+				return &ast.Token{ast.Pipe, "|", pos}
 			}
 		case r == '&':
 			s.consume()
 			r := s.cur.r
 			if r == '&' {
 				s.consume()
-				return &ast.Token{ast.DBL_AMP, "&&", pos}
+				return &ast.Token{ast.DblAmp, "&&", pos}
 			} else if r == '=' {
 				s.consume()
-				return &ast.Token{ast.AMP_EQ, "&=", pos}
+				return &ast.Token{ast.AmpEq, "&=", pos}
 			} else {
-				return &ast.Token{ast.AMP, "&", pos}
+				return &ast.Token{ast.Amp, "&", pos}
 			}
 
 		case r == '\'':
@@ -312,7 +312,7 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == eof:
 			s.isDone = true
-			s.doneToken = &ast.Token{ast.EOF, "", pos}
+			s.doneToken = &ast.Token{ast.Eof, "", pos}
 			return s.doneToken
 
 		default:
@@ -333,77 +333,77 @@ func (s *Scanner) nextIdentOrKeyword() *ast.Token {
 	switch text {
 
 	case "_":
-		return &ast.Token{ast.BLANK_IDENT, text, pos}
+		return &ast.Token{ast.BlankDent, text, pos}
 	case "null":
-		return &ast.Token{ast.NULL, text, pos}
+		return &ast.Token{ast.Null, text, pos}
 	case "true":
 		return &ast.Token{ast.True, text, pos}
 	case "false":
 		return &ast.Token{ast.False, text, pos}
 	case "if":
-		return &ast.Token{ast.IF, text, pos}
+		return &ast.Token{ast.If, text, pos}
 	case "else":
-		return &ast.Token{ast.ELSE, text, pos}
+		return &ast.Token{ast.Else, text, pos}
 	case "while":
-		return &ast.Token{ast.WHILE, text, pos}
+		return &ast.Token{ast.While, text, pos}
 	case "break":
-		return &ast.Token{ast.BREAK, text, pos}
+		return &ast.Token{ast.Break, text, pos}
 	case "continue":
-		return &ast.Token{ast.CONTINUE, text, pos}
+		return &ast.Token{ast.Continue, text, pos}
 	case "fn":
-		return &ast.Token{ast.FN, text, pos}
+		return &ast.Token{ast.Fn, text, pos}
 	case "return":
-		return &ast.Token{ast.RETURN, text, pos}
+		return &ast.Token{ast.Return, text, pos}
 	case "const":
-		return &ast.Token{ast.CONST, text, pos}
+		return &ast.Token{ast.Const, text, pos}
 	case "let":
-		return &ast.Token{ast.LET, text, pos}
+		return &ast.Token{ast.Let, text, pos}
 	case "for":
-		return &ast.Token{ast.FOR, text, pos}
+		return &ast.Token{ast.For, text, pos}
 	case "in":
-		return &ast.Token{ast.IN, text, pos}
+		return &ast.Token{ast.In, text, pos}
 	case "switch":
-		return &ast.Token{ast.SWITCH, text, pos}
+		return &ast.Token{ast.Switch, text, pos}
 	case "case":
-		return &ast.Token{ast.CASE, text, pos}
+		return &ast.Token{ast.Case, text, pos}
 	case "default":
-		return &ast.Token{ast.DEFAULT, text, pos}
+		return &ast.Token{ast.Default, text, pos}
 	case "prop":
-		return &ast.Token{ast.PROP, text, pos}
+		return &ast.Token{ast.Prop, text, pos}
 	case "try":
-		return &ast.Token{ast.TRY, text, pos}
+		return &ast.Token{ast.Try, text, pos}
 	case "catch":
-		return &ast.Token{ast.CATCH, text, pos}
+		return &ast.Token{ast.Catch, text, pos}
 	case "finally":
-		return &ast.Token{ast.FINALLY, text, pos}
+		return &ast.Token{ast.Finally, text, pos}
 	case "throw":
-		return &ast.Token{ast.THROW, text, pos}
+		return &ast.Token{ast.Throw, text, pos}
 	case "go":
-		return &ast.Token{ast.GO, text, pos}
+		return &ast.Token{ast.Go, text, pos}
 	case "module":
-		return &ast.Token{ast.MODULE, text, pos}
+		return &ast.Token{ast.Module, text, pos}
 	case "import":
-		return &ast.Token{ast.IMPORT, text, pos}
+		return &ast.Token{ast.Import, text, pos}
 	case "struct":
-		return &ast.Token{ast.STRUCT, text, pos}
+		return &ast.Token{ast.Struct, text, pos}
 	case "dict":
-		return &ast.Token{ast.DICT, text, pos}
+		return &ast.Token{ast.Dict, text, pos}
 	case "set":
-		return &ast.Token{ast.SET, text, pos}
+		return &ast.Token{ast.Set, text, pos}
 	case "this":
-		return &ast.Token{ast.THIS, text, pos}
+		return &ast.Token{ast.This, text, pos}
 	case "has":
-		return &ast.Token{ast.HAS, text, pos}
+		return &ast.Token{ast.Has, text, pos}
 
 	case "byte", "defer", "goto", "like", "native", "package",
 		"priv", "private", "prot", "protected", "pub", "public",
 		"rune", "select", "static", "sync", "rsync", "with", "yield":
 
 		// reserve a bunch of keywords just in case
-		return &ast.Token{ast.RESERVED, text, pos}
+		return &ast.Token{ast.Reserved, text, pos}
 
 	default:
-		return &ast.Token{ast.IDENT, text, pos}
+		return &ast.Token{ast.Ident, text, pos}
 	}
 }
 
@@ -422,7 +422,7 @@ func (s *Scanner) nextStr(delim rune) *ast.Token {
 		case r == delim:
 			// end of string
 			s.consume()
-			return &ast.Token{ast.STR, buf.String(), pos}
+			return &ast.Token{ast.Str, buf.String(), pos}
 
 		case r == '\\':
 			// escaped character
@@ -520,7 +520,7 @@ func (s *Scanner) nextMultilineStr() *ast.Token {
 		case r == '`':
 			// end of string
 			s.consume()
-			return &ast.Token{ast.STR, buf.String(), pos}
+			return &ast.Token{ast.Str, buf.String(), pos}
 
 		case r == eof:
 			// unterminated string literal
@@ -559,7 +559,7 @@ func (s *Scanner) nextNumber() *ast.Token {
 			return s.nextHexInt(begin, pos)
 
 		default:
-			return &ast.Token{ast.INT, "0", pos}
+			return &ast.Token{ast.Int, "0", pos}
 		}
 
 	} else {
@@ -568,7 +568,7 @@ func (s *Scanner) nextNumber() *ast.Token {
 		if r == '.' || isExp(r) {
 			return s.nextFloat(begin, pos)
 		}
-		return &ast.Token{ast.INT, s.source[begin:s.cur.idx], pos}
+		return &ast.Token{ast.Int, s.source[begin:s.cur.idx], pos}
 	}
 
 }
@@ -583,7 +583,7 @@ func (s *Scanner) nextHexInt(begin int, pos ast.Pos) *ast.Token {
 	}
 	s.acceptWhile(isHexDigit)
 
-	return &ast.Token{ast.INT, s.source[begin:s.cur.idx], pos}
+	return &ast.Token{ast.Int, s.source[begin:s.cur.idx], pos}
 }
 
 func (s *Scanner) nextFloat(begin int, pos ast.Pos) *ast.Token {
@@ -606,7 +606,7 @@ func (s *Scanner) nextFloat(begin int, pos ast.Pos) *ast.Token {
 		s.acceptWhile(isDigit)
 	}
 
-	return &ast.Token{ast.FLOAT, s.source[begin:s.cur.idx], pos}
+	return &ast.Token{ast.Float, s.source[begin:s.cur.idx], pos}
 }
 
 // accept a rune that matches the given function
@@ -649,9 +649,9 @@ func (s *Scanner) expect(fn func(rune) bool) *ast.Token {
 func (s *Scanner) unexpectedChar(r rune, pos ast.Pos) *ast.Token {
 	s.isDone = true
 	if r == eof {
-		s.doneToken = &ast.Token{ast.UNEXPECTED_EOF, "", pos}
+		s.doneToken = &ast.Token{ast.UnexpectedEof, "", pos}
 	} else {
-		s.doneToken = &ast.Token{ast.UNEXPECTED_CHAR, string(r), pos}
+		s.doneToken = &ast.Token{ast.UnexpectedChar, string(r), pos}
 	}
 	return s.doneToken
 }

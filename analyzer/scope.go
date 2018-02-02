@@ -23,7 +23,7 @@ func (s scopeType) String() string {
 	if s == funcType {
 		return "Func "
 	} else if s == blockType {
-		return "Block"
+		return "BlockNode"
 	} else {
 		return "Struct"
 	}
@@ -125,7 +125,7 @@ func mapString(m map[string]*ast.Variable) string {
 }
 
 // Define a Variable, either as a formal param for a Function,
-// or via Let or Const.
+// or via LetStmt or ConstStmt.
 func (s *scope) put(sym string, isConst bool) *ast.Variable {
 
 	_, ok := s.defs[sym]
@@ -197,14 +197,14 @@ func (s *scope) get(sym string) (*ast.Variable, bool) {
 			}
 		}
 
-		// If the varable is defined in the current scope, then
+		// IfStmt the varable is defined in the current scope, then
 		// capture anything that needs to be captured in the stack we have
 		// created, and then return.
 		if _, ok := z.defs[sym]; ok {
 			return capture(sym, stack), true
 		}
 
-		// Still can't find it.  Go to the parent, or return false.
+		// Still can't find it.  GoStmt to the parent, or return false.
 		if z.parent == nil {
 			return nil, false
 		}

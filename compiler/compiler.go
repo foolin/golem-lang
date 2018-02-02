@@ -67,19 +67,19 @@ func (c *compiler) makeModuleContents(mod *g.BytecodeModule) g.Struct {
 	stmts := c.funcs[0].Body.Statements
 	for _, st := range stmts {
 		switch t := st.(type) {
-		case *ast.Let:
+		case *ast.LetStmt:
 			for _, d := range t.Decls {
 				vbl := d.Ident.Variable
 				entries = append(entries, c.makeModuleProperty(
 					mod, d.Ident.Symbol.Text, vbl.Index, vbl.IsConst))
 			}
-		case *ast.Const:
+		case *ast.ConstStmt:
 			for _, d := range t.Decls {
 				vbl := d.Ident.Variable
 				entries = append(entries, c.makeModuleProperty(
 					mod, d.Ident.Symbol.Text, vbl.Index, vbl.IsConst))
 			}
-		case *ast.NamedFn:
+		case *ast.NamedFnStmt:
 			vbl := t.Ident.Variable
 			entries = append(entries, c.makeModuleProperty(
 				mod, t.Ident.Symbol.Text, vbl.Index, vbl.IsConst))
@@ -123,11 +123,11 @@ func (c *compiler) compileFunc(fe *ast.FnExpr) *g.Template {
 	c.lnum = []g.LineNumberEntry{}
 	c.handlers = []g.ExceptionHandler{}
 
-	// TODO LoadNull and Return are workarounds for the fact that
+	// TODO LoadNull and ReturnStmt are workarounds for the fact that
 	// we have not yet written a Control Flow Graph
 	c.push(ast.Pos{}, o.LoadNull)
 	c.Visit(fe.Body)
-	c.push(ast.Pos{}, o.Return)
+	c.push(ast.Pos{}, o.ReturnStmt)
 
 	tpl.OpCodes = c.opc
 	tpl.LineNumberTable = c.lnum
@@ -139,49 +139,49 @@ func (c *compiler) compileFunc(fe *ast.FnExpr) *g.Template {
 func (c *compiler) Visit(node ast.Node) {
 	switch t := node.(type) {
 
-	case *ast.Block:
+	case *ast.BlockNode:
 		c.visitBlock(t)
 
-	case *ast.Import:
+	case *ast.ImportStmt:
 		c.visitImport(t)
 
-	case *ast.Const:
+	case *ast.ConstStmt:
 		c.visitDecls(t.Decls)
 
-	case *ast.Let:
+	case *ast.LetStmt:
 		c.visitDecls(t.Decls)
 
-	case *ast.NamedFn:
+	case *ast.NamedFnStmt:
 		c.visitNamedFn(t)
 
 	case *ast.AssignmentExpr:
 		c.visitAssignment(t)
 
-	case *ast.If:
+	case *ast.IfStmt:
 		c.visitIf(t)
 
-	case *ast.While:
+	case *ast.WhileStmt:
 		c.visitWhile(t)
 
-	case *ast.For:
+	case *ast.ForStmt:
 		c.visitFor(t)
 
-	case *ast.Switch:
+	case *ast.SwitchStmt:
 		c.visitSwitch(t)
 
-	case *ast.Break:
+	case *ast.BreakStmt:
 		c.visitBreak(t)
 
-	case *ast.Continue:
+	case *ast.ContinueStmt:
 		c.visitContinue(t)
 
-	case *ast.Return:
+	case *ast.ReturnStmt:
 		c.visitReturn(t)
 
-	case *ast.Try:
+	case *ast.TryStmt:
 		c.visitTry(t)
 
-	case *ast.Throw:
+	case *ast.ThrowStmt:
 		c.visitThrow(t)
 
 	case *ast.TernaryExpr:
@@ -211,7 +211,7 @@ func (c *compiler) Visit(node ast.Node) {
 	case *ast.InvokeExpr:
 		c.visitInvoke(t)
 
-	case *ast.Go:
+	case *ast.GoStmt:
 		c.visitGo(t)
 
 	case *ast.ExprStmt:
@@ -255,7 +255,7 @@ func (c *compiler) Visit(node ast.Node) {
 	}
 }
 
-func (c *compiler) visitBlock(blk *ast.Block) {
+func (c *compiler) visitBlock(blk *ast.BlockNode) {
 
 	// TODO A 'standalone' expression is an expression that is evaluated
 	// but whose result is never assigned.  The *last* of these type
@@ -278,7 +278,7 @@ func (c *compiler) visitBlock(blk *ast.Block) {
 	}
 }
 
-func (c *compiler) visitDecls(decls []*ast.Decl) {
+func (c *compiler) visitDecls(decls []*ast.DeclNode) {
 
 	for _, d := range decls {
 		if d.Val == nil {
@@ -291,7 +291,7 @@ func (c *compiler) visitDecls(decls []*ast.Decl) {
 	}
 }
 
-func (c *compiler) visitImport(imp *ast.Import) {
+func (c *compiler) visitImport(imp *ast.ImportStmt) {
 
 	ident := imp.Ident
 
@@ -317,7 +317,7 @@ func (c *compiler) assignIdent(ident *ast.IdentExpr) {
 	}
 }
 
-func (c *compiler) visitNamedFn(nf *ast.NamedFn) {
+func (c *compiler) visitNamedFn(nf *ast.NamedFnStmt) {
 
 	c.Visit(nf.Func)
 
@@ -417,7 +417,7 @@ func (c *compiler) visitPostfixExpr(pe *ast.PostfixExpr) {
 	}
 }
 
-func (c *compiler) visitIf(f *ast.If) {
+func (c *compiler) visitIf(f *ast.IfStmt) {
 
 	c.Visit(f.Cond)
 
@@ -451,7 +451,7 @@ func (c *compiler) visitTernaryExpr(f *ast.TernaryExpr) {
 	c.setJump(j1, c.opcLen())
 }
 
-func (c *compiler) visitWhile(w *ast.While) {
+func (c *compiler) visitWhile(w *ast.WhileStmt) {
 
 	begin := c.opcLen()
 	c.Visit(w.Cond)
@@ -467,7 +467,7 @@ func (c *compiler) visitWhile(w *ast.While) {
 	c.fixBreakContinue(begin, body, end)
 }
 
-func (c *compiler) visitFor(f *ast.For) {
+func (c *compiler) visitFor(f *ast.ForStmt) {
 
 	tok := f.Iterable.Begin()
 	idx := f.IterableIdent.Variable.Index
@@ -526,14 +526,14 @@ func (c *compiler) visitFor(f *ast.For) {
 
 func (c *compiler) fixBreakContinue(begin *instPtr, body *instPtr, end *instPtr) {
 
-	// replace Break and Continue with Jump
+	// replace BreakStmt and ContinueStmt with Jump
 	for i := body.ip; i < end.ip; {
 		switch c.opc[i] {
-		case o.Break:
+		case o.BreakStmt:
 			c.opc[i] = o.Jump
 			c.opc[i+1] = end.high
 			c.opc[i+2] = end.low
-		case o.Continue:
+		case o.ContinueStmt:
 			c.opc[i] = o.Jump
 			c.opc[i+1] = begin.high
 			c.opc[i+2] = begin.low
@@ -542,15 +542,15 @@ func (c *compiler) fixBreakContinue(begin *instPtr, body *instPtr, end *instPtr)
 	}
 }
 
-func (c *compiler) visitBreak(br *ast.Break) {
-	c.push(br.Begin(), o.Break, 0xFF, 0xFF)
+func (c *compiler) visitBreak(br *ast.BreakStmt) {
+	c.push(br.Begin(), o.BreakStmt, 0xFF, 0xFF)
 }
 
-func (c *compiler) visitContinue(cn *ast.Continue) {
-	c.push(cn.Begin(), o.Continue, 0xFF, 0xFF)
+func (c *compiler) visitContinue(cn *ast.ContinueStmt) {
+	c.push(cn.Begin(), o.ContinueStmt, 0xFF, 0xFF)
 }
 
-func (c *compiler) visitSwitch(sw *ast.Switch) {
+func (c *compiler) visitSwitch(sw *ast.SwitchStmt) {
 
 	// visit the item, if there is one
 	hasItem := false
@@ -566,8 +566,8 @@ func (c *compiler) visitSwitch(sw *ast.Switch) {
 	}
 
 	// visit default
-	if sw.Default != nil {
-		for _, n := range sw.Default.Body {
+	if sw.DefaultNode != nil {
+		for _, n := range sw.DefaultNode.Body {
 			c.Visit(n)
 		}
 	}
@@ -583,7 +583,7 @@ func (c *compiler) visitSwitch(sw *ast.Switch) {
 	}
 }
 
-func (c *compiler) visitCase(cs *ast.Case, hasItem bool) int {
+func (c *compiler) visitCase(cs *ast.CaseNode, hasItem bool) int {
 
 	bodyJumps := []int{}
 
@@ -624,12 +624,12 @@ func (c *compiler) visitCase(cs *ast.Case, hasItem bool) int {
 	return endJump
 }
 
-func (c *compiler) visitReturn(rt *ast.Return) {
+func (c *compiler) visitReturn(rt *ast.ReturnStmt) {
 	c.Visit(rt.Val)
-	c.push(rt.Begin(), o.Return)
+	c.push(rt.Begin(), o.ReturnStmt)
 }
 
-func (c *compiler) visitTry(t *ast.Try) {
+func (c *compiler) visitTry(t *ast.TryStmt) {
 
 	begin := len(c.opc)
 	c.Visit(t.TryBlock)
@@ -689,75 +689,75 @@ func (c *compiler) visitTry(t *ast.Try) {
 	c.handlers = append(c.handlers, g.ExceptionHandler{begin, end, catch, finally})
 }
 
-func (c *compiler) visitThrow(t *ast.Throw) {
+func (c *compiler) visitThrow(t *ast.ThrowStmt) {
 	c.Visit(t.Val)
-	c.push(t.End(), o.Throw)
+	c.push(t.End(), o.ThrowStmt)
 }
 
 func (c *compiler) visitBinaryExpr(b *ast.BinaryExpr) {
 
 	switch b.Op.Kind {
 
-	case ast.DBL_PIPE:
+	case ast.DblPipe:
 		c.visitOr(b.Lhs, b.Rhs)
-	case ast.DBL_AMP:
+	case ast.DblAmp:
 		c.visitAnd(b.Lhs, b.Rhs)
 
-	case ast.DBL_EQ:
+	case ast.DblEq:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.Eq)
-	case ast.NOT_EQ:
+	case ast.NotEq:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.Ne)
 
-	case ast.GT:
+	case ast.Gt:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.Gt)
-	case ast.GT_EQ:
+	case ast.GtEq:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.Gte)
-	case ast.LT:
+	case ast.Lt:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.Lt)
-	case ast.LT_EQ:
+	case ast.LtEq:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.Lte)
-	case ast.CMP:
+	case ast.Cmp:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.Cmp)
-	case ast.HAS:
+	case ast.Has:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.Has)
 
-	case ast.PLUS:
+	case ast.Plus:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.Plus)
-	case ast.MINUS:
+	case ast.Minus:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.Sub)
-	case ast.STAR:
+	case ast.Star:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.Mul)
-	case ast.SLASH:
+	case ast.Slash:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.Div)
 
-	case ast.PERCENT:
+	case ast.Percent:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.Rem)
-	case ast.AMP:
+	case ast.Amp:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.BitAnd)
-	case ast.PIPE:
+	case ast.Pipe:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.BitOr)
-	case ast.CARET:
+	case ast.Caret:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.BitXor)
-	case ast.DBL_LT:
+	case ast.DblLt:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.LeftShift)
-	case ast.DBL_GT:
+	case ast.DblGt:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.RightShift)
 
@@ -805,14 +805,14 @@ func (c *compiler) visitAnd(lhs ast.Expression, rhs ast.Expression) {
 func (c *compiler) visitUnaryExpr(u *ast.UnaryExpr) {
 
 	switch u.Op.Kind {
-	case ast.MINUS:
+	case ast.Minus:
 		opn := u.Operand
 
 		switch t := opn.(type) {
 		case *ast.BasicExpr:
 			switch t.Token.Kind {
 
-			case ast.INT:
+			case ast.Int:
 				i := parseInt(t.Token.Text)
 				switch i {
 				case 0:
@@ -835,11 +835,11 @@ func (c *compiler) visitUnaryExpr(u *ast.UnaryExpr) {
 			c.push(u.Op.Position, o.Negate)
 		}
 
-	case ast.NOT:
+	case ast.Not:
 		c.Visit(u.Operand)
 		c.push(u.Op.Position, o.Not)
 
-	case ast.TILDE:
+	case ast.Tilde:
 		c.Visit(u.Operand)
 		c.push(u.Op.Position, o.Complement)
 
@@ -852,7 +852,7 @@ func (c *compiler) visitBasicExpr(basic *ast.BasicExpr) {
 
 	switch basic.Token.Kind {
 
-	case ast.NULL:
+	case ast.Null:
 		c.push(basic.Token.Position, o.LoadNull)
 
 	case ast.True:
@@ -861,18 +861,18 @@ func (c *compiler) visitBasicExpr(basic *ast.BasicExpr) {
 	case ast.False:
 		c.push(basic.Token.Position, o.LoadFalse)
 
-	case ast.STR:
+	case ast.Str:
 		c.pushIndex(
 			basic.Token.Position,
 			o.LoadConst,
 			poolIndex(c.pool, g.NewStr(basic.Token.Text)))
 
-	case ast.INT:
+	case ast.Int:
 		c.loadInt(
 			basic.Token.Position,
 			parseInt(basic.Token.Text))
 
-	case ast.FLOAT:
+	case ast.Float:
 		f := parseFloat(basic.Token.Text)
 		c.pushIndex(
 			basic.Token.Position,
@@ -922,14 +922,14 @@ func (c *compiler) visitInvoke(inv *ast.InvokeExpr) {
 	c.pushIndex(inv.Begin(), o.Invoke, len(inv.Params))
 }
 
-func (c *compiler) visitGo(gw *ast.Go) {
+func (c *compiler) visitGo(gw *ast.GoStmt) {
 
 	inv := gw.Invocation
 	c.Visit(inv.Operand)
 	for _, n := range inv.Params {
 		c.Visit(n)
 	}
-	c.pushIndex(inv.Begin(), o.Go, len(inv.Params))
+	c.pushIndex(inv.Begin(), o.GoStmt, len(inv.Params))
 }
 
 func (c *compiler) visitExprStmt(es *ast.ExprStmt) {

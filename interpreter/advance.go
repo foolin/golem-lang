@@ -60,7 +60,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			return nil, g.TypeMismatchError("Expected 'Func'")
 		}
 
-	case o.Return:
+	case o.ReturnStmt:
 
 		// TODO once we've written a Control Flow Graph
 		// turn this sanity check on to make sure we are managing
@@ -79,7 +79,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// pop the old frame
 		i.frames = i.frames[:frameIndex]
 
-		// If we are on the last frame, then we are done.
+		// IfStmt we are on the last frame, then we are done.
 		if frameIndex == lastFrame {
 			return result, nil
 		}
@@ -94,7 +94,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case o.Done:
 		panic("Done cannot be executed directly")
 
-	case o.Go:
+	case o.GoStmt:
 
 		idx := index(opc, f.ip)
 		params := f.stack[n-idx+1:]
@@ -128,7 +128,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			return nil, g.TypeMismatchError("Expected 'Func'")
 		}
 
-	case o.Throw:
+	case o.ThrowStmt:
 
 		// get struct from stack
 		stc, ok := f.stack[n].(g.Struct)

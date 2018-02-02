@@ -75,19 +75,19 @@ func TestFlat(t *testing.T) {
 	errors := anl.Analyze()
 	ok(t, anl, errors, `
 FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   Let
+.   BlockNode
+.   .   LetStmt
 .   .   .   IdentExpr(a,(0,false,false))
-.   .   .   BasicExpr(INT,"1")
-.   .   Const
+.   .   .   BasicExpr(Int,"1")
+.   .   ConstStmt
 .   .   .   IdentExpr(b,(1,true,false))
-.   .   .   BasicExpr(INT,"2")
+.   .   .   BasicExpr(Int,"2")
 .   .   ExprStmt
 .   .   .   AssignmentExpr
 .   .   .   .   IdentExpr(a,(0,false,false))
 .   .   .   .   BinaryExpr("+")
 .   .   .   .   .   IdentExpr(b,(1,true,false))
-.   .   .   .   .   BasicExpr(INT,"3")
+.   .   .   .   .   BasicExpr(Int,"3")
 `)
 
 	errors = newAnalyzer("a;").Analyze()
@@ -123,28 +123,28 @@ if (true) {
 	errors := anl.Analyze()
 	ok(t, anl, errors, `
 FnExpr(numLocals:3 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   Let
+.   BlockNode
+.   .   LetStmt
 .   .   .   IdentExpr(a,(0,false,false))
-.   .   .   BasicExpr(INT,"1")
-.   .   If
+.   .   .   BasicExpr(Int,"1")
+.   .   IfStmt
 .   .   .   BasicExpr(True,"true")
-.   .   .   Block
+.   .   .   BlockNode
 .   .   .   .   ExprStmt
 .   .   .   .   .   AssignmentExpr
 .   .   .   .   .   .   IdentExpr(a,(0,false,false))
-.   .   .   .   .   .   BasicExpr(INT,"2")
-.   .   .   .   Const
+.   .   .   .   .   .   BasicExpr(Int,"2")
+.   .   .   .   ConstStmt
 .   .   .   .   .   IdentExpr(b,(1,true,false))
-.   .   .   .   .   BasicExpr(INT,"2")
-.   .   .   Block
+.   .   .   .   .   BasicExpr(Int,"2")
+.   .   .   BlockNode
 .   .   .   .   ExprStmt
 .   .   .   .   .   AssignmentExpr
 .   .   .   .   .   .   IdentExpr(a,(0,false,false))
-.   .   .   .   .   .   BasicExpr(INT,"3")
-.   .   .   .   Let
+.   .   .   .   .   .   BasicExpr(Int,"3")
+.   .   .   .   LetStmt
 .   .   .   .   .   IdentExpr(b,(2,false,false))
-.   .   .   .   .   BasicExpr(INT,"3")
+.   .   .   .   .   BasicExpr(Int,"3")
 `)
 }
 
@@ -154,30 +154,30 @@ func TestLoop(t *testing.T) {
 	errors := anl.Analyze()
 	ok(t, anl, errors, `
 FnExpr(numLocals:0 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   While
+.   BlockNode
+.   .   WhileStmt
 .   .   .   BasicExpr(True,"true")
-.   .   .   Block
+.   .   .   BlockNode
 .   .   .   .   ExprStmt
 .   .   .   .   .   BinaryExpr("+")
-.   .   .   .   .   .   BasicExpr(INT,"1")
-.   .   .   .   .   .   BasicExpr(INT,"2")
+.   .   .   .   .   .   BasicExpr(Int,"1")
+.   .   .   .   .   .   BasicExpr(Int,"2")
 `)
 
 	anl = newAnalyzer("while true { 1 + 2; break; continue; }")
 	errors = anl.Analyze()
 	ok(t, anl, errors, `
 FnExpr(numLocals:0 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   While
+.   BlockNode
+.   .   WhileStmt
 .   .   .   BasicExpr(True,"true")
-.   .   .   Block
+.   .   .   BlockNode
 .   .   .   .   ExprStmt
 .   .   .   .   .   BinaryExpr("+")
-.   .   .   .   .   .   BasicExpr(INT,"1")
-.   .   .   .   .   .   BasicExpr(INT,"2")
-.   .   .   .   Break
-.   .   .   .   Continue
+.   .   .   .   .   .   BasicExpr(Int,"1")
+.   .   .   .   .   .   BasicExpr(Int,"2")
+.   .   .   .   BreakStmt
+.   .   .   .   ContinueStmt
 `)
 
 	errors = newAnalyzer("break;").Analyze()
@@ -190,29 +190,29 @@ FnExpr(numLocals:0 numCaptures:0 parentCaptures:[])
 	errors = anl.Analyze()
 	ok(t, anl, errors, `
 FnExpr(numLocals:3 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   Let
+.   BlockNode
+.   .   LetStmt
 .   .   .   IdentExpr(a,(0,false,false))
-.   .   For
+.   .   ForStmt
 .   .   .   IdentExpr(b,(1,false,false))
 .   .   .   IdentExpr(#synthetic0,(2,false,false))
 .   .   .   ListExpr
-.   .   .   Block
-.   .   .   .   Break
-.   .   .   .   Continue
+.   .   .   BlockNode
+.   .   .   .   BreakStmt
+.   .   .   .   ContinueStmt
 `)
 
 	anl = newAnalyzer("for (a, b) in [] { }")
 	errors = anl.Analyze()
 	ok(t, anl, errors, `
 FnExpr(numLocals:3 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   For
+.   BlockNode
+.   .   ForStmt
 .   .   .   IdentExpr(a,(0,false,false))
 .   .   .   IdentExpr(b,(1,false,false))
 .   .   .   IdentExpr(#synthetic0,(2,false,false))
 .   .   .   ListExpr
-.   .   .   Block
+.   .   .   BlockNode
 `)
 
 	anl = newAnalyzer(`
@@ -224,17 +224,17 @@ for a in [] {
 	errors = anl.Analyze()
 	ok(t, anl, errors, `
 FnExpr(numLocals:4 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   For
+.   BlockNode
+.   .   ForStmt
 .   .   .   IdentExpr(a,(0,false,false))
 .   .   .   IdentExpr(#synthetic0,(1,false,false))
 .   .   .   ListExpr
-.   .   .   Block
-.   .   .   .   For
+.   .   .   BlockNode
+.   .   .   .   ForStmt
 .   .   .   .   .   IdentExpr(b,(2,false,false))
 .   .   .   .   .   IdentExpr(#synthetic1,(3,false,false))
 .   .   .   .   .   ListExpr
-.   .   .   .   .   Block
+.   .   .   .   .   BlockNode
 `)
 
 	//fmt.Println(ast.Dump(anl.Module()))
@@ -264,40 +264,40 @@ let b = fn(x) {
 
 	ok(t, anl, errors, `
 FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   Let
+.   BlockNode
+.   .   LetStmt
 .   .   .   IdentExpr(a,(0,false,false))
-.   .   .   BasicExpr(INT,"1")
-.   .   Let
+.   .   .   BasicExpr(Int,"1")
+.   .   LetStmt
 .   .   .   IdentExpr(b,(1,false,false))
 .   .   .   FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
 .   .   .   .   IdentExpr(x,(0,false,false))
-.   .   .   .   Block
-.   .   .   .   .   Let
+.   .   .   .   BlockNode
+.   .   .   .   .   LetStmt
 .   .   .   .   .   .   IdentExpr(c,(1,false,false))
 .   .   .   .   .   .   FnExpr(numLocals:3 numCaptures:0 parentCaptures:[])
 .   .   .   .   .   .   .   IdentExpr(y,(0,false,false))
 .   .   .   .   .   .   .   IdentExpr(z,(1,false,false))
-.   .   .   .   .   .   .   Block
-.   .   .   .   .   .   .   .   If
+.   .   .   .   .   .   .   BlockNode
+.   .   .   .   .   .   .   .   IfStmt
 .   .   .   .   .   .   .   .   .   BinaryExpr("<")
 .   .   .   .   .   .   .   .   .   .   IdentExpr(y,(0,false,false))
-.   .   .   .   .   .   .   .   .   .   BasicExpr(INT,"33")
-.   .   .   .   .   .   .   .   .   Block
-.   .   .   .   .   .   .   .   .   .   Return
+.   .   .   .   .   .   .   .   .   .   BasicExpr(Int,"33")
+.   .   .   .   .   .   .   .   .   BlockNode
+.   .   .   .   .   .   .   .   .   .   ReturnStmt
 .   .   .   .   .   .   .   .   .   .   .   BinaryExpr("+")
 .   .   .   .   .   .   .   .   .   .   .   .   BinaryExpr("+")
 .   .   .   .   .   .   .   .   .   .   .   .   .   IdentExpr(y,(0,false,false))
 .   .   .   .   .   .   .   .   .   .   .   .   .   IdentExpr(z,(1,false,false))
-.   .   .   .   .   .   .   .   .   .   .   .   BasicExpr(INT,"5")
-.   .   .   .   .   .   .   .   .   Block
-.   .   .   .   .   .   .   .   .   .   Let
+.   .   .   .   .   .   .   .   .   .   .   .   BasicExpr(Int,"5")
+.   .   .   .   .   .   .   .   .   BlockNode
+.   .   .   .   .   .   .   .   .   .   LetStmt
 .   .   .   .   .   .   .   .   .   .   .   IdentExpr(b,(2,false,false))
-.   .   .   .   .   .   .   .   .   .   .   BasicExpr(INT,"42")
-.   .   .   .   .   Return
+.   .   .   .   .   .   .   .   .   .   .   BasicExpr(Int,"42")
+.   .   .   .   .   ReturnStmt
 .   .   .   .   .   .   InvokeExpr
 .   .   .   .   .   .   .   IdentExpr(c,(1,false,false))
-.   .   .   .   .   .   .   BasicExpr(INT,"3")
+.   .   .   .   .   .   .   BasicExpr(Int,"3")
 `)
 }
 
@@ -320,23 +320,23 @@ const accumGen = fn(n) {
 
 	ok(t, anl, errors, `
 FnExpr(numLocals:1 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   Const
+.   BlockNode
+.   .   ConstStmt
 .   .   .   IdentExpr(accumGen,(0,true,false))
 .   .   .   FnExpr(numLocals:1 numCaptures:0 parentCaptures:[])
 .   .   .   .   IdentExpr(n,(0,false,false))
-.   .   .   .   Block
-.   .   .   .   .   Return
+.   .   .   .   BlockNode
+.   .   .   .   .   ReturnStmt
 .   .   .   .   .   .   FnExpr(numLocals:1 numCaptures:1 parentCaptures:[(0,false,false)])
 .   .   .   .   .   .   .   IdentExpr(i,(0,false,false))
-.   .   .   .   .   .   .   Block
+.   .   .   .   .   .   .   BlockNode
 .   .   .   .   .   .   .   .   ExprStmt
 .   .   .   .   .   .   .   .   .   AssignmentExpr
 .   .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
 .   .   .   .   .   .   .   .   .   .   BinaryExpr("+")
 .   .   .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
 .   .   .   .   .   .   .   .   .   .   .   IdentExpr(i,(0,false,false))
-.   .   .   .   .   .   .   .   Return
+.   .   .   .   .   .   .   .   ReturnStmt
 .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
 `)
 
@@ -359,19 +359,19 @@ const accumGen = fn(n) {
 
 	ok(t, anl, errors, `
 FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   Let
+.   BlockNode
+.   .   LetStmt
 .   .   .   IdentExpr(z,(0,false,false))
-.   .   .   BasicExpr(INT,"2")
-.   .   Const
+.   .   .   BasicExpr(Int,"2")
+.   .   ConstStmt
 .   .   .   IdentExpr(accumGen,(1,true,false))
 .   .   .   FnExpr(numLocals:1 numCaptures:1 parentCaptures:[(0,false,false)])
 .   .   .   .   IdentExpr(n,(0,false,false))
-.   .   .   .   Block
-.   .   .   .   .   Return
+.   .   .   .   BlockNode
+.   .   .   .   .   ReturnStmt
 .   .   .   .   .   .   FnExpr(numLocals:1 numCaptures:2 parentCaptures:[(0,false,false), (0,false,true)])
 .   .   .   .   .   .   .   IdentExpr(i,(0,false,false))
-.   .   .   .   .   .   .   Block
+.   .   .   .   .   .   .   BlockNode
 .   .   .   .   .   .   .   .   ExprStmt
 .   .   .   .   .   .   .   .   .   AssignmentExpr
 .   .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
@@ -384,7 +384,7 @@ FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
 .   .   .   .   .   .   .   .   .   .   BinaryExpr("+")
 .   .   .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
 .   .   .   .   .   .   .   .   .   .   .   IdentExpr(z,(1,false,true))
-.   .   .   .   .   .   .   .   Return
+.   .   .   .   .   .   .   .   ReturnStmt
 .   .   .   .   .   .   .   .   .   IdentExpr(n,(0,false,true))
 `)
 
@@ -403,29 +403,29 @@ foo()
 
 	ok(t, anl, errors, `
 FnExpr(numLocals:3 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   Const
+.   BlockNode
+.   .   ConstStmt
 .   .   .   IdentExpr(a,(1,true,false))
-.   .   .   BasicExpr(INT,"123")
-.   .   Const
+.   .   .   BasicExpr(Int,"123")
+.   .   ConstStmt
 .   .   .   IdentExpr(b,(2,true,false))
-.   .   .   BasicExpr(INT,"456")
-.   .   NamedFn
+.   .   .   BasicExpr(Int,"456")
+.   .   NamedFnStmt
 .   .   .   IdentExpr(foo,(0,true,false))
 .   .   .   FnExpr(numLocals:0 numCaptures:2 parentCaptures:[(2,true,false), (1,true,false)])
-.   .   .   .   Block
+.   .   .   .   BlockNode
 .   .   .   .   .   ExprStmt
 .   .   .   .   .   .   InvokeExpr
 .   .   .   .   .   .   .   BuiltinExpr("assert")
 .   .   .   .   .   .   .   BinaryExpr("==")
 .   .   .   .   .   .   .   .   IdentExpr(b,(0,true,true))
-.   .   .   .   .   .   .   .   BasicExpr(INT,"456")
+.   .   .   .   .   .   .   .   BasicExpr(Int,"456")
 .   .   .   .   .   ExprStmt
 .   .   .   .   .   .   InvokeExpr
 .   .   .   .   .   .   .   BuiltinExpr("assert")
 .   .   .   .   .   .   .   BinaryExpr("==")
 .   .   .   .   .   .   .   .   IdentExpr(a,(1,true,true))
-.   .   .   .   .   .   .   .   BasicExpr(INT,"123")
+.   .   .   .   .   .   .   .   BasicExpr(Int,"123")
 .   .   ExprStmt
 .   .   .   InvokeExpr
 .   .   .   .   IdentExpr(foo,(0,true,false))
@@ -448,7 +448,7 @@ struct{ }
 	errors = anl.Analyze()
 	ok(t, anl, errors, `
 FnExpr(numLocals:0 numCaptures:0 parentCaptures:[])
-.   Block
+.   BlockNode
 .   .   ExprStmt
 .   .   .   StructExpr([],-1)
 `)
@@ -460,10 +460,10 @@ struct{ a: 1 }
 	errors = anl.Analyze()
 	ok(t, anl, errors, `
 FnExpr(numLocals:0 numCaptures:0 parentCaptures:[])
-.   Block
+.   BlockNode
 .   .   ExprStmt
 .   .   .   StructExpr([a],-1)
-.   .   .   .   BasicExpr(INT,"1")
+.   .   .   .   BasicExpr(Int,"1")
 `)
 
 	source = `
@@ -473,7 +473,7 @@ struct{ a: this }
 	errors = anl.Analyze()
 	ok(t, anl, errors, `
 FnExpr(numLocals:1 numCaptures:0 parentCaptures:[])
-.   Block
+.   BlockNode
 .   .   ExprStmt
 .   .   .   StructExpr([a],0)
 .   .   .   .   ThisExpr((0,true,false))
@@ -486,7 +486,7 @@ struct{ a: struct { b: this } }
 	errors = anl.Analyze()
 	ok(t, anl, errors, `
 FnExpr(numLocals:1 numCaptures:0 parentCaptures:[])
-.   Block
+.   BlockNode
 .   .   ExprStmt
 .   .   .   StructExpr([a],-1)
 .   .   .   .   StructExpr([b],0)
@@ -500,11 +500,11 @@ struct{ a: struct { b: 1 }, c: this.a }
 	errors = anl.Analyze()
 	ok(t, anl, errors, `
 FnExpr(numLocals:1 numCaptures:0 parentCaptures:[])
-.   Block
+.   BlockNode
 .   .   ExprStmt
 .   .   .   StructExpr([a, c],0)
 .   .   .   .   StructExpr([b],-1)
-.   .   .   .   .   BasicExpr(INT,"1")
+.   .   .   .   .   BasicExpr(Int,"1")
 .   .   .   .   FieldExpr(a)
 .   .   .   .   .   ThisExpr((0,true,false))
 `)
@@ -516,7 +516,7 @@ struct{ a: struct { b: this }, c: this }
 	errors = anl.Analyze()
 	ok(t, anl, errors, `
 FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
-.   Block
+.   BlockNode
 .   .   ExprStmt
 .   .   .   StructExpr([a, c],1)
 .   .   .   .   StructExpr([b],0)
@@ -531,7 +531,7 @@ struct{ a: this, b: struct { c: this } }
 	errors = anl.Analyze()
 	ok(t, anl, errors, `
 FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
-.   Block
+.   BlockNode
 .   .   ExprStmt
 .   .   .   StructExpr([a, b],0)
 .   .   .   .   ThisExpr((0,true,false))
@@ -554,34 +554,34 @@ let c = a.minus()
 
 	ok(t, anl, errors, `
 FnExpr(numLocals:4 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   Let
+.   BlockNode
+.   .   LetStmt
 .   .   .   IdentExpr(a,(1,false,false))
 .   .   .   StructExpr([x, y, plus, minus],0)
-.   .   .   .   BasicExpr(INT,"8")
-.   .   .   .   BasicExpr(INT,"5")
+.   .   .   .   BasicExpr(Int,"8")
+.   .   .   .   BasicExpr(Int,"5")
 .   .   .   .   FnExpr(numLocals:0 numCaptures:1 parentCaptures:[(0,true,false)])
-.   .   .   .   .   Block
-.   .   .   .   .   .   Return
+.   .   .   .   .   BlockNode
+.   .   .   .   .   .   ReturnStmt
 .   .   .   .   .   .   .   BinaryExpr("+")
 .   .   .   .   .   .   .   .   FieldExpr(x)
 .   .   .   .   .   .   .   .   .   ThisExpr((0,true,true))
 .   .   .   .   .   .   .   .   FieldExpr(y)
 .   .   .   .   .   .   .   .   .   ThisExpr((0,true,true))
 .   .   .   .   FnExpr(numLocals:0 numCaptures:1 parentCaptures:[(0,true,false)])
-.   .   .   .   .   Block
-.   .   .   .   .   .   Return
+.   .   .   .   .   BlockNode
+.   .   .   .   .   .   ReturnStmt
 .   .   .   .   .   .   .   BinaryExpr("-")
 .   .   .   .   .   .   .   .   FieldExpr(x)
 .   .   .   .   .   .   .   .   .   ThisExpr((0,true,true))
 .   .   .   .   .   .   .   .   FieldExpr(y)
 .   .   .   .   .   .   .   .   .   ThisExpr((0,true,true))
-.   .   Let
+.   .   LetStmt
 .   .   .   IdentExpr(b,(2,false,false))
 .   .   .   InvokeExpr
 .   .   .   .   FieldExpr(plus)
 .   .   .   .   .   IdentExpr(a,(1,false,false))
-.   .   Let
+.   .   LetStmt
 .   .   .   IdentExpr(c,(3,false,false))
 .   .   .   InvokeExpr
 .   .   .   .   FieldExpr(minus)
@@ -613,12 +613,12 @@ const i = 6, j
 
 	ok(t, anl, errors, `
 FnExpr(numLocals:6 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   Let
+.   BlockNode
+.   .   LetStmt
 .   .   .   IdentExpr(x,(0,false,false))
 .   .   .   StructExpr([a],-1)
-.   .   .   .   BasicExpr(INT,"0")
-.   .   Let
+.   .   .   .   BasicExpr(Int,"0")
+.   .   LetStmt
 .   .   .   IdentExpr(y,(1,false,false))
 .   .   .   FieldExpr(a)
 .   .   .   .   IdentExpr(x,(0,false,false))
@@ -626,7 +626,7 @@ FnExpr(numLocals:6 numCaptures:0 parentCaptures:[])
 .   .   .   AssignmentExpr
 .   .   .   .   FieldExpr(a)
 .   .   .   .   .   IdentExpr(x,(0,false,false))
-.   .   .   .   BasicExpr(INT,"3")
+.   .   .   .   BasicExpr(Int,"3")
 .   .   ExprStmt
 .   .   .   PostfixExpr("++")
 .   .   .   .   FieldExpr(a)
@@ -639,18 +639,18 @@ FnExpr(numLocals:6 numCaptures:0 parentCaptures:[])
 .   .   .   .   IndexExpr
 .   .   .   .   .   IdentExpr(x,(0,false,false))
 .   .   .   .   .   IdentExpr(y,(1,false,false))
-.   .   .   .   BasicExpr(INT,"42")
+.   .   .   .   BasicExpr(Int,"42")
 .   .   ExprStmt
 .   .   .   AssignmentExpr
 .   .   .   .   IdentExpr(y,(1,false,false))
 .   .   .   .   IndexExpr
 .   .   .   .   .   IdentExpr(x,(0,false,false))
-.   .   .   .   .   BasicExpr(INT,"3")
+.   .   .   .   .   BasicExpr(Int,"3")
 .   .   ExprStmt
 .   .   .   PostfixExpr("++")
 .   .   .   .   IndexExpr
 .   .   .   .   .   IdentExpr(x,(0,false,false))
-.   .   .   .   .   BasicExpr(INT,"2")
+.   .   .   .   .   BasicExpr(Int,"2")
 .   .   ExprStmt
 .   .   .   AssignmentExpr
 .   .   .   .   FieldExpr(z)
@@ -658,14 +658,14 @@ FnExpr(numLocals:6 numCaptures:0 parentCaptures:[])
 .   .   .   .   PostfixExpr("++")
 .   .   .   .   .   IndexExpr
 .   .   .   .   .   .   IdentExpr(x,(0,false,false))
-.   .   .   .   .   .   BasicExpr(INT,"2")
-.   .   Let
+.   .   .   .   .   .   BasicExpr(Int,"2")
+.   .   LetStmt
 .   .   .   IdentExpr(g,(2,false,false))
 .   .   .   IdentExpr(h,(3,false,false))
-.   .   .   BasicExpr(INT,"5")
-.   .   Const
+.   .   .   BasicExpr(Int,"5")
+.   .   ConstStmt
 .   .   .   IdentExpr(i,(4,true,false))
-.   .   .   BasicExpr(INT,"6")
+.   .   .   BasicExpr(Int,"6")
 .   .   .   IdentExpr(j,(5,true,false))
 `)
 }
@@ -687,28 +687,28 @@ b[0]++
 
 	ok(t, anl, errors, `
 FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   Let
+.   BlockNode
+.   .   LetStmt
 .   .   .   IdentExpr(a,(0,false,false))
 .   .   .   IndexExpr
 .   .   .   .   ListExpr
-.   .   .   .   .   BasicExpr(STR,"x")
-.   .   .   .   BasicExpr(INT,"0")
-.   .   Let
+.   .   .   .   .   BasicExpr(Str,"x")
+.   .   .   .   BasicExpr(Int,"0")
+.   .   LetStmt
 .   .   .   IdentExpr(b,(1,false,false))
 .   .   .   ListExpr
-.   .   .   .   BasicExpr(STR,"x")
+.   .   .   .   BasicExpr(Str,"x")
 .   .   ExprStmt
 .   .   .   AssignmentExpr
 .   .   .   .   IndexExpr
 .   .   .   .   .   IdentExpr(b,(1,false,false))
-.   .   .   .   .   BasicExpr(INT,"0")
-.   .   .   .   BasicExpr(INT,"3")
+.   .   .   .   .   BasicExpr(Int,"0")
+.   .   .   .   BasicExpr(Int,"3")
 .   .   ExprStmt
 .   .   .   PostfixExpr("++")
 .   .   .   .   IndexExpr
 .   .   .   .   .   IdentExpr(b,(1,false,false))
-.   .   .   .   .   BasicExpr(INT,"0")
+.   .   .   .   .   BasicExpr(Int,"0")
 `)
 }
 
@@ -720,15 +720,15 @@ func TestTry(t *testing.T) {
 
 	ok(t, anl, errors, `
 FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   Let
+.   BlockNode
+.   .   LetStmt
 .   .   .   IdentExpr(a,(0,false,false))
-.   .   .   BasicExpr(INT,"1")
-.   .   Try
-.   .   .   Block
+.   .   .   BasicExpr(Int,"1")
+.   .   TryStmt
+.   .   .   BlockNode
 .   .   .   IdentExpr(e,(1,true,false))
-.   .   .   Block
-.   .   .   Block
+.   .   .   BlockNode
+.   .   .   BlockNode
 `)
 
 	source = "let a = 1; try { } catch a { } finally { }"
@@ -756,20 +756,20 @@ fn b() {
 
 	ok(t, anl, errors, `
 FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   NamedFn
+.   BlockNode
+.   .   NamedFnStmt
 .   .   .   IdentExpr(a,(0,true,false))
 .   .   .   FnExpr(numLocals:0 numCaptures:1 parentCaptures:[(1,true,false)])
-.   .   .   .   Block
-.   .   .   .   .   Return
+.   .   .   .   BlockNode
+.   .   .   .   .   ReturnStmt
 .   .   .   .   .   .   InvokeExpr
 .   .   .   .   .   .   .   IdentExpr(b,(0,true,true))
-.   .   NamedFn
+.   .   NamedFnStmt
 .   .   .   IdentExpr(b,(1,true,false))
 .   .   .   FnExpr(numLocals:0 numCaptures:0 parentCaptures:[])
-.   .   .   .   Block
-.   .   .   .   .   Return
-.   .   .   .   .   .   BasicExpr(INT,"42")
+.   .   .   .   BlockNode
+.   .   .   .   .   ReturnStmt
+.   .   .   .   .   .   BasicExpr(Int,"42")
 `)
 
 	errors = newAnalyzer("fn a() {}; const a = 1;").Analyze()
@@ -786,12 +786,12 @@ func TestImport(t *testing.T) {
 
 	ok(t, anl, errors, `
 FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
-.   Block
-.   .   Import
+.   BlockNode
+.   .   ImportStmt
 .   .   .   IdentExpr(sys,(0,true,false))
-.   .   Let
+.   .   LetStmt
 .   .   .   IdentExpr(b,(1,false,false))
-.   .   .   BasicExpr(INT,"2")
+.   .   .   BasicExpr(Int,"2")
 `)
 
 	errors = newAnalyzer("import sys; let sys = 2;").Analyze()

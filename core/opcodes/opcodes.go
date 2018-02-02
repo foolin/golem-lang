@@ -59,10 +59,10 @@ const (
 	FuncLocal
 
 	Invoke
-	Go
-	Return
+	GoStmt
+	ReturnStmt
 	Done
-	Throw
+	ThrowStmt
 
 	NewStruct
 	NewDict
@@ -95,8 +95,8 @@ const (
 
 	// These are temporary values created during compilation.
 	// The interpreter will panic if it encounters them.
-	Break    = 0xFD
-	Continue = 0xFE
+	BreakStmt    = 0xFD
+	ContinueStmt = 0xFE
 )
 
 // OpCodeSize returns how 'wide' an opcode is.  Opcodes are always either 1 or 3 bytes.
@@ -106,8 +106,8 @@ func OpCodeSize(opc byte) int {
 
 	case ImportModule, LoadBuiltin, LoadConst,
 		LoadLocal, LoadCapture, StoreLocal, StoreCapture,
-		Jump, JumpTrue, JumpFalse, Break, Continue,
-		NewFunc, FuncCapture, FuncLocal, Invoke, Go,
+		Jump, JumpTrue, JumpFalse, BreakStmt, ContinueStmt,
+		NewFunc, FuncCapture, FuncLocal, Invoke, GoStmt,
 		NewStruct, GetField, InitField, SetField, IncField,
 		NewDict, NewList, NewSet, NewTuple, CheckCast, CheckTuple:
 
@@ -213,14 +213,14 @@ func FmtOpcode(opcodes []byte, i int) string {
 
 	case Invoke:
 		return fmtIndex(opcodes, i, "Invoke")
-	case Go:
-		return fmtIndex(opcodes, i, "Go")
-	case Return:
-		return fmt.Sprintf("%d: Return\n", i)
+	case GoStmt:
+		return fmtIndex(opcodes, i, "GoStmt")
+	case ReturnStmt:
+		return fmt.Sprintf("%d: ReturnStmt\n", i)
 	case Done:
 		return fmt.Sprintf("%d: Done\n", i)
-	case Throw:
-		return fmt.Sprintf("%d: Throw\n", i)
+	case ThrowStmt:
+		return fmt.Sprintf("%d: ThrowStmt\n", i)
 
 	case NewStruct:
 		return fmtIndex(opcodes, i, "NewStruct")
@@ -272,10 +272,10 @@ func FmtOpcode(opcodes []byte, i int) string {
 	case Dup:
 		return fmt.Sprintf("%d: Dup\n", i)
 
-	case Break:
-		return fmtIndex(opcodes, i, "Break")
-	case Continue:
-		return fmtIndex(opcodes, i, "Continue")
+	case BreakStmt:
+		return fmtIndex(opcodes, i, "BreakStmt")
+	case ContinueStmt:
+		return fmtIndex(opcodes, i, "ContinueStmt")
 
 	default:
 		panic(fmt.Sprintf("unreachable %d", opcodes[i]))

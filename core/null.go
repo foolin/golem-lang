@@ -5,7 +5,7 @@
 package core
 
 // NOTE: the type 'null' cannot be an empty struct, because empty structs have
-// unusual semantics in Go, insofar as they all point to the same address.
+// unusual semantics in GoStmt, insofar as they all point to the same address.
 //
 // https://golang.org/ref/spec#Size_and_alignment_guarantees
 //

@@ -105,7 +105,7 @@ func TestExpression(t *testing.T) {
 					o.Plus,
 					o.LoadConst, 0, 1,
 					o.Plus,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 1},
@@ -133,7 +133,7 @@ func TestExpression(t *testing.T) {
 					o.Mul,
 					o.LoadConst, 0, 3,
 					o.Div,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 1},
@@ -155,7 +155,7 @@ func TestExpression(t *testing.T) {
 					o.Div,
 					o.LoadFalse,
 					o.Plus,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 1},
@@ -179,7 +179,7 @@ func TestExpression(t *testing.T) {
 					o.LoadConst, 0, 0,
 					o.LoadConst, 0, 1,
 					o.Mul,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 1},
@@ -200,7 +200,7 @@ func TestExpression(t *testing.T) {
 					o.LoadConst, 0, 0,
 					o.LoadTrue,
 					o.Eq,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 1},
@@ -218,7 +218,7 @@ func TestExpression(t *testing.T) {
 				[]byte{
 					o.LoadNull,
 					o.LoadTrue, o.LoadFalse, o.Ne,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 1},
@@ -237,7 +237,7 @@ func TestExpression(t *testing.T) {
 					o.LoadNull,
 					o.LoadTrue, o.LoadFalse, o.Gt,
 					o.LoadTrue, o.LoadFalse, o.Gte,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 1},
@@ -257,7 +257,7 @@ func TestExpression(t *testing.T) {
 					o.LoadTrue, o.LoadFalse, o.Lt,
 					o.LoadTrue, o.LoadFalse, o.Lte,
 					o.LoadTrue, o.LoadFalse, o.Cmp,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 1},
@@ -284,7 +284,7 @@ func TestExpression(t *testing.T) {
 					o.Jump, 0, 18,
 					o.LoadFalse,
 					o.StoreLocal, 0, 0,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 1},
@@ -311,7 +311,7 @@ func TestExpression(t *testing.T) {
 					o.Jump, 0, 18,
 					o.LoadFalse,
 					o.StoreLocal, 0, 0,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 1},
@@ -340,7 +340,7 @@ func TestAssignment(t *testing.T) {
 					o.LoadConst, 0, 1,
 					o.Dup,
 					o.StoreLocal, 0, 0,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 1},
@@ -389,7 +389,7 @@ func TestIf(t *testing.T) {
 					o.JumpFalse, 0, 17,
 					o.LoadConst, 0, 2,
 					o.StoreLocal, 0, 0,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 1},
@@ -429,7 +429,7 @@ func TestIf(t *testing.T) {
 					o.StoreLocal, 0, 2,
 					o.LoadConst, 0, 2,
 					o.StoreLocal, 0, 3,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 1},
@@ -465,7 +465,7 @@ func TestWhile(t *testing.T) {
 					o.LoadConst, 0, 0,
 					o.StoreLocal, 0, 1,
 					o.Jump, 0, 5,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 1},
@@ -499,7 +499,7 @@ func TestWhile(t *testing.T) {
 					o.Jump, 0, 7,
 					o.LoadConst, 0, 2,
 					o.StoreLocal, 0, 2,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 1},
@@ -530,11 +530,11 @@ func TestReturn(t *testing.T) {
 					o.LoadLocal, 0, 0,
 					o.LoadConst, 0, 0,
 					o.Sub,
-					o.Return,
+					o.ReturnStmt,
 					o.LoadConst, 0, 1,
 					o.Dup,
 					o.StoreLocal, 0, 0,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 1},
@@ -579,7 +579,7 @@ let b = fn(x) {
 					o.StoreLocal, 0, 0,
 					o.NewFunc, 0, 2,
 					o.StoreLocal, 0, 1,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 2},
@@ -590,7 +590,7 @@ let b = fn(x) {
 				[]byte{
 					o.LoadNull,
 					o.LoadConst, 0, 0,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 2},
@@ -608,7 +608,7 @@ let b = fn(x) {
 					o.LoadLocal, 0, 0,
 					o.Invoke, 0, 1,
 					o.Plus,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 4},
@@ -621,7 +621,7 @@ let b = fn(x) {
 					o.LoadLocal, 0, 0,
 					o.LoadConst, 0, 1,
 					o.Mul,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 5},
@@ -671,7 +671,7 @@ c(2, 3)
 					o.LoadConst, 0, 0,
 					o.LoadConst, 0, 1,
 					o.Invoke, 0, 2,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 2},
@@ -686,7 +686,7 @@ c(2, 3)
 			&g.Template{0, 0, 0,
 				[]byte{
 					o.LoadNull,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0}},
 				nil},
@@ -695,7 +695,7 @@ c(2, 3)
 				[]byte{
 					o.LoadNull,
 					o.LoadLocal, 0, 0,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 3},
@@ -712,7 +712,7 @@ c(2, 3)
 					o.Mul,
 					o.LoadLocal, 0, 2,
 					o.Mul,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 4},
@@ -743,7 +743,7 @@ const accumGen = fn(n) {
 					o.LoadNull,
 					o.NewFunc, 0, 1,
 					o.StoreLocal, 0, 0,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 2},
@@ -754,8 +754,8 @@ const accumGen = fn(n) {
 					o.LoadNull,
 					o.NewFunc, 0, 2,
 					o.FuncLocal, 0, 0,
-					o.Return,
-					o.Return},
+					o.ReturnStmt,
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 3},
@@ -770,8 +770,8 @@ const accumGen = fn(n) {
 					o.Dup,
 					o.StoreCapture, 0, 0,
 					o.LoadCapture, 0, 0,
-					o.Return,
-					o.Return},
+					o.ReturnStmt,
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 4},
@@ -810,7 +810,7 @@ const accumGen = fn(n) {
 					o.NewFunc, 0, 1,
 					o.FuncLocal, 0, 0,
 					o.StoreLocal, 0, 1,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 2},
@@ -823,8 +823,8 @@ const accumGen = fn(n) {
 					o.NewFunc, 0, 2,
 					o.FuncLocal, 0, 0,
 					o.FuncCapture, 0, 0,
-					o.Return,
-					o.Return},
+					o.ReturnStmt,
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 4},
@@ -841,8 +841,8 @@ const accumGen = fn(n) {
 					o.Dup,
 					o.StoreCapture, 0, 0,
 					o.LoadCapture, 0, 0,
-					o.Return,
-					o.Return},
+					o.ReturnStmt,
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 5},
@@ -894,7 +894,7 @@ let d = b--
 					o.Plus,
 					o.StoreLocal, 0, 1,
 					o.StoreLocal, 0, 3,
-					o.Return},
+					o.ReturnStmt},
 				[]g.LineNumberEntry{
 					{0, 0},
 					{1, 2},

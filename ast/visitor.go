@@ -15,13 +15,13 @@ type Visitor interface {
 	Visit(node Node)
 }
 
-// Traverse Import
-func (imp *Import) Traverse(v Visitor) {
+// Traverse ImportStmt
+func (imp *ImportStmt) Traverse(v Visitor) {
 	v.Visit(imp.Ident)
 }
 
-// Traverse Const
-func (cns *Const) Traverse(v Visitor) {
+// Traverse ConstStmt
+func (cns *ConstStmt) Traverse(v Visitor) {
 	for _, d := range cns.Decls {
 		v.Visit(d.Ident)
 		if d.Val != nil {
@@ -30,8 +30,8 @@ func (cns *Const) Traverse(v Visitor) {
 	}
 }
 
-// Traverse Let
-func (let *Let) Traverse(v Visitor) {
+// Traverse LetStmt
+func (let *LetStmt) Traverse(v Visitor) {
 	for _, d := range let.Decls {
 		v.Visit(d.Ident)
 		if d.Val != nil {
@@ -40,8 +40,8 @@ func (let *Let) Traverse(v Visitor) {
 	}
 }
 
-// Traverse NamedFn
-func (nf *NamedFn) Traverse(v Visitor) {
+// Traverse NamedFnStmt
+func (nf *NamedFnStmt) Traverse(v Visitor) {
 	v.Visit(nf.Ident)
 	v.Visit(nf.Func)
 }
@@ -52,8 +52,8 @@ func (asn *AssignmentExpr) Traverse(v Visitor) {
 	v.Visit(asn.Val)
 }
 
-// Traverse If
-func (ifn *If) Traverse(v Visitor) {
+// Traverse IfStmt
+func (ifn *IfStmt) Traverse(v Visitor) {
 	v.Visit(ifn.Cond)
 	v.Visit(ifn.Then)
 	if ifn.Else != nil {
@@ -61,14 +61,14 @@ func (ifn *If) Traverse(v Visitor) {
 	}
 }
 
-// Traverse While
-func (wh *While) Traverse(v Visitor) {
+// Traverse WhileStmt
+func (wh *WhileStmt) Traverse(v Visitor) {
 	v.Visit(wh.Cond)
 	v.Visit(wh.Body)
 }
 
-// Traverse For
-func (fr *For) Traverse(v Visitor) {
+// Traverse ForStmt
+func (fr *ForStmt) Traverse(v Visitor) {
 	for _, n := range fr.Idents {
 		v.Visit(n)
 	}
@@ -77,8 +77,8 @@ func (fr *For) Traverse(v Visitor) {
 	v.Visit(fr.Body)
 }
 
-// Traverse Switch
-func (sw *Switch) Traverse(v Visitor) {
+// Traverse SwitchStmt
+func (sw *SwitchStmt) Traverse(v Visitor) {
 	if sw.Item != nil {
 		v.Visit(sw.Item)
 	}
@@ -87,13 +87,13 @@ func (sw *Switch) Traverse(v Visitor) {
 		v.Visit(cs)
 	}
 
-	if sw.Default != nil {
-		v.Visit(sw.Default)
+	if sw.DefaultNode != nil {
+		v.Visit(sw.DefaultNode)
 	}
 }
 
-// Traverse Case
-func (cs *Case) Traverse(v Visitor) {
+// Traverse CaseNode
+func (cs *CaseNode) Traverse(v Visitor) {
 	for _, n := range cs.Matches {
 		v.Visit(n)
 	}
@@ -103,35 +103,35 @@ func (cs *Case) Traverse(v Visitor) {
 	}
 }
 
-// Traverse Default
-func (def *Default) Traverse(v Visitor) {
+// Traverse DefaultNode
+func (def *DefaultNode) Traverse(v Visitor) {
 	for _, n := range def.Body {
 		v.Visit(n)
 	}
 }
 
-// Traverse Break
-func (br *Break) Traverse(v Visitor) {
+// Traverse BreakStmt
+func (br *BreakStmt) Traverse(v Visitor) {
 }
 
-// Traverse Continue
-func (cn *Continue) Traverse(v Visitor) {
+// Traverse ContinueStmt
+func (cn *ContinueStmt) Traverse(v Visitor) {
 }
 
-// Traverse Return
-func (rt *Return) Traverse(v Visitor) {
+// Traverse ReturnStmt
+func (rt *ReturnStmt) Traverse(v Visitor) {
 	if rt.Val != nil {
 		v.Visit(rt.Val)
 	}
 }
 
-// Traverse Throw
-func (t *Throw) Traverse(v Visitor) {
+// Traverse ThrowStmt
+func (t *ThrowStmt) Traverse(v Visitor) {
 	v.Visit(t.Val)
 }
 
-// Traverse Try
-func (t *Try) Traverse(v Visitor) {
+// Traverse TryStmt
+func (t *TryStmt) Traverse(v Visitor) {
 	v.Visit(t.TryBlock)
 	if t.CatchToken != nil {
 		v.Visit(t.CatchIdent)
@@ -142,8 +142,8 @@ func (t *Try) Traverse(v Visitor) {
 	}
 }
 
-// Traverse Go
-func (g *Go) Traverse(v Visitor) {
+// Traverse GoStmt
+func (g *GoStmt) Traverse(v Visitor) {
 	v.Visit(g.Invocation)
 }
 
@@ -152,8 +152,8 @@ func (n *ExprStmt) Traverse(v Visitor) {
 	v.Visit(n.Expr)
 }
 
-// Traverse Block
-func (blk *Block) Traverse(v Visitor) {
+// Traverse BlockNode
+func (blk *BlockNode) Traverse(v Visitor) {
 	for _, n := range blk.Statements {
 		v.Visit(n)
 	}
@@ -309,36 +309,36 @@ func (p *dump) Visit(node Node) {
 
 	switch t := node.(type) {
 
-	case *Block:
-		p.buf.WriteString("Block\n")
+	case *BlockNode:
+		p.buf.WriteString("BlockNode\n")
 
-	case *Import:
-		p.buf.WriteString("Import\n")
-	case *Const:
-		p.buf.WriteString("Const\n")
-	case *Let:
-		p.buf.WriteString("Let\n")
-	case *NamedFn:
-		p.buf.WriteString("NamedFn\n")
+	case *ImportStmt:
+		p.buf.WriteString("ImportStmt\n")
+	case *ConstStmt:
+		p.buf.WriteString("ConstStmt\n")
+	case *LetStmt:
+		p.buf.WriteString("LetStmt\n")
+	case *NamedFnStmt:
+		p.buf.WriteString("NamedFnStmt\n")
 
-	case *If:
-		p.buf.WriteString("If\n")
-	case *While:
-		p.buf.WriteString("While\n")
-	case *For:
-		p.buf.WriteString("For\n")
-	case *Break:
-		p.buf.WriteString("Break\n")
-	case *Continue:
-		p.buf.WriteString("Continue\n")
-	case *Return:
-		p.buf.WriteString("Return\n")
-	case *Throw:
-		p.buf.WriteString("Throw\n")
-	case *Try:
-		p.buf.WriteString("Try\n")
-	case *Go:
-		p.buf.WriteString("Go\n")
+	case *IfStmt:
+		p.buf.WriteString("IfStmt\n")
+	case *WhileStmt:
+		p.buf.WriteString("WhileStmt\n")
+	case *ForStmt:
+		p.buf.WriteString("ForStmt\n")
+	case *BreakStmt:
+		p.buf.WriteString("BreakStmt\n")
+	case *ContinueStmt:
+		p.buf.WriteString("ContinueStmt\n")
+	case *ReturnStmt:
+		p.buf.WriteString("ReturnStmt\n")
+	case *ThrowStmt:
+		p.buf.WriteString("ThrowStmt\n")
+	case *TryStmt:
+		p.buf.WriteString("TryStmt\n")
+	case *GoStmt:
+		p.buf.WriteString("GoStmt\n")
 
 	case *ExprStmt:
 		p.buf.WriteString("ExprStmt\n")

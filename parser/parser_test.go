@@ -103,7 +103,7 @@ func parseExpression(p *Parser) (expr ast.Expression, err error) {
 
 	// parse the expression
 	expr = p.expression()
-	p.expect(ast.EOF)
+	p.expect(ast.Eof)
 
 	return expr, err
 }
@@ -111,13 +111,13 @@ func parseExpression(p *Parser) (expr ast.Expression, err error) {
 func TestPrimary(t *testing.T) {
 
 	p := newParser("")
-	failExpr(t, p, "Unexpected EOF at (1, 1)")
+	failExpr(t, p, "Unexpected Eof at (1, 1)")
 
 	p = newParser("#")
 	failExpr(t, p, "Unexpected Character '#' at (1, 1)")
 
 	p = newParser("'")
-	failExpr(t, p, "Unexpected EOF at (1, 2)")
+	failExpr(t, p, "Unexpected Eof at (1, 2)")
 
 	p = newParser("1 2")
 	failExpr(t, p, "Unexpected Token '2' at (1, 3)")
@@ -192,13 +192,13 @@ func TestTernary(t *testing.T) {
 	okExpr(t, p, "((a || b) ? (b = c) : (d ? e : f))")
 
 	p = newParser("a ?")
-	failExpr(t, p, "Unexpected EOF at (1, 4)")
+	failExpr(t, p, "Unexpected Eof at (1, 4)")
 
 	p = newParser("a ? b")
-	failExpr(t, p, "Unexpected EOF at (1, 6)")
+	failExpr(t, p, "Unexpected Eof at (1, 6)")
 
 	p = newParser("a ? b :")
-	failExpr(t, p, "Unexpected EOF at (1, 8)")
+	failExpr(t, p, "Unexpected Eof at (1, 8)")
 }
 
 func TestMultiplicative(t *testing.T) {
@@ -250,7 +250,7 @@ func TestAdditive(t *testing.T) {
 	okExpr(t, p, "(1 ^ (2 % 3))")
 
 	p = newParser("1 +")
-	failExpr(t, p, "Unexpected EOF at (1, 4)")
+	failExpr(t, p, "Unexpected Eof at (1, 4)")
 }
 
 func TestAssign(t *testing.T) {
@@ -383,10 +383,10 @@ func TestFor(t *testing.T) {
 	fail(t, p, "Unexpected Token 'in' at (1, 5)")
 
 	p = newParser("for (a) in c {}")
-	fail(t, p, "Invalid For Expression at (1, 5)")
+	fail(t, p, "Invalid ForStmt Expression at (1, 5)")
 
 	p = newParser("for () in c {}")
-	fail(t, p, "Invalid For Expression at (1, 5)")
+	fail(t, p, "Invalid ForStmt Expression at (1, 5)")
 }
 
 func TestFn(t *testing.T) {
@@ -452,7 +452,7 @@ func TestTry(t *testing.T) {
 	fail(t, p, "Unexpected Token ';' at (1, 4)")
 
 	p = newParser("try {}")
-	fail(t, p, "Invalid TRY Expression at (1, 1)")
+	fail(t, p, "Invalid Try Expression at (1, 1)")
 }
 
 func TestInvoke(t *testing.T) {
@@ -754,7 +754,7 @@ func TestSwitch(t *testing.T) {
 	fail(t, p, "Unexpected Token '}' at (1, 10)")
 
 	p = newParser("switch { case a: x;")
-	fail(t, p, "Unexpected EOF at (1, 20)")
+	fail(t, p, "Unexpected Eof at (1, 20)")
 
 	p = newParser("switch { default: x; }")
 	fail(t, p, "Unexpected Token 'default' at (1, 10)")
@@ -766,10 +766,10 @@ func TestSwitch(t *testing.T) {
 	fail(t, p, "Unexpected Token ';' at (1, 19)")
 
 	p = newParser("switch { case a, b, c: }")
-	fail(t, p, "Invalid Switch Expression at (1, 22)")
+	fail(t, p, "Invalid SwitchStmt Expression at (1, 22)")
 
 	p = newParser("switch { case a: b; default: }")
-	fail(t, p, "Invalid Switch Expression at (1, 28)")
+	fail(t, p, "Invalid SwitchStmt Expression at (1, 28)")
 }
 
 func TestLambda(t *testing.T) {
