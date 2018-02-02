@@ -57,8 +57,8 @@ func (p *Parser) ParseModule() (fn *ast.FnExpr, err error) {
 	stmts := p.imports()
 
 	// parse the module
-	stmts = append(stmts, p.statements(ast.Eof)...)
-	p.expect(ast.Eof)
+	stmts = append(stmts, p.statements(ast.EOF)...)
+	p.expect(ast.EOF)
 
 	params := []*ast.FormalParam{}
 	block := &ast.BlockNode{nil, stmts, nil}
@@ -1092,7 +1092,7 @@ func (p *Parser) expectStatementDelimiter() {
 	switch {
 	case
 		p.cur.token.Kind == ast.Semicolon,
-		p.cur.token.Kind == ast.Eof:
+		p.cur.token.Kind == ast.EOF:
 		p.consume()
 	case p.cur.skipLF:
 		// nothing to do
@@ -1107,7 +1107,7 @@ func (p *Parser) atStatementDelimiter() bool {
 	switch {
 	case
 		p.cur.token.Kind == ast.Semicolon,
-		p.cur.token.Kind == ast.Eof:
+		p.cur.token.Kind == ast.EOF:
 		return true
 	case p.cur.skipLF:
 		return true
@@ -1141,7 +1141,7 @@ func (p *Parser) advance() tokenInfo {
 		case ast.UnexpectedChar:
 			panic(&parserError{UnexpectedChar, token})
 
-		case ast.UnexpectedEof:
+		case ast.UnexpectedEOF:
 			panic(&parserError{UnexpectedEOF, token})
 
 		default:
@@ -1156,7 +1156,7 @@ func (p *Parser) advance() tokenInfo {
 // create a error that we will panic with
 func (p *Parser) unexpected() error {
 	switch p.cur.token.Kind {
-	case ast.Eof:
+	case ast.EOF:
 		return &parserError{UnexpectedEOF, p.cur.token}
 
 	case ast.Reserved:
@@ -1335,7 +1335,7 @@ func (e *parserError) Error() string {
 		return fmt.Sprintf("Unexpected Reserved Word '%v' at %v", e.token.Text, e.token.Position)
 
 	case UnexpectedEOF:
-		return fmt.Sprintf("Unexpected Eof at %v", e.token.Position)
+		return fmt.Sprintf("Unexpected EOF at %v", e.token.Position)
 
 	case InvalidPostfix:
 		return fmt.Sprintf("Invalid Postfix Expression at %v", e.token.Position)

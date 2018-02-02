@@ -40,7 +40,6 @@ func okExpr(t *testing.T, p *Parser, expect string) {
 
 	expr, err := parseExpression(p)
 	if err != nil {
-		panic(err)
 		t.Error(err, " != nil")
 	}
 
@@ -103,7 +102,7 @@ func parseExpression(p *Parser) (expr ast.Expression, err error) {
 
 	// parse the expression
 	expr = p.expression()
-	p.expect(ast.Eof)
+	p.expect(ast.EOF)
 
 	return expr, err
 }
@@ -111,13 +110,13 @@ func parseExpression(p *Parser) (expr ast.Expression, err error) {
 func TestPrimary(t *testing.T) {
 
 	p := newParser("")
-	failExpr(t, p, "Unexpected Eof at (1, 1)")
+	failExpr(t, p, "Unexpected EOF at (1, 1)")
 
 	p = newParser("#")
 	failExpr(t, p, "Unexpected Character '#' at (1, 1)")
 
 	p = newParser("'")
-	failExpr(t, p, "Unexpected Eof at (1, 2)")
+	failExpr(t, p, "Unexpected EOF at (1, 2)")
 
 	p = newParser("1 2")
 	failExpr(t, p, "Unexpected Token '2' at (1, 3)")
@@ -192,13 +191,13 @@ func TestTernary(t *testing.T) {
 	okExpr(t, p, "((a || b) ? (b = c) : (d ? e : f))")
 
 	p = newParser("a ?")
-	failExpr(t, p, "Unexpected Eof at (1, 4)")
+	failExpr(t, p, "Unexpected EOF at (1, 4)")
 
 	p = newParser("a ? b")
-	failExpr(t, p, "Unexpected Eof at (1, 6)")
+	failExpr(t, p, "Unexpected EOF at (1, 6)")
 
 	p = newParser("a ? b :")
-	failExpr(t, p, "Unexpected Eof at (1, 8)")
+	failExpr(t, p, "Unexpected EOF at (1, 8)")
 }
 
 func TestMultiplicative(t *testing.T) {
@@ -250,7 +249,7 @@ func TestAdditive(t *testing.T) {
 	okExpr(t, p, "(1 ^ (2 % 3))")
 
 	p = newParser("1 +")
-	failExpr(t, p, "Unexpected Eof at (1, 4)")
+	failExpr(t, p, "Unexpected EOF at (1, 4)")
 }
 
 func TestAssign(t *testing.T) {
@@ -754,7 +753,7 @@ func TestSwitch(t *testing.T) {
 	fail(t, p, "Unexpected Token '}' at (1, 10)")
 
 	p = newParser("switch { case a: x;")
-	fail(t, p, "Unexpected Eof at (1, 20)")
+	fail(t, p, "Unexpected EOF at (1, 20)")
 
 	p = newParser("switch { default: x; }")
 	fail(t, p, "Unexpected Token 'default' at (1, 10)")

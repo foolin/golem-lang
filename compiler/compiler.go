@@ -699,9 +699,9 @@ func (c *compiler) visitBinaryExpr(b *ast.BinaryExpr) {
 	switch b.Op.Kind {
 
 	case ast.DblPipe:
-		c.visitOr(b.Lhs, b.Rhs)
+		c.visitOr(b.LHS, b.RHS)
 	case ast.DblAmp:
-		c.visitAnd(b.Lhs, b.Rhs)
+		c.visitAnd(b.LHS, b.RHS)
 
 	case ast.DblEq:
 		b.Traverse(c)

@@ -168,8 +168,8 @@ func (trn *TernaryExpr) Traverse(v Visitor) {
 
 // Traverse BinaryExpr
 func (bin *BinaryExpr) Traverse(v Visitor) {
-	v.Visit(bin.Lhs)
-	v.Visit(bin.Rhs)
+	v.Visit(bin.LHS)
+	v.Visit(bin.RHS)
 }
 
 // Traverse UnaryExpr

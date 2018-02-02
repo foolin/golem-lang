@@ -312,7 +312,7 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == eof:
 			s.isDone = true
-			s.doneToken = &ast.Token{ast.Eof, "", pos}
+			s.doneToken = &ast.Token{ast.EOF, "", pos}
 			return s.doneToken
 
 		default:
@@ -649,7 +649,7 @@ func (s *Scanner) expect(fn func(rune) bool) *ast.Token {
 func (s *Scanner) unexpectedChar(r rune, pos ast.Pos) *ast.Token {
 	s.isDone = true
 	if r == eof {
-		s.doneToken = &ast.Token{ast.UnexpectedEof, "", pos}
+		s.doneToken = &ast.Token{ast.UnexpectedEOF, "", pos}
 	} else {
 		s.doneToken = &ast.Token{ast.UnexpectedChar, string(r), pos}
 	}

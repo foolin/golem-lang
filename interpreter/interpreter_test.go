@@ -117,7 +117,6 @@ func failErr(t *testing.T, source string, expect g.Error) {
 	}
 
 	if err.Error() != expect.Error() {
-		panic("sadfdfadf")
 		t.Error(err, " != ", expect)
 	}
 }
@@ -1607,7 +1606,6 @@ try {
 func okVal(t *testing.T, val g.Value, err g.Error, expect g.Value) {
 
 	if err != nil {
-		panic("ok")
 		t.Error(err, " != ", nil)
 	}
 

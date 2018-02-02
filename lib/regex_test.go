@@ -17,7 +17,6 @@ func tassert(t *testing.T, flag bool) {
 }
 func ok(t *testing.T, val g.Value, err g.Error, expect g.Value) {
 	if err != nil {
-		panic("ok")
 		t.Error(err, " != ", nil)
 	}
 

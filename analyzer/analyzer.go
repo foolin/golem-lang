@@ -249,7 +249,7 @@ func (a *analyzer) makeParentCaptures() []*ast.Variable {
 	}
 
 	// First, sort the captured Variables by index
-	caps := make(ast.VariableArray, 0, num)
+	caps := make(byIndex, 0, num)
 	for _, v := range fscope.captures {
 		caps = append(caps, v)
 	}
@@ -261,6 +261,19 @@ func (a *analyzer) makeParentCaptures() []*ast.Variable {
 		parentCaps = append(parentCaps, fscope.parentCaptures[v.Symbol])
 	}
 	return parentCaps
+}
+
+type byIndex []*ast.Variable
+
+// Variables are sorted by Index
+func (v byIndex) Len() int {
+	return len(v)
+}
+func (v byIndex) Swap(i, j int) {
+	v[i], v[j] = v[j], v[i]
+}
+func (v byIndex) Less(i, j int) bool {
+	return v[i].Index < v[j].Index
 }
 
 func (a *analyzer) visitAssignment(asn *ast.AssignmentExpr) {

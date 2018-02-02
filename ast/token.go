@@ -11,6 +11,7 @@ import (
 //-------------------------------------
 // Pos
 
+// Pos represents a Line-and-Column location in Golem source code.
 type Pos struct {
 	Line int
 	Col  int
@@ -20,21 +21,21 @@ func (p Pos) String() string {
 	return fmt.Sprintf("(%d, %d)", p.Line, p.Col)
 }
 
+// Advance advances a Pos column forwards
 func (p Pos) Advance(len int) Pos {
 	return Pos{p.Line, p.Col + len}
 }
 
-//-------------------------------------
-// Token
-
+// TokenKind defines all the various kinds of token
 type TokenKind int
 
+// The various kinds of token
 const (
 	UnexpectedChar TokenKind = iota
-	UnexpectedEof
+	UnexpectedEOF
 	badKind
 
-	Eof
+	EOF
 	LineFeed
 
 	Plus
@@ -140,11 +141,11 @@ func (t TokenKind) String() string {
 	switch t {
 	case UnexpectedChar:
 		return "UnexpectedChar"
-	case UnexpectedEof:
-		return "UnexpectedEof"
+	case UnexpectedEOF:
+		return "UnexpectedEOF"
 
-	case Eof:
-		return "Eof"
+	case EOF:
+		return "EOF"
 	case LineFeed:
 		return "LineFeed"
 
@@ -301,6 +302,8 @@ func (t TokenKind) String() string {
 	}
 }
 
+// Token is produced by the Scanner.  The Parser uses Tokens to assemble
+// an Abstract Syntax Tree.
 type Token struct {
 	Kind     TokenKind
 	Text     string
@@ -311,10 +314,12 @@ func (t *Token) String() string {
 	return fmt.Sprintf("Token(%v, %q, %v)", t.Kind, t.Text, t.Position)
 }
 
+// IsBad returns whether or not a Token is considered to be invalid.
 func (t *Token) IsBad() bool {
 	return t.Kind < badKind
 }
 
+// IsBasic returns whether or not a token represents one of the basic types.
 func (t *Token) IsBasic() bool {
 	return t.Kind > basicBegin && t.Kind < basicEnd
 }
