@@ -4,6 +4,7 @@ Things to do before Golem is releasable
 -----------------------------------------------------------
 
 golint and go vet
+refactor Error so its a distinct type
 
 create an example to demonstrate how to embed/sandbox.
 

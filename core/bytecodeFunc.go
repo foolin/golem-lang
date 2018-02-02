@@ -23,7 +23,8 @@ type bytecodeFunc struct {
 	captures []*Ref
 }
 
-// Called via NewFunc opcode at runtime
+// NewBytecodeFunc creates a new BytecodeFunc.  NewBytecodeFunc is
+// called via NewFunc opcode at runtime.
 func NewBytecodeFunc(template *Template) BytecodeFunc {
 	captures := make([]*Ref, 0, template.NumCaptures)
 	return &bytecodeFunc{template, captures}
@@ -101,13 +102,13 @@ type Template struct {
 	ExceptionHandlers []ExceptionHandler
 }
 
-// A LineNumberEntry tracks which sequence of opcodes are on a given line
+// LineNumberEntry tracks which sequence of opcodes are on a given line
 type LineNumberEntry struct {
 	Index   int
 	LineNum int
 }
 
-// An ExceptionHandler handles exceptions for a given block of opcodes,
+// ExceptionHandler handles exceptions for a given block of opcodes,
 // by providing the instruction pointers for 'catch' and 'finally'
 type ExceptionHandler struct {
 	Begin   int
@@ -116,7 +117,7 @@ type ExceptionHandler struct {
 	Finally int
 }
 
-// Return the line number for the opcode at the ven instruction pointer
+// LineNumber returns the line number for the opcode at the given instruction pointer
 func (t *Template) LineNumber(instPtr int) int {
 
 	table := t.LineNumberTable

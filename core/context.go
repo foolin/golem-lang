@@ -4,9 +4,8 @@
 
 package core
 
-//---------------------------------------------------------------
-// A Context can evaluate bytecode.
-
+// Context evaluates bytecode. In practice, this means that a Context is actually
+// a full-fledged instance of the Golem Interpreter.
 type Context interface {
 	Eval(BytecodeFunc, []Value) (Value, Error)
 }

@@ -12,10 +12,12 @@ type channel struct {
 	ch chan Value
 }
 
+// NewChan creates a new Chan
 func NewChan() Chan {
 	return &channel{make(chan Value)}
 }
 
+// NewBufferedChan creates a new buffered Chan
 func NewBufferedChan(size int) Chan {
 	return &channel{make(chan Value, size)}
 }

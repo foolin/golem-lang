@@ -13,6 +13,7 @@ type dict struct {
 	frozen  bool
 }
 
+// NewDict creates a new Dict
 func NewDict(cx Context, entries []*HEntry) Dict {
 	return &dict{NewHashMap(cx, entries), false}
 }
@@ -141,9 +142,8 @@ func (d *dict) AddAll(cx Context, val Value) Error {
 			}
 		}
 		return nil
-	} else {
-		return TypeMismatchError("Expected Iterable Type")
 	}
+	return TypeMismatchError("Expected Iterable Type")
 }
 
 //---------------------------------------------------------------
@@ -171,9 +171,8 @@ func (i *dictIterator) IterGet() (Value, Error) {
 	if i.hasNext {
 		entry := i.itr.Get()
 		return NewTuple([]Value{entry.Key, entry.Value}), nil
-	} else {
-		return nil, NoSuchElementError()
 	}
+	return nil, NoSuchElementError()
 }
 
 //--------------------------------------------------------------
@@ -189,9 +188,8 @@ func (d *dict) GetField(cx Context, key Str) (Value, Error) {
 				err := d.AddAll(cx, values[0])
 				if err != nil {
 					return nil, err
-				} else {
-					return d, nil
 				}
+				return d, nil
 			}}}, nil
 
 	case "clear":
@@ -201,9 +199,8 @@ func (d *dict) GetField(cx Context, key Str) (Value, Error) {
 				err := d.Clear()
 				if err != nil {
 					return nil, err
-				} else {
-					return d, nil
 				}
+				return d, nil
 			}}}, nil
 
 	case "isEmpty":

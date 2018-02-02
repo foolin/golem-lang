@@ -11,12 +11,15 @@ import (
 //-----------------------------------------------------------------
 
 type (
+	// BuiltinManager manages the built-in functions (and other built-in values)
+	// for a given instance of the Interpreter
 	BuiltinManager interface {
 		Builtins() []Value
 		Contains(s string) bool
 		IndexOf(s string) int
 	}
 
+	// BuiltinEntry is an entry in a BuiltinManager
 	BuiltinEntry struct {
 		Name  string
 		Value Value
@@ -28,6 +31,7 @@ type (
 	}
 )
 
+// NewBuiltinManager creates a new BuiltinManager
 func NewBuiltinManager(entries []*BuiltinEntry) BuiltinManager {
 	values := make([]Value, len(entries), len(entries))
 	lookup := make(map[string]int)
@@ -58,6 +62,8 @@ func (b *builtinManager) IndexOf(s string) int {
 
 //-----------------------------------------------------------------
 
+// SandboxBuiltins is the 'standard' list of built-ins that are
+// pure functions.  These functions do not do any form of I/O.
 var SandboxBuiltins = []*BuiltinEntry{
 	{"str", BuiltinStr},
 	{"len", BuiltinLen},
@@ -74,8 +80,7 @@ var SandboxBuiltins = []*BuiltinEntry{
 	{"arity", BuiltinArity},
 }
 
-// print() and println() do IO, so they should not be included
-// in a sandboxed environment.
+// CommandLineBuiltins consists of the SandboxBuiltins, plus print() and println().
 var CommandLineBuiltins = append(
 	SandboxBuiltins,
 	[]*BuiltinEntry{
@@ -83,9 +88,8 @@ var CommandLineBuiltins = append(
 		{"println", BuiltinPrintln}}...)
 
 //-----------------------------------------------------------------
-// print() and println() do IO, so they should not be included
-// in a sandboxed environment.
 
+// BuiltinPrint prints to stdout.
 var BuiltinPrint = &nativeFunc{
 	0, -1,
 	func(cx Context, values []Value) (Value, Error) {
@@ -96,6 +100,7 @@ var BuiltinPrint = &nativeFunc{
 		return NullValue, nil
 	}}
 
+// BuiltinPrintln prints to stdout.
 var BuiltinPrintln = &nativeFunc{
 	0, -1,
 	func(cx Context, values []Value) (Value, Error) {
@@ -109,22 +114,24 @@ var BuiltinPrintln = &nativeFunc{
 
 //-----------------------------------------------------------------
 
+// BuiltinStr converts a single value to a Str
 var BuiltinStr = &nativeFunc{
 	1, 1,
 	func(cx Context, values []Value) (Value, Error) {
 		return values[0].ToStr(cx), nil
 	}}
 
+// BuiltinLen returns the length of a single Lenable
 var BuiltinLen = &nativeFunc{
 	1, 1,
 	func(cx Context, values []Value) (Value, Error) {
 		if ln, ok := values[0].(Lenable); ok {
 			return ln.Len(), nil
-		} else {
-			return nil, TypeMismatchError("Expected Lenable Type")
 		}
+		return nil, TypeMismatchError("Expected Lenable Type")
 	}}
 
+// BuiltinRange creates a new Range
 var BuiltinRange = &nativeFunc{
 	2, 3,
 	func(cx Context, values []Value) (Value, Error) {
@@ -149,6 +156,7 @@ var BuiltinRange = &nativeFunc{
 		return NewRange(from.IntVal(), to.IntVal(), step.IntVal())
 	}}
 
+// BuiltinAssert asserts that a single Bool is TRUE
 var BuiltinAssert = &nativeFunc{
 	1, 1,
 	func(cx Context, values []Value) (Value, Error) {
@@ -159,11 +167,11 @@ var BuiltinAssert = &nativeFunc{
 
 		if b.BoolVal() {
 			return TRUE, nil
-		} else {
-			return nil, AssertionFailedError()
 		}
+		return nil, AssertionFailedError()
 	}}
 
+// BuiltinMerge merges structs together.
 var BuiltinMerge = &nativeFunc{
 	2, -1,
 	func(cx Context, values []Value) (Value, Error) {
@@ -179,6 +187,8 @@ var BuiltinMerge = &nativeFunc{
 		return MergeStructs(structs), nil
 	}}
 
+// BuiltinChan creates a new Chan.  If an Int is passed in,
+// it is used to create a buffered Chan.
 var BuiltinChan = &nativeFunc{
 	0, 1,
 	func(cx Context, values []Value) (Value, Error) {
@@ -197,6 +207,7 @@ var BuiltinChan = &nativeFunc{
 		}
 	}}
 
+// BuiltinType returns the Str representation of the Type of a single Value
 var BuiltinType = &nativeFunc{
 	1, 1,
 	func(cx Context, values []Value) (Value, Error) {
@@ -204,24 +215,26 @@ var BuiltinType = &nativeFunc{
 		// we are going to pretend it doesn't
 		if values[0] == NullValue {
 			return nil, NullValueError()
-		} else {
-			_type := values[0].Type()
-			return NewStr(_type.String()), nil
 		}
+		t := values[0].Type()
+		return NewStr(t.String()), nil
 	}}
 
+// BuiltinFreeze freezes a single Value.
 var BuiltinFreeze = &nativeFunc{
 	1, 1,
 	func(cx Context, values []Value) (Value, Error) {
 		return values[0].Freeze()
 	}}
 
+// BuiltinFrozen returns whether a single Value is Frozen.
 var BuiltinFrozen = &nativeFunc{
 	1, 1,
 	func(cx Context, values []Value) (Value, Error) {
 		return values[0].Frozen()
 	}}
 
+// BuiltinFields returns the fields of a Struct
 var BuiltinFields = &nativeFunc{
 	1, 1,
 	func(cx Context, values []Value) (Value, Error) {
@@ -238,6 +251,7 @@ var BuiltinFields = &nativeFunc{
 		return NewSet(cx, result), nil
 	}}
 
+// BuiltinGetVal gets the Value associated with a Struct's field name.
 var BuiltinGetVal = &nativeFunc{
 	2, 2,
 	func(cx Context, values []Value) (Value, Error) {
@@ -253,6 +267,7 @@ var BuiltinGetVal = &nativeFunc{
 		return st.GetField(cx, field)
 	}}
 
+// BuiltinSetVal sets the Value associated with a Struct's field name.
 var BuiltinSetVal = &nativeFunc{
 	3, 3,
 	func(cx Context, values []Value) (Value, Error) {
@@ -269,11 +284,11 @@ var BuiltinSetVal = &nativeFunc{
 		err := st.SetField(cx, field, val)
 		if err != nil {
 			return nil, err
-		} else {
-			return val, nil
 		}
+		return val, nil
 	}}
 
+// BuiltinArity returns the arity of a function.
 var BuiltinArity = &nativeFunc{
 	1, 1,
 	func(cx Context, values []Value) (Value, Error) {

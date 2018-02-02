@@ -426,7 +426,7 @@ func TestRangeIterator(t *testing.T) {
 
 	var ibl Iterable = newRange(1, 5, 1)
 
-	var itr Iterator = ibl.NewIterator(cx)
+	itr := ibl.NewIterator(cx)
 	v, err := itr.IterGet()
 	fail(t, v, err, "NoSuchElement")
 	var n int64 = 1
@@ -459,7 +459,7 @@ func TestListIterator(t *testing.T) {
 	var ibl Iterable = NewList(
 		[]Value{NewInt(1), NewInt(2), NewInt(3), NewInt(4)})
 
-	var itr Iterator = ibl.NewIterator(cx)
+	itr := ibl.NewIterator(cx)
 	v, err := itr.IterGet()
 	fail(t, v, err, "NoSuchElement")
 	var n int64 = 1
@@ -500,7 +500,7 @@ func TestDictIterator(t *testing.T) {
 			{NewStr("b"), NewInt(2)},
 			{NewStr("c"), NewInt(3)}})
 
-	var itr Iterator = ibl.NewIterator(cx)
+	itr := ibl.NewIterator(cx)
 	v, err := itr.IterGet()
 	fail(t, v, err, "NoSuchElement")
 	s := NewStr("")
@@ -533,7 +533,7 @@ func TestSetIterator(t *testing.T) {
 	var ibl Iterable = NewSet(cx,
 		[]Value{NewStr("a"), NewStr("b"), NewStr("c")})
 
-	var itr Iterator = ibl.NewIterator(cx)
+	itr := ibl.NewIterator(cx)
 	v, err := itr.IterGet()
 	fail(t, v, err, "NoSuchElement")
 	s := NewStr("")
