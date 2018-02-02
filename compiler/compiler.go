@@ -852,7 +852,7 @@ func (c *compiler) visitBasicExpr(basic *ast.BasicExpr) {
 
 	switch basic.Token.Kind {
 
-	case ast.NullValue:
+	case ast.NULL:
 		c.push(basic.Token.Position, o.LoadNull)
 
 	case ast.True:
