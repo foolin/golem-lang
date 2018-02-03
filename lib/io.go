@@ -82,7 +82,7 @@ func makeFile(name g.Str) g.Struct {
 			if err != nil {
 				return nil, g.NewError("IoError", err.Error())
 			}
-			defer f.Close()
+			defer f.Close() // nolint: errcheck
 
 			scanner := bufio.NewScanner(f)
 			list := []g.Value{}

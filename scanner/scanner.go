@@ -189,7 +189,7 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == '%':
 			s.consume()
-			r := s.cur.r
+			r = s.cur.r
 			if r == '=' {
 				s.consume()
 				return &ast.Token{ast.PercentEq, "%=", pos}
@@ -198,7 +198,7 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == '^':
 			s.consume()
-			r := s.cur.r
+			r = s.cur.r
 			if r == '=' {
 				s.consume()
 				return &ast.Token{ast.CaretEq, "^=", pos}
@@ -211,7 +211,7 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == '=':
 			s.consume()
-			r := s.cur.r
+			r = s.cur.r
 			if r == '=' {
 				s.consume()
 				return &ast.Token{ast.DblEq, "==", pos}
@@ -224,7 +224,7 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == '!':
 			s.consume()
-			r := s.cur.r
+			r = s.cur.r
 			if r == '=' {
 				s.consume()
 				return &ast.Token{ast.NotEq, "!=", pos}
@@ -232,13 +232,13 @@ func (s *Scanner) Next() *ast.Token {
 			return &ast.Token{ast.Not, "!", pos}
 		case r == '>':
 			s.consume()
-			r := s.cur.r
+			r = s.cur.r
 			if r == '=' {
 				s.consume()
 				return &ast.Token{ast.GtEq, ">=", pos}
 			} else if r == '>' {
 				s.consume()
-				r := s.cur.r
+				r = s.cur.r
 				if r == '=' {
 					s.consume()
 					return &ast.Token{ast.DblGtEq, ">>=", pos}
@@ -249,10 +249,10 @@ func (s *Scanner) Next() *ast.Token {
 			}
 		case r == '<':
 			s.consume()
-			r := s.cur.r
+			r = s.cur.r
 			if r == '=' {
 				s.consume()
-				r := s.cur.r
+				r = s.cur.r
 				if r == '>' {
 					s.consume()
 					return &ast.Token{ast.Cmp, "<=>", pos}
@@ -260,7 +260,7 @@ func (s *Scanner) Next() *ast.Token {
 				return &ast.Token{ast.LtEq, "<=", pos}
 			} else if r == '<' {
 				s.consume()
-				r := s.cur.r
+				r = s.cur.r
 				if r == '=' {
 					s.consume()
 					return &ast.Token{ast.DblLtEq, "<<=", pos}
@@ -272,7 +272,7 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == '|':
 			s.consume()
-			r := s.cur.r
+			r = s.cur.r
 			if r == '|' {
 				s.consume()
 				return &ast.Token{ast.DblPipe, "||", pos}
@@ -284,7 +284,7 @@ func (s *Scanner) Next() *ast.Token {
 			}
 		case r == '&':
 			s.consume()
-			r := s.cur.r
+			r = s.cur.r
 			if r == '&' {
 				s.consume()
 				return &ast.Token{ast.DblAmp, "&&", pos}
@@ -502,7 +502,7 @@ func (s *Scanner) unicodeRune() (rune, *ast.Token) {
 	if err != nil {
 		panic("unreachable")
 	}
-	return rune(int32(n)), nil
+	return rune(n), nil
 }
 
 func (s *Scanner) nextMultilineStr() *ast.Token {
@@ -545,7 +545,7 @@ func (s *Scanner) nextNumber() *ast.Token {
 	s.consume()
 
 	if r == '0' {
-		r := s.cur.r
+		r = s.cur.r
 
 		switch {
 
@@ -564,7 +564,7 @@ func (s *Scanner) nextNumber() *ast.Token {
 
 	} else {
 		s.acceptWhile(isDigit)
-		r := s.cur.r
+		r = s.cur.r
 		if r == '.' || isExp(r) {
 			return s.nextFloat(begin, pos)
 		}

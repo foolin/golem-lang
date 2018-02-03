@@ -113,11 +113,7 @@ func (i *Interpreter) walkStack(errTrace g.Error) (g.Value, g.Error) {
 						if eh.Finally != -1 {
 							f.ip = eh.Finally
 							fres, ferr := i.runTryClause(f, frameIndex)
-							if ferr != nil {
-								// save the error
-								/*errTrace = */
-								i.makeErrorTrace(ferr, i.stackTrace())
-							} else if fres != nil {
+							if ferr == nil && fres != nil {
 								// stop unwinding the stack
 								return fres, nil
 							}
@@ -209,8 +205,8 @@ func (i *Interpreter) makeErrorTrace(err g.Error, stackTrace []string) g.Error {
 	for i, s := range stackTrace {
 		vals[i] = g.NewStr(s)
 	}
-	list := g.NewList(vals)
-	list.Freeze()
+	list, e := g.NewList(vals).Freeze()
+	assert(e == nil)
 
 	stc, e := g.NewStruct([]g.Field{g.NewField("stackTrace", true, list)}, true)
 	assert(e == nil)

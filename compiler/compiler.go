@@ -642,7 +642,7 @@ func (c *compiler) visitTry(t *ast.TryStmt) {
 	if t.CatchBlock != nil {
 
 		// push a jump, so we'll skip the catch block during normal execution
-		end := c.push(t.TryBlock.End(), o.Jump, 0xFF, 0xFF)
+		catchEnd := c.push(t.TryBlock.End(), o.Jump, 0xFF, 0xFF)
 
 		// save the beginning of the catch
 		catch = len(c.opc)
@@ -662,7 +662,7 @@ func (c *compiler) visitTry(t *ast.TryStmt) {
 		c.push(t.CatchBlock.End(), o.Done)
 
 		// fix the jump
-		c.setJump(end, c.opcLen())
+		c.setJump(catchEnd, c.opcLen())
 	}
 
 	//////////////////////////
@@ -1106,14 +1106,14 @@ func parseInt(text string) int64 {
 	i, err := strconv.ParseInt(text, 10, 64)
 	assert(err == nil)
 	assert(i >= 0)
-	return int64(i)
+	return i
 }
 
 func parseFloat(text string) float64 {
 	f, err := strconv.ParseFloat(text, 64)
 	assert(err == nil)
 	assert(f >= 0)
-	return float64(f)
+	return f
 }
 
 //--------------------------------------------------------------
@@ -1129,7 +1129,8 @@ func poolIndex(pool *g.HashMap, key g.Basic) int {
 	assert(err == nil)
 
 	if b.BoolVal() {
-		v, err := pool.Get(cx, key)
+		var v g.Value
+		v, err = pool.Get(cx, key)
 		assert(err == nil)
 
 		i, ok := v.(g.Int)

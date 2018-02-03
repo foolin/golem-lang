@@ -248,7 +248,7 @@ var BuiltinFields = &nativeFunc{
 		for i, k := range fields {
 			result[i] = NewStr(k)
 		}
-		return NewSet(cx, result), nil
+		return NewSet(cx, result)
 	}}
 
 // BuiltinGetVal gets the Value associated with a Struct's field name.

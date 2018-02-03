@@ -200,9 +200,14 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		size := index(opc, f.ip)
 		vals := make([]g.Value, size)
 		copy(vals, f.stack[n-size+1:])
-
 		f.stack = f.stack[:n-size+1]
-		f.stack = append(f.stack, g.NewSet(i, vals))
+
+		set, err := g.NewSet(i, vals)
+		if err != nil {
+			return nil, err
+		}
+
+		f.stack = append(f.stack, set)
 		f.ip += 3
 
 	case o.NewTuple:

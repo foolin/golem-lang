@@ -14,14 +14,17 @@ type set struct {
 }
 
 // NewSet creates a new Set
-func NewSet(cx Context, values []Value) Set {
+func NewSet(cx Context, values []Value) (Set, Error) {
 
 	hashMap := EmptyHashMap()
 	for _, v := range values {
-		hashMap.Put(cx, v, True)
+		err := hashMap.Put(cx, v, True)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return &set{hashMap, false}
+	return &set{hashMap, false}, nil
 }
 
 func (s *set) compositeMarker() {}

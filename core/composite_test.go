@@ -278,8 +278,16 @@ func TestDict(t *testing.T) {
 	ok(t, v, err, True)
 }
 
+func newSet(cx Context, values []Value) Set {
+	set, err := NewSet(cx, values)
+	if err != nil {
+		panic(err)
+	}
+	return set
+}
+
 func TestSet(t *testing.T) {
-	s := NewSet(cx, []Value{})
+	s := newSet(cx, []Value{})
 	okType(t, s, SetType)
 
 	var v Value
@@ -288,10 +296,10 @@ func TestSet(t *testing.T) {
 	v = s.ToStr(cx)
 	ok(t, v, err, NewStr("set { }"))
 
-	v, err = s.Eq(cx, NewSet(cx, []Value{}))
+	v, err = s.Eq(cx, newSet(cx, []Value{}))
 	ok(t, v, err, True)
 
-	v, err = s.Eq(cx, NewSet(cx, []Value{One}))
+	v, err = s.Eq(cx, newSet(cx, []Value{One}))
 	ok(t, v, err, False)
 
 	v, err = s.Eq(cx, NullValue)
@@ -300,15 +308,15 @@ func TestSet(t *testing.T) {
 	v = s.Len()
 	ok(t, v, nil, Zero)
 
-	s = NewSet(cx, []Value{One})
+	s = newSet(cx, []Value{One})
 
 	v = s.ToStr(cx)
 	ok(t, v, err, NewStr("set { 1 }"))
 
-	v, err = s.Eq(cx, NewSet(cx, []Value{}))
+	v, err = s.Eq(cx, newSet(cx, []Value{}))
 	ok(t, v, err, False)
 
-	v, err = s.Eq(cx, NewSet(cx, []Value{One, One, One}))
+	v, err = s.Eq(cx, newSet(cx, []Value{One, One, One}))
 	ok(t, v, err, True)
 
 	v, err = s.Eq(cx, NullValue)
@@ -317,13 +325,16 @@ func TestSet(t *testing.T) {
 	v = s.Len()
 	ok(t, v, nil, One)
 
-	s = NewSet(cx, []Value{One, Zero, Zero, One})
+	s = newSet(cx, []Value{One, Zero, Zero, One})
 
 	v = s.ToStr(cx)
 	ok(t, v, err, NewStr("set { 0, 1 }"))
 
 	v = s.Len()
 	ok(t, v, nil, NewInt(2))
+
+	s, err = NewSet(cx, []Value{NullValue})
+	fail(t, s, err, "NullValue")
 }
 
 func TestTuple(t *testing.T) {
@@ -532,7 +543,7 @@ func TestDictIterator(t *testing.T) {
 
 func TestSetIterator(t *testing.T) {
 
-	var ibl Iterable = NewSet(cx,
+	var ibl Iterable = newSet(cx,
 		[]Value{NewStr("a"), NewStr("b"), NewStr("c")})
 
 	itr := ibl.NewIterator(cx)
