@@ -77,7 +77,7 @@ func TestIndex(t *testing.T) {
 	_, err = boundedIndex(NewInt(-4), 3)
 	ifail(t, err, "IndexOutOfBounds: -1")
 
-	n, err = boundedIndex(NewInt(3), 3)
+	_, err = boundedIndex(NewInt(3), 3)
 	ifail(t, err, "IndexOutOfBounds: 3")
 
 	//--------------------------------------

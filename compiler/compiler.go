@@ -1061,9 +1061,7 @@ func (c *compiler) loadInt(pos ast.Pos, i int64) {
 // returns the length of opc *before* the bytes are pushed
 func (c *compiler) push(pos ast.Pos, bytes ...byte) int {
 	n := len(c.opc)
-	for _, b := range bytes {
-		c.opc = append(c.opc, b)
-	}
+	c.opc = append(c.opc, bytes...)
 
 	ln := len(c.lnum)
 	if (ln == 0) || (pos.Line != c.lnum[ln-1].LineNum) {
@@ -1178,7 +1176,7 @@ func makePoolSlice(pool *g.HashMap) []g.Basic {
 
 	sort.Sort(PoolItems(entries))
 
-	slice := make([]g.Basic, n, n)
+	slice := make([]g.Basic, n)
 	for i, e := range entries {
 		b, ok := e.Key.(g.Basic)
 		assert(ok)

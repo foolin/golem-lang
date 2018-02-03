@@ -112,7 +112,10 @@ func (s *set) AddAll(cx Context, val Value) Error {
 			if err != nil {
 				return err
 			}
-			s.hashMap.Put(cx, v, True)
+			err = s.hashMap.Put(cx, v, True)
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	}

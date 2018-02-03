@@ -4,10 +4,6 @@
 
 package core
 
-import (
-	"fmt"
-)
-
 type (
 	// HashMap is an associative array
 	HashMap struct {
@@ -30,7 +26,7 @@ func EmptyHashMap() *HashMap {
 // NewHashMap creates an empty HashMap
 func NewHashMap(cx Context, entries []*HEntry) *HashMap {
 	capacity := 5
-	buckets := make([][]*HEntry, capacity, capacity)
+	buckets := make([][]*HEntry, capacity)
 	hm := &HashMap{buckets, 0}
 
 	for _, e := range entries {
@@ -204,7 +200,7 @@ func (hm *HashMap) _rehash(cx Context) {
 	oldBuckets := hm.buckets
 
 	capacity := len(hm.buckets)<<1 + 1
-	hm.buckets = make([][]*HEntry, capacity, capacity)
+	hm.buckets = make([][]*HEntry, capacity)
 	for _, b := range oldBuckets {
 		for _, e := range b {
 			h := hm._lookupBucket(cx, e.Key)
@@ -230,23 +226,23 @@ func (hm *HashMap) _lookupBucket(cx Context, key Value) int {
 }
 
 //--------------------------------------------------------------
-
-func (hm *HashMap) dump() {
-	fmt.Println("--------------------------")
-	fmt.Printf("size: %d\n", hm.size)
-	for i, b := range hm.buckets {
-		fmt.Printf("%d, %d: [", i, len(b))
-		for j, e := range b {
-			if j > 0 {
-				fmt.Print(", ")
-			}
-			fmt.Printf("(%v:%v)", e.Key, e.Value)
-		}
-		fmt.Println("]")
-	}
-	fmt.Println("--------------------------")
-}
-
+//
+//func (hm *HashMap) dump() {
+//	fmt.Println("--------------------------")
+//	fmt.Printf("size: %d\n", hm.size)
+//	for i, b := range hm.buckets {
+//		fmt.Printf("%d, %d: [", i, len(b))
+//		for j, e := range b {
+//			if j > 0 {
+//				fmt.Print(", ")
+//			}
+//			fmt.Printf("(%v:%v)", e.Key, e.Value)
+//		}
+//		fmt.Println("]")
+//	}
+//	fmt.Println("--------------------------")
+//}
+//
 //--------------------------------------------------------------
 
 // Iterator returns an iterator over the entries in the HashMap

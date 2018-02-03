@@ -133,7 +133,10 @@ func (d *dict) AddAll(cx Context, val Value) Error {
 			}
 			if tp, ok := v.(tuple); ok {
 				if len(tp) == 2 {
-					d.hashMap.Put(cx, tp[0], tp[1])
+					err = d.hashMap.Put(cx, tp[0], tp[1])
+					if err != nil {
+						return err
+					}
 				} else {
 					return TupleLengthError(2, len(tp))
 				}

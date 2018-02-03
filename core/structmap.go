@@ -22,7 +22,7 @@ type structMap struct {
 }
 
 func newStructMap() *structMap {
-	return &structMap{make([][]*field, 5, 5), 0}
+	return &structMap{make([][]*field, 5), 0}
 }
 
 // put a field, but only if it doesn't already exist
@@ -50,7 +50,7 @@ func (s *structMap) get(name string) (*field, bool) {
 }
 
 func (s *structMap) fieldNames() []string {
-	fieldNames := make([]string, s.size, s.size)
+	fieldNames := make([]string, s.size)
 	n := 0
 	for _, b := range s.buckets {
 		for _, f := range b {
@@ -82,7 +82,7 @@ func (s *structMap) _rehash() {
 
 	oldBuckets := s.buckets
 	capacity := len(s.buckets)<<1 + 1
-	s.buckets = make([][]*field, capacity, capacity)
+	s.buckets = make([][]*field, capacity)
 	for _, b := range oldBuckets {
 		for _, f := range b {
 			h := s._lookupBucket(f.name)

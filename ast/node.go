@@ -31,7 +31,7 @@ type (
 	// Loop is a Statement that is a loop
 	Loop interface {
 		Statement
-		loopMarker()
+		loopMarker() // nolint: megacheck
 	}
 
 	// Expression is a Node that is an expression

@@ -138,7 +138,7 @@ func (ls *list) Values() []Value {
 
 func (ls *list) Join(cx Context, delim Str) Str {
 
-	s := make([]string, len(ls.array), len(ls.array))
+	s := make([]string, len(ls.array))
 	for i, v := range ls.array {
 		s[i] = v.ToStr(cx).String()
 	}
@@ -148,7 +148,7 @@ func (ls *list) Join(cx Context, delim Str) Str {
 
 func (ls *list) Map(cx Context, mapper func(Value) (Value, Error)) (Value, Error) {
 
-	vals := make([]Value, len(ls.array), len(ls.array))
+	vals := make([]Value, len(ls.array))
 
 	var err Error
 	for i, v := range ls.array {

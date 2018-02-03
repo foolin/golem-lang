@@ -423,7 +423,7 @@ let e = fibonacci(5)
 let f = fibonacci(6)
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 	okRef(t, i, mod.Refs[1], g.One)
 	okRef(t, i, mod.Refs[2], g.One)
 	okRef(t, i, mod.Refs[3], g.NewInt(2))
@@ -441,7 +441,7 @@ let foo = fn(n) {
 let a = foo(5)
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 	okRef(t, i, mod.Refs[1], g.NewInt(32))
 }
 
@@ -484,7 +484,7 @@ let y = a(1)
 `
 	mod = newCompiler(source).Compile()
 
-	i = interpret(mod)
+	interpret(mod)
 
 	okRef(t, i, mod.Refs[0], g.Zero)
 	okRef(t, i, mod.Refs[3], g.NewInt(7))
@@ -505,7 +505,7 @@ fn foo() {
 foo()
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 }
 
 func TestStruct(t *testing.T) {
@@ -537,7 +537,7 @@ let y = x.a
 x.a = 6
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
@@ -558,7 +558,7 @@ let b = a.plus()
 let c = a.minus()
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 
 	okRef(t, i, mod.Refs[2], g.NewInt(13))
 	okRef(t, i, mod.Refs[3], g.NewInt(3))
@@ -568,7 +568,7 @@ let a = null
 a = struct { x: 8 }.x = 5
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 
 	okRef(t, i, mod.Refs[0], g.NewInt(5))
 
@@ -582,7 +582,7 @@ assert(b.x)
 assert(!b.y)
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 }
 
 func TestMerge(t *testing.T) {
@@ -665,7 +665,7 @@ let c = a.x++
 let d = b.y--
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
@@ -734,7 +734,7 @@ assert(a.add != b.add);
 assert(b.add != a.add);
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 
 	source = `
 let a = [];
@@ -751,7 +751,7 @@ assert(b.addAll != a.addAll);
 assert(a.add != a.addAll);
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 
 	source = "let a = []; a.addAll(false);"
 	failErr(t, source, g.TypeMismatchError("Expected Iterable Type"))
@@ -768,7 +768,7 @@ a.clear();
 assert(a.isEmpty());
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 
 	source = `
 let a = [];
@@ -779,7 +779,7 @@ assert(a.contains('x'));
 assert(a.indexOf('x') == 1);
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 
 	source = `
 let a = [];
@@ -796,7 +796,7 @@ assert(a.join() == '12abc');
 assert(a.join(',') == '1,2,abc');
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 
 	source = `
 let ls = [true, 0, 'abc'];
@@ -804,7 +804,7 @@ let types = ls.map(type);
 assert(types == ['Bool', 'Int', 'Str']);
 	`
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 
 	source = `
 let ls = [1, 2, 3, 4, 5];
@@ -820,7 +820,7 @@ ls.remove(2);
 assert(ls == [1, 2, 4, 5]);
 	`
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 
 	source = "['a'].remove(-1);"
 	failErr(t, source, g.IndexOutOfBoundsError(-1))
@@ -839,7 +839,7 @@ let b = a.map(fn(x) { n += x; x*x; });
 assert(b == [1, 4, 9] && n == 6);
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 
 	source = "[3, 4, 5][-4];"
 	failErr(t, source, g.IndexOutOfBoundsError(-1))
@@ -863,7 +863,7 @@ a['x'] = -1;
 let d = a['x'];
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
@@ -885,7 +885,7 @@ assert(b.addAll != a.addAll);
 assert(a.clear != a.addAll);
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 
 	source = "let a = dict{}; a.addAll(false);"
 	failErr(t, source, g.TypeMismatchError("Expected Iterable Type"))
@@ -912,7 +912,7 @@ a.clear();
 assert(a.isEmpty());
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 
 	source = `
 let a = dict {'z': 3};
@@ -920,7 +920,7 @@ assert(a.containsKey('z'));
 assert(!a.containsKey('x'));
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 
 	source = `
 let d = dict {'a': 1, 'b': 2};
@@ -932,7 +932,7 @@ assert(d == dict {});
 assert(len(d) == 0);
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 
 	source = `
 let d = dict {'a': 1, 'b': 2};
@@ -944,7 +944,7 @@ assert(d == dict {});
 assert(len(d) == 0);
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 }
 
 func TestSet(t *testing.T) {
@@ -1072,7 +1072,7 @@ assert(print != println);
 let a = assert(true);
 `
 	mod = newCompiler(source).Compile()
-	i = interpret(mod)
+	interpret(mod)
 	okRef(t, i, mod.Refs[0], g.True)
 
 	fail(t, "assert(1, 2);",
@@ -1280,7 +1280,7 @@ try {
     a = 3
 }
 `
-	mod := fail(t, source,
+	fail(t, source,
 		g.DivideByZeroError(),
 		[]string{
 			"    at line 4"})
@@ -1297,7 +1297,7 @@ try {
     a++;
 }
 `
-	mod = fail(t, source,
+	fail(t, source,
 		g.DivideByZeroError(),
 		[]string{
 			"    at line 5"})
@@ -1316,7 +1316,7 @@ try {
     a++;
 }
 `
-	mod = fail(t, source,
+	fail(t, source,
 		g.DivideByZeroError(),
 		[]string{
 			"    at line 6"})
@@ -1345,7 +1345,7 @@ try {
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	mod = fail(t, source,
+	fail(t, source,
 		g.DivideByZeroError(),
 		[]string{
 			"    at line 6",
@@ -1361,7 +1361,7 @@ let b = fn() {
 };
 assert(b() == 1);
 `
-	mod = newCompiler(source).Compile()
+	mod := newCompiler(source).Compile()
 	interpret(mod)
 
 	source = `
@@ -1389,7 +1389,7 @@ try {
 } finally {
 }
 `
-	mod = fail(t, source,
+	fail(t, source,
 		g.ArityMismatchError("1", 3),
 		[]string{
 			"    at line 3"})
@@ -1401,7 +1401,7 @@ try {
     1/0;
 }
 `
-	mod = fail(t, source,
+	fail(t, source,
 		g.DivideByZeroError(),
 		[]string{
 			"    at line 5"})

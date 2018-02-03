@@ -952,10 +952,5 @@ try {
 }
 `
 	anl = newAnalyzer(source)
-	mod = newCompiler(anl).Compile()
-	//	fmt.Println("----------------------------")
-	//	fmt.Println(source)
-	//	fmt.Println("----------------------------")
-	//	fmt.Printf("%s\n", ast.Dump(anl.Module()))
-	//	fmt.Println(mod)
+	newCompiler(anl).Compile()
 }

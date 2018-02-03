@@ -115,7 +115,8 @@ func (i *Interpreter) walkStack(errTrace g.Error) (g.Value, g.Error) {
 							fres, ferr := i.runTryClause(f, frameIndex)
 							if ferr != nil {
 								// save the error
-								errTrace = i.makeErrorTrace(ferr, i.stackTrace())
+								/*errTrace = */
+								i.makeErrorTrace(ferr, i.stackTrace())
 							} else if fres != nil {
 								// stop unwinding the stack
 								return fres, nil
@@ -178,7 +179,7 @@ func (i *Interpreter) stackTrace() []string {
 
 func newLocals(numLocals int, params []g.Value) []*g.Ref {
 	p := len(params)
-	locals := make([]*g.Ref, numLocals, numLocals)
+	locals := make([]*g.Ref, numLocals)
 	for j := 0; j < numLocals; j++ {
 		if j < p {
 			locals[j] = &g.Ref{params[j]}
@@ -187,20 +188,6 @@ func newLocals(numLocals int, params []g.Value) []*g.Ref {
 		}
 	}
 	return locals
-}
-
-func (i *Interpreter) dump() {
-
-	println("-----------------------------------------")
-
-	f := i.frames[len(i.frames)-1]
-	opc := f.fn.Template().OpCodes
-	print(o.FmtOpcode(opc, f.ip))
-
-	for j, f := range i.frames {
-		fmt.Printf("frame %d\n", j)
-		i.dumpFrame(f)
-	}
 }
 
 //---------------------------------------------------------------
@@ -213,24 +200,12 @@ type frame struct {
 	ip     int
 }
 
-func (i *Interpreter) dumpFrame(f *frame) {
-	fmt.Printf("    locals:\n")
-	for j, r := range f.locals {
-		fmt.Printf("        %d: %s\n", j, r.Val.ToStr(i))
-	}
-	fmt.Printf("    stack:\n")
-	for j, v := range f.stack {
-		fmt.Printf("        %d: %s\n", j, v.ToStr(i))
-	}
-	fmt.Printf("    ip: %d\n", f.ip)
-}
-
 //---------------------------------------------------------------
 
 func (i *Interpreter) makeErrorTrace(err g.Error, stackTrace []string) g.Error {
 
 	// make list-of-str
-	vals := make([]g.Value, len(stackTrace), len(stackTrace))
+	vals := make([]g.Value, len(stackTrace))
 	for i, s := range stackTrace {
 		vals[i] = g.NewStr(s)
 	}
@@ -249,3 +224,32 @@ func assert(flag bool) {
 		panic("assertion failure")
 	}
 }
+
+////---------------------------------------------------------------
+//
+//func (i *Interpreter) dump() {
+//
+//	println("-----------------------------------------")
+//
+//	f := i.frames[len(i.frames)-1]
+//	opc := f.fn.Template().OpCodes
+//	print(o.FmtOpcode(opc, f.ip))
+//
+//	for j, f := range i.frames {
+//		fmt.Printf("frame %d\n", j)
+//		i.dumpFrame(f)
+//	}
+//}
+//
+//func (i *Interpreter) dumpFrame(f *frame) {
+//	fmt.Printf("    locals:\n")
+//	for j, r := range f.locals {
+//		fmt.Printf("        %d: %s\n", j, r.Val.ToStr(i))
+//	}
+//	fmt.Printf("    stack:\n")
+//	for j, v := range f.stack {
+//		fmt.Printf("        %d: %s\n", j, v.ToStr(i))
+//	}
+//	fmt.Printf("    ip: %d\n", f.ip)
+//}
+//

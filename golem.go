@@ -72,7 +72,7 @@ func main() {
 		arity := mainFn.Template().Arity
 		if arity == 1 {
 			osArgs := os.Args[2:]
-			args := make([]g.Value, len(osArgs), len(osArgs))
+			args := make([]g.Value, len(osArgs))
 			for i, a := range osArgs {
 				args[i] = g.NewStr(a)
 			}

@@ -48,15 +48,15 @@ var isBuiltIn = func(s string) bool {
 	return ok
 }
 
-func dump(source string) {
-	scanner := scanner.NewScanner(source)
-	parser := parser.NewParser(scanner, isBuiltIn)
-	mod, err := parser.ParseModule()
-	if err != nil {
-		panic("analyzer_test: could not parse")
-	}
-	fmt.Println(ast.Dump(mod))
-}
+//func dump(source string) {
+//	scanner := scanner.NewScanner(source)
+//	parser := parser.NewParser(scanner, isBuiltIn)
+//	mod, err := parser.ParseModule()
+//	if err != nil {
+//		panic("analyzer_test: could not parse")
+//	}
+//	fmt.Println(ast.Dump(mod))
+//}
 
 func newAnalyzer(source string) Analyzer {
 

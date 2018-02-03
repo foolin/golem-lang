@@ -165,7 +165,8 @@ func TestList(t *testing.T) {
 	v = ls.Len()
 	ok(t, v, nil, Zero)
 
-	ls.Add(cx, NewStr("a"))
+	err = ls.Add(cx, NewStr("a"))
+	tassert(t, err == nil)
 
 	v, err = ls.Eq(cx, NewList([]Value{}))
 	ok(t, v, err, False)
@@ -200,7 +201,8 @@ func TestList(t *testing.T) {
 	v = ls.ToStr(cx)
 	ok(t, v, nil, NewStr("[ true ]"))
 
-	ls.Add(cx, NewStr("z"))
+	err = ls.Add(cx, NewStr("z"))
+	tassert(t, err == nil)
 
 	v = ls.ToStr(cx)
 	ok(t, v, nil, NewStr("[ true, z ]"))

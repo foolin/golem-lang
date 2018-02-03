@@ -33,7 +33,7 @@ type (
 
 // NewBuiltinManager creates a new BuiltinManager
 func NewBuiltinManager(entries []*BuiltinEntry) BuiltinManager {
-	values := make([]Value, len(entries), len(entries))
+	values := make([]Value, len(entries))
 	lookup := make(map[string]int)
 	for i, e := range entries {
 		values[i] = e.Value
@@ -175,7 +175,7 @@ var BuiltinAssert = &nativeFunc{
 var BuiltinMerge = &nativeFunc{
 	2, -1,
 	func(cx Context, values []Value) (Value, Error) {
-		structs := make([]Struct, len(values), len(values))
+		structs := make([]Struct, len(values))
 		for i, v := range values {
 			if s, ok := v.(Struct); ok {
 				structs[i] = s
@@ -244,7 +244,7 @@ var BuiltinFields = &nativeFunc{
 		}
 
 		fields := st.smap.fieldNames()
-		result := make([]Value, len(fields), len(fields))
+		result := make([]Value, len(fields))
 		for i, k := range fields {
 			result[i] = NewStr(k)
 		}

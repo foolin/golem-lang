@@ -147,17 +147,17 @@ func (s *scope) this() *ast.Variable {
 	}
 
 	// define a 'this' variable on the structScope, if its not already defined
-	v, ok := os.defs["this"]
+	_, ok := os.defs["this"]
 	if !ok {
 		idx := incrementNumLocals(os)
-		v = &ast.Variable{"this", idx, true, false}
-		os.defs["this"] = v
+		os.defs["this"] = &ast.Variable{"this", idx, true, false}
 		os.structScope.stc.LocalThisIndex = idx
 	}
 
 	// now call get(), from the original scope, to trigger captures in
 	// any intervening functions.
-	if v, ok = s.get("this"); !ok {
+	v, ok := s.get("this")
+	if !ok {
 		panic("call to 'this' failed")
 	}
 
