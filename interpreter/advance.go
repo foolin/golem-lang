@@ -262,7 +262,13 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		}
 
 		f.stack = f.stack[:n-numVals+1]
-		f.stack = append(f.stack, g.NewDict(i, entries))
+
+		dict, err := g.NewDict(i, entries)
+		if err != nil {
+			return nil, err
+		}
+
+		f.stack = append(f.stack, dict)
 		f.ip += 3
 
 	case o.GetField:

@@ -208,8 +208,16 @@ func TestList(t *testing.T) {
 	ok(t, v, nil, NewStr("[ true, z ]"))
 }
 
+func newDict(cx Context, entries []*HEntry) Dict {
+	dict, err := NewDict(cx, entries)
+	if err != nil {
+		panic(err)
+	}
+	return dict
+}
+
 func TestCompositeHashCode(t *testing.T) {
-	h, err := NewDict(cx, []*HEntry{}).HashCode(cx)
+	h, err := newDict(cx, []*HEntry{}).HashCode(cx)
 	fail(t, h, err, "TypeMismatch: Expected Hashable Type")
 
 	h, err = NewList([]Value{}).HashCode(cx)
@@ -220,7 +228,7 @@ func TestCompositeHashCode(t *testing.T) {
 }
 
 func TestDict(t *testing.T) {
-	d := NewDict(cx, []*HEntry{})
+	d := newDict(cx, []*HEntry{})
 	okType(t, d, DictType)
 
 	var v Value
@@ -229,7 +237,7 @@ func TestDict(t *testing.T) {
 	v = d.ToStr(cx)
 	ok(t, v, err, NewStr("dict { }"))
 
-	v, err = d.Eq(cx, NewDict(cx, []*HEntry{}))
+	v, err = d.Eq(cx, newDict(cx, []*HEntry{}))
 	ok(t, v, err, True)
 
 	v, err = d.Eq(cx, NullValue)
@@ -247,10 +255,10 @@ func TestDict(t *testing.T) {
 	v, err = d.Get(cx, NewStr("a"))
 	ok(t, v, err, One)
 
-	v, err = d.Eq(cx, NewDict(cx, []*HEntry{}))
+	v, err = d.Eq(cx, newDict(cx, []*HEntry{}))
 	ok(t, v, err, False)
 
-	v, err = d.Eq(cx, NewDict(cx, []*HEntry{{NewStr("a"), One}}))
+	v, err = d.Eq(cx, newDict(cx, []*HEntry{{NewStr("a"), One}}))
 	ok(t, v, err, True)
 
 	v = d.Len()
@@ -269,13 +277,19 @@ func TestDict(t *testing.T) {
 	ok(t, v, nil, NewStr("dict { b: 2, a: 1 }"))
 
 	tp := NewTuple([]Value{One, Zero})
-	d = NewDict(cx, []*HEntry{{tp, True}})
+	d = newDict(cx, []*HEntry{{tp, True}})
 
 	v = d.ToStr(cx)
 	ok(t, v, nil, NewStr("dict { (1, 0): true }"))
 
 	v, err = d.Get(cx, tp)
 	ok(t, v, err, True)
+
+	d, err = NewDict(cx, []*HEntry{{NullValue, True}})
+	fail(t, d, err, "NullValue")
+
+	d, err = NewDict(cx, []*HEntry{{NewList([]Value{}), True}})
+	fail(t, d, err, "TypeMismatch: Expected Hashable Type")
 }
 
 func newSet(cx Context, values []Value) Set {
@@ -335,6 +349,9 @@ func TestSet(t *testing.T) {
 
 	s, err = NewSet(cx, []Value{NullValue})
 	fail(t, s, err, "NullValue")
+
+	s, err = NewSet(cx, []Value{NewList([]Value{})})
+	fail(t, s, err, "TypeMismatch: Expected Hashable Type")
 }
 
 func TestTuple(t *testing.T) {
@@ -360,7 +377,6 @@ func TestTuple(t *testing.T) {
 	ok(t, v, err, Zero)
 
 	v, err = tp.Get(cx, NegOne)
-	println("adfasfda", v.ToStr(cx))
 	ok(t, v, err, Zero)
 
 	v, err = tp.Get(cx, NewInt(2))
@@ -507,7 +523,7 @@ func TestListIterator(t *testing.T) {
 
 func TestDictIterator(t *testing.T) {
 
-	var ibl Iterable = NewDict(cx,
+	var ibl Iterable = newDict(cx,
 		[]*HEntry{
 			{NewStr("a"), One},
 			{NewStr("b"), NewInt(2)},

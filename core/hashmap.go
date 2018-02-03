@@ -20,19 +20,23 @@ type (
 
 // EmptyHashMap creates an empty HashMap
 func EmptyHashMap() *HashMap {
-	return NewHashMap(nil, []*HEntry{})
+	h, _ := NewHashMap(nil, []*HEntry{})
+	return h
 }
 
 // NewHashMap creates an empty HashMap
-func NewHashMap(cx Context, entries []*HEntry) *HashMap {
+func NewHashMap(cx Context, entries []*HEntry) (*HashMap, Error) {
 	capacity := 5
 	buckets := make([][]*HEntry, capacity)
 	hm := &HashMap{buckets, 0}
 
 	for _, e := range entries {
-		hm.Put(cx, e.Key, e.Value)
+		err := hm.Put(cx, e.Key, e.Value)
+		if err != nil {
+			return nil, err
+		}
 	}
-	return hm
+	return hm, nil
 }
 
 // Eq tests whether two HashMaps are equal

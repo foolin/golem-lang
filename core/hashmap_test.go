@@ -9,8 +9,16 @@ import (
 	"testing"
 )
 
+func newHashMap(cx Context, entries []*HEntry) *HashMap {
+	h, err := NewHashMap(cx, entries)
+	if err != nil {
+		panic(err)
+	}
+	return h
+}
+
 func TestHashMap(t *testing.T) {
-	hm := NewHashMap(cx, nil)
+	hm := newHashMap(cx, nil)
 
 	ok(t, hm.Len(), nil, Zero)
 	v, err := hm.Get(cx, NewInt(3))
@@ -59,7 +67,7 @@ func TestHashMap(t *testing.T) {
 
 func TestRemove(t *testing.T) {
 
-	d := NewHashMap(cx, []*HEntry{
+	d := newHashMap(cx, []*HEntry{
 		{NewStr("a"), NewInt(1)},
 		{NewStr("b"), NewInt(2)}})
 
@@ -69,7 +77,7 @@ func TestRemove(t *testing.T) {
 	v, err = d.Remove(cx, NewStr("a"))
 	ok(t, v, err, True)
 
-	e := NewHashMap(cx, []*HEntry{
+	e := newHashMap(cx, []*HEntry{
 		{NewStr("b"), NewInt(2)}})
 
 	v, err = d.Eq(cx, e)
@@ -78,7 +86,7 @@ func TestRemove(t *testing.T) {
 
 func TestStrHashMap(t *testing.T) {
 
-	hm := NewHashMap(cx, nil)
+	hm := newHashMap(cx, nil)
 
 	err := hm.Put(cx, NewStr("abc"), NewStr("xyz"))
 	ok(t, nil, err, nil)
@@ -95,7 +103,7 @@ func TestStrHashMap(t *testing.T) {
 
 func testIteratorEntries(t *testing.T, initial []*HEntry, expect []*HEntry) {
 
-	hm := NewHashMap(cx, initial)
+	hm := newHashMap(cx, initial)
 
 	entries := []*HEntry{}
 	itr := hm.Iterator()
@@ -145,7 +153,7 @@ func TestBogusHashCode(t *testing.T) {
 	var v Value
 	var err Error
 
-	hm := NewHashMap(cx, nil)
+	hm := newHashMap(cx, nil)
 	v, err = hm.Get(cx, key)
 	fail(t, v, err, "TypeMismatch: Expected Hashable Type")
 
@@ -153,5 +161,8 @@ func TestBogusHashCode(t *testing.T) {
 	fail(t, v, err, "TypeMismatch: Expected Hashable Type")
 
 	err = hm.Put(cx, key, Zero)
+	fail(t, nil, err, "TypeMismatch: Expected Hashable Type")
+
+	_, err = NewHashMap(cx, []*HEntry{{key, NewInt(2)}})
 	fail(t, nil, err, "TypeMismatch: Expected Hashable Type")
 }

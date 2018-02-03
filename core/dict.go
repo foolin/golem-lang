@@ -14,8 +14,12 @@ type dict struct {
 }
 
 // NewDict creates a new Dict
-func NewDict(cx Context, entries []*HEntry) Dict {
-	return &dict{NewHashMap(cx, entries), false}
+func NewDict(cx Context, entries []*HEntry) (Dict, Error) {
+	h, err := NewHashMap(cx, entries)
+	if err != nil {
+		return nil, err
+	}
+	return &dict{h, false}, nil
 }
 
 func (d *dict) compositeMarker() {}

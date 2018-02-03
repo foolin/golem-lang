@@ -945,6 +945,25 @@ assert(len(d) == 0);
 `
 	mod = newCompiler(source).Compile()
 	interpret(mod)
+
+	source = `
+try {
+    let d = dict {null:  'b'}
+    assert(false)
+} catch e {
+    assert(e.kind == "NullValue")
+}
+
+try {
+    let d = dict {[]:  'b'}
+    assert(false)
+} catch e {
+    assert(e.kind == "TypeMismatch")
+    assert(e.msg == "Expected Hashable Type")
+}
+`
+	mod = newCompiler(source).Compile()
+	interpret(mod)
 }
 
 func TestSet(t *testing.T) {
@@ -1455,6 +1474,26 @@ assert(b == 2);
 `
 	mod = newCompiler(source).Compile()
 	interpret(mod)
+
+	source = `
+try {
+    let s = set {'a', 'b', null}
+    assert(false)
+} catch e {
+    assert(e.kind == "NullValue")
+}
+
+try {
+    let s = set {'a', 'b', []}
+    assert(false)
+} catch e {
+    assert(e.kind == "TypeMismatch")
+    assert(e.msg == "Expected Hashable Type")
+}
+`
+	mod = newCompiler(source).Compile()
+	interpret(mod)
+
 }
 
 func TestCatchFinally(t *testing.T) {
