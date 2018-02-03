@@ -565,8 +565,18 @@ func (s *Scanner) nextNumber() *ast.Token {
 	} else {
 		s.acceptWhile(isDigit)
 		r = s.cur.r
-		if r == '.' || isExp(r) {
+		switch {
+		case r == '.':
 			return s.nextFloat(begin, pos)
+		case isExp(r):
+			s.consume()
+			s.accept(func(r rune) bool { return (r == '+') || (r == '-') })
+			t := s.expect(isDigit)
+			if t != nil {
+				return t
+			}
+			s.acceptWhile(isDigit)
+			return &ast.Token{ast.Float, s.source[begin:s.cur.idx], pos}
 		}
 		return &ast.Token{ast.Int, s.source[begin:s.cur.idx], pos}
 	}

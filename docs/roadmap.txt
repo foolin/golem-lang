@@ -5,6 +5,8 @@ Things to do before Golem is releasable
 
 create an example to demonstrate how to embed/sandbox.
 
+get rid of 'finally' and use 'defer' instead.
+
 complete all documentation:
 
     source code
@@ -49,7 +51,7 @@ list, str, range, dict:
     all need elems() to iterate over (i, v)
     dict elems(): (i, k, v) 
     sort()
-    clone()
+    copy()
     toDict()
     toSet()
     toTuple()
@@ -58,11 +60,11 @@ list, str, range, dict:
 dict: 
     fromStruct(), toStruct(f = null)
     toList()
-    clone()
+    copy()
 
 set: 
     toList()
-    clone()
+    copy()
 
 range: 
     from(), to(), skip()
@@ -88,7 +90,6 @@ optional formal parameters in functions
 variadic functions
 keyword args 
 
-multiline strings -- backticks
 interpolated strings: $"123$foo456"
 
 concurrency improvements:
@@ -100,10 +101,6 @@ break, continue to label: for, while
     note that to avoid linefeed ambiguity, we will have to include syntax 
     between break (or continue) and the label, e.g. :
         break: foo
-        break(foo)
-        break { foo }
-        break -> foo
-        break #foo
 
 'like' keyword for comparing structs
 

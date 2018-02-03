@@ -190,9 +190,16 @@ func TestFloat(t *testing.T) {
 	ok(t, s, ast.Float, "0e6", 1, 1)
 	ok(t, s, ast.EOF, "", 1, 4)
 
-	s = NewScanner("1e6")
+	s = NewScanner("1e6 12.34e5 12.34e-5")
 	ok(t, s, ast.Float, "1e6", 1, 1)
-	ok(t, s, ast.EOF, "", 1, 4)
+	ok(t, s, ast.Float, "12.34e5", 1, 5)
+	ok(t, s, ast.Float, "12.34e-5", 1, 13)
+	ok(t, s, ast.EOF, "", 1, 21)
+
+	s = NewScanner("1e+6 1e-6")
+	ok(t, s, ast.Float, "1e+6", 1, 1)
+	ok(t, s, ast.Float, "1e-6", 1, 6)
+	ok(t, s, ast.EOF, "", 1, 10)
 
 	s = NewScanner("0.")
 	ok(t, s, ast.UnexpectedEOF, "", 1, 3)

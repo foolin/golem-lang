@@ -30,6 +30,9 @@ and then run it like so:
 The function `println` is built in to Golem.  There are several of these builtin functions
 in Golem.
 
+If you are a vim user, there is a [vim plugin](https://github.com/mjarmy/golem-lang-vim) for 
+Golem that you can install.
+
 You may have noticed that there is a semicolon at the end of the println 
 statement.  Semicolons are optional in Golem --  you are not required to include a
 semicolon after each statement in your code, although you can do so if you 
