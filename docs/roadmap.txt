@@ -3,9 +3,6 @@
 Things to do before Golem is releasable
 -----------------------------------------------------------
 
-golint and go vet
-refactor Error so its a distinct type
-
 create an example to demonstrate how to embed/sandbox.
 
 complete all documentation:
@@ -35,7 +32,8 @@ Improvements to library of intrinsic functions
 -----------------------------------------------------------
 
 str:  
-    toRune() // str-with-one-char
+    toRune() // str-with-one-char --> int
+    toRunes() // list of ints
     parseInt(radix = 10),  // radix
     parseFloat(), 
     format() // variadic
@@ -55,6 +53,7 @@ list, str, range, dict:
     toDict()
     toSet()
     toTuple()
+    each(fn)
 
 dict: 
     fromStruct(), toStruct(f = null)
@@ -74,6 +73,8 @@ tuple:
 -----------------------------------------------------------
 Improvements to the core language
 -----------------------------------------------------------
+
+refactor Error (maybe)
 
 allow for user defined properties
 
@@ -118,7 +119,7 @@ $add, $sub, etc:  operator overloading
 
 annotations: like Java and Python
 
-stream() function on lists, a la Java 8
+stream() function on iterables, a la Java 8
 
 check for recursive data structures in String() functions
 
