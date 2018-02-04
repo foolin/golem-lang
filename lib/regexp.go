@@ -9,12 +9,12 @@ import (
 	"regexp"
 )
 
-type regexModule struct {
+type regexpModule struct {
 	contents g.Struct
 }
 
-// InitRegexModule initializes the 'regex' module.
-func InitRegexModule() g.Module {
+// NewRegexpModule creates the 'regexp' module.
+func NewRegexpModule() g.Module {
 
 	compile := g.NewNativeFunc(
 		1, 1,
@@ -26,18 +26,20 @@ func InitRegexModule() g.Module {
 
 			rgx, err := regexp.Compile(s.String())
 			if err != nil {
-				return nil, g.NewError("RegexError", err.Error())
+				return nil, g.NewError("RegexpError", err.Error())
 			}
 
 			return makePattern(rgx), nil
 		})
 
-	contents, err := g.NewStruct([]g.Field{g.NewField("compile", true, compile)}, true)
-	if err != nil {
-		panic("InitRegexModule")
-	}
+	contents, err := g.NewStruct([]g.Field{
+		g.NewField("compile", true, compile)},
+		true)
 
-	return &regexModule{contents}
+	if err != nil {
+		panic("NewRegexpModule")
+	}
+	return &regexpModule{contents}
 }
 
 func makePattern(rgx *regexp.Regexp) g.Struct {
@@ -53,18 +55,20 @@ func makePattern(rgx *regexp.Regexp) g.Struct {
 			return g.NewBool(rgx.MatchString(s.String())), nil
 		})
 
-	pattern, err := g.NewStruct([]g.Field{g.NewField("match", true, match)}, true)
-	if err != nil {
-		panic("InitRegexModule")
-	}
+	pattern, err := g.NewStruct(
+		[]g.Field{g.NewField("match", true, match)},
+		true)
 
+	if err != nil {
+		panic("NewRegexpModule")
+	}
 	return pattern
 }
 
-func (m *regexModule) GetModuleName() string {
-	return "regex"
+func (m *regexpModule) GetModuleName() string {
+	return "regexp"
 }
 
-func (m *regexModule) GetContents() g.Struct {
+func (m *regexpModule) GetContents() g.Struct {
 	return m.contents
 }

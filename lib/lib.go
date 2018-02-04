@@ -5,14 +5,19 @@
 package lib
 
 import (
-	"fmt"
+	"sync"
+
 	g "github.com/mjarmy/golem-lang/core"
 )
 
 var libModules = make(map[string]g.Module)
+var mutex = &sync.Mutex{}
 
-// LookupModule looks up the module with the given name.
-func LookupModule(name string) (g.Module, error) {
+// LookupModule resolves up the module with the given name.
+func LookupModule(name string) (g.Module, g.Error) {
+
+	mutex.Lock()
+	defer mutex.Unlock()
 
 	mod, ok := libModules[name]
 	if ok {
@@ -20,19 +25,15 @@ func LookupModule(name string) (g.Module, error) {
 	}
 
 	switch name {
-	case "io":
-		io := InitIoModule()
-		libModules[name] = io
-		return io, nil
-	case "regex":
-		rgx := InitRegexModule()
+	case "regexp":
+		rgx := NewRegexpModule()
 		libModules[name] = rgx
 		return rgx, nil
 	case "sys":
-		sys := InitSysModule()
+		sys := NewSysModule()
 		libModules[name] = sys
 		return sys, nil
 	default:
-		return nil, fmt.Errorf("Module '%s' is not defined", name)
+		return nil, g.UndefinedModuleError(name)
 	}
 }

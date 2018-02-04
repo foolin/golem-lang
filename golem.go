@@ -10,6 +10,7 @@ import (
 	"github.com/mjarmy/golem-lang/compiler"
 	g "github.com/mjarmy/golem-lang/core"
 	"github.com/mjarmy/golem-lang/interpreter"
+	"github.com/mjarmy/golem-lang/lib"
 	"github.com/mjarmy/golem-lang/parser"
 	"github.com/mjarmy/golem-lang/scanner"
 	"io/ioutil"
@@ -22,9 +23,6 @@ func main() {
 		panic("No source file was specified")
 	}
 
-	// builtins
-	builtInMgr := g.NewBuiltinManager(g.CommandLineBuiltins)
-
 	// read source
 	filename := os.Args[1]
 	buf, e := ioutil.ReadFile(filename)
@@ -33,8 +31,13 @@ func main() {
 	}
 	source := string(buf)
 
-	// parse
+	// scan
 	scanner := scanner.NewScanner(source)
+
+	// command line builtins
+	builtInMgr := g.NewBuiltinManager(g.CommandLineBuiltins)
+
+	// parse
 	parser := parser.NewParser(scanner, builtInMgr.Contains)
 	exprMod, e := parser.ParseModule()
 	if e != nil {
@@ -52,8 +55,8 @@ func main() {
 	cmp := compiler.NewCompiler(anl, builtInMgr)
 	mod := cmp.Compile()
 
-	// interpret
-	intp := interpreter.NewInterpreter(mod, builtInMgr)
+	// interpret with modules from standard library
+	intp := interpreter.NewInterpreter(mod, builtInMgr, lib.LookupModule)
 	_, err := intp.Init()
 	if err != nil {
 		dumpError(intp, err)

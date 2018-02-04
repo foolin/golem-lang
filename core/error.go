@@ -165,3 +165,10 @@ func UndefinedSymbolError(name string) Error {
 func ImmutableValueError() Error {
 	return NewError("ImmutableValue", "")
 }
+
+// UndefinedModuleError creates a UndefinedModule Error
+func UndefinedModuleError(name string) Error {
+	return NewError(
+		"UndefinedModule",
+		fmt.Sprintf("Module '%s' is not defined", name))
+}

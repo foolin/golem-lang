@@ -8,7 +8,6 @@ import (
 	"fmt"
 	g "github.com/mjarmy/golem-lang/core"
 	o "github.com/mjarmy/golem-lang/core/opcodes"
-	"github.com/mjarmy/golem-lang/lib"
 )
 
 // Advance the interpreter forwards by one opcode.
@@ -104,7 +103,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			f.stack = f.stack[:n-idx]
 			f.ip += 3
 
-			intp := &Interpreter{i.mod, i.builtInMgr, []*frame{}}
+			intp := &Interpreter{i.mod, i.builtInMgr, i.resolveImport, []*frame{}}
 			locals := newLocals(fn.Template().NumLocals, params)
 			go (func() {
 				_, errTrace := intp.eval(fn, locals)
@@ -509,17 +508,16 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 	case o.ImportModule:
 
-		// An error here is "impossible", because we already
-		// made sure the module really existed in the Analyzer.
-
 		// get the module name from the pool
 		idx := index(opc, f.ip)
 		name, ok := pool[idx].(g.Str)
 		assert(ok)
 
 		// Lookup the module.
-		mod, err := lib.LookupModule(name.String())
-		assert(err == nil)
+		mod, err := i.resolveImport(name.String())
+		if err != nil {
+			return nil, err
+		}
 
 		// Push the module's contents onto the stack
 		f.stack = append(f.stack, mod.GetContents())

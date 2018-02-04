@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mjarmy/golem-lang/ast"
-	"github.com/mjarmy/golem-lang/lib"
 	"sort"
 )
 
@@ -140,11 +139,6 @@ func (a *analyzer) visitDecls(decls []*ast.DeclNode, isConst bool) {
 
 func (a *analyzer) visitImport(imp *ast.ImportStmt) {
 	a.defineIdent(imp.Ident, true)
-
-	sym := imp.Ident.Symbol.Text
-	if _, err := lib.LookupModule(sym); err != nil {
-		a.errors = append(a.errors, err)
-	}
 }
 
 func (a *analyzer) visitTry(t *ast.TryStmt) {

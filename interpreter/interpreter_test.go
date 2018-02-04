@@ -23,7 +23,7 @@ func tassert(t *testing.T, flag bool) {
 
 func okExpr(t *testing.T, source string, expect g.Value) {
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod, builtInMgr)
+	intp := NewInterpreter(mod, builtInMgr, nil)
 
 	result, err := intp.Init()
 	if err != nil {
@@ -52,7 +52,7 @@ func okRef(t *testing.T, intp *Interpreter, ref *g.Ref, expect g.Value) {
 
 func okMod(t *testing.T, source string, expectResult g.Value, expectRefs []*g.Ref) {
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod, builtInMgr)
+	intp := NewInterpreter(mod, builtInMgr, nil)
 
 	result, err := intp.Init()
 	if err != nil {
@@ -75,7 +75,7 @@ func okMod(t *testing.T, source string, expectResult g.Value, expectRefs []*g.Re
 func failExpr(t *testing.T, source string, expect string) {
 
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod, builtInMgr)
+	intp := NewInterpreter(mod, builtInMgr, nil)
 
 	result, err := intp.Init()
 	if result != nil {
@@ -90,7 +90,7 @@ func failExpr(t *testing.T, source string, expect string) {
 func fail(t *testing.T, source string, err g.Error, stack []string) *g.BytecodeModule {
 
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod, builtInMgr)
+	intp := NewInterpreter(mod, builtInMgr, nil)
 
 	expect := intp.makeErrorTrace(err, stack)
 
@@ -109,7 +109,7 @@ func fail(t *testing.T, source string, err g.Error, stack []string) *g.BytecodeM
 func failErr(t *testing.T, source string, expect g.Error) {
 
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod, builtInMgr)
+	intp := NewInterpreter(mod, builtInMgr, nil)
 
 	result, err := intp.Init()
 	if result != nil {
@@ -149,7 +149,7 @@ func newCompiler(source string) compiler.Compiler {
 }
 
 func interpret(mod *g.BytecodeModule) *Interpreter {
-	intp := NewInterpreter(mod, builtInMgr)
+	intp := NewInterpreter(mod, builtInMgr, nil)
 	_, err := intp.Init()
 	if err != nil {
 		fmt.Printf("%v\n", err)
@@ -1697,17 +1697,6 @@ fn main(args) {}
 
 	err = mod.Contents.SetField(i, g.NewStr("main"), g.NegOne)
 	failVal(t, nil, err, "ReadonlyField: Field 'main' is readonly")
-}
-
-func TestImport(t *testing.T) {
-
-	source := `
-import regex;
-let pattern = regex.compile("abc");
-assert([pattern.match("xyzabcdef"), pattern.match("123")] == [true, false]);
-`
-	mod := newCompiler(source).Compile()
-	interpret(mod)
 }
 
 func TestTypeOf(t *testing.T) {

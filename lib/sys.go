@@ -13,8 +13,8 @@ type sysModule struct {
 	contents g.Struct
 }
 
-// InitSysModule initializes the 'sys' module.
-func InitSysModule() g.Module {
+// NewSysModule creates the 'sys' module.
+func NewSysModule() g.Module {
 
 	exit := g.NewNativeFunc(
 		0, 1,
@@ -29,16 +29,19 @@ func InitSysModule() g.Module {
 					return nil, g.TypeMismatchError("Expected Int")
 				}
 			default:
-				panic("arity mismatch")
+				return nil, g.ArityMismatchError("0 or 1", len(values))
 			}
 
 			// we will never actually get here
 			return g.NullValue, nil
 		})
 
-	contents, err := g.NewStruct([]g.Field{g.NewField("exit", true, exit)}, true)
+	contents, err := g.NewStruct([]g.Field{
+		g.NewField("exit", true, exit)},
+		true)
+
 	if err != nil {
-		panic("InitSysModule")
+		panic("NewSysModule")
 	}
 
 	return &sysModule{contents}

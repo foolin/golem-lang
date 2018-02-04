@@ -5,12 +5,19 @@
 package lib
 
 import (
-	g "github.com/mjarmy/golem-lang/core"
 	"testing"
+
+	g "github.com/mjarmy/golem-lang/core"
 )
 
+func tassert(t *testing.T, flag bool) {
+	if !flag {
+		t.Error("assertion failure")
+	}
+}
+
 func TestSys(t *testing.T) {
-	sys := InitSysModule()
+	sys := NewSysModule()
 	exit, err := sys.GetContents().GetField(nil, g.NewStr("exit"))
 	tassert(t, exit != nil)
 	tassert(t, err == nil)
