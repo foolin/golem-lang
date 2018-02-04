@@ -9,12 +9,12 @@ import (
 	"os"
 )
 
-type sysModule struct {
+type osModule struct {
 	contents g.Struct
 }
 
-// NewSysModule creates the 'sys' module.
-func NewSysModule() g.Module {
+// NewOsModule creates the 'os' module.
+func NewOsModule() g.Module {
 
 	exit := g.NewNativeFunc(
 		0, 1,
@@ -41,16 +41,16 @@ func NewSysModule() g.Module {
 		true)
 
 	if err != nil {
-		panic("NewSysModule")
+		panic("NewOsModule")
 	}
 
-	return &sysModule{contents}
+	return &osModule{contents}
 }
 
-func (m *sysModule) GetModuleName() string {
-	return "sys"
+func (m *osModule) GetModuleName() string {
+	return "os"
 }
 
-func (m *sysModule) GetContents() g.Struct {
+func (m *osModule) GetContents() g.Struct {
 	return m.contents
 }

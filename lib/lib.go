@@ -29,10 +29,10 @@ func LookupModule(name string) (g.Module, g.Error) {
 		rgx := NewRegexpModule()
 		libModules[name] = rgx
 		return rgx, nil
-	case "sys":
-		sys := NewSysModule()
-		libModules[name] = sys
-		return sys, nil
+	case "os":
+		os := NewOsModule()
+		libModules[name] = os
+		return os, nil
 	default:
 		return nil, g.UndefinedModuleError(name)
 	}
