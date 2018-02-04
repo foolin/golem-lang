@@ -74,35 +74,3 @@ func TestRegexp(t *testing.T) {
 //	tassert(t, pattern == nil && err.Error() ==
 //		"RegexpError: error parsing regexp: trailing backslash at end of expression: ``")
 //}
-
-////////////////////////////////////////////////////////////////
-// TODO put in interpreter_test
-
-//func TestImport(t *testing.T) {
-//
-//	anl := newAnalyzer("import sys; let b = 2;")
-//	errors := anl.Analyze()
-//
-//	//fmt.Println(ast.Dump(anl.Module()))
-//	//fmt.Println(errors)
-//
-//	ok(t, anl, errors, `
-//FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
-//.   BlockNode
-//.   .   ImportStmt
-//.   .   .   IdentExpr(sys,(0,true,false))
-//.   .   LetStmt
-//.   .   .   IdentExpr(b,(1,false,false))
-//.   .   .   BasicExpr(Int,"2")
-//`)
-//
-//	errors = newAnalyzer("import sys; let sys = 2;").Analyze()
-//	fail(t, errors, "[Symbol 'sys' is already defined]")
-//
-//	errors = newAnalyzer("import sys; sys = 2;").Analyze()
-//	fail(t, errors, "[Symbol 'sys' is constant]")
-//
-//	errors = newAnalyzer("import foo;").Analyze()
-//	fail(t, errors, "[Module 'foo' is not defined]")
-//}
-//

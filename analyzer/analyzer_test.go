@@ -781,3 +781,11 @@ func TestFormalParams(t *testing.T) {
 	errors := newAnalyzer("fn(const a, b) { a = 1; };").Analyze()
 	fail(t, errors, "[Symbol 'a' is constant]")
 }
+
+func TestImport(t *testing.T) {
+	errors := newAnalyzer("import sys; let sys = 2;").Analyze()
+	fail(t, errors, "[Symbol 'sys' is already defined]")
+
+	errors = newAnalyzer("import sys; sys = 2;").Analyze()
+	fail(t, errors, "[Symbol 'sys' is constant]")
+}

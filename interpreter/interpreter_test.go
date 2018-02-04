@@ -23,7 +23,7 @@ func tassert(t *testing.T, flag bool) {
 
 func okExpr(t *testing.T, source string, expect g.Value) {
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod, builtInMgr, nil)
+	intp := NewInterpreter(mod, builtInMgr, importResolver())
 
 	result, err := intp.Init()
 	if err != nil {
@@ -52,7 +52,7 @@ func okRef(t *testing.T, intp *Interpreter, ref *g.Ref, expect g.Value) {
 
 func okMod(t *testing.T, source string, expectResult g.Value, expectRefs []*g.Ref) {
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod, builtInMgr, nil)
+	intp := NewInterpreter(mod, builtInMgr, importResolver())
 
 	result, err := intp.Init()
 	if err != nil {
@@ -75,7 +75,7 @@ func okMod(t *testing.T, source string, expectResult g.Value, expectRefs []*g.Re
 func failExpr(t *testing.T, source string, expect string) {
 
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod, builtInMgr, nil)
+	intp := NewInterpreter(mod, builtInMgr, importResolver())
 
 	result, err := intp.Init()
 	if result != nil {
@@ -90,7 +90,7 @@ func failExpr(t *testing.T, source string, expect string) {
 func fail(t *testing.T, source string, err g.Error, stack []string) *g.BytecodeModule {
 
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod, builtInMgr, nil)
+	intp := NewInterpreter(mod, builtInMgr, importResolver())
 
 	expect := intp.makeErrorTrace(err, stack)
 
@@ -109,7 +109,7 @@ func fail(t *testing.T, source string, err g.Error, stack []string) *g.BytecodeM
 func failErr(t *testing.T, source string, expect g.Error) {
 
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod, builtInMgr, nil)
+	intp := NewInterpreter(mod, builtInMgr, importResolver())
 
 	result, err := intp.Init()
 	if result != nil {
@@ -148,8 +148,33 @@ func newCompiler(source string) compiler.Compiler {
 	return compiler.NewCompiler(anl, builtInMgr)
 }
 
+type testModule struct {
+	name     string
+	contents g.Struct
+}
+
+func (t *testModule) GetModuleName() string { return t.name }
+func (t *testModule) GetContents() g.Struct { return t.contents }
+
+func importResolver() func(name string) (g.Module, g.Error) {
+	stc, err := g.NewStruct([]g.Field{
+		g.NewField("a", true, g.One)},
+		false)
+	if err != nil {
+		panic("invalid struct")
+	}
+
+	foo := &testModule{"foo", stc}
+	return func(name string) (g.Module, g.Error) {
+		if name == "foo" {
+			return foo, nil
+		}
+		return nil, g.UndefinedModuleError(name)
+	}
+}
+
 func interpret(mod *g.BytecodeModule) *Interpreter {
-	intp := NewInterpreter(mod, builtInMgr, nil)
+	intp := NewInterpreter(mod, builtInMgr, importResolver())
 	_, err := intp.Init()
 	if err != nil {
 		fmt.Printf("%v\n", err)
@@ -2046,4 +2071,21 @@ assert(s[2] == '$')
 
 	mod := newCompiler(source).Compile()
 	interpret(mod)
+}
+
+func TestImport(t *testing.T) {
+	source := `
+import foo
+assert(foo.a == 1)
+`
+	mod := newCompiler(source).Compile()
+	interpret(mod)
+
+	source = `
+import bar
+`
+	fail(t, source,
+		g.UndefinedModuleError("bar"),
+		[]string{
+			"    at line 2"})
 }
