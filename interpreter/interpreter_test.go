@@ -2082,7 +2082,7 @@ assert(foo.a == 1)
 	interpret(mod)
 
 	source = `
-import bar
+import foo, bar
 `
 	fail(t, source,
 		g.UndefinedModuleError("bar"),

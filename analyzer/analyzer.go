@@ -138,7 +138,9 @@ func (a *analyzer) visitDecls(decls []*ast.DeclNode, isConst bool) {
 }
 
 func (a *analyzer) visitImport(imp *ast.ImportStmt) {
-	a.defineIdent(imp.Ident, true)
+	for _, ident := range imp.Idents {
+		a.defineIdent(ident, true)
+	}
 }
 
 func (a *analyzer) visitTry(t *ast.TryStmt) {

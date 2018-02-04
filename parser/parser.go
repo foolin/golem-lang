@@ -74,11 +74,26 @@ func (p *Parser) imports() []ast.Statement {
 			break
 		}
 
-		imp := &ast.ImportStmt{
-			p.expect(ast.Import),
-			&ast.IdentExpr{p.expect(ast.Ident), nil}}
+		tok := p.expect(ast.Import)
+
+		idents := []*ast.IdentExpr{}
+		idents = append(idents, &ast.IdentExpr{p.expect(ast.Ident), nil})
+
+	loop:
+		for {
+			switch {
+			case p.cur.token.Kind == ast.Comma:
+				p.consume()
+				idents = append(idents, &ast.IdentExpr{p.expect(ast.Ident), nil})
+			case p.atStatementDelimiter():
+				break loop
+			default:
+				panic(p.unexpected())
+			}
+		}
+
 		p.expectStatementDelimiter()
-		stmts = append(stmts, imp)
+		stmts = append(stmts, &ast.ImportStmt{tok, idents})
 	}
 
 	return stmts

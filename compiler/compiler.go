@@ -293,18 +293,18 @@ func (c *compiler) visitDecls(decls []*ast.DeclNode) {
 
 func (c *compiler) visitImport(imp *ast.ImportStmt) {
 
-	ident := imp.Ident
+	for _, ident := range imp.Idents {
+		// push the module onto the stack
+		sym := ident.Symbol.Text
+		c.pushIndex(
+			ident.Begin(),
+			o.ImportModule,
+			poolIndex(c.pool, g.NewStr(sym)))
 
-	// push the module onto the stack
-	sym := ident.Symbol.Text
-	c.pushIndex(
-		ident.Begin(),
-		o.ImportModule,
-		poolIndex(c.pool, g.NewStr(sym)))
-
-	// store module in identifer
-	v := ident.Variable
-	c.pushIndex(ident.Begin(), o.StoreLocal, v.Index)
+		// store module in identifer
+		v := ident.Variable
+		c.pushIndex(ident.Begin(), o.StoreLocal, v.Index)
+	}
 }
 
 func (c *compiler) assignIdent(ident *ast.IdentExpr) {

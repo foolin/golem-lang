@@ -786,6 +786,6 @@ func TestImport(t *testing.T) {
 	errors := newAnalyzer("import sys; let sys = 2;").Analyze()
 	fail(t, errors, "[Symbol 'sys' is already defined]")
 
-	errors = newAnalyzer("import sys; sys = 2;").Analyze()
+	errors = newAnalyzer("import sys, zork; sys = 2;").Analyze()
 	fail(t, errors, "[Symbol 'sys' is constant]")
 }

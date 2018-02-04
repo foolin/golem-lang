@@ -17,7 +17,9 @@ type Visitor interface {
 
 // Traverse ImportStmt
 func (imp *ImportStmt) Traverse(v Visitor) {
-	v.Visit(imp.Ident)
+	for _, i := range imp.Idents {
+		v.Visit(i)
+	}
 }
 
 // Traverse ConstStmt

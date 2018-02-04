@@ -51,8 +51,8 @@ type (
 
 	// ImportStmt is an 'import' statement
 	ImportStmt struct {
-		Token *Token
-		Ident *IdentExpr
+		Token  *Token
+		Idents []*IdentExpr
 	}
 
 	// ConstStmt is a 'const' statement
@@ -414,7 +414,7 @@ func (n *BlockNode) End() Pos {
 func (n *ImportStmt) Begin() Pos { return n.Token.Position }
 
 // End ImportStmt
-func (n *ImportStmt) End() Pos { return n.Ident.End() }
+func (n *ImportStmt) End() Pos { return n.Idents[len(n.Idents)-1].End() }
 
 // Begin DeclNode
 func (n *DeclNode) Begin() Pos { return n.Ident.Begin() }
@@ -700,7 +700,12 @@ func (n *BlockNode) String() string {
 func (n *ImportStmt) String() string {
 	buf := new(bytes.Buffer)
 	buf.WriteString("import ")
-	buf.WriteString(n.Ident.String())
+	for i, ident := range n.Idents {
+		if i > 0 {
+			buf.WriteString(", ")
+		}
+		buf.WriteString(ident.String())
+	}
 	buf.WriteString(";")
 	return buf.String()
 }

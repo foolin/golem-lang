@@ -811,6 +811,9 @@ func TestImport(t *testing.T) {
 	p = newParser("import a; import b;let z = 3; ")
 	ok(t, p, "fn() { import a; import b; let z = 3; }")
 
+	p = newParser("import a, b,c")
+	ok(t, p, "fn() { import a, b, c; }")
+
 	p = newParser("let z = 3; import a;")
 	fail(t, p, "Unexpected Token 'import' at (1, 12)")
 }
