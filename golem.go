@@ -39,13 +39,13 @@ func main() {
 
 	// parse
 	parser := parser.NewParser(scanner, builtInMgr.Contains)
-	exprMod, e := parser.ParseModule()
+	astMod, e := parser.ParseModule()
 	if e != nil {
 		panic(e.Error())
 	}
 
 	// analyze
-	anl := analyzer.NewAnalyzer(exprMod)
+	anl := analyzer.NewAnalyzer(astMod)
 	errors := anl.Analyze()
 	if len(errors) > 0 {
 		panic(fmt.Sprintf("%v", errors))

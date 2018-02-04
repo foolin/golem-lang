@@ -29,7 +29,7 @@ func NewRegexpModule() g.Module {
 				return nil, g.NewError("RegexpError", err.Error())
 			}
 
-			return makePattern(rgx), nil
+			return makeRegexp(rgx), nil
 		})
 
 	contents, err := g.NewStruct([]g.Field{
@@ -42,7 +42,7 @@ func NewRegexpModule() g.Module {
 	return &regexpModule{contents}
 }
 
-func makePattern(rgx *regexp.Regexp) g.Struct {
+func makeRegexp(rgx *regexp.Regexp) g.Struct {
 
 	match := g.NewNativeFunc(
 		1, 1,
@@ -51,12 +51,11 @@ func makePattern(rgx *regexp.Regexp) g.Struct {
 			if !ok {
 				return nil, g.TypeMismatchError("Expected Str")
 			}
-
 			return g.NewBool(rgx.MatchString(s.String())), nil
 		})
 
 	pattern, err := g.NewStruct(
-		[]g.Field{g.NewField("match", true, match)},
+		[]g.Field{g.NewField("matchString", true, match)},
 		true)
 
 	if err != nil {

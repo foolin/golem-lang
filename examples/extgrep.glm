@@ -1,0 +1,44 @@
+import os, re, sys
+
+fn searchFile(f, rgx) {
+    let n = 1
+    for line in os.open(f, 'r').readlines() {
+        if rgx.search(line) {
+            println('%s:%s:%s'.fmt(f, n, line[0:-1]))
+        }
+        n++
+    }
+}
+
+fn main(args) {
+
+    let n = len(args)
+    if n < 2 || n > 3 {
+        println('usage:')
+        println('  extgrep.glm <dir> <string> <exts>')
+        println(' ')
+        println('example:')
+        println('  extgrep.glm . foo go,js,html,css')
+        sys.exit(1)
+    }
+
+    let root = args[0]
+    let rgx = re.compile(args[1])
+    let exts = (n == 3) ? 
+        args[2].split(',').toSet() : 
+        set { 'go' }
+
+    for (dir, subDirs, files) in os.walk(root) {
+        for f in files {
+            let ext = os.path.splitExt(f)[1]
+            if len(ext) > 0 && exts.contains(ext[1:]) {
+                searchFile(os.path.join(dir, f), rgx)
+            }
+        }
+    }
+
+    sys.exit(0) 
+}
+
+    
+ 

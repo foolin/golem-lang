@@ -596,7 +596,7 @@ inheritance, multiple-inheritance, prototype chains, and the like.
 For instance, consider the following program:
 
 ```
-fn Rectangle(w, h) {
+fn newRectangle(w, h) {
     return struct {
         width: w,
         height: h,
@@ -604,7 +604,7 @@ fn Rectangle(w, h) {
     }
 }
 
-fn Box(rect, d) {
+fn newBox(rect, d) {
     return merge(
         rect, 
         struct {
@@ -613,8 +613,8 @@ fn Box(rect, d) {
         })
 }
 
-let r = Rectangle(2, 3)
-let b = Box(r, 4)
+let r = newRectangle(2, 3)
+let b = newBox(r, 4)
 
 assert(fields(r) == set { 'width', 'height', 'area' })
 assert(fields(b) == set { 'width', 'depth', 'height', 'volume', 'area' })
@@ -625,7 +625,7 @@ assert([b.width, b.height, b.depth, b.area(), b.volume()] == [5, 3, 4, 15, 60])
 
 ```
 
-The functions 'Rectangle' and 'Box' are very much like what one might call 'constructors'
+The functions 'newRectangle' and 'newBox' are very much like what one might call 'constructors'
 in another language.  The structs that they return have functions as entries 
 (e.g. 'area()'), and these functions refer to the 'this' keyword, and to captured 
 variables.  As such, the functions are an awful lot like what one might call a 
@@ -636,11 +636,6 @@ how inheritance is used in other languages.  Does that mean that a Box is a subc
 of a Rectangle?  Not really, no.  There is no such thing as a 'class' in Golem.  However, 
 due to the behaviour of merge(), they *are* inter-related in a way that is 
 very much like inheritance.
-
-By the way, note that the functions 'Rectangle' and 'Box' are capitalized.  It is 
-considered idiomatic in Golem to capitalize 'constructor-like' functions that 
-return complicated structs which have things like closures, 'this' references, 
-merges from other complicated structs, and the like.
 
 One of the primary goals of the Golem project is to explore the power provided by 
 the simple building blocks of functions, closures, structs and merge().  It is hoped

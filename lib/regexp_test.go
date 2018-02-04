@@ -5,72 +5,70 @@
 package lib
 
 import (
-	//"reflect"
+	"fmt"
 	"testing"
-	//	//"github.com/mjarmy/golem-lang/analyzer"
-	//	"github.com/mjarmy/golem-lang/compiler"
-	//	g "github.com/mjarmy/golem-lang/core"
-	//	"github.com/mjarmy/golem-lang/parser"
-	//	"github.com/mjarmy/golem-lang/scanner"
+
+	"github.com/mjarmy/golem-lang/analyzer"
+	"github.com/mjarmy/golem-lang/compiler"
+	g "github.com/mjarmy/golem-lang/core"
+	"github.com/mjarmy/golem-lang/interpreter"
+	"github.com/mjarmy/golem-lang/parser"
+	"github.com/mjarmy/golem-lang/scanner"
 )
 
-//func newCompiler(source string) compiler.Compiler {
-//	scanner := scanner.NewScanner(source)
-//	parser := parser.NewParser(scanner, builtInMgr.Contains)
-//	mod, err := parser.ParseModule()
-//	if err != nil {
-//		panic(err.Error())
-//	}
-//	anl := analyzer.NewAnalyzer(mod)
-//	errors := anl.Analyze()
-//	if len(errors) > 0 {
-//		panic(fmt.Sprintf("%v", errors))
-//	}
-//
-//	return compiler.NewCompiler(anl, builtInMgr)
-//}
-//
-//func interpret(mod *g.BytecodeModule) {
-//	intp := NewInterpreter(mod, builtInMgr)
-//	_, err := intp.Init()
-//	if err != nil {
-//		fmt.Printf("%v\n", err)
-//		panic("interpret failed")
-//	}
-//}
+func interpret(source string) {
+
+	// scan
+	scanner := scanner.NewScanner(source)
+
+	// parse
+	builtInMgr := g.NewBuiltinManager(g.CommandLineBuiltins)
+	parser := parser.NewParser(scanner, builtInMgr.Contains)
+	astMod, err := parser.ParseModule()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// analyze
+	anl := analyzer.NewAnalyzer(astMod)
+	errors := anl.Analyze()
+	if len(errors) > 0 {
+		panic(fmt.Sprintf("%v", errors))
+	}
+
+	// compile
+	cmp := compiler.NewCompiler(anl, builtInMgr)
+	mod := cmp.Compile()
+
+	// interpret
+	intp := interpreter.NewInterpreter(mod, builtInMgr, LookupModule)
+	_, err = intp.Init()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		panic("interpret failed")
+	}
+}
 
 func TestRegexp(t *testing.T) {
 
-	//	source := `
-	//import regexp;
-	//
-	//let pattern = regexp.compile("abc");
-	//assert([pattern.match("xyzabcdef"), pattern.match("123")] == [true, false]);
-	//`
-	//	mod := newCompiler(source).Compile()
-	//	interpret(mod)
-}
+	interpret(`
+import regexp
+let rgx = regexp.compile("abc")
+assert(
+	[rgx.matchString("xyzabcdef"), rgx.matchString("123")] == 
+	[true, false])
 
-//	regex := InitRegexpModule()
-//
-//	compile, err := regex.GetContents().GetField(nil, g.NewStr("compile"))
-//	tassert(t, compile != nil && err == nil)
-//	fnCompile := compile.(g.NativeFunc)
-//
-//	pattern, err := fnCompile.Invoke(nil, []g.Value{g.NewStr(`^[a-z]+\[[0-9]+\]$`)})
-//	tassert(t, pattern != nil && err == nil)
-//
-//	match, err := pattern.GetField(nil, g.NewStr("match"))
-//	tassert(t, match != nil && err == nil)
-//	fnMatch := match.(g.NativeFunc)
-//
-//	result, err := fnMatch.Invoke(nil, []g.Value{g.NewStr("foo[123]")})
-//	ok(t, result, err, g.True)
-//
-//	result, err = fnMatch.Invoke(nil, []g.Value{g.NewStr("456")})
-//	ok(t, result, err, g.False)
-//
-//	pattern, err = fnCompile.Invoke(nil, []g.Value{g.NewStr("\\")})
-//	tassert(t, pattern == nil && err.Error() ==
-//		"RegexpError: error parsing regexp: trailing backslash at end of expression: ``")
-//}
+rgx = regexp.compile("^[a-z]+\\[[0-9]+\\]$")
+assert(
+	[rgx.matchString("foo[123]"), rgx.matchString("456")] == 
+	[true, false])
+
+try {
+	rgx = regexp.compile("\\")
+	assert(false)
+} catch e {
+	assert(e.kind == 'RegexpError')
+	assert(e.msg == 'error parsing regexp: trailing backslash at end of expression: ` + "``" + `')
+}
+`)
+}
