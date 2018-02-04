@@ -1,10 +1,10 @@
-import os, re, sys
+import os, re, path
 
-fn searchFile(f, rgx) {
+fn searchFile(name, rgx) {
     let n = 1
-    for line in os.open(f, 'r').readlines() {
-        if rgx.search(line) {
-            println('%s:%s:%s'.fmt(f, n, line[0:-1]))
+    for line in os.open(name).readLines() {
+        if rgx.matchString(line) {
+            println([name, n, line].join(":"))
         }
         n++
     }
@@ -19,26 +19,22 @@ fn main(args) {
         println(' ')
         println('example:')
         println('  extgrep.glm . foo go,js,html,css')
-        sys.exit(1)
+        os.exit(1)
     }
 
-    let root = args[0]
+    let dir = args[0]
     let rgx = re.compile(args[1])
-    let exts = (n == 3) ? 
-        args[2].split(',').toSet() : 
-        set { 'go' }
+    let exts = (n == 3) ? args[2].split(',') : ['go']
 
-    for (dir, subDirs, files) in os.walk(root) {
-        for f in files {
-            let ext = os.path.splitExt(f)[1]
+    path.filepath.walk(dir, fn(name, info) {
+        if !info.isDir() {
+            let ext = path.filepath.ext(name)
             if len(ext) > 0 && exts.contains(ext[1:]) {
-                searchFile(os.path.join(dir, f), rgx)
+                searchFile(name, rgx)
             }
         }
-    }
+    })
 
-    sys.exit(0) 
+    os.exit(0) 
 }
-
-    
  

@@ -169,6 +169,7 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 				}
 				return NewBool(strings.Contains(string(s), string(z))), nil
 			}}}, nil
+
 	case "index":
 		return &intrinsicFunc{s, sn, &nativeFunc{
 			1, 1,
@@ -179,6 +180,7 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 				}
 				return NewInt(int64(strings.Index(string(s), string(z)))), nil
 			}}}, nil
+
 	case "startsWith":
 		return &intrinsicFunc{s, sn, &nativeFunc{
 			1, 1,
@@ -189,6 +191,7 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 				}
 				return NewBool(strings.HasPrefix(string(s), string(z))), nil
 			}}}, nil
+
 	case "endsWith":
 		return &intrinsicFunc{s, sn, &nativeFunc{
 			1, 1,
@@ -199,6 +202,7 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 				}
 				return NewBool(strings.HasSuffix(string(s), string(z))), nil
 			}}}, nil
+
 	case "replace":
 		return &intrinsicFunc{s, sn, &nativeFunc{
 			2, 3,
@@ -221,6 +225,25 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 				}
 				return NewStr(strings.Replace(string(s), string(a), string(b), n)), nil
 			}}}, nil
+
+	case "split":
+		return &intrinsicFunc{s, sn, &nativeFunc{
+			1, 1,
+			func(cx Context, values []Value) (Value, Error) {
+				z, ok := values[0].(str)
+				if !ok {
+					return nil, TypeMismatchError("Expected Str")
+				}
+				tokens := strings.Split(string(s), string(z))
+				result := make([]Value, len(tokens))
+				for i, t := range tokens {
+					result[i] = NewStr(t)
+				}
+				return NewList(result), nil
+
+			}}}, nil
+
+		//func Split(s, sep string) []string
 	default:
 		return nil, NoSuchFieldError(key.String())
 	}

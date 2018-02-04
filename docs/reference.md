@@ -42,6 +42,9 @@
             the optional 'max' paramter is supplied, then a maximum of that many 
             replacements are done.
 
+        split(str)
+            Splits the string into a list, by using the provided string as a separator.
+
 ### Int
 
     An Int is a signed, 64-bit integer.

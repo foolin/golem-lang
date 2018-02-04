@@ -1756,6 +1756,7 @@ assert('aaa'.replace('a', 'z') == 'zzz');
 assert('aaa'.replace('a', 'z', 2) == 'zza');
 assert('aaa'.replace('a', 'z', 0) == 'aaa');
 assert('aaa'.replace('a', 'z', -1) == 'zzz');
+assert('a,b,c'.split(',') == ['a','b','c']);
 `
 	mod := newCompiler(source).Compile()
 	interpret(mod)
