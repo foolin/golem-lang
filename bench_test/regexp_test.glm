@@ -1,0 +1,27 @@
+import regexp, os
+
+fn testCompile() {
+    let rgx = regexp.compile("abc")
+    assert(
+        [rgx.matchString("xyzabcdef"), rgx.matchString("123")] == 
+        [true, false])
+
+    rgx = regexp.compile("^[a-z]+\\[[0-9]+\\]$")
+    assert(
+        [rgx.matchString("foo[123]"), rgx.matchString("456")] == 
+        [true, false])
+
+    try {
+        rgx = regexp.compile("\\")
+        assert(false)
+    } catch e {
+        assert(e.kind == 'RegexpError')
+        assert(e.msg == 'error parsing regexp: trailing backslash at end of expression: ``')
+    }
+}
+
+fn main() {
+    testCompile()
+    println("regexp bench test succeeded")
+    os.exit(0)
+}

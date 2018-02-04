@@ -1,0 +1,45 @@
+import os
+
+fn testTry() {
+    try {
+        os.exit('foo')
+        assert(false)
+    } catch e {
+        assert(e.kind == 'TypeMismatch')
+        assert(e.msg == 'Expected Int')
+    }
+
+    try {
+        os.exit(1, 2)
+        assert(false)
+    } catch e {
+        assert(e.kind == 'ArityMismatch')
+        assert(e.msg == 'Expected at most 1 params, got 2')
+    }
+}
+
+fn testReadLines() {
+    try {
+        let file = os.open("./bench_test/data/no_such_file.txt")
+        assert(false)
+    } catch e {
+        assert(e.kind == 'OsError')
+        assert(e.msg == 'open ./bench_test/data/no_such_file.txt: no such file or directory')
+    }
+
+    let file = os.open("./bench_test/data/lines.txt")
+    let lines = file.readLines()
+    assert(['abc', 'def'] == lines)
+    file.close()
+
+    assert(['abc', 'def'] == os.open("./bench_test/data/lines.txt").readLines())
+}
+
+fn main(args) {
+    testTry()
+    testReadLines()
+    println("os bench test succeeded")
+    os.exit(0)
+}
+
+

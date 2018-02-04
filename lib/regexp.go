@@ -13,10 +13,30 @@ type regexpModule struct {
 	contents g.Struct
 }
 
+func (m *regexpModule) GetModuleName() string {
+	return "regexp"
+}
+
+func (m *regexpModule) GetContents() g.Struct {
+	return m.contents
+}
+
 // NewRegexpModule creates the 'regexp' module.
 func NewRegexpModule() g.Module {
 
-	compile := g.NewNativeFunc(
+	contents, err := g.NewStruct([]g.Field{
+		g.NewField("compile", true, compile())},
+		true)
+
+	if err != nil {
+		panic("NewRegexpModule")
+	}
+	return &regexpModule{contents}
+}
+
+func compile() g.NativeFunc {
+
+	return g.NewNativeFunc(
 		1, 1,
 		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
 			s, ok := values[0].(g.Str)
@@ -31,15 +51,6 @@ func NewRegexpModule() g.Module {
 
 			return makeRegexp(rgx), nil
 		})
-
-	contents, err := g.NewStruct([]g.Field{
-		g.NewField("compile", true, compile)},
-		true)
-
-	if err != nil {
-		panic("NewRegexpModule")
-	}
-	return &regexpModule{contents}
 }
 
 func makeRegexp(rgx *regexp.Regexp) g.Struct {
@@ -62,12 +73,4 @@ func makeRegexp(rgx *regexp.Regexp) g.Struct {
 		panic("NewRegexpModule")
 	}
 	return pattern
-}
-
-func (m *regexpModule) GetModuleName() string {
-	return "regexp"
-}
-
-func (m *regexpModule) GetContents() g.Struct {
-	return m.contents
 }

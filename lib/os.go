@@ -5,7 +5,9 @@
 package lib
 
 import (
+	"bufio"
 	g "github.com/mjarmy/golem-lang/core"
+	"io"
 	"os"
 )
 
@@ -13,10 +15,51 @@ type osModule struct {
 	contents g.Struct
 }
 
+func (m *osModule) GetModuleName() string {
+	return "os"
+}
+
+func (m *osModule) GetContents() g.Struct {
+	return m.contents
+}
+
 // NewOsModule creates the 'os' module.
 func NewOsModule() g.Module {
 
-	exit := g.NewNativeFunc(
+	contents, err := g.NewStruct([]g.Field{
+		g.NewField("open", true, open()),
+		g.NewField("exit", true, exit())},
+		true)
+
+	if err != nil {
+		panic("NewOsModule")
+	}
+
+	return &osModule{contents}
+}
+
+func open() g.NativeFunc {
+
+	return g.NewNativeFunc(
+		1, 1,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+			s, ok := values[0].(g.Str)
+			if !ok {
+				return nil, g.TypeMismatchError("Expected Str")
+			}
+
+			f, err := os.Open(s.String())
+			if err != nil {
+				return nil, g.NewError("OsError", err.Error())
+			}
+			return makeFile(f), nil
+		})
+
+}
+
+func exit() g.NativeFunc {
+
+	return g.NewNativeFunc(
 		0, 1,
 		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
 			switch len(values) {
@@ -36,21 +79,50 @@ func NewOsModule() g.Module {
 			return g.NullValue, nil
 		})
 
-	contents, err := g.NewStruct([]g.Field{
-		g.NewField("exit", true, exit)},
-		true)
+}
 
+//-------------------------------------------------------------------------
+
+func makeFile(f *os.File) g.Struct {
+
+	file, err := g.NewStruct([]g.Field{
+		g.NewField("readLines", true, readLines(f)),
+		g.NewField("close", true, close(f))},
+		true)
 	if err != nil {
 		panic("NewOsModule")
 	}
 
-	return &osModule{contents}
+	return file
 }
 
-func (m *osModule) GetModuleName() string {
-	return "os"
+func readLines(f io.Reader) g.NativeFunc {
+	return g.NewNativeFunc(
+		0, 0,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+
+			lines := []g.Value{}
+			scanner := bufio.NewScanner(f)
+			for scanner.Scan() {
+				lines = append(lines, g.NewStr(scanner.Text()))
+			}
+
+			if err := scanner.Err(); err != nil {
+				return nil, g.NewError("OsError", err.Error())
+			}
+
+			return g.NewList(lines), nil
+		})
 }
 
-func (m *osModule) GetContents() g.Struct {
-	return m.contents
+func close(f io.Closer) g.NativeFunc {
+	return g.NewNativeFunc(
+		0, 0,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+			err := f.Close()
+			if err != nil {
+				return nil, g.NewError("OsError", err.Error())
+			}
+			return g.NullValue, nil
+		})
 }

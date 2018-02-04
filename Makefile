@@ -17,5 +17,12 @@ vet:
 test:
 	go test ./...
 
-build: clean fmt lint vet test
+compile: 
+	go build golem.go
+
+bench_test: compile
+	./golem bench_test/os_test.glm
+	./golem bench_test/regexp_test.glm
+
+build: clean fmt lint vet test compile bench_test
 	go build golem.go

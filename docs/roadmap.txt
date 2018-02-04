@@ -34,6 +34,7 @@ Improvements to library of intrinsic functions
 -----------------------------------------------------------
 
 str:  
+    replace()
     toRune() // str-with-one-char --> int
     toRunes() // list of ints
     parseInt(radix = 10),  // radix
