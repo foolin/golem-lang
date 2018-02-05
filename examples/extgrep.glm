@@ -24,7 +24,9 @@ fn main(args) {
 
     let dir = args[0]
     let rgx = re.compile(args[1])
-    let exts = (n == 3) ? args[2].split(',') : ['go']
+    let exts = (n == 3) ? 
+        args[2].split(',') : 
+        ['go']
 
     path.filepath.walk(dir, fn(name, info) {
         if !info.isDir() {

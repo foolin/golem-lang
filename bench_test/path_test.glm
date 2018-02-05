@@ -6,7 +6,20 @@ fn testExt() {
          path.filepath.ext('abc')])
 }
 
+fn testWalk() {
+    let list = []
+    path.filepath.walk('./bench_test/data', fn(name, info) {
+        list.add((name, info.isDir))
+    })
+    assert([ 
+        ('./bench_test/data', true), 
+        ('bench_test/data/dir', true), 
+        ('bench_test/data/empty', false), 
+        ('bench_test/data/lines.txt', false) ] == list)
+}
+
 fn main(args) {
     testExt()
+    testWalk()
     println('path bench test succeeded')
 }

@@ -10,8 +10,10 @@ let fibonacciGenerator = fn() {
     }
 }
 
-println("Fibonacci series:")
-let nextFib = fibonacciGenerator()
+let fg = fibonacciGenerator()
+
+let list = []
 for i in range(0, 10) {
-    println(i, " == ", nextFib())
+    list.add(fg())
 }
+println(list)
