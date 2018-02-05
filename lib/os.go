@@ -33,7 +33,7 @@ func NewOsModule() g.Module {
 	}, true)
 
 	if err != nil {
-		panic("NewOsModule")
+		panic("unreachable")
 	}
 
 	return &osModule{contents}
@@ -77,7 +77,7 @@ func open() g.NativeFunc {
 			if err != nil {
 				return nil, g.NewError("OsError", err.Error())
 			}
-			return makeFile(f), nil
+			return newFile(f), nil
 		})
 
 }
@@ -114,13 +114,13 @@ func stat() g.NativeFunc {
 			if err != nil {
 				return nil, g.NewError("OsError", err.Error())
 			}
-			return makeInfo(info), nil
+			return newInfo(info), nil
 		})
 }
 
 //-------------------------------------------------------------------------
 
-func makeInfo(info os.FileInfo) g.Struct {
+func newInfo(info os.FileInfo) g.Struct {
 
 	stc, err := g.NewStruct([]g.Field{
 		g.NewField("name", true, g.NewStr(info.Name())),
@@ -130,20 +130,20 @@ func makeInfo(info os.FileInfo) g.Struct {
 		g.NewField("isDir", true, g.NewBool(info.IsDir())),
 	}, true)
 	if err != nil {
-		panic("NewOsModule")
+		panic("unreachable")
 	}
 
 	return stc
 }
 
-func makeFile(f *os.File) g.Struct {
+func newFile(f *os.File) g.Struct {
 
 	stc, err := g.NewStruct([]g.Field{
 		g.NewField("readLines", true, readLines(f)),
 		g.NewField("close", true, close(f)),
 	}, true)
 	if err != nil {
-		panic("NewOsModule")
+		panic("unreachable")
 	}
 
 	return stc

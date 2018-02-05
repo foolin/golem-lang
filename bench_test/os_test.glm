@@ -20,23 +20,23 @@ fn testExit() {
 
 fn testReadLines() {
     try {
-        let file = os.open("./bench_test/data/no_such_file.txt")
+        let file = os.open('./bench_test/data/no_such_file.txt')
         assert(false)
     } catch e {
         assert(e.kind == 'OsError')
         assert(e.msg == 'open ./bench_test/data/no_such_file.txt: no such file or directory')
     }
 
-    let file = os.open("./bench_test/data/lines.txt")
+    let file = os.open('./bench_test/data/lines.txt')
     let lines = file.readLines()
     assert(['abc', 'def'] == lines)
     file.close()
 
-    assert(['abc', 'def'] == os.open("./bench_test/data/lines.txt").readLines())
+    assert(['abc', 'def'] == os.open('./bench_test/data/lines.txt').readLines())
 }
 
 fn testStat() {
-    let info = os.stat("./bench_test/data/lines.txt")
+    let info = os.stat('./bench_test/data/lines.txt')
     assert(struct { size: 8, isDir: false, name: 'lines.txt', mode: 436 } == info)
 }
 
@@ -44,7 +44,7 @@ fn main(args) {
     testExit()
     testReadLines()
     testStat()
-    println("os bench test succeeded")
+    println('os bench test succeeded')
     os.exit(0)
 }
 

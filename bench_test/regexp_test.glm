@@ -1,18 +1,18 @@
 import regexp, os
 
 fn testCompile() {
-    let rgx = regexp.compile("abc")
+    let rgx = regexp.compile('abc')
     assert(
-        [rgx.matchString("xyzabcdef"), rgx.matchString("123")] == 
+        [rgx.matchString('xyzabcdef'), rgx.matchString('123')] == 
         [true, false])
 
-    rgx = regexp.compile("^[a-z]+\\[[0-9]+\\]$")
+    rgx = regexp.compile('^[a-z]+\\[[0-9]+\\]$')
     assert(
-        [rgx.matchString("foo[123]"), rgx.matchString("456")] == 
+        [rgx.matchString('foo[123]'), rgx.matchString('456')] == 
         [true, false])
 
     try {
-        rgx = regexp.compile("\\")
+        rgx = regexp.compile('\\')
         assert(false)
     } catch e {
         assert(e.kind == 'RegexpError')
@@ -22,6 +22,6 @@ fn testCompile() {
 
 fn main() {
     testCompile()
-    println("regexp bench test succeeded")
+    println('regexp bench test succeeded')
     os.exit(0)
 }

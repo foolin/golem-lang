@@ -26,13 +26,17 @@ func LookupModule(name string) (g.Module, g.Error) {
 
 	switch name {
 	case "regexp":
-		rgx := NewRegexpModule()
-		libModules[name] = rgx
-		return rgx, nil
+		m := NewRegexpModule()
+		libModules[name] = m
+		return m, nil
 	case "os":
-		os := NewOsModule()
-		libModules[name] = os
-		return os, nil
+		m := NewOsModule()
+		libModules[name] = m
+		return m, nil
+	case "path":
+		m := NewPathModule()
+		libModules[name] = m
+		return m, nil
 	default:
 		return nil, g.UndefinedModuleError(name)
 	}

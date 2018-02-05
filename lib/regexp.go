@@ -29,7 +29,7 @@ func NewRegexpModule() g.Module {
 		true)
 
 	if err != nil {
-		panic("NewRegexpModule")
+		panic("unreachable")
 	}
 	return &regexpModule{contents}
 }
@@ -70,7 +70,7 @@ func makeRegexp(rgx *regexp.Regexp) g.Struct {
 		true)
 
 	if err != nil {
-		panic("NewRegexpModule")
+		panic("unreachable")
 	}
 	return pattern
 }

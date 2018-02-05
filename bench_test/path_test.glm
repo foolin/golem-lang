@@ -1,0 +1,12 @@
+import path
+
+fn testExt() {
+    assert(['.txt', ''] == 
+        [path.filepath.ext('abc.txt'),
+         path.filepath.ext('abc')])
+}
+
+fn main(args) {
+    testExt()
+    println('path bench test succeeded')
+}
