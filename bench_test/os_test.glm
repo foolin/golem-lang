@@ -1,6 +1,6 @@
 import os
 
-fn testTry() {
+fn testExit() {
     try {
         os.exit('foo')
         assert(false)
@@ -35,9 +35,15 @@ fn testReadLines() {
     assert(['abc', 'def'] == os.open("./bench_test/data/lines.txt").readLines())
 }
 
+fn testStat() {
+    let info = os.stat("./bench_test/data/lines.txt")
+    assert(struct { size: 8, isDir: false, name: 'lines.txt', mode: 436 } == info)
+}
+
 fn main(args) {
-    testTry()
+    testExit()
     testReadLines()
+    testStat()
     println("os bench test succeeded")
     os.exit(0)
 }

@@ -4,7 +4,7 @@ fn searchFile(name, rgx) {
     let n = 1
     for line in os.open(name).readLines() {
         if rgx.matchString(line) {
-            println([name, n, line].join(":"))
+            println([name, n, line))
         }
         n++
     }

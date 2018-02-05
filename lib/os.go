@@ -27,34 +27,16 @@ func (m *osModule) GetContents() g.Struct {
 func NewOsModule() g.Module {
 
 	contents, err := g.NewStruct([]g.Field{
+		g.NewField("exit", true, exit()),
 		g.NewField("open", true, open()),
-		g.NewField("exit", true, exit())},
-		true)
+		g.NewField("stat", true, stat()),
+	}, true)
 
 	if err != nil {
 		panic("NewOsModule")
 	}
 
 	return &osModule{contents}
-}
-
-func open() g.NativeFunc {
-
-	return g.NewNativeFunc(
-		1, 1,
-		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
-			s, ok := values[0].(g.Str)
-			if !ok {
-				return nil, g.TypeMismatchError("Expected Str")
-			}
-
-			f, err := os.Open(s.String())
-			if err != nil {
-				return nil, g.NewError("OsError", err.Error())
-			}
-			return makeFile(f), nil
-		})
-
 }
 
 func exit() g.NativeFunc {
@@ -81,19 +63,90 @@ func exit() g.NativeFunc {
 
 }
 
+func open() g.NativeFunc {
+
+	return g.NewNativeFunc(
+		1, 1,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+			s, ok := values[0].(g.Str)
+			if !ok {
+				return nil, g.TypeMismatchError("Expected Str")
+			}
+
+			f, err := os.Open(s.String())
+			if err != nil {
+				return nil, g.NewError("OsError", err.Error())
+			}
+			return makeFile(f), nil
+		})
+
+}
+
+func stat() g.NativeFunc {
+
+	return g.NewNativeFunc(
+		//1, 2,
+		1, 1,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+
+			name, ok := values[0].(g.Str)
+			if !ok {
+				return nil, g.TypeMismatchError("Expected Str")
+			}
+
+			// TODO os.Lstat
+			// TODO followSymLink == false, same as os.Lstat
+			//
+			//followSymLink := g.True
+			//if len(values) == 2 {
+			//	var ok bool
+			//	followSymLink, ok = values[1].(g.Bool)
+			//	if !ok {
+			//		return nil, g.TypeMismatchError("Expected Bool")
+			//	}
+			//}
+			//var fn = os.Stat
+			//if !followSymLink.BoolVal() {
+			//	fn = os.Lstat
+			//}
+
+			info, err := os.Stat(name.String())
+			if err != nil {
+				return nil, g.NewError("OsError", err.Error())
+			}
+			return makeInfo(info), nil
+		})
+}
+
 //-------------------------------------------------------------------------
 
-func makeFile(f *os.File) g.Struct {
+func makeInfo(info os.FileInfo) g.Struct {
 
-	file, err := g.NewStruct([]g.Field{
-		g.NewField("readLines", true, readLines(f)),
-		g.NewField("close", true, close(f))},
-		true)
+	stc, err := g.NewStruct([]g.Field{
+		g.NewField("name", true, g.NewStr(info.Name())),
+		g.NewField("size", true, g.NewInt(info.Size())),
+		g.NewField("mode", true, g.NewInt(int64(info.Mode()))),
+		//g.NewField("readLines", true, ModTime() time.Time TODO
+		g.NewField("isDir", true, g.NewBool(info.IsDir())),
+	}, true)
 	if err != nil {
 		panic("NewOsModule")
 	}
 
-	return file
+	return stc
+}
+
+func makeFile(f *os.File) g.Struct {
+
+	stc, err := g.NewStruct([]g.Field{
+		g.NewField("readLines", true, readLines(f)),
+		g.NewField("close", true, close(f)),
+	}, true)
+	if err != nil {
+		panic("NewOsModule")
+	}
+
+	return stc
 }
 
 func readLines(f io.Reader) g.NativeFunc {
