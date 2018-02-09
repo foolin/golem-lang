@@ -7,6 +7,7 @@ package analyzer
 import (
 	"errors"
 	"fmt"
+	"github.com/mjarmy/golem-lang/analyzer/scope"
 	"github.com/mjarmy/golem-lang/ast"
 	"sort"
 )
@@ -16,13 +17,13 @@ type Analyzer interface {
 	ast.Visitor
 	Module() *ast.FnExpr
 	Analyze() []error
-	scope() *scope
+	scope() *scope.Scope
 }
 
 type analyzer struct {
 	mod       *ast.FnExpr
-	rootScope *scope
-	curScope  *scope
+	rootScope *scope.Scope
+	curScope  *scope.Scope
 	loops     []ast.Loop
 	structs   []*ast.StructExpr
 	errors    []error
@@ -31,12 +32,12 @@ type analyzer struct {
 // NewAnalyzer creates a new Analyzer
 func NewAnalyzer(mod *ast.FnExpr) Analyzer {
 
-	rootScope := newFuncScope(nil)
+	rootScope := scope.NewFuncScope(nil)
 
 	return &analyzer{mod, rootScope, rootScope, []ast.Loop{}, []*ast.StructExpr{}, nil}
 }
 
-func (a *analyzer) scope() *scope {
+func (a *analyzer) scope() *scope.Scope {
 	return a.rootScope
 }
 
@@ -47,11 +48,11 @@ func (a *analyzer) Analyze() []error {
 	a.visitBlock(a.mod.Body)
 
 	// save NumLocals
-	fscope := a.curScope.funcScope
-	a.mod.NumLocals = fscope.numLocals
+	fscope := a.curScope.FuncScope
+	a.mod.NumLocals = fscope.NumLocals
 
-	// sanity check for captures
-	if len(fscope.captures) > 0 {
+	// sanity check for Captures
+	if len(fscope.Captures) > 0 {
 		panic("invalid module")
 	}
 	a.mod.NumCaptures = 0
@@ -147,10 +148,10 @@ func (a *analyzer) visitTry(t *ast.TryStmt) {
 
 	a.Visit(t.TryBlock)
 	if t.CatchToken != nil {
-		a.curScope = newBlockScope(a.curScope)
+		a.curScope = scope.NewBlockScope(a.curScope)
 		a.defineIdent(t.CatchIdent, true)
 		a.Visit(t.CatchBlock)
-		a.curScope = a.curScope.parent
+		a.curScope = a.curScope.Parent
 	}
 	if t.FinallyToken != nil {
 		a.Visit(t.FinallyBlock)
@@ -159,17 +160,17 @@ func (a *analyzer) visitTry(t *ast.TryStmt) {
 
 func (a *analyzer) defineIdent(ident *ast.IdentExpr, isConst bool) {
 	sym := ident.Symbol.Text
-	if _, ok := a.curScope.get(sym); ok {
+	if _, ok := a.curScope.Get(sym); ok {
 		a.errors = append(a.errors,
 			fmt.Errorf("Symbol '%s' is already defined, at %v", sym, ident.Symbol.Position))
 	} else {
-		ident.Variable = a.curScope.put(sym, isConst)
+		ident.Variable = a.curScope.Put(sym, isConst)
 	}
 }
 
 func (a *analyzer) visitBlock(blk *ast.BlockNode) {
 
-	a.curScope = newBlockScope(a.curScope)
+	a.curScope = scope.NewBlockScope(a.curScope)
 
 	// visit named funcs identifiers
 	for _, n := range blk.Statements {
@@ -187,13 +188,13 @@ func (a *analyzer) visitBlock(blk *ast.BlockNode) {
 		}
 	}
 
-	a.curScope = a.curScope.parent
+	a.curScope = a.curScope.Parent
 }
 
 func (a *analyzer) visitFor(fr *ast.ForStmt) {
 
 	// push block scope
-	a.curScope = newBlockScope(a.curScope)
+	a.curScope = scope.NewBlockScope(a.curScope)
 
 	// define identifiers
 	for _, ident := range fr.Idents {
@@ -208,36 +209,36 @@ func (a *analyzer) visitFor(fr *ast.ForStmt) {
 	a.visitBlock(fr.Body)
 
 	// pop block scope
-	a.curScope = a.curScope.parent
+	a.curScope = a.curScope.Parent
 }
 
 func (a *analyzer) visitFunc(fn *ast.FnExpr) {
 
 	// push scope
-	a.curScope = newFuncScope(a.curScope)
+	a.curScope = scope.NewFuncScope(a.curScope)
 
 	// visit child nodes
 	for _, f := range fn.FormalParams {
-		f.Ident.Variable = a.curScope.put(f.Ident.Symbol.Text, f.IsConst)
+		f.Ident.Variable = a.curScope.Put(f.Ident.Symbol.Text, f.IsConst)
 	}
 	a.visitBlock(fn.Body)
 
 	// save function scope info
-	fscope := a.curScope.funcScope
-	fn.NumLocals = fscope.numLocals
-	fn.NumCaptures = len(fscope.captures)
+	fscope := a.curScope.FuncScope
+	fn.NumLocals = fscope.NumLocals
+	fn.NumCaptures = len(fscope.Captures)
 	fn.ParentCaptures = a.makeParentCaptures()
 
 	// pop scope
-	a.curScope = a.curScope.parent
+	a.curScope = a.curScope.Parent
 }
 
 func (a *analyzer) makeParentCaptures() []*ast.Variable {
 
-	fscope := a.curScope.funcScope
-	num := len(fscope.captures)
+	fscope := a.curScope.FuncScope
+	num := len(fscope.Captures)
 
-	if num != len(fscope.parentCaptures) {
+	if num != len(fscope.ParentCaptures) {
 		panic("capture length mismatch")
 	}
 	if num == 0 {
@@ -246,15 +247,15 @@ func (a *analyzer) makeParentCaptures() []*ast.Variable {
 
 	// First, sort the captured Variables by index
 	caps := make(byIndex, 0, num)
-	for _, v := range fscope.captures {
+	for _, v := range fscope.Captures {
 		caps = append(caps, v)
 	}
 	sort.Sort(caps)
 
-	// Then use the sorted list to create the proper ordering of parentCaptures
+	// Then use the sorted list to create the proper ordering of ParentCaptures
 	parentCaps := make([]*ast.Variable, 0, num)
 	for _, v := range caps {
-		parentCaps = append(parentCaps, fscope.parentCaptures[v.Symbol])
+		parentCaps = append(parentCaps, fscope.ParentCaptures[v.Symbol])
 	}
 	return parentCaps
 }
@@ -316,7 +317,7 @@ func (a *analyzer) visitPostfixExpr(ps *ast.PostfixExpr) {
 // visit an Ident that is part of an assignment
 func (a *analyzer) doVisitAssignIdent(ident *ast.IdentExpr) {
 	sym := ident.Symbol.Text
-	if v, ok := a.curScope.get(sym); ok {
+	if v, ok := a.curScope.Get(sym); ok {
 		if v.IsConst {
 			a.errors = append(a.errors,
 				fmt.Errorf("Symbol '%s' is constant, at %v", sym, ident.Symbol.Position))
@@ -332,7 +333,7 @@ func (a *analyzer) visitIdentExpr(ident *ast.IdentExpr) {
 
 	sym := ident.Symbol.Text
 
-	if v, ok := a.curScope.get(sym); ok {
+	if v, ok := a.curScope.Get(sym); ok {
 		ident.Variable = v
 	} else {
 		a.errors = append(a.errors,
@@ -343,9 +344,9 @@ func (a *analyzer) visitIdentExpr(ident *ast.IdentExpr) {
 func (a *analyzer) visitStructExpr(stc *ast.StructExpr) {
 	a.structs = append(a.structs, stc)
 
-	a.curScope = newStructScope(a.curScope, stc)
+	a.curScope = scope.NewStructScope(a.curScope, stc)
 	stc.Traverse(a)
-	a.curScope = a.curScope.parent
+	a.curScope = a.curScope.Parent
 
 	a.structs = a.structs[:len(a.structs)-1]
 }
@@ -356,6 +357,6 @@ func (a *analyzer) visitThisExpr(this *ast.ThisExpr) {
 	if n == 0 {
 		a.errors = append(a.errors, errors.New("'this' outside of loop"))
 	} else {
-		this.Variable = a.curScope.this()
+		this.Variable = a.curScope.This()
 	}
 }
