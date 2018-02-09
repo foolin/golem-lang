@@ -17,10 +17,15 @@ import (
 	"os"
 )
 
+func exit(msg string) {
+	fmt.Printf("%s\n", msg)
+	os.Exit(-1)
+}
+
 func main() {
 
 	if len(os.Args) < 2 {
-		panic("No source file was specified")
+		exit("No source file was specified")
 	}
 
 	// read source
@@ -41,14 +46,17 @@ func main() {
 	parser := parser.NewParser(scanner, builtInMgr.Contains)
 	astMod, e := parser.ParseModule()
 	if e != nil {
-		panic(e.Error())
+		exit(e.Error())
 	}
 
 	// analyze
 	anl := analyzer.NewAnalyzer(astMod)
 	errors := anl.Analyze()
 	if len(errors) > 0 {
-		panic(fmt.Sprintf("%v", errors))
+		for _, e := range errors {
+			fmt.Printf("%s\n", e)
+			os.Exit(-1)
+		}
 	}
 
 	// compile
@@ -68,7 +76,7 @@ func main() {
 	if mainErr == nil {
 		mainFn, ok := mainVal.(g.BytecodeFunc)
 		if !ok {
-			panic("'main' is not a function")
+			exit("'main' is not a function")
 		}
 
 		params := []g.Value{}
@@ -81,7 +89,7 @@ func main() {
 			}
 			params = append(params, g.NewList(args))
 		} else if arity > 1 {
-			panic("'main' has too many arguments")
+			exit("'main' has too many arguments")
 		}
 
 		_, err := intp.Eval(mainFn, params)

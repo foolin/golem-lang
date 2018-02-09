@@ -85,11 +85,10 @@ write Control Flow Graph:
     use the POP opcode to keep stack size down
     find unreachable statements
 
-treeDict(), treeSet()
-
 optional formal parameters in functions
 variadic functions
-keyword args 
+
+treeDict(), treeSet()
 
 interpolated strings: $"123$foo456"
 
@@ -108,6 +107,8 @@ break, continue to label: for, while
 destructing tuple: assignment, lambda
 
 blank id '_': for, assignment, like
+
+keyword args 
 
 $eq, $hash:  allow composite keys in hashMap
 $str: allow for custom str() 

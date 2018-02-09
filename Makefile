@@ -21,6 +21,7 @@ compile:
 	go build golem.go
 
 bench_test: compile
+	./golem bench_test/core_test.glm
 	./golem bench_test/os_test.glm
 	./golem bench_test/regexp_test.glm
 	./golem bench_test/path_test.glm

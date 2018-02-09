@@ -22,6 +22,4 @@ fn testCompile() {
 
 fn main() {
     testCompile()
-    println('regexp bench test succeeded')
-    os.exit(0)
 }

@@ -161,7 +161,7 @@ func (a *analyzer) defineIdent(ident *ast.IdentExpr, isConst bool) {
 	sym := ident.Symbol.Text
 	if _, ok := a.curScope.get(sym); ok {
 		a.errors = append(a.errors,
-			fmt.Errorf("Symbol '%s' is already defined", sym))
+			fmt.Errorf("Symbol '%s' is already defined, at %v", sym, ident.Symbol.Position))
 	} else {
 		ident.Variable = a.curScope.put(sym, isConst)
 	}
@@ -319,12 +319,12 @@ func (a *analyzer) doVisitAssignIdent(ident *ast.IdentExpr) {
 	if v, ok := a.curScope.get(sym); ok {
 		if v.IsConst {
 			a.errors = append(a.errors,
-				fmt.Errorf("Symbol '%s' is constant", sym))
+				fmt.Errorf("Symbol '%s' is constant, at %v", sym, ident.Symbol.Position))
 		}
 		ident.Variable = v
 	} else {
 		a.errors = append(a.errors,
-			fmt.Errorf("Symbol '%s' is not defined", sym))
+			fmt.Errorf("Symbol '%s' is not defined, at %v", sym, ident.Symbol.Position))
 	}
 }
 
@@ -336,7 +336,7 @@ func (a *analyzer) visitIdentExpr(ident *ast.IdentExpr) {
 		ident.Variable = v
 	} else {
 		a.errors = append(a.errors,
-			fmt.Errorf("Symbol '%s' is not defined", sym))
+			fmt.Errorf("Symbol '%s' is not defined, at %v", sym, ident.Symbol.Position))
 	}
 }
 

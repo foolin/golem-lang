@@ -91,16 +91,16 @@ FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
 `)
 
 	errors = newAnalyzer("a;").Analyze()
-	fail(t, errors, "[Symbol 'a' is not defined]")
+	fail(t, errors, "[Symbol 'a' is not defined, at (1, 1)]")
 
 	errors = newAnalyzer("let a = 1;const a = 1;").Analyze()
-	fail(t, errors, "[Symbol 'a' is already defined]")
+	fail(t, errors, "[Symbol 'a' is already defined, at (1, 17)]")
 
 	errors = newAnalyzer("const a = 1;a = 1;").Analyze()
-	fail(t, errors, "[Symbol 'a' is constant]")
+	fail(t, errors, "[Symbol 'a' is constant, at (1, 13)]")
 
 	errors = newAnalyzer("a = a;").Analyze()
-	fail(t, errors, "[Symbol 'a' is not defined Symbol 'a' is not defined]")
+	fail(t, errors, "[Symbol 'a' is not defined, at (1, 5) Symbol 'a' is not defined, at (1, 1)]")
 }
 
 func TestNested(t *testing.T) {
@@ -734,7 +734,7 @@ FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
 	source = "let a = 1; try { } catch a { } finally { }"
 	anl = newAnalyzer(source)
 	errors = anl.Analyze()
-	fail(t, errors, "[Symbol 'a' is already defined]")
+	fail(t, errors, "[Symbol 'a' is already defined, at (1, 26)]")
 }
 
 func TestNamedFunc(t *testing.T) {
@@ -773,19 +773,19 @@ FnExpr(numLocals:2 numCaptures:0 parentCaptures:[])
 `)
 
 	errors = newAnalyzer("fn a() {}; const a = 1;").Analyze()
-	fail(t, errors, "[Symbol 'a' is already defined]")
+	fail(t, errors, "[Symbol 'a' is already defined, at (1, 18)]")
 }
 
 func TestFormalParams(t *testing.T) {
 
 	errors := newAnalyzer("fn(const a, b) { a = 1; };").Analyze()
-	fail(t, errors, "[Symbol 'a' is constant]")
+	fail(t, errors, "[Symbol 'a' is constant, at (1, 18)]")
 }
 
 func TestImport(t *testing.T) {
 	errors := newAnalyzer("import sys; let sys = 2;").Analyze()
-	fail(t, errors, "[Symbol 'sys' is already defined]")
+	fail(t, errors, "[Symbol 'sys' is already defined, at (1, 17)]")
 
 	errors = newAnalyzer("import sys, zork; sys = 2;").Analyze()
-	fail(t, errors, "[Symbol 'sys' is constant]")
+	fail(t, errors, "[Symbol 'sys' is constant, at (1, 19)]")
 }

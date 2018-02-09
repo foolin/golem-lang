@@ -1,0 +1,15 @@
+
+const foo = 3
+
+fn main(args) {
+    let ls = [
+        fn () {
+            foo
+        },
+        fn () {
+            foo
+        }
+    ]
+    let a = ls[0]()
+    let b = ls[1]()
+}

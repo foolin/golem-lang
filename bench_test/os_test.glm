@@ -44,7 +44,6 @@ fn main(args) {
     testExit()
     testReadLines()
     testStat()
-    println('os bench test succeeded')
     os.exit(0)
 }
 
