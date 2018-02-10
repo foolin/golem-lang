@@ -764,54 +764,55 @@ println(types)
 
 ## A Full-Fledged Program
 
-As a final example, here is a  program that finds strings inside a text file or
-files.  This program can be found in the 'examples' directory of the github repo.
+As a final example, here is a program that searches for all occurences of 
+a given string, in any files having a given list of extensions, anywhere 
+underneatch a given directory.
 
 ```
-import io
-import regex
-import sys
+import os, regexp, path
 
-/*
- * To run this program, do the following from the parent directory:
- * 
- *     go build .
- *     ./golem examples/searchFiles.glm let examples
- *
- * This will find every occurence of the word 'let' in all of the files 
- * in the 'examples' directory.
- * 
- * Note that this program doesn't yet understand file globbing, so for now you have to 
- * provide an explicit name for the file or directory that you want to search.
- */
-
-fn traverse(pattern, file) {
-    if file.isDir() {
-        for child in file.items() {
-            traverse(pattern, child)
+fn searchFile(name, rgx) {
+    let n = 1
+    for line in os.open(name).readLines() {
+        if rgx.matchString(line) {
+            println([name, n, line].join(':'))
         }
-    } else {
-        let lines = file.readLines()
-        for i in range(0, len(lines)) {
-            if pattern.match(lines[i]) {
-                println([file.name, i, lines[i]].join(':'))
-            } 
-        }
+        n++
     }
 }
 
 fn main(args) {
 
-    if len(args) != 2 {
-        println("Expected 2 arguments, got ", len(args))
-        sys.exit(-1)
+    let numArgs = len(args)
+    if numArgs < 2 || numArgs > 3 {
+        println('usage:')
+        println('  extgrep.glm <dir> <string> <exts>')
+        println(' ')
+        println('example:')
+        println('  extgrep.glm . Foo go,js,html,css')
+        os.exit(1)
     }
 
-    let pattern = regex.compile(args[0])
-    let file = io.File(args[1])
+    let dir = args[0]
+    let rgx = regexp.compile(args[1])
+    let exts = (numArgs == 3) ? 
+        args[2].split(',') : 
+        ['go']
 
-    traverse(pattern, file)
+    path.filepath.walk(dir, fn(name, info) {
+        if !info.isDir {
+
+            let n = name.lastIndex('.')
+            let ext = n == -1 ? '' : name[n:]
+
+            if len(ext) > 0 && exts.contains(ext[1:]) {
+                searchFile(name, rgx)
+            }
+        }
+    })
+
+    os.exit(0) 
 }
-
+ 
 ```
 
