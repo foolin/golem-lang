@@ -181,6 +181,17 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 				return NewInt(int64(strings.Index(string(s), string(z)))), nil
 			}}}, nil
 
+	case "lastIndex":
+		return &intrinsicFunc{s, sn, &nativeFunc{
+			1, 1,
+			func(cx Context, values []Value) (Value, Error) {
+				z, ok := values[0].(str)
+				if !ok {
+					return nil, TypeMismatchError("Expected Str")
+				}
+				return NewInt(int64(strings.LastIndex(string(s), string(z)))), nil
+			}}}, nil
+
 	case "startsWith":
 		return &intrinsicFunc{s, sn, &nativeFunc{
 			1, 1,

@@ -29,7 +29,10 @@
             Return whether this string contains the given string.
 
         index(str)
-            Return the starting index of the given string in this string, or -1.
+            Return the index of the first occurence of given string in this string, or -1.
+
+        lastIndex(str)
+            Return the index of the last occurence of given string in this string, or -1.
 
         startsWith(str)
             Return whether this string starts with the given string.

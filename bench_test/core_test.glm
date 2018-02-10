@@ -153,11 +153,23 @@ fn testStr() {
     assert('aaa'.replace('a', 'z', -1) == 'zzz')
     assert('a,b,c'.split(',') == ['a','b','c'])
 
+    assert('abcabc'.lastIndex('ab') == 3)
+    assert('abc'.lastIndex('z') == -1)
+
+    fn ext(s) {
+        let n = s.lastIndex('.')
+        return n == -1 ? '' : s[n:]
+    }
+    assert(ext('foo') == '')
+    assert(ext('foo.txt') == '.txt')
+
 	failMsg(|| => 'abc'.contains(), 'ArityMismatch', 'Expected 1 params, got 0')
 	failMsg(|| => 'abc'.contains(1), 'TypeMismatch', 'Expected Str')
 
 	failMsg(|| => 'abc'.index(), 'ArityMismatch', 'Expected 1 params, got 0')
 	failMsg(|| => 'abc'.index(1), 'TypeMismatch', 'Expected Str')
+	failMsg(|| => 'abc'.lastIndex(), 'ArityMismatch', 'Expected 1 params, got 0')
+	failMsg(|| => 'abc'.lastIndex(1), 'TypeMismatch', 'Expected Str')
 
 	failMsg(|| => 'abc'.startsWith(), 'ArityMismatch', 'Expected 1 params, got 0')
 	failMsg(|| => 'abc'.startsWith(1), 'TypeMismatch', 'Expected Str')
@@ -170,6 +182,8 @@ fn testStr() {
 	failMsg(|| => 'abc'.replace(0, 'a'), 'TypeMismatch', 'Expected Str')
 	failMsg(|| => 'abc'.replace('a', 0), 'TypeMismatch', 'Expected Str')
 	failMsg(|| => 'abc'.replace('a', 'b', 'c'), 'TypeMismatch', 'Expected Int')
+
+	failMsg(|| => 'abc'.bogus(), 'NoSuchField', "Field 'bogus' not found")
 }
 
 fn testMerge() {
