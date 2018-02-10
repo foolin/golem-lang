@@ -1113,5 +1113,5 @@ type Variable struct {
 }
 
 func (v *Variable) String() string {
-	return fmt.Sprintf("(%d,%v,%v)", v.Index, v.IsConst, v.IsCapture)
+	return fmt.Sprintf("(%s,%d,%v,%v)", v.Symbol, v.Index, v.IsConst, v.IsCapture)
 }

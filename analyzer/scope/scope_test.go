@@ -36,8 +36,10 @@ func testScopeOk(test *testing.T, s *Scope, expect string) {
 	ds := dumpScope(s)
 	if ("\n" + ds) != expect {
 		fmt.Println("--------------------------------------------------------------")
+		fmt.Println("dump:")
 		fmt.Println(ds)
 		fmt.Println("--------------------------------------------------------------")
+		fmt.Println("expect:")
 		fmt.Println(expect)
 		test.Error("Scope not ok")
 	}
@@ -93,12 +95,12 @@ func TestCaptureScope(test *testing.T) {
 	s5.Get("c")
 
 	testScopeOk(test, s5, `
-Block defs:{f: (1,false,false)}
-Func defs:{e: (0,false,false)} captures:{a: (0,false,true), c: (1,false,true)} parentCaptures:{a: (0,false,true), c: (0,false,false)} numLocals:2
-Block defs:{d: (1,false,false)}
-Func defs:{c: (0,false,false)} captures:{a: (0,false,true)} parentCaptures:{a: (0,false,false)} numLocals:2
-Block defs:{b: (1,false,false)}
-Func defs:{a: (0,false,false)} captures:{} parentCaptures:{} numLocals:2
+Block defs:{f: (f,1,false,false)}
+Func defs:{e: (e,0,false,false)} captures:{a: (a,0,false,true), c: (c,1,false,true)} parentCaptures:{a: (a,0,false,true), c: (c,0,false,false)} numLocals:2
+Block defs:{d: (d,1,false,false)}
+Func defs:{c: (c,0,false,false)} captures:{a: (a,0,false,true)} parentCaptures:{a: (a,0,false,false)} numLocals:2
+Block defs:{b: (b,1,false,false)}
+Func defs:{a: (a,0,false,false)} captures:{} parentCaptures:{} numLocals:2
 `)
 }
 
@@ -136,10 +138,10 @@ func TestThisStructScope(test *testing.T) {
 	s3.This()
 
 	testScopeOk(test, s3, `
-Struct defs:{this: (2,true,false)}
+Struct defs:{this: (this,2,true,false)}
 Struct defs:{}
-Block defs:{b: (1,false,false)}
-Func defs:{a: (0,false,false)} captures:{} parentCaptures:{} numLocals:3
+Block defs:{b: (b,1,false,false)}
+Func defs:{a: (a,0,false,false)} captures:{} parentCaptures:{} numLocals:3
 `)
 
 	if struct2.LocalThisIndex != -1 {
@@ -166,8 +168,8 @@ func TestMethodScope(test *testing.T) {
 
 	testScopeOk(test, s4, `
 Block defs:{}
-Func defs:{} captures:{this: (0,true,true)} parentCaptures:{this: (0,true,false)} numLocals:0
-Struct defs:{this: (0,true,false)}
+Func defs:{} captures:{this: (this,0,true,true)} parentCaptures:{this: (this,0,true,false)} numLocals:0
+Struct defs:{this: (this,0,true,false)}
 Block defs:{}
 Func defs:{} captures:{} parentCaptures:{} numLocals:1
 `)

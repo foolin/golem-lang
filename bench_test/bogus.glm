@@ -2,18 +2,16 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-// TODO fix problem with captures
-const foo = 3
+const foo = 1
 
 fn main(args) {
-    let ls = [
-        fn () {
-            foo
-        },
-        fn () {
-            foo
-        }
-    ]
-    let a = ls[0]()
-    let b = ls[1]()
+    // TODO fix problem with captures
+    let a = || => foo
+    let b = || => foo
+    a()
+    b()
+
+    //// TODO this should compile....
+    //(|| => foo)()
+    //(|| => foo)()
 }
