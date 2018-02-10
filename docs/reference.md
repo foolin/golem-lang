@@ -268,18 +268,24 @@
 
 **TODO** work on these has barely begun.
 
-    sys
+    os
         exit(val)
-            Exit the interpreter's process with the given exit code.
-
-    io
-        File(name) Create a file:
-            isDir()
-            items()
-            readLines()
-            name
+            Exit the interpreter with the given exit code.
+        open(fileName)
+            Open the given file for reading:
+                readLines()
+                close()
+        stat(fileName)
+            Return information about the given file
             
-    regex
+    path
+        filepath
+            ext(fileName)
+                Return the file extension, or an empty string if the file doesn't have an extension
+            walk(rootDir, callback)
+                Traverse the given directory, calling the function 'callback' once for each file in the hierarchy.
+                'callback' should have two formal parameters -- the name of the file, and info about the file.
+
+    regexp
         compile(str) Create a regex:
             match(str)
-

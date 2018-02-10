@@ -766,7 +766,7 @@ println(types)
 
 As a final example, here is a program that searches for all occurences of 
 a given string, in any files having a given list of extensions, anywhere 
-underneatch a given directory.
+underneath a given directory.
 
 ```
 import os, regexp, path
