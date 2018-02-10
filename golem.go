@@ -17,6 +17,8 @@ import (
 	"os"
 )
 
+var version = "0.8.0"
+
 func exit(msg string) {
 	fmt.Printf("%s\n", msg)
 	os.Exit(-1)
@@ -24,8 +26,9 @@ func exit(msg string) {
 
 func main() {
 
-	if len(os.Args) < 2 {
-		exit("No source file was specified")
+	if len(os.Args) == 1 {
+		fmt.Printf("Golem %s\n", version)
+		os.Exit(0)
 	}
 
 	// read source
