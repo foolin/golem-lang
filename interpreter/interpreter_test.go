@@ -556,91 +556,6 @@ let b = false ? 5 : 6;
 	okRef(t, i, mod.Refs[1], g.NewInt(6))
 }
 
-func TestSet(t *testing.T) {
-
-	source := `
-let a = set {};
-a.add(1);
-assert(a == set {1});
-a.add(2).add(3).add(2);
-assert(a == set {1,2,3});
-assert(set {3,1,2} == set {1,2,3});
-assert(set {1,2} != set {1,2,3});
-let b = set { 4 };
-b.add(4);
-assert(b == set { 4 });
-assert(a.add == a.add);
-assert(b.add == b.add);
-assert(a.add != b.add);
-assert(b.add != a.add);
-`
-	mod := newCompiler(source).Compile()
-	interpret(mod)
-
-	source = `
-let a = set {};
-a.addAll([1,2]).addAll('bc');
-assert(a == set {1,2,'b','c'});
-let b = set {};
-b.addAll(range(0,3));
-assert(b == set { 0, 1, 2 });
-assert(a.addAll == a.addAll);
-assert(b.addAll == b.addAll);
-assert(a.addAll != b.addAll);
-assert(b.addAll != a.addAll);
-assert(a.add != a.addAll);
-`
-	mod = newCompiler(source).Compile()
-	interpret(mod)
-
-	source = "let a = set{}; a.addAll(false);"
-	failErr(t, source, g.TypeMismatchError("Expected Iterable Type"))
-
-	source = "let a = set{}; a.add(3,4);"
-	failErr(t, source, g.ArityMismatchError("1", 2))
-
-	source = "let a = set{}; a.add([1,2]);"
-	failErr(t, source, g.TypeMismatchError("Expected Hashable Type"))
-
-	source = "let a = set{}; a.contains([1,2]);"
-	failErr(t, source, g.TypeMismatchError("Expected Hashable Type"))
-
-	source = `
-let a = set{};
-assert(a.isEmpty());
-a.add(1);
-assert(!a.isEmpty());
-a.clear();
-assert(a.isEmpty());
-`
-	mod = newCompiler(source).Compile()
-	interpret(mod)
-
-	source = `
-let a = set{};
-assert(!a.contains('x'));
-a = set {'z', 'x'};
-assert(a.contains('x'));
-`
-	mod = newCompiler(source).Compile()
-	interpret(mod)
-
-	source = `
-let s = set {'a', 'b', 'c'};
-assert(!s.remove('z'));
-assert(s.remove('a'));
-assert(s == set {'c', 'b'});
-assert(s.remove('b'));
-assert(s == set {'c'});
-assert(len(s) == 1);
-assert(s.remove('c'));
-assert(s == set {});
-assert(len(s) == 0);
-`
-	mod = newCompiler(source).Compile()
-	interpret(mod)
-}
-
 func newRange(from int64, to int64, step int64) g.Range {
 	r, err := g.NewRange(from, to, step)
 	if err != nil {
@@ -698,25 +613,6 @@ let a = assert(true);
 		g.AssertionFailedError(),
 		[]string{
 			"    at line 1"})
-}
-
-func TestTuple(t *testing.T) {
-
-	source := `
-let a = (4,5);
-let b = a[0];
-let c = a[1];
-`
-	mod := newCompiler(source).Compile()
-	i := interpret(mod)
-
-	//fmt.Println("----------------------------")
-	//fmt.Println(source)
-	//fmt.Println(mod)
-
-	okRef(t, i, mod.Refs[0], g.NewTuple([]g.Value{g.NewInt(4), g.NewInt(5)}))
-	okRef(t, i, mod.Refs[1], g.NewInt(4))
-	okRef(t, i, mod.Refs[2], g.NewInt(5))
 }
 
 func TestDecl(t *testing.T) {
@@ -1155,40 +1051,6 @@ try {
 	interpret(mod)
 }
 
-func TestGo(t *testing.T) {
-
-	source := `
-fn sum(a, c) {
-	let total = 0;
-	for v in a {
-		total += v;
-	}
-    c.send(total);
-}
-
-let a = [7, 2, 8, -9, 4, 0];
-let n = len(a) / 2;
-let c = chan();
-
-go sum(a[:n], c);
-go sum(a[n:], c);
-let x = c.recv();
-let y = c.recv();
-assert([x, y] == [-5, 17]);
-`
-	mod := newCompiler(source).Compile()
-	interpret(mod)
-
-	source = `
-let ch = chan(2);
-ch.send(1);
-ch.send(2);
-assert([ch.recv(), ch.recv()] == [1, 2]);
-`
-	mod = newCompiler(source).Compile()
-	interpret(mod)
-}
-
 func TestIntrinsicAssign(t *testing.T) {
 	source := `
 try {
@@ -1276,122 +1138,6 @@ assert(
 	interpret(mod)
 }
 
-func TestFields(t *testing.T) {
-
-	source := `
-fn fail(f, kind) {
-    try {
-        f();
-        assert(false);
-    } catch e {
-        assert(e.kind == kind);
-    }
-}
-
-let s = struct {a: 1, b: 2};
-assert(fields(s) == set {'a', 'b'});
-assert(getval(s, 'a') == 1);
-assert(setval(s, 'a', 3) == 3);
-
-fail(|| => fields(0), 'TypeMismatch');
-fail(|| => fields(0, 1), 'ArityMismatch');
-
-fail(|| => getval(0, 1), 'TypeMismatch');
-fail(|| => getval(s, 1), 'TypeMismatch');
-fail(|| => getval(0), 'ArityMismatch');
-
-fail(|| => setval(0, 1, 2), 'TypeMismatch');
-fail(|| => setval(s, 1, 2), 'TypeMismatch');
-fail(|| => setval(0), 'ArityMismatch');
-fail(|| => setval(0, 1), 'ArityMismatch');
-`
-	mod := newCompiler(source).Compile()
-	interpret(mod)
-}
-
-func TestArity(t *testing.T) {
-
-	source := `
-fn fail(f, kind) {
-    try {
-        f();
-        assert(false);
-    } catch e {
-        assert(e.kind == kind);
-    }
-}
-assert(arity(type) == struct { min: 1, max: 1 });
-assert(arity(print) == struct { min: 0, max: -1 });
-assert(arity(|x,y| => x + y) == struct { min: 2, max: 2 });
-
-fail(|| => arity(0), 'TypeMismatch');
-`
-	mod := newCompiler(source).Compile()
-	interpret(mod)
-}
-
-func TestRange(t *testing.T) {
-
-	source := `
-fn listify(r) {
-    let ls = [];
-    for n in r {
-        ls.add(n);
-    }
-    return ls;
-}
-let a = range(0, 5);
-let b = range(0, 5, 2);
-let c = range(2, 14, 3);
-let d = range(-1, -8, -3);
-let e = range(2, 2);
-let f = range(-1, -1, -1);
-assert(listify(a) == [ 0, 1, 2, 3, 4 ]);
-assert(listify(b) == [ 0, 2, 4 ]);
-assert(listify(c) == [ 2, 5, 8, 11 ]);
-assert(listify(d) == [ -1, -4, -7 ]);
-assert(listify(e) == []);
-assert(listify(f) == []);
-assert([a.from(), a.to(), a.step(), a.count()] == [0, 5, 1, 5]);
-assert([b.from(), b.to(), b.step(), b.count()] == [0, 5, 2, 3]);
-assert([c.from(), c.to(), c.step(), c.count()] == [2, 14, 3, 4]);
-assert([d.from(), d.to(), d.step(), d.count()] == [-1, -8, -3, 3]);
-assert([e.from(), e.to(), e.step(), e.count()] == [2, 2, 1, 0]);
-
-let i = 0;
-while i < a.count() {
-    assert(a[i] == i);
-    i++;
-} 
-`
-	mod := newCompiler(source).Compile()
-	interpret(mod)
-
-	//fmt.Println("----------------------------")
-	//fmt.Println(source)
-	//fmt.Println(mod)
-}
-
-func TestSlice(t *testing.T) {
-
-	source := `
-let ls = [3,4,5];
-assert(ls[0:1] == [3]);
-assert(ls[1:3] == [4,5]);
-assert(ls[-2:-1] == [4]);
-assert(ls[-5:-4] == []);
-assert(ls[3:4] == []);
-let s = '345';
-assert(s[0:1] == '3');
-assert(s[1:3] == '45');
-assert(s[-2:-1] == '4');
-assert(s[-5:-4] == '');
-assert(s[3:4] == '');
-`
-	mod := newCompiler(source).Compile()
-	interpret(mod)
-}
-
 func TestMultilineString(t *testing.T) {
 
 	source :=
@@ -1403,18 +1149,6 @@ func TestMultilineString(t *testing.T) {
 			"\tassert(s[1:3] == 'ab')\n" +
 			"\tassert(s[4:6] == 'cd')\n" +
 			"\tassert(s[7:-1] == 'efgh')"
-
-	mod := newCompiler(source).Compile()
-	interpret(mod)
-}
-
-func TestUnicodeEscape(t *testing.T) {
-	source := `
-let s = '\u{1f496}\u{2665}\u{24}'
-assert(s[0] == '💖')
-assert(s[1] == '♥')
-assert(s[2] == '$')
-`
 
 	mod := newCompiler(source).Compile()
 	interpret(mod)

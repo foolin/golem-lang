@@ -14,7 +14,7 @@ fn testWalk() {
     let list = []
 
     path.filepath.walk('./bench_test/data', fn(name, info) {
-        // TODO
+        // TODO fix problem with captures
         //println(path.filepath.ext(name))
         list.add((name, info.isDir))
     })

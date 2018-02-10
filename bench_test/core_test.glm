@@ -16,6 +16,13 @@ fn failMsg(func, kind, msg) {
         func()
         assert(false)
     } catch e {
+        if (kind != e.kind) {
+            println("kind: ", e.kind)
+        }
+        if (msg != e.msg) {
+            println("msg: ", e.msg)
+        }
+
         assert(kind == e.kind)
         assert(msg == e.msg)
     }
@@ -112,12 +119,12 @@ fn testCapture() {
 
 fn testNamedFunc() {
     fn a() {
-        return b();
+        return b()
     }
     fn b() {
-        return 42;
+        return 42
     }
-    assert(a() == 42);
+    assert(a() == 42)
 }
 
 fn testLambda() {
@@ -146,20 +153,20 @@ fn testStr() {
     assert('aaa'.replace('a', 'z', -1) == 'zzz')
     assert('a,b,c'.split(',') == ['a','b','c'])
 
-	fail(|| => 'abc'.contains(), 'ArityMismatch')
+	failMsg(|| => 'abc'.contains(), 'ArityMismatch', 'Expected 1 params, got 0')
 	failMsg(|| => 'abc'.contains(1), 'TypeMismatch', 'Expected Str')
 
-	fail(|| => 'abc'.index(), 'ArityMismatch')
+	failMsg(|| => 'abc'.index(), 'ArityMismatch', 'Expected 1 params, got 0')
 	failMsg(|| => 'abc'.index(1), 'TypeMismatch', 'Expected Str')
 
-	fail(|| => 'abc'.startsWith(), 'ArityMismatch')
+	failMsg(|| => 'abc'.startsWith(), 'ArityMismatch', 'Expected 1 params, got 0')
 	failMsg(|| => 'abc'.startsWith(1), 'TypeMismatch', 'Expected Str')
 
-	fail(|| => 'abc'.endsWith(), 'ArityMismatch')
+	failMsg(|| => 'abc'.endsWith(), 'ArityMismatch', 'Expected 1 params, got 0')
 	failMsg(|| => 'abc'.endsWith(1), 'TypeMismatch', 'Expected Str')
 
-	fail(|| => 'abc'.replace(), 'ArityMismatch')
-	fail(|| => 'abc'.replace(1,2,3,4), 'ArityMismatch')
+	failMsg(|| => 'abc'.replace(), 'ArityMismatch', 'Expected at least 2 params, got 0')
+	failMsg(|| => 'abc'.replace(1,2,3,4), 'ArityMismatch', 'Expected at most 3 params, got 4')
 	failMsg(|| => 'abc'.replace(0, 'a'), 'TypeMismatch', 'Expected Str')
 	failMsg(|| => 'abc'.replace('a', 0), 'TypeMismatch', 'Expected Str')
 	failMsg(|| => 'abc'.replace('a', 'b', 'c'), 'TypeMismatch', 'Expected Int')
@@ -242,7 +249,7 @@ fn testList() {
         },
         fn () {
             let a = []
-            assert(!a.contains('x'));
+            assert(!a.contains('x'))
             assert(a.indexOf('x') == -1)
             a = ['z', 'x']
             assert(a.contains('x'))
@@ -300,130 +307,130 @@ fn testFreeze() {
 	fail(|| => freeze(null), 'NullValue')
 	fail(|| => frozen(null), 'NullValue')
 
-    assert(frozen(true));
-    assert(frozen('a'));
-    assert(frozen(1));
-    assert(frozen(1.0));
-    assert(frozen(range(1,2)));
-    assert(frozen(chan()));
-    assert(frozen(fn(){}));
-    assert(frozen((1,2)));
+    assert(frozen(true))
+    assert(frozen('a'))
+    assert(frozen(1))
+    assert(frozen(1.0))
+    assert(frozen(range(1,2)))
+    assert(frozen(chan()))
+    assert(frozen(fn(){}))
+    assert(frozen((1,2)))
 
-    freeze(true);
-    freeze('a');
-    freeze(1);
-    freeze(1.0);
-    freeze(range(1,2));
-    freeze(chan());
-    freeze(fn(){});
-    freeze((1,2));
+    freeze(true)
+    freeze('a')
+    freeze(1)
+    freeze(1.0)
+    freeze(range(1,2))
+    freeze(chan())
+    freeze(fn(){})
+    freeze((1,2))
 
-    let ls = [1,2,3];
-    assert(!frozen(ls));
+    let ls = [1,2,3]
+    assert(!frozen(ls))
 
-    ls.clear();
-    ls.add('a');
-    ls.addAll(['b', 'c']);
-    ls.remove(1);
-    ls[1] = 'z';
+    ls.clear()
+    ls.add('a')
+    ls.addAll(['b', 'c'])
+    ls.remove(1)
+    ls[1] = 'z'
 
+    assert(ls == ['a', 'z'])
+
+    freeze(ls)
+    assert(frozen(ls))
     assert(ls == ['a', 'z']);
 
-    freeze(ls);
-    assert(frozen(ls));
-    assert(ls == ['a', 'z']);
+    fail(|| => ls.clear(), 'ImmutableValue')
+    fail(|| => ls.add('a'), 'ImmutableValue')
+    fail(|| => ls.addAll(['b', 'c']), 'ImmutableValue')
+    fail(|| => ls.remove(1), 'ImmutableValue')
+    fail(|| => ls[1] = 'z', 'ImmutableValue')
 
-    fail(|| => ls.clear(), 'ImmutableValue');
-    fail(|| => ls.add('a'), 'ImmutableValue');
-    fail(|| => ls.addAll(['b', 'c']), 'ImmutableValue');
-    fail(|| => ls.remove(1), 'ImmutableValue');
-    fail(|| => ls[1] = 'z', 'ImmutableValue');
+    let d = dict {'x': 1, 'y': 2}
+    assert(!frozen(d))
 
-    let d = dict {'x': 1, 'y': 2};
-    assert(!frozen(d));
+    d.clear()
+    d.addAll([('a', 1), ('b', 2), ('c', 3)])
+    d.remove('c')
+    d['a'] = 0
+    assert(d == dict {'a': 0, 'b': 2})
 
-    d.clear();
-    d.addAll([('a', 1), ('b', 2), ('c', 3)]);
-    d.remove('c');
-    d['a'] = 0;
-    assert(d == dict {'a': 0, 'b': 2});
+    freeze(d)
+    assert(frozen(d))
+    assert(d == dict {'a': 0, 'b': 2})
 
-    freeze(d);
-    assert(frozen(d));
-    assert(d == dict {'a': 0, 'b': 2});
+    fail(|| => d.clear(), 'ImmutableValue')
+    fail(|| => d.addAll([('a', 1), ('b', 2), ('c', 3)]), 'ImmutableValue')
+    fail(|| => d.remove('c'), 'ImmutableValue')
+    fail(|| => d['a'] = 0, 'ImmutableValue')
 
-    fail(|| => d.clear(), 'ImmutableValue');
-    fail(|| => d.addAll([('a', 1), ('b', 2), ('c', 3)]), 'ImmutableValue');
-    fail(|| => d.remove('c'), 'ImmutableValue');
-    fail(|| => d['a'] = 0, 'ImmutableValue');
+    let s = set {'x', 'y'}
+    assert(!frozen(s))
 
-    let s = set {'x', 'y'};
-    assert(!frozen(s));
+    s.clear()
+    s.addAll('a')
+    s.addAll(['a', 'b', 'c'])
+    s.remove('c')
+    assert(s == set {'a', 'b'})
 
-    s.clear();
-    s.addAll('a');
-    s.addAll(['a', 'b', 'c']);
-    s.remove('c');
-    assert(s == set {'a', 'b'});
+    freeze(s)
+    assert(frozen(s))
+    assert(s == set {'a', 'b'})
 
-    freeze(s);
-    assert(frozen(s));
-    assert(s == set {'a', 'b'});
+    fail(|| => s.clear(), 'ImmutableValue')
+    fail(|| => s.addAll('a'), 'ImmutableValue')
+    fail(|| => s.addAll(['a', 'b', 'c']), 'ImmutableValue')
+    fail(|| => s.remove('c'), 'ImmutableValue')
 
-    fail(|| => s.clear(), 'ImmutableValue');
-    fail(|| => s.addAll('a'), 'ImmutableValue');
-    fail(|| => s.addAll(['a', 'b', 'c']), 'ImmutableValue');
-    fail(|| => s.remove('c'), 'ImmutableValue');
+    let st = struct {x: 1, y: 2}
+    st.y = 3
 
-    let st = struct {x: 1, y: 2};
-    st.y = 3;
+    freeze(st)
+    assert(frozen(st))
+    assert(st == struct {x: 1, y: 3})
 
-    freeze(st);
-    assert(frozen(st));
-    assert(st == struct {x: 1, y: 3});
+    fail(|| => st.y = 3, 'ImmutableValue')
 
-    fail(|| => st.y = 3, 'ImmutableValue');
-
-    assert(!frozen(merge(struct {}, struct{})));
-    assert(frozen(merge(st, struct{})));
-    assert(frozen(merge(struct {}, st)));
+    assert(!frozen(merge(struct {}, struct{})))
+    assert(frozen(merge(st, struct{})))
+    assert(frozen(merge(struct {}, st)))
 }
 
 fn testDict() {
 
     let funcs = [
-        //fn () {
-        //    let d = dict {'x': 1, 'y': 2};
-        //    d['x'] = 0;
-        //    assert(d == dict {'y': 2, 'x': 0});
-        //},
-        //fn () {
-        //    let a = dict { 'x': 1, 'y': 2 };
-        //    let b = a['x'];
-        //    let c = a['z'];
-        //    a['x'] = -1;
-        //    let d = a['x'];
-        //    assert([1, null, -1] == [b, c, d])
-        //},
-        //fn () {
-        //    let a = dict {};
-        //    a.addAll([(1,2)]).addAll([(3,4)]);
-        //    assert(a == dict {1:2,3:4});
-        //    let b = dict {};
-        //    assert(a.addAll == a.addAll);
-        //    assert(b.addAll == b.addAll);
-        //    assert(a.addAll != b.addAll);
-        //    assert(b.addAll != a.addAll);
-        //    assert(a.clear != a.addAll);
-        //},
+        fn () {
+            let d = dict {'x': 1, 'y': 2};
+            d['x'] = 0;
+            assert(d == dict {'y': 2, 'x': 0});
+        },
+        fn () {
+            let a = dict { 'x': 1, 'y': 2 };
+            let b = a['x'];
+            let c = a['z'];
+            a['x'] = -1;
+            let d = a['x'];
+            assert([1, null, -1] == [b, c, d])
+        },
+        fn () {
+            let a = dict {};
+            a.addAll([(1,2)]).addAll([(3,4)]);
+            assert(a == dict {1:2,3:4});
+            let b = dict {};
+            assert(a.addAll == a.addAll);
+            assert(b.addAll == b.addAll);
+            assert(a.addAll != b.addAll);
+            assert(b.addAll != a.addAll);
+            assert(a.clear != a.addAll);
+        },
         fn () {
             let a = dict{}
             failMsg(|| => a.addAll(false), "TypeMismatch", "Expected Iterable Type")
-        //    failMsg(|| => a.addAll([false]), "TypeMismatch", "Expected Tuple")
-        //    failMsg(|| => a.addAll([(1,2,3)]), "TupleLength", "Expected Tuple of length 2, got 3")
-        //    failMsg(|| => a[[1,2]], "TypeMismatch", "Expected Hashable Type")
-        //    failMsg(|| => a[[1,2]] = 3, "TypeMismatch", "Expected Hashable Type")
-        //    failMsg(|| => a.containsKey([1,2]), "TypeMismatch", "Expected Hashable Type")
+            failMsg(|| => a.addAll([false]), "TypeMismatch", "Expected Tuple")
+            failMsg(|| => a.addAll([(1,2,3)]), "TupleLength", "Expected Tuple of length 2, got 3")
+            failMsg(|| => a[[1,2]], "TypeMismatch", "Expected Hashable Type")
+            failMsg(|| => a[[1,2]] = 3, "TypeMismatch", "Expected Hashable Type")
+            failMsg(|| => a.containsKey([1,2]), "TypeMismatch", "Expected Hashable Type")
         },
         fn () {
             let a = dict {};
@@ -456,6 +463,7 @@ fn testDict() {
             assert(d == dict {});
             assert(len(d) == 0);
         }//,
+        // TODO
         //fn () {
         //    fail(|| => dict {null: 'b'}, "NullValue")
         //    failMsg(|| => dict {[]: 'b'}, "TypeMismatch", "Expected Hashable Type")
@@ -464,14 +472,223 @@ fn testDict() {
     for f in funcs { f(); }
 }
 
+fn testSet() {
+
+    let funcs = [
+        fn () {
+            let a = set {};
+            a.add(1);
+            assert(a == set {1});
+            a.add(2).add(3).add(2);
+            assert(a == set {1,2,3});
+            assert(set {3,1,2} == set {1,2,3});
+            assert(set {1,2} != set {1,2,3});
+            let b = set { 4 };
+            b.add(4);
+            assert(b == set { 4 });
+            assert(a.add == a.add);
+            assert(b.add == b.add);
+            assert(a.add != b.add);
+            assert(b.add != a.add);
+        },
+        fn () {
+            let a = set {};
+            a.addAll([1,2]).addAll('bc');
+            assert(a == set {1,2,'b','c'});
+            let b = set {};
+            b.addAll(range(0,3));
+            assert(b == set { 0, 1, 2 });
+            assert(a.addAll == a.addAll);
+            assert(b.addAll == b.addAll);
+            assert(a.addAll != b.addAll);
+            assert(b.addAll != a.addAll);
+            assert(a.add != a.addAll);
+        },
+        // TODO
+        //fn () {
+        //    failMsg(fn() { let a = set{}; a.addAll(false); },   "TypeMismatch", "Expected Iterable Type")
+        //    failMsg(fn() { let a = set{}; a.add(3,4); },        "ArityMismatchError", "FIX")
+        //    failMsg(fn() { let a = set{}; a.add([1,2]); },      "TypeMismatch", "Expected Hashable Type")
+        //    failMsg(fn() { let a = set{}; a.contains([1,2]); }, "TypeMismatch", "Expected Hashable Type")
+        //},
+        fn () {
+            let a = set{};
+            assert(a.isEmpty());
+            a.add(1);
+            assert(!a.isEmpty());
+            a.clear();
+            assert(a.isEmpty());
+        },
+        fn () {
+            let a = set{};
+            assert(!a.contains('x'));
+            a = set {'z', 'x'};
+        },
+        fn () {
+            let s = set {'a', 'b', 'c'};
+            assert(!s.remove('z'));
+            assert(s.remove('a'));
+            assert(s == set {'c', 'b'});
+            assert(s.remove('b'));
+            assert(s == set {'c'});
+            assert(len(s) == 1);
+            assert(s.remove('c'));
+            assert(s == set {});
+            assert(len(s) == 0);
+        }
+    ]
+    for f in funcs { f(); }
+}
+
+fn testTuple() {
+
+    let a = (4,5)
+    let b = a[0]
+    let c = a[1]
+    assert(b == 4)
+    assert(c == 5)
+    assert(len(a) == 2)
+
+    failMsg(|| => a[2], "IndexOutOfBounds", "2")
+}
+
+fn testTypes() {
+    let values = [
+        true, "", 0, 0.0, fn(){}, 
+        [], range(0,1), (0,1), dict{}, set{}, 
+        struct{}, chan()]
+
+    assert(
+        [ "Bool", "Str", "Int", "Float", "Func", "List", "Range", 
+          "Tuple", "Dict", "Set", "Struct", "Chan"] == 
+        values.map(type))
+}
+
+fn testGo() {
+    fn sum(a, c) {
+        let total = 0
+        for v in a {
+            total += v
+        }
+        c.send(total)
+    }
+
+    let a = [7, 2, 8, -9, 4, 0]
+    let n = len(a) / 2
+    let c = chan()
+
+    go sum(a[:n], c)
+    go sum(a[n:], c)
+    let x = c.recv()
+    let y = c.recv()
+    assert([x, y] == [-5, 17])
+
+    let ch = chan(2)
+    ch.send(1)
+    ch.send(2)
+    assert([ch.recv(), ch.recv()] == [1, 2])
+}
+
+fn testFields() {
+
+    let s = struct {a: 1, b: 2}
+    assert(fields(s) == set {'a', 'b'})
+    assert(getval(s, 'a') == 1)
+    assert(setval(s, 'a', 3) == 3)
+
+    failMsg(|| => fields(0),       'TypeMismatch' , "Expected 'Struct'")
+    failMsg(|| => fields(0, 1),    'ArityMismatch', 'Expected 1 params, got 2')
+    failMsg(|| => getval(0, 1),    'TypeMismatch' , "Expected 'Struct'")
+    failMsg(|| => getval(s, 1),    'TypeMismatch' , "Expected 'Str'")
+    failMsg(|| => getval(0),       'ArityMismatch', 'Expected 2 params, got 1')
+    failMsg(|| => setval(0, 1, 2), 'TypeMismatch' , "Expected 'Struct'")
+    failMsg(|| => setval(s, 1, 2), 'TypeMismatch' , "Expected 'Str'")
+    failMsg(|| => setval(0),       'ArityMismatch', 'Expected 3 params, got 1')
+    failMsg(|| => setval(0, 1),    'ArityMismatch', 'Expected 3 params, got 2')
+}
+
+fn testArity() {
+
+    assert(arity(type) == struct { min: 1, max: 1 });
+    assert(arity(print) == struct { min: 0, max: -1 })
+    assert(arity(|x,y| => x + y) == struct { min: 2, max: 2 })
+
+    failMsg(|| => arity(0), 'TypeMismatch', "Expected 'Func'")
+}
+
+fn testRange() {
+
+    fn listify(r) {
+        let ls = []
+        for n in r {
+            ls.add(n)
+        }
+        return ls
+    }
+    let a = range(0, 5)
+    let b = range(0, 5, 2)
+    let c = range(2, 14, 3)
+    let d = range(-1, -8, -3)
+    let e = range(2, 2)
+    let f = range(-1, -1, -1)
+    assert(listify(a) == [ 0, 1, 2, 3, 4 ])
+    assert(listify(b) == [ 0, 2, 4 ])
+    assert(listify(c) == [ 2, 5, 8, 11 ])
+    assert(listify(d) == [ -1, -4, -7 ])
+    assert(listify(e) == [])
+    assert(listify(f) == [])
+    assert([a.from(), a.to(), a.step(), a.count()] == [0, 5, 1, 5])
+    assert([b.from(), b.to(), b.step(), b.count()] == [0, 5, 2, 3])
+    assert([c.from(), c.to(), c.step(), c.count()] == [2, 14, 3, 4])
+    assert([d.from(), d.to(), d.step(), d.count()] == [-1, -8, -3, 3])
+    assert([e.from(), e.to(), e.step(), e.count()] == [2, 2, 1, 0])
+
+    let i = 0
+    while i < a.count() {
+        assert(a[i] == i)
+        i++
+    } 
+}
+
+fn testSlice() {
+    let ls = [3,4,5];
+    assert(ls[0:1] == [3]);
+    assert(ls[1:3] == [4,5]);
+    assert(ls[-2:-1] == [4]);
+    assert(ls[-5:-4] == []);
+    assert(ls[3:4] == []);
+    let s = '345';
+    assert(s[0:1] == '3');
+    assert(s[1:3] == '45');
+    assert(s[-2:-1] == '4');
+    assert(s[-5:-4] == '');
+    assert(s[3:4] == '');
+}
+
+fn testUnicodeEscape() {
+    let s = '\u{1f496}\u{2665}\u{24}'
+    assert(s[0] == '💖')
+    assert(s[1] == '♥')
+    assert(s[2] == '$')
+}
+
 fn main(args) {
-    //testFunc()
-    //testCapture()
-    //testNamedFunc()
-    //testLambda()
-    //testStr()
-    //testMerge()
-    //testList()
-    //testFreeze()
+    testFunc()
+    testCapture()
+    testNamedFunc()
+    testLambda()
+    testStr()
+    testMerge()
+    testList()
+    testFreeze()
     testDict()
+    testSet()
+    testTuple()
+    testTypes()
+    testGo()
+    testFields()
+    testArity()
+    testRange()
+    testSlice()
+    testUnicodeEscape()
 }
