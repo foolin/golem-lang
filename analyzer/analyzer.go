@@ -5,7 +5,6 @@
 package analyzer
 
 import (
-	"errors"
 	"fmt"
 	"github.com/mjarmy/golem-lang/analyzer/scope"
 	"github.com/mjarmy/golem-lang/ast"
@@ -108,12 +107,14 @@ func (a *analyzer) Visit(node ast.Node) {
 
 	case *ast.BreakStmt:
 		if len(a.loops) == 0 {
-			a.errors = append(a.errors, errors.New("'break' outside of loop"))
+			a.errors = append(a.errors,
+				fmt.Errorf("'break' outside of loop, at %v", t.Token.Position))
 		}
 
 	case *ast.ContinueStmt:
 		if len(a.loops) == 0 {
-			a.errors = append(a.errors, errors.New("'continue' outside of loop"))
+			a.errors = append(a.errors,
+				fmt.Errorf("'continue' outside of loop, at %v", t.Token.Position))
 		}
 
 	case *ast.StructExpr:
@@ -355,7 +356,8 @@ func (a *analyzer) visitThisExpr(this *ast.ThisExpr) {
 
 	n := len(a.structs)
 	if n == 0 {
-		a.errors = append(a.errors, errors.New("'this' outside of loop"))
+		a.errors = append(a.errors,
+			fmt.Errorf("'this' outside of struct, at %v", this.Token.Position))
 	} else {
 		this.Variable = a.curScope.This()
 	}

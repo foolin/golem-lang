@@ -181,10 +181,10 @@ FnExpr(numLocals:0 numCaptures:0 parentCaptures:[])
 `)
 
 	errors = newAnalyzer("break;").Analyze()
-	fail(t, errors, "['break' outside of loop]")
+	fail(t, errors, "['break' outside of loop, at (1, 1)]")
 
 	errors = newAnalyzer("continue;").Analyze()
-	fail(t, errors, "['continue' outside of loop]")
+	fail(t, errors, "['continue' outside of loop, at (1, 1)]")
 
 	anl = newAnalyzer("let a; for b in [] { break; continue; }")
 	errors = anl.Analyze()
@@ -439,7 +439,7 @@ FnExpr(numLocals:3 numCaptures:0 parentCaptures:[])
 func TestStruct(t *testing.T) {
 
 	errors := newAnalyzer("this").Analyze()
-	fail(t, errors, "['this' outside of loop]")
+	fail(t, errors, "['this' outside of struct, at (1, 1)]")
 
 	source := `
 struct{ }
