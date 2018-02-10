@@ -8,7 +8,7 @@ fn searchFile(name, rgx) {
     let n = 1
     for line in os.open(name).readLines() {
         if rgx.matchString(line) {
-            println([name, n, line])
+            println([name, n, line].join(':'))
         }
         n++
     }
@@ -16,29 +16,33 @@ fn searchFile(name, rgx) {
 
 fn main(args) {
 
-    let n = len(args)
-    if n < 2 || n > 3 {
+    let numArgs = len(args)
+    if numArgs < 2 || numArgs > 3 {
         println('usage:')
-        println('  extgrep.glm <dir> <string> <exts>\n\u{123}')
+        println('  extgrep.glm <dir> <string> <exts>')
         println(' ')
         println('example:')
-        println('  extgrep.glm . foo go,js,html,css')
+        println('  extgrep.glm . Foo go,js,html,css')
         os.exit(1)
     }
 
     let dir = args[0]
     let rgx = regexp.compile(args[1])
-    let exts = (n == 3) ? 
+    let exts = (numArgs == 3) ? 
         args[2].split(',') : 
         ['go']
 
     path.filepath.walk(dir, fn(name, info) {
         if !info.isDir {
-            println(name)
+
+            // TODO
             //let ext = path.filepath.ext(name)
-            //if len(ext) > 0 && exts.contains(ext[1:]) {
-            //    searchFile(name, rgx)
-            //}
+            let n = name.lastIndex('.')
+            let ext = n == -1 ? '' : name[n:]
+
+            if len(ext) > 0 && exts.contains(ext[1:]) {
+                searchFile(name, rgx)
+            }
         }
     })
 
