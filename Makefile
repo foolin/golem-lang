@@ -28,16 +28,16 @@ bench_test: compile
 build: clean fmt lint vet test compile bench_test
 	go build golem.go
 
-release: build
-	rm -rf ./release
-	mkdir -p ./release/linux
-	mkdir -p ./release/mac
-	mkdir -p ./release/windows
-
-	GOOS=linux   GOARCH=amd64 go build -o ./release/linux/golem       golem.go
-	GOOS=darwin  GOARCH=amd64 go build -o ./release/mac/golem         golem.go
-	GOOS=windows GOARCH=amd64 go build -o ./release/windows/golem.exe golem.go
-
-# To tag a release:
+# Tagging a release:
 #     git tag -a v0.8.0 -m "version 0.8.0"
 #     git push origin v0.8.0
+release: build
+	rm -rf ./release
+	mkdir -p ./release/golem/linux
+	mkdir -p ./release/golem/mac
+	mkdir -p ./release/golem/windows
+	GOOS=linux   GOARCH=amd64 go build -o ./release/golem/linux/golem       golem.go
+	GOOS=darwin  GOARCH=amd64 go build -o ./release/golem/mac/golem         golem.go
+	GOOS=windows GOARCH=amd64 go build -o ./release/golem/windows/golem.exe golem.go
+	cd release && zip -r ./golem.zip golem
+	cd release && tar czf ./golem.tar.gz golem
