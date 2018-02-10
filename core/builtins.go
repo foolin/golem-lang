@@ -137,19 +137,19 @@ var BuiltinRange = &nativeFunc{
 	func(cx Context, values []Value) (Value, Error) {
 		from, ok := values[0].(Int)
 		if !ok {
-			return nil, TypeMismatchError("Expected 'Int'")
+			return nil, TypeMismatchError("Expected Int")
 		}
 
 		to, ok := values[1].(Int)
 		if !ok {
-			return nil, TypeMismatchError("Expected 'Int'")
+			return nil, TypeMismatchError("Expected Int")
 		}
 
 		step := One
 		if len(values) == 3 {
 			step, ok = values[2].(Int)
 			if !ok {
-				return nil, TypeMismatchError("Expected 'Int'")
+				return nil, TypeMismatchError("Expected Int")
 			}
 		}
 
@@ -162,7 +162,7 @@ var BuiltinAssert = &nativeFunc{
 	func(cx Context, values []Value) (Value, Error) {
 		b, ok := values[0].(Bool)
 		if !ok {
-			return nil, TypeMismatchError("Expected 'Bool'")
+			return nil, TypeMismatchError("Expected Bool")
 		}
 
 		if b.BoolVal() {
@@ -180,7 +180,7 @@ var BuiltinMerge = &nativeFunc{
 			if s, ok := v.(Struct); ok {
 				structs[i] = s
 			} else {
-				return nil, TypeMismatchError("Expected 'Struct'")
+				return nil, TypeMismatchError("Expected Struct")
 			}
 		}
 
@@ -198,7 +198,7 @@ var BuiltinChan = &nativeFunc{
 		case 1:
 			size, ok := values[0].(Int)
 			if !ok {
-				return nil, TypeMismatchError("Expected 'Int'")
+				return nil, TypeMismatchError("Expected Int")
 			}
 			return NewBufferedChan(int(size.IntVal())), nil
 
@@ -240,7 +240,7 @@ var BuiltinFields = &nativeFunc{
 	func(cx Context, values []Value) (Value, Error) {
 		st, ok := values[0].(*_struct)
 		if !ok {
-			return nil, TypeMismatchError("Expected 'Struct'")
+			return nil, TypeMismatchError("Expected Struct")
 		}
 
 		fields := st.smap.fieldNames()
@@ -257,11 +257,11 @@ var BuiltinGetVal = &nativeFunc{
 	func(cx Context, values []Value) (Value, Error) {
 		st, ok := values[0].(*_struct)
 		if !ok {
-			return nil, TypeMismatchError("Expected 'Struct'")
+			return nil, TypeMismatchError("Expected Struct")
 		}
 		field, ok := values[1].(Str)
 		if !ok {
-			return nil, TypeMismatchError("Expected 'Str'")
+			return nil, TypeMismatchError("Expected Str")
 		}
 
 		return st.GetField(cx, field)
@@ -273,11 +273,11 @@ var BuiltinSetVal = &nativeFunc{
 	func(cx Context, values []Value) (Value, Error) {
 		st, ok := values[0].(*_struct)
 		if !ok {
-			return nil, TypeMismatchError("Expected 'Struct'")
+			return nil, TypeMismatchError("Expected Struct")
 		}
 		field, ok := values[1].(Str)
 		if !ok {
-			return nil, TypeMismatchError("Expected 'Str'")
+			return nil, TypeMismatchError("Expected Str")
 		}
 		val := values[2]
 
@@ -294,7 +294,7 @@ var BuiltinArity = &nativeFunc{
 	func(cx Context, values []Value) (Value, Error) {
 		f, ok := values[0].(Func)
 		if !ok {
-			return nil, TypeMismatchError("Expected 'Func'")
+			return nil, TypeMismatchError("Expected Func")
 		}
 
 		st, err := NewStruct([]Field{

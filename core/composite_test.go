@@ -96,7 +96,7 @@ func TestStruct(t *testing.T) {
 	ok(t, val, err, False)
 
 	val, err = stc.Has(Zero)
-	fail(t, val, err, "TypeMismatch: Expected 'Str'")
+	fail(t, val, err, "TypeMismatch: Expected Str")
 
 	stc, err = NewStruct([]Field{NewField("a", true, NullValue)}, false)
 	if err != nil {

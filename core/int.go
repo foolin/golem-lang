@@ -188,7 +188,7 @@ func (i _int) Rem(v Value) (Int, Error) {
 	case _int:
 		return i % t, nil
 	default:
-		return nil, TypeMismatchError("Expected 'Int'")
+		return nil, TypeMismatchError("Expected Int")
 	}
 }
 
@@ -197,7 +197,7 @@ func (i _int) BitAnd(v Value) (Int, Error) {
 	case _int:
 		return i & t, nil
 	default:
-		return nil, TypeMismatchError("Expected 'Int'")
+		return nil, TypeMismatchError("Expected Int")
 	}
 }
 
@@ -206,7 +206,7 @@ func (i _int) BitOr(v Value) (Int, Error) {
 	case _int:
 		return i | t, nil
 	default:
-		return nil, TypeMismatchError("Expected 'Int'")
+		return nil, TypeMismatchError("Expected Int")
 	}
 }
 
@@ -215,7 +215,7 @@ func (i _int) BitXOr(v Value) (Int, Error) {
 	case _int:
 		return i ^ t, nil
 	default:
-		return nil, TypeMismatchError("Expected 'Int'")
+		return nil, TypeMismatchError("Expected Int")
 	}
 }
 
@@ -227,7 +227,7 @@ func (i _int) LeftShift(v Value) (Int, Error) {
 		}
 		return i << uint(t), nil
 	default:
-		return nil, TypeMismatchError("Expected 'Int'")
+		return nil, TypeMismatchError("Expected Int")
 	}
 }
 
@@ -239,7 +239,7 @@ func (i _int) RightShift(v Value) (Int, Error) {
 		}
 		return i >> uint(t), nil
 	default:
-		return nil, TypeMismatchError("Expected 'Int'")
+		return nil, TypeMismatchError("Expected Int")
 	}
 }
 

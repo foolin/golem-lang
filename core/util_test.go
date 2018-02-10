@@ -58,7 +58,7 @@ func TestIndex(t *testing.T) {
 	iok(t, n, err, 0)
 
 	_, err = posIndex(NewStr(""), 3)
-	ifail(t, err, "TypeMismatch: Expected 'Int'")
+	ifail(t, err, "TypeMismatch: Expected Int")
 
 	//--------------------------------------
 
@@ -72,7 +72,7 @@ func TestIndex(t *testing.T) {
 	iok(t, n, err, 0)
 
 	_, err = boundedIndex(NewStr(""), 3)
-	ifail(t, err, "TypeMismatch: Expected 'Int'")
+	ifail(t, err, "TypeMismatch: Expected Int")
 
 	_, err = boundedIndex(NewInt(-4), 3)
 	ifail(t, err, "IndexOutOfBounds: -1")
@@ -91,8 +91,8 @@ func TestIndex(t *testing.T) {
 	iok(t, b, err, 3)
 
 	_, _, err = sliceIndices(NewStr(""), Zero, 3)
-	ifail(t, err, "TypeMismatch: Expected 'Int'")
+	ifail(t, err, "TypeMismatch: Expected Int")
 
 	_, _, err = sliceIndices(Zero, NewStr(""), 3)
-	ifail(t, err, "TypeMismatch: Expected 'Int'")
+	ifail(t, err, "TypeMismatch: Expected Int")
 }

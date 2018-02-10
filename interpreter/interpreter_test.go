@@ -205,11 +205,11 @@ func TestExpressions(t *testing.T) {
 
 	okExpr(t, "!false;", g.True)
 	okExpr(t, "!true;", g.False)
-	failExpr(t, "!null;", "TypeMismatch: Expected 'Bool'")
+	failExpr(t, "!null;", "TypeMismatch: Expected Bool")
 
-	failExpr(t, "!'a';", "TypeMismatch: Expected 'Bool'")
-	failExpr(t, "!1;", "TypeMismatch: Expected 'Bool'")
-	failExpr(t, "!1.0;", "TypeMismatch: Expected 'Bool'")
+	failExpr(t, "!'a';", "TypeMismatch: Expected Bool")
+	failExpr(t, "!1;", "TypeMismatch: Expected Bool")
+	failExpr(t, "!1.0;", "TypeMismatch: Expected Bool")
 
 	okExpr(t, "1 < 2;", g.True)
 	okExpr(t, "1 <= 2;", g.True)
@@ -229,14 +229,14 @@ func TestExpressions(t *testing.T) {
 	okExpr(t, "true  && false;", g.False)
 	okExpr(t, "false && true;", g.False)
 	okExpr(t, "false && 12;", g.False)
-	failExpr(t, "12  && false;", "TypeMismatch: Expected 'Bool'")
+	failExpr(t, "12  && false;", "TypeMismatch: Expected Bool")
 
 	okExpr(t, "true  || true;", g.True)
 	okExpr(t, "true  || false;", g.True)
 	okExpr(t, "false || true;", g.True)
 	okExpr(t, "false || false;", g.False)
 	okExpr(t, "true  || 12;", g.True)
-	failExpr(t, "12  || true;", "TypeMismatch: Expected 'Bool'")
+	failExpr(t, "12  || true;", "TypeMismatch: Expected Bool")
 
 	okExpr(t, "~0;", g.NewInt(-1))
 
@@ -605,7 +605,7 @@ let a = assert(true);
 			"    at line 1"})
 
 	fail(t, "assert(1);",
-		g.TypeMismatchError("Expected 'Bool'"),
+		g.TypeMismatchError("Expected Bool"),
 		[]string{
 			"    at line 1"})
 
@@ -684,7 +684,7 @@ assert(values == 6);
 
 	source = "for (k, v)  in [1, 2, 3] {}"
 	fail(t, source,
-		g.TypeMismatchError("Expected 'Tuple'"),
+		g.TypeMismatchError("Expected Tuple"),
 		[]string{"    at line 1"})
 
 	source = "for (a, b, c)  in [('a', 1), ('b', 2), ('c', 3)] {}"
@@ -1057,7 +1057,7 @@ try {
     [].join = 456;
 } catch e {
     assert(e.kind == 'TypeMismatch');
-    assert(e.msg == "Expected 'Struct'");
+    assert(e.msg == "Expected Struct");
 }
 `
 	mod := newCompiler(source).Compile()

@@ -176,7 +176,7 @@ fn testMerge() {
 
 	failMsg(|| => merge(), 'ArityMismatch', 'Expected at least 2 params, got 0')
 	failMsg(|| => merge(true), 'ArityMismatch', 'Expected at least 2 params, got 1')
-	failMsg(|| => merge(struct{}, false), 'TypeMismatch', "Expected 'Struct'")
+	failMsg(|| => merge(struct{}, false), 'TypeMismatch', 'Expected Struct')
 
     let a = struct { x: 1, y: 2}
     let b = merge(struct { y: 3, z: 4}, a)
@@ -596,13 +596,13 @@ fn testFields() {
     assert(getval(s, 'a') == 1)
     assert(setval(s, 'a', 3) == 3)
 
-    failMsg(|| => fields(0),       'TypeMismatch' , "Expected 'Struct'")
+    failMsg(|| => fields(0),       'TypeMismatch' , 'Expected Struct')
     failMsg(|| => fields(0, 1),    'ArityMismatch', 'Expected 1 params, got 2')
-    failMsg(|| => getval(0, 1),    'TypeMismatch' , "Expected 'Struct'")
-    failMsg(|| => getval(s, 1),    'TypeMismatch' , "Expected 'Str'")
+    failMsg(|| => getval(0, 1),    'TypeMismatch' , 'Expected Struct')
+    failMsg(|| => getval(s, 1),    'TypeMismatch' , 'Expected Str')
     failMsg(|| => getval(0),       'ArityMismatch', 'Expected 2 params, got 1')
-    failMsg(|| => setval(0, 1, 2), 'TypeMismatch' , "Expected 'Struct'")
-    failMsg(|| => setval(s, 1, 2), 'TypeMismatch' , "Expected 'Str'")
+    failMsg(|| => setval(0, 1, 2), 'TypeMismatch' , 'Expected Struct')
+    failMsg(|| => setval(s, 1, 2), 'TypeMismatch' , 'Expected Str')
     failMsg(|| => setval(0),       'ArityMismatch', 'Expected 3 params, got 1')
     failMsg(|| => setval(0, 1),    'ArityMismatch', 'Expected 3 params, got 2')
 }
@@ -613,7 +613,7 @@ fn testArity() {
     assert(arity(print) == struct { min: 0, max: -1 })
     assert(arity(|x,y| => x + y) == struct { min: 2, max: 2 })
 
-    failMsg(|| => arity(0), 'TypeMismatch', "Expected 'Func'")
+    failMsg(|| => arity(0), 'TypeMismatch', 'Expected Func')
 }
 
 fn testRange() {

@@ -9,7 +9,7 @@ import ()
 func posIndex(val Value, length int) (int, Error) {
 	i, ok := val.(Int)
 	if !ok {
-		return -1, TypeMismatchError("Expected 'Int'")
+		return -1, TypeMismatchError("Expected Int")
 	}
 
 	n := int(i.IntVal())
@@ -49,11 +49,11 @@ func sliceBounds(n int, length int) int {
 func sliceIndices(from Value, to Value, length int) (int, int, Error) {
 	f, err := posIndex(from, length)
 	if err != nil {
-		return 0, 0, TypeMismatchError("Expected 'Int'")
+		return 0, 0, TypeMismatchError("Expected Int")
 	}
 	t, err := posIndex(to, length)
 	if err != nil {
-		return 0, 0, TypeMismatchError("Expected 'Int'")
+		return 0, 0, TypeMismatchError("Expected Int")
 	}
 
 	return sliceBounds(f, length), sliceBounds(t, length), nil

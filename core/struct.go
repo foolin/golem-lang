@@ -159,7 +159,7 @@ func (st *_struct) Has(name Value) (Bool, Error) {
 		_, has := st.smap.get(s.String())
 		return NewBool(has), nil
 	}
-	return nil, TypeMismatchError("Expected 'Str'")
+	return nil, TypeMismatchError("Expected Str")
 }
 
 //---------------------------------------------------------------
