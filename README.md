@@ -9,9 +9,9 @@ the concurrency of Go, the flexibility of Javascript, and the embeddability of L
 You can download the latest release from the 
 [release](https://github.com/mjarmy/golem-lang/releases) directory.
 
-Please read the [Tutorial](https://github.com/mjarmy/golem-lang/blob/master/docs/tutorial.md) 
+Please read the [Tutorial](https://github.com/mjarmy/golem-lang/wiki/Tutorial) 
 to learn about Golem.
 
-Consult the [Language Reference](https://github.com/mjarmy/golem-lang/blob/master/docs/reference.md) 
+Consult the [Language Reference](https://github.com/mjarmy/golem-lang/wiki/Language-Reference) 
 for a thorough description of Golem's features.
 
