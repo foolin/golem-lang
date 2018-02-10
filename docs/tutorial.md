@@ -8,11 +8,9 @@ Golem doesn't have a [REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%8
 follow along with this tutorial by entering Golem source code into a text file ('tutorial.glm', for example), 
 and then running the file from the command line to look at the results.
 
-First, build a golem executable via make:
-
-```
-make
-```
+First, download the golem executable for your operating system from 
+the [release](https://github.com/mjarmy/golem-lang/tree/master/release) directory,
+and put it in the current directory of your command-line shell.
 
 Then, fire up your text editor of choice, and type the following program into 
 a file named 'tutorial.glm':
