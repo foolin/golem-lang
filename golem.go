@@ -17,7 +17,7 @@ import (
 	"os"
 )
 
-var version = "0.8.0"
+var version = "0.8.1"
 
 func exit(msg string) {
 	fmt.Printf("%s\n", msg)
