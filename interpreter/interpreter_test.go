@@ -432,29 +432,28 @@ x.a = 6
 	mod = newCompiler(source).Compile()
 	interpret(mod)
 
-	//fmt.Println("----------------------------")
-	//fmt.Println(source)
-	//fmt.Println(mod)
-
 	okRef(t, i, mod.Refs[0], newStruct([]g.Field{
 		g.NewField("a", false, g.NewInt(6))}))
 	okRef(t, i, mod.Refs[1], g.NewInt(5))
 
 	source = `
-let a = struct {
-    x: 8,
-    y: 5,
-    plus:  fn() { return this.x + this.y; },
-    minus: fn() { return this.x - this.y; }
-}
-let b = a.plus()
-let c = a.minus()
-`
+	let a = struct {
+	    x: 8,
+	    y: 5,
+	    plus:  fn() { return this.x + this.y; },
+	    minus: fn() { return this.x - this.y; }
+	}
+	let b = a.plus()
+	let c = a.minus()
+	`
 	mod = newCompiler(source).Compile()
-	interpret(mod)
+	fmt.Println("----------------------------")
+	fmt.Println(source)
+	fmt.Println(mod)
 
-	okRef(t, i, mod.Refs[2], g.NewInt(13))
-	okRef(t, i, mod.Refs[3], g.NewInt(3))
+	interpret(mod)
+	okRef(t, i, mod.Refs[1], g.NewInt(13))
+	okRef(t, i, mod.Refs[2], g.NewInt(3))
 
 	source = `
 let a = null
@@ -828,7 +827,7 @@ try {
 
 	source = `
 let a = 1
-let b = fn() { 
+let b = fn() {
     try {
         try {
             3 / 0
@@ -857,7 +856,7 @@ try {
 			"    at line 15"})
 
 	source = `
-let b = fn() { 
+let b = fn() {
     try {
     } finally {
         return 1;
@@ -871,7 +870,7 @@ assert(b() == 1);
 
 	source = `
 let a = 1;
-let b = fn() { 
+let b = fn() {
     try {
         try {
         } finally {
@@ -1125,13 +1124,13 @@ func TestTypeOf(t *testing.T) {
 
 	source := `
 assert(
-    [type(true), type(""), type(0), type(0.0)] == 
+    [type(true), type(""), type(0), type(0.0)] ==
     ["Bool", "Str", "Int", "Float"]);
 assert(
-    [type(fn(){}), type([]), type(range(0,1)), type((0,1))] == 
+    [type(fn(){}), type([]), type(range(0,1)), type((0,1))] ==
     ["Func", "List", "Range", "Tuple"]);
 assert(
-    [type(dict{}), type(set{}), type(struct{}), type(chan())] == 
+    [type(dict{}), type(set{}), type(struct{}), type(chan())] ==
     ["Dict", "Set", "Struct", "Chan"]);
 `
 	mod := newCompiler(source).Compile()

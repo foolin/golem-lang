@@ -34,12 +34,7 @@ fn main(args) {
 
     path.filepath.walk(dir, fn(name, info) {
         if !info.isDir {
-
-            // TODO
-            //let ext = path.filepath.ext(name)
-            let n = name.lastIndex('.')
-            let ext = n == -1 ? '' : name[n:]
-
+            let ext = path.filepath.ext(name)
             if len(ext) > 0 && exts.contains(ext[1:]) {
                 searchFile(name, rgx)
             }

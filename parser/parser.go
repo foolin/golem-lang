@@ -61,8 +61,8 @@ func (p *Parser) ParseModule() (fn *ast.FnExpr, err error) {
 	p.expect(ast.EOF)
 
 	params := []*ast.FormalParam{}
-	block := &ast.BlockNode{nil, stmts, nil}
-	return &ast.FnExpr{nil, params, block, 0, 0, nil}, err
+	block := &ast.BlockNode{nil, stmts, nil, ast.NewScope()}
+	return &ast.FnExpr{nil, params, block, ast.NewFuncScope()}, err
 }
 
 func (p *Parser) imports() []ast.Statement {
@@ -314,7 +314,7 @@ func (p *Parser) forStmt() *ast.ForStmt {
 
 	// done
 	p.expectStatementDelimiter()
-	return &ast.ForStmt{token, idents, iblIdent, iterable, body}
+	return &ast.ForStmt{token, idents, iblIdent, iterable, body, ast.NewScope()}
 }
 
 func (p *Parser) tupleIdents() []*ast.IdentExpr {
@@ -492,7 +492,8 @@ func (p *Parser) tryStmt() *ast.TryStmt {
 	return &ast.TryStmt{
 		tryToken, tryBlock,
 		catchToken, catchIdent, catchBlock,
-		finallyToken, finallyBlock}
+		finallyToken, finallyBlock,
+		ast.NewScope()}
 }
 
 func (p *Parser) goStmt() *ast.GoStmt {
@@ -516,7 +517,7 @@ func (p *Parser) block() *ast.BlockNode {
 	lbrace := p.expect(ast.Lbrace)
 	stmts := p.statements(ast.Rbrace)
 	rbrace := p.expect(ast.Rbrace)
-	return &ast.BlockNode{lbrace, stmts, rbrace}
+	return &ast.BlockNode{lbrace, stmts, rbrace, ast.NewScope()}
 }
 
 func (p *Parser) expression() ast.Expression {
@@ -788,7 +789,7 @@ func (p *Parser) fnExpr(token *ast.Token) *ast.FnExpr {
 
 	p.expect(ast.Lparen)
 	if p.accept(ast.Rparen) {
-		return &ast.FnExpr{token, nil, p.block(), 0, 0, nil}
+		return &ast.FnExpr{token, nil, p.block(), ast.NewFuncScope()}
 	}
 	params := []*ast.FormalParam{}
 
@@ -809,7 +810,7 @@ func (p *Parser) fnExpr(token *ast.Token) *ast.FnExpr {
 			p.consume()
 		case ast.Rparen:
 			p.consume()
-			return &ast.FnExpr{token, params, p.block(), 0, 0, nil}
+			return &ast.FnExpr{token, params, p.block(), ast.NewFuncScope()}
 		default:
 			panic(p.unexpected())
 		}
@@ -824,8 +825,8 @@ func (p *Parser) lambdaZero() *ast.FnExpr {
 	p.expect(ast.EqGt)
 	params := []*ast.FormalParam{}
 	expr := &ast.ExprStmt{p.expression()}
-	block := &ast.BlockNode{nil, []ast.Statement{expr}, nil}
-	return &ast.FnExpr{token, params, block, 0, 0, nil}
+	block := &ast.BlockNode{nil, []ast.Statement{expr}, nil, ast.NewScope()}
+	return &ast.FnExpr{token, params, block, ast.NewFuncScope()}
 }
 
 func (p *Parser) lambdaOne() *ast.FnExpr {
@@ -833,8 +834,8 @@ func (p *Parser) lambdaOne() *ast.FnExpr {
 	p.expect(ast.EqGt)
 	params := []*ast.FormalParam{{&ast.IdentExpr{token, nil}, false}}
 	expr := &ast.ExprStmt{p.expression()}
-	block := &ast.BlockNode{nil, []ast.Statement{expr}, nil}
-	return &ast.FnExpr{token, params, block, 0, 0, nil}
+	block := &ast.BlockNode{nil, []ast.Statement{expr}, nil, ast.NewScope()}
+	return &ast.FnExpr{token, params, block, ast.NewFuncScope()}
 }
 
 func (p *Parser) lambda() *ast.FnExpr {
@@ -873,8 +874,8 @@ func (p *Parser) lambda() *ast.FnExpr {
 	p.expect(ast.EqGt)
 
 	expr := &ast.ExprStmt{p.expression()}
-	block := &ast.BlockNode{nil, []ast.Statement{expr}, nil}
-	return &ast.FnExpr{token, params, block, 0, 0, nil}
+	block := &ast.BlockNode{nil, []ast.Statement{expr}, nil, ast.NewScope()}
+	return &ast.FnExpr{token, params, block, ast.NewFuncScope()}
 }
 
 func (p *Parser) structExpr() ast.Expression {
@@ -929,7 +930,7 @@ func (p *Parser) structBody(token *ast.Token) ast.Expression {
 	}
 
 	// done
-	return &ast.StructExpr{token, lbrace, keys, values, rbrace, -1}
+	return &ast.StructExpr{token, lbrace, keys, values, rbrace, ast.NewStructScope()}
 }
 
 func (p *Parser) dictExpr() ast.Expression {

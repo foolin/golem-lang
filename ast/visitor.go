@@ -312,7 +312,7 @@ func (p *dump) Visit(node Node) {
 	switch t := node.(type) {
 
 	case *BlockNode:
-		p.buf.WriteString("BlockNode\n")
+		p.buf.WriteString(fmt.Sprintf("BlockNode(%v)\n", t.Scope))
 
 	case *ImportStmt:
 		p.buf.WriteString("ImportStmt\n")
@@ -328,7 +328,7 @@ func (p *dump) Visit(node Node) {
 	case *WhileStmt:
 		p.buf.WriteString("WhileStmt\n")
 	case *ForStmt:
-		p.buf.WriteString("ForStmt\n")
+		p.buf.WriteString(fmt.Sprintf("ForStmt(%v)\n", t.Scope))
 	case *BreakStmt:
 		p.buf.WriteString("BreakStmt\n")
 	case *ContinueStmt:
@@ -338,7 +338,7 @@ func (p *dump) Visit(node Node) {
 	case *ThrowStmt:
 		p.buf.WriteString("ThrowStmt\n")
 	case *TryStmt:
-		p.buf.WriteString("TryStmt\n")
+		p.buf.WriteString(fmt.Sprintf("TryStmt(%v)\n", t.CatchScope))
 	case *GoStmt:
 		p.buf.WriteString("GoStmt\n")
 
@@ -359,18 +359,14 @@ func (p *dump) Visit(node Node) {
 		p.buf.WriteString(fmt.Sprintf("IdentExpr(%v,%v)\n", t.Symbol.Text, t.Variable))
 
 	case *FnExpr:
-		p.buf.WriteString(fmt.Sprintf("FnExpr(numLocals:%d", t.NumLocals))
-		p.buf.WriteString(fmt.Sprintf(" numCaptures:%d", t.NumCaptures))
-		p.buf.WriteString(" parentCaptures:")
-		p.buf.WriteString(varsString(t.ParentCaptures))
-		p.buf.WriteString(")\n")
+		p.buf.WriteString(fmt.Sprintf("FnExpr(%v)\n", t.Scope))
 	case *InvokeExpr:
 		p.buf.WriteString("InvokeExpr\n")
 	case *BuiltinExpr:
 		p.buf.WriteString(fmt.Sprintf("BuiltinExpr(%q)\n", t.Fn.Text))
 
 	case *StructExpr:
-		p.buf.WriteString(fmt.Sprintf("StructExpr(%v,%d)\n", tokensString(t.Keys), t.LocalThisIndex))
+		p.buf.WriteString(fmt.Sprintf("StructExpr(%v,%v)\n", tokensString(t.Keys), t.Scope))
 	case *DictExpr:
 		p.buf.WriteString("DictExpr\n")
 	case *DictEntryExpr:
@@ -403,22 +399,6 @@ func (p *dump) Visit(node Node) {
 	p.indent++
 	node.Traverse(p)
 	p.indent--
-}
-
-func varsString(vars []*Variable) string {
-
-	var buf bytes.Buffer
-	buf.WriteString("[")
-	n := 0
-	for v := range vars {
-		if n > 0 {
-			buf.WriteString(", ")
-		}
-		n++
-		buf.WriteString(fmt.Sprintf("%v", vars[v]))
-	}
-	buf.WriteString("]")
-	return buf.String()
 }
 
 func tokensString(tokens []*Token) string {

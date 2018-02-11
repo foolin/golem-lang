@@ -71,18 +71,18 @@ func (c *compiler) makeModuleContents(mod *g.BytecodeModule) g.Struct {
 			for _, d := range t.Decls {
 				vbl := d.Ident.Variable
 				entries = append(entries, c.makeModuleProperty(
-					mod, d.Ident.Symbol.Text, vbl.Index, vbl.IsConst))
+					mod, d.Ident.Symbol.Text, vbl.Index(), vbl.IsConst()))
 			}
 		case *ast.ConstStmt:
 			for _, d := range t.Decls {
 				vbl := d.Ident.Variable
 				entries = append(entries, c.makeModuleProperty(
-					mod, d.Ident.Symbol.Text, vbl.Index, vbl.IsConst))
+					mod, d.Ident.Symbol.Text, vbl.Index(), vbl.IsConst()))
 			}
 		case *ast.NamedFnStmt:
 			vbl := t.Ident.Variable
 			entries = append(entries, c.makeModuleProperty(
-				mod, t.Ident.Symbol.Text, vbl.Index, vbl.IsConst))
+				mod, t.Ident.Symbol.Text, vbl.Index(), vbl.IsConst()))
 		}
 	}
 
@@ -117,7 +117,7 @@ func (c *compiler) makeModuleProperty(
 func (c *compiler) compileFunc(fe *ast.FnExpr) *g.Template {
 
 	arity := len(fe.FormalParams)
-	tpl := &g.Template{arity, fe.NumCaptures, fe.NumLocals, nil, nil, nil}
+	tpl := &g.Template{arity, fe.Scope.NumCaptures(), fe.Scope.NumLocals(), nil, nil, nil}
 
 	c.opc = []byte{}
 	c.lnum = []g.LineNumberEntry{}
@@ -303,17 +303,17 @@ func (c *compiler) visitImport(imp *ast.ImportStmt) {
 
 		// store module in identifer
 		v := ident.Variable
-		c.pushIndex(ident.Begin(), o.StoreLocal, v.Index)
+		c.pushIndex(ident.Begin(), o.StoreLocal, v.Index())
 	}
 }
 
 func (c *compiler) assignIdent(ident *ast.IdentExpr) {
 
 	v := ident.Variable
-	if v.IsCapture {
-		c.pushIndex(ident.Begin(), o.StoreCapture, v.Index)
+	if v.IsCapture() {
+		c.pushIndex(ident.Begin(), o.StoreCapture, v.Index())
 	} else {
-		c.pushIndex(ident.Begin(), o.StoreLocal, v.Index)
+		c.pushIndex(ident.Begin(), o.StoreLocal, v.Index())
 	}
 }
 
@@ -322,8 +322,8 @@ func (c *compiler) visitNamedFn(nf *ast.NamedFnStmt) {
 	c.Visit(nf.Func)
 
 	v := nf.Ident.Variable
-	assert(!v.IsCapture)
-	c.pushIndex(nf.Ident.Begin(), o.StoreLocal, v.Index)
+	assert(!v.IsCapture())
+	c.pushIndex(nf.Ident.Begin(), o.StoreLocal, v.Index())
 }
 
 func (c *compiler) visitAssignment(asn *ast.AssignmentExpr) {
@@ -470,7 +470,7 @@ func (c *compiler) visitWhile(w *ast.WhileStmt) {
 func (c *compiler) visitFor(f *ast.ForStmt) {
 
 	tok := f.Iterable.Begin()
-	idx := f.IterableIdent.Variable.Index
+	idx := f.IterableIdent.Variable.Index()
 
 	// put Iterable expression on stack
 	c.Visit(f.Iterable)
@@ -494,7 +494,7 @@ func (c *compiler) visitFor(f *ast.ForStmt) {
 	if len(f.Idents) == 1 {
 		// perform StoreLocal on the current item
 		ident := f.Idents[0]
-		c.pushIndex(ident.Begin(), o.StoreLocal, ident.Variable.Index)
+		c.pushIndex(ident.Begin(), o.StoreLocal, ident.Variable.Index())
 	} else {
 		// make sure the current item is really a tuple,
 		// and is of the proper length
@@ -505,7 +505,7 @@ func (c *compiler) visitFor(f *ast.ForStmt) {
 			c.push(tok, o.Dup)
 			c.loadInt(tok, int64(i))
 			c.push(tok, o.GetIndex)
-			c.pushIndex(ident.Begin(), o.StoreLocal, ident.Variable.Index)
+			c.pushIndex(ident.Begin(), o.StoreLocal, ident.Variable.Index())
 		}
 
 		// pop the tuple
@@ -649,8 +649,8 @@ func (c *compiler) visitTry(t *ast.TryStmt) {
 
 		// store the exception that the interpreter has put on the stack for us
 		v := t.CatchIdent.Variable
-		assert(!v.IsCapture)
-		c.pushIndex(t.CatchIdent.Begin(), o.StoreLocal, v.Index)
+		assert(!v.IsCapture())
+		c.pushIndex(t.CatchIdent.Begin(), o.StoreLocal, v.Index())
 
 		// compile the catch
 		c.Visit(t.CatchBlock)
@@ -887,10 +887,10 @@ func (c *compiler) visitBasicExpr(basic *ast.BasicExpr) {
 
 func (c *compiler) visitIdentExpr(ident *ast.IdentExpr) {
 	v := ident.Variable
-	if v.IsCapture {
-		c.pushIndex(ident.Begin(), o.LoadCapture, v.Index)
+	if v.IsCapture() {
+		c.pushIndex(ident.Begin(), o.LoadCapture, v.Index())
 	} else {
-		c.pushIndex(ident.Begin(), o.LoadLocal, v.Index)
+		c.pushIndex(ident.Begin(), o.LoadLocal, v.Index())
 	}
 }
 
@@ -902,11 +902,11 @@ func (c *compiler) visitBuiltinExpr(blt *ast.BuiltinExpr) {
 func (c *compiler) visitFunc(fe *ast.FnExpr) {
 
 	c.pushIndex(fe.Begin(), o.NewFunc, len(c.funcs))
-	for _, pc := range fe.ParentCaptures {
-		if pc.IsCapture {
-			c.pushIndex(fe.Begin(), o.FuncCapture, pc.Index)
+	for _, vbl := range fe.Scope.GetParentCaptures() {
+		if vbl.IsCapture() {
+			c.pushIndex(fe.Begin(), o.FuncCapture, vbl.Index())
 		} else {
-			c.pushIndex(fe.Begin(), o.FuncLocal, pc.Index)
+			c.pushIndex(fe.Begin(), o.FuncLocal, vbl.Index())
 		}
 	}
 
@@ -950,9 +950,9 @@ func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 	c.pushIndex(stc.Begin(), o.NewStruct, defIdx)
 
 	// if the struct is referenced by a 'this', then store local
-	if stc.LocalThisIndex != -1 {
+	if this, ok := stc.Scope.GetVariable("this"); ok {
 		c.push(stc.Begin(), o.Dup)
-		c.pushIndex(stc.Begin(), o.StoreLocal, stc.LocalThisIndex)
+		c.pushIndex(stc.Begin(), o.StoreLocal, this.Index())
 	}
 
 	// init each value
@@ -970,10 +970,10 @@ func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 
 func (c *compiler) visitThisExpr(this *ast.ThisExpr) {
 	v := this.Variable
-	if v.IsCapture {
-		c.pushIndex(this.Begin(), o.LoadCapture, v.Index)
+	if v.IsCapture() {
+		c.pushIndex(this.Begin(), o.LoadCapture, v.Index())
 	} else {
-		c.pushIndex(this.Begin(), o.LoadLocal, v.Index)
+		c.pushIndex(this.Begin(), o.LoadLocal, v.Index())
 	}
 }
 

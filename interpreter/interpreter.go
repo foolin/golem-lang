@@ -36,10 +36,6 @@ func (i *Interpreter) Init() (g.Value, g.Error) {
 
 	// the init function is always the zeroth template
 	tpl := i.mod.Templates[0]
-	//tpl := mod.Templates[0]
-	if tpl.Arity != 0 || tpl.NumCaptures != 0 {
-		panic("TODO")
-	}
 
 	// create empty locals
 	i.mod.Refs = newLocals(tpl.NumLocals, nil)

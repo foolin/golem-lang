@@ -96,6 +96,9 @@ type (
 		IterableIdent *IdentExpr
 		Iterable      Expression
 		Body          *BlockNode
+
+		// Scope defines the scope for the Idents
+		Scope Scope
 	}
 
 	// SwitchStmt is a 'switch' statement
@@ -139,6 +142,9 @@ type (
 		CatchBlock   *BlockNode
 		FinallyToken *Token
 		FinallyBlock *BlockNode
+
+		// CatchScope defines the scope for the CatchIdent
+		CatchScope Scope
 	}
 
 	// GoStmt is a 'go' statement
@@ -157,6 +163,8 @@ type (
 		LBrace     *Token
 		Statements []Statement
 		RBrace     *Token
+
+		Scope Scope
 	}
 
 	// DeclNode is a declaration
@@ -219,7 +227,7 @@ type (
 	// IdentExpr is an identifier expression
 	IdentExpr struct {
 		Symbol   *Token
-		Variable *Variable
+		Variable Variable
 	}
 
 	// BuiltinExpr is a builtin-value expression
@@ -233,10 +241,7 @@ type (
 		FormalParams []*FormalParam
 		Body         *BlockNode
 
-		// set by analyzer
-		NumLocals      int
-		NumCaptures    int
-		ParentCaptures []*Variable
+		Scope FuncScope
 	}
 
 	// FormalParam is a formal parameter in a function expression
@@ -283,16 +288,15 @@ type (
 		Values      []Expression
 		RBrace      *Token
 
-		// The index of the struct expression in the local variable array.
-		// '-1' means that the struct is not referenced by a 'this', and thus
-		// is not stored in the local variable array
-		LocalThisIndex int
+		// ThisScope will always either be empty, or contain
+		// a single 'this' Variable.
+		Scope StructScope
 	}
 
 	// ThisExpr is a 'this' expression
 	ThisExpr struct {
 		Token    *Token
-		Variable *Variable
+		Variable Variable
 	}
 
 	// FieldExpr is a field expression
@@ -1100,18 +1104,4 @@ func writeStatements(stmts []Statement, buf *bytes.Buffer) {
 			buf.WriteString(";")
 		}
 	}
-}
-
-// A Variable points to a Ref.  Variables are defined either
-// as formal params for a Function, or via LetStmt or ConstStmt, or via
-// the capture mechanism.
-type Variable struct {
-	Symbol    string
-	Index     int
-	IsConst   bool
-	IsCapture bool
-}
-
-func (v *Variable) String() string {
-	return fmt.Sprintf("(%s,%d,%v,%v)", v.Symbol, v.Index, v.IsConst, v.IsCapture)
 }

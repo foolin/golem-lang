@@ -14,15 +14,13 @@ fn testWalk() {
     let list = []
 
     path.filepath.walk('./bench_test/data', fn(name, info) {
-        // TODO fix problem with captures
-        //println(path.filepath.ext(name))
-        list.add((name, info.isDir))
+        list.add((name, info.isDir, path.filepath.ext(name)))
     })
     assert([ 
-        ('./bench_test/data', true), 
-        ('bench_test/data/dir', true), 
-        ('bench_test/data/empty', false), 
-        ('bench_test/data/lines.txt', false) ] == list)
+        ('./bench_test/data', true, ''), 
+        ('bench_test/data/dir', true, ''), 
+        ('bench_test/data/empty', false, ''), 
+        ('bench_test/data/lines.txt', false, '.txt') ] == list)
 }
 
 fn main(args) {

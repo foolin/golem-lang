@@ -28,18 +28,6 @@ bench_test: compile
 build: clean fmt lint vet test compile bench_test
 	go build golem.go
 
-# Creating A Release:
-#
-#     update version in golem.go
-#     git commit
-#     'make release'
-#     git tag -a v0.0.0 -m "version 0.0.0"
-#     git push origin v0.0.0
-#     github will automatically create a draft release
-#         upload the zip and tar.gz to the draft relase
-#         add notes to the release
-#         publish
-#
 release: build
 	rm -rf ./release
 	mkdir -p ./release/golem/linux

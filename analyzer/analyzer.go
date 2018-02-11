@@ -6,9 +6,7 @@ package analyzer
 
 import (
 	"fmt"
-	"github.com/mjarmy/golem-lang/analyzer/scope"
 	"github.com/mjarmy/golem-lang/ast"
-	"sort"
 )
 
 // Analyzer analyzes an AST.
@@ -16,28 +14,20 @@ type Analyzer interface {
 	ast.Visitor
 	Module() *ast.FnExpr
 	Analyze() []error
-	scope() *scope.Scope
 }
 
 type analyzer struct {
-	mod       *ast.FnExpr
-	rootScope *scope.Scope
-	curScope  *scope.Scope
-	loops     []ast.Loop
-	structs   []*ast.StructExpr
-	errors    []error
+	mod     *ast.FnExpr
+	scopes  []ast.Scope
+	loops   []ast.Loop
+	structs []*ast.StructExpr
+	errors  []error
 }
 
 // NewAnalyzer creates a new Analyzer
 func NewAnalyzer(mod *ast.FnExpr) Analyzer {
 
-	rootScope := scope.NewFuncScope(nil)
-
-	return &analyzer{mod, rootScope, rootScope, []ast.Loop{}, []*ast.StructExpr{}, nil}
-}
-
-func (a *analyzer) scope() *scope.Scope {
-	return a.rootScope
+	return &analyzer{mod, []ast.Scope{mod.Scope}, []ast.Loop{}, []*ast.StructExpr{}, nil}
 }
 
 // Analyze analyzes an AST.
@@ -45,17 +35,6 @@ func (a *analyzer) Analyze() []error {
 
 	// visit module block
 	a.visitBlock(a.mod.Body)
-
-	// save NumLocals
-	fscope := a.curScope.FuncScope
-	a.mod.NumLocals = fscope.NumLocals
-
-	// sanity check for Captures
-	if len(fscope.Captures) > 0 {
-		panic("invalid module")
-	}
-	a.mod.NumCaptures = 0
-	a.mod.ParentCaptures = nil
 
 	// done
 	return a.errors
@@ -149,10 +128,11 @@ func (a *analyzer) visitTry(t *ast.TryStmt) {
 
 	a.Visit(t.TryBlock)
 	if t.CatchToken != nil {
-		a.curScope = scope.NewBlockScope(a.curScope)
-		a.defineIdent(t.CatchIdent, true)
+		a.pushScope(t.CatchScope)
+		t.CatchIdent.Variable = a.putVariable(t.CatchIdent.Symbol.Text, true)
+
 		a.Visit(t.CatchBlock)
-		a.curScope = a.curScope.Parent
+		a.popScope()
 	}
 	if t.FinallyToken != nil {
 		a.Visit(t.FinallyBlock)
@@ -161,17 +141,17 @@ func (a *analyzer) visitTry(t *ast.TryStmt) {
 
 func (a *analyzer) defineIdent(ident *ast.IdentExpr, isConst bool) {
 	sym := ident.Symbol.Text
-	if _, ok := a.curScope.Get(sym); ok {
+	if _, ok := a.getVariable(sym); ok {
 		a.errors = append(a.errors,
 			fmt.Errorf("Symbol '%s' is already defined, at %v", sym, ident.Symbol.Position))
 	} else {
-		ident.Variable = a.curScope.Put(sym, isConst)
+		ident.Variable = a.putVariable(sym, isConst)
 	}
 }
 
 func (a *analyzer) visitBlock(blk *ast.BlockNode) {
 
-	a.curScope = scope.NewBlockScope(a.curScope)
+	a.pushScope(blk.Scope)
 
 	// visit named funcs identifiers
 	for _, n := range blk.Statements {
@@ -189,17 +169,16 @@ func (a *analyzer) visitBlock(blk *ast.BlockNode) {
 		}
 	}
 
-	a.curScope = a.curScope.Parent
+	a.popScope()
 }
 
 func (a *analyzer) visitFor(fr *ast.ForStmt) {
 
-	// push block scope
-	a.curScope = scope.NewBlockScope(a.curScope)
+	a.pushScope(fr.Scope)
 
 	// define identifiers
 	for _, ident := range fr.Idents {
-		a.defineIdent(ident, false)
+		ident.Variable = a.putVariable(ident.Symbol.Text, false)
 	}
 
 	// define the identifier for the iterable
@@ -209,69 +188,20 @@ func (a *analyzer) visitFor(fr *ast.ForStmt) {
 	a.Visit(fr.Iterable)
 	a.visitBlock(fr.Body)
 
-	// pop block scope
-	a.curScope = a.curScope.Parent
+	a.popScope()
 }
 
 func (a *analyzer) visitFunc(fn *ast.FnExpr) {
 
-	// push scope
-	a.curScope = scope.NewFuncScope(a.curScope)
+	a.pushScope(fn.Scope)
 
 	// visit child nodes
 	for _, f := range fn.FormalParams {
-		f.Ident.Variable = a.curScope.Put(f.Ident.Symbol.Text, f.IsConst)
+		f.Ident.Variable = a.putVariable(f.Ident.Symbol.Text, f.IsConst)
 	}
 	a.visitBlock(fn.Body)
 
-	// save function scope info
-	fscope := a.curScope.FuncScope
-	fn.NumLocals = fscope.NumLocals
-	fn.NumCaptures = len(fscope.Captures)
-	fn.ParentCaptures = a.makeParentCaptures()
-
-	// pop scope
-	a.curScope = a.curScope.Parent
-}
-
-func (a *analyzer) makeParentCaptures() []*ast.Variable {
-
-	fscope := a.curScope.FuncScope
-	num := len(fscope.Captures)
-
-	if num != len(fscope.ParentCaptures) {
-		panic("capture length mismatch")
-	}
-	if num == 0 {
-		return nil
-	}
-
-	// First, sort the captured Variables by index
-	caps := make(byIndex, 0, num)
-	for _, v := range fscope.Captures {
-		caps = append(caps, v)
-	}
-	sort.Sort(caps)
-
-	// Then use the sorted list to create the proper ordering of ParentCaptures
-	parentCaps := make([]*ast.Variable, 0, num)
-	for _, v := range caps {
-		parentCaps = append(parentCaps, fscope.ParentCaptures[v.Symbol])
-	}
-	return parentCaps
-}
-
-type byIndex []*ast.Variable
-
-// Variables are sorted by Index
-func (v byIndex) Len() int {
-	return len(v)
-}
-func (v byIndex) Swap(i, j int) {
-	v[i], v[j] = v[j], v[i]
-}
-func (v byIndex) Less(i, j int) bool {
-	return v[i].Index < v[j].Index
+	a.popScope()
 }
 
 func (a *analyzer) visitAssignment(asn *ast.AssignmentExpr) {
@@ -318,8 +248,8 @@ func (a *analyzer) visitPostfixExpr(ps *ast.PostfixExpr) {
 // visit an Ident that is part of an assignment
 func (a *analyzer) doVisitAssignIdent(ident *ast.IdentExpr) {
 	sym := ident.Symbol.Text
-	if v, ok := a.curScope.Get(sym); ok {
-		if v.IsConst {
+	if v, ok := a.getVariable(sym); ok {
+		if v.IsConst() {
 			a.errors = append(a.errors,
 				fmt.Errorf("Symbol '%s' is constant, at %v", sym, ident.Symbol.Position))
 		}
@@ -334,7 +264,7 @@ func (a *analyzer) visitIdentExpr(ident *ast.IdentExpr) {
 
 	sym := ident.Symbol.Text
 
-	if v, ok := a.curScope.Get(sym); ok {
+	if v, ok := a.getVariable(sym); ok {
 		ident.Variable = v
 	} else {
 		a.errors = append(a.errors,
@@ -345,9 +275,9 @@ func (a *analyzer) visitIdentExpr(ident *ast.IdentExpr) {
 func (a *analyzer) visitStructExpr(stc *ast.StructExpr) {
 	a.structs = append(a.structs, stc)
 
-	a.curScope = scope.NewStructScope(a.curScope, stc)
+	a.pushScope(stc.Scope)
 	stc.Traverse(a)
-	a.curScope = a.curScope.Parent
+	a.popScope()
 
 	a.structs = a.structs[:len(a.structs)-1]
 }
@@ -359,6 +289,121 @@ func (a *analyzer) visitThisExpr(this *ast.ThisExpr) {
 		a.errors = append(a.errors,
 			fmt.Errorf("'this' outside of struct, at %v", this.Token.Position))
 	} else {
-		this.Variable = a.curScope.This()
+		this.Variable = a.putThis()
 	}
+}
+
+//-----------------------------------------------------------------------------
+// Scope Management
+//-----------------------------------------------------------------------------
+
+func (a *analyzer) pushScope(scope ast.Scope) {
+	a.scopes = append(a.scopes, scope)
+}
+
+func (a *analyzer) popScope() {
+	a.scopes = a.scopes[:len(a.scopes)-1]
+}
+
+// Put a symbol entry into the current scope.
+func (a *analyzer) putVariable(sym string, isConst bool) ast.Variable {
+
+	s := a.scopes[len(a.scopes)-1]
+
+	if _, ok := s.GetVariable(sym); ok {
+		// its the caller's responsibility to ensure this never happens
+		panic("symbol is already defined")
+	}
+
+	v := ast.NewVariable(sym, a.incrementNumLocals(), isConst, false)
+	s.PutVariable(sym, v)
+	return v
+}
+
+// Increment the number of local variables in the nearest parent FuncScope.
+func (a *analyzer) incrementNumLocals() int {
+
+	for i := len(a.scopes) - 1; i >= 0; i-- {
+		s := a.scopes[i]
+
+		if f, ok := s.(ast.FuncScope); ok {
+			idx := f.NumLocals()
+			f.IncrementNumLocals()
+			if idx+1 >= (2 << 16) {
+				panic("TODO wide index")
+			}
+			return idx
+		}
+	}
+
+	panic("unreachable")
+}
+
+// Get a variable by walking up the scope stack, or return false if we can't find it.
+func (a *analyzer) getVariable(sym string) (ast.Variable, bool) {
+
+	// If we passed any functions while we were looking for the variable,
+	// we must create captures in each of those functions.
+	funcScopes := []ast.FuncScope{}
+
+	for i := len(a.scopes) - 1; i >= 0; i-- {
+		s := a.scopes[i]
+
+		// we found the variable definition
+		if v, ok := s.GetVariable(sym); ok {
+			v = a.applyCaptures(v, funcScopes)
+			return v, true
+		}
+
+		if f, ok := s.(ast.FuncScope); ok {
+			// we found the variable in a function capture
+			if v, ok := f.GetCapture(sym); ok {
+				v = a.applyCaptures(v, funcScopes)
+				return v, true
+			}
+			// Save the function so we can capture into it later.
+			funcScopes = append(funcScopes, f)
+		}
+	}
+
+	// The variable is not currently defined in any scope in the stack
+	return nil, false
+}
+
+func (a *analyzer) applyCaptures(
+	v ast.Variable,
+	funcScopes []ast.FuncScope) ast.Variable {
+
+	for i := len(funcScopes) - 1; i >= 0; i-- {
+		v = funcScopes[i].PutCapture(v)
+	}
+	return v
+}
+
+// This creates a variable for 'this', or returns an existing 'this' variable.
+func (a *analyzer) putThis() ast.Variable {
+
+	// walk up the stack, looking for a StructScope
+	for i := len(a.scopes) - 1; i >= 0; i-- {
+		s := a.scopes[i]
+
+		if _, ok := s.(ast.StructScope); ok {
+
+			// define a 'this' variable on the structScope, if its not already defined
+			if _, ok := s.GetVariable("this"); !ok {
+				s.PutVariable(
+					"this",
+					ast.NewVariable("this", a.incrementNumLocals(), true, false))
+			}
+
+			// now call getVariable(), to trigger captures in any intervening functions.
+			v, ok := a.getVariable("this")
+			if !ok {
+				panic("call to 'this' failed")
+			}
+			return v
+		}
+	}
+
+	panic("unreachable")
 }

@@ -115,6 +115,13 @@ fn testCapture() {
         assert(m == 123)
     }
     foo()
+
+    //---------------------
+
+    const zork = 1
+    let f1 = || => zork
+    let f2 = || => zork
+    assert([1, 1] == [f1(), f2()])
 }
 
 fn testNamedFunc() {
@@ -476,12 +483,11 @@ fn testDict() {
             assert(d.remove('b'));
             assert(d == dict {});
             assert(len(d) == 0);
-        }//,
-        // TODO
-        //fn () {
-        //    fail(|| => dict {null: 'b'}, "NullValue")
-        //    failMsg(|| => dict {[]: 'b'}, "TypeMismatch", "Expected Hashable Type")
-        //}
+        },
+        fn () {
+            fail(|| => dict {null: 'b'}, "NullValue")
+            failMsg(|| => dict {[]: 'b'}, "TypeMismatch", "Expected Hashable Type")
+        }
     ]
     for f in funcs { f(); }
 }
@@ -518,13 +524,12 @@ fn testSet() {
             assert(b.addAll != a.addAll);
             assert(a.add != a.addAll);
         },
-        // TODO
-        //fn () {
-        //    failMsg(fn() { let a = set{}; a.addAll(false); },   "TypeMismatch", "Expected Iterable Type")
-        //    failMsg(fn() { let a = set{}; a.add(3,4); },        "ArityMismatchError", "FIX")
-        //    failMsg(fn() { let a = set{}; a.add([1,2]); },      "TypeMismatch", "Expected Hashable Type")
-        //    failMsg(fn() { let a = set{}; a.contains([1,2]); }, "TypeMismatch", "Expected Hashable Type")
-        //},
+        fn () {
+            failMsg(fn() { let a = set{}; a.addAll(false); },   "TypeMismatch", "Expected Iterable Type")
+            failMsg(fn() { let a = set{}; a.add(3,4); },        "ArityMismatch", "Expected 1 params, got 2")
+            failMsg(fn() { let a = set{}; a.add([1,2]); },      "TypeMismatch", "Expected Hashable Type")
+            failMsg(fn() { let a = set{}; a.contains([1,2]); }, "TypeMismatch", "Expected Hashable Type")
+        },
         fn () {
             let a = set{};
             assert(a.isEmpty());
