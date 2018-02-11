@@ -902,7 +902,9 @@ func (c *compiler) visitBuiltinExpr(blt *ast.BuiltinExpr) {
 func (c *compiler) visitFunc(fe *ast.FnExpr) {
 
 	c.pushIndex(fe.Begin(), o.NewFunc, len(c.funcs))
-	for _, vbl := range fe.Scope.GetParentCaptures() {
+
+	parents := getSortedCaptureParents(fe.Scope)
+	for _, vbl := range parents {
 		if vbl.IsCapture() {
 			c.pushIndex(fe.Begin(), o.FuncCapture, vbl.Index())
 		} else {
@@ -1116,6 +1118,12 @@ func parseFloat(text string) float64 {
 	return f
 }
 
+func assert(flag bool) {
+	if !flag {
+		panic("assertion failure")
+	}
+}
+
 //--------------------------------------------------------------
 // pool
 
@@ -1187,8 +1195,35 @@ func makePoolSlice(pool *g.HashMap) []g.Basic {
 	return slice
 }
 
-func assert(flag bool) {
-	if !flag {
-		panic("assertion failure")
+//--------------------------------------------------------------
+// capture
+
+func getSortedCaptureParents(f ast.FuncScope) []ast.Variable {
+
+	// First sort the captures by child index
+	sorted := byChildIndex{}
+	for _, v := range f.GetCaptures() {
+		sorted = append(sorted, v)
 	}
+	sort.Sort(sorted)
+
+	// Then use the sorted list to create the proper ordering of parents
+	parents := []ast.Variable{}
+	for _, c := range sorted {
+		parents = append(parents, c.Parent())
+	}
+	return parents
+}
+
+type byChildIndex []ast.Capture
+
+// Variables are sorted by Index
+func (c byChildIndex) Len() int {
+	return len(c)
+}
+func (c byChildIndex) Swap(i, j int) {
+	c[i], c[j] = c[j], c[i]
+}
+func (c byChildIndex) Less(i, j int) bool {
+	return c[i].Child().Index() < c[j].Child().Index()
 }

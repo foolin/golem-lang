@@ -32,11 +32,19 @@ type (
 		NumLocals() int
 		IncrementNumLocals()
 
-		NumCaptures() int
-		GetCapture(string) (Variable, bool)
-		PutCapture(Variable) Variable
+		GetCapture(string) (Capture, bool)
+		PutCapture(Variable) Capture
 
-		GetParentCaptures() []Variable
+		NumCaptures() int
+		GetCaptures() []Capture
+	}
+
+	// Capture defines a parent/child relationship between a 'child' captured Variable,
+	// and a 'parent' Variable that is found higher up in the AST.
+	Capture interface {
+		Symbol() string
+		Parent() Variable
+		Child() Variable
 	}
 
 	// A Variable contains information about how an Identifer is defined in a Node.
@@ -126,12 +134,7 @@ func (s *structScope) structMarker() {}
 type funcScope struct {
 	scope
 	numLocals int
-	captures  map[string]capture
-}
-
-type capture struct {
-	parent Variable
-	child  Variable
+	captures  map[string]Capture
 }
 
 // NewFuncScope creates a new FuncScope
@@ -139,7 +142,7 @@ func NewFuncScope() FuncScope {
 	return &funcScope{
 		scope{make(map[string]Variable)},
 		0,
-		make(map[string]capture),
+		make(map[string]Capture),
 	}
 }
 
@@ -165,55 +168,46 @@ func (s *funcScope) IncrementNumLocals() {
 	s.numLocals++
 }
 
+func (s *funcScope) GetCapture(sym string) (Capture, bool) {
+	cp, ok := s.captures[sym]
+	return cp, ok
+}
+
+func (s *funcScope) PutCapture(parent Variable) Capture {
+	sym := parent.Symbol()
+	child := NewVariable(sym, len(s.captures), parent.IsConst(), true)
+	cp := &capture{sym, parent, child}
+	s.captures[sym] = cp
+	return cp
+}
+
 func (s *funcScope) NumCaptures() int {
 	return len(s.captures)
 }
 
-func (s *funcScope) GetCapture(sym string) (Variable, bool) {
-	cap, ok := s.captures[sym]
-	if ok {
-		return cap.child, true
-	}
-	return nil, false
-}
-
-func (s *funcScope) PutCapture(parent Variable) Variable {
-
-	sym := parent.Symbol()
-	child := NewVariable(sym, len(s.captures), parent.IsConst(), true)
-	s.captures[sym] = capture{parent, child}
-	return child
-}
-
-func (s *funcScope) GetParentCaptures() []Variable {
-
-	// First sort the captures by child index
-	sorted := byChildIndex{}
+func (s *funcScope) GetCaptures() []Capture {
+	cp := make([]Capture, len(s.captures))
+	n := 0
 	for _, v := range s.captures {
-		sorted = append(sorted, v)
+		cp[n] = v
+		n++
 	}
-	sort.Sort(sorted)
-
-	// Then use the sorted list to create the proper ordering of parents
-	parents := []Variable{}
-	for _, c := range sorted {
-		parents = append(parents, c.parent)
-	}
-	return parents
+	return cp
 }
 
-type byChildIndex []capture
+//-----------------------------------------------------------------------------
+// Capture
+//-----------------------------------------------------------------------------
 
-// Variables are sorted by Index
-func (c byChildIndex) Len() int {
-	return len(c)
+type capture struct {
+	symbol string
+	parent Variable
+	child  Variable
 }
-func (c byChildIndex) Swap(i, j int) {
-	c[i], c[j] = c[j], c[i]
-}
-func (c byChildIndex) Less(i, j int) bool {
-	return c[i].child.Index() < c[j].child.Index()
-}
+
+func (c *capture) Symbol() string   { return c.symbol }
+func (c *capture) Parent() Variable { return c.parent }
+func (c *capture) Child() Variable  { return c.child }
 
 //-----------------------------------------------------------------------------
 // Variable
@@ -291,7 +285,7 @@ func defString(defs map[string]Variable) string {
 	return buf.String()
 }
 
-func capString(caps map[string]capture) string {
+func capString(caps map[string]Capture) string {
 
 	// sort the keys alphabetically
 	keys := make([]string, len(caps))
@@ -311,7 +305,7 @@ func capString(caps map[string]capture) string {
 		}
 		n++
 		c := caps[k]
-		buf.WriteString(fmt.Sprintf("%v: (parent: %v, child %v)", k, c.parent, c.child))
+		buf.WriteString(fmt.Sprintf("%v: (parent: %v, child %v)", k, c.Parent(), c.Child()))
 	}
 	buf.WriteString("}")
 	return buf.String()

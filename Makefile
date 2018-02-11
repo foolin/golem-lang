@@ -3,6 +3,7 @@ default: build
 
 clean:
 	rm -f golem
+	rm -rf ./release
 
 fmt:
 	go fmt ./...
@@ -29,7 +30,6 @@ build: clean fmt lint vet test compile bench_test
 	go build golem.go
 
 release: build
-	rm -rf ./release
 	mkdir -p ./release/golem/linux
 	mkdir -p ./release/golem/mac
 	mkdir -p ./release/golem/windows

@@ -342,8 +342,8 @@ func (a *analyzer) incrementNumLocals() int {
 // Get a variable by walking up the scope stack, or return false if we can't find it.
 func (a *analyzer) getVariable(sym string) (ast.Variable, bool) {
 
-	// If we passed any functions while we were looking for the variable,
-	// we must create captures in each of those functions.
+	// We must create a capture in each function that we skip over
+	// while we were looking for the variable
 	funcScopes := []ast.FuncScope{}
 
 	for i := len(a.scopes) - 1; i >= 0; i-- {
@@ -351,15 +351,13 @@ func (a *analyzer) getVariable(sym string) (ast.Variable, bool) {
 
 		// we found the variable definition
 		if v, ok := s.GetVariable(sym); ok {
-			v = a.applyCaptures(v, funcScopes)
-			return v, true
+			return a.applyCaptures(v, funcScopes), true
 		}
 
 		if f, ok := s.(ast.FuncScope); ok {
 			// we found the variable in a function capture
-			if v, ok := f.GetCapture(sym); ok {
-				v = a.applyCaptures(v, funcScopes)
-				return v, true
+			if cp, ok := f.GetCapture(sym); ok {
+				return a.applyCaptures(cp.Child(), funcScopes), true
 			}
 			// Save the function so we can capture into it later.
 			funcScopes = append(funcScopes, f)
@@ -375,7 +373,7 @@ func (a *analyzer) applyCaptures(
 	funcScopes []ast.FuncScope) ast.Variable {
 
 	for i := len(funcScopes) - 1; i >= 0; i-- {
-		v = funcScopes[i].PutCapture(v)
+		v = funcScopes[i].PutCapture(v).Child()
 	}
 	return v
 }
