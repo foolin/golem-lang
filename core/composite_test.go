@@ -98,12 +98,12 @@ func TestStruct(t *testing.T) {
 	val, err = stc.Has(Zero)
 	fail(t, val, err, "TypeMismatch: Expected Str")
 
-	stc, err = NewStruct([]Field{NewField("a", true, NullValue)}, false)
+	stc, err = NewStruct([]Field{NewField("a", true, Null)}, false)
 	if err != nil {
 		panic("oops")
 	}
 	val, err = stc.GetField(cx, NewStr("a"))
-	ok(t, val, err, NullValue)
+	ok(t, val, err, Null)
 
 	tassert(t, reflect.DeepEqual(stc.FieldNames(), []string{"a"}))
 
@@ -159,7 +159,7 @@ func TestList(t *testing.T) {
 	v, err = ls.Eq(cx, NewList([]Value{NewStr("a")}))
 	ok(t, v, err, False)
 
-	v, err = ls.Eq(cx, NullValue)
+	v, err = ls.Eq(cx, Null)
 	ok(t, v, err, False)
 
 	v = ls.Len()
@@ -240,14 +240,14 @@ func TestDict(t *testing.T) {
 	v, err = d.Eq(cx, newDict(cx, []*HEntry{}))
 	ok(t, v, err, True)
 
-	v, err = d.Eq(cx, NullValue)
+	v, err = d.Eq(cx, Null)
 	ok(t, v, err, False)
 
 	v = d.Len()
 	ok(t, v, nil, Zero)
 
 	v, err = d.Get(cx, NewStr("a"))
-	ok(t, v, err, NullValue)
+	ok(t, v, err, Null)
 
 	err = d.Set(cx, NewStr("a"), One)
 	tassert(t, err == nil)
@@ -285,7 +285,7 @@ func TestDict(t *testing.T) {
 	v, err = d.Get(cx, tp)
 	ok(t, v, err, True)
 
-	d, err = NewDict(cx, []*HEntry{{NullValue, True}})
+	d, err = NewDict(cx, []*HEntry{{Null, True}})
 	fail(t, d, err, "NullValue")
 
 	d, err = NewDict(cx, []*HEntry{{NewList([]Value{}), True}})
@@ -316,7 +316,7 @@ func TestSet(t *testing.T) {
 	v, err = s.Eq(cx, newSet(cx, []Value{One}))
 	ok(t, v, err, False)
 
-	v, err = s.Eq(cx, NullValue)
+	v, err = s.Eq(cx, Null)
 	ok(t, v, err, False)
 
 	v = s.Len()
@@ -333,7 +333,7 @@ func TestSet(t *testing.T) {
 	v, err = s.Eq(cx, newSet(cx, []Value{One, One, One}))
 	ok(t, v, err, True)
 
-	v, err = s.Eq(cx, NullValue)
+	v, err = s.Eq(cx, Null)
 	ok(t, v, err, False)
 
 	v = s.Len()
@@ -347,7 +347,7 @@ func TestSet(t *testing.T) {
 	v = s.Len()
 	ok(t, v, nil, NewInt(2))
 
-	s, err = NewSet(cx, []Value{NullValue})
+	s, err = NewSet(cx, []Value{Null})
 	fail(t, s, err, "NullValue")
 
 	s, err = NewSet(cx, []Value{NewList([]Value{})})
@@ -367,7 +367,7 @@ func TestTuple(t *testing.T) {
 	v, err = tp.Eq(cx, NewTuple([]Value{One, Zero}))
 	ok(t, v, err, True)
 
-	v, err = tp.Eq(cx, NullValue)
+	v, err = tp.Eq(cx, Null)
 	ok(t, v, err, False)
 
 	v, err = tp.Get(cx, Zero)
@@ -410,7 +410,7 @@ func TestRange(t *testing.T) {
 	v, err = r.Eq(cx, newRange(0, 5, 1))
 	ok(t, v, err, True)
 
-	v, err = r.Eq(cx, NullValue)
+	v, err = r.Eq(cx, Null)
 	ok(t, v, err, False)
 
 	v = r.Len()
@@ -505,9 +505,9 @@ func TestListIterator(t *testing.T) {
 	fail(t, v, err, "NoSuchElement")
 
 	itr = ibl.NewIterator(cx)
-	err = itr.SetField(cx, NewStr("nextValue"), NullValue)
+	err = itr.SetField(cx, NewStr("nextValue"), Null)
 	fail(t, nil, err, "ImmutableValue")
-	err = itr.SetField(cx, NewStr("getValue"), NullValue)
+	err = itr.SetField(cx, NewStr("getValue"), Null)
 	fail(t, nil, err, "ImmutableValue")
 
 	n = 1

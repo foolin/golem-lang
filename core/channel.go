@@ -67,7 +67,7 @@ func (ch *channel) GetField(cx Context, key Str) (Value, Error) {
 			1, 1,
 			func(cx Context, values []Value) (Value, Error) {
 				ch.ch <- values[0]
-				return NullValue, nil
+				return Null, nil
 			}}}, nil
 
 	case "recv":

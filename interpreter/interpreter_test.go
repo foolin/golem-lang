@@ -332,7 +332,7 @@ func TestIf(t *testing.T) {
 		[]*g.Ref{&g.Ref{g.NewInt(2)}})
 
 	okMod(t, "let a = 1; if (false) { a = 2; }",
-		g.NullValue,
+		g.Null,
 		[]*g.Ref{&g.Ref{g.One}})
 
 	okMod(t, "let a = 1; if (1 == 1) { a = 2; } else { a = 3; }; let b = 4;",
@@ -398,7 +398,7 @@ let b = 5`,
 		g.NewInt(3),
 		[]*g.Ref{
 			&g.Ref{g.One},
-			&g.Ref{g.NullValue}})
+			&g.Ref{g.Null}})
 }
 
 func TestStruct(t *testing.T) {
@@ -627,10 +627,10 @@ const c = 1, d;
 	//fmt.Println(source)
 	//fmt.Println(mod)
 
-	okRef(t, i, mod.Refs[0], g.NullValue)
+	okRef(t, i, mod.Refs[0], g.Null)
 	okRef(t, i, mod.Refs[1], g.Zero)
 	okRef(t, i, mod.Refs[2], g.One)
-	okRef(t, i, mod.Refs[3], g.NullValue)
+	okRef(t, i, mod.Refs[3], g.Null)
 }
 
 func TestFor(t *testing.T) {

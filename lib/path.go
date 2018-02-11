@@ -101,6 +101,6 @@ func walk() g.NativeFunc {
 				}
 				return nil, g.NewError("PathError", err.Error())
 			}
-			return g.NullValue, nil
+			return g.Null, nil
 		})
 }

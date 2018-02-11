@@ -97,7 +97,7 @@ var BuiltinPrint = &nativeFunc{
 			fmt.Print(v.ToStr(cx).String())
 		}
 
-		return NullValue, nil
+		return Null, nil
 	}}
 
 // BuiltinPrintln prints to stdout.
@@ -109,7 +109,7 @@ var BuiltinPrintln = &nativeFunc{
 		}
 		fmt.Println()
 
-		return NullValue, nil
+		return Null, nil
 	}}
 
 //-----------------------------------------------------------------
@@ -213,7 +213,7 @@ var BuiltinType = &nativeFunc{
 	func(cx Context, values []Value) (Value, Error) {
 		// Null has a type, but for the purposes of type()
 		// we are going to pretend it doesn't
-		if values[0] == NullValue {
+		if values[0] == Null {
 			return nil, NullValueError()
 		}
 		t := values[0].Type()

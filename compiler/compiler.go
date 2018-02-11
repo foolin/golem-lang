@@ -943,7 +943,7 @@ func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 	// create def and entries
 	def := []g.Field{}
 	for _, k := range stc.Keys {
-		def = append(def, g.NewField(k.Text, false, g.NullValue))
+		def = append(def, g.NewField(k.Text, false, g.Null))
 	}
 	defIdx := len(c.structDefs)
 	c.structDefs = append(c.structDefs, def)

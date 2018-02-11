@@ -58,7 +58,7 @@ func exit() g.NativeFunc {
 			}
 
 			// we will never actually get here
-			return g.NullValue, nil
+			return g.Null, nil
 		})
 
 }
@@ -176,6 +176,6 @@ func close(f io.Closer) g.NativeFunc {
 			if err != nil {
 				return nil, g.NewError("OsError", err.Error())
 			}
-			return g.NullValue, nil
+			return g.Null, nil
 		})
 }

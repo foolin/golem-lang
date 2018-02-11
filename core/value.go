@@ -68,8 +68,8 @@ type (
 		basicMarker()
 	}
 
-	// Null is the null value
-	Null interface {
+	// Nil is the null value.
+	Nil interface {
 		Basic
 	}
 

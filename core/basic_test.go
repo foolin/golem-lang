@@ -45,20 +45,20 @@ func okType(t *testing.T, val Value, expected Type) {
 }
 
 func TestNull(t *testing.T) {
-	okType(t, NullValue, NullType)
+	okType(t, Null, NullType)
 
 	var v Value
 	var err Error
 
-	v = NullValue.ToStr(cx)
+	v = Null.ToStr(cx)
 	ok(t, v, nil, NewStr("null"))
 
-	v, err = NullValue.Eq(cx, NullValue)
+	v, err = Null.Eq(cx, Null)
 	ok(t, v, err, True)
-	v, err = NullValue.Eq(cx, True)
+	v, err = Null.Eq(cx, True)
 	ok(t, v, err, False)
 
-	v, err = NullValue.Cmp(cx, True)
+	v, err = Null.Cmp(cx, True)
 	fail(t, v, err, "NullValue")
 }
 
@@ -220,7 +220,7 @@ func TestInt(t *testing.T) {
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = NewInt(3).Sub(False)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
-	val, err = NewInt(3).Sub(NullValue)
+	val, err = NewInt(3).Sub(Null)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 
 	val, err = NewInt(3).Mul(NewInt(2))
@@ -231,7 +231,7 @@ func TestInt(t *testing.T) {
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = NewInt(3).Mul(False)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
-	val, err = NewInt(3).Mul(NullValue)
+	val, err = NewInt(3).Mul(Null)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 
 	val, err = NewInt(3).Div(NewInt(2))
@@ -242,7 +242,7 @@ func TestInt(t *testing.T) {
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = NewInt(3).Div(False)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
-	val, err = NewInt(3).Div(NullValue)
+	val, err = NewInt(3).Div(Null)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 
 	val, err = NewInt(3).Div(NewInt(0))
@@ -327,7 +327,7 @@ func TestFloat(t *testing.T) {
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = NewFloat(3.3).Sub(False)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
-	val, err = NewFloat(3.3).Sub(NullValue)
+	val, err = NewFloat(3.3).Sub(Null)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 
 	val, err = NewFloat(3.3).Mul(NewInt(2))
@@ -338,7 +338,7 @@ func TestFloat(t *testing.T) {
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = NewFloat(3.3).Mul(False)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
-	val, err = NewFloat(3.3).Mul(NullValue)
+	val, err = NewFloat(3.3).Mul(Null)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 
 	val, err = NewFloat(3.3).Div(NewInt(2))
@@ -349,7 +349,7 @@ func TestFloat(t *testing.T) {
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 	val, err = NewFloat(3.3).Div(False)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
-	val, err = NewFloat(3.3).Div(NullValue)
+	val, err = NewFloat(3.3).Div(Null)
 	fail(t, val, err, "TypeMismatch: Expected Number Type")
 
 	val, err = NewFloat(3.3).Div(NewInt(0))
@@ -361,14 +361,14 @@ func TestFloat(t *testing.T) {
 func TestBasic(t *testing.T) {
 	// make sure all the Basic types can be used as hashmap key
 	entries := make(map[Basic]Value)
-	entries[NullValue] = True
+	entries[Null] = True
 	entries[Zero] = True
 	entries[NewFloat(0.123)] = True
 	entries[False] = True
 }
 
 func TestBasicHashCode(t *testing.T) {
-	h, err := NullValue.HashCode(cx)
+	h, err := Null.HashCode(cx)
 	fail(t, h, err, "NullValue")
 
 	h, err = True.HashCode(cx)

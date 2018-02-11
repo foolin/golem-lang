@@ -22,7 +22,7 @@ func TestHashMap(t *testing.T) {
 
 	ok(t, hm.Len(), nil, Zero)
 	v, err := hm.Get(cx, NewInt(3))
-	ok(t, v, err, NullValue)
+	ok(t, v, err, Null)
 
 	err = hm.Put(cx, NewInt(3), NewInt(33))
 	ok(t, nil, err, nil)
@@ -31,7 +31,7 @@ func TestHashMap(t *testing.T) {
 	v, err = hm.Get(cx, NewInt(3))
 	ok(t, v, err, NewInt(33))
 	v, err = hm.Get(cx, NewInt(5))
-	ok(t, v, err, NullValue)
+	ok(t, v, err, Null)
 
 	err = hm.Put(cx, NewInt(3), NewInt(33))
 	ok(t, nil, err, nil)
@@ -40,7 +40,7 @@ func TestHashMap(t *testing.T) {
 	v, err = hm.Get(cx, NewInt(3))
 	ok(t, v, err, NewInt(33))
 	v, err = hm.Get(cx, NewInt(5))
-	ok(t, v, err, NullValue)
+	ok(t, v, err, Null)
 
 	err = hm.Put(cx, NewInt(int64(2)), NewInt(int64(22)))
 	ok(t, nil, err, nil)
@@ -60,7 +60,7 @@ func TestHashMap(t *testing.T) {
 		if i <= 20 {
 			ok(t, v, err, NewInt(int64(i*10+i)))
 		} else {
-			ok(t, v, err, NullValue)
+			ok(t, v, err, Null)
 		}
 	}
 }

@@ -96,10 +96,10 @@ func strHash(s string) int {
 
 func newIteratorStruct() Struct {
 
-	// create a struct with fields that have placeholder NullValue values
+	// create a struct with fields that have placeholder Null values
 	stc, err := NewStruct([]Field{
-		NewField("nextValue", true, NullValue),
-		NewField("getValue", true, NullValue)}, true)
+		NewField("nextValue", true, Null),
+		NewField("getValue", true, Null)}, true)
 	if err != nil {
 		panic("invalid iterator")
 	}

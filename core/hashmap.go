@@ -68,7 +68,7 @@ func (hm *HashMap) Eq(cx Context, that *HashMap) (Bool, Error) {
 	return True, nil
 }
 
-// Get retrieves a value, or returns NullValue if the value is not present
+// Get retrieves a value, or returns Null if the value is not present
 func (hm *HashMap) Get(cx Context, key Value) (value Value, err Error) {
 
 	// recover from an un-hashable value
@@ -86,7 +86,7 @@ func (hm *HashMap) Get(cx Context, key Value) (value Value, err Error) {
 	b := hm.buckets[hm._lookupBucket(cx, key)]
 	n := hm._indexOf(cx, b, key)
 	if n == -1 {
-		return NullValue, nil
+		return Null, nil
 	}
 	return b[n].Value, nil
 }
