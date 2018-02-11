@@ -302,7 +302,7 @@ func (s *Scanner) Next() *ast.Token {
 			return s.nextStr('"')
 
 		case r == '`':
-			return s.nextMultilineStr()
+			return s.nextRawStr()
 
 		case isDigit(r):
 			return s.nextNumber()
@@ -505,7 +505,7 @@ func (s *Scanner) unicodeRune() (rune, *ast.Token) {
 	return rune(n), nil
 }
 
-func (s *Scanner) nextMultilineStr() *ast.Token {
+func (s *Scanner) nextRawStr() *ast.Token {
 
 	pos := s.pos
 	s.consume()

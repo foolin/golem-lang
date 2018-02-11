@@ -1137,7 +1137,7 @@ assert(
 	interpret(mod)
 }
 
-func TestMultilineString(t *testing.T) {
+func TestRawString(t *testing.T) {
 
 	source :=
 		"let s = `\n" +
