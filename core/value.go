@@ -219,9 +219,9 @@ type (
 
 		FieldNames() []string
 		Has(Value) (Bool, Error)
-
-		InitField(Context, Str, Value) Error
 		SetField(Context, Str, Value) Error
+
+		InternalInitField(Context, Str, Value) Error
 	}
 
 	// Iterator iterates over a sequence of values

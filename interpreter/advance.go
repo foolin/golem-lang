@@ -301,7 +301,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		// init or set
 		if opc[f.ip] == o.InitField {
-			err := stc.InitField(i, key, value)
+			err := stc.InternalInitField(i, key, value)
 			if err != nil {
 				return nil, err
 			}

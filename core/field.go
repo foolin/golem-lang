@@ -11,7 +11,7 @@ type Field interface {
 
 type field struct {
 	name       string
-	isConst    bool
+	isReadonly bool
 	isProperty bool
 	value      Value
 }
@@ -22,24 +22,32 @@ func (f *field) Name() string {
 }
 
 // NewField a name-value pair.
-func NewField(name string, isConst bool, value Value) Field {
-	return &field{name, isConst, false, value}
+func NewField(name string, isReadonly bool, value Value) Field {
+	return &field{name, isReadonly, false, value}
+}
+
+// NewReadonlyProperty creates a readonly Property using a 'getter' function.
+func NewReadonlyProperty(name string, getter Func) Field {
+
+	if getter.MinArity() != 0 || getter.MaxArity() != 0 {
+		panic("Property getter does not have arity 0")
+	}
+
+	prop := NewTuple([]Value{getter, nil})
+	return &field{name, true, true, prop}
 }
 
 // NewProperty creates a Property using 'getter' and 'setter' functions.
-// IfStmt the setter is nil, then the property is const.
 func NewProperty(name string, getter Func, setter Func) Field {
 
 	if getter.MinArity() != 0 || getter.MaxArity() != 0 {
 		panic("Property getter does not have arity 0")
 	}
 
-	if setter != nil {
-		if setter.MinArity() != 1 || setter.MaxArity() != 1 {
-			panic("Property setter does not have arity 1")
-		}
+	if setter.MinArity() != 1 || setter.MaxArity() != 1 {
+		panic("Property setter does not have arity 1")
 	}
 
 	prop := NewTuple([]Value{getter, setter})
-	return &field{name, setter == nil, true, prop}
+	return &field{name, false, true, prop}
 }

@@ -101,16 +101,15 @@ func (c *compiler) makeModuleProperty(
 		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
 			return mod.Refs[refIndex].Val, nil
 		})
-
-	var setter g.Func
-	if !isConst {
-		setter = g.NewNativeFunc(1, 1,
-			func(cx g.Context, values []g.Value) (g.Value, g.Error) {
-				mod.Refs[refIndex].Val = values[0]
-				return nil, nil
-			})
+	if isConst {
+		return g.NewReadonlyProperty(name, getter)
 	}
 
+	setter := g.NewNativeFunc(1, 1,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+			mod.Refs[refIndex].Val = values[0]
+			return nil, nil
+		})
 	return g.NewProperty(name, getter, setter)
 }
 

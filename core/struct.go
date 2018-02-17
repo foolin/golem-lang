@@ -142,6 +142,8 @@ func (st *_struct) GetField(cx Context, name Str) (Value, Error) {
 	f, has := st.smap.get(name.String())
 	if has {
 		if f.isProperty {
+			// The value for a property is always a tuple
+			// containing two functions: the getter, and the setter.
 			fn := ((f.value.(tuple))[0]).(Func)
 			return fn.Invoke(cx, nil)
 		}
@@ -165,22 +167,16 @@ func (st *_struct) Has(name Value) (Bool, Error) {
 //---------------------------------------------------------------
 // Mutation
 
-func (st *_struct) InitField(cx Context, name Str, val Value) Error {
+// This is an internal method, don't call it directly.
+func (st *_struct) InternalInitField(cx Context, name Str, val Value) Error {
 	// We ignore 'frozen' here, since we are initializing the value
 
 	f, has := st.smap.get(name.String())
 	if has {
 		// We ignore IsConst here, since we are initializing the value
+
 		if f.isProperty {
-			// TODO what are the semantics here?
-			// Do we really want to invoke this func?
-
-			//// The value for a property is always a tuple
-			//// containing two functions: the getter, and the setter.
-			//fn := ((f.value.(tuple))[1]).(Func)
-			//_, err := fn.Invoke(cx, []Value{val})
-			//return err
-
+			// properties do not need to be inited
 			return nil
 		}
 		f.value = val
@@ -198,7 +194,7 @@ func (st *_struct) SetField(cx Context, name Str, val Value) Error {
 	f, has := st.smap.get(name.String())
 	if has {
 		switch {
-		case f.isConst:
+		case f.isReadonly:
 			return ReadonlyFieldError(name.String())
 		case f.isProperty:
 			// The value for a property is always a tuple
