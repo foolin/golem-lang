@@ -882,16 +882,11 @@ func (p *Parser) structExpr() ast.Expression {
 	return p.structBody(p.expect(ast.Struct))
 }
 
-//func (p *Parser) propExpr() ast.Expression {
-//	token := p.expect(ast.Prop)
-//	return p.structBody(token)
-//}
-
 func (p *Parser) structBody(token *ast.Token) ast.Expression {
 
 	// key-value pairs
 	keys := []*ast.Token{}
-	values := []ast.Expression{}
+	values := []ast.Node{}
 	var rbrace *ast.Token
 	lbrace := p.expect(ast.Lbrace)
 
@@ -901,7 +896,13 @@ func (p *Parser) structBody(token *ast.Token) ast.Expression {
 		keys = append(keys, p.cur.token)
 		p.consume()
 		p.expect(ast.Colon)
-		values = append(values, p.expression())
+
+		if p.cur.token.Kind == ast.Prop {
+			values = append(values, p.property())
+		} else {
+			values = append(values, p.expression())
+		}
+
 	loop:
 		for {
 			switch p.cur.token.Kind {
@@ -911,7 +912,12 @@ func (p *Parser) structBody(token *ast.Token) ast.Expression {
 				keys = append(keys, p.cur.token)
 				p.consume()
 				p.expect(ast.Colon)
-				values = append(values, p.expression())
+
+				if p.cur.token.Kind == ast.Prop {
+					values = append(values, p.property())
+				} else {
+					values = append(values, p.expression())
+				}
 
 			case ast.Rbrace:
 				rbrace = p.consume().token
@@ -931,6 +937,48 @@ func (p *Parser) structBody(token *ast.Token) ast.Expression {
 
 	// done
 	return &ast.StructExpr{token, lbrace, keys, values, rbrace, ast.NewStructScope()}
+}
+
+func (p *Parser) property() *ast.PropNode {
+
+	token := p.expect(ast.Prop)
+	lbrace := p.expect(ast.Lbrace)
+
+	getter := p.propertyFunc()
+	if len(getter.FormalParams) != 0 {
+		panic(&parserError{InvalidPropertyGetter, getter.Token})
+	}
+
+	var setter *ast.FnExpr
+	if p.accept(ast.Comma) {
+		setter = p.propertyFunc()
+		if len(setter.FormalParams) != 1 {
+			panic(&parserError{InvalidPropertySetter, setter.Token})
+		}
+	}
+
+	return &ast.PropNode{token, lbrace, getter, setter, p.expect(ast.Rbrace)}
+}
+
+func (p *Parser) propertyFunc() *ast.FnExpr {
+
+	switch p.cur.token.Kind {
+
+	case ast.Fn:
+		return p.fnExpr(p.consume().token)
+
+	case ast.DblPipe:
+		return p.lambdaZero()
+
+	case ast.Ident:
+		return p.lambdaOne()
+
+	case ast.Pipe:
+		return p.lambda()
+
+	default:
+		panic(p.unexpected())
+	}
 }
 
 func (p *Parser) dictExpr() ast.Expression {
@@ -1330,6 +1378,8 @@ const (
 	InvalidFor
 	InvalidSwitch
 	InvalidTry
+	InvalidPropertyGetter
+	InvalidPropertySetter
 )
 
 type parserError struct {
@@ -1364,6 +1414,12 @@ func (e *parserError) Error() string {
 
 	case InvalidTry:
 		return fmt.Sprintf("Invalid Try Expression at %v", e.token.Position)
+
+	case InvalidPropertyGetter:
+		return fmt.Sprintf("Invalid Property Getter at %v", e.token.Position)
+
+	case InvalidPropertySetter:
+		return fmt.Sprintf("Invalid Property Setter at %v", e.token.Position)
 
 	default:
 		panic("unreachable")

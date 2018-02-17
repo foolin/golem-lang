@@ -397,6 +397,51 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:3)
 .   .   .   .   FieldExpr(minus)
 .   .   .   .   .   IdentExpr(a,v(3: a,0,false,false))
 `)
+
+	source = `
+let x = 1;
+let y = 2;
+struct {
+	a: prop { || => x },
+	b: prop { || => y, |v| => y = v }
+}
+`
+	anl = newAnalyzer(source)
+	errors = anl.Analyze()
+
+	//println(source)
+	//println(ast.Dump(anl.Module()))
+	//println(errors)
+
+	ok(t, anl, errors, `
+FnExpr(FuncScope defs:{} captures:{} numLocals:2)
+.   BlockNode(Scope defs:{x: v(0: x,0,false,false), y: v(1: y,1,false,false)})
+.   .   LetStmt
+.   .   .   IdentExpr(x,v(0: x,0,false,false))
+.   .   .   BasicExpr(Int,"1")
+.   .   LetStmt
+.   .   .   IdentExpr(y,v(1: y,1,false,false))
+.   .   .   BasicExpr(Int,"2")
+.   .   ExprStmt
+.   .   .   StructExpr([a, b],StructScope defs:{})
+.   .   .   .   PropNode
+.   .   .   .   .   FnExpr(FuncScope defs:{} captures:{x: (parent: v(0: x,0,false,false), child v(2: x,0,false,true))} numLocals:0)
+.   .   .   .   .   .   BlockNode(Scope defs:{})
+.   .   .   .   .   .   .   ExprStmt
+.   .   .   .   .   .   .   .   IdentExpr(x,v(2: x,0,false,true))
+.   .   .   .   PropNode
+.   .   .   .   .   FnExpr(FuncScope defs:{} captures:{y: (parent: v(1: y,1,false,false), child v(3: y,0,false,true))} numLocals:0)
+.   .   .   .   .   .   BlockNode(Scope defs:{})
+.   .   .   .   .   .   .   ExprStmt
+.   .   .   .   .   .   .   .   IdentExpr(y,v(3: y,0,false,true))
+.   .   .   .   .   FnExpr(FuncScope defs:{v: v(4: v,0,false,false)} captures:{y: (parent: v(1: y,1,false,false), child v(5: y,0,false,true))} numLocals:1)
+.   .   .   .   .   .   IdentExpr(v,v(4: v,0,false,false))
+.   .   .   .   .   .   BlockNode(Scope defs:{})
+.   .   .   .   .   .   .   ExprStmt
+.   .   .   .   .   .   .   .   AssignmentExpr
+.   .   .   .   .   .   .   .   .   IdentExpr(y,v(5: y,0,false,true))
+.   .   .   .   .   .   .   .   .   IdentExpr(v,v(4: v,0,false,false))
+`)
 }
 
 func TestAssignment(t *testing.T) {

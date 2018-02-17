@@ -528,6 +528,43 @@ func TestStruct(t *testing.T) {
 
 	p = newParser("this = b")
 	fail(t, p, "Unexpected Token '=' at (1, 6)")
+
+	////////////
+
+	p = newParser("struct { a: prop { fn() { x; } } }")
+	okExpr(t, p, "struct { a: prop { fn() { x; } } }")
+
+	p = newParser("struct { a: prop { || => x } }")
+	okExpr(t, p, "struct { a: prop { fn() { x; } } }")
+
+	p = newParser("struct { a: prop { |x| => x } }")
+	fail(t, p, "Invalid Property Getter at (1, 20)")
+
+	p = newParser("struct { a: prop { x => x } }")
+	fail(t, p, "Invalid Property Getter at (1, 20)")
+
+	p = newParser("struct { a: prop { |x,y| => x } }")
+	fail(t, p, "Invalid Property Getter at (1, 20)")
+
+	////////////
+
+	p = newParser("struct { a: prop { fn() { x; }, fn(y) { y; } } }")
+	okExpr(t, p, "struct { a: prop { fn() { x; }, fn(y) { y; } } }")
+
+	p = newParser("struct { a: prop { || => x, } }")
+	fail(t, p, "Unexpected Token '}' at (1, 29)")
+
+	p = newParser("struct { a: prop { || => x, || => y} }")
+	fail(t, p, "Invalid Property Setter at (1, 29)")
+
+	p = newParser("struct { a: prop { || => x, |y| => y } }")
+	okExpr(t, p, "struct { a: prop { fn() { x; }, fn(y) { y; } } }")
+
+	p = newParser("struct { a: prop { || => x, y => y} }")
+	okExpr(t, p, "struct { a: prop { fn() { x; }, fn(y) { y; } } }")
+
+	p = newParser("struct { a: prop { || => x, |x,y| => y} }")
+	fail(t, p, "Invalid Property Setter at (1, 29)")
 }
 
 func TestPrimarySuffix(t *testing.T) {

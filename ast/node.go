@@ -285,12 +285,21 @@ type (
 		StructToken *Token
 		LBrace      *Token
 		Keys        []*Token
-		Values      []Expression
+		Values      []Node
 		RBrace      *Token
 
 		// ThisScope will always either be empty, or contain
 		// a single 'this' Variable.
 		Scope StructScope
+	}
+
+	// PropNode is a 'prop' value in a struct
+	PropNode struct {
+		Token  *Token
+		LBrace *Token
+		Getter *FnExpr
+		Setter *FnExpr
+		RBrace *Token
 	}
 
 	// ThisExpr is a 'this' expression
@@ -637,6 +646,12 @@ func (n *StructExpr) Begin() Pos { return n.StructToken.Position }
 
 // End StructExpr
 func (n *StructExpr) End() Pos { return n.RBrace.Position }
+
+// Begin PropNode
+func (n *PropNode) Begin() Pos { return n.Token.Position }
+
+// End PropNode
+func (n *PropNode) End() Pos { return n.RBrace.Position }
 
 // Begin ThisExpr
 func (n *ThisExpr) Begin() Pos { return n.Token.Position }
@@ -1019,6 +1034,21 @@ func (n *StructExpr) String() string {
 		buf.WriteString(": ")
 		buf.WriteString(n.Values[idx].String())
 	}
+	buf.WriteString(" }")
+	return buf.String()
+}
+
+func (n *PropNode) String() string {
+	var buf bytes.Buffer
+	buf.WriteString("prop { ")
+
+	buf.WriteString(n.Getter.String())
+
+	if n.Setter != nil {
+		buf.WriteString(", ")
+		buf.WriteString(n.Setter.String())
+	}
+
 	buf.WriteString(" }")
 	return buf.String()
 }

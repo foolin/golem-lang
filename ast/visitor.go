@@ -241,6 +241,15 @@ func (stc *StructExpr) Traverse(v Visitor) {
 }
 
 // Traverse DictExpr
+func (propNode *PropNode) Traverse(v Visitor) {
+	v.Visit(propNode.Getter)
+
+	if propNode.Setter != nil {
+		v.Visit(propNode.Setter)
+	}
+}
+
+// Traverse DictExpr
 func (dict *DictExpr) Traverse(v Visitor) {
 	for _, e := range dict.Entries {
 		v.Visit(e)
@@ -367,6 +376,9 @@ func (p *dump) Visit(node Node) {
 
 	case *StructExpr:
 		p.buf.WriteString(fmt.Sprintf("StructExpr(%v,%v)\n", tokensString(t.Keys), t.Scope))
+	case *PropNode:
+		p.buf.WriteString("PropNode\n")
+
 	case *DictExpr:
 		p.buf.WriteString("DictExpr\n")
 	case *DictEntryExpr:
