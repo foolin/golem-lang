@@ -29,14 +29,14 @@ type Value interface {
 // Shared Interfaces
 
 type (
-	// Getable is a value that supports the dot operator
-	Getable interface {
+	// Indexable is a value that supports the index operator
+	Indexable interface {
 		Get(Context, Value) (Value, Error)
 	}
 
-	// Indexable is a value that supports the index operator
-	Indexable interface {
-		Getable
+	// IndexAssignable is a value that supports index assignment
+	IndexAssignable interface {
+		Indexable
 		Set(Context, Value, Value) Error
 	}
 
@@ -86,7 +86,7 @@ type (
 		Basic
 		fmt.Stringer
 
-		Getable
+		Indexable
 		Lenable
 		Sliceable
 		Iterable
@@ -140,7 +140,7 @@ type (
 	// List is an indexable sequence of values
 	List interface {
 		Composite
-		Indexable
+		IndexAssignable
 		Lenable
 		Iterable
 		Sliceable
@@ -166,7 +166,7 @@ type (
 	// Range is an immutable, iterable representation of a  sequence of integers
 	Range interface {
 		Composite
-		Getable
+		Indexable
 		Lenable
 		Iterable
 
@@ -179,14 +179,14 @@ type (
 	// Tuple is an immutable sequence of two or more values
 	Tuple interface {
 		Composite
-		Getable
+		Indexable
 		Lenable
 	}
 
 	// Dict is an associative array, a.k.a Hash Map
 	Dict interface {
 		Composite
-		Indexable
+		IndexAssignable
 		Lenable
 		Iterable
 

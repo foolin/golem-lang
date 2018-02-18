@@ -352,10 +352,10 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 	case o.GetIndex:
 
-		// get Getable from stack
-		gtb, ok := f.stack[n-1].(g.Getable)
+		// get Indexable from stack
+		gtb, ok := f.stack[n-1].(g.Indexable)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Getable")
+			return nil, g.TypeMismatchError("Expected Indexable")
 		}
 
 		// get index from stack
@@ -372,10 +372,10 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 	case o.SetIndex:
 
-		// get Indexable from stack
-		ibl, ok := f.stack[n-2].(g.Indexable)
+		// get IndexAssignable from stack
+		ibl, ok := f.stack[n-2].(g.IndexAssignable)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Getable")
+			return nil, g.TypeMismatchError("Expected Indexable")
 		}
 
 		// get index from stack
@@ -395,10 +395,10 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 	case o.IncIndex:
 
-		// get Indexable from stack
-		ibl, ok := f.stack[n-2].(g.Indexable)
+		// get IndexAssignable from stack
+		ibl, ok := f.stack[n-2].(g.IndexAssignable)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Getable")
+			return nil, g.TypeMismatchError("Expected Indexable")
 		}
 
 		// get index from stack

@@ -175,10 +175,10 @@ func (st *_struct) InternalInitField(cx Context, name Str, val Value) Error {
 	if has {
 		// We ignore IsConst here, since we are initializing the value
 
-		if f.isProperty {
-			// properties do not need to be inited
-			return nil
-		}
+		//if f.isProperty {
+		//	// properties do not need to be inited
+		//	return nil
+		//}
 		f.value = val
 		return nil
 	}
