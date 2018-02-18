@@ -175,8 +175,8 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 	case o.NewStruct:
 
-		def := i.mod.StructDefs[index(opc, f.ip)]
-		stc, err := g.NewStruct(def, false)
+		defs := i.mod.StructDefs[index(opc, f.ip)]
+		stc, err := g.DefineStruct(defs)
 		if err != nil {
 			return nil, err
 		}
@@ -301,7 +301,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		// init or set
 		if opc[f.ip] == o.InitField {
-			err := stc.InternalInitField(i, key, value)
+			err := stc.InitField(i, key, value)
 			if err != nil {
 				return nil, err
 			}

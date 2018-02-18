@@ -5,13 +5,15 @@
 package compiler
 
 import (
+	//"fmt"
+	"reflect"
+	"testing"
+
 	"github.com/mjarmy/golem-lang/analyzer"
 	g "github.com/mjarmy/golem-lang/core"
 	o "github.com/mjarmy/golem-lang/core/opcodes"
 	"github.com/mjarmy/golem-lang/parser"
 	"github.com/mjarmy/golem-lang/scanner"
-	"reflect"
-	"testing"
 )
 
 func tassert(t *testing.T, flag bool) {
@@ -88,7 +90,7 @@ func TestExpression(t *testing.T) {
 			g.NewInt(int64(-2)),
 			g.NewInt(int64(2))},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 0,
@@ -120,7 +122,7 @@ func TestExpression(t *testing.T) {
 			g.NewInt(int64(-4)),
 			g.NewInt(int64(10))},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 0,
@@ -144,7 +146,7 @@ func TestExpression(t *testing.T) {
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 0,
@@ -170,7 +172,7 @@ func TestExpression(t *testing.T) {
 			g.NewStr("a"),
 			g.NewFloat(float64(12300))},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 0,
@@ -191,7 +193,7 @@ func TestExpression(t *testing.T) {
 		[]g.Basic{
 			g.NewStr("a")},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 0,
@@ -211,7 +213,7 @@ func TestExpression(t *testing.T) {
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 0,
@@ -229,7 +231,7 @@ func TestExpression(t *testing.T) {
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 0,
@@ -248,7 +250,7 @@ func TestExpression(t *testing.T) {
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 0,
@@ -270,7 +272,7 @@ func TestExpression(t *testing.T) {
 			g.NewInt(int64(2)),
 			g.NewInt(int64(3))},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 1,
@@ -297,7 +299,7 @@ func TestExpression(t *testing.T) {
 			g.NewInt(int64(2)),
 			g.NewInt(int64(3))},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 1,
@@ -327,7 +329,7 @@ func TestAssignment(t *testing.T) {
 			g.NewInt(2),
 			g.NewInt(3)},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 2,
@@ -377,7 +379,7 @@ func TestIf(t *testing.T) {
 			g.NewInt(2),
 			g.NewInt(42)},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 1,
@@ -412,7 +414,7 @@ func TestIf(t *testing.T) {
 			g.NewInt(3),
 			g.NewInt(4)},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 4,
@@ -450,7 +452,7 @@ func TestWhile(t *testing.T) {
 		[]g.Basic{
 			g.NewInt(2)},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 2,
@@ -480,7 +482,7 @@ func TestWhile(t *testing.T) {
 			g.NewInt(2),
 			g.NewInt(3)},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 3,
@@ -519,7 +521,7 @@ func TestReturn(t *testing.T) {
 			g.NewInt(2),
 			g.NewInt(3)},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 1,
@@ -570,7 +572,7 @@ let b = fn(x) {
 			g.NewInt(42),
 			g.NewInt(7)},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{0, 0, 2,
 				[]byte{
@@ -651,7 +653,7 @@ c(2, 3)
 			g.NewInt(3),
 			g.NewInt(4)},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{0, 0, 3,
 				[]byte{
@@ -736,7 +738,7 @@ const accumGen = fn(n) {
 	ok(t, mod, &g.BytecodeModule{
 		[]g.Basic{},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{0, 0, 1,
 				[]byte{
@@ -800,7 +802,7 @@ const accumGen = fn(n) {
 		[]g.Basic{
 			g.NewInt(2)},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{0, 0, 2,
 				[]byte{
@@ -872,7 +874,7 @@ let d = b--
 			g.NewInt(int64(10)),
 			g.NewInt(int64(20))},
 		nil,
-		[][]g.Field{},
+		[][]*g.FieldDef{},
 		[]*g.Template{
 			&g.Template{
 				0, 0, 4,
@@ -939,18 +941,20 @@ assert(a == 2)
 	mod := newCompiler(anl).Compile()
 	tassert(t, mod.Templates[0].ExceptionHandlers[0] ==
 		g.ExceptionHandler{5, 14, -1, 14})
+}
 
-	source = `
-try {
-    try {
-        3 / 0
-    } catch e2 {
-        assert(1,2)
-    }
-} catch e {
-    println(e)
-}
-`
-	anl = newAnalyzer(source)
-	newCompiler(anl).Compile()
-}
+//func TestProperty(t *testing.T) {
+//
+//	source := `
+//let x = 1;
+//let c = struct {
+//	a: prop { || => 0 },
+//	b: prop { || => x, |v| => x = v }
+//}
+//`
+//	mod := newCompiler(newAnalyzer(source)).Compile()
+//	fmt.Println("----------------------------")
+//	fmt.Println(source)
+//	fmt.Println("----------------------------")
+//	fmt.Println(mod)
+//}

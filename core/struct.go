@@ -32,6 +32,22 @@ func NewStruct(fields []Field, frozen bool) (Struct, Error) {
 	return &_struct{smap, frozen}, nil
 }
 
+// DefineStruct defines an un-initialized Struct.
+// This function is called by the Golem Interpreter -- you shouldn't use it yourself
+// unless you are completely sure you know what you are doing.
+func DefineStruct(defs []*FieldDef) (Struct, Error) {
+
+	smap := newStructMap()
+	for _, d := range defs {
+		if _, has := smap.get(d.Name); has {
+			return nil, DuplicateFieldError(d.Name)
+		}
+		smap.put(&field{d.Name, d.IsReadonly, d.IsProperty, Null})
+	}
+
+	return &_struct{smap, false}, nil
+}
+
 // MergeStructs merges Structs together into one Struct.
 // Field name that are defined in more than one of the structs are combined so
 // that the value of the field is taken only from the first such Struct.
@@ -167,18 +183,22 @@ func (st *_struct) Has(name Value) (Bool, Error) {
 //---------------------------------------------------------------
 // Mutation
 
-// This is an internal method, don't call it directly.
-func (st *_struct) InternalInitField(cx Context, name Str, val Value) Error {
+// InitField initializes the Value of a Field in a Struct.
+// This function is called by the Golem Interpreter -- you shouldn't use it yourself
+// unless you are completely sure you know what you are doing.
+func (st *_struct) InitField(cx Context, name Str, val Value) Error {
+
 	// We ignore 'frozen' and isReadonly here, since we are initializing the value
 
 	f, has := st.smap.get(name.String())
-	if has {
-		f.value = val
-		return nil
+	if !has {
+		return NoSuchFieldError(name.String())
 	}
-	return NoSuchFieldError(name.String())
+	f.value = val
+	return nil
 }
 
+// SetField sets the Value of a Field in a Struct.
 func (st *_struct) SetField(cx Context, name Str, val Value) Error {
 
 	if st.frozen {

@@ -4,10 +4,22 @@
 
 package core
 
+import (
+	"fmt"
+)
+
 type (
-	// Field is a name-value pair inside a Struct
+	// Field is a name-value pair in a Struct
 	Field interface {
 		Name() string
+		fieldMarker()
+	}
+
+	// FieldDef defines a name-value pair in a Struct
+	FieldDef struct {
+		Name       string
+		IsReadonly bool
+		IsProperty bool
 	}
 
 	field struct {
@@ -17,7 +29,10 @@ type (
 		value      Value
 	}
 
+	// PropertyGetter is the signature for a native 'getter' function.
 	PropertyGetter func(Context) (Value, Error)
+
+	// PropertySetter is the signature for a native 'setter' function.
 	PropertySetter func(Context, Value) (Value, Error)
 )
 
@@ -26,25 +41,12 @@ func (f *field) Name() string {
 	return f.name
 }
 
-// NewField a name-value pair.
+func (f *field) fieldMarker() {}
+
+// NewField creates a name-value pair.
 func NewField(name string, isReadonly bool, value Value) Field {
 	return &field{name, isReadonly, false, value}
 }
-
-//// NewProperty creates a Property using 'getter' and 'setter' functions.
-//func NewProperty(name string, getter Func, setter Func) Field {
-//
-//	if getter.MinArity() != 0 || getter.MaxArity() != 0 {
-//		panic("Property getter does not have arity 0")
-//	}
-//
-//	if setter.MinArity() != 1 || setter.MaxArity() != 1 {
-//		panic("Property setter does not have arity 1")
-//	}
-//
-//	prop := NewTuple([]Value{getter, setter})
-//	return &field{name, false, true, prop}
-//}
 
 // NewNativeProperty creates a Property using 'getter' and 'setter' functions.
 // If 'setter' is nil, the Property will be readonly.
@@ -55,15 +57,16 @@ func NewNativeProperty(name string, getter PropertyGetter, setter PropertySetter
 			return getter(cx)
 		})
 	if setter == nil {
-		prop := NewTuple([]Value{get, nil})
-		return &field{name, true, true, prop}
-
+		return &field{name, true, true, NewTuple([]Value{get, nil})}
 	}
 
 	set := NewNativeFunc(1, 1,
 		func(cx Context, values []Value) (Value, Error) {
 			return setter(cx, values[0])
 		})
-	prop := NewTuple([]Value{get, set})
-	return &field{name, false, true, prop}
+	return &field{name, false, true, NewTuple([]Value{get, set})}
+}
+
+func (fd *FieldDef) String() string {
+	return fmt.Sprintf("fieldDef(%s %v %v)", fd.Name, fd.IsReadonly, fd.IsProperty)
 }

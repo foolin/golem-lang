@@ -31,7 +31,7 @@ type compiler struct {
 
 	funcs      []*ast.FnExpr
 	templates  []*g.Template
-	structDefs [][]g.Field
+	structDefs [][]*g.FieldDef
 	idx        int
 }
 
@@ -40,9 +40,11 @@ func NewCompiler(anl analyzer.Analyzer, builtInMgr g.BuiltinManager) Compiler {
 
 	funcs := []*ast.FnExpr{anl.Module()}
 	templates := []*g.Template{}
-	structDefs := [][]g.Field{}
+	structDefs := [][]*g.FieldDef{}
 
-	return &compiler{builtInMgr, g.EmptyHashMap(), nil, nil, nil, funcs, templates, structDefs, 0}
+	return &compiler{
+		builtInMgr, g.EmptyHashMap(), nil, nil, nil,
+		funcs, templates, structDefs, 0}
 }
 
 func (c *compiler) Compile() *g.BytecodeModule {
@@ -216,6 +218,9 @@ func (c *compiler) Visit(node ast.Node) {
 
 	case *ast.StructExpr:
 		c.visitStructExpr(t)
+
+	case *ast.PropNode:
+		c.visitPropNode(t)
 
 	case *ast.ThisExpr:
 		c.visitThisExpr(t)
@@ -938,9 +943,15 @@ func (c *compiler) visitExprStmt(es *ast.ExprStmt) {
 func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 
 	// create def and entries
-	def := []g.Field{}
-	for _, k := range stc.Keys {
-		def = append(def, g.NewField(k.Text, false, g.Null))
+	def := []*g.FieldDef{}
+	for i, k := range stc.Keys {
+		v := stc.Values[i]
+
+		if p, ok := v.(*ast.PropNode); ok {
+			def = append(def, &g.FieldDef{k.Text, p.Setter == nil, true})
+		} else {
+			def = append(def, &g.FieldDef{k.Text, false, false})
+		}
 	}
 	defIdx := len(c.structDefs)
 	c.structDefs = append(c.structDefs, def)
@@ -965,6 +976,19 @@ func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 			poolIndex(c.pool, g.NewStr(k.Text)))
 		c.push(k.Position, o.Pop)
 	}
+}
+
+func (c *compiler) visitPropNode(pn *ast.PropNode) {
+
+	c.Visit(pn.Getter)
+
+	if pn.Setter == nil {
+		c.push(pn.Begin(), o.LoadNull)
+	} else {
+		c.Visit(pn.Setter)
+	}
+
+	c.pushIndex(pn.Begin(), o.NewTuple, 2)
 }
 
 func (c *compiler) visitThisExpr(this *ast.ThisExpr) {

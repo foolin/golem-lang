@@ -28,7 +28,7 @@ type Module interface {
 type BytecodeModule struct {
 	Pool       []Basic
 	Refs       []*Ref
-	StructDefs [][]Field
+	StructDefs [][]*FieldDef
 	Templates  []*Template
 	Contents   Struct
 }
