@@ -4,17 +4,22 @@
 
 package core
 
-// Field is a name-value pair inside a Struct
-type Field interface {
-	Name() string
-}
+type (
+	// Field is a name-value pair inside a Struct
+	Field interface {
+		Name() string
+	}
 
-type field struct {
-	name       string
-	isReadonly bool
-	isProperty bool
-	value      Value
-}
+	field struct {
+		name       string
+		isReadonly bool
+		isProperty bool
+		value      Value
+	}
+
+	PropertyGetter func(Context) (Value, Error)
+	PropertySetter func(Context, Value) (Value, Error)
+)
 
 // Name returns the name of a field
 func (f *field) Name() string {
@@ -26,28 +31,39 @@ func NewField(name string, isReadonly bool, value Value) Field {
 	return &field{name, isReadonly, false, value}
 }
 
-// NewReadonlyProperty creates a readonly Property using a 'getter' function.
-func NewReadonlyProperty(name string, getter Func) Field {
+//// NewProperty creates a Property using 'getter' and 'setter' functions.
+//func NewProperty(name string, getter Func, setter Func) Field {
+//
+//	if getter.MinArity() != 0 || getter.MaxArity() != 0 {
+//		panic("Property getter does not have arity 0")
+//	}
+//
+//	if setter.MinArity() != 1 || setter.MaxArity() != 1 {
+//		panic("Property setter does not have arity 1")
+//	}
+//
+//	prop := NewTuple([]Value{getter, setter})
+//	return &field{name, false, true, prop}
+//}
 
-	if getter.MinArity() != 0 || getter.MaxArity() != 0 {
-		panic("Property getter does not have arity 0")
+// NewNativeProperty creates a Property using 'getter' and 'setter' functions.
+// If 'setter' is nil, the Property will be readonly.
+func NewNativeProperty(name string, getter PropertyGetter, setter PropertySetter) Field {
+
+	get := NewNativeFunc(0, 0,
+		func(cx Context, values []Value) (Value, Error) {
+			return getter(cx)
+		})
+	if setter == nil {
+		prop := NewTuple([]Value{get, nil})
+		return &field{name, true, true, prop}
+
 	}
 
-	prop := NewTuple([]Value{getter, nil})
-	return &field{name, true, true, prop}
-}
-
-// NewProperty creates a Property using 'getter' and 'setter' functions.
-func NewProperty(name string, getter Func, setter Func) Field {
-
-	if getter.MinArity() != 0 || getter.MaxArity() != 0 {
-		panic("Property getter does not have arity 0")
-	}
-
-	if setter.MinArity() != 1 || setter.MaxArity() != 1 {
-		panic("Property setter does not have arity 1")
-	}
-
-	prop := NewTuple([]Value{getter, setter})
+	set := NewNativeFunc(1, 1,
+		func(cx Context, values []Value) (Value, Error) {
+			return setter(cx, values[0])
+		})
+	prop := NewTuple([]Value{get, set})
 	return &field{name, false, true, prop}
 }

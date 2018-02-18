@@ -169,16 +169,10 @@ func (st *_struct) Has(name Value) (Bool, Error) {
 
 // This is an internal method, don't call it directly.
 func (st *_struct) InternalInitField(cx Context, name Str, val Value) Error {
-	// We ignore 'frozen' here, since we are initializing the value
+	// We ignore 'frozen' and isReadonly here, since we are initializing the value
 
 	f, has := st.smap.get(name.String())
 	if has {
-		// We ignore IsConst here, since we are initializing the value
-
-		//if f.isProperty {
-		//	// properties do not need to be inited
-		//	return nil
-		//}
 		f.value = val
 		return nil
 	}

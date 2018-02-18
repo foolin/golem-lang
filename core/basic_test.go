@@ -15,6 +15,7 @@ var cx Context
 func tassert(t *testing.T, flag bool) {
 	if !flag {
 		t.Error("assertion failure")
+		panic("tassert")
 	}
 }
 
