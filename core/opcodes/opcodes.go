@@ -64,7 +64,7 @@ const (
 	Done
 	ThrowStmt
 
-	NewStruct
+	DefineStruct
 	NewDict
 	NewList
 	NewSet
@@ -108,7 +108,7 @@ func OpCodeSize(opc byte) int {
 		LoadLocal, LoadCapture, StoreLocal, StoreCapture,
 		Jump, JumpTrue, JumpFalse, BreakStmt, ContinueStmt,
 		NewFunc, FuncCapture, FuncLocal, Invoke, GoStmt,
-		NewStruct, GetField, InitField, SetField, IncField,
+		DefineStruct, GetField, InitField, SetField, IncField,
 		NewDict, NewList, NewSet, NewTuple, CheckCast, CheckTuple:
 
 		return 3
@@ -222,8 +222,8 @@ func FmtOpcode(opcodes []byte, i int) string {
 	case ThrowStmt:
 		return fmt.Sprintf("%d: ThrowStmt\n", i)
 
-	case NewStruct:
-		return fmtIndex(opcodes, i, "NewStruct")
+	case DefineStruct:
+		return fmtIndex(opcodes, i, "DefineStruct")
 	case GetField:
 		return fmtIndex(opcodes, i, "GetField")
 	case InitField:

@@ -957,7 +957,7 @@ func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 	c.structDefs = append(c.structDefs, def)
 
 	// create new struct
-	c.pushIndex(stc.Begin(), o.NewStruct, defIdx)
+	c.pushIndex(stc.Begin(), o.DefineStruct, defIdx)
 
 	// if the struct is referenced by a 'this', then store local
 	if this, ok := stc.Scope.GetVariable("this"); ok {

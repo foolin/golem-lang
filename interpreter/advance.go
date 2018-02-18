@@ -173,7 +173,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		fn.PushCapture(f.fn.GetCapture(idx))
 		f.ip += 3
 
-	case o.NewStruct:
+	case o.DefineStruct:
 
 		defs := i.mod.StructDefs[index(opc, f.ip)]
 		stc, err := g.DefineStruct(defs)
