@@ -117,16 +117,21 @@ func TestNativeProp(t *testing.T) {
 
 	var propValue Value = Zero
 
-	getter := func(cx Context) (Value, Error) {
-		return propValue, nil
-	}
+	getter := NewNativeFunc(0, 0,
+		func(cx Context, values []Value) (Value, Error) {
+			return propValue, nil
+		})
 
-	setter := func(cx Context, val Value) (Value, Error) {
-		propValue = val
-		return Null, nil
-	}
+	setter := NewNativeFunc(1, 1,
+		func(cx Context, values []Value) (Value, Error) {
+			propValue = values[0]
+			return Null, nil
+		})
 
-	stc, err := NewStruct([]Field{NewNativeProperty("a", getter, setter)}, false)
+	prop, err := NewNativeProperty("a", getter, setter)
+	tassert(t, err == nil)
+
+	stc, err := NewStruct([]Field{prop}, false)
 	tassert(t, err == nil)
 
 	val, err := stc.GetField(cx, NewStr("a"))

@@ -99,18 +99,28 @@ func (c *compiler) makeModuleProperty(
 	refIndex int,
 	isConst bool) g.Field {
 
-	getter := func(cx g.Context) (g.Value, g.Error) {
-		return mod.Refs[refIndex].Val, nil
-	}
+	getter := g.NewNativeFunc(0, 0,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+			return mod.Refs[refIndex].Val, nil
+		})
 	if isConst {
-		return g.NewNativeProperty(name, getter, nil)
+		prop, err := g.NewReadonlyNativeProperty(name, getter)
+		if err != nil {
+			panic("unreachable")
+		}
+		return prop
 	}
 
-	setter := func(cx g.Context, val g.Value) (g.Value, g.Error) {
-		mod.Refs[refIndex].Val = val
-		return g.Null, nil
+	setter := g.NewNativeFunc(1, 1,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+			mod.Refs[refIndex].Val = values[0]
+			return g.Null, nil
+		})
+	prop, err := g.NewNativeProperty(name, getter, setter)
+	if err != nil {
+		panic("unreachable")
 	}
-	return g.NewNativeProperty(name, getter, setter)
+	return prop
 }
 
 func (c *compiler) compileFunc(fe *ast.FnExpr) *g.Template {

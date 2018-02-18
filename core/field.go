@@ -28,12 +28,6 @@ type (
 		isProperty bool
 		value      Value
 	}
-
-	// PropertyGetter is the signature for a native 'getter' function.
-	PropertyGetter func(Context) (Value, Error)
-
-	// PropertySetter is the signature for a native 'setter' function.
-	PropertySetter func(Context, Value) (Value, Error)
 )
 
 // Name returns the name of a field
@@ -48,23 +42,32 @@ func NewField(name string, isReadonly bool, value Value) Field {
 	return &field{name, isReadonly, false, value}
 }
 
-// NewNativeProperty creates a Property using 'getter' and 'setter' functions.
-// If 'setter' is nil, the Property will be readonly.
-func NewNativeProperty(name string, getter PropertyGetter, setter PropertySetter) Field {
+// NewReadonlyNativeProperty creates a readonly Property using a 'getter' function.
+// The 'getter' function must have an arity of 0.
+func NewReadonlyNativeProperty(name string, getter NativeFunc) (Field, Error) {
 
-	get := NewNativeFunc(0, 0,
-		func(cx Context, values []Value) (Value, Error) {
-			return getter(cx)
-		})
-	if setter == nil {
-		return &field{name, true, true, NewTuple([]Value{get, nil})}
+	if getter.MinArity() != 0 || getter.MaxArity() != 0 {
+		return nil, ArityMismatchError("0", getter.MaxArity())
 	}
 
-	set := NewNativeFunc(1, 1,
-		func(cx Context, values []Value) (Value, Error) {
-			return setter(cx, values[0])
-		})
-	return &field{name, false, true, NewTuple([]Value{get, set})}
+	return &field{name, true, true, NewTuple([]Value{getter, Null})}, nil
+}
+
+// NewNativeProperty creates a Property using 'getter' and 'setter' functions.
+// The 'getter' function must have an arity of 0, and the 'setter' function
+// must have an arity of 1.  By convention the setter function should
+// return 'Null'; its return value will be ignored.
+func NewNativeProperty(name string, getter NativeFunc, setter NativeFunc) (Field, Error) {
+
+	if getter.MinArity() != 0 || getter.MaxArity() != 0 {
+		return nil, ArityMismatchError("0", getter.MaxArity())
+	}
+
+	if setter.MinArity() != 1 || setter.MaxArity() != 1 {
+		return nil, ArityMismatchError("1", setter.MaxArity())
+	}
+
+	return &field{name, false, true, NewTuple([]Value{getter, setter})}, nil
 }
 
 func (fd *FieldDef) String() string {
