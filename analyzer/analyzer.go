@@ -315,15 +315,16 @@ func (a *analyzer) putVariable(sym string, isConst bool) ast.Variable {
 		panic("symbol is already defined")
 	}
 
-	v := ast.NewVariable(sym, a.incrementNumLocals(), isConst, false)
+	v := ast.NewVariable(sym, a.incrementNumLocals(len(a.scopes)-1), isConst, false)
 	s.PutVariable(sym, v)
 	return v
 }
 
-// Increment the number of local variables in the nearest parent FuncScope.
-func (a *analyzer) incrementNumLocals() int {
+// Increment the number of local variables in the nearest parent FuncScope,
+// staring from the given scope index.
+func (a *analyzer) incrementNumLocals(from int) int {
 
-	for i := len(a.scopes) - 1; i >= 0; i-- {
+	for i := from; i >= 0; i-- {
 		s := a.scopes[i]
 
 		if f, ok := s.(ast.FuncScope); ok {
@@ -387,11 +388,13 @@ func (a *analyzer) putThis() ast.Variable {
 
 		if _, ok := s.(ast.StructScope); ok {
 
-			// define a 'this' variable on the structScope, if its not already defined
+			// Define a 'this' variable on the structScope, if its not already defined.
+			// NOTE: We increment the number of local variables
+			// starting from the current scope, not the top of the stack.
 			if _, ok := s.GetVariable("this"); !ok {
 				s.PutVariable(
 					"this",
-					ast.NewVariable("this", a.incrementNumLocals(), true, false))
+					ast.NewVariable("this", a.incrementNumLocals(i), true, false))
 			}
 
 			// now call getVariable(), to trigger captures in any intervening functions.

@@ -691,20 +691,27 @@ fn testUnicodeEscape() {
     assert(s[2] == '$')
 }
 
-fn testProperty() {
+fn testStruct() {
 
-    let x = 1;
+    let x = 2;
     let s = struct {
-        a: prop { || => 0 },
-        b: prop { || => x, |v| => x = v }
+        a: prop { || => 1 },
+        b: prop { || => x, |v| => x = v },
+        c: || => this.a + this.b
     }
 
-    assert(s.a == 0)
+    assert(s.a == 1)
     failMsg(|| => s.a = -1, 'ReadonlyField' , "Field 'a' is readonly")
 
-    assert(s.b == 1 && x == 1)
-    s.b = 2
-    assert(s.b == 2 && x == 2)
+    assert([s.b, x, s.c()] == [2, 2, 3])
+    s.b = 3
+    assert([s.b, x, s.c()] == [3, 3, 4])
+
+    let u = struct {
+        a: prop { || => x },
+        b: || => this.a
+    }
+    assert([u.a, u.b()] == [3, 3])
 }
 
 fn main(args) {
@@ -726,6 +733,6 @@ fn main(args) {
     testRange()
     testSlice()
     testUnicodeEscape()
-    testProperty()
+    testStruct()
 }
 

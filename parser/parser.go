@@ -17,11 +17,11 @@ import (
 
 // Parser parses Golem source code, and creates an Abstract Syntax Tree.
 type Parser struct {
-	scn       *scanner.Scanner
-	isBuiltIn func(string) bool
-	cur       tokenInfo
-	next      tokenInfo
-	synthetic int
+	scn           *scanner.Scanner
+	isBuiltIn     func(string) bool
+	cur           tokenInfo
+	next          tokenInfo
+	iterIDCounter int
 }
 
 type tokenInfo struct {
@@ -305,8 +305,8 @@ func (p *Parser) forStmt() *ast.ForStmt {
 	// parse 'in'
 	tok := p.expect(ast.In)
 
-	// make synthetic Identifier for iterable
-	iblIdent := p.makeSyntheticIdent(tok.Position)
+	// make identifier for iterable
+	iblIdent := p.makeIterIdent(tok.Position)
 
 	// parse the rest
 	iterable := p.expression()
@@ -315,6 +315,14 @@ func (p *Parser) forStmt() *ast.ForStmt {
 	// done
 	p.expectStatementDelimiter()
 	return &ast.ForStmt{token, idents, iblIdent, iterable, body, ast.NewScope()}
+}
+
+// make an identifier for an iterable in a 'for' stmt
+func (p *Parser) makeIterIdent(pos ast.Pos) *ast.IdentExpr {
+	sym := fmt.Sprintf("#iter%d", p.iterIDCounter)
+	p.iterIDCounter++
+	return &ast.IdentExpr{
+		&ast.Token{ast.Ident, sym, pos}, nil}
 }
 
 func (p *Parser) tupleIdents() []*ast.IdentExpr {
@@ -1229,14 +1237,6 @@ func (p *Parser) unexpected() error {
 	default:
 		return &parserError{UnexpectedToken, p.cur.token}
 	}
-}
-
-// make a synthetic identifier
-func (p *Parser) makeSyntheticIdent(pos ast.Pos) *ast.IdentExpr {
-	sym := fmt.Sprintf("#synthetic%d", p.synthetic)
-	p.synthetic++
-	return &ast.IdentExpr{
-		&ast.Token{ast.Ident, sym, pos}, nil}
 }
 
 func isComparative(kind ast.TokenKind) bool {

@@ -943,14 +943,15 @@ assert(a == 2)
 		g.ExceptionHandler{5, 14, -1, 14})
 }
 
-//func TestProperty(t *testing.T) {
+//func TestStruct(t *testing.T) {
 //
 //	source := `
-//let x = 1;
-//let c = struct {
-//	a: prop { || => 0 },
-//	b: prop { || => x, |v| => x = v }
+//let x = 1
+//let u = struct {
+//	a: prop { || => x },
+//	b: || => this.a
 //}
+//println(u)
 //`
 //	mod := newCompiler(newAnalyzer(source)).Compile()
 //	fmt.Println("----------------------------")

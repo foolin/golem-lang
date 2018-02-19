@@ -53,7 +53,7 @@ type (
 	//      (1) A 'let' or 'const' stmt.
 	//		(2) The 'for' clause of a for-loop.
 	//		(3) The 'catch' clause of a try-catch block.
-	//		(4) A 'this' expression
+	//		(4) A 'this' expression (but not always! they share the nearest parent struct)
 	// 		(5) The formal parameters of a function.
 	//
 	// Variables are created indirectly via the capture mechanism, in which

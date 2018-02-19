@@ -437,14 +437,14 @@ x.a = 6
 	okRef(t, i, mod.Refs[1], g.NewInt(5))
 
 	source = `
-	let a = struct {
-	    x: 8,
-	    y: 5,
-	    plus:  fn() { return this.x + this.y; },
-	    minus: fn() { return this.x - this.y; }
-	}
-	let b = a.plus()
-	let c = a.minus()
+let a = struct {
+	x: 8,
+	y: 5,
+	plus:  fn() { return this.x + this.y; },
+	minus: fn() { return this.x - this.y; }
+}
+let b = a.plus()
+let c = a.minus()
 	`
 	mod = newCompiler(source).Compile()
 	fmt.Println("----------------------------")
@@ -452,8 +452,8 @@ x.a = 6
 	fmt.Println(mod)
 
 	interpret(mod)
-	okRef(t, i, mod.Refs[1], g.NewInt(13))
-	okRef(t, i, mod.Refs[2], g.NewInt(3))
+	okRef(t, i, mod.Refs[2], g.NewInt(13))
+	okRef(t, i, mod.Refs[3], g.NewInt(3))
 
 	source = `
 let a = null
