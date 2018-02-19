@@ -35,5 +35,5 @@ release: build
 	GOOS=linux   GOARCH=amd64 go build -o ./release/golem/linux/golem       golem.go
 	GOOS=darwin  GOARCH=amd64 go build -o ./release/golem/mac/golem         golem.go
 	GOOS=windows GOARCH=amd64 go build -o ./release/golem/windows/golem.exe golem.go
-	cd release && zip -r ./golem-0.8.1.zip golem
-	cd release && tar czf ./golem-0.8.1.tar.gz golem
+	cd release && zip -r ./golem-0.8.2.zip golem
+	cd release && tar czf ./golem-0.8.2.tar.gz golem
