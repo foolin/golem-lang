@@ -693,25 +693,34 @@ fn testUnicodeEscape() {
 
 fn testStruct() {
 
-    let x = 2;
+    let x = 2
     let s = struct {
+
+        // 'a' is a readonly property with a getter function.
         a: prop { || => 1 },
+
+        // 'b' is a property with getter and setters functions.
         b: prop { || => x, |v| => x = v },
+
+        // 'a' and 'b' act like normal fields here.
         c: || => this.a + this.b
     }
 
-    assert(s.a == 1)
-    failMsg(|| => s.a = -1, 'ReadonlyField' , "Field 'a' is readonly")
-
-    assert([s.b, x, s.c()] == [2, 2, 3])
-    s.b = 3
-    assert([s.b, x, s.c()] == [3, 3, 4])
-
-    let u = struct {
-        a: prop { || => x },
-        b: || => this.a
+    try {
+        s.a = 42
+        assert(false) // we will never get here.
+    } catch e {
+        assert(e.kind == 'ReadonlyField')
+        assert(e.msg == "Field 'a' is readonly")
     }
-    assert([u.a, u.b()] == [3, 3])
+
+    assert([s.a, s.b, x, s.c()] == [1, 2, 2, 3])
+
+    s.b = 3
+    assert([s.a, s.b, x, s.c()] == [1, 3, 3, 4])
+
+    x = 4
+    assert([s.a, s.b, x, s.c()] == [1, 4, 4, 5])
 }
 
 fn main(args) {
