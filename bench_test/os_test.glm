@@ -41,7 +41,7 @@ fn testReadLines() {
 
 fn testStat() {
     let info = os.stat('./bench_test/data/lines.txt')
-    assert(struct { size: 8, isDir: false, name: 'lines.txt', mode: 436 } == info)
+    assert(struct { size: 8, isDir: false, name: 'lines.txt', mode: 420 } == info)
 }
 
 fn main(args) {

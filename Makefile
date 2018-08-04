@@ -9,7 +9,7 @@ fmt:
 	go fmt ./...
 
 lint:
-	gometalinter --disable=gocyclo --disable=goconst ./...
+	gometalinter.v2 --disable=gocyclo --disable=goconst ./...
 
 vet:
 	go vet ./...
@@ -26,7 +26,8 @@ bench_test: compile
 	./golem bench_test/regexp_test.glm
 	./golem bench_test/path_test.glm
 
-build: clean fmt lint vet test compile bench_test
+#build: clean fmt lint vet test compile bench_test
+build: clean fmt test compile bench_test
 
 release: build
 	mkdir -p ./release/golem/linux
