@@ -108,7 +108,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			go (func() {
 				_, errTrace := intp.eval(fn, locals)
 				if errTrace != nil {
-					fmt.Printf("%v\n", errTrace.Error)
+					fmt.Printf("%v\n", errTrace.Error())
 				}
 			})()
 
