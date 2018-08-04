@@ -179,9 +179,9 @@ func newLocals(numLocals int, params []g.Value) []*g.Ref {
 	locals := make([]*g.Ref, numLocals)
 	for j := 0; j < numLocals; j++ {
 		if j < p {
-			locals[j] = &g.Ref{params[j]}
+			locals[j] = &g.Ref{Val: params[j]}
 		} else {
-			locals[j] = &g.Ref{g.Null}
+			locals[j] = &g.Ref{Val: g.Null}
 		}
 	}
 	return locals

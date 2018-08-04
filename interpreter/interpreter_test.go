@@ -283,8 +283,8 @@ a = a + B
 `,
 		g.NewInt(3),
 		[]*g.Ref{
-			&g.Ref{g.NewInt(3)},
-			&g.Ref{g.NewInt(2)}})
+			&g.Ref{Val: g.NewInt(3)},
+			&g.Ref{Val: g.NewInt(2)}})
 
 	okMod(t, `
 let a = 1
@@ -295,9 +295,9 @@ c = (c + a)/13
 `,
 		g.NewInt(4),
 		[]*g.Ref{
-			&g.Ref{g.NewInt(42)},
-			&g.Ref{g.NewInt(7)},
-			&g.Ref{g.NewInt(4)}})
+			&g.Ref{Val: g.NewInt(42)},
+			&g.Ref{Val: g.NewInt(7)},
+			&g.Ref{Val: g.NewInt(4)}})
 
 	okMod(t, `
 let a = 1
@@ -309,9 +309,9 @@ b *= 2
 `,
 		g.NewInt(8),
 		[]*g.Ref{
-			&g.Ref{g.NewInt(4)},
-			&g.Ref{g.NewInt(8)},
-			&g.Ref{g.NewInt(16)}})
+			&g.Ref{Val: g.NewInt(4)},
+			&g.Ref{Val: g.NewInt(8)},
+			&g.Ref{Val: g.NewInt(16)}})
 
 	okMod(t, `
 let a = 1
@@ -321,31 +321,31 @@ b = a %= 4
 `,
 		g.NewInt(3),
 		[]*g.Ref{
-			&g.Ref{g.NewInt(3)},
-			&g.Ref{g.NewInt(3)}})
+			&g.Ref{Val: g.NewInt(3)},
+			&g.Ref{Val: g.NewInt(3)}})
 }
 
 func TestIf(t *testing.T) {
 
 	okMod(t, "let a = 1; if (true) { a = 2; }",
 		g.NewInt(2),
-		[]*g.Ref{&g.Ref{g.NewInt(2)}})
+		[]*g.Ref{&g.Ref{Val: g.NewInt(2)}})
 
 	okMod(t, "let a = 1; if (false) { a = 2; }",
 		g.Null,
-		[]*g.Ref{&g.Ref{g.One}})
+		[]*g.Ref{&g.Ref{Val: g.One}})
 
 	okMod(t, "let a = 1; if (1 == 1) { a = 2; } else { a = 3; }; let b = 4;",
 		g.NewInt(2),
 		[]*g.Ref{
-			&g.Ref{g.NewInt(2)},
-			&g.Ref{g.NewInt(4)}})
+			&g.Ref{Val: g.NewInt(2)},
+			&g.Ref{Val: g.NewInt(4)}})
 
 	okMod(t, "let a = 1; if (1 == 2) { a = 2; } else { a = 3; }; const b = 4;",
 		g.NewInt(3),
 		[]*g.Ref{
-			&g.Ref{g.NewInt(3)},
-			&g.Ref{g.NewInt(4)}})
+			&g.Ref{Val: g.NewInt(3)},
+			&g.Ref{Val: g.NewInt(4)}})
 }
 
 func TestWhile(t *testing.T) {
@@ -367,7 +367,7 @@ while (a < 3) {
     a = a + 1
 }`,
 		g.NewInt(3),
-		[]*g.Ref{&g.Ref{g.NewInt(3)}})
+		[]*g.Ref{&g.Ref{Val: g.NewInt(3)}})
 
 	okMod(t, `
 let a = 1
@@ -376,7 +376,7 @@ while (a < 11) {
     a = a + 1
 }`,
 		g.NewInt(6),
-		[]*g.Ref{&g.Ref{g.NewInt(6)}})
+		[]*g.Ref{&g.Ref{Val: g.NewInt(6)}})
 
 	okMod(t, `
 let a = 1
@@ -388,8 +388,8 @@ while (a < 11) {
 }`,
 		g.NewInt(11),
 		[]*g.Ref{
-			&g.Ref{g.NewInt(11)},
-			&g.Ref{g.NewInt(4)}})
+			&g.Ref{Val: g.NewInt(11)},
+			&g.Ref{Val: g.NewInt(4)}})
 
 	okMod(t, `
 let a = 1
@@ -397,8 +397,8 @@ return a + 2
 let b = 5`,
 		g.NewInt(3),
 		[]*g.Ref{
-			&g.Ref{g.One},
-			&g.Ref{g.Null}})
+			&g.Ref{Val: g.One},
+			&g.Ref{Val: g.Null}})
 }
 
 func TestStruct(t *testing.T) {

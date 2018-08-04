@@ -58,7 +58,13 @@ func (c *compiler) Compile() *g.BytecodeModule {
 	}
 
 	// done
-	mod := &g.BytecodeModule{makePoolSlice(c.pool), nil, c.structDefs, c.templates, nil}
+	mod := &g.BytecodeModule{
+		Pool:       makePoolSlice(c.pool),
+		Refs:       nil,
+		StructDefs: c.structDefs,
+		Templates:  c.templates,
+		Contents:   nil,
+	}
 	mod.Contents = c.makeModuleContents(mod)
 	return mod
 }
@@ -126,7 +132,14 @@ func (c *compiler) makeModuleProperty(
 func (c *compiler) compileFunc(fe *ast.FnExpr) *g.Template {
 
 	arity := len(fe.FormalParams)
-	tpl := &g.Template{arity, fe.Scope.NumCaptures(), fe.Scope.NumLocals(), nil, nil, nil}
+	tpl := &g.Template{
+		Arity:             arity,
+		NumCaptures:       fe.Scope.NumCaptures(),
+		NumLocals:         fe.Scope.NumLocals(),
+		OpCodes:           nil,
+		LineNumberTable:   nil,
+		ExceptionHandlers: nil,
+	}
 
 	c.opc = []byte{}
 	c.lnum = []g.LineNumberEntry{}
@@ -698,7 +711,12 @@ func (c *compiler) visitTry(t *ast.TryStmt) {
 
 	// sanity check
 	assert(!(catch == -1 && finally == -1))
-	c.handlers = append(c.handlers, g.ExceptionHandler{begin, end, catch, finally})
+	c.handlers = append(c.handlers, g.ExceptionHandler{
+		Begin:   begin,
+		End:     end,
+		Catch:   catch,
+		Finally: finally,
+	})
 }
 
 func (c *compiler) visitThrow(t *ast.ThrowStmt) {
@@ -958,9 +976,17 @@ func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 		v := stc.Values[i]
 
 		if p, ok := v.(*ast.PropNode); ok {
-			def = append(def, &g.FieldDef{k.Text, p.Setter == nil, true})
+			def = append(def, &g.FieldDef{
+				Name:       k.Text,
+				IsReadonly: p.Setter == nil,
+				IsProperty: true,
+			})
 		} else {
-			def = append(def, &g.FieldDef{k.Text, false, false})
+			def = append(def, &g.FieldDef{
+				Name:       k.Text,
+				IsReadonly: false,
+				IsProperty: false,
+			})
 		}
 	}
 	defIdx := len(c.structDefs)
@@ -1098,7 +1124,10 @@ func (c *compiler) push(pos ast.Pos, bytes ...byte) int {
 
 	ln := len(c.lnum)
 	if (ln == 0) || (pos.Line != c.lnum[ln-1].LineNum) {
-		c.lnum = append(c.lnum, g.LineNumberEntry{n, pos.Line})
+		c.lnum = append(c.lnum, g.LineNumberEntry{
+			Index:   n,
+			LineNum: pos.Line,
+		})
 	}
 
 	return n

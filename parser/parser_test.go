@@ -645,64 +645,64 @@ func okPos(t *testing.T, p *Parser, expectBegin ast.Pos, expectEnd ast.Pos) {
 
 func TestPos(t *testing.T) {
 	p := newParser("1.23")
-	okExprPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 4})
+	okExprPos(t, p, ast.Pos{Line: 1, Col: 1}, ast.Pos{Line: 1, Col: 4})
 
 	p = newParser("-1")
-	okExprPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 2})
+	okExprPos(t, p, ast.Pos{Line: 1, Col: 1}, ast.Pos{Line: 1, Col: 2})
 
 	p = newParser("null + true")
-	okExprPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 11})
+	okExprPos(t, p, ast.Pos{Line: 1, Col: 1}, ast.Pos{Line: 1, Col: 11})
 
 	p = newParser("a1")
-	okExprPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 2})
+	okExprPos(t, p, ast.Pos{Line: 1, Col: 1}, ast.Pos{Line: 1, Col: 2})
 
 	p = newParser("a = \n3")
-	okExprPos(t, p, ast.Pos{1, 1}, ast.Pos{2, 1})
+	okExprPos(t, p, ast.Pos{Line: 1, Col: 1}, ast.Pos{Line: 2, Col: 1})
 
 	p = newParser("a(b,c)")
-	okExprPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 6})
+	okExprPos(t, p, ast.Pos{Line: 1, Col: 1}, ast.Pos{Line: 1, Col: 6})
 
 	p = newParser("struct{}")
-	okExprPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 8})
+	okExprPos(t, p, ast.Pos{Line: 1, Col: 1}, ast.Pos{Line: 1, Col: 8})
 
 	p = newParser("struct { a: 1 }")
-	okExprPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 15})
+	okExprPos(t, p, ast.Pos{Line: 1, Col: 1}, ast.Pos{Line: 1, Col: 15})
 
 	p = newParser("   this")
-	okExprPos(t, p, ast.Pos{1, 4}, ast.Pos{1, 7})
+	okExprPos(t, p, ast.Pos{Line: 1, Col: 4}, ast.Pos{Line: 1, Col: 7})
 
 	p = newParser("a.b")
-	okExprPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 3})
+	okExprPos(t, p, ast.Pos{Line: 1, Col: 1}, ast.Pos{Line: 1, Col: 3})
 
 	p = newParser("a.b = 2")
-	okExprPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 7})
+	okExprPos(t, p, ast.Pos{Line: 1, Col: 1}, ast.Pos{Line: 1, Col: 7})
 
 	p = newParser(`
 fn() {
     return x;
 }`)
-	okExprPos(t, p, ast.Pos{2, 1}, ast.Pos{4, 1})
+	okExprPos(t, p, ast.Pos{Line: 2, Col: 1}, ast.Pos{Line: 4, Col: 1})
 
 	p = newParser("const a = 1;")
-	okPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 11})
+	okPos(t, p, ast.Pos{Line: 1, Col: 1}, ast.Pos{Line: 1, Col: 11})
 
 	p = newParser("let a = 1\n;")
-	okPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 9})
+	okPos(t, p, ast.Pos{Line: 1, Col: 1}, ast.Pos{Line: 1, Col: 9})
 
 	p = newParser("break;")
-	okPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 5})
+	okPos(t, p, ast.Pos{Line: 1, Col: 1}, ast.Pos{Line: 1, Col: 5})
 
 	p = newParser("\n  continue;")
-	okPos(t, p, ast.Pos{2, 3}, ast.Pos{2, 10})
+	okPos(t, p, ast.Pos{Line: 2, Col: 3}, ast.Pos{Line: 2, Col: 10})
 
 	p = newParser("while true { 42; \n};")
-	okPos(t, p, ast.Pos{1, 1}, ast.Pos{2, 1})
+	okPos(t, p, ast.Pos{Line: 1, Col: 1}, ast.Pos{Line: 2, Col: 1})
 
 	p = newParser("if 0 {};")
-	okPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 7})
+	okPos(t, p, ast.Pos{Line: 1, Col: 1}, ast.Pos{Line: 1, Col: 7})
 
 	p = newParser("if 0 {} else {};")
-	okPos(t, p, ast.Pos{1, 1}, ast.Pos{1, 15})
+	okPos(t, p, ast.Pos{Line: 1, Col: 1}, ast.Pos{Line: 1, Col: 15})
 }
 
 func TestList(t *testing.T) {

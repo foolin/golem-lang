@@ -257,7 +257,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		numVals := size * 2
 		for j := n - numVals + 1; j <= n; j += 2 {
-			entries = append(entries, &g.HEntry{f.stack[j], f.stack[j+1]})
+			entries = append(entries, &g.HEntry{Key: f.stack[j], Value: f.stack[j+1]})
 		}
 
 		f.stack = f.stack[:n-numVals+1]

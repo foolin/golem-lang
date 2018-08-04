@@ -86,15 +86,15 @@ func TestExpression(t *testing.T) {
 
 	mod := newCompiler(newAnalyzer("-2 + -1 + -0 + 0 + 1 + 2")).Compile()
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{
-			g.NewInt(int64(-2)),
-			g.NewInt(int64(2))},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
+		Pool:       []g.Basic{g.NewInt(int64(-2)), g.NewInt(int64(2))},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{
 			&g.Template{
-				0, 0, 0,
-				[]byte{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   0,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.LoadConst, 0, 0,
 					o.LoadNegOne,
@@ -108,25 +108,26 @@ func TestExpression(t *testing.T) {
 					o.LoadConst, 0, 1,
 					o.Plus,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 1},
-					{16, 0}},
-				nil}}, contents()})
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 1},
+					{Index: 16, LineNum: 0}},
+				ExceptionHandlers: nil,
+			}},
+		Contents: contents(),
+	})
 
 	mod = newCompiler(newAnalyzer("(2 + 3) * -4 / 10")).Compile()
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{
-			g.NewInt(int64(2)),
-			g.NewInt(int64(3)),
-			g.NewInt(int64(-4)),
-			g.NewInt(int64(10))},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
+		Pool:       []g.Basic{g.NewInt(int64(2)), g.NewInt(int64(3)), g.NewInt(int64(-4)), g.NewInt(int64(10))},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{
 			&g.Template{
-				0, 0, 0,
-				[]byte{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   0,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.LoadConst, 0, 0,
 					o.LoadConst, 0, 1,
@@ -136,21 +137,26 @@ func TestExpression(t *testing.T) {
 					o.LoadConst, 0, 3,
 					o.Div,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 1},
-					{16, 0}},
-				nil}}, contents()})
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 1},
+					{Index: 16, LineNum: 0}},
+				ExceptionHandlers: nil,
+			}},
+		Contents: contents(),
+	})
 
 	mod = newCompiler(newAnalyzer("null / true + \nfalse")).Compile()
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
+		Pool:       []g.Basic{},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{
 			&g.Template{
-				0, 0, 0,
-				[]byte{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   0,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.LoadNull,
 					o.LoadTrue,
@@ -158,125 +164,162 @@ func TestExpression(t *testing.T) {
 					o.LoadFalse,
 					o.Plus,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 1},
-					{4, 2},
-					{5, 1},
-					{6, 0}},
-				nil}}, contents()})
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 1},
+					{Index: 4, LineNum: 2},
+					{Index: 5, LineNum: 1},
+					{Index: 6, LineNum: 0}},
+				ExceptionHandlers: nil,
+			}},
+		Contents: contents(),
+	})
 
 	mod = newCompiler(newAnalyzer("'a' * 1.23e4")).Compile()
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{
-			g.NewStr("a"),
-			g.NewFloat(float64(12300))},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
+		Pool:       []g.Basic{g.NewStr("a"), g.NewFloat(float64(12300))},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{
 			&g.Template{
-				0, 0, 0,
-				[]byte{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   0,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.LoadConst, 0, 0,
 					o.LoadConst, 0, 1,
 					o.Mul,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 1},
-					{8, 0}},
-				nil}}, contents()})
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 1},
+					{Index: 8, LineNum: 0}},
+				ExceptionHandlers: nil,
+			}},
+		Contents: contents(),
+	})
 
 	mod = newCompiler(newAnalyzer("'a' == true")).Compile()
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{
-			g.NewStr("a")},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
+		Pool:       []g.Basic{g.NewStr("a")},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{
 			&g.Template{
-				0, 0, 0,
-				[]byte{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   0,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.LoadConst, 0, 0,
 					o.LoadTrue,
 					o.Eq,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 1},
-					{6, 0}},
-				nil}}, contents()})
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 1},
+					{Index: 6, LineNum: 0}},
+				ExceptionHandlers: nil,
+			}},
+		Contents: contents(),
+	})
 
 	mod = newCompiler(newAnalyzer("true != false")).Compile()
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
+		Pool:       []g.Basic{},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{
 			&g.Template{
-				0, 0, 0,
-				[]byte{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   0,
+				OpCodes: []byte{
 					o.LoadNull,
-					o.LoadTrue, o.LoadFalse, o.Ne,
+					o.LoadTrue,
+					o.LoadFalse,
+					o.Ne,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 1},
-					{4, 0}},
-				nil}}, contents()})
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 1},
+					{Index: 4, LineNum: 0}},
+				ExceptionHandlers: nil,
+			}},
+		Contents: contents(),
+	})
 
 	mod = newCompiler(newAnalyzer("true > false; true >= false")).Compile()
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
+		Pool:       []g.Basic{},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{
 			&g.Template{
-				0, 0, 0,
-				[]byte{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   0,
+				OpCodes: []byte{
 					o.LoadNull,
-					o.LoadTrue, o.LoadFalse, o.Gt,
-					o.LoadTrue, o.LoadFalse, o.Gte,
+					o.LoadTrue,
+					o.LoadFalse,
+					o.Gt,
+					o.LoadTrue,
+					o.LoadFalse,
+					o.Gte,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 1},
-					{7, 0}},
-				nil}}, contents()})
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 1},
+					{Index: 7, LineNum: 0}},
+				ExceptionHandlers: nil,
+			}},
+		Contents: contents(),
+	})
 
 	mod = newCompiler(newAnalyzer("true < false; true <= false; true <=> false;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
+		Pool:       []g.Basic{},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{
 			&g.Template{
-				0, 0, 0,
-				[]byte{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   0,
+				OpCodes: []byte{
 					o.LoadNull,
-					o.LoadTrue, o.LoadFalse, o.Lt,
-					o.LoadTrue, o.LoadFalse, o.Lte,
-					o.LoadTrue, o.LoadFalse, o.Cmp,
+					o.LoadTrue,
+					o.LoadFalse,
+					o.Lt,
+					o.LoadTrue,
+					o.LoadFalse,
+					o.Lte,
+					o.LoadTrue,
+					o.LoadFalse,
+					o.Cmp,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 1},
-					{10, 0}},
-				nil}}, contents()})
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 1},
+					{Index: 10, LineNum: 0}},
+				ExceptionHandlers: nil,
+			}},
+		Contents: contents(),
+	})
 
 	mod = newCompiler(newAnalyzer("let a = 2 && 3;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{
-			g.NewInt(int64(2)),
-			g.NewInt(int64(3))},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
+		Pool:       []g.Basic{g.NewInt(int64(2)), g.NewInt(int64(3))},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{
 			&g.Template{
-				0, 0, 1,
-				[]byte{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   1,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.LoadConst, 0, 0,
 					o.JumpFalse, 0, 17,
@@ -287,23 +330,26 @@ func TestExpression(t *testing.T) {
 					o.LoadFalse,
 					o.StoreLocal, 0, 0,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 1},
-					{21, 0}},
-				nil}}, contents()})
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 1},
+					{Index: 21, LineNum: 0}},
+				ExceptionHandlers: nil,
+			}},
+		Contents: contents(),
+	})
 
 	mod = newCompiler(newAnalyzer("let a = 2 || 3;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{
-			g.NewInt(int64(2)),
-			g.NewInt(int64(3))},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
+		Pool:       []g.Basic{g.NewInt(int64(2)), g.NewInt(int64(3))},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{
 			&g.Template{
-				0, 0, 1,
-				[]byte{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   1,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.LoadConst, 0, 0,
 					o.JumpTrue, 0, 13,
@@ -314,26 +360,29 @@ func TestExpression(t *testing.T) {
 					o.LoadFalse,
 					o.StoreLocal, 0, 0,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 1},
-					{21, 0}},
-				nil}}, contents()})
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 1},
+					{Index: 21, LineNum: 0}},
+				ExceptionHandlers: nil,
+			}},
+		Contents: contents(),
+	})
 }
 
 func TestAssignment(t *testing.T) {
 
 	mod := newCompiler(newAnalyzer("let a = 1;\nconst b = \n2;a = 3;")).Compile()
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{
-			g.NewInt(2),
-			g.NewInt(3)},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
+		Pool:       []g.Basic{g.NewInt(2), g.NewInt(3)},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{
 			&g.Template{
-				0, 0, 2,
-				[]byte{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   2,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.LoadOne,
 					o.StoreLocal, 0, 0,
@@ -343,14 +392,17 @@ func TestAssignment(t *testing.T) {
 					o.Dup,
 					o.StoreLocal, 0, 0,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 1},
-					{5, 3},
-					{8, 2},
-					{11, 3},
-					{18, 0}},
-				nil}}, contents()})
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 1},
+					{Index: 5, LineNum: 3},
+					{Index: 8, LineNum: 2},
+					{Index: 11, LineNum: 3},
+					{Index: 18, LineNum: 0}},
+				ExceptionHandlers: nil,
+			}},
+		Contents: contents(),
+	})
 }
 
 func TestShift(t *testing.T) {
@@ -374,16 +426,15 @@ func TestIf(t *testing.T) {
 	anl := newAnalyzer(source)
 	mod := newCompiler(anl).Compile()
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{
-			g.NewInt(3),
-			g.NewInt(2),
-			g.NewInt(42)},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
+		Pool:       []g.Basic{g.NewInt(3), g.NewInt(2), g.NewInt(42)},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{
 			&g.Template{
-				0, 0, 1,
-				[]byte{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   1,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.LoadConst, 0, 0,
 					o.LoadConst, 0, 1,
@@ -392,11 +443,14 @@ func TestIf(t *testing.T) {
 					o.LoadConst, 0, 2,
 					o.StoreLocal, 0, 0,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 1},
-					{17, 0}},
-				nil}}, contents()})
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 1},
+					{Index: 17, LineNum: 0}},
+				ExceptionHandlers: nil,
+			}},
+		Contents: contents(),
+	})
 
 	source = `let a = 1
 		if (false) {
@@ -409,16 +463,15 @@ func TestIf(t *testing.T) {
 	anl = newAnalyzer(source)
 	mod = newCompiler(anl).Compile()
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{
-			g.NewInt(2),
-			g.NewInt(3),
-			g.NewInt(4)},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
+		Pool:       []g.Basic{g.NewInt(2), g.NewInt(3), g.NewInt(4)},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{
 			&g.Template{
-				0, 0, 4,
-				[]byte{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   4,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.LoadOne,
 					o.StoreLocal, 0, 0,
@@ -432,16 +485,19 @@ func TestIf(t *testing.T) {
 					o.LoadConst, 0, 2,
 					o.StoreLocal, 0, 3,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 1},
-					{5, 2},
-					{9, 3},
-					{15, 4},
-					{18, 5},
-					{24, 7},
-					{30, 0}},
-				nil}}, contents()})
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 1},
+					{Index: 5, LineNum: 2},
+					{Index: 9, LineNum: 3},
+					{Index: 15, LineNum: 4},
+					{Index: 18, LineNum: 5},
+					{Index: 24, LineNum: 7},
+					{Index: 30, LineNum: 0}},
+				ExceptionHandlers: nil,
+			}},
+		Contents: contents(),
+	})
 }
 
 func TestWhile(t *testing.T) {
@@ -449,14 +505,15 @@ func TestWhile(t *testing.T) {
 	source := "let a = 1; while (0 < 1) { let b = 2; }"
 	mod := newCompiler(newAnalyzer(source)).Compile()
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{
-			g.NewInt(2)},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
+		Pool:       []g.Basic{g.NewInt(2)},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{
 			&g.Template{
-				0, 0, 2,
-				[]byte{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   2,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.LoadOne,
 					o.StoreLocal, 0, 0,
@@ -468,25 +525,27 @@ func TestWhile(t *testing.T) {
 					o.StoreLocal, 0, 1,
 					o.Jump, 0, 5,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 1},
-					{20, 0}},
-				nil}}, contents()})
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 1},
+					{Index: 20, LineNum: 0}},
+				ExceptionHandlers: nil,
+			}},
+		Contents: contents(),
+	})
 
 	source = "let a = 'z'; while (0 < 1) \n{ break; continue; let b = 2; }; let c = 3;"
 	mod = newCompiler(newAnalyzer(source)).Compile()
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{
-			g.NewStr("z"),
-			g.NewInt(2),
-			g.NewInt(3)},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
+		Pool:       []g.Basic{g.NewStr("z"), g.NewInt(2), g.NewInt(3)},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{
 			&g.Template{
-				0, 0, 3,
-				[]byte{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   3,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.LoadConst, 0, 0,
 					o.StoreLocal, 0, 0,
@@ -502,12 +561,15 @@ func TestWhile(t *testing.T) {
 					o.LoadConst, 0, 2,
 					o.StoreLocal, 0, 2,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 1},
-					{13, 2},
-					{34, 0}},
-				nil}}, contents()})
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 1},
+					{Index: 13, LineNum: 2},
+					{Index: 34, LineNum: 0}},
+				ExceptionHandlers: nil,
+			}},
+		Contents: contents(),
+	})
 }
 
 func TestReturn(t *testing.T) {
@@ -517,15 +579,15 @@ func TestReturn(t *testing.T) {
 	mod := newCompiler(anl).Compile()
 
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{
-			g.NewInt(2),
-			g.NewInt(3)},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
+		Pool:       []g.Basic{g.NewInt(2), g.NewInt(3)},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{
 			&g.Template{
-				0, 0, 1,
-				[]byte{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   1,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.LoadOne,
 					o.StoreLocal, 0, 0,
@@ -537,14 +599,17 @@ func TestReturn(t *testing.T) {
 					o.Dup,
 					o.StoreLocal, 0, 0,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 1},
-					{8, 2},
-					{12, 1},
-					{13, 2},
-					{20, 0}},
-				nil}}, contents()})
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 1},
+					{Index: 8, LineNum: 2},
+					{Index: 12, LineNum: 1},
+					{Index: 13, LineNum: 2},
+					{Index: 20, LineNum: 0}},
+				ExceptionHandlers: nil,
+			}},
+		Contents: contents(),
+	})
 }
 
 func TestFunc(t *testing.T) {
@@ -568,38 +633,49 @@ let b = fn(x) {
 	//fmt.Println(mod)
 
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{
+		Pool: []g.Basic{
 			g.NewInt(42),
 			g.NewInt(7)},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
-			&g.Template{0, 0, 2,
-				[]byte{
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{
+			&g.Template{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   2,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.NewFunc, 0, 1,
 					o.StoreLocal, 0, 0,
 					o.NewFunc, 0, 2,
 					o.StoreLocal, 0, 1,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 2},
-					{7, 3},
-					{13, 0}},
-				nil},
-			&g.Template{0, 0, 0,
-				[]byte{
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 2},
+					{Index: 7, LineNum: 3},
+					{Index: 13, LineNum: 0}},
+				ExceptionHandlers: nil,
+			},
+			&g.Template{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   0,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.LoadConst, 0, 0,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 2},
-					{4, 0}},
-				nil},
-			&g.Template{1, 0, 2,
-				[]byte{
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 2},
+					{Index: 4, LineNum: 0}},
+				ExceptionHandlers: nil,
+			},
+			&g.Template{
+				Arity:       1,
+				NumCaptures: 0,
+				NumLocals:   2,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.NewFunc, 0, 3,
 					o.StoreLocal, 0, 1,
@@ -611,24 +687,30 @@ let b = fn(x) {
 					o.Invoke, 0, 1,
 					o.Plus,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 4},
-					{7, 7},
-					{24, 0}},
-				nil},
-			&g.Template{1, 0, 1,
-				[]byte{
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 4},
+					{Index: 7, LineNum: 7},
+					{Index: 24, LineNum: 0}},
+				ExceptionHandlers: nil,
+			},
+			&g.Template{
+				Arity:       1,
+				NumCaptures: 0,
+				NumLocals:   1,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.LoadLocal, 0, 0,
 					o.LoadConst, 0, 1,
 					o.Mul,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 5},
-					{8, 0}},
-				nil}}, contents()})
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 5},
+					{Index: 8, LineNum: 0}},
+				ExceptionHandlers: nil,
+			}},
+		Contents: contents()})
 
 	source = `
 let a = fn() { }
@@ -648,15 +730,15 @@ c(2, 3)
 	//fmt.Println(mod)
 
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{
-			g.NewInt(2),
-			g.NewInt(3),
-			g.NewInt(4)},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
-			&g.Template{0, 0, 3,
-				[]byte{
+		Pool:       []g.Basic{g.NewInt(2), g.NewInt(3), g.NewInt(4)},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{
+			&g.Template{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   3,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.NewFunc, 0, 1,
 					o.StoreLocal, 0, 0,
@@ -674,38 +756,47 @@ c(2, 3)
 					o.LoadConst, 0, 1,
 					o.Invoke, 0, 2,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 2},
-					{7, 3},
-					{13, 4},
-					{19, 5},
-					{25, 6},
-					{32, 7},
-					{44, 0}},
-				nil},
-
-			&g.Template{0, 0, 0,
-				[]byte{
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 2},
+					{Index: 7, LineNum: 3},
+					{Index: 13, LineNum: 4},
+					{Index: 19, LineNum: 5},
+					{Index: 25, LineNum: 6},
+					{Index: 32, LineNum: 7},
+					{Index: 44, LineNum: 0}},
+				ExceptionHandlers: nil,
+			},
+			&g.Template{
+				Arity:       0,
+				NumCaptures: 0,
+				NumLocals:   0,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0}},
-				nil},
-
-			&g.Template{1, 0, 1,
-				[]byte{
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0}},
+				ExceptionHandlers: nil,
+			},
+			&g.Template{
+				Arity:       1,
+				NumCaptures: 0,
+				NumLocals:   1,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.LoadLocal, 0, 0,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 3},
-					{4, 0}},
-				nil},
-
-			&g.Template{2, 0, 3,
-				[]byte{
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 3},
+					{Index: 4, LineNum: 0}},
+				ExceptionHandlers: nil,
+			},
+			&g.Template{
+				Arity:       2,
+				NumCaptures: 0,
+				NumLocals:   3,
+				OpCodes: []byte{
 					o.LoadNull,
 					o.LoadConst, 0, 2,
 					o.StoreLocal, 0, 2,
@@ -715,11 +806,14 @@ c(2, 3)
 					o.LoadLocal, 0, 2,
 					o.Mul,
 					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 4},
-					{18, 0}},
-				nil}}, contents()})
+				LineNumberTable: []g.LineNumberEntry{
+					{Index: 0, LineNum: 0},
+					{Index: 1, LineNum: 4},
+					{Index: 18, LineNum: 0}},
+				ExceptionHandlers: nil,
+			}},
+		Contents: contents(),
+	})
 }
 
 func TestCapture(t *testing.T) {
@@ -736,50 +830,61 @@ const accumGen = fn(n) {
 	mod := newCompiler(anl).Compile()
 
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
-			&g.Template{0, 0, 1,
-				[]byte{
-					o.LoadNull,
-					o.NewFunc, 0, 1,
-					o.StoreLocal, 0, 0,
-					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 2},
-					{7, 0}},
-				nil},
-			&g.Template{1, 0, 1,
-				[]byte{
-					o.LoadNull,
-					o.NewFunc, 0, 2,
-					o.FuncLocal, 0, 0,
-					o.ReturnStmt,
-					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 3},
-					{8, 0}},
-				nil},
-			&g.Template{1, 1, 1,
-				[]byte{
-					o.LoadNull,
-					o.LoadCapture, 0, 0,
-					o.LoadLocal, 0, 0,
-					o.Plus,
-					o.Dup,
-					o.StoreCapture, 0, 0,
-					o.LoadCapture, 0, 0,
-					o.ReturnStmt,
-					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 4},
-					{12, 5},
-					{16, 0}},
-				nil}}, contents()})
+		Pool:       []g.Basic{},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{&g.Template{
+			Arity:       0,
+			NumCaptures: 0,
+			NumLocals:   1,
+			OpCodes: []byte{
+				o.LoadNull,
+				o.NewFunc, 0, 1,
+				o.StoreLocal, 0, 0,
+				o.ReturnStmt},
+			LineNumberTable: []g.LineNumberEntry{
+				{Index: 0, LineNum: 0},
+				{Index: 1, LineNum: 2},
+				{Index: 7, LineNum: 0}},
+			ExceptionHandlers: nil,
+		}, &g.Template{
+			Arity:       1,
+			NumCaptures: 0,
+			NumLocals:   1,
+			OpCodes: []byte{
+				o.LoadNull,
+				o.NewFunc, 0, 2,
+				o.FuncLocal, 0, 0,
+				o.ReturnStmt,
+				o.ReturnStmt},
+			LineNumberTable: []g.LineNumberEntry{
+				{Index: 0, LineNum: 0},
+				{Index: 1, LineNum: 3},
+				{Index: 8, LineNum: 0}},
+			ExceptionHandlers: nil,
+		}, &g.Template{
+			Arity:       1,
+			NumCaptures: 1,
+			NumLocals:   1,
+			OpCodes: []byte{
+				o.LoadNull,
+				o.LoadCapture, 0, 0,
+				o.LoadLocal, 0, 0,
+				o.Plus,
+				o.Dup,
+				o.StoreCapture, 0, 0,
+				o.LoadCapture, 0, 0,
+				o.ReturnStmt,
+				o.ReturnStmt},
+			LineNumberTable: []g.LineNumberEntry{
+				{Index: 0, LineNum: 0},
+				{Index: 1, LineNum: 4},
+				{Index: 12, LineNum: 5},
+				{Index: 16, LineNum: 0}},
+			ExceptionHandlers: nil,
+		}},
+		Contents: contents(),
+	})
 
 	source = `
 let z = 2
@@ -799,58 +904,68 @@ const accumGen = fn(n) {
 	//fmt.Println(mod)
 
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{
-			g.NewInt(2)},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
-			&g.Template{0, 0, 2,
-				[]byte{
-					o.LoadNull,
-					o.LoadConst, 0, 0,
-					o.StoreLocal, 0, 0,
-					o.NewFunc, 0, 1,
-					o.FuncLocal, 0, 0,
-					o.StoreLocal, 0, 1,
-					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 2},
-					{7, 3},
-					{16, 0}},
-				nil},
-			&g.Template{1, 1, 1,
-				[]byte{
-					o.LoadNull,
-					o.NewFunc, 0, 2,
-					o.FuncLocal, 0, 0,
-					o.FuncCapture, 0, 0,
-					o.ReturnStmt,
-					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 4},
-					{11, 0}},
-				nil},
-			&g.Template{1, 2, 1,
-				[]byte{
-					o.LoadNull,
-					o.LoadCapture, 0, 0,
-					o.LoadLocal, 0, 0,
-					o.Plus,
-					o.LoadCapture, 0, 1,
-					o.Plus,
-					o.Dup,
-					o.StoreCapture, 0, 0,
-					o.LoadCapture, 0, 0,
-					o.ReturnStmt,
-					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 5},
-					{16, 6},
-					{20, 0}},
-				nil}}, contents()})
+		Pool:       []g.Basic{g.NewInt(2)},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{&g.Template{
+			Arity:       0,
+			NumCaptures: 0,
+			NumLocals:   2,
+			OpCodes: []byte{
+				o.LoadNull,
+				o.LoadConst, 0, 0,
+				o.StoreLocal, 0, 0,
+				o.NewFunc, 0, 1,
+				o.FuncLocal, 0, 0,
+				o.StoreLocal, 0, 1,
+				o.ReturnStmt},
+			LineNumberTable: []g.LineNumberEntry{
+				{Index: 0, LineNum: 0},
+				{Index: 1, LineNum: 2},
+				{Index: 7, LineNum: 3},
+				{Index: 16, LineNum: 0}},
+			ExceptionHandlers: nil,
+		}, &g.Template{
+			Arity:       1,
+			NumCaptures: 1,
+			NumLocals:   1,
+			OpCodes: []byte{
+				o.LoadNull,
+				o.NewFunc, 0, 2,
+				o.FuncLocal, 0, 0,
+				o.FuncCapture, 0, 0,
+				o.ReturnStmt,
+				o.ReturnStmt},
+			LineNumberTable: []g.LineNumberEntry{
+				{Index: 0, LineNum: 0},
+				{Index: 1, LineNum: 4},
+				{Index: 11, LineNum: 0}},
+			ExceptionHandlers: nil,
+		}, &g.Template{
+			Arity:       1,
+			NumCaptures: 2,
+			NumLocals:   1,
+			OpCodes: []byte{
+				o.LoadNull,
+				o.LoadCapture, 0, 0,
+				o.LoadLocal, 0, 0,
+				o.Plus,
+				o.LoadCapture, 0, 1,
+				o.Plus,
+				o.Dup,
+				o.StoreCapture, 0, 0,
+				o.LoadCapture, 0, 0,
+				o.ReturnStmt,
+				o.ReturnStmt},
+			LineNumberTable: []g.LineNumberEntry{
+				{Index: 0, LineNum: 0},
+				{Index: 1, LineNum: 5},
+				{Index: 16, LineNum: 6},
+				{Index: 20, LineNum: 0}},
+			ExceptionHandlers: nil,
+		}},
+		Contents: contents(),
+	})
 }
 
 func TestPostfix(t *testing.T) {
@@ -870,41 +985,43 @@ let d = b--
 	//fmt.Println(mod)
 
 	ok(t, mod, &g.BytecodeModule{
-		[]g.Basic{
-			g.NewInt(int64(10)),
-			g.NewInt(int64(20))},
-		nil,
-		[][]*g.FieldDef{},
-		[]*g.Template{
-			&g.Template{
-				0, 0, 4,
-				[]byte{
-					o.LoadNull,
-					o.LoadConst, 0, 0,
-					o.StoreLocal, 0, 0,
-					o.LoadConst, 0, 1,
-					o.StoreLocal, 0, 1,
-					o.LoadLocal, 0, 0,
-					o.Dup,
-					o.LoadOne,
-					o.Plus,
-					o.StoreLocal, 0, 0,
-					o.StoreLocal, 0, 2,
-					o.LoadLocal, 0, 1,
-					o.Dup,
-					o.LoadNegOne,
-					o.Plus,
-					o.StoreLocal, 0, 1,
-					o.StoreLocal, 0, 3,
-					o.ReturnStmt},
-				[]g.LineNumberEntry{
-					{0, 0},
-					{1, 2},
-					{7, 3},
-					{13, 4},
-					{25, 5},
-					{37, 0}},
-				nil}}, contents()})
+		Pool:       []g.Basic{g.NewInt(int64(10)), g.NewInt(int64(20))},
+		Refs:       nil,
+		StructDefs: [][]*g.FieldDef{},
+		Templates: []*g.Template{&g.Template{
+			Arity:       0,
+			NumCaptures: 0,
+			NumLocals:   4,
+			OpCodes: []byte{
+				o.LoadNull,
+				o.LoadConst, 0, 0,
+				o.StoreLocal, 0, 0,
+				o.LoadConst, 0, 1,
+				o.StoreLocal, 0, 1,
+				o.LoadLocal, 0, 0,
+				o.Dup,
+				o.LoadOne,
+				o.Plus,
+				o.StoreLocal, 0, 0,
+				o.StoreLocal, 0, 2,
+				o.LoadLocal, 0, 1,
+				o.Dup,
+				o.LoadNegOne,
+				o.Plus,
+				o.StoreLocal, 0, 1,
+				o.StoreLocal, 0, 3,
+				o.ReturnStmt},
+			LineNumberTable: []g.LineNumberEntry{
+				{Index: 0, LineNum: 0},
+				{Index: 1, LineNum: 2},
+				{Index: 7, LineNum: 3},
+				{Index: 13, LineNum: 4},
+				{Index: 25, LineNum: 5},
+				{Index: 37, LineNum: 0}},
+			ExceptionHandlers: nil,
+		}},
+		Contents: contents(),
+	})
 }
 
 func TestPool(t *testing.T) {
@@ -940,22 +1057,10 @@ assert(a == 2)
 	anl := newAnalyzer(source)
 	mod := newCompiler(anl).Compile()
 	tassert(t, mod.Templates[0].ExceptionHandlers[0] ==
-		g.ExceptionHandler{5, 14, -1, 14})
+		g.ExceptionHandler{
+			Begin:   5,
+			End:     14,
+			Catch:   -1,
+			Finally: 14,
+		})
 }
-
-//func TestStruct(t *testing.T) {
-//
-//	source := `
-//let x = 1
-//let u = struct {
-//	a: prop { || => x },
-//	b: || => this.a
-//}
-//println(u)
-//`
-//	mod := newCompiler(newAnalyzer(source)).Compile()
-//	fmt.Println("----------------------------")
-//	fmt.Println(source)
-//	fmt.Println("----------------------------")
-//	fmt.Println(mod)
-//}

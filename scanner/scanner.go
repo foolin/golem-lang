@@ -36,7 +36,14 @@ type (
 // NewScanner creates a new Scanner
 func NewScanner(source string) *Scanner {
 	reader := strings.NewReader(source)
-	s := &Scanner{source, reader, curRune{0, 1, -1}, ast.Pos{1, 0}, false, nil}
+	s := &Scanner{
+		source:    source,
+		reader:    reader,
+		cur:       curRune{r: 0, size: 1, idx: -1},
+		pos:       ast.Pos{Line: 1, Col: 0},
+		isDone:    false,
+		doneToken: nil,
+	}
 	s.consume()
 	return s
 }
@@ -63,7 +70,7 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == '\n':
 			s.consume()
-			return &ast.Token{ast.LineFeed, "\n", pos}
+			return &ast.Token{Kind: ast.LineFeed, Text: "\n", Position: pos}
 
 		case r == '/':
 			s.consume()
@@ -112,10 +119,10 @@ func (s *Scanner) Next() *ast.Token {
 
 			case '=':
 				s.consume()
-				return &ast.Token{ast.SlashEq, "/=", pos}
+				return &ast.Token{Kind: ast.SlashEq, Text: "/=", Position: pos}
 
 			default:
-				return &ast.Token{ast.Slash, "/", pos}
+				return &ast.Token{Kind: ast.Slash, Text: "/", Position: pos}
 			}
 
 		case r == '+':
@@ -123,12 +130,12 @@ func (s *Scanner) Next() *ast.Token {
 			r = s.cur.r
 			if r == '+' {
 				s.consume()
-				return &ast.Token{ast.DblPlus, "++", pos}
+				return &ast.Token{Kind: ast.DblPlus, Text: "++", Position: pos}
 			} else if r == '=' {
 				s.consume()
-				return &ast.Token{ast.PlusEq, "+=", pos}
+				return &ast.Token{Kind: ast.PlusEq, Text: "+=", Position: pos}
 			} else {
-				return &ast.Token{ast.Plus, "+", pos}
+				return &ast.Token{Kind: ast.Plus, Text: "+", Position: pos}
 			}
 
 		case r == '-':
@@ -136,12 +143,12 @@ func (s *Scanner) Next() *ast.Token {
 			r = s.cur.r
 			if r == '-' {
 				s.consume()
-				return &ast.Token{ast.DblMinus, "--", pos}
+				return &ast.Token{Kind: ast.DblMinus, Text: "--", Position: pos}
 			} else if r == '=' {
 				s.consume()
-				return &ast.Token{ast.MinusEq, "-=", pos}
+				return &ast.Token{Kind: ast.MinusEq, Text: "-=", Position: pos}
 			} else {
-				return &ast.Token{ast.Minus, "-", pos}
+				return &ast.Token{Kind: ast.Minus, Text: "-", Position: pos}
 			}
 
 		case r == '*':
@@ -149,77 +156,77 @@ func (s *Scanner) Next() *ast.Token {
 			r = s.cur.r
 			if r == '=' {
 				s.consume()
-				return &ast.Token{ast.StarEq, "*=", pos}
+				return &ast.Token{Kind: ast.StarEq, Text: "*=", Position: pos}
 			}
-			return &ast.Token{ast.Star, "*", pos}
+			return &ast.Token{Kind: ast.Star, Text: "*", Position: pos}
 
 		case r == '(':
 			s.consume()
-			return &ast.Token{ast.Lparen, "(", pos}
+			return &ast.Token{Kind: ast.Lparen, Text: "(", Position: pos}
 		case r == ')':
 			s.consume()
-			return &ast.Token{ast.Rparen, ")", pos}
+			return &ast.Token{Kind: ast.Rparen, Text: ")", Position: pos}
 		case r == '{':
 			s.consume()
-			return &ast.Token{ast.Lbrace, "{", pos}
+			return &ast.Token{Kind: ast.Lbrace, Text: "{", Position: pos}
 		case r == '}':
 			s.consume()
-			return &ast.Token{ast.Rbrace, "}", pos}
+			return &ast.Token{Kind: ast.Rbrace, Text: "}", Position: pos}
 		case r == '[':
 			s.consume()
-			return &ast.Token{ast.Lbracket, "[", pos}
+			return &ast.Token{Kind: ast.Lbracket, Text: "[", Position: pos}
 		case r == ']':
 			s.consume()
-			return &ast.Token{ast.Rbracket, "]", pos}
+			return &ast.Token{Kind: ast.Rbracket, Text: "]", Position: pos}
 		case r == ';':
 			s.consume()
-			return &ast.Token{ast.Semicolon, ";", pos}
+			return &ast.Token{Kind: ast.Semicolon, Text: ";", Position: pos}
 		case r == ':':
 			s.consume()
-			return &ast.Token{ast.Colon, ":", pos}
+			return &ast.Token{Kind: ast.Colon, Text: ":", Position: pos}
 		case r == ',':
 			s.consume()
-			return &ast.Token{ast.Comma, ",", pos}
+			return &ast.Token{Kind: ast.Comma, Text: ",", Position: pos}
 		case r == '.':
 			s.consume()
-			return &ast.Token{ast.Dot, ".", pos}
+			return &ast.Token{Kind: ast.Dot, Text: ".", Position: pos}
 		case r == '?':
 			s.consume()
-			return &ast.Token{ast.Hook, "?", pos}
+			return &ast.Token{Kind: ast.Hook, Text: "?", Position: pos}
 
 		case r == '%':
 			s.consume()
 			r = s.cur.r
 			if r == '=' {
 				s.consume()
-				return &ast.Token{ast.PercentEq, "%=", pos}
+				return &ast.Token{Kind: ast.PercentEq, Text: "%=", Position: pos}
 			}
-			return &ast.Token{ast.Percent, "%", pos}
+			return &ast.Token{Kind: ast.Percent, Text: "%", Position: pos}
 
 		case r == '^':
 			s.consume()
 			r = s.cur.r
 			if r == '=' {
 				s.consume()
-				return &ast.Token{ast.CaretEq, "^=", pos}
+				return &ast.Token{Kind: ast.CaretEq, Text: "^=", Position: pos}
 			}
-			return &ast.Token{ast.Caret, "^", pos}
+			return &ast.Token{Kind: ast.Caret, Text: "^", Position: pos}
 
 		case r == '~':
 			s.consume()
-			return &ast.Token{ast.Tilde, "~", pos}
+			return &ast.Token{Kind: ast.Tilde, Text: "~", Position: pos}
 
 		case r == '=':
 			s.consume()
 			r = s.cur.r
 			if r == '=' {
 				s.consume()
-				return &ast.Token{ast.DblEq, "==", pos}
+				return &ast.Token{Kind: ast.DblEq, Text: "==", Position: pos}
 			} else if r == '>' {
 				s.consume()
-				return &ast.Token{ast.EqGt, "=>", pos}
+				return &ast.Token{Kind: ast.EqGt, Text: "=>", Position: pos}
 			} else {
-				return &ast.Token{ast.Eq, "=", pos}
+				return &ast.Token{Kind: ast.Eq, Text: "=", Position: pos}
 			}
 
 		case r == '!':
@@ -227,25 +234,25 @@ func (s *Scanner) Next() *ast.Token {
 			r = s.cur.r
 			if r == '=' {
 				s.consume()
-				return &ast.Token{ast.NotEq, "!=", pos}
+				return &ast.Token{Kind: ast.NotEq, Text: "!=", Position: pos}
 			}
-			return &ast.Token{ast.Not, "!", pos}
+			return &ast.Token{Kind: ast.Not, Text: "!", Position: pos}
 		case r == '>':
 			s.consume()
 			r = s.cur.r
 			if r == '=' {
 				s.consume()
-				return &ast.Token{ast.GtEq, ">=", pos}
+				return &ast.Token{Kind: ast.GtEq, Text: ">=", Position: pos}
 			} else if r == '>' {
 				s.consume()
 				r = s.cur.r
 				if r == '=' {
 					s.consume()
-					return &ast.Token{ast.DblGtEq, ">>=", pos}
+					return &ast.Token{Kind: ast.DblGtEq, Text: ">>=", Position: pos}
 				}
-				return &ast.Token{ast.DblGt, ">>", pos}
+				return &ast.Token{Kind: ast.DblGt, Text: ">>", Position: pos}
 			} else {
-				return &ast.Token{ast.Gt, ">", pos}
+				return &ast.Token{Kind: ast.Gt, Text: ">", Position: pos}
 			}
 		case r == '<':
 			s.consume()
@@ -255,19 +262,19 @@ func (s *Scanner) Next() *ast.Token {
 				r = s.cur.r
 				if r == '>' {
 					s.consume()
-					return &ast.Token{ast.Cmp, "<=>", pos}
+					return &ast.Token{Kind: ast.Cmp, Text: "<=>", Position: pos}
 				}
-				return &ast.Token{ast.LtEq, "<=", pos}
+				return &ast.Token{Kind: ast.LtEq, Text: "<=", Position: pos}
 			} else if r == '<' {
 				s.consume()
 				r = s.cur.r
 				if r == '=' {
 					s.consume()
-					return &ast.Token{ast.DblLtEq, "<<=", pos}
+					return &ast.Token{Kind: ast.DblLtEq, Text: "<<=", Position: pos}
 				}
-				return &ast.Token{ast.DblLt, "<<", pos}
+				return &ast.Token{Kind: ast.DblLt, Text: "<<", Position: pos}
 			} else {
-				return &ast.Token{ast.Lt, "<", pos}
+				return &ast.Token{Kind: ast.Lt, Text: "<", Position: pos}
 			}
 
 		case r == '|':
@@ -275,24 +282,24 @@ func (s *Scanner) Next() *ast.Token {
 			r = s.cur.r
 			if r == '|' {
 				s.consume()
-				return &ast.Token{ast.DblPipe, "||", pos}
+				return &ast.Token{Kind: ast.DblPipe, Text: "||", Position: pos}
 			} else if r == '=' {
 				s.consume()
-				return &ast.Token{ast.PipeEq, "|=", pos}
+				return &ast.Token{Kind: ast.PipeEq, Text: "|=", Position: pos}
 			} else {
-				return &ast.Token{ast.Pipe, "|", pos}
+				return &ast.Token{Kind: ast.Pipe, Text: "|", Position: pos}
 			}
 		case r == '&':
 			s.consume()
 			r = s.cur.r
 			if r == '&' {
 				s.consume()
-				return &ast.Token{ast.DblAmp, "&&", pos}
+				return &ast.Token{Kind: ast.DblAmp, Text: "&&", Position: pos}
 			} else if r == '=' {
 				s.consume()
-				return &ast.Token{ast.AmpEq, "&=", pos}
+				return &ast.Token{Kind: ast.AmpEq, Text: "&=", Position: pos}
 			} else {
-				return &ast.Token{ast.Amp, "&", pos}
+				return &ast.Token{Kind: ast.Amp, Text: "&", Position: pos}
 			}
 
 		case r == '\'':
@@ -312,7 +319,7 @@ func (s *Scanner) Next() *ast.Token {
 
 		case r == eof:
 			s.isDone = true
-			s.doneToken = &ast.Token{ast.EOF, "", pos}
+			s.doneToken = &ast.Token{Kind: ast.EOF, Text: "", Position: pos}
 			return s.doneToken
 
 		default:
@@ -333,77 +340,77 @@ func (s *Scanner) nextIdentOrKeyword() *ast.Token {
 	switch text {
 
 	case "_":
-		return &ast.Token{ast.BlankDent, text, pos}
+		return &ast.Token{Kind: ast.BlankDent, Text: text, Position: pos}
 	case "null":
-		return &ast.Token{ast.Null, text, pos}
+		return &ast.Token{Kind: ast.Null, Text: text, Position: pos}
 	case "true":
-		return &ast.Token{ast.True, text, pos}
+		return &ast.Token{Kind: ast.True, Text: text, Position: pos}
 	case "false":
-		return &ast.Token{ast.False, text, pos}
+		return &ast.Token{Kind: ast.False, Text: text, Position: pos}
 	case "if":
-		return &ast.Token{ast.If, text, pos}
+		return &ast.Token{Kind: ast.If, Text: text, Position: pos}
 	case "else":
-		return &ast.Token{ast.Else, text, pos}
+		return &ast.Token{Kind: ast.Else, Text: text, Position: pos}
 	case "while":
-		return &ast.Token{ast.While, text, pos}
+		return &ast.Token{Kind: ast.While, Text: text, Position: pos}
 	case "break":
-		return &ast.Token{ast.Break, text, pos}
+		return &ast.Token{Kind: ast.Break, Text: text, Position: pos}
 	case "continue":
-		return &ast.Token{ast.Continue, text, pos}
+		return &ast.Token{Kind: ast.Continue, Text: text, Position: pos}
 	case "fn":
-		return &ast.Token{ast.Fn, text, pos}
+		return &ast.Token{Kind: ast.Fn, Text: text, Position: pos}
 	case "return":
-		return &ast.Token{ast.Return, text, pos}
+		return &ast.Token{Kind: ast.Return, Text: text, Position: pos}
 	case "const":
-		return &ast.Token{ast.Const, text, pos}
+		return &ast.Token{Kind: ast.Const, Text: text, Position: pos}
 	case "let":
-		return &ast.Token{ast.Let, text, pos}
+		return &ast.Token{Kind: ast.Let, Text: text, Position: pos}
 	case "for":
-		return &ast.Token{ast.For, text, pos}
+		return &ast.Token{Kind: ast.For, Text: text, Position: pos}
 	case "in":
-		return &ast.Token{ast.In, text, pos}
+		return &ast.Token{Kind: ast.In, Text: text, Position: pos}
 	case "switch":
-		return &ast.Token{ast.Switch, text, pos}
+		return &ast.Token{Kind: ast.Switch, Text: text, Position: pos}
 	case "case":
-		return &ast.Token{ast.Case, text, pos}
+		return &ast.Token{Kind: ast.Case, Text: text, Position: pos}
 	case "default":
-		return &ast.Token{ast.Default, text, pos}
+		return &ast.Token{Kind: ast.Default, Text: text, Position: pos}
 	case "prop":
-		return &ast.Token{ast.Prop, text, pos}
+		return &ast.Token{Kind: ast.Prop, Text: text, Position: pos}
 	case "try":
-		return &ast.Token{ast.Try, text, pos}
+		return &ast.Token{Kind: ast.Try, Text: text, Position: pos}
 	case "catch":
-		return &ast.Token{ast.Catch, text, pos}
+		return &ast.Token{Kind: ast.Catch, Text: text, Position: pos}
 	case "finally":
-		return &ast.Token{ast.Finally, text, pos}
+		return &ast.Token{Kind: ast.Finally, Text: text, Position: pos}
 	case "throw":
-		return &ast.Token{ast.Throw, text, pos}
+		return &ast.Token{Kind: ast.Throw, Text: text, Position: pos}
 	case "go":
-		return &ast.Token{ast.Go, text, pos}
+		return &ast.Token{Kind: ast.Go, Text: text, Position: pos}
 	case "module":
-		return &ast.Token{ast.Module, text, pos}
+		return &ast.Token{Kind: ast.Module, Text: text, Position: pos}
 	case "import":
-		return &ast.Token{ast.Import, text, pos}
+		return &ast.Token{Kind: ast.Import, Text: text, Position: pos}
 	case "struct":
-		return &ast.Token{ast.Struct, text, pos}
+		return &ast.Token{Kind: ast.Struct, Text: text, Position: pos}
 	case "dict":
-		return &ast.Token{ast.Dict, text, pos}
+		return &ast.Token{Kind: ast.Dict, Text: text, Position: pos}
 	case "set":
-		return &ast.Token{ast.Set, text, pos}
+		return &ast.Token{Kind: ast.Set, Text: text, Position: pos}
 	case "this":
-		return &ast.Token{ast.This, text, pos}
+		return &ast.Token{Kind: ast.This, Text: text, Position: pos}
 	case "has":
-		return &ast.Token{ast.Has, text, pos}
+		return &ast.Token{Kind: ast.Has, Text: text, Position: pos}
 
 	case "byte", "defer", "goto", "like", "native", "package",
 		"priv", "private", "prot", "protected", "pub", "public",
 		"rune", "select", "static", "sync", "rsync", "with", "yield":
 
 		// reserve a bunch of keywords just in case
-		return &ast.Token{ast.Reserved, text, pos}
+		return &ast.Token{Kind: ast.Reserved, Text: text, Position: pos}
 
 	default:
-		return &ast.Token{ast.Ident, text, pos}
+		return &ast.Token{Kind: ast.Ident, Text: text, Position: pos}
 	}
 }
 
@@ -422,7 +429,7 @@ func (s *Scanner) nextStr(delim rune) *ast.Token {
 		case r == delim:
 			// end of string
 			s.consume()
-			return &ast.Token{ast.Str, buf.String(), pos}
+			return &ast.Token{Kind: ast.Str, Text: buf.String(), Position: pos}
 
 		case r == '\\':
 			// escaped character
@@ -520,7 +527,7 @@ func (s *Scanner) nextRawStr() *ast.Token {
 		case r == '`':
 			// end of string
 			s.consume()
-			return &ast.Token{ast.Str, buf.String(), pos}
+			return &ast.Token{Kind: ast.Str, Text: buf.String(), Position: pos}
 
 		case r == eof:
 			// unterminated string literal
@@ -559,7 +566,7 @@ func (s *Scanner) nextNumber() *ast.Token {
 			return s.nextHexInt(begin, pos)
 
 		default:
-			return &ast.Token{ast.Int, "0", pos}
+			return &ast.Token{Kind: ast.Int, Text: "0", Position: pos}
 		}
 
 	} else {
@@ -576,9 +583,9 @@ func (s *Scanner) nextNumber() *ast.Token {
 				return t
 			}
 			s.acceptWhile(isDigit)
-			return &ast.Token{ast.Float, s.source[begin:s.cur.idx], pos}
+			return &ast.Token{Kind: ast.Float, Text: s.source[begin:s.cur.idx], Position: pos}
 		}
-		return &ast.Token{ast.Int, s.source[begin:s.cur.idx], pos}
+		return &ast.Token{Kind: ast.Int, Text: s.source[begin:s.cur.idx], Position: pos}
 	}
 
 }
@@ -593,7 +600,7 @@ func (s *Scanner) nextHexInt(begin int, pos ast.Pos) *ast.Token {
 	}
 	s.acceptWhile(isHexDigit)
 
-	return &ast.Token{ast.Int, s.source[begin:s.cur.idx], pos}
+	return &ast.Token{Kind: ast.Int, Text: s.source[begin:s.cur.idx], Position: pos}
 }
 
 func (s *Scanner) nextFloat(begin int, pos ast.Pos) *ast.Token {
@@ -616,7 +623,7 @@ func (s *Scanner) nextFloat(begin int, pos ast.Pos) *ast.Token {
 		s.acceptWhile(isDigit)
 	}
 
-	return &ast.Token{ast.Float, s.source[begin:s.cur.idx], pos}
+	return &ast.Token{Kind: ast.Float, Text: s.source[begin:s.cur.idx], Position: pos}
 }
 
 // accept a rune that matches the given function
@@ -659,9 +666,9 @@ func (s *Scanner) expect(fn func(rune) bool) *ast.Token {
 func (s *Scanner) unexpectedChar(r rune, pos ast.Pos) *ast.Token {
 	s.isDone = true
 	if r == eof {
-		s.doneToken = &ast.Token{ast.UnexpectedEOF, "", pos}
+		s.doneToken = &ast.Token{Kind: ast.UnexpectedEOF, Text: "", Position: pos}
 	} else {
-		s.doneToken = &ast.Token{ast.UnexpectedChar, string(r), pos}
+		s.doneToken = &ast.Token{Kind: ast.UnexpectedChar, Text: string(r), Position: pos}
 	}
 	return s.doneToken
 }

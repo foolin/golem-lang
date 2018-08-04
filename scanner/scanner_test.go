@@ -13,7 +13,11 @@ import (
 
 func ok(t *testing.T, s *Scanner, tokenKind ast.TokenKind, text string, line int, col int) {
 
-	token := &ast.Token{tokenKind, text, ast.Pos{line, col}}
+	token := &ast.Token{
+		Kind:     tokenKind,
+		Text:     text,
+		Position: ast.Pos{Line: line, Col: col},
+	}
 
 	nextToken := s.Next()
 

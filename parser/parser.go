@@ -61,8 +61,18 @@ func (p *Parser) ParseModule() (fn *ast.FnExpr, err error) {
 	p.expect(ast.EOF)
 
 	params := []*ast.FormalParam{}
-	block := &ast.BlockNode{nil, stmts, nil, ast.NewScope()}
-	return &ast.FnExpr{nil, params, block, ast.NewFuncScope()}, err
+	block := &ast.BlockNode{
+		LBrace:     nil,
+		Statements: stmts,
+		RBrace:     nil,
+		Scope:      ast.NewScope(),
+	}
+	return &ast.FnExpr{
+		Token:        nil,
+		FormalParams: params,
+		Body:         block,
+		Scope:        ast.NewFuncScope(),
+	}, err
 }
 
 func (p *Parser) imports() []ast.Statement {
@@ -77,14 +87,20 @@ func (p *Parser) imports() []ast.Statement {
 		tok := p.expect(ast.Import)
 
 		idents := []*ast.IdentExpr{}
-		idents = append(idents, &ast.IdentExpr{p.expect(ast.Ident), nil})
+		idents = append(idents, &ast.IdentExpr{
+			Symbol:   p.expect(ast.Ident),
+			Variable: nil,
+		})
 
 	loop:
 		for {
 			switch {
 			case p.cur.token.Kind == ast.Comma:
 				p.consume()
-				idents = append(idents, &ast.IdentExpr{p.expect(ast.Ident), nil})
+				idents = append(idents, &ast.IdentExpr{
+					Symbol:   p.expect(ast.Ident),
+					Variable: nil,
+				})
 			case p.atStatementDelimiter():
 				break loop
 			default:
@@ -93,7 +109,10 @@ func (p *Parser) imports() []ast.Statement {
 		}
 
 		p.expectStatementDelimiter()
-		stmts = append(stmts, &ast.ImportStmt{tok, idents})
+		stmts = append(stmts, &ast.ImportStmt{
+			Token:  tok,
+			Idents: idents,
+		})
 	}
 
 	return stmts
@@ -150,7 +169,7 @@ func (p *Parser) statement() ast.Statement {
 		// anonymous function
 		expr := p.fnExpr(p.consume().token)
 		p.expectStatementDelimiter()
-		return &ast.ExprStmt{expr}
+		return &ast.ExprStmt{Expr: expr}
 
 	case ast.If:
 		return p.ifStmt()
@@ -186,16 +205,20 @@ func (p *Parser) statement() ast.Statement {
 		// we couldn't find a statement to parse, so parse an expression instead
 		expr := p.expression()
 		p.expectStatementDelimiter()
-		return &ast.ExprStmt{expr}
+		return &ast.ExprStmt{Expr: expr}
 	}
 }
 
 func (p *Parser) namedFn() *ast.NamedFnStmt {
 	token := p.expect(ast.Fn)
 	result := &ast.NamedFnStmt{
-		token,
-		&ast.IdentExpr{p.expect(ast.Ident), nil},
-		p.fnExpr(token)}
+		Token: token,
+		Ident: &ast.IdentExpr{
+			Symbol:   p.expect(ast.Ident),
+			Variable: nil,
+		},
+		Func: p.fnExpr(token),
+	}
 	p.expectStatementDelimiter()
 	return result
 }
@@ -212,7 +235,10 @@ func (p *Parser) constStmt() *ast.ConstStmt {
 			decls = append(decls, p.decl())
 		case p.atStatementDelimiter():
 			p.expectStatementDelimiter()
-			return &ast.ConstStmt{token, decls}
+			return &ast.ConstStmt{
+				Token: token,
+				Decls: decls,
+			}
 		default:
 			panic(p.unexpected())
 		}
@@ -231,7 +257,10 @@ func (p *Parser) letStmt() *ast.LetStmt {
 			decls = append(decls, p.decl())
 		case p.atStatementDelimiter():
 			p.expectStatementDelimiter()
-			return &ast.LetStmt{token, decls}
+			return &ast.LetStmt{
+				Token: token,
+				Decls: decls,
+			}
 		default:
 			panic(p.unexpected())
 		}
@@ -240,11 +269,20 @@ func (p *Parser) letStmt() *ast.LetStmt {
 
 func (p *Parser) decl() *ast.DeclNode {
 
-	ident := &ast.IdentExpr{p.expect(ast.Ident), nil}
-	if p.accept(ast.Eq) {
-		return &ast.DeclNode{ident, p.expression()}
+	ident := &ast.IdentExpr{
+		Symbol:   p.expect(ast.Ident),
+		Variable: nil,
 	}
-	return &ast.DeclNode{ident, nil}
+	if p.accept(ast.Eq) {
+		return &ast.DeclNode{
+			Ident: ident,
+			Val:   p.expression(),
+		}
+	}
+	return &ast.DeclNode{
+		Ident: ident,
+		Val:   nil,
+	}
 }
 
 func (p *Parser) ifStmt() *ast.IfStmt {
@@ -258,12 +296,22 @@ func (p *Parser) ifStmt() *ast.IfStmt {
 		switch p.cur.token.Kind {
 
 		case ast.Lbrace:
-			result := &ast.IfStmt{token, cond, then, p.block()}
+			result := &ast.IfStmt{
+				Token: token,
+				Cond:  cond,
+				Then:  then,
+				Else:  p.block(),
+			}
 			p.expectStatementDelimiter()
 			return result
 
 		case ast.If:
-			result := &ast.IfStmt{token, cond, then, p.ifStmt()}
+			result := &ast.IfStmt{
+				Token: token,
+				Cond:  cond,
+				Then:  then,
+				Else:  p.ifStmt(),
+			}
 			p.expectStatementDelimiter()
 			return result
 
@@ -273,13 +321,22 @@ func (p *Parser) ifStmt() *ast.IfStmt {
 
 	} else {
 		p.expectStatementDelimiter()
-		return &ast.IfStmt{token, cond, then, nil}
+		return &ast.IfStmt{
+			Token: token,
+			Cond:  cond,
+			Then:  then,
+			Else:  nil,
+		}
 	}
 }
 
 func (p *Parser) whileStmt() *ast.WhileStmt {
 
-	result := &ast.WhileStmt{p.expect(ast.While), p.expression(), p.block()}
+	result := &ast.WhileStmt{
+		Token: p.expect(ast.While),
+		Cond:  p.expression(),
+		Body:  p.block(),
+	}
 	p.expectStatementDelimiter()
 	return result
 }
@@ -314,7 +371,14 @@ func (p *Parser) forStmt() *ast.ForStmt {
 
 	// done
 	p.expectStatementDelimiter()
-	return &ast.ForStmt{token, idents, iblIdent, iterable, body, ast.NewScope()}
+	return &ast.ForStmt{
+		Token:         token,
+		Idents:        idents,
+		IterableIdent: iblIdent,
+		Iterable:      iterable,
+		Body:          body,
+		Scope:         ast.NewScope(),
+	}
 }
 
 // make an identifier for an iterable in a 'for' stmt
@@ -322,7 +386,9 @@ func (p *Parser) makeIterIdent(pos ast.Pos) *ast.IdentExpr {
 	sym := fmt.Sprintf("#iter%d", p.iterIDCounter)
 	p.iterIDCounter++
 	return &ast.IdentExpr{
-		&ast.Token{ast.Ident, sym, pos}, nil}
+		Symbol:   &ast.Token{Kind: ast.Ident, Text: sym, Position: pos},
+		Variable: nil,
+	}
 }
 
 func (p *Parser) tupleIdents() []*ast.IdentExpr {
@@ -389,7 +455,14 @@ func (p *Parser) switchStmt() *ast.SwitchStmt {
 	}
 
 	// done
-	result := &ast.SwitchStmt{token, item, lbrace, cases, def, p.expect(ast.Rbrace)}
+	result := &ast.SwitchStmt{
+		Token:       token,
+		Item:        item,
+		LBrace:      lbrace,
+		Cases:       cases,
+		DefaultNode: def,
+		RBrace:      p.expect(ast.Rbrace),
+	}
 	p.expectStatementDelimiter()
 	return result
 }
@@ -412,7 +485,11 @@ func (p *Parser) caseStmt() *ast.CaseNode {
 			if len(body) == 0 {
 				panic(&parserError{InvalidSwitch, colon})
 			}
-			return &ast.CaseNode{token, matches, body}
+			return &ast.CaseNode{
+				Token:   token,
+				Matches: matches,
+				Body:    body,
+			}
 
 		default:
 			panic(p.unexpected())
@@ -430,19 +507,24 @@ func (p *Parser) defaultStmt() *ast.DefaultNode {
 		panic(&parserError{InvalidSwitch, colon})
 	}
 
-	return &ast.DefaultNode{token, body}
+	return &ast.DefaultNode{
+		Token: token,
+		Body:  body,
+	}
 }
 
 func (p *Parser) breakStmt() *ast.BreakStmt {
 	result := &ast.BreakStmt{
-		p.expect(ast.Break)}
+		Token: p.expect(ast.Break),
+	}
 	p.expectStatementDelimiter()
 	return result
 }
 
 func (p *Parser) continueStmt() *ast.ContinueStmt {
 	result := &ast.ContinueStmt{
-		p.expect(ast.Continue)}
+		Token: p.expect(ast.Continue),
+	}
 	p.expectStatementDelimiter()
 	return result
 }
@@ -453,14 +535,18 @@ func (p *Parser) returnStmt() *ast.ReturnStmt {
 
 	val := p.expression()
 	p.expectStatementDelimiter()
-	return &ast.ReturnStmt{token, val}
+	return &ast.ReturnStmt{
+		Token: token,
+		Val:   val,
+	}
 }
 
 func (p *Parser) throwStmt() *ast.ThrowStmt {
 
 	result := &ast.ThrowStmt{
-		p.expect(ast.Throw),
-		p.expression()}
+		Token: p.expect(ast.Throw),
+		Val:   p.expression(),
+	}
 	p.expectStatementDelimiter()
 	return result
 }
@@ -498,10 +584,15 @@ func (p *Parser) tryStmt() *ast.TryStmt {
 	// done
 	p.expectStatementDelimiter()
 	return &ast.TryStmt{
-		tryToken, tryBlock,
-		catchToken, catchIdent, catchBlock,
-		finallyToken, finallyBlock,
-		ast.NewScope()}
+		TryToken:     tryToken,
+		TryBlock:     tryBlock,
+		CatchToken:   catchToken,
+		CatchIdent:   catchIdent,
+		CatchBlock:   catchBlock,
+		FinallyToken: finallyToken,
+		FinallyBlock: finallyBlock,
+		CatchScope:   ast.NewScope(),
+	}
 }
 
 func (p *Parser) goStmt() *ast.GoStmt {
@@ -513,10 +604,18 @@ func (p *Parser) goStmt() *ast.GoStmt {
 		panic(p.unexpected())
 	}
 	lparen, actual, rparen := p.actualParams()
-	invocation := &ast.InvokeExpr{prm, lparen, actual, rparen}
+	invocation := &ast.InvokeExpr{
+		Operand: prm,
+		LParen:  lparen,
+		Params:  actual,
+		RParen:  rparen,
+	}
 
 	p.expectStatementDelimiter()
-	return &ast.GoStmt{token, invocation}
+	return &ast.GoStmt{
+		Token:      token,
+		Invocation: invocation,
+	}
 }
 
 // parse a sequence of stmts that are wrapped in curly braces
@@ -525,7 +624,12 @@ func (p *Parser) block() *ast.BlockNode {
 	lbrace := p.expect(ast.Lbrace)
 	stmts := p.statements(ast.Rbrace)
 	rbrace := p.expect(ast.Rbrace)
-	return &ast.BlockNode{lbrace, stmts, rbrace, ast.NewScope()}
+	return &ast.BlockNode{
+		LBrace:     lbrace,
+		Statements: stmts,
+		RBrace:     rbrace,
+		Scope:      ast.NewScope(),
+	}
 }
 
 func (p *Parser) expression() ast.Expression {
@@ -538,19 +642,25 @@ func (p *Parser) expression() ast.Expression {
 
 			// assignment
 			eq := p.expect(ast.Eq)
-			exp = &ast.AssignmentExpr{asn, eq, p.expression()}
+			exp = &ast.AssignmentExpr{
+				Assignee: asn,
+				Eq:       eq,
+				Val:      p.expression(),
+			}
 
 		} else if isAssignOp(p.cur.token.Kind) {
 
 			// assignment operation
 			op := p.consume().token
 			exp = &ast.AssignmentExpr{
-				asn,
-				op,
-				&ast.BinaryExpr{
-					asn,
-					fromAssignOp(op),
-					p.expression()}}
+				Assignee: asn,
+				Eq:       op,
+				Val: &ast.BinaryExpr{
+					LHS: asn,
+					Op:  fromAssignOp(op),
+					RHS: p.expression(),
+				},
+			}
 		}
 	}
 
@@ -567,7 +677,11 @@ func (p *Parser) ternaryExpr() ast.Expression {
 		then := p.expression()
 		p.expect(ast.Colon)
 		_else := p.ternaryExpr()
-		return &ast.TernaryExpr{lhs, then, _else}
+		return &ast.TernaryExpr{
+			Cond: lhs,
+			Then: then,
+			Else: _else,
+		}
 
 	}
 	return lhs
@@ -579,7 +693,11 @@ func (p *Parser) orExpr() ast.Expression {
 	for p.cur.token.Kind == ast.DblPipe {
 		tok := p.cur.token
 		p.consume()
-		lhs = &ast.BinaryExpr{lhs, tok, p.andExpr()}
+		lhs = &ast.BinaryExpr{
+			LHS: lhs,
+			Op:  tok,
+			RHS: p.andExpr(),
+		}
 	}
 	return lhs
 }
@@ -590,7 +708,11 @@ func (p *Parser) andExpr() ast.Expression {
 	for p.cur.token.Kind == ast.DblAmp {
 		tok := p.cur.token
 		p.consume()
-		lhs = &ast.BinaryExpr{lhs, tok, p.comparativeExpr()}
+		lhs = &ast.BinaryExpr{
+			LHS: lhs,
+			Op:  tok,
+			RHS: p.comparativeExpr(),
+		}
 	}
 	return lhs
 }
@@ -601,7 +723,11 @@ func (p *Parser) comparativeExpr() ast.Expression {
 	for isComparative(p.cur.token.Kind) {
 		tok := p.cur.token
 		p.consume()
-		lhs = &ast.BinaryExpr{lhs, tok, p.additiveExpr()}
+		lhs = &ast.BinaryExpr{
+			LHS: lhs,
+			Op:  tok,
+			RHS: p.additiveExpr(),
+		}
 	}
 	return lhs
 }
@@ -612,7 +738,11 @@ func (p *Parser) additiveExpr() ast.Expression {
 	for isAdditive(p.cur.token.Kind) {
 		tok := p.cur.token
 		p.consume()
-		lhs = &ast.BinaryExpr{lhs, tok, p.multiplicativeExpr()}
+		lhs = &ast.BinaryExpr{
+			LHS: lhs,
+			Op:  tok,
+			RHS: p.multiplicativeExpr(),
+		}
 	}
 	return lhs
 }
@@ -623,7 +753,11 @@ func (p *Parser) multiplicativeExpr() ast.Expression {
 	for isMultiplicative(p.cur.token.Kind) {
 		tok := p.cur.token
 		p.consume()
-		lhs = &ast.BinaryExpr{lhs, tok, p.unaryExpr()}
+		lhs = &ast.BinaryExpr{
+			LHS: lhs,
+			Op:  tok,
+			RHS: p.unaryExpr(),
+		}
 	}
 	return lhs
 }
@@ -633,7 +767,10 @@ func (p *Parser) unaryExpr() ast.Expression {
 	if isUnary(p.cur.token.Kind) {
 		tok := p.cur.token
 		p.consume()
-		return &ast.UnaryExpr{tok, p.unaryExpr()}
+		return &ast.UnaryExpr{
+			Op:      tok,
+			Operand: p.unaryExpr(),
+		}
 
 	}
 	return p.postfixExpr()
@@ -648,7 +785,10 @@ func (p *Parser) postfixExpr() ast.Expression {
 		if asn, ok := exp.(ast.Assignable); ok {
 			tok := p.cur.token
 			p.consume()
-			exp = &ast.PostfixExpr{asn, tok}
+			exp = &ast.PostfixExpr{
+				Assignee: asn,
+				Op:       tok,
+			}
 		} else {
 			panic(&parserError{InvalidPostfix, p.cur.token})
 		}
@@ -666,7 +806,12 @@ func (p *Parser) primaryExpr() ast.Expression {
 
 		case ast.Lparen:
 			lparen, actual, rparen := p.actualParams()
-			prm = &ast.InvokeExpr{prm, lparen, actual, rparen}
+			prm = &ast.InvokeExpr{
+				Operand: prm,
+				LParen:  lparen,
+				Params:  actual,
+				RParen:  rparen,
+			}
 
 		case ast.Lbracket:
 			lbracket := p.consume().token
@@ -675,10 +820,11 @@ func (p *Parser) primaryExpr() ast.Expression {
 			case ast.Colon:
 				p.consume()
 				prm = &ast.SliceToExpr{
-					prm,
-					lbracket,
-					p.expression(),
-					p.expect(ast.Rbracket)}
+					Operand:  prm,
+					LBracket: lbracket,
+					To:       p.expression(),
+					RBracket: p.expect(ast.Rbracket),
+				}
 
 			default:
 				exp := p.expression()
@@ -686,10 +832,11 @@ func (p *Parser) primaryExpr() ast.Expression {
 				switch p.cur.token.Kind {
 				case ast.Rbracket:
 					prm = &ast.IndexExpr{
-						prm,
-						lbracket,
-						exp,
-						p.expect(ast.Rbracket)}
+						Operand:  prm,
+						LBracket: lbracket,
+						Index:    exp,
+						RBracket: p.expect(ast.Rbracket),
+					}
 
 				case ast.Colon:
 					p.consume()
@@ -697,17 +844,19 @@ func (p *Parser) primaryExpr() ast.Expression {
 					switch p.cur.token.Kind {
 					case ast.Rbracket:
 						prm = &ast.SliceFromExpr{
-							prm,
-							lbracket,
-							exp,
-							p.expect(ast.Rbracket)}
+							Operand:  prm,
+							LBracket: lbracket,
+							From:     exp,
+							RBracket: p.expect(ast.Rbracket),
+						}
 					default:
 						prm = &ast.SliceExpr{
-							prm,
-							lbracket,
-							exp,
-							p.expression(),
-							p.expect(ast.Rbracket)}
+							Operand:  prm,
+							LBracket: lbracket,
+							From:     exp,
+							To:       p.expression(),
+							RBracket: p.expect(ast.Rbracket),
+						}
 					}
 
 				default:
@@ -717,7 +866,10 @@ func (p *Parser) primaryExpr() ast.Expression {
 
 		case ast.Dot:
 			p.expect(ast.Dot)
-			prm = &ast.FieldExpr{prm, p.expect(ast.Ident)}
+			prm = &ast.FieldExpr{
+				Operand: prm,
+				Key:     p.expect(ast.Ident),
+			}
 
 		default:
 			return prm
@@ -750,7 +902,9 @@ func (p *Parser) primary() ast.Expression {
 
 		switch {
 		case p.isBuiltIn(p.cur.token.Text):
-			return &ast.BuiltinExpr{p.consume().token}
+			return &ast.BuiltinExpr{
+				Fn: p.consume().token,
+			}
 
 		case p.next.token.Kind == ast.EqGt:
 			return p.lambdaOne()
@@ -759,7 +913,10 @@ func (p *Parser) primary() ast.Expression {
 		}
 
 	case p.cur.token.Kind == ast.This:
-		return &ast.ThisExpr{p.consume().token, nil}
+		return &ast.ThisExpr{
+			Token:    p.consume().token,
+			Variable: nil,
+		}
 
 	case p.cur.token.Kind == ast.Fn:
 		return p.fnExpr(p.consume().token)
@@ -790,14 +947,22 @@ func (p *Parser) primary() ast.Expression {
 func (p *Parser) identExpr() *ast.IdentExpr {
 	tok := p.cur.token
 	p.expect(ast.Ident)
-	return &ast.IdentExpr{tok, nil}
+	return &ast.IdentExpr{
+		Symbol:   tok,
+		Variable: nil,
+	}
 }
 
 func (p *Parser) fnExpr(token *ast.Token) *ast.FnExpr {
 
 	p.expect(ast.Lparen)
 	if p.accept(ast.Rparen) {
-		return &ast.FnExpr{token, nil, p.block(), ast.NewFuncScope()}
+		return &ast.FnExpr{
+			Token:        token,
+			FormalParams: nil,
+			Body:         p.block(),
+			Scope:        ast.NewFuncScope(),
+		}
 	}
 	params := []*ast.FormalParam{}
 
@@ -806,9 +971,15 @@ func (p *Parser) fnExpr(token *ast.Token) *ast.FnExpr {
 		switch p.cur.token.Kind {
 		case ast.Const:
 			p.consume()
-			params = append(params, &ast.FormalParam{p.identExpr(), true})
+			params = append(params, &ast.FormalParam{
+				Ident:   p.identExpr(),
+				IsConst: true,
+			})
 		case ast.Ident:
-			params = append(params, &ast.FormalParam{p.identExpr(), false})
+			params = append(params, &ast.FormalParam{
+				Ident:   p.identExpr(),
+				IsConst: false,
+			})
 		default:
 			panic(p.unexpected())
 		}
@@ -818,7 +989,12 @@ func (p *Parser) fnExpr(token *ast.Token) *ast.FnExpr {
 			p.consume()
 		case ast.Rparen:
 			p.consume()
-			return &ast.FnExpr{token, params, p.block(), ast.NewFuncScope()}
+			return &ast.FnExpr{
+				Token:        token,
+				FormalParams: params,
+				Body:         p.block(),
+				Scope:        ast.NewFuncScope(),
+			}
 		default:
 			panic(p.unexpected())
 		}
@@ -832,18 +1008,41 @@ func (p *Parser) lambdaZero() *ast.FnExpr {
 
 	p.expect(ast.EqGt)
 	params := []*ast.FormalParam{}
-	expr := &ast.ExprStmt{p.expression()}
-	block := &ast.BlockNode{nil, []ast.Statement{expr}, nil, ast.NewScope()}
-	return &ast.FnExpr{token, params, block, ast.NewFuncScope()}
+	expr := &ast.ExprStmt{Expr: p.expression()}
+	block := &ast.BlockNode{
+		LBrace:     nil,
+		Statements: []ast.Statement{expr},
+		RBrace:     nil,
+		Scope:      ast.NewScope(),
+	}
+	return &ast.FnExpr{
+		Token:        token,
+		FormalParams: params,
+		Body:         block,
+		Scope:        ast.NewFuncScope(),
+	}
 }
 
 func (p *Parser) lambdaOne() *ast.FnExpr {
 	token := p.expect(ast.Ident)
 	p.expect(ast.EqGt)
-	params := []*ast.FormalParam{{&ast.IdentExpr{token, nil}, false}}
-	expr := &ast.ExprStmt{p.expression()}
-	block := &ast.BlockNode{nil, []ast.Statement{expr}, nil, ast.NewScope()}
-	return &ast.FnExpr{token, params, block, ast.NewFuncScope()}
+	params := []*ast.FormalParam{{&ast.IdentExpr{
+		Symbol:   token,
+		Variable: nil,
+	}, false}}
+	expr := &ast.ExprStmt{Expr: p.expression()}
+	block := &ast.BlockNode{
+		LBrace:     nil,
+		Statements: []ast.Statement{expr},
+		RBrace:     nil,
+		Scope:      ast.NewScope(),
+	}
+	return &ast.FnExpr{
+		Token:        token,
+		FormalParams: params,
+		Body:         block,
+		Scope:        ast.NewFuncScope(),
+	}
 }
 
 func (p *Parser) lambda() *ast.FnExpr {
@@ -854,14 +1053,20 @@ func (p *Parser) lambda() *ast.FnExpr {
 	switch p.cur.token.Kind {
 
 	case ast.Ident:
-		params = append(params, &ast.FormalParam{p.identExpr(), false})
+		params = append(params, &ast.FormalParam{
+			Ident:   p.identExpr(),
+			IsConst: false,
+		})
 	loop:
 		for {
 			switch p.cur.token.Kind {
 
 			case ast.Comma:
 				p.consume()
-				params = append(params, &ast.FormalParam{p.identExpr(), false})
+				params = append(params, &ast.FormalParam{
+					Ident:   p.identExpr(),
+					IsConst: false,
+				})
 
 			case ast.Pipe:
 				p.consume()
@@ -881,9 +1086,19 @@ func (p *Parser) lambda() *ast.FnExpr {
 
 	p.expect(ast.EqGt)
 
-	expr := &ast.ExprStmt{p.expression()}
-	block := &ast.BlockNode{nil, []ast.Statement{expr}, nil, ast.NewScope()}
-	return &ast.FnExpr{token, params, block, ast.NewFuncScope()}
+	expr := &ast.ExprStmt{Expr: p.expression()}
+	block := &ast.BlockNode{
+		LBrace:     nil,
+		Statements: []ast.Statement{expr},
+		RBrace:     nil,
+		Scope:      ast.NewScope(),
+	}
+	return &ast.FnExpr{
+		Token:        token,
+		FormalParams: params,
+		Body:         block,
+		Scope:        ast.NewFuncScope(),
+	}
 }
 
 func (p *Parser) structExpr() ast.Expression {
@@ -944,7 +1159,14 @@ func (p *Parser) structBody(token *ast.Token) ast.Expression {
 	}
 
 	// done
-	return &ast.StructExpr{token, lbrace, keys, values, rbrace, ast.NewStructScope()}
+	return &ast.StructExpr{
+		StructToken: token,
+		LBrace:      lbrace,
+		Keys:        keys,
+		Values:      values,
+		RBrace:      rbrace,
+		Scope:       ast.NewStructScope(),
+	}
 }
 
 func (p *Parser) property() *ast.PropNode {
@@ -965,7 +1187,13 @@ func (p *Parser) property() *ast.PropNode {
 		}
 	}
 
-	return &ast.PropNode{token, lbrace, getter, setter, p.expect(ast.Rbrace)}
+	return &ast.PropNode{
+		Token:  token,
+		LBrace: lbrace,
+		Getter: getter,
+		Setter: setter,
+		RBrace: p.expect(ast.Rbrace),
+	}
 }
 
 func (p *Parser) propertyFunc() *ast.FnExpr {
@@ -1007,7 +1235,10 @@ func (p *Parser) dictExpr() ast.Expression {
 		key := p.expression()
 		p.expect(ast.Colon)
 		value := p.expression()
-		entries = append(entries, &ast.DictEntryExpr{key, value})
+		entries = append(entries, &ast.DictEntryExpr{
+			Key:   key,
+			Value: value,
+		})
 
 	loop:
 		for {
@@ -1019,7 +1250,10 @@ func (p *Parser) dictExpr() ast.Expression {
 				key = p.expression()
 				p.expect(ast.Colon)
 				value = p.expression()
-				entries = append(entries, &ast.DictEntryExpr{key, value})
+				entries = append(entries, &ast.DictEntryExpr{
+					Key:   key,
+					Value: value,
+				})
 
 			case ast.Rbrace:
 				rbrace = p.consume().token
@@ -1031,7 +1265,12 @@ func (p *Parser) dictExpr() ast.Expression {
 		}
 	}
 
-	return &ast.DictExpr{dictToken, lbrace, entries, rbrace}
+	return &ast.DictExpr{
+		DictToken: dictToken,
+		LBrace:    lbrace,
+		Entries:   entries,
+		RBrace:    rbrace,
+	}
 }
 
 func (p *Parser) setExpr() ast.Expression {
@@ -1040,14 +1279,24 @@ func (p *Parser) setExpr() ast.Expression {
 	lbrace := p.expect(ast.Lbrace)
 
 	if p.cur.token.Kind == ast.Rbrace {
-		return &ast.SetExpr{setToken, lbrace, []ast.Expression{}, p.consume().token}
+		return &ast.SetExpr{
+			SetToken: setToken,
+			LBrace:   lbrace,
+			Elems:    []ast.Expression{},
+			RBrace:   p.consume().token,
+		}
 	}
 
 	elems := []ast.Expression{p.expression()}
 	for {
 		switch p.cur.token.Kind {
 		case ast.Rbrace:
-			return &ast.SetExpr{setToken, lbrace, elems, p.consume().token}
+			return &ast.SetExpr{
+				SetToken: setToken,
+				LBrace:   lbrace,
+				Elems:    elems,
+				RBrace:   p.consume().token,
+			}
 		case ast.Comma:
 			p.consume()
 			elems = append(elems, p.expression())
@@ -1062,14 +1311,22 @@ func (p *Parser) listExpr() ast.Expression {
 	lbracket := p.expect(ast.Lbracket)
 
 	if p.cur.token.Kind == ast.Rbracket {
-		return &ast.ListExpr{lbracket, []ast.Expression{}, p.consume().token}
+		return &ast.ListExpr{
+			LBracket: lbracket,
+			Elems:    []ast.Expression{},
+			RBracket: p.consume().token,
+		}
 	}
 
 	elems := []ast.Expression{p.expression()}
 	for {
 		switch p.cur.token.Kind {
 		case ast.Rbracket:
-			return &ast.ListExpr{lbracket, elems, p.consume().token}
+			return &ast.ListExpr{
+				LBracket: lbracket,
+				Elems:    elems,
+				RBracket: p.consume().token,
+			}
 		case ast.Comma:
 			p.consume()
 			elems = append(elems, p.expression())
@@ -1086,7 +1343,11 @@ func (p *Parser) tupleExpr(lparen *ast.Token, expr ast.Expression) ast.Expressio
 	for {
 		switch p.cur.token.Kind {
 		case ast.Rparen:
-			return &ast.TupleExpr{lparen, elems, p.consume().token}
+			return &ast.TupleExpr{
+				LParen: lparen,
+				Elems:  elems,
+				RParen: p.consume().token,
+			}
 		case ast.Comma:
 			p.consume()
 			elems = append(elems, p.expression())
@@ -1104,7 +1365,9 @@ func (p *Parser) basicExpr() ast.Expression {
 
 	case tok.IsBasic():
 		p.consume()
-		return &ast.BasicExpr{tok}
+		return &ast.BasicExpr{
+			Token: tok,
+		}
 
 	default:
 		panic(p.unexpected())
@@ -1338,25 +1601,25 @@ func fromAssignOp(t *ast.Token) *ast.Token {
 
 	switch t.Kind {
 	case ast.PlusEq:
-		return &ast.Token{ast.Plus, "+", t.Position}
+		return &ast.Token{Kind: ast.Plus, Text: "+", Position: t.Position}
 	case ast.MinusEq:
-		return &ast.Token{ast.Minus, "-", t.Position}
+		return &ast.Token{Kind: ast.Minus, Text: "-", Position: t.Position}
 	case ast.StarEq:
-		return &ast.Token{ast.Star, "*", t.Position}
+		return &ast.Token{Kind: ast.Star, Text: "*", Position: t.Position}
 	case ast.SlashEq:
-		return &ast.Token{ast.Slash, "/", t.Position}
+		return &ast.Token{Kind: ast.Slash, Text: "/", Position: t.Position}
 	case ast.PercentEq:
-		return &ast.Token{ast.Percent, "%", t.Position}
+		return &ast.Token{Kind: ast.Percent, Text: "%", Position: t.Position}
 	case ast.CaretEq:
-		return &ast.Token{ast.Caret, "^", t.Position}
+		return &ast.Token{Kind: ast.Caret, Text: "^", Position: t.Position}
 	case ast.AmpEq:
-		return &ast.Token{ast.Amp, "&", t.Position}
+		return &ast.Token{Kind: ast.Amp, Text: "&", Position: t.Position}
 	case ast.PipeEq:
-		return &ast.Token{ast.Pipe, "|", t.Position}
+		return &ast.Token{Kind: ast.Pipe, Text: "|", Position: t.Position}
 	case ast.DblLtEq:
-		return &ast.Token{ast.DblLt, "<<", t.Position}
+		return &ast.Token{Kind: ast.DblLt, Text: "<<", Position: t.Position}
 	case ast.DblGtEq:
-		return &ast.Token{ast.DblGt, ">>", t.Position}
+		return &ast.Token{Kind: ast.DblGt, Text: ">>", Position: t.Position}
 
 	default:
 		panic("invalid op")
