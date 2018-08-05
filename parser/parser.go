@@ -906,8 +906,6 @@ func (p *Parser) primary() ast.Expression {
 				Fn: p.consume().token,
 			}
 
-		case p.next.token.Kind == ast.EqGt:
-			return p.lambdaOne()
 		default:
 			return p.identExpr()
 		}
@@ -1008,28 +1006,6 @@ func (p *Parser) lambdaZero() *ast.FnExpr {
 
 	p.expect(ast.EqGt)
 	params := []*ast.FormalParam{}
-	expr := &ast.ExprStmt{Expr: p.expression()}
-	block := &ast.BlockNode{
-		LBrace:     nil,
-		Statements: []ast.Statement{expr},
-		RBrace:     nil,
-		Scope:      ast.NewScope(),
-	}
-	return &ast.FnExpr{
-		Token:        token,
-		FormalParams: params,
-		Body:         block,
-		Scope:        ast.NewFuncScope(),
-	}
-}
-
-func (p *Parser) lambdaOne() *ast.FnExpr {
-	token := p.expect(ast.Ident)
-	p.expect(ast.EqGt)
-	params := []*ast.FormalParam{{&ast.IdentExpr{
-		Symbol:   token,
-		Variable: nil,
-	}, false}}
 	expr := &ast.ExprStmt{Expr: p.expression()}
 	block := &ast.BlockNode{
 		LBrace:     nil,
@@ -1205,9 +1181,6 @@ func (p *Parser) propertyFunc() *ast.FnExpr {
 
 	case ast.DblPipe:
 		return p.lambdaZero()
-
-	case ast.Ident:
-		return p.lambdaOne()
 
 	case ast.Pipe:
 		return p.lambda()

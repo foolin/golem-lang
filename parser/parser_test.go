@@ -33,6 +33,7 @@ func fail(t *testing.T, p *Parser, expect string) {
 
 	if err.Error() != expect {
 		t.Error(err, " != ", expect)
+		panic("fail")
 	}
 }
 
@@ -540,9 +541,6 @@ func TestStruct(t *testing.T) {
 	p = newParser("struct { a: prop { |x| => x } }")
 	fail(t, p, "Invalid Property Getter at (1, 20)")
 
-	p = newParser("struct { a: prop { x => x } }")
-	fail(t, p, "Invalid Property Getter at (1, 20)")
-
 	p = newParser("struct { a: prop { |x,y| => x } }")
 	fail(t, p, "Invalid Property Getter at (1, 20)")
 
@@ -558,9 +556,6 @@ func TestStruct(t *testing.T) {
 	fail(t, p, "Invalid Property Setter at (1, 29)")
 
 	p = newParser("struct { a: prop { || => x, |y| => y } }")
-	okExpr(t, p, "struct { a: prop { fn() { x; }, fn(y) { y; } } }")
-
-	p = newParser("struct { a: prop { || => x, y => y} }")
 	okExpr(t, p, "struct { a: prop { fn() { x; }, fn(y) { y; } } }")
 
 	p = newParser("struct { a: prop { || => x, |x,y| => y} }")
@@ -810,10 +805,7 @@ func TestSwitch(t *testing.T) {
 
 func TestLambda(t *testing.T) {
 
-	p := newParser("x => true")
-	okExpr(t, p, "fn(x) { true; }")
-
-	p = newParser("|| => true")
+	p := newParser("|| => true")
 	okExpr(t, p, "fn() { true; }")
 
 	p = newParser("| | => true")
@@ -862,9 +854,9 @@ a() {}`)
 	ok(t, p, "fn() { fn a() {  }; }")
 
 	p = newParser(`
-a
+|a
 
-=> a*a`)
+| => a*a`)
 	ok(t, p, "fn() { fn(a) { (a * a); }; }")
 }
 

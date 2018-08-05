@@ -137,7 +137,7 @@ fn testNamedFunc() {
 fn testLambda() {
     let z = 5
     let a = || => 3
-    let b = x => x * x
+    let b = |x| => x * x
     let c = |x, y| => (x + y)*z
     assert(a() == 3)
     assert(b(2) == 4)
@@ -297,9 +297,9 @@ fn testList() {
         },
         fn () {
             let ls = [1, 2, 3, 4, 5]
-            let squares = ls.map(x => x * x)
+            let squares = ls.map(|x| => x * x)
             let addedUp = ls.reduce(0, |acc, x| => acc + x)
-            let even = ls.filter(x => (x % 2 == 0))
+            let even = ls.filter(|x| => (x % 2 == 0))
 
             assert(squares == [1, 4, 9, 16, 25])
             assert(addedUp == 15)
