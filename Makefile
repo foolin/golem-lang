@@ -8,8 +8,13 @@ clean:
 fmt:
 	go fmt ./...
 
-#lint:
-#	gometalinter.v2 --disable=gocyclo --disable=goconst ./...
+lint:
+	gometalinter.v2 \
+		--disable=gocyclo \
+		--disable=goconst \
+		--exclude="lib/(.*)LoadModule is unused" \
+		--exclude="lib/(.*)is unused \(U1000\) \(megacheck\)" \
+		./...
 
 vet:
 	go vet ./...
@@ -30,7 +35,7 @@ bench_test: compile
 	build/golem bench_test/regexp_test.glm
 	build/golem bench_test/path_test.glm
 
-build: clean fmt vet test compile bench_test
+build: clean fmt lint vet test compile bench_test
 
 #release: build
 #	mkdir -p release/golem/linux
