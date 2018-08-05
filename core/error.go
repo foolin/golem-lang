@@ -172,3 +172,10 @@ func UndefinedModuleError(name string) Error {
 		"UndefinedModule",
 		fmt.Sprintf("Module '%s' is not defined", name))
 }
+
+// CouldNotLoadModuleError creates a CouldNotLoadModule Error
+func CouldNotLoadModuleError(name string, err error) Error {
+	return NewError(
+		"CouldNotLoadModule",
+		fmt.Sprintf("Could not load Module '%s': %s", name, err.Error()))
+}

@@ -6,18 +6,94 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"plugin"
+	"sync"
+
 	"github.com/mjarmy/golem-lang/analyzer"
 	"github.com/mjarmy/golem-lang/compiler"
 	g "github.com/mjarmy/golem-lang/core"
 	"github.com/mjarmy/golem-lang/interpreter"
-	"github.com/mjarmy/golem-lang/lib"
 	"github.com/mjarmy/golem-lang/parser"
 	"github.com/mjarmy/golem-lang/scanner"
-	"io/ioutil"
-	"os"
 )
 
 var version = "0.8.2"
+
+var homePath string
+var libModules = make(map[string]g.Module)
+var libMutex = &sync.Mutex{}
+
+// exPath looks up the path of the golem executable
+func exPath() string {
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	return filepath.Dir(ex)
+}
+
+// lookupModule looks up a module by to loadng a plugin from the '$HOME/lib' directory.
+func lookupModule(name string) (g.Module, g.Error) {
+
+	libMutex.Lock()
+	defer libMutex.Unlock()
+
+	if mod, ok := libModules[name]; ok {
+		return mod, nil
+	}
+
+	// open the plugin
+	p, err := plugin.Open(homePath + "/lib/" + name + "/" + name + ".so")
+	if err != nil {
+		return nil, g.CouldNotLoadModuleError(name, err)
+	}
+
+	// lookup the 'LoadModule' function
+	f, err := p.Lookup("LoadModule")
+	if err != nil {
+		return nil, g.CouldNotLoadModuleError(name, err)
+	}
+	loader := f.(func() (g.Module, g.Error))
+
+	// load the module
+	mod, gerr := loader()
+	if gerr != nil {
+		return nil, gerr
+	}
+	if mod.GetModuleName() != name {
+		return nil, g.CouldNotLoadModuleError(
+			name,
+			fmt.Errorf("Module name mismatch %s != %s", mod.GetModuleName(), name))
+	}
+
+	libModules[name] = mod
+	return mod, nil
+}
+
+func dumpError(cx g.Context, err g.Error) {
+	fmt.Printf("Error: %s\n", err.Error())
+
+	v, e := err.Struct().GetField(cx, g.NewStr("stackTrace"))
+	if e != nil {
+		return
+	}
+	ls, ok := v.(g.List)
+	if !ok {
+		return
+	}
+
+	itr := ls.NewIterator(cx)
+	for itr.IterNext().BoolVal() {
+		v, e = itr.IterGet()
+		if e != nil {
+			return
+		}
+		fmt.Printf("%s\n", v.ToStr(cx))
+	}
+}
 
 func exit(msg string) {
 	fmt.Printf("%s\n", msg)
@@ -30,6 +106,8 @@ func main() {
 		fmt.Printf("Golem %s\n", version)
 		os.Exit(0)
 	}
+
+	homePath = exPath()
 
 	// read source
 	filename := os.Args[1]
@@ -67,7 +145,7 @@ func main() {
 	mod := cmp.Compile()
 
 	// interpret with modules from standard library
-	intp := interpreter.NewInterpreter(mod, builtInMgr, lib.LookupModule)
+	intp := interpreter.NewInterpreter(mod, builtInMgr, lookupModule)
 	_, err := intp.Init()
 	if err != nil {
 		dumpError(intp, err)
@@ -100,27 +178,5 @@ func main() {
 			dumpError(intp, err)
 			os.Exit(-1)
 		}
-	}
-}
-
-func dumpError(cx g.Context, err g.Error) {
-	fmt.Printf("Error: %s\n", err.Error())
-
-	v, e := err.Struct().GetField(cx, g.NewStr("stackTrace"))
-	if e != nil {
-		return
-	}
-	ls, ok := v.(g.List)
-	if !ok {
-		return
-	}
-
-	itr := ls.NewIterator(cx)
-	for itr.IterNext().BoolVal() {
-		v, e = itr.IterGet()
-		if e != nil {
-			return
-		}
-		fmt.Printf("%s\n", v.ToStr(cx))
 	}
 }

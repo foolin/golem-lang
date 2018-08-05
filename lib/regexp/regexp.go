@@ -2,36 +2,30 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-package lib
+package main
 
 import (
-	g "github.com/mjarmy/golem-lang/core"
 	"regexp"
+
+	g "github.com/mjarmy/golem-lang/core"
 )
 
-type regexpModule struct {
-	contents g.Struct
-}
+type module struct{ contents g.Struct }
 
-func (m *regexpModule) GetModuleName() string {
-	return "regexp"
-}
+func (m *module) GetModuleName() string { return "regexp" }
+func (m *module) GetContents() g.Struct { return m.contents }
 
-func (m *regexpModule) GetContents() g.Struct {
-	return m.contents
-}
-
-// NewRegexpModule creates the 'regexp' module.
-func NewRegexpModule() g.Module {
+// LoadModule creates the 'path' module.
+func LoadModule() (g.Module, g.Error) {
 
 	contents, err := g.NewStruct([]g.Field{
 		g.NewField("compile", true, compile())},
 		true)
-
 	if err != nil {
-		panic("unreachable")
+		return nil, err
 	}
-	return &regexpModule{contents}
+
+	return &module{contents}, nil
 }
 
 func compile() g.NativeFunc {

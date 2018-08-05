@@ -2,41 +2,35 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-package lib
+package main
 
 import (
 	"bufio"
-	g "github.com/mjarmy/golem-lang/core"
 	"io"
 	"os"
+
+	g "github.com/mjarmy/golem-lang/core"
+	osutil "github.com/mjarmy/golem-lang/lib/os/util"
 )
 
-type osModule struct {
-	contents g.Struct
-}
+type module struct{ contents g.Struct }
 
-func (m *osModule) GetModuleName() string {
-	return "os"
-}
+func (m *module) GetModuleName() string { return "os" }
+func (m *module) GetContents() g.Struct { return m.contents }
 
-func (m *osModule) GetContents() g.Struct {
-	return m.contents
-}
-
-// NewOsModule creates the 'os' module.
-func NewOsModule() g.Module {
+// LoadModule creates the 'os' module.
+func LoadModule() (g.Module, g.Error) {
 
 	contents, err := g.NewStruct([]g.Field{
 		g.NewField("exit", true, exit()),
 		g.NewField("open", true, open()),
 		g.NewField("stat", true, stat()),
 	}, true)
-
 	if err != nil {
-		panic("unreachable")
+		return nil, err
 	}
 
-	return &osModule{contents}
+	return &module{contents}, nil
 }
 
 func exit() g.NativeFunc {
@@ -60,7 +54,6 @@ func exit() g.NativeFunc {
 			// we will never actually get here
 			return g.Null, nil
 		})
-
 }
 
 func open() g.NativeFunc {
@@ -79,7 +72,6 @@ func open() g.NativeFunc {
 			}
 			return newFile(f), nil
 		})
-
 }
 
 func stat() g.NativeFunc {
@@ -114,27 +106,11 @@ func stat() g.NativeFunc {
 			if err != nil {
 				return nil, g.NewError("OsError", err.Error())
 			}
-			return newInfo(info), nil
+			return osutil.NewInfo(info), nil
 		})
 }
 
 //-------------------------------------------------------------------------
-
-func newInfo(info os.FileInfo) g.Struct {
-
-	stc, err := g.NewStruct([]g.Field{
-		g.NewField("name", true, g.NewStr(info.Name())),
-		g.NewField("size", true, g.NewInt(info.Size())),
-		g.NewField("mode", true, g.NewInt(int64(info.Mode()))),
-		//g.NewField("readLines", true, ModTime() time.Time TODO
-		g.NewField("isDir", true, g.NewBool(info.IsDir())),
-	}, true)
-	if err != nil {
-		panic("unreachable")
-	}
-
-	return stc
-}
 
 func newFile(f *os.File) g.Struct {
 

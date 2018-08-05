@@ -2,39 +2,32 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-package lib
+package main
 
 import (
 	"os"
 	"path/filepath"
 
 	g "github.com/mjarmy/golem-lang/core"
+	osutil "github.com/mjarmy/golem-lang/lib/os/util"
 )
 
-type pathModule struct {
-	contents g.Struct
-}
+type module struct{ contents g.Struct }
 
-func (m *pathModule) GetModuleName() string {
-	return "path"
-}
+func (m *module) GetModuleName() string { return "path" }
+func (m *module) GetContents() g.Struct { return m.contents }
 
-func (m *pathModule) GetContents() g.Struct {
-	return m.contents
-}
-
-// NewPathModule creates the 'path' module.
-func NewPathModule() g.Module {
+// LoadModule creates the 'path' module.
+func LoadModule() (g.Module, g.Error) {
 
 	contents, err := g.NewStruct([]g.Field{
 		g.NewField("filepath", true, newFilepath()),
 	}, true)
-
 	if err != nil {
-		panic("unreachable")
+		return nil, err
 	}
 
-	return &pathModule{contents}
+	return &module{contents}, nil
 }
 
 func newFilepath() g.Struct {
@@ -91,7 +84,7 @@ func walk() g.NativeFunc {
 						return err
 					}
 					_, gerr := callback.Invoke(cx,
-						[]g.Value{g.NewStr(path), newInfo(info)})
+						[]g.Value{g.NewStr(path), osutil.NewInfo(info)})
 					return gerr
 				})
 
