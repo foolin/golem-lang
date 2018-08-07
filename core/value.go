@@ -256,6 +256,15 @@ type Chan interface {
 }
 
 //---------------------------------------------------------------
+// Plugin
+
+// Plugin is a golang plugin
+type Plugin interface {
+	Value
+	pluginMarker()
+}
+
+//---------------------------------------------------------------
 // Type
 
 // Type represents all of the possible types of a Golem Value
@@ -276,9 +285,11 @@ const (
 	SetType
 	StructType
 	ChanType
+	PluginType
 )
 
 func (t Type) String() string {
+
 	switch t {
 	case NullType:
 		return "Null"
@@ -306,6 +317,8 @@ func (t Type) String() string {
 		return "Struct"
 	case ChanType:
 		return "Chan"
+	case PluginType:
+		return "Plugin"
 
 	default:
 		panic("unreachable")

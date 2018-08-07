@@ -22,12 +22,11 @@ import (
 
 var version = "0.8.2"
 
-var homePath string
 var libModules = make(map[string]g.Module)
 var libMutex = &sync.Mutex{}
 
-// exPath looks up the path of the golem executable
-func exPath() string {
+// homePath looks up the path of the golem executable
+func homePath() string {
 	ex, err := os.Executable()
 	if err != nil {
 		panic(err)
@@ -36,7 +35,7 @@ func exPath() string {
 }
 
 // lookupModule looks up a module by to loadng a plugin from the '$HOME/lib' directory.
-func lookupModule(name string) (g.Module, g.Error) {
+func lookupModule(homePath, name string) (g.Module, g.Error) {
 
 	libMutex.Lock()
 	defer libMutex.Unlock()
@@ -107,7 +106,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	homePath = exPath()
+	homePath := homePath()
 
 	// read source
 	filename := os.Args[1]
@@ -145,7 +144,7 @@ func main() {
 	mod := cmp.Compile()
 
 	// interpret with modules from standard library
-	intp := interpreter.NewInterpreter(mod, builtInMgr, lookupModule)
+	intp := interpreter.NewInterpreter(homePath, mod, builtInMgr, lookupModule)
 	_, err := intp.Init()
 	if err != nil {
 		dumpError(intp, err)

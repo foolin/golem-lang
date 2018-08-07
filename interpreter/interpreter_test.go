@@ -23,7 +23,7 @@ func tassert(t *testing.T, flag bool) {
 
 func okExpr(t *testing.T, source string, expect g.Value) {
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod, builtInMgr, importResolver())
+	intp := NewInterpreter(".", mod, builtInMgr, importResolver())
 
 	result, err := intp.Init()
 	if err != nil {
@@ -52,7 +52,7 @@ func okRef(t *testing.T, intp *Interpreter, ref *g.Ref, expect g.Value) {
 
 func okMod(t *testing.T, source string, expectResult g.Value, expectRefs []*g.Ref) {
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod, builtInMgr, importResolver())
+	intp := NewInterpreter(".", mod, builtInMgr, importResolver())
 
 	result, err := intp.Init()
 	if err != nil {
@@ -75,7 +75,7 @@ func okMod(t *testing.T, source string, expectResult g.Value, expectRefs []*g.Re
 func failExpr(t *testing.T, source string, expect string) {
 
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod, builtInMgr, importResolver())
+	intp := NewInterpreter(".", mod, builtInMgr, importResolver())
 
 	result, err := intp.Init()
 	if result != nil {
@@ -90,7 +90,7 @@ func failExpr(t *testing.T, source string, expect string) {
 func fail(t *testing.T, source string, err g.Error, stack []string) *g.BytecodeModule {
 
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod, builtInMgr, importResolver())
+	intp := NewInterpreter(".", mod, builtInMgr, importResolver())
 
 	expect := intp.makeErrorTrace(err, stack)
 
@@ -109,7 +109,7 @@ func fail(t *testing.T, source string, err g.Error, stack []string) *g.BytecodeM
 func failErr(t *testing.T, source string, expect g.Error) {
 
 	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(mod, builtInMgr, importResolver())
+	intp := NewInterpreter(".", mod, builtInMgr, importResolver())
 
 	result, err := intp.Init()
 	if result != nil {
@@ -156,7 +156,7 @@ type testModule struct {
 func (t *testModule) GetModuleName() string { return t.name }
 func (t *testModule) GetContents() g.Struct { return t.contents }
 
-func importResolver() func(name string) (g.Module, g.Error) {
+func importResolver() func(homePath string, name string) (g.Module, g.Error) {
 	stc, err := g.NewStruct([]g.Field{
 		g.NewField("a", true, g.One)},
 		false)
@@ -165,7 +165,7 @@ func importResolver() func(name string) (g.Module, g.Error) {
 	}
 
 	foo := &testModule{"foo", stc}
-	return func(name string) (g.Module, g.Error) {
+	return func(homePath, name string) (g.Module, g.Error) {
 		if name == "foo" {
 			return foo, nil
 		}
@@ -174,7 +174,7 @@ func importResolver() func(name string) (g.Module, g.Error) {
 }
 
 func interpret(mod *g.BytecodeModule) *Interpreter {
-	intp := NewInterpreter(mod, builtInMgr, importResolver())
+	intp := NewInterpreter(".", mod, builtInMgr, importResolver())
 	_, err := intp.Init()
 	if err != nil {
 		fmt.Printf("%v\n", err)

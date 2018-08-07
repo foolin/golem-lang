@@ -103,7 +103,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			f.stack = f.stack[:n-idx]
 			f.ip += 3
 
-			intp := &Interpreter{i.mod, i.builtInMgr, i.resolveImport, []*frame{}}
+			intp := &Interpreter{i.homePath, i.mod, i.builtInMgr, i.resolveImport, []*frame{}}
 			locals := newLocals(fn.Template().NumLocals, params)
 			go (func() {
 				_, errTrace := intp.eval(fn, locals)
@@ -514,7 +514,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		assert(ok)
 
 		// Lookup the module.
-		mod, err := i.resolveImport(name.String())
+		mod, err := i.resolveImport(i.homePath, name.String())
 		if err != nil {
 			return nil, err
 		}

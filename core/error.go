@@ -179,3 +179,10 @@ func CouldNotLoadModuleError(name string, err error) Error {
 		"CouldNotLoadModule",
 		fmt.Sprintf("Could not load Module '%s': %s", name, err.Error()))
 }
+
+// PluginError creates a Plugin Error
+func PluginError(path string, err error) Error {
+	return NewError(
+		"Plugin",
+		fmt.Sprintf("Plugin '%s': %s", path, err.Error()))
+}

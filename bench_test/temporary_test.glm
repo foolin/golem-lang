@@ -2,21 +2,31 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-import regexp
+//import temporary
+
+const plg = plugin("temporary")
+
+const temporary = struct {
+    compile: fn(expr) {
+        plg.lookup("Compile")(expr)
+    }
+}
+
+//-------------------------------------------
 
 fn testCompile() {
-    let rgx = regexp.compile('abc')
+    let rgx = temporary.compile('abc')
     assert(
         [rgx.matchString('xyzabcdef'), rgx.matchString('123')] == 
         [true, false])
 
-    rgx = regexp.compile('^[a-z]+\\[[0-9]+\\]$')
+    rgx = temporary.compile('^[a-z]+\\[[0-9]+\\]$')
     assert(
         [rgx.matchString('foo[123]'), rgx.matchString('456')] == 
         [true, false])
 
     try {
-        rgx = regexp.compile('\\')
+        rgx = temporary.compile('\\')
         assert(false)
     } catch e {
         assert(e.kind == 'RegexpError')

@@ -80,12 +80,13 @@ var SandboxBuiltins = []*BuiltinEntry{
 	{"arity", BuiltinArity},
 }
 
-// CommandLineBuiltins consists of the SandboxBuiltins, plus print() and println().
+// CommandLineBuiltins consists of the SandboxBuiltins, plus print(), println() and plugin().
 var CommandLineBuiltins = append(
 	SandboxBuiltins,
 	[]*BuiltinEntry{
 		{"print", BuiltinPrint},
-		{"println", BuiltinPrintln}}...)
+		{"println", BuiltinPrintln},
+		{"plugin", BuiltinPlugin}}...)
 
 //-----------------------------------------------------------------
 
@@ -187,7 +188,7 @@ var BuiltinMerge = &nativeFunc{
 		return MergeStructs(structs), nil
 	}}
 
-// BuiltinChan creates a new Chan.  IfStmt an Int is passed in,
+// BuiltinChan creates a new Chan.  If an Int is passed in,
 // it is used to create a buffered Chan.
 var BuiltinChan = &nativeFunc{
 	0, 1,
@@ -304,4 +305,17 @@ var BuiltinArity = &nativeFunc{
 			panic("invalid struct")
 		}
 		return st, nil
+	}}
+
+// BuiltinPlugin creates a newPlugChan.
+var BuiltinPlugin = &nativeFunc{
+	1, 1,
+	func(cx Context, values []Value) (Value, Error) {
+
+		path, ok := values[0].(Str)
+		if !ok {
+			return nil, TypeMismatchError("Expected Str")
+		}
+
+		return NewPlugin(cx, path)
 	}}

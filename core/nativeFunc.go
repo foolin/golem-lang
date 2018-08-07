@@ -11,7 +11,7 @@ import (
 //--------------------------------------------------------------
 // NativeFunc
 
-// NativeFunc is a Func that is implemented in GoStmt rather than Golem
+// NativeFunc is a Func that is implemented in Go rather than Golem
 type NativeFunc interface {
 	Func
 }
@@ -23,7 +23,11 @@ type nativeFunc struct {
 }
 
 // NewNativeFunc creates a new NativeFunc
-func NewNativeFunc(minArity int, maxArity int, f func(Context, []Value) (Value, Error)) NativeFunc {
+func NewNativeFunc(
+	minArity int,
+	maxArity int,
+	f func(Context, []Value) (Value, Error)) NativeFunc {
+
 	return &nativeFunc{minArity, maxArity, f}
 }
 

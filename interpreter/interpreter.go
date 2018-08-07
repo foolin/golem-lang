@@ -16,19 +16,21 @@ import (
 
 // Interpreter interprets Golem bytecode.
 type Interpreter struct {
+	homePath      string
 	mod           *g.BytecodeModule
 	builtInMgr    g.BuiltinManager
-	resolveImport func(name string) (g.Module, g.Error)
+	resolveImport func(homePath, name string) (g.Module, g.Error)
 	frames        []*frame
 }
 
 // NewInterpreter creates a new Interpreter
 func NewInterpreter(
+	homePath string,
 	mod *g.BytecodeModule,
 	builtInMgr g.BuiltinManager,
-	resolveImport func(name string) (g.Module, g.Error)) *Interpreter {
+	resolveImport func(homePath string, name string) (g.Module, g.Error)) *Interpreter {
 
-	return &Interpreter{mod, builtInMgr, resolveImport, []*frame{}}
+	return &Interpreter{homePath, mod, builtInMgr, resolveImport, []*frame{}}
 }
 
 // Init initializes an interpreter, by interpreting its "init" function.
@@ -47,11 +49,20 @@ func (i *Interpreter) Init() (g.Value, g.Error) {
 	return i.eval(fn, i.mod.Refs)
 }
 
-// Eval evaluates a given BytecodeFunc.  Note that this function has the same
-// signature as core.Context.Eval()
+//-------------------------------------------------------------------------
+// Context
+
+// HomePath returns the home directory path of the interpreter.
+func (i *Interpreter) HomePath() string {
+	return i.homePath
+}
+
+// Eval evaluates a given BytecodeFunc.
 func (i *Interpreter) Eval(fn g.BytecodeFunc, params []g.Value) (g.Value, g.Error) {
 	return i.eval(fn, newLocals(fn.Template().NumLocals, params))
 }
+
+//-------------------------------------------------------------------------
 
 func (i *Interpreter) eval(fn g.BytecodeFunc, locals []*g.Ref) (result g.Value, errTrace g.Error) {
 
