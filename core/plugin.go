@@ -68,7 +68,7 @@ func (p *_plugin) GetField(cx Context, key Str) (Value, Error) {
 	switch sn := key.String(); sn {
 
 	case "lookup":
-		return &intrinsicFunc{p, sn, &nativeFunc{
+		return &intrinsicFunc{p, sn, NewNativeFunc(
 			1, 1,
 			func(cx Context, values []Value) (Value, Error) {
 
@@ -91,7 +91,7 @@ func (p *_plugin) GetField(cx Context, key Str) (Value, Error) {
 				}
 				return *value, nil
 
-			}}}, nil
+			})}, nil
 
 	default:
 		return nil, NoSuchFieldError(key.String())

@@ -189,7 +189,7 @@ func (d *dict) GetField(cx Context, key Str) (Value, Error) {
 	switch sn := key.String(); sn {
 
 	case "addAll":
-		return &intrinsicFunc{d, sn, &nativeFunc{
+		return &intrinsicFunc{d, sn, NewNativeFunc(
 			1, 1,
 			func(cx Context, values []Value) (Value, Error) {
 				err := d.AddAll(cx, values[0])
@@ -197,10 +197,10 @@ func (d *dict) GetField(cx Context, key Str) (Value, Error) {
 					return nil, err
 				}
 				return d, nil
-			}}}, nil
+			})}, nil
 
 	case "clear":
-		return &intrinsicFunc{d, sn, &nativeFunc{
+		return &intrinsicFunc{d, sn, NewNativeFunc(
 			0, 0,
 			func(cx Context, values []Value) (Value, Error) {
 				err := d.Clear()
@@ -208,28 +208,28 @@ func (d *dict) GetField(cx Context, key Str) (Value, Error) {
 					return nil, err
 				}
 				return d, nil
-			}}}, nil
+			})}, nil
 
 	case "isEmpty":
-		return &intrinsicFunc{d, sn, &nativeFunc{
+		return &intrinsicFunc{d, sn, NewNativeFunc(
 			0, 0,
 			func(cx Context, values []Value) (Value, Error) {
 				return d.IsEmpty(), nil
-			}}}, nil
+			})}, nil
 
 	case "containsKey":
-		return &intrinsicFunc{d, sn, &nativeFunc{
+		return &intrinsicFunc{d, sn, NewNativeFunc(
 			1, 1,
 			func(cx Context, values []Value) (Value, Error) {
 				return d.ContainsKey(cx, values[0])
-			}}}, nil
+			})}, nil
 
 	case "remove":
-		return &intrinsicFunc{d, sn, &nativeFunc{
+		return &intrinsicFunc{d, sn, NewNativeFunc(
 			1, 1,
 			func(cx Context, values []Value) (Value, Error) {
 				return d.Remove(cx, values[0])
-			}}}, nil
+			})}, nil
 
 	default:
 		return nil, NoSuchFieldError(key.String())

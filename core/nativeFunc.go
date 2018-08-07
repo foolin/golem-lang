@@ -8,9 +8,6 @@ import (
 	"fmt"
 )
 
-//--------------------------------------------------------------
-// NativeFunc
-
 // NativeFunc is a Func that is implemented in Go rather than Golem
 type NativeFunc interface {
 	Func
@@ -45,7 +42,7 @@ func (f *nativeFunc) Frozen() (Bool, Error) {
 
 func (f *nativeFunc) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
-	case NativeFunc:
+	case *nativeFunc:
 		// equality is based on identity
 		return NewBool(f == t), nil
 	default:
@@ -101,7 +98,7 @@ func (f *nativeFunc) Invoke(cx Context, values []Value) (Value, Error) {
 type intrinsicFunc struct {
 	owner Value
 	name  string
-	*nativeFunc
+	Func
 }
 
 func (f *intrinsicFunc) Eq(cx Context, v Value) (Bool, Error) {

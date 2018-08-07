@@ -160,7 +160,7 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 	switch sn := key.String(); sn {
 
 	case "contains":
-		return &intrinsicFunc{s, sn, &nativeFunc{
+		return &intrinsicFunc{s, sn, NewNativeFunc(
 			1, 1,
 			func(cx Context, values []Value) (Value, Error) {
 				z, ok := values[0].(str)
@@ -168,10 +168,10 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 					return nil, TypeMismatchError("Expected Str")
 				}
 				return NewBool(strings.Contains(string(s), string(z))), nil
-			}}}, nil
+			})}, nil
 
 	case "index":
-		return &intrinsicFunc{s, sn, &nativeFunc{
+		return &intrinsicFunc{s, sn, NewNativeFunc(
 			1, 1,
 			func(cx Context, values []Value) (Value, Error) {
 				z, ok := values[0].(str)
@@ -179,10 +179,10 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 					return nil, TypeMismatchError("Expected Str")
 				}
 				return NewInt(int64(strings.Index(string(s), string(z)))), nil
-			}}}, nil
+			})}, nil
 
 	case "lastIndex":
-		return &intrinsicFunc{s, sn, &nativeFunc{
+		return &intrinsicFunc{s, sn, NewNativeFunc(
 			1, 1,
 			func(cx Context, values []Value) (Value, Error) {
 				z, ok := values[0].(str)
@@ -190,10 +190,10 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 					return nil, TypeMismatchError("Expected Str")
 				}
 				return NewInt(int64(strings.LastIndex(string(s), string(z)))), nil
-			}}}, nil
+			})}, nil
 
 	case "startsWith":
-		return &intrinsicFunc{s, sn, &nativeFunc{
+		return &intrinsicFunc{s, sn, NewNativeFunc(
 			1, 1,
 			func(cx Context, values []Value) (Value, Error) {
 				z, ok := values[0].(str)
@@ -201,10 +201,10 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 					return nil, TypeMismatchError("Expected Str")
 				}
 				return NewBool(strings.HasPrefix(string(s), string(z))), nil
-			}}}, nil
+			})}, nil
 
 	case "endsWith":
-		return &intrinsicFunc{s, sn, &nativeFunc{
+		return &intrinsicFunc{s, sn, NewNativeFunc(
 			1, 1,
 			func(cx Context, values []Value) (Value, Error) {
 				z, ok := values[0].(str)
@@ -212,10 +212,10 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 					return nil, TypeMismatchError("Expected Str")
 				}
 				return NewBool(strings.HasSuffix(string(s), string(z))), nil
-			}}}, nil
+			})}, nil
 
 	case "replace":
-		return &intrinsicFunc{s, sn, &nativeFunc{
+		return &intrinsicFunc{s, sn, NewNativeFunc(
 			2, 3,
 			func(cx Context, values []Value) (Value, Error) {
 				a, ok := values[0].(str)
@@ -235,10 +235,10 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 					n = int(z)
 				}
 				return NewStr(strings.Replace(string(s), string(a), string(b), n)), nil
-			}}}, nil
+			})}, nil
 
 	case "split":
-		return &intrinsicFunc{s, sn, &nativeFunc{
+		return &intrinsicFunc{s, sn, NewNativeFunc(
 			1, 1,
 			func(cx Context, values []Value) (Value, Error) {
 				z, ok := values[0].(str)
@@ -252,7 +252,7 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 				}
 				return NewList(result), nil
 
-			}}}, nil
+			})}, nil
 
 		//func Split(s, sep string) []string
 	default:
