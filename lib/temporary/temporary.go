@@ -11,13 +11,8 @@ import (
 )
 
 // Compile compiles a regex expression
-var Compile g.Value = g.NewNativeFunc(
-	1, 1,
-	func(cx g.Context, values []g.Value) (g.Value, g.Error) {
-		s, ok := values[0].(g.Str)
-		if !ok {
-			return nil, g.TypeMismatchError("Expected Str")
-		}
+var Compile g.Value = g.NewNativeFuncStr(
+	func(cx g.Context, s g.Str) (g.Value, g.Error) {
 
 		rgx, err := regexp.Compile(s.String())
 		if err != nil {
@@ -29,13 +24,8 @@ var Compile g.Value = g.NewNativeFunc(
 
 func makeRegexp(rgx *regexp.Regexp) g.Struct {
 
-	matchString := g.NewNativeFunc(
-		1, 1,
-		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
-			s, ok := values[0].(g.Str)
-			if !ok {
-				return nil, g.TypeMismatchError("Expected Str")
-			}
+	matchString := g.NewNativeFuncStr(
+		func(cx g.Context, s g.Str) (g.Value, g.Error) {
 			return g.NewBool(rgx.MatchString(s.String())), nil
 		})
 

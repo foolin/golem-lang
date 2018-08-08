@@ -58,13 +58,8 @@ func exit() g.NativeFunc {
 
 func open() g.NativeFunc {
 
-	return g.NewNativeFunc(
-		1, 1,
-		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
-			s, ok := values[0].(g.Str)
-			if !ok {
-				return nil, g.TypeMismatchError("Expected Str")
-			}
+	return g.NewNativeFuncStr(
+		func(cx g.Context, s g.Str) (g.Value, g.Error) {
 
 			f, err := os.Open(s.String())
 			if err != nil {
@@ -126,9 +121,8 @@ func newFile(f *os.File) g.Struct {
 }
 
 func readLines(f io.Reader) g.NativeFunc {
-	return g.NewNativeFunc(
-		0, 0,
-		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+	return g.NewNativeFunc0(
+		func(cx g.Context) (g.Value, g.Error) {
 
 			lines := []g.Value{}
 			scanner := bufio.NewScanner(f)
@@ -145,9 +139,8 @@ func readLines(f io.Reader) g.NativeFunc {
 }
 
 func close(f io.Closer) g.NativeFunc {
-	return g.NewNativeFunc(
-		0, 0,
-		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+	return g.NewNativeFunc0(
+		func(cx g.Context) (g.Value, g.Error) {
 			err := f.Close()
 			if err != nil {
 				return nil, g.NewError("OsError", err.Error())

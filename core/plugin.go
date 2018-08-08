@@ -68,16 +68,10 @@ func (p *_plugin) GetField(cx Context, key Str) (Value, Error) {
 	switch sn := key.String(); sn {
 
 	case "lookup":
-		return &intrinsicFunc{p, sn, NewNativeFunc(
-			1, 1,
-			func(cx Context, values []Value) (Value, Error) {
+		return &intrinsicFunc{p, sn, NewNativeFuncStr(
+			func(cx Context, s Str) (Value, Error) {
 
-				name, ok := values[0].(Str)
-				if !ok {
-					return nil, TypeMismatchError("Expected Str")
-				}
-
-				sym, err := p.plug.Lookup(name.String())
+				sym, err := p.plug.Lookup(s.String())
 				if err != nil {
 					return nil, PluginError(p.path, err)
 				}
@@ -86,7 +80,7 @@ func (p *_plugin) GetField(cx Context, key Str) (Value, Error) {
 				if !ok {
 					return nil, PluginError(p.path, fmt.Errorf(
 						"plugin symbol '%s' is not a Value: %s",
-						name.String(),
+						s.String(),
 						reflect.TypeOf(sym)))
 				}
 				return *value, nil

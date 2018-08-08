@@ -318,6 +318,8 @@ fn testList() {
             let n = 0
             let b = a.map(fn(x) { n += x; x*x; })
             assert(b == [1, 4, 9] && n == 6)
+
+            fail(|| => [].remove('a'), 'TypeMismatch')
         }
     ]
     for f in funcs { f(); }

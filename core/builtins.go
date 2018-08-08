@@ -116,10 +116,9 @@ var BuiltinPrintln = NewNativeFunc(
 //-----------------------------------------------------------------
 
 // BuiltinStr converts a single value to a Str
-var BuiltinStr = NewNativeFunc(
-	1, 1,
-	func(cx Context, values []Value) (Value, Error) {
-		return values[0].ToStr(cx), nil
+var BuiltinStr = NewNativeFuncValue(
+	func(cx Context, val Value) (Value, Error) {
+		return val.ToStr(cx), nil
 	})
 
 // BuiltinLen returns the length of a single Lenable
@@ -158,14 +157,8 @@ var BuiltinRange = NewNativeFunc(
 	})
 
 // BuiltinAssert asserts that a single Bool is True
-var BuiltinAssert = NewNativeFunc(
-	1, 1,
-	func(cx Context, values []Value) (Value, Error) {
-		b, ok := values[0].(Bool)
-		if !ok {
-			return nil, TypeMismatchError("Expected Bool")
-		}
-
+var BuiltinAssert = NewNativeFuncBool(
+	func(cx Context, b Bool) (Value, Error) {
 		if b.BoolVal() {
 			return True, nil
 		}
@@ -209,42 +202,33 @@ var BuiltinChan = NewNativeFunc(
 	})
 
 // BuiltinType returns the Str representation of the Type of a single Value
-var BuiltinType = NewNativeFunc(
-	1, 1,
-	func(cx Context, values []Value) (Value, Error) {
+var BuiltinType = NewNativeFuncValue(
+	func(cx Context, val Value) (Value, Error) {
 		// Null has a type, but for the purposes of type()
-		// we are going to pretend it doesn't
-		if values[0] == Null {
+		// we are going to pretend that it doesn't
+		if val == Null {
 			return nil, NullValueError()
 		}
-		t := values[0].Type()
+		t := val.Type()
 		return NewStr(t.String()), nil
 	})
 
 // BuiltinFreeze freezes a single Value.
-var BuiltinFreeze = NewNativeFunc(
-	1, 1,
-	func(cx Context, values []Value) (Value, Error) {
-		return values[0].Freeze()
+var BuiltinFreeze = NewNativeFuncValue(
+	func(cx Context, val Value) (Value, Error) {
+		return val.Freeze()
 	})
 
 // BuiltinFrozen returns whether a single Value is Frozen.
-var BuiltinFrozen = NewNativeFunc(
-	1, 1,
-	func(cx Context, values []Value) (Value, Error) {
-		return values[0].Frozen()
+var BuiltinFrozen = NewNativeFuncValue(
+	func(cx Context, val Value) (Value, Error) {
+		return val.Frozen()
 	})
 
 // BuiltinFields returns the fields of a Struct
-var BuiltinFields = NewNativeFunc(
-	1, 1,
-	func(cx Context, values []Value) (Value, Error) {
-		st, ok := values[0].(*_struct)
-		if !ok {
-			return nil, TypeMismatchError("Expected Struct")
-		}
-
-		fields := st.smap.fieldNames()
+var BuiltinFields = NewNativeFuncStruct(
+	func(cx Context, st Struct) (Value, Error) {
+		fields := st.(*_struct).smap.fieldNames()
 		result := make([]Value, len(fields))
 		for i, k := range fields {
 			result[i] = NewStr(k)
@@ -290,14 +274,8 @@ var BuiltinSetVal = NewNativeFunc(
 	})
 
 // BuiltinArity returns the arity of a function.
-var BuiltinArity = NewNativeFunc(
-	1, 1,
-	func(cx Context, values []Value) (Value, Error) {
-		f, ok := values[0].(Func)
-		if !ok {
-			return nil, TypeMismatchError("Expected Func")
-		}
-
+var BuiltinArity = NewNativeFuncFunc(
+	func(cx Context, f Func) (Value, Error) {
 		st, err := NewStruct([]Field{
 			NewField("min", true, NewInt(int64(f.MinArity()))),
 			NewField("max", true, NewInt(int64(f.MaxArity())))}, true)
@@ -307,15 +285,8 @@ var BuiltinArity = NewNativeFunc(
 		return st, nil
 	})
 
-// BuiltinPlugin creates a newPlugChan.
-var BuiltinPlugin = NewNativeFunc(
-	1, 1,
-	func(cx Context, values []Value) (Value, Error) {
-
-		path, ok := values[0].(Str)
-		if !ok {
-			return nil, TypeMismatchError("Expected Str")
-		}
-
-		return NewPlugin(cx, path)
+// BuiltinPlugin creates a newPlugin.
+var BuiltinPlugin = NewNativeFuncStr(
+	func(cx Context, s Str) (Value, Error) {
+		return NewPlugin(cx, s)
 	})

@@ -30,13 +30,8 @@ func LoadModule() (g.Module, g.Error) {
 
 func compile() g.NativeFunc {
 
-	return g.NewNativeFunc(
-		1, 1,
-		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
-			s, ok := values[0].(g.Str)
-			if !ok {
-				return nil, g.TypeMismatchError("Expected Str")
-			}
+	return g.NewNativeFuncStr(
+		func(cx g.Context, s g.Str) (g.Value, g.Error) {
 
 			rgx, err := regexp.Compile(s.String())
 			if err != nil {
@@ -49,13 +44,8 @@ func compile() g.NativeFunc {
 
 func makeRegexp(rgx *regexp.Regexp) g.Struct {
 
-	match := g.NewNativeFunc(
-		1, 1,
-		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
-			s, ok := values[0].(g.Str)
-			if !ok {
-				return nil, g.TypeMismatchError("Expected Str")
-			}
+	match := g.NewNativeFuncStr(
+		func(cx g.Context, s g.Str) (g.Value, g.Error) {
 			return g.NewBool(rgx.MatchString(s.String())), nil
 		})
 

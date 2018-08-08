@@ -45,15 +45,8 @@ func newFilepath() g.Struct {
 
 func ext() g.NativeFunc {
 
-	return g.NewNativeFunc(
-		1, 1,
-		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
-
-			name, ok := values[0].(g.Str)
-			if !ok {
-				return nil, g.TypeMismatchError("Expected Str")
-			}
-
+	return g.NewNativeFuncStr(
+		func(cx g.Context, name g.Str) (g.Value, g.Error) {
 			return g.NewStr(filepath.Ext(name.String())), nil
 		})
 }

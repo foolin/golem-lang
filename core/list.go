@@ -302,10 +302,9 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 	switch sn := key.String(); sn {
 
 	case "add":
-		return &intrinsicFunc{ls, sn, NewNativeFunc(
-			1, 1,
-			func(cx Context, values []Value) (Value, Error) {
-				err := ls.Add(cx, values[0])
+		return &intrinsicFunc{ls, sn, NewNativeFuncValue(
+			func(cx Context, val Value) (Value, Error) {
+				err := ls.Add(cx, val)
 				if err != nil {
 					return nil, err
 				}
@@ -313,10 +312,9 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "addAll":
-		return &intrinsicFunc{ls, sn, NewNativeFunc(
-			1, 1,
-			func(cx Context, values []Value) (Value, Error) {
-				err := ls.AddAll(cx, values[0])
+		return &intrinsicFunc{ls, sn, NewNativeFuncValue(
+			func(cx Context, val Value) (Value, Error) {
+				err := ls.AddAll(cx, val)
 				if err != nil {
 					return nil, err
 				}
@@ -324,15 +322,9 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "remove":
-		return &intrinsicFunc{ls, sn, NewNativeFunc(
-			1, 1,
-			func(cx Context, values []Value) (Value, Error) {
-				index, ok := values[0].(Int)
-				if !ok {
-					return nil, TypeMismatchError("Expected Iterable Type")
-				}
-
-				err := ls.Remove(cx, index)
+		return &intrinsicFunc{ls, sn, NewNativeFuncInt(
+			func(cx Context, i Int) (Value, Error) {
+				err := ls.Remove(cx, i)
 				if err != nil {
 					return nil, err
 				}
@@ -340,9 +332,8 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "clear":
-		return &intrinsicFunc{ls, sn, NewNativeFunc(
-			0, 0,
-			func(cx Context, values []Value) (Value, Error) {
+		return &intrinsicFunc{ls, sn, NewNativeFunc0(
+			func(cx Context) (Value, Error) {
 				err := ls.Clear()
 				if err != nil {
 					return nil, err
@@ -351,24 +342,21 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "isEmpty":
-		return &intrinsicFunc{ls, sn, NewNativeFunc(
-			0, 0,
-			func(cx Context, values []Value) (Value, Error) {
+		return &intrinsicFunc{ls, sn, NewNativeFunc0(
+			func(cx Context) (Value, Error) {
 				return ls.IsEmpty(), nil
 			})}, nil
 
 	case "contains":
-		return &intrinsicFunc{ls, sn, NewNativeFunc(
-			1, 1,
-			func(cx Context, values []Value) (Value, Error) {
-				return ls.Contains(cx, values[0])
+		return &intrinsicFunc{ls, sn, NewNativeFuncValue(
+			func(cx Context, val Value) (Value, Error) {
+				return ls.Contains(cx, val)
 			})}, nil
 
 	case "indexOf":
-		return &intrinsicFunc{ls, sn, NewNativeFunc(
-			1, 1,
-			func(cx Context, values []Value) (Value, Error) {
-				return ls.IndexOf(cx, values[0])
+		return &intrinsicFunc{ls, sn, NewNativeFuncValue(
+			func(cx Context, val Value) (Value, Error) {
+				return ls.IndexOf(cx, val)
 			})}, nil
 
 	case "join":
@@ -393,11 +381,10 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "map":
-		return &intrinsicFunc{ls, sn, NewNativeFunc(
-			1, 1,
-			func(cx Context, values []Value) (Value, Error) {
+		return &intrinsicFunc{ls, sn, NewNativeFuncValue(
+			func(cx Context, val Value) (Value, Error) {
 
-				if f, ok := values[0].(Func); ok {
+				if f, ok := val.(Func); ok {
 					return ls.Map(cx, func(v Value) (Value, Error) {
 						return f.Invoke(cx, []Value{v})
 					})
@@ -421,16 +408,12 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "filter":
-		return &intrinsicFunc{ls, sn, NewNativeFunc(
-			1, 1,
-			func(cx Context, values []Value) (Value, Error) {
+		return &intrinsicFunc{ls, sn, NewNativeFuncFunc(
+			func(cx Context, f Func) (Value, Error) {
 
-				if f, ok := values[0].(Func); ok {
-					return ls.Filter(cx, func(v Value) (Value, Error) {
-						return f.Invoke(cx, []Value{v})
-					})
-				}
-				return nil, TypeMismatchError("Expected Func")
+				return ls.Filter(cx, func(v Value) (Value, Error) {
+					return f.Invoke(cx, []Value{v})
+				})
 
 			})}, nil
 

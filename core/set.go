@@ -178,10 +178,9 @@ func (s *set) GetField(cx Context, key Str) (Value, Error) {
 	switch sn := key.String(); sn {
 
 	case "add":
-		return &intrinsicFunc{s, sn, NewNativeFunc(
-			1, 1,
-			func(cx Context, values []Value) (Value, Error) {
-				err := s.Add(cx, values[0])
+		return &intrinsicFunc{s, sn, NewNativeFuncValue(
+			func(cx Context, val Value) (Value, Error) {
+				err := s.Add(cx, val)
 				if err != nil {
 					return nil, err
 				}
@@ -189,10 +188,9 @@ func (s *set) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "addAll":
-		return &intrinsicFunc{s, sn, NewNativeFunc(
-			1, 1,
-			func(cx Context, values []Value) (Value, Error) {
-				err := s.AddAll(cx, values[0])
+		return &intrinsicFunc{s, sn, NewNativeFuncValue(
+			func(cx Context, val Value) (Value, Error) {
+				err := s.AddAll(cx, val)
 				if err != nil {
 					return nil, err
 				}
@@ -200,9 +198,8 @@ func (s *set) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "clear":
-		return &intrinsicFunc{s, sn, NewNativeFunc(
-			0, 0,
-			func(cx Context, values []Value) (Value, Error) {
+		return &intrinsicFunc{s, sn, NewNativeFunc0(
+			func(cx Context) (Value, Error) {
 				err := s.Clear()
 				if err != nil {
 					return nil, err
@@ -211,24 +208,21 @@ func (s *set) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "isEmpty":
-		return &intrinsicFunc{s, sn, NewNativeFunc(
-			0, 0,
-			func(cx Context, values []Value) (Value, Error) {
+		return &intrinsicFunc{s, sn, NewNativeFunc0(
+			func(cx Context) (Value, Error) {
 				return s.IsEmpty(), nil
 			})}, nil
 
 	case "contains":
-		return &intrinsicFunc{s, sn, NewNativeFunc(
-			1, 1,
-			func(cx Context, values []Value) (Value, Error) {
-				return s.Contains(cx, values[0])
+		return &intrinsicFunc{s, sn, NewNativeFuncValue(
+			func(cx Context, val Value) (Value, Error) {
+				return s.Contains(cx, val)
 			})}, nil
 
 	case "remove":
-		return &intrinsicFunc{s, sn, NewNativeFunc(
-			1, 1,
-			func(cx Context, values []Value) (Value, Error) {
-				return s.Remove(cx, values[0])
+		return &intrinsicFunc{s, sn, NewNativeFuncValue(
+			func(cx Context, val Value) (Value, Error) {
+				return s.Remove(cx, val)
 			})}, nil
 
 	default:

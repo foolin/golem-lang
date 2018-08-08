@@ -117,14 +117,14 @@ func TestNativeProp(t *testing.T) {
 
 	var propValue Value = Zero
 
-	getter := NewNativeFunc(0, 0,
-		func(cx Context, values []Value) (Value, Error) {
+	getter := NewNativeFunc0(
+		func(cx Context) (Value, Error) {
 			return propValue, nil
 		})
 
-	setter := NewNativeFunc(1, 1,
-		func(cx Context, values []Value) (Value, Error) {
-			propValue = values[0]
+	setter := NewNativeFuncValue(
+		func(cx Context, val Value) (Value, Error) {
+			propValue = val
 			return Null, nil
 		})
 

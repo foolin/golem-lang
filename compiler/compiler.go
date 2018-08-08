@@ -105,8 +105,8 @@ func (c *compiler) makeModuleProperty(
 	refIndex int,
 	isConst bool) g.Field {
 
-	getter := g.NewNativeFunc(0, 0,
-		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+	getter := g.NewNativeFunc0(
+		func(cx g.Context) (g.Value, g.Error) {
 			return mod.Refs[refIndex].Val, nil
 		})
 	if isConst {
@@ -117,9 +117,9 @@ func (c *compiler) makeModuleProperty(
 		return prop
 	}
 
-	setter := g.NewNativeFunc(1, 1,
-		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
-			mod.Refs[refIndex].Val = values[0]
+	setter := g.NewNativeFuncValue(
+		func(cx g.Context, val g.Value) (g.Value, g.Error) {
+			mod.Refs[refIndex].Val = val
 			return g.Null, nil
 		})
 	prop, err := g.NewNativeProperty(name, getter, setter)
