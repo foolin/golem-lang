@@ -9,7 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"plugin"
+	//"plugin"
 	"sync"
 
 	"github.com/mjarmy/golem-lang/analyzer"
@@ -34,43 +34,43 @@ func homePath() string {
 	return filepath.Dir(ex)
 }
 
-// lookupModule looks up a module by to loadng a plugin from the '$HOME/lib' directory.
-func lookupModule(homePath, name string) (g.Module, g.Error) {
-
-	libMutex.Lock()
-	defer libMutex.Unlock()
-
-	if mod, ok := libModules[name]; ok {
-		return mod, nil
-	}
-
-	// open the plugin
-	p, err := plugin.Open(homePath + "/lib/" + name + "/" + name + ".so")
-	if err != nil {
-		return nil, g.CouldNotLoadModuleError(name, err)
-	}
-
-	// lookup the 'LoadModule' function
-	f, err := p.Lookup("LoadModule")
-	if err != nil {
-		return nil, g.CouldNotLoadModuleError(name, err)
-	}
-	loader := f.(func() (g.Module, g.Error))
-
-	// load the module
-	mod, gerr := loader()
-	if gerr != nil {
-		return nil, gerr
-	}
-	if mod.GetModuleName() != name {
-		return nil, g.CouldNotLoadModuleError(
-			name,
-			fmt.Errorf("Module name mismatch %s != %s", mod.GetModuleName(), name))
-	}
-
-	libModules[name] = mod
-	return mod, nil
-}
+//// lookupModule looks up a module by to loadng a plugin from the '$HOME/lib' directory.
+//func lookupModule(homePath, name string) (g.Module, g.Error) {
+//
+//	libMutex.Lock()
+//	defer libMutex.Unlock()
+//
+//	if mod, ok := libModules[name]; ok {
+//		return mod, nil
+//	}
+//
+//	// open the plugin
+//	p, err := plugin.Open(homePath + "/lib/" + name + "/" + name + ".so")
+//	if err != nil {
+//		return nil, g.CouldNotLoadModuleError(name, err)
+//	}
+//
+//	// lookup the 'LoadModule' function
+//	f, err := p.Lookup("LoadModule")
+//	if err != nil {
+//		return nil, g.CouldNotLoadModuleError(name, err)
+//	}
+//	loader := f.(func() (g.Module, g.Error))
+//
+//	// load the module
+//	mod, gerr := loader()
+//	if gerr != nil {
+//		return nil, gerr
+//	}
+//	if mod.GetModuleName() != name {
+//		return nil, g.CouldNotLoadModuleError(
+//			name,
+//			fmt.Errorf("Module name mismatch %s != %s", mod.GetModuleName(), name))
+//	}
+//
+//	libModules[name] = mod
+//	return mod, nil
+//}
 
 func dumpError(cx g.Context, err g.Error) {
 	fmt.Printf("Error: %s\n", err.Error())
@@ -144,7 +144,7 @@ func main() {
 	mod := cmp.Compile()
 
 	// interpret with modules from standard library
-	intp := interpreter.NewInterpreter(homePath, mod, builtInMgr, lookupModule)
+	intp := interpreter.NewInterpreter(homePath, mod, builtInMgr /*, lookupModule*/)
 	_, err := intp.Init()
 	if err != nil {
 		dumpError(intp, err)

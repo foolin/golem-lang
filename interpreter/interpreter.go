@@ -16,11 +16,11 @@ import (
 
 // Interpreter interprets Golem bytecode.
 type Interpreter struct {
-	homePath      string
-	mod           *g.BytecodeModule
-	builtInMgr    g.BuiltinManager
-	resolveImport func(homePath, name string) (g.Module, g.Error)
-	frames        []*frame
+	homePath   string
+	mod        *g.BytecodeModule
+	builtInMgr g.BuiltinManager
+	//resolveImport func(homePath, name string) (g.Module, g.Error)
+	frames []*frame
 }
 
 // NewInterpreter creates a new Interpreter
@@ -28,9 +28,9 @@ func NewInterpreter(
 	homePath string,
 	mod *g.BytecodeModule,
 	builtInMgr g.BuiltinManager,
-	resolveImport func(homePath string, name string) (g.Module, g.Error)) *Interpreter {
+	/*resolveImport func(homePath string, name string) (g.Module, g.Error)*/) *Interpreter {
 
-	return &Interpreter{homePath, mod, builtInMgr, resolveImport, []*frame{}}
+	return &Interpreter{homePath, mod, builtInMgr /*resolveImport,*/, []*frame{}}
 }
 
 // Init initializes an interpreter, by interpreting its "init" function.

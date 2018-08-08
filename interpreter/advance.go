@@ -103,7 +103,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			f.stack = f.stack[:n-idx]
 			f.ip += 3
 
-			intp := &Interpreter{i.homePath, i.mod, i.builtInMgr, i.resolveImport, []*frame{}}
+			intp := &Interpreter{i.homePath, i.mod, i.builtInMgr /*i.resolveImport,*/, []*frame{}}
 			locals := newLocals(fn.Template().NumLocals, params)
 			go (func() {
 				_, errTrace := intp.eval(fn, locals)
@@ -508,20 +508,22 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 	case o.ImportModule:
 
-		// get the module name from the pool
-		idx := index(opc, f.ip)
-		name, ok := pool[idx].(g.Str)
-		assert(ok)
+		panic("TODO")
 
-		// Lookup the module.
-		mod, err := i.resolveImport(i.homePath, name.String())
-		if err != nil {
-			return nil, err
-		}
+		//// get the module name from the pool
+		//idx := index(opc, f.ip)
+		//name, ok := pool[idx].(g.Str)
+		//assert(ok)
 
-		// Push the module's contents onto the stack
-		f.stack = append(f.stack, mod.GetContents())
-		f.ip += 3
+		//// Lookup the module.
+		//mod, err := i.resolveImport(i.homePath, name.String())
+		//if err != nil {
+		//	return nil, err
+		//}
+
+		//// Push the module's contents onto the stack
+		//f.stack = append(f.stack, mod.GetContents())
+		//f.ip += 3
 
 	case o.LoadBuiltin:
 		idx := index(opc, f.ip)

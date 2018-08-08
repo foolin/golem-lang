@@ -1,5 +1,5 @@
 
-default: build
+default: bench_test
 
 clean:
 	rm -rf build
@@ -23,18 +23,18 @@ test:
 	go test ./...
 
 compile: 
-	mkdir -p build/lib
 	go build -o build/golem golem.go
-	go build -buildmode=plugin -o build/lib/os/os.so lib/os/os.go
-	go build -buildmode=plugin -o build/lib/path/path.so lib/path/path.go
-	go build -buildmode=plugin -o build/lib/regexp/regexp.so lib/regexp/regexp.go
+	mkdir -p build/lib
+#go build -buildmode=plugin -o build/lib/os/os.so lib/os/os.go
+#go build -buildmode=plugin -o build/lib/path/path.so lib/path/path.go
+#go build -buildmode=plugin -o build/lib/regexp/regexp.so lib/regexp/regexp.go
 	go build -buildmode=plugin -o build/lib/temporary/temporary.so lib/temporary/temporary.go
 
 bench_test: test compile
 	build/golem bench_test/core_test.glm
-	build/golem bench_test/os_test.glm
-	build/golem bench_test/path_test.glm
-	build/golem bench_test/regexp_test.glm
+#build/golem bench_test/os_test.glm
+#build/golem bench_test/path_test.glm
+#build/golem bench_test/regexp_test.glm
 	build/golem bench_test/temporary_test.glm
 
 build: clean fmt lint vet test compile bench_test
