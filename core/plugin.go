@@ -11,18 +11,18 @@ import (
 )
 
 type _plugin struct {
+	name string
 	path string
 	plug *plugin.Plugin
 }
 
 // NewPlugin creates a new Plugin
-func NewPlugin(cx Context, path Str) (Plugin, Error) {
+func NewPlugin(cx Context, name Str) (Plugin, Error) {
 
-	// TODO make sure path doesn't have '..', etc
-	plugPath := cx.HomePath() + "/lib/" + path.String() + "/" + path.String() + ".so"
+	plugPath := cx.HomePath() + "/lib/" + name.String() + "/" + name.String() + ".so"
 	plug, err := plugin.Open(plugPath)
 	if err != nil {
-		return nil, PluginError(path.String(), err)
+		return nil, PluginError(name.String(), err)
 	}
 	return &_plugin{path: plugPath, plug: plug}, nil
 }
@@ -73,12 +73,12 @@ func (p *_plugin) GetField(cx Context, key Str) (Value, Error) {
 
 				sym, err := p.plug.Lookup(s.String())
 				if err != nil {
-					return nil, PluginError(p.path, err)
+					return nil, PluginError(p.name, err)
 				}
 
 				value, ok := sym.(*Value)
 				if !ok {
-					return nil, PluginError(p.path, fmt.Errorf(
+					return nil, PluginError(p.name, fmt.Errorf(
 						"plugin symbol '%s' is not a Value: %s",
 						s.String(),
 						reflect.TypeOf(sym)))

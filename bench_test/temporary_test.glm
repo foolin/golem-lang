@@ -7,9 +7,7 @@
 const plg = plugin("temporary")
 
 const temporary = struct {
-    compile: fn(expr) {
-        plg.lookup("Compile")(expr)
-    }
+    compile: |expr| => plg.lookup("Compile")(expr)
 }
 
 //-------------------------------------------
@@ -36,4 +34,11 @@ fn testCompile() {
 
 fn main() {
     testCompile()
+
+    try {
+        plg.lookup("Bogus")
+        assert(false)
+    } catch e {
+        assert("Plugin" == e.kind)
+    }
 }
