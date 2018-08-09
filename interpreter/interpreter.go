@@ -17,7 +17,7 @@ import (
 // Interpreter interprets Golem bytecode.
 type Interpreter struct {
 	homePath   string
-	mod        *g.BytecodeModule
+	mod        *g.Module
 	builtInMgr g.BuiltinManager
 	//resolveImport func(homePath, name string) (g.Module, g.Error)
 	frames []*frame
@@ -26,7 +26,7 @@ type Interpreter struct {
 // NewInterpreter creates a new Interpreter
 func NewInterpreter(
 	homePath string,
-	mod *g.BytecodeModule,
+	mod *g.Module,
 	builtInMgr g.BuiltinManager,
 	/*resolveImport func(homePath string, name string) (g.Module, g.Error)*/) *Interpreter {
 

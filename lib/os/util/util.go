@@ -4,24 +4,24 @@
 
 package util
 
-import (
-	g "github.com/mjarmy/golem-lang/core"
-	"os"
-)
-
-// NewInfo creates a struct for 'os.FileInfo'
-func NewInfo(info os.FileInfo) g.Struct {
-
-	stc, err := g.NewStruct([]g.Field{
-		g.NewField("name", true, g.NewStr(info.Name())),
-		g.NewField("size", true, g.NewInt(info.Size())),
-		g.NewField("mode", true, g.NewInt(int64(info.Mode()))),
-		//g.NewField("modTime", true, ModTime() time.Time TODO
-		g.NewField("isDir", true, g.NewBool(info.IsDir())),
-	}, true)
-	if err != nil {
-		panic("unreachable")
-	}
-
-	return stc
-}
+//import (
+//	g "github.com/mjarmy/golem-lang/core"
+//	"os"
+//)
+//
+//// NewInfo creates a struct for 'os.FileInfo'
+//func NewInfo(info os.FileInfo) g.Struct {
+//
+//	stc, err := g.NewStruct([]g.Field{
+//		g.NewField("name", true, g.NewStr(info.Name())),
+//		g.NewField("size", true, g.NewInt(info.Size())),
+//		g.NewField("mode", true, g.NewInt(int64(info.Mode()))),
+//		//g.NewField("modTime", true, ModTime() time.Time TODO
+//		g.NewField("isDir", true, g.NewBool(info.IsDir())),
+//	}, true)
+//	if err != nil {
+//		panic("unreachable")
+//	}
+//
+//	return stc
+//}

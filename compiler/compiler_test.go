@@ -22,7 +22,7 @@ func tassert(t *testing.T, flag bool) {
 	}
 }
 
-func ok(t *testing.T, mod *g.BytecodeModule, expect *g.BytecodeModule) {
+func ok(t *testing.T, mod *g.Module, expect *g.Module) {
 
 	if !reflect.DeepEqual(mod.Pool, expect.Pool) {
 		t.Error(mod, " != ", expect)
@@ -85,7 +85,7 @@ func contents() g.Struct {
 func TestExpression(t *testing.T) {
 
 	mod := newCompiler(newAnalyzer("-2 + -1 + -0 + 0 + 1 + 2")).Compile()
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{g.NewInt(int64(-2)), g.NewInt(int64(2))},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -118,7 +118,7 @@ func TestExpression(t *testing.T) {
 	})
 
 	mod = newCompiler(newAnalyzer("(2 + 3) * -4 / 10")).Compile()
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{g.NewInt(int64(2)), g.NewInt(int64(3)), g.NewInt(int64(-4)), g.NewInt(int64(10))},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -147,7 +147,7 @@ func TestExpression(t *testing.T) {
 	})
 
 	mod = newCompiler(newAnalyzer("null / true + \nfalse")).Compile()
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -176,7 +176,7 @@ func TestExpression(t *testing.T) {
 	})
 
 	mod = newCompiler(newAnalyzer("'a' * 1.23e4")).Compile()
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{g.NewStr("a"), g.NewFloat(float64(12300))},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -201,7 +201,7 @@ func TestExpression(t *testing.T) {
 	})
 
 	mod = newCompiler(newAnalyzer("'a' == true")).Compile()
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{g.NewStr("a")},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -226,7 +226,7 @@ func TestExpression(t *testing.T) {
 	})
 
 	mod = newCompiler(newAnalyzer("true != false")).Compile()
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -251,7 +251,7 @@ func TestExpression(t *testing.T) {
 	})
 
 	mod = newCompiler(newAnalyzer("true > false; true >= false")).Compile()
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -279,7 +279,7 @@ func TestExpression(t *testing.T) {
 	})
 
 	mod = newCompiler(newAnalyzer("true < false; true <= false; true <=> false;")).Compile()
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -310,7 +310,7 @@ func TestExpression(t *testing.T) {
 	})
 
 	mod = newCompiler(newAnalyzer("let a = 2 && 3;")).Compile()
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{g.NewInt(int64(2)), g.NewInt(int64(3))},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -340,7 +340,7 @@ func TestExpression(t *testing.T) {
 	})
 
 	mod = newCompiler(newAnalyzer("let a = 2 || 3;")).Compile()
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{g.NewInt(int64(2)), g.NewInt(int64(3))},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -373,7 +373,7 @@ func TestExpression(t *testing.T) {
 func TestAssignment(t *testing.T) {
 
 	mod := newCompiler(newAnalyzer("let a = 1;\nconst b = \n2;a = 3;")).Compile()
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{g.NewInt(2), g.NewInt(3)},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -425,7 +425,7 @@ func TestIf(t *testing.T) {
 	source := "if (3 == 2) { let a = 42; }"
 	anl := newAnalyzer(source)
 	mod := newCompiler(anl).Compile()
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{g.NewInt(3), g.NewInt(2), g.NewInt(42)},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -462,7 +462,7 @@ func TestIf(t *testing.T) {
 
 	anl = newAnalyzer(source)
 	mod = newCompiler(anl).Compile()
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{g.NewInt(2), g.NewInt(3), g.NewInt(4)},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -504,7 +504,7 @@ func TestWhile(t *testing.T) {
 
 	source := "let a = 1; while (0 < 1) { let b = 2; }"
 	mod := newCompiler(newAnalyzer(source)).Compile()
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{g.NewInt(2)},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -536,7 +536,7 @@ func TestWhile(t *testing.T) {
 
 	source = "let a = 'z'; while (0 < 1) \n{ break; continue; let b = 2; }; let c = 3;"
 	mod = newCompiler(newAnalyzer(source)).Compile()
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{g.NewStr("z"), g.NewInt(2), g.NewInt(3)},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -578,7 +578,7 @@ func TestReturn(t *testing.T) {
 	anl := newAnalyzer(source)
 	mod := newCompiler(anl).Compile()
 
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{g.NewInt(2), g.NewInt(3)},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -629,10 +629,10 @@ let b = fn(x) {
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
 	//fmt.Println("----------------------------")
-	//fmt.Printf("%s\n", ast.Dump(anl.BytecodeModule()))
+	//fmt.Printf("%s\n", ast.Dump(anl.Module()))
 	//fmt.Println(mod)
 
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool: []g.Basic{
 			g.NewInt(42),
 			g.NewInt(7)},
@@ -726,10 +726,10 @@ c(2, 3)
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
 	//fmt.Println("----------------------------")
-	//fmt.Printf("%s\n", ast.Dump(anl.BytecodeModule()))
+	//fmt.Printf("%s\n", ast.Dump(anl.Module()))
 	//fmt.Println(mod)
 
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{g.NewInt(2), g.NewInt(3), g.NewInt(4)},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -829,7 +829,7 @@ const accumGen = fn(n) {
 	anl := newAnalyzer(source)
 	mod := newCompiler(anl).Compile()
 
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -900,10 +900,10 @@ const accumGen = fn(n) {
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
 	//fmt.Println("----------------------------")
-	//fmt.Printf("%s\n", ast.Dump(anl.BytecodeModule()))
+	//fmt.Printf("%s\n", ast.Dump(anl.Module()))
 	//fmt.Println(mod)
 
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{g.NewInt(2)},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
@@ -981,10 +981,10 @@ let d = b--
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
 	//fmt.Println("----------------------------")
-	//fmt.Printf("%s\n", ast.Dump(anl.BytecodeModule()))
+	//fmt.Printf("%s\n", ast.Dump(anl.Module()))
 	//fmt.Println(mod)
 
-	ok(t, mod, &g.BytecodeModule{
+	ok(t, mod, &g.Module{
 		Pool:       []g.Basic{g.NewInt(int64(10)), g.NewInt(int64(20))},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},

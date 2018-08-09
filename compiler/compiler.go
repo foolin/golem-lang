@@ -18,7 +18,7 @@ import (
 // Compiler compiles an AST into bytecode
 type Compiler interface {
 	ast.Visitor
-	Compile() *g.BytecodeModule
+	Compile() *g.Module
 }
 
 type compiler struct {
@@ -47,7 +47,7 @@ func NewCompiler(anl analyzer.Analyzer, builtInMgr g.BuiltinManager) Compiler {
 		funcs, templates, structDefs, 0}
 }
 
-func (c *compiler) Compile() *g.BytecodeModule {
+func (c *compiler) Compile() *g.Module {
 
 	// compile all the funcs
 	for c.idx < len(c.funcs) {
@@ -58,7 +58,7 @@ func (c *compiler) Compile() *g.BytecodeModule {
 	}
 
 	// done
-	mod := &g.BytecodeModule{
+	mod := &g.Module{
 		Pool:       makePoolSlice(c.pool),
 		Refs:       nil,
 		StructDefs: c.structDefs,
@@ -69,7 +69,7 @@ func (c *compiler) Compile() *g.BytecodeModule {
 	return mod
 }
 
-func (c *compiler) makeModuleContents(mod *g.BytecodeModule) g.Struct {
+func (c *compiler) makeModuleContents(mod *g.Module) g.Struct {
 
 	entries := []g.Field{}
 	stmts := c.funcs[0].Body.Statements
@@ -100,7 +100,7 @@ func (c *compiler) makeModuleContents(mod *g.BytecodeModule) g.Struct {
 }
 
 func (c *compiler) makeModuleProperty(
-	mod *g.BytecodeModule,
+	mod *g.Module,
 	name string,
 	refIndex int,
 	isConst bool) g.Field {

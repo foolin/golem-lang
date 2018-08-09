@@ -87,7 +87,7 @@ func failExpr(t *testing.T, source string, expect string) {
 	}
 }
 
-func fail(t *testing.T, source string, err g.Error, stack []string) *g.BytecodeModule {
+func fail(t *testing.T, source string, err g.Error, stack []string) *g.Module {
 
 	mod := newCompiler(source).Compile()
 	intp := NewInterpreter(".", mod, builtInMgr /*, importResolver()*/)
@@ -173,7 +173,7 @@ func newCompiler(source string) compiler.Compiler {
 //	}
 //}
 
-func interpret(mod *g.BytecodeModule) *Interpreter {
+func interpret(mod *g.Module) *Interpreter {
 	intp := NewInterpreter(".", mod, builtInMgr /*, importResolver()*/)
 	_, err := intp.Init()
 	if err != nil {

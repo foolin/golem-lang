@@ -11,21 +11,9 @@ import (
 	"github.com/mjarmy/golem-lang/core/opcodes"
 )
 
-//---------------------------------------------------------------
-// Module
-
-// Module defines a Golem Module, which is a named top-level
-// Struct that is analagous to a 'module' from e.g. python.
-type Module interface {
-	GetModuleName() string
-	GetContents() Struct
-}
-
-//---------------------------------------------------------------
-// BytecodeModule
-
-// BytecodeModule is a Module that is implemented in Golem
-type BytecodeModule struct {
+// Module is a namespace containing compiled Golem code
+type Module struct {
+	Name       string
 	Pool       []Basic
 	Refs       []*Ref
 	StructDefs [][]*FieldDef
@@ -33,20 +21,20 @@ type BytecodeModule struct {
 	Contents   Struct
 }
 
-// GetModuleName for a BytecodeModule returns the empty string.
-func (m *BytecodeModule) GetModuleName() string {
+// GetModuleName for a Module returns the empty string.
+func (m *Module) GetModuleName() string {
 	return ""
 }
 
 // GetContents returns the contents of a Module.
-func (m *BytecodeModule) GetContents() Struct {
+func (m *Module) GetContents() Struct {
 	return m.Contents
 }
 
-func (m *BytecodeModule) String() string {
+func (m *Module) String() string {
 	var buf bytes.Buffer
 	buf.WriteString("----------------------------\n")
-	buf.WriteString("BytecodeModule:\n")
+	buf.WriteString("Module:\n")
 
 	buf.WriteString("    Pool:\n")
 	for i, val := range m.Pool {
