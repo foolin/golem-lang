@@ -80,7 +80,7 @@ func newParser(source string) *Parser {
 		return ok
 	}
 
-	return NewParser(scanner.NewScanner(source), isBuiltIn)
+	return NewParser(scanner.NewScanner("", "", source), isBuiltIn)
 }
 
 func parseExpression(p *Parser) (expr ast.Expression, err error) {

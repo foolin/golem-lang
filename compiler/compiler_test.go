@@ -58,7 +58,7 @@ var builtInMgr = g.NewBuiltinManager(g.CommandLineBuiltins)
 
 func newAnalyzer(source string) analyzer.Analyzer {
 
-	scanner := scanner.NewScanner(source)
+	scanner := scanner.NewScanner("", "", source)
 	parser := parser.NewParser(scanner, builtInMgr.Contains)
 	mod, err := parser.ParseModule()
 	if err != nil {

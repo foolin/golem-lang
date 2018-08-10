@@ -9,7 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	//"plugin"
+	"strings"
 	"sync"
 
 	"github.com/mjarmy/golem-lang/analyzer"
@@ -25,11 +25,16 @@ var version = "0.8.2"
 var libModules = make(map[string]g.Module)
 var libMutex = &sync.Mutex{}
 
+func abExit(msg string) {
+	fmt.Printf("%s\n", msg)
+	os.Exit(-1)
+}
+
 // homePath looks up the path of the golem executable
 func homePath() string {
 	ex, err := os.Executable()
 	if err != nil {
-		panic(err)
+		abExit(err.Error())
 	}
 	return filepath.Dir(ex)
 }
@@ -94,9 +99,36 @@ func dumpError(cx g.Context, err g.Error) {
 	}
 }
 
-func exit(msg string) {
-	fmt.Printf("%s\n", msg)
-	os.Exit(-1)
+type source struct {
+	path string
+	name string
+	code string
+}
+
+func readSource(filename string) (*source, error) {
+
+	// code
+	buf, e := ioutil.ReadFile(filename)
+	if e != nil {
+		return nil, e
+	}
+	code := string(buf)
+
+	// path
+	path, e := filepath.Abs(filename)
+	if e != nil {
+		return nil, e
+	}
+
+	// name
+	ext := filepath.Ext(path)
+	if ext != ".glm" {
+		return nil, fmt.Errorf("Golem source file '%s' does not end in '.glm'", path)
+	}
+	name := strings.TrimSuffix(filepath.Base(path), ext)
+
+	// done
+	return &source{path, name, code}, nil
 }
 
 func main() {
@@ -108,16 +140,12 @@ func main() {
 
 	homePath := homePath()
 
-	// read source
-	filename := os.Args[1]
-	buf, e := ioutil.ReadFile(filename)
-	if e != nil {
-		panic(e)
-	}
-	source := string(buf)
-
 	// scan
-	scanner := scanner.NewScanner(source)
+	source, e := readSource(os.Args[1])
+	if e != nil {
+		abExit(e.Error())
+	}
+	scanner := scanner.NewScanner(source.path, source.name, source.code)
 
 	// command line builtins
 	builtInMgr := g.NewBuiltinManager(g.CommandLineBuiltins)
@@ -126,7 +154,7 @@ func main() {
 	parser := parser.NewParser(scanner, builtInMgr.Contains)
 	astMod, e := parser.ParseModule()
 	if e != nil {
-		exit(e.Error())
+		abExit(e.Error())
 	}
 
 	// analyze
@@ -151,14 +179,16 @@ func main() {
 		os.Exit(-1)
 	}
 
-	// run main
+	// run main, if it exists
 	mainVal, mainErr := mod.Contents.GetField(intp, g.NewStr("main"))
 	if mainErr == nil {
 		mainFn, ok := mainVal.(g.BytecodeFunc)
 		if !ok {
-			exit("'main' is not a function")
+			abExit("'main' is not a function")
 		}
 
+		// gather up the command line arguments into a single list
+		// that will be passed into the main function
 		params := []g.Value{}
 		arity := mainFn.Template().Arity
 		if arity == 1 {
@@ -169,9 +199,10 @@ func main() {
 			}
 			params = append(params, g.NewList(args))
 		} else if arity > 1 {
-			exit("'main' has too many arguments")
+			abExit("'main' has too many arguments")
 		}
 
+		// evaluate the main function
 		_, err := intp.Eval(mainFn, params)
 		if err != nil {
 			dumpError(intp, err)

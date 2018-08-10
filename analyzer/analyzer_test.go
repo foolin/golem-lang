@@ -53,7 +53,7 @@ func newAnalyzer(source string) Analyzer {
 
 	ast.InternalResetDebugging()
 
-	scanner := scanner.NewScanner(source)
+	scanner := scanner.NewScanner("", "", source)
 	parser := parser.NewParser(scanner, isBuiltIn)
 	mod, err := parser.ParseModule()
 	if err != nil {

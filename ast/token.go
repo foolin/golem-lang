@@ -101,7 +101,7 @@ const (
 
 	Ident
 
-	BlankDent
+	BlankIdent
 	If
 	Else
 	While

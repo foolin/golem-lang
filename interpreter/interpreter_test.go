@@ -133,7 +133,7 @@ func newStruct(entries []g.Field) g.Struct {
 var builtInMgr = g.NewBuiltinManager(g.CommandLineBuiltins)
 
 func newCompiler(source string) compiler.Compiler {
-	scanner := scanner.NewScanner(source)
+	scanner := scanner.NewScanner("", "", source)
 	parser := parser.NewParser(scanner, builtInMgr.Contains)
 	mod, err := parser.ParseModule()
 	if err != nil {
