@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
+	//"sync"
 
 	"github.com/mjarmy/golem-lang/analyzer"
 	"github.com/mjarmy/golem-lang/compiler"
@@ -22,8 +22,8 @@ import (
 
 var version = "0.8.2"
 
-var libModules = make(map[string]g.Module)
-var libMutex = &sync.Mutex{}
+//var libModules = make(map[string]g.Module)
+//var libMutex = &sync.Mutex{}
 
 func abExit(msg string) {
 	fmt.Printf("%s\n", msg)
