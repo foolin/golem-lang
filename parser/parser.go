@@ -426,7 +426,7 @@ func (p *Parser) tupleIdents() []*ast.IdentExpr {
 	}
 
 	if len(idents) < 2 {
-		panic(&parserError{InvalidFor, lparen})
+		panic(&parserError{path: p.scn.Path, kind: InvalidFor, token: lparen})
 	}
 
 	return idents
@@ -483,7 +483,7 @@ func (p *Parser) caseStmt() *ast.CaseNode {
 			colon := p.expect(ast.Colon)
 			body := p.statementsAny(ast.Case, ast.Default, ast.Rbrace)
 			if len(body) == 0 {
-				panic(&parserError{InvalidSwitch, colon})
+				panic(&parserError{path: p.scn.Path, kind: InvalidSwitch, token: colon})
 			}
 			return &ast.CaseNode{
 				Token:   token,
@@ -504,7 +504,7 @@ func (p *Parser) defaultStmt() *ast.DefaultNode {
 
 	body := p.statements(ast.Rbrace)
 	if len(body) == 0 {
-		panic(&parserError{InvalidSwitch, colon})
+		panic(&parserError{path: p.scn.Path, kind: InvalidSwitch, token: colon})
 	}
 
 	return &ast.DefaultNode{
@@ -578,7 +578,7 @@ func (p *Parser) tryStmt() *ast.TryStmt {
 
 	// make sure we got at least one of try or catch
 	if catchToken == nil && finallyToken == nil {
-		panic(&parserError{InvalidTry, tryToken})
+		panic(&parserError{path: p.scn.Path, kind: InvalidTry, token: tryToken})
 	}
 
 	// done
@@ -790,7 +790,7 @@ func (p *Parser) postfixExpr() ast.Expression {
 				Op:       tok,
 			}
 		} else {
-			panic(&parserError{InvalidPostfix, p.cur.token})
+			panic(&parserError{path: p.scn.Path, kind: InvalidPostfix, token: p.cur.token})
 		}
 	}
 
@@ -1152,14 +1152,14 @@ func (p *Parser) property() *ast.PropNode {
 
 	getter := p.propertyFunc()
 	if len(getter.FormalParams) != 0 {
-		panic(&parserError{InvalidPropertyGetter, getter.Token})
+		panic(&parserError{path: p.scn.Path, kind: InvalidPropertyGetter, token: getter.Token})
 	}
 
 	var setter *ast.FnExpr
 	if p.accept(ast.Comma) {
 		setter = p.propertyFunc()
 		if len(setter.FormalParams) != 1 {
-			panic(&parserError{InvalidPropertySetter, setter.Token})
+			panic(&parserError{path: p.scn.Path, kind: InvalidPropertySetter, token: setter.Token})
 		}
 	}
 
@@ -1447,10 +1447,10 @@ func (p *Parser) advance() tokenInfo {
 		switch token.Kind {
 
 		case ast.UnexpectedChar:
-			panic(&parserError{UnexpectedChar, token})
+			panic(&parserError{path: p.scn.Path, kind: UnexpectedChar, token: token})
 
 		case ast.UnexpectedEOF:
-			panic(&parserError{UnexpectedEOF, token})
+			panic(&parserError{path: p.scn.Path, kind: UnexpectedEOF, token: token})
 
 		default:
 			panic("unreachable")
@@ -1465,13 +1465,13 @@ func (p *Parser) advance() tokenInfo {
 func (p *Parser) unexpected() error {
 	switch p.cur.token.Kind {
 	case ast.EOF:
-		return &parserError{UnexpectedEOF, p.cur.token}
+		return &parserError{path: p.scn.Path, kind: UnexpectedEOF, token: p.cur.token}
 
 	case ast.Reserved:
-		return &parserError{UnexpectedReservedWork, p.cur.token}
+		return &parserError{path: p.scn.Path, kind: UnexpectedReservedWork, token: p.cur.token}
 
 	default:
-		return &parserError{UnexpectedToken, p.cur.token}
+		return &parserError{path: p.scn.Path, kind: UnexpectedToken, token: p.cur.token}
 	}
 }
 
@@ -1619,6 +1619,7 @@ const (
 )
 
 type parserError struct {
+	path  string
 	kind  parserErrorKind
 	token *ast.Token
 }
@@ -1628,34 +1629,34 @@ func (e *parserError) Error() string {
 	switch e.kind {
 
 	case UnexpectedChar:
-		return fmt.Sprintf("Unexpected Character '%v' at %v", e.token.Text, e.token.Position)
+		return fmt.Sprintf("Unexpected Character '%v' at %s:%v", e.token.Text, e.path, e.token.Position)
 
 	case UnexpectedToken:
-		return fmt.Sprintf("Unexpected Token '%v' at %v", e.token.Text, e.token.Position)
+		return fmt.Sprintf("Unexpected Token '%v' at %s:%v", e.token.Text, e.path, e.token.Position)
 
 	case UnexpectedReservedWork:
-		return fmt.Sprintf("Unexpected Reserved Word '%v' at %v", e.token.Text, e.token.Position)
+		return fmt.Sprintf("Unexpected Reserved Word '%v' at %s:%v", e.token.Text, e.path, e.token.Position)
 
 	case UnexpectedEOF:
-		return fmt.Sprintf("Unexpected EOF at %v", e.token.Position)
+		return fmt.Sprintf("Unexpected EOF at %s:%v", e.path, e.token.Position)
 
 	case InvalidPostfix:
-		return fmt.Sprintf("Invalid Postfix Expression at %v", e.token.Position)
+		return fmt.Sprintf("Invalid Postfix Expression at %s:%v", e.path, e.token.Position)
 
 	case InvalidFor:
-		return fmt.Sprintf("Invalid ForStmt Expression at %v", e.token.Position)
+		return fmt.Sprintf("Invalid ForStmt Expression at %s:%v", e.path, e.token.Position)
 
 	case InvalidSwitch:
-		return fmt.Sprintf("Invalid SwitchStmt Expression at %v", e.token.Position)
+		return fmt.Sprintf("Invalid SwitchStmt Expression at %s:%v", e.path, e.token.Position)
 
 	case InvalidTry:
-		return fmt.Sprintf("Invalid Try Expression at %v", e.token.Position)
+		return fmt.Sprintf("Invalid Try Expression at %s:%v", e.path, e.token.Position)
 
 	case InvalidPropertyGetter:
-		return fmt.Sprintf("Invalid Property Getter at %v", e.token.Position)
+		return fmt.Sprintf("Invalid Property Getter at %s:%v", e.path, e.token.Position)
 
 	case InvalidPropertySetter:
-		return fmt.Sprintf("Invalid Property Setter at %v", e.token.Position)
+		return fmt.Sprintf("Invalid Property Setter at %s:%v", e.path, e.token.Position)
 
 	default:
 		panic("unreachable")

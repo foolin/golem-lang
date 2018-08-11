@@ -80,7 +80,7 @@ func newParser(source string) *Parser {
 		return ok
 	}
 
-	return NewParser(scanner.NewScanner("", "", source), isBuiltIn)
+	return NewParser(scanner.NewScanner("foo", "foo.glm", source), isBuiltIn)
 }
 
 func parseExpression(p *Parser) (expr ast.Expression, err error) {
@@ -111,22 +111,22 @@ func parseExpression(p *Parser) (expr ast.Expression, err error) {
 func TestPrimary(t *testing.T) {
 
 	p := newParser("")
-	failExpr(t, p, "Unexpected EOF at (1, 1)")
+	failExpr(t, p, "Unexpected EOF at foo.glm:1:1")
 
 	p = newParser("#")
-	failExpr(t, p, "Unexpected Character '#' at (1, 1)")
+	failExpr(t, p, "Unexpected Character '#' at foo.glm:1:1")
 
 	p = newParser("'")
-	failExpr(t, p, "Unexpected EOF at (1, 2)")
+	failExpr(t, p, "Unexpected EOF at foo.glm:1:2")
 
 	p = newParser("1 2")
-	failExpr(t, p, "Unexpected Token '2' at (1, 3)")
+	failExpr(t, p, "Unexpected Token '2' at foo.glm:1:3")
 
 	p = newParser("a == goto")
-	failExpr(t, p, "Unexpected Reserved Word 'goto' at (1, 6)")
+	failExpr(t, p, "Unexpected Reserved Word 'goto' at foo.glm:1:6")
 
 	p = newParser("1 #")
-	failExpr(t, p, "Unexpected Character '#' at (1, 3)")
+	failExpr(t, p, "Unexpected Character '#' at foo.glm:1:3")
 
 	p = newParser("1")
 	okExpr(t, p, "1")
@@ -181,7 +181,7 @@ func TestPostfix(t *testing.T) {
 	okExpr(t, p, "a.b++")
 
 	p = newParser("3++")
-	failExpr(t, p, "Invalid Postfix Expression at (1, 2)")
+	failExpr(t, p, "Invalid Postfix Expression at foo.glm:1:2")
 }
 
 func TestTernary(t *testing.T) {
@@ -192,13 +192,13 @@ func TestTernary(t *testing.T) {
 	okExpr(t, p, "((a || b) ? (b = c) : (d ? e : f))")
 
 	p = newParser("a ?")
-	failExpr(t, p, "Unexpected EOF at (1, 4)")
+	failExpr(t, p, "Unexpected EOF at foo.glm:1:4")
 
 	p = newParser("a ? b")
-	failExpr(t, p, "Unexpected EOF at (1, 6)")
+	failExpr(t, p, "Unexpected EOF at foo.glm:1:6")
 
 	p = newParser("a ? b :")
-	failExpr(t, p, "Unexpected EOF at (1, 8)")
+	failExpr(t, p, "Unexpected EOF at foo.glm:1:8")
 }
 
 func TestMultiplicative(t *testing.T) {
@@ -250,7 +250,7 @@ func TestAdditive(t *testing.T) {
 	okExpr(t, p, "(1 ^ (2 % 3))")
 
 	p = newParser("1 +")
-	failExpr(t, p, "Unexpected EOF at (1, 4)")
+	failExpr(t, p, "Unexpected EOF at foo.glm:1:4")
 }
 
 func TestAssign(t *testing.T) {
@@ -377,16 +377,16 @@ func TestFor(t *testing.T) {
 	ok(t, p, "fn() { for (a, b, c) in d {  }; }")
 
 	p = newParser("for a b")
-	fail(t, p, "Unexpected Token 'b' at (1, 7)")
+	fail(t, p, "Unexpected Token 'b' at foo.glm:1:7")
 
 	p = newParser("for in")
-	fail(t, p, "Unexpected Token 'in' at (1, 5)")
+	fail(t, p, "Unexpected Token 'in' at foo.glm:1:5")
 
 	p = newParser("for (a) in c {}")
-	fail(t, p, "Invalid ForStmt Expression at (1, 5)")
+	fail(t, p, "Invalid ForStmt Expression at foo.glm:1:5")
 
 	p = newParser("for () in c {}")
-	fail(t, p, "Invalid ForStmt Expression at (1, 5)")
+	fail(t, p, "Invalid ForStmt Expression at foo.glm:1:5")
 }
 
 func TestFn(t *testing.T) {
@@ -427,7 +427,7 @@ func TestFn(t *testing.T) {
 	ok(t, p, "fn() { fn(const a, b) { (a = 1); }; }")
 
 	p = newParser("return;")
-	fail(t, p, "Unexpected Token ';' at (1, 7)")
+	fail(t, p, "Unexpected Token ';' at foo.glm:1:7")
 
 }
 
@@ -437,7 +437,7 @@ func TestTry(t *testing.T) {
 	ok(t, p, "fn() { throw a; }")
 
 	p = newParser("throw;")
-	fail(t, p, "Unexpected Token ';' at (1, 6)")
+	fail(t, p, "Unexpected Token ';' at foo.glm:1:6")
 
 	p = newParser("try { a; } catch e { b; };")
 	ok(t, p, "fn() { try { a; } catch e { b; }; }")
@@ -449,10 +449,10 @@ func TestTry(t *testing.T) {
 	ok(t, p, "fn() { try { a; } finally { c; }; }")
 
 	p = newParser("try;")
-	fail(t, p, "Unexpected Token ';' at (1, 4)")
+	fail(t, p, "Unexpected Token ';' at foo.glm:1:4")
 
 	p = newParser("try {}")
-	fail(t, p, "Invalid Try Expression at (1, 1)")
+	fail(t, p, "Invalid Try Expression at foo.glm:1:1")
 }
 
 func TestInvoke(t *testing.T) {
@@ -495,7 +495,7 @@ func TestStruct(t *testing.T) {
 	okExpr(t, p, "(a.b = 3)")
 
 	p = newParser("let a.b = 3;")
-	fail(t, p, "Unexpected Token '.' at (1, 6)")
+	fail(t, p, "Unexpected Token '.' at foo.glm:1:6")
 
 	p = newParser("this")
 	okExpr(t, p, "this")
@@ -528,7 +528,7 @@ func TestStruct(t *testing.T) {
 	okExpr(t, p, "(a = (struct { x: 8 }.x = 5))")
 
 	p = newParser("this = b")
-	fail(t, p, "Unexpected Token '=' at (1, 6)")
+	fail(t, p, "Unexpected Token '=' at foo.glm:1:6")
 
 	////////////
 
@@ -539,10 +539,10 @@ func TestStruct(t *testing.T) {
 	okExpr(t, p, "struct { a: prop { fn() { x; } } }")
 
 	p = newParser("struct { a: prop { |x| => x } }")
-	fail(t, p, "Invalid Property Getter at (1, 20)")
+	fail(t, p, "Invalid Property Getter at foo.glm:1:20")
 
 	p = newParser("struct { a: prop { |x,y| => x } }")
-	fail(t, p, "Invalid Property Getter at (1, 20)")
+	fail(t, p, "Invalid Property Getter at foo.glm:1:20")
 
 	////////////
 
@@ -550,16 +550,16 @@ func TestStruct(t *testing.T) {
 	okExpr(t, p, "struct { a: prop { fn() { x; }, fn(y) { y; } } }")
 
 	p = newParser("struct { a: prop { || => x, } }")
-	fail(t, p, "Unexpected Token '}' at (1, 29)")
+	fail(t, p, "Unexpected Token '}' at foo.glm:1:29")
 
 	p = newParser("struct { a: prop { || => x, || => y} }")
-	fail(t, p, "Invalid Property Setter at (1, 29)")
+	fail(t, p, "Invalid Property Setter at foo.glm:1:29")
 
 	p = newParser("struct { a: prop { || => x, |y| => y } }")
 	okExpr(t, p, "struct { a: prop { fn() { x; }, fn(y) { y; } } }")
 
 	p = newParser("struct { a: prop { || => x, |x,y| => y} }")
-	fail(t, p, "Invalid Property Setter at (1, 29)")
+	fail(t, p, "Invalid Property Setter at foo.glm:1:29")
 }
 
 func TestPrimarySuffix(t *testing.T) {
@@ -581,17 +581,17 @@ func TestPrimarySuffix(t *testing.T) {
 	p = newParser("a[:b]")
 	okExpr(t, p, "a[:b]")
 	p = newParser("a[:]")
-	fail(t, p, "Unexpected Token ']' at (1, 4)")
+	fail(t, p, "Unexpected Token ']' at foo.glm:1:4")
 
 	p = newParser("a[b:]")
 	okExpr(t, p, "a[b:]")
 	p = newParser("a[b:}")
-	fail(t, p, "Unexpected Token '}' at (1, 5)")
+	fail(t, p, "Unexpected Token '}' at foo.glm:1:5")
 
 	p = newParser("a[b:c]")
 	okExpr(t, p, "a[b:c]")
 	p = newParser("a[b:c:]")
-	fail(t, p, "Unexpected Token ':' at (1, 6)")
+	fail(t, p, "Unexpected Token ':' at foo.glm:1:6")
 
 	p = newParser("a[b][c[:x]].d[y:].e().f[g[i:j]]")
 	okExpr(t, p, "a[b][c[:x]].d[y:].e().f[g[i:j]]")
@@ -782,25 +782,25 @@ func TestSwitch(t *testing.T) {
 	ok(t, p, "fn() { switch { case a: x; case b: y; default: z; }; }")
 
 	p = newParser("switch { }")
-	fail(t, p, "Unexpected Token '}' at (1, 10)")
+	fail(t, p, "Unexpected Token '}' at foo.glm:1:10")
 
 	p = newParser("switch { case a: x;")
-	fail(t, p, "Unexpected EOF at (1, 20)")
+	fail(t, p, "Unexpected EOF at foo.glm:1:20")
 
 	p = newParser("switch { default: x; }")
-	fail(t, p, "Unexpected Token 'default' at (1, 10)")
+	fail(t, p, "Unexpected Token 'default' at foo.glm:1:10")
 
 	p = newParser("switch { case case a: x; }")
-	fail(t, p, "Unexpected Token 'case' at (1, 15)")
+	fail(t, p, "Unexpected Token 'case' at foo.glm:1:15")
 
 	p = newParser("switch { case z, x; }")
-	fail(t, p, "Unexpected Token ';' at (1, 19)")
+	fail(t, p, "Unexpected Token ';' at foo.glm:1:19")
 
 	p = newParser("switch { case a, b, c: }")
-	fail(t, p, "Invalid SwitchStmt Expression at (1, 22)")
+	fail(t, p, "Invalid SwitchStmt Expression at foo.glm:1:22")
 
 	p = newParser("switch { case a: b; default: }")
-	fail(t, p, "Invalid SwitchStmt Expression at (1, 28)")
+	fail(t, p, "Invalid SwitchStmt Expression at foo.glm:1:28")
 }
 
 func TestLambda(t *testing.T) {
@@ -830,7 +830,7 @@ func TestSpawn(t *testing.T) {
 	ok(t, p, "fn() { go false(a, b, c); }")
 
 	p = newParser("go foo;")
-	fail(t, p, "Unexpected Token ';' at (1, 7)")
+	fail(t, p, "Unexpected Token ';' at foo.glm:1:7")
 }
 
 func TestImport(t *testing.T) {
@@ -844,7 +844,7 @@ func TestImport(t *testing.T) {
 	ok(t, p, "fn() { import a, b, c; }")
 
 	p = newParser("let z = 3; import a;")
-	fail(t, p, "Unexpected Token 'import' at (1, 12)")
+	fail(t, p, "Unexpected Token 'import' at foo.glm:1:12")
 }
 
 func TestLookaheadLF(t *testing.T) {

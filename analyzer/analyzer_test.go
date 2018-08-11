@@ -53,7 +53,7 @@ func newAnalyzer(source string) Analyzer {
 
 	ast.InternalResetDebugging()
 
-	scanner := scanner.NewScanner("", "", source)
+	scanner := scanner.NewScanner("foo", "foo.glm", source)
 	parser := parser.NewParser(scanner, isBuiltIn)
 	mod, err := parser.ParseModule()
 	if err != nil {
@@ -84,16 +84,16 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 `)
 
 	errors = newAnalyzer("a;").Analyze()
-	fail(t, errors, "[Symbol 'a' is not defined, at (1, 1)]")
+	fail(t, errors, "[Symbol 'a' is not defined, at 1:1]")
 
 	errors = newAnalyzer("let a = 1;const a = 1;").Analyze()
-	fail(t, errors, "[Symbol 'a' is already defined, at (1, 17)]")
+	fail(t, errors, "[Symbol 'a' is already defined, at 1:17]")
 
 	errors = newAnalyzer("const a = 1;a = 1;").Analyze()
-	fail(t, errors, "[Symbol 'a' is constant, at (1, 13)]")
+	fail(t, errors, "[Symbol 'a' is constant, at 1:13]")
 
 	errors = newAnalyzer("a = a;").Analyze()
-	fail(t, errors, "[Symbol 'a' is not defined, at (1, 5) Symbol 'a' is not defined, at (1, 1)]")
+	fail(t, errors, "[Symbol 'a' is not defined, at 1:5 Symbol 'a' is not defined, at 1:1]")
 }
 
 func TestNested(t *testing.T) {
@@ -170,10 +170,10 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:0)
 `)
 
 	errors = newAnalyzer("break;").Analyze()
-	fail(t, errors, "['break' outside of loop, at (1, 1)]")
+	fail(t, errors, "['break' outside of loop, at 1:1]")
 
 	errors = newAnalyzer("continue;").Analyze()
-	fail(t, errors, "['continue' outside of loop, at (1, 1)]")
+	fail(t, errors, "['continue' outside of loop, at 1:1]")
 
 	anl = newAnalyzer("let a; for b in [] { break; continue; }")
 	errors = anl.Analyze()
@@ -401,15 +401,15 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 func TestFormalParams(t *testing.T) {
 
 	errors := newAnalyzer("fn(const a, b) { a = 1; };").Analyze()
-	fail(t, errors, "[Symbol 'a' is constant, at (1, 18)]")
+	fail(t, errors, "[Symbol 'a' is constant, at 1:18]")
 }
 
 func TestImport(t *testing.T) {
 	errors := newAnalyzer("import foo; let foo = 2;").Analyze()
-	fail(t, errors, "[Symbol 'foo' is already defined, at (1, 17)]")
+	fail(t, errors, "[Symbol 'foo' is already defined, at 1:17]")
 
 	errors = newAnalyzer("import foo, zork; foo = 2;").Analyze()
-	fail(t, errors, "[Symbol 'foo' is constant, at (1, 19)]")
+	fail(t, errors, "[Symbol 'foo' is constant, at 1:19]")
 }
 
 func TestPureFunction(t *testing.T) {
@@ -500,7 +500,7 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 `)
 
 	errors = newAnalyzer("fn a() {}; const a = 1;").Analyze()
-	fail(t, errors, "[Symbol 'a' is already defined, at (1, 18)]")
+	fail(t, errors, "[Symbol 'a' is already defined, at 1:18]")
 }
 
 func TestCaptureFunction(t *testing.T) {

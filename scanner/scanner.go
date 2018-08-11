@@ -37,7 +37,7 @@ type (
 )
 
 // NewScanner creates a new Scanner
-func NewScanner(path, name, code string) *Scanner {
+func NewScanner(name, path, code string) *Scanner {
 
 	s := &Scanner{
 		Name: name,

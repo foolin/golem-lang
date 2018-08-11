@@ -18,7 +18,7 @@ type Pos struct {
 }
 
 func (p Pos) String() string {
-	return fmt.Sprintf("(%d, %d)", p.Line, p.Col)
+	return fmt.Sprintf("%d:%d", p.Line, p.Col)
 }
 
 // Advance advances a Pos column forwards
