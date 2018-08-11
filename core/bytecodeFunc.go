@@ -13,19 +13,19 @@ import (
 type BytecodeFunc interface {
 	Func
 
-	Template() *Template
+	Template() *FuncTemplate
 	GetCapture(int) *Ref
 	PushCapture(*Ref)
 }
 
 type bytecodeFunc struct {
-	template *Template
+	template *FuncTemplate
 	captures []*Ref
 }
 
 // NewBytecodeFunc creates a new BytecodeFunc.  NewBytecodeFunc is
 // called via NewFunc opcode at runtime.
-func NewBytecodeFunc(template *Template) BytecodeFunc {
+func NewBytecodeFunc(template *FuncTemplate) BytecodeFunc {
 	captures := make([]*Ref, 0, template.NumCaptures)
 	return &bytecodeFunc{template, captures}
 }
@@ -68,7 +68,7 @@ func (f *bytecodeFunc) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
-func (f *bytecodeFunc) Template() *Template {
+func (f *bytecodeFunc) Template() *FuncTemplate {
 	return f.template
 }
 
@@ -88,12 +88,12 @@ func (f *bytecodeFunc) Invoke(cx Context, values []Value) (Value, Error) {
 }
 
 //---------------------------------------------------------------
-// Template
+// FuncTemplate
 
-// Template represents the information needed to invoke a function
+// FuncTemplate represents the information needed to invoke a function
 // instance.  Templates are created at compile time, and
 // are immutable at run time.
-type Template struct {
+type FuncTemplate struct {
 	ModuleName        string
 	ModulePath        string
 	Arity             int // TODO MinArity, MaxArity
@@ -120,7 +120,7 @@ type ExceptionHandler struct {
 }
 
 // LineNumber returns the line number for the opcode at the given instruction pointer
-func (t *Template) LineNumber(instPtr int) int {
+func (t *FuncTemplate) LineNumber(instPtr int) int {
 
 	table := t.LineNumberTable
 	n := len(table) - 1

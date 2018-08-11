@@ -31,7 +31,7 @@ type compiler struct {
 	modName    string
 	modPath    string
 	funcs      []*ast.FnExpr
-	templates  []*g.Template
+	templates  []*g.FuncTemplate
 	structDefs [][]*g.FieldDef
 	idx        int
 }
@@ -41,7 +41,7 @@ func NewCompiler(modName, modPath string, mod *ast.FnExpr, builtInMgr g.BuiltinM
 
 	// the "init" function for a module is always the first function
 	funcs := []*ast.FnExpr{mod}
-	templates := []*g.Template{}
+	templates := []*g.FuncTemplate{}
 	structDefs := [][]*g.FieldDef{}
 
 	return &compiler{
@@ -61,13 +61,14 @@ func (c *compiler) Compile() *g.Module {
 
 	// done
 	mod := &g.Module{
-		Name:       c.modName,
-		Path:       c.modPath,
-		Pool:       makePoolSlice(c.pool),
-		Refs:       nil,
-		StructDefs: c.structDefs,
+		Name:     c.modName,
+		Path:     c.modPath,
+		Contents: nil,
+		Refs:     nil,
+
 		Templates:  c.templates,
-		Contents:   nil,
+		ConstPool:       makePoolSlice(c.pool),
+		StructDefs: c.structDefs,
 	}
 	mod.Contents = c.makeModuleContents(mod)
 	return mod
@@ -133,10 +134,10 @@ func (c *compiler) makeModuleProperty(
 	return prop
 }
 
-func (c *compiler) compileFunc(fe *ast.FnExpr) *g.Template {
+func (c *compiler) compileFunc(fe *ast.FnExpr) *g.FuncTemplate {
 
 	arity := len(fe.FormalParams)
-	tpl := &g.Template{
+	tpl := &g.FuncTemplate{
 		ModuleName:        c.modName,
 		ModulePath:        c.modPath,
 		Arity:             arity,

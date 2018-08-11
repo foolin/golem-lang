@@ -11,15 +11,24 @@ import (
 	"github.com/mjarmy/golem-lang/core/opcodes"
 )
 
-// Module is a namespace containing compiled Golem code
+// Module is a namespace containing compiled Golem code.  Modules are the fundamental
+// unit of compilation in Golem.
 type Module struct {
-	Name       string
-	Path       string
-	Pool       []Basic
-	Refs       []*Ref
+	// Name is the name of the module
+	Name string
+	// Path is the path to the source code of the module
+	Path string
+	// Contents is the top level exported values of the module
+	Contents Struct
+	// Refs is a list  containers for the values contained in the contents
+	Refs []*Ref
+
+	// Templates is a list of function templates defined in this module
+	Templates []*FuncTemplate
+	// ConstPool is a list of constant Basic values defined in this module
+	ConstPool []Basic
+	// StructDefs is a list of struct definitions defined in this module
 	StructDefs [][]*FieldDef
-	Templates  []*Template
-	Contents   Struct
 }
 
 func (m *Module) String() string {
@@ -29,8 +38,8 @@ func (m *Module) String() string {
 	buf.WriteString(fmt.Sprintf("    Name: %s\n", m.Name))
 	buf.WriteString(fmt.Sprintf("    Path: %s\n", m.Path))
 
-	buf.WriteString("    Pool:\n")
-	for i, val := range m.Pool {
+	buf.WriteString("    ConstPool:\n")
+	for i, val := range m.ConstPool {
 		typeOf := val.Type()
 		buf.WriteString("        ")
 		buf.WriteString(fmt.Sprintf("%d: %v(%v)\n", i, typeOf, val))
@@ -51,7 +60,7 @@ func (m *Module) String() string {
 	for i, t := range m.Templates {
 
 		buf.WriteString(fmt.Sprintf(
-			"    Template(%d): Arity: %d, NumCaptures: %d, NumLocals: %d\n",
+			"    FuncTemplate(%d): Arity: %d, NumCaptures: %d, NumLocals: %d\n",
 			i, t.Arity, t.NumCaptures, t.NumLocals))
 
 		buf.WriteString("        OpCodes:\n")
@@ -76,21 +85,4 @@ func (m *Module) String() string {
 	}
 
 	return buf.String()
-}
-
-//---------------------------------------------------------------
-
-// Ref is a container for a Value.  Refs are used by the interpreter
-// as a place to store the value of a variable.
-type Ref struct {
-	Val Value
-}
-
-// NewRef creates a new Ref
-func NewRef(val Value) *Ref {
-	return &Ref{val}
-}
-
-func (r *Ref) String() string {
-	return fmt.Sprintf("Ref(%v)", r.Val)
 }

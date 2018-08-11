@@ -24,7 +24,7 @@ func tassert(t *testing.T, flag bool) {
 
 func ok(t *testing.T, mod *g.Module, expect *g.Module) {
 
-	if !reflect.DeepEqual(mod.Pool, expect.Pool) {
+	if !reflect.DeepEqual(mod.ConstPool, expect.ConstPool) {
 		t.Error(mod, " != ", expect)
 	}
 
@@ -86,11 +86,11 @@ func TestExpression(t *testing.T) {
 
 	mod := newCompiler(newAnalyzer("-2 + -1 + -0 + 0 + 1 + 2")).Compile()
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{g.NewInt(int64(-2)), g.NewInt(int64(2))},
+		ConstPool:       []g.Basic{g.NewInt(int64(-2)), g.NewInt(int64(2))},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{
-			&g.Template{
+		Templates: []*g.FuncTemplate{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   0,
@@ -119,11 +119,11 @@ func TestExpression(t *testing.T) {
 
 	mod = newCompiler(newAnalyzer("(2 + 3) * -4 / 10")).Compile()
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{g.NewInt(int64(2)), g.NewInt(int64(3)), g.NewInt(int64(-4)), g.NewInt(int64(10))},
+		ConstPool:       []g.Basic{g.NewInt(int64(2)), g.NewInt(int64(3)), g.NewInt(int64(-4)), g.NewInt(int64(10))},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{
-			&g.Template{
+		Templates: []*g.FuncTemplate{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   0,
@@ -148,11 +148,11 @@ func TestExpression(t *testing.T) {
 
 	mod = newCompiler(newAnalyzer("null / true + \nfalse")).Compile()
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{},
+		ConstPool:       []g.Basic{},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{
-			&g.Template{
+		Templates: []*g.FuncTemplate{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   0,
@@ -177,11 +177,11 @@ func TestExpression(t *testing.T) {
 
 	mod = newCompiler(newAnalyzer("'a' * 1.23e4")).Compile()
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{g.NewStr("a"), g.NewFloat(float64(12300))},
+		ConstPool:       []g.Basic{g.NewStr("a"), g.NewFloat(float64(12300))},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{
-			&g.Template{
+		Templates: []*g.FuncTemplate{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   0,
@@ -202,11 +202,11 @@ func TestExpression(t *testing.T) {
 
 	mod = newCompiler(newAnalyzer("'a' == true")).Compile()
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{g.NewStr("a")},
+		ConstPool:       []g.Basic{g.NewStr("a")},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{
-			&g.Template{
+		Templates: []*g.FuncTemplate{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   0,
@@ -227,11 +227,11 @@ func TestExpression(t *testing.T) {
 
 	mod = newCompiler(newAnalyzer("true != false")).Compile()
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{},
+		ConstPool:       []g.Basic{},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{
-			&g.Template{
+		Templates: []*g.FuncTemplate{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   0,
@@ -252,11 +252,11 @@ func TestExpression(t *testing.T) {
 
 	mod = newCompiler(newAnalyzer("true > false; true >= false")).Compile()
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{},
+		ConstPool:       []g.Basic{},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{
-			&g.Template{
+		Templates: []*g.FuncTemplate{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   0,
@@ -280,11 +280,11 @@ func TestExpression(t *testing.T) {
 
 	mod = newCompiler(newAnalyzer("true < false; true <= false; true <=> false;")).Compile()
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{},
+		ConstPool:       []g.Basic{},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{
-			&g.Template{
+		Templates: []*g.FuncTemplate{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   0,
@@ -311,11 +311,11 @@ func TestExpression(t *testing.T) {
 
 	mod = newCompiler(newAnalyzer("let a = 2 && 3;")).Compile()
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{g.NewInt(int64(2)), g.NewInt(int64(3))},
+		ConstPool:       []g.Basic{g.NewInt(int64(2)), g.NewInt(int64(3))},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{
-			&g.Template{
+		Templates: []*g.FuncTemplate{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   1,
@@ -341,11 +341,11 @@ func TestExpression(t *testing.T) {
 
 	mod = newCompiler(newAnalyzer("let a = 2 || 3;")).Compile()
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{g.NewInt(int64(2)), g.NewInt(int64(3))},
+		ConstPool:       []g.Basic{g.NewInt(int64(2)), g.NewInt(int64(3))},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{
-			&g.Template{
+		Templates: []*g.FuncTemplate{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   1,
@@ -374,11 +374,11 @@ func TestAssignment(t *testing.T) {
 
 	mod := newCompiler(newAnalyzer("let a = 1;\nconst b = \n2;a = 3;")).Compile()
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{g.NewInt(2), g.NewInt(3)},
+		ConstPool:       []g.Basic{g.NewInt(2), g.NewInt(3)},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{
-			&g.Template{
+		Templates: []*g.FuncTemplate{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   2,
@@ -426,11 +426,11 @@ func TestIf(t *testing.T) {
 	anl := newAnalyzer(source)
 	mod := newCompiler(anl).Compile()
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{g.NewInt(3), g.NewInt(2), g.NewInt(42)},
+		ConstPool:       []g.Basic{g.NewInt(3), g.NewInt(2), g.NewInt(42)},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{
-			&g.Template{
+		Templates: []*g.FuncTemplate{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   1,
@@ -463,11 +463,11 @@ func TestIf(t *testing.T) {
 	anl = newAnalyzer(source)
 	mod = newCompiler(anl).Compile()
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{g.NewInt(2), g.NewInt(3), g.NewInt(4)},
+		ConstPool:       []g.Basic{g.NewInt(2), g.NewInt(3), g.NewInt(4)},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{
-			&g.Template{
+		Templates: []*g.FuncTemplate{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   4,
@@ -505,11 +505,11 @@ func TestWhile(t *testing.T) {
 	source := "let a = 1; while (0 < 1) { let b = 2; }"
 	mod := newCompiler(newAnalyzer(source)).Compile()
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{g.NewInt(2)},
+		ConstPool:       []g.Basic{g.NewInt(2)},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{
-			&g.Template{
+		Templates: []*g.FuncTemplate{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   2,
@@ -537,11 +537,11 @@ func TestWhile(t *testing.T) {
 	source = "let a = 'z'; while (0 < 1) \n{ break; continue; let b = 2; }; let c = 3;"
 	mod = newCompiler(newAnalyzer(source)).Compile()
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{g.NewStr("z"), g.NewInt(2), g.NewInt(3)},
+		ConstPool:       []g.Basic{g.NewStr("z"), g.NewInt(2), g.NewInt(3)},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{
-			&g.Template{
+		Templates: []*g.FuncTemplate{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   3,
@@ -579,11 +579,11 @@ func TestReturn(t *testing.T) {
 	mod := newCompiler(anl).Compile()
 
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{g.NewInt(2), g.NewInt(3)},
+		ConstPool:       []g.Basic{g.NewInt(2), g.NewInt(3)},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{
-			&g.Template{
+		Templates: []*g.FuncTemplate{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   1,
@@ -633,13 +633,13 @@ let b = fn(x) {
 	//fmt.Println(mod)
 
 	ok(t, mod, &g.Module{
-		Pool: []g.Basic{
+		ConstPool: []g.Basic{
 			g.NewInt(42),
 			g.NewInt(7)},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{
-			&g.Template{
+		Templates: []*g.FuncTemplate{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   2,
@@ -657,7 +657,7 @@ let b = fn(x) {
 					{Index: 13, LineNum: 0}},
 				ExceptionHandlers: nil,
 			},
-			&g.Template{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   0,
@@ -671,7 +671,7 @@ let b = fn(x) {
 					{Index: 4, LineNum: 0}},
 				ExceptionHandlers: nil,
 			},
-			&g.Template{
+			&g.FuncTemplate{
 				Arity:       1,
 				NumCaptures: 0,
 				NumLocals:   2,
@@ -694,7 +694,7 @@ let b = fn(x) {
 					{Index: 24, LineNum: 0}},
 				ExceptionHandlers: nil,
 			},
-			&g.Template{
+			&g.FuncTemplate{
 				Arity:       1,
 				NumCaptures: 0,
 				NumLocals:   1,
@@ -730,11 +730,11 @@ c(2, 3)
 	//fmt.Println(mod)
 
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{g.NewInt(2), g.NewInt(3), g.NewInt(4)},
+		ConstPool:       []g.Basic{g.NewInt(2), g.NewInt(3), g.NewInt(4)},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{
-			&g.Template{
+		Templates: []*g.FuncTemplate{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   3,
@@ -767,7 +767,7 @@ c(2, 3)
 					{Index: 44, LineNum: 0}},
 				ExceptionHandlers: nil,
 			},
-			&g.Template{
+			&g.FuncTemplate{
 				Arity:       0,
 				NumCaptures: 0,
 				NumLocals:   0,
@@ -778,7 +778,7 @@ c(2, 3)
 					{Index: 0, LineNum: 0}},
 				ExceptionHandlers: nil,
 			},
-			&g.Template{
+			&g.FuncTemplate{
 				Arity:       1,
 				NumCaptures: 0,
 				NumLocals:   1,
@@ -792,7 +792,7 @@ c(2, 3)
 					{Index: 4, LineNum: 0}},
 				ExceptionHandlers: nil,
 			},
-			&g.Template{
+			&g.FuncTemplate{
 				Arity:       2,
 				NumCaptures: 0,
 				NumLocals:   3,
@@ -830,10 +830,10 @@ const accumGen = fn(n) {
 	mod := newCompiler(anl).Compile()
 
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{},
+		ConstPool:       []g.Basic{},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{&g.Template{
+		Templates: []*g.FuncTemplate{&g.FuncTemplate{
 			Arity:       0,
 			NumCaptures: 0,
 			NumLocals:   1,
@@ -847,7 +847,7 @@ const accumGen = fn(n) {
 				{Index: 1, LineNum: 2},
 				{Index: 7, LineNum: 0}},
 			ExceptionHandlers: nil,
-		}, &g.Template{
+		}, &g.FuncTemplate{
 			Arity:       1,
 			NumCaptures: 0,
 			NumLocals:   1,
@@ -862,7 +862,7 @@ const accumGen = fn(n) {
 				{Index: 1, LineNum: 3},
 				{Index: 8, LineNum: 0}},
 			ExceptionHandlers: nil,
-		}, &g.Template{
+		}, &g.FuncTemplate{
 			Arity:       1,
 			NumCaptures: 1,
 			NumLocals:   1,
@@ -904,10 +904,10 @@ const accumGen = fn(n) {
 	//fmt.Println(mod)
 
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{g.NewInt(2)},
+		ConstPool:       []g.Basic{g.NewInt(2)},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{&g.Template{
+		Templates: []*g.FuncTemplate{&g.FuncTemplate{
 			Arity:       0,
 			NumCaptures: 0,
 			NumLocals:   2,
@@ -925,7 +925,7 @@ const accumGen = fn(n) {
 				{Index: 7, LineNum: 3},
 				{Index: 16, LineNum: 0}},
 			ExceptionHandlers: nil,
-		}, &g.Template{
+		}, &g.FuncTemplate{
 			Arity:       1,
 			NumCaptures: 1,
 			NumLocals:   1,
@@ -941,7 +941,7 @@ const accumGen = fn(n) {
 				{Index: 1, LineNum: 4},
 				{Index: 11, LineNum: 0}},
 			ExceptionHandlers: nil,
-		}, &g.Template{
+		}, &g.FuncTemplate{
 			Arity:       1,
 			NumCaptures: 2,
 			NumLocals:   1,
@@ -985,10 +985,10 @@ let d = b--
 	//fmt.Println(mod)
 
 	ok(t, mod, &g.Module{
-		Pool:       []g.Basic{g.NewInt(int64(10)), g.NewInt(int64(20))},
+		ConstPool:       []g.Basic{g.NewInt(int64(10)), g.NewInt(int64(20))},
 		Refs:       nil,
 		StructDefs: [][]*g.FieldDef{},
-		Templates: []*g.Template{&g.Template{
+		Templates: []*g.FuncTemplate{&g.FuncTemplate{
 			Arity:       0,
 			NumCaptures: 0,
 			NumLocals:   4,

@@ -11,8 +11,8 @@ import (
 
 func TestBytecodeFunc(t *testing.T) {
 
-	a := NewBytecodeFunc(&Template{})
-	b := NewBytecodeFunc(&Template{})
+	a := NewBytecodeFunc(&FuncTemplate{})
+	b := NewBytecodeFunc(&FuncTemplate{})
 
 	okType(t, a, FuncType)
 	okType(t, b, FuncType)
@@ -32,7 +32,7 @@ func TestBytecodeFunc(t *testing.T) {
 
 func TestLineNumber(t *testing.T) {
 
-	tp := &Template{
+	tp := &FuncTemplate{
 		ModuleName:  "",
 		ModulePath:  "",
 		Arity:       0,

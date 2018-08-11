@@ -13,7 +13,7 @@ import (
 // Advance the interpreter forwards by one opcode.
 func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
-	pool := i.mod.Pool
+	pool := i.mod.ConstPool
 	frameIndex := len(i.frames) - 1
 	f := i.frames[frameIndex]
 	n := len(f.stack) - 1
