@@ -145,7 +145,7 @@ func newCompiler(source string) compiler.Compiler {
 		panic(fmt.Sprintf("%v", errors))
 	}
 
-	return compiler.NewCompiler(anl, builtInMgr)
+	return compiler.NewCompiler("", "", anl.Module(), builtInMgr)
 }
 
 //type testModule struct {

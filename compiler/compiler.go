@@ -9,7 +9,6 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/mjarmy/golem-lang/analyzer"
 	"github.com/mjarmy/golem-lang/ast"
 	g "github.com/mjarmy/golem-lang/core"
 	o "github.com/mjarmy/golem-lang/core/opcodes"
@@ -29,6 +28,8 @@ type compiler struct {
 	lnum     []g.LineNumberEntry
 	handlers []g.ExceptionHandler
 
+	modName    string
+	modPath    string
 	funcs      []*ast.FnExpr
 	templates  []*g.Template
 	structDefs [][]*g.FieldDef
@@ -36,15 +37,15 @@ type compiler struct {
 }
 
 // NewCompiler creates a new Compiler
-func NewCompiler(anl analyzer.Analyzer, builtInMgr g.BuiltinManager) Compiler {
+func NewCompiler(modName, modPath string, mod *ast.FnExpr, builtInMgr g.BuiltinManager) Compiler {
 
-	funcs := []*ast.FnExpr{anl.Module()}
+	funcs := []*ast.FnExpr{mod}
 	templates := []*g.Template{}
 	structDefs := [][]*g.FieldDef{}
 
 	return &compiler{
 		builtInMgr, g.EmptyHashMap(), nil, nil, nil,
-		funcs, templates, structDefs, 0}
+		modName, modPath, funcs, templates, structDefs, 0}
 }
 
 func (c *compiler) Compile() *g.Module {
@@ -59,6 +60,8 @@ func (c *compiler) Compile() *g.Module {
 
 	// done
 	mod := &g.Module{
+		Name:       c.modName,
+		Path:       c.modPath,
 		Pool:       makePoolSlice(c.pool),
 		Refs:       nil,
 		StructDefs: c.structDefs,

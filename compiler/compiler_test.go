@@ -74,7 +74,7 @@ func newAnalyzer(source string) analyzer.Analyzer {
 }
 
 func newCompiler(analyzer analyzer.Analyzer) Compiler {
-	return NewCompiler(analyzer, builtInMgr)
+	return NewCompiler("", "", analyzer.Module(), builtInMgr)
 }
 
 func contents() g.Struct {

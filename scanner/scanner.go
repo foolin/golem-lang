@@ -24,8 +24,8 @@ type (
 
 	// Scanner scans Golem source code and produces a stream of tokens.
 	Scanner struct {
-		Path string
 		Name string
+		Path string
 		Code string
 
 		reader    io.RuneReader
@@ -40,8 +40,8 @@ type (
 func NewScanner(path, name, code string) *Scanner {
 
 	s := &Scanner{
-		Path: path,
 		Name: name,
+		Path: path,
 		Code: code,
 
 		reader:    strings.NewReader(code),

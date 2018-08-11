@@ -14,6 +14,7 @@ import (
 // Module is a namespace containing compiled Golem code
 type Module struct {
 	Name       string
+	Path       string
 	Pool       []Basic
 	Refs       []*Ref
 	StructDefs [][]*FieldDef
@@ -21,20 +22,12 @@ type Module struct {
 	Contents   Struct
 }
 
-// GetModuleName for a Module returns the empty string.
-func (m *Module) GetModuleName() string {
-	return ""
-}
-
-// GetContents returns the contents of a Module.
-func (m *Module) GetContents() Struct {
-	return m.Contents
-}
-
 func (m *Module) String() string {
 	var buf bytes.Buffer
 	buf.WriteString("----------------------------\n")
 	buf.WriteString("Module:\n")
+	buf.WriteString(fmt.Sprintf("    Name: %s\n", m.Name))
+	buf.WriteString(fmt.Sprintf("    Path: %s\n", m.Path))
 
 	buf.WriteString("    Pool:\n")
 	for i, val := range m.Pool {

@@ -100,8 +100,8 @@ func dumpError(cx g.Context, err g.Error) {
 }
 
 type source struct {
-	path string
 	name string
+	path string
 	code string
 }
 
@@ -128,7 +128,7 @@ func readSource(filename string) (*source, error) {
 	name := strings.TrimSuffix(filepath.Base(path), ext)
 
 	// done
-	return &source{path, name, code}, nil
+	return &source{name, path, code}, nil
 }
 
 func main() {
@@ -145,7 +145,7 @@ func main() {
 	if e != nil {
 		abExit(e.Error())
 	}
-	scanner := scanner.NewScanner(source.path, source.name, source.code)
+	scanner := scanner.NewScanner(source.name, source.path, source.code)
 
 	// command line builtins
 	builtInMgr := g.NewBuiltinManager(g.CommandLineBuiltins)
@@ -168,7 +168,7 @@ func main() {
 	}
 
 	// compile
-	cmp := compiler.NewCompiler(anl, builtInMgr)
+	cmp := compiler.NewCompiler(source.name, source.path, anl.Module(), builtInMgr)
 	mod := cmp.Compile()
 
 	// interpret with modules from standard library
