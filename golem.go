@@ -158,7 +158,7 @@ func main() {
 	}
 
 	// analyze
-	anl := analyzer.NewAnalyzer(astMod)
+	anl := analyzer.NewAnalyzer(source.name, source.path, astMod)
 	errors := anl.Analyze()
 	if len(errors) > 0 {
 		for _, e := range errors {

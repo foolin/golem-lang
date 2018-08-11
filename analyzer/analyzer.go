@@ -17,6 +17,8 @@ type Analyzer interface {
 }
 
 type analyzer struct {
+	modName string
+	modPath string
 	mod     *ast.FnExpr
 	scopes  []ast.Scope
 	loops   []ast.Loop
@@ -25,9 +27,9 @@ type analyzer struct {
 }
 
 // NewAnalyzer creates a new Analyzer
-func NewAnalyzer(mod *ast.FnExpr) Analyzer {
+func NewAnalyzer(modName, modPath string, mod *ast.FnExpr) Analyzer {
 
-	return &analyzer{mod, []ast.Scope{mod.Scope}, []ast.Loop{}, []*ast.StructExpr{}, nil}
+	return &analyzer{modName, modPath, mod, []ast.Scope{mod.Scope}, []ast.Loop{}, []*ast.StructExpr{}, nil}
 }
 
 // Analyze analyzes an AST.
@@ -87,13 +89,13 @@ func (a *analyzer) Visit(node ast.Node) {
 	case *ast.BreakStmt:
 		if len(a.loops) == 0 {
 			a.errors = append(a.errors,
-				fmt.Errorf("'break' outside of loop, at %v", t.Token.Position))
+				fmt.Errorf("'break' outside of loop, at %s:%v", a.modPath, t.Token.Position))
 		}
 
 	case *ast.ContinueStmt:
 		if len(a.loops) == 0 {
 			a.errors = append(a.errors,
-				fmt.Errorf("'continue' outside of loop, at %v", t.Token.Position))
+				fmt.Errorf("'continue' outside of loop, at %s:%v", a.modPath, t.Token.Position))
 		}
 
 	case *ast.StructExpr:
@@ -143,7 +145,7 @@ func (a *analyzer) defineIdent(ident *ast.IdentExpr, isConst bool) {
 	sym := ident.Symbol.Text
 	if _, ok := a.getVariable(sym); ok {
 		a.errors = append(a.errors,
-			fmt.Errorf("Symbol '%s' is already defined, at %v", sym, ident.Symbol.Position))
+			fmt.Errorf("Symbol '%s' is already defined, at %s:%v", sym, a.modPath, ident.Symbol.Position))
 	} else {
 		ident.Variable = a.putVariable(sym, isConst)
 	}
@@ -251,12 +253,12 @@ func (a *analyzer) doVisitAssignIdent(ident *ast.IdentExpr) {
 	if v, ok := a.getVariable(sym); ok {
 		if v.IsConst() {
 			a.errors = append(a.errors,
-				fmt.Errorf("Symbol '%s' is constant, at %v", sym, ident.Symbol.Position))
+				fmt.Errorf("Symbol '%s' is constant, at %s:%v", sym, a.modPath, ident.Symbol.Position))
 		}
 		ident.Variable = v
 	} else {
 		a.errors = append(a.errors,
-			fmt.Errorf("Symbol '%s' is not defined, at %v", sym, ident.Symbol.Position))
+			fmt.Errorf("Symbol '%s' is not defined, at %s:%v", sym, a.modPath, ident.Symbol.Position))
 	}
 }
 
@@ -268,7 +270,7 @@ func (a *analyzer) visitIdentExpr(ident *ast.IdentExpr) {
 		ident.Variable = v
 	} else {
 		a.errors = append(a.errors,
-			fmt.Errorf("Symbol '%s' is not defined, at %v", sym, ident.Symbol.Position))
+			fmt.Errorf("Symbol '%s' is not defined, at %s:%v", sym, a.modPath, ident.Symbol.Position))
 	}
 }
 
@@ -287,7 +289,7 @@ func (a *analyzer) visitThisExpr(this *ast.ThisExpr) {
 	n := len(a.structs)
 	if n == 0 {
 		a.errors = append(a.errors,
-			fmt.Errorf("'this' outside of struct, at %v", this.Token.Position))
+			fmt.Errorf("'this' outside of struct, at %s:%v", a.modPath, this.Token.Position))
 	} else {
 		this.Variable = a.putThis()
 	}

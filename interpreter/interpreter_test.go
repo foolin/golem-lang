@@ -139,7 +139,7 @@ func newCompiler(source string) compiler.Compiler {
 	if err != nil {
 		panic(err.Error())
 	}
-	anl := analyzer.NewAnalyzer(mod)
+	anl := analyzer.NewAnalyzer("foo", "foo.glm", mod)
 	errors := anl.Analyze()
 	if len(errors) > 0 {
 		panic(fmt.Sprintf("%v", errors))

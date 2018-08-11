@@ -65,7 +65,7 @@ func newAnalyzer(source string) analyzer.Analyzer {
 		panic(err)
 	}
 
-	anl := analyzer.NewAnalyzer(mod)
+	anl := analyzer.NewAnalyzer("foo", "foo.glm", mod)
 	errors := anl.Analyze()
 	if len(errors) > 0 {
 		panic(err)

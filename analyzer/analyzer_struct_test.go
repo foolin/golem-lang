@@ -12,7 +12,7 @@ import (
 func TestStruct(t *testing.T) {
 
 	errors := newAnalyzer("this").Analyze()
-	fail(t, errors, "['this' outside of struct, at 1:1]")
+	fail(t, errors, "['this' outside of struct, at foo.glm:1:1]")
 
 	source := `
 struct{ }
