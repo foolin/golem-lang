@@ -36,17 +36,17 @@ func NewInterpreter(
 // Init initializes an interpreter, by interpreting its "init" function.
 func (i *Interpreter) Init() (g.Value, g.Error) {
 
-	// the init function is always the zeroth template
-	tpl := i.mod.Templates[0]
+	// the init function is always the first template
+	initTpl := i.mod.Templates[0]
 
 	// create empty locals
-	i.mod.Refs = newLocals(tpl.NumLocals, nil)
+	i.mod.Refs = newLocals(initTpl.NumLocals, nil)
 
-	// make func
-	fn := g.NewBytecodeFunc(tpl)
+	// make init function from template
+	initFn := g.NewBytecodeFunc(initTpl)
 
-	// go
-	return i.eval(fn, i.mod.Refs)
+	// invoke the "init" function
+	return i.eval(initFn, i.mod.Refs)
 }
 
 //-------------------------------------------------------------------------

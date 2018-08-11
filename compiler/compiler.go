@@ -39,6 +39,7 @@ type compiler struct {
 // NewCompiler creates a new Compiler
 func NewCompiler(modName, modPath string, mod *ast.FnExpr, builtInMgr g.BuiltinManager) Compiler {
 
+	// the "init" function for a module is always the first function
 	funcs := []*ast.FnExpr{mod}
 	templates := []*g.Template{}
 	structDefs := [][]*g.FieldDef{}
