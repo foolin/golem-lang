@@ -145,7 +145,7 @@ func newCompiler(source string) compiler.Compiler {
 		panic(fmt.Sprintf("%v", errors))
 	}
 
-	return compiler.NewCompiler("", "", anl.Module(), builtInMgr)
+	return compiler.NewCompiler("foo", "foo.glm", anl.Module(), builtInMgr)
 }
 
 //type testModule struct {
@@ -488,8 +488,8 @@ let a = divide(3, 0)
 	fail(t, source,
 		g.DivideByZeroError(),
 		[]string{
-			"    at line 3",
-			"    at line 5"})
+			"    at foo.glm:3",
+			"    at foo.glm:5"})
 
 	source = `
 let foo = fn(n) { n + n; }
@@ -498,7 +498,7 @@ let a = foo(5, 6)
 	fail(t, source,
 		g.ArityMismatchError("1", 2),
 		[]string{
-			"    at line 3"})
+			"    at foo.glm:3"})
 }
 
 func TestPostfix(t *testing.T) {
@@ -601,17 +601,17 @@ let a = assert(true);
 	fail(t, "assert(1, 2);",
 		g.ArityMismatchError("1", 2),
 		[]string{
-			"    at line 1"})
+			"    at foo.glm:1"})
 
 	fail(t, "assert(1);",
 		g.TypeMismatchError("Expected Bool"),
 		[]string{
-			"    at line 1"})
+			"    at foo.glm:1"})
 
 	fail(t, "assert(1 == 2);",
 		g.AssertionFailedError(),
 		[]string{
-			"    at line 1"})
+			"    at foo.glm:1"})
 }
 
 func TestDecl(t *testing.T) {
@@ -684,12 +684,12 @@ assert(values == 6);
 	source = "for (k, v)  in [1, 2, 3] {}"
 	fail(t, source,
 		g.TypeMismatchError("Expected Tuple"),
-		[]string{"    at line 1"})
+		[]string{"    at foo.glm:1"})
 
 	source = "for (a, b, c)  in [('a', 1), ('b', 2), ('c', 3)] {}"
 	fail(t, source,
 		g.InvalidArgumentError("Expected Tuple of length 3"),
-		[]string{"    at line 1"})
+		[]string{"    at foo.glm:1"})
 }
 
 func TestSwitch(t *testing.T) {
@@ -751,7 +751,7 @@ func TestGetField(t *testing.T) {
 	source := "null.bogus;"
 	fail(t, source,
 		g.NullValueError(),
-		[]string{"    at line 1"})
+		[]string{"    at foo.glm:1"})
 
 	err := g.NoSuchFieldError("bogus")
 
@@ -787,7 +787,7 @@ try {
 	fail(t, source,
 		g.DivideByZeroError(),
 		[]string{
-			"    at line 4"})
+			"    at foo.glm:4"})
 
 	source = `
 let a = 1;
@@ -804,7 +804,7 @@ try {
 	fail(t, source,
 		g.DivideByZeroError(),
 		[]string{
-			"    at line 5"})
+			"    at foo.glm:5"})
 
 	source = `
 let a = 1;
@@ -823,7 +823,7 @@ try {
 	fail(t, source,
 		g.DivideByZeroError(),
 		[]string{
-			"    at line 6"})
+			"    at foo.glm:6"})
 
 	source = `
 let a = 1
@@ -852,8 +852,8 @@ try {
 	fail(t, source,
 		g.DivideByZeroError(),
 		[]string{
-			"    at line 6",
-			"    at line 15"})
+			"    at foo.glm:6",
+			"    at foo.glm:15"})
 
 	source = `
 let b = fn() {
@@ -896,7 +896,7 @@ try {
 	fail(t, source,
 		g.ArityMismatchError("1", 3),
 		[]string{
-			"    at line 3"})
+			"    at foo.glm:3"})
 
 	source = `
 try {
@@ -908,7 +908,7 @@ try {
 	fail(t, source,
 		g.DivideByZeroError(),
 		[]string{
-			"    at line 5"})
+			"    at foo.glm:5"})
 }
 
 func TestCatch(t *testing.T) {
@@ -919,7 +919,7 @@ try {
 } catch e {
     assert(e.kind == "DivideByZero");
     assert(!(e has "msg"));
-    assert(e.stackTrace == ['    at line 3']);
+    assert(e.stackTrace == ['    at foo.glm:3']);
 }
 `
 	mod := newCompiler(source).Compile()
@@ -935,7 +935,7 @@ try {
 } catch e {
     assert(e.kind == "ArityMismatch");
     assert(e.msg == "Expected 1 params, got 0");
-    assert(e.stackTrace == ['    at line 6']);
+    assert(e.stackTrace == ['    at foo.glm:6']);
 }
 `
 	mod = newCompiler(source).Compile()
@@ -1043,7 +1043,7 @@ try {
     throw struct { foo: 'zork' };
 } catch e {
     assert(e.foo == 'zork');
-    assert(e.stackTrace == ['    at line 3']);
+    assert(e.stackTrace == ['    at foo.glm:3']);
 }
 `
 	mod := newCompiler(source).Compile()
@@ -1167,5 +1167,5 @@ func TestRawString(t *testing.T) {
 //	fail(t, source,
 //		g.UndefinedModuleError("bar"),
 //		[]string{
-//			"    at line 2"})
+//			"    at foo.glm:2"})
 //}

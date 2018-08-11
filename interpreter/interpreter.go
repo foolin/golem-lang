@@ -179,7 +179,7 @@ func (i *Interpreter) stackTrace() []string {
 	for j := n - 1; j >= 0; j-- {
 		tpl := i.frames[j].fn.Template()
 		lineNum := tpl.LineNumber(i.frames[j].ip)
-		stack = append(stack, fmt.Sprintf("    at line %d", lineNum))
+		stack = append(stack, fmt.Sprintf("    at %s:%d", tpl.ModulePath, lineNum))
 	}
 
 	return stack

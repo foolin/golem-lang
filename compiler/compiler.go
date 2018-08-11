@@ -136,6 +136,8 @@ func (c *compiler) compileFunc(fe *ast.FnExpr) *g.Template {
 
 	arity := len(fe.FormalParams)
 	tpl := &g.Template{
+		ModuleName:        c.modName,
+		ModulePath:        c.modPath,
 		Arity:             arity,
 		NumCaptures:       fe.Scope.NumCaptures(),
 		NumLocals:         fe.Scope.NumLocals(),

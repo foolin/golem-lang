@@ -32,14 +32,21 @@ func TestBytecodeFunc(t *testing.T) {
 
 func TestLineNumber(t *testing.T) {
 
-	tp := &Template{0, 0, 0, nil,
-		[]LineNumberEntry{
+	tp := &Template{
+		ModuleName:  "",
+		ModulePath:  "",
+		Arity:       0,
+		NumCaptures: 0,
+		NumLocals:   0,
+		OpCodes:     nil,
+		LineNumberTable: []LineNumberEntry{
 			{0, 0},
 			{1, 2},
 			{11, 3},
 			{20, 4},
 			{29, 0}},
-		nil}
+		ExceptionHandlers: nil,
+	}
 
 	tassert(t, tp.LineNumber(0) == 0)
 	tassert(t, tp.LineNumber(1) == 2)
