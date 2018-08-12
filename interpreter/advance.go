@@ -79,7 +79,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// pop the old frame
 		i.frames = i.frames[:frameIndex]
 
-		// IfStmt we are on the last frame, then we are done.
+		// If we are on the last frame, then we are done.
 		if frameIndex == lastFrame {
 			return result, nil
 		}
@@ -511,13 +511,13 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		panic("TODO")
 
-		//// get the module name from the pool.Constants
+		//// get the module name from the pool
 		//idx := index(opc, f.ip)
 		//name, ok := pool.Constants[idx].(g.Str)
 		//assert(ok)
 
 		//// Lookup the module.
-		//mod, err := i.resolveImport(i.homePath, name.String())
+		//mod, err := i.lookupModule(name.String())
 		//if err != nil {
 		//	return nil, err
 		//}

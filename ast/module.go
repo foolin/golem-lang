@@ -8,6 +8,5 @@ package ast
 type Module struct {
 	Name     string
 	Path     string
-	Imports  []*ImportStmt
 	InitFunc *FnExpr
 }

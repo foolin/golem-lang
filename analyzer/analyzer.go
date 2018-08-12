@@ -32,11 +32,6 @@ func NewAnalyzer(mod *ast.Module) Analyzer {
 // Analyze analyzes an AST.
 func (a *analyzer) Analyze() []error {
 
-	// visit imports
-	for _, imp := range a.mod.Imports {
-		a.visitImport(imp)
-	}
-
 	// visit InitFunc
 	a.visitBlock(a.mod.InitFunc.Body)
 

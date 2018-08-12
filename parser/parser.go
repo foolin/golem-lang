@@ -54,10 +54,10 @@ func (p *Parser) ParseModule() (mod *ast.Module, err error) {
 	p.next = p.advance()
 
 	// parse imports
-	imports := p.imports()
+	stmts := p.imports()
 
 	// parse the rest of the statements
-	stmts := p.statements(ast.EOF)
+	stmts = append(stmts, p.statements(ast.EOF)...)
 	p.expect(ast.EOF)
 
 	// create initialization function
@@ -77,15 +77,14 @@ func (p *Parser) ParseModule() (mod *ast.Module, err error) {
 	mod = &ast.Module{
 		Name:     p.scn.Name,
 		Path:     p.scn.Path,
-		Imports:  imports,
 		InitFunc: initFunc,
 	}
 	return
 }
 
-func (p *Parser) imports() []*ast.ImportStmt {
+func (p *Parser) imports() []ast.Statement {
 
-	imports := []*ast.ImportStmt{}
+	stmts := []ast.Statement{}
 
 	for {
 		if p.cur.token.Kind != ast.Import {
@@ -117,13 +116,13 @@ func (p *Parser) imports() []*ast.ImportStmt {
 		}
 
 		p.expectStatementDelimiter()
-		imports = append(imports, &ast.ImportStmt{
+		stmts = append(stmts, &ast.ImportStmt{
 			Token:  tok,
 			Idents: idents,
 		})
 	}
 
-	return imports
+	return stmts
 }
 
 // Parse a sequence of statements or expressions.

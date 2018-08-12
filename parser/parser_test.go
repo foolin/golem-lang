@@ -835,13 +835,13 @@ func TestSpawn(t *testing.T) {
 
 func TestImport(t *testing.T) {
 	p := newParser("import a;")
-	ok(t, p, "fn() {  }")
+	ok(t, p, "fn() { import a; }")
 
 	p = newParser("import a; import b;let z = 3; ")
-	ok(t, p, "fn() { let z = 3; }")
+	ok(t, p, "fn() { import a; import b; let z = 3; }")
 
 	p = newParser("import a, b,c")
-	ok(t, p, "fn() {  }")
+	ok(t, p, "fn() { import a, b, c; }")
 
 	p = newParser("let z = 3; import a;")
 	fail(t, p, "Unexpected Token 'import' at foo.glm:1:12")

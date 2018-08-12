@@ -324,6 +324,7 @@ func (c *compiler) visitDecls(decls []*ast.DeclNode) {
 func (c *compiler) visitImport(imp *ast.ImportStmt) {
 
 	for _, ident := range imp.Idents {
+
 		// push the module onto the stack
 		sym := ident.Symbol.Text
 		c.pushIndex(

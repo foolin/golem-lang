@@ -68,7 +68,7 @@ func (r *Ref) String() string {
 // Pool
 //--------------------------------------------------------------
 
-// Pool is a pool of constants, function templates, and struct definitions
+// Pool is a pool of the constants, function templates, and struct definitions
 // used by a given Module.  Pools are created at compile time, and
 // are immutable at run time.
 type Pool struct {
