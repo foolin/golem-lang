@@ -18,7 +18,6 @@ import (
 type Interpreter struct {
 	homePath   string
 	mod        *g.Module
-	pool       *g.Pool
 	builtInMgr g.BuiltinManager
 	frames     []*frame
 }
@@ -27,13 +26,11 @@ type Interpreter struct {
 func NewInterpreter(
 	homePath string,
 	builtInMgr g.BuiltinManager,
-	mod *g.Module,
-	pool *g.Pool) *Interpreter {
+	mod *g.Module) *Interpreter {
 
 	return &Interpreter{
 		homePath:   homePath,
 		mod:        mod,
-		pool:       pool,
 		builtInMgr: builtInMgr,
 		frames:     []*frame{},
 	}
@@ -43,7 +40,7 @@ func NewInterpreter(
 func (i *Interpreter) Init() (g.Value, g.Error) {
 
 	// the init function is always the first template
-	initTpl := i.pool.Templates[0]
+	initTpl := i.mod.Pool.Templates[0]
 
 	// create empty locals
 	i.mod.Refs = newLocals(initTpl.NumLocals, nil)
@@ -185,7 +182,7 @@ func (i *Interpreter) stackTrace() []string {
 	for j := n - 1; j >= 0; j-- {
 		tpl := i.frames[j].fn.Template()
 		lineNum := tpl.LineNumber(i.frames[j].ip)
-		stack = append(stack, fmt.Sprintf("    at %s:%d", tpl.ModulePath, lineNum))
+		stack = append(stack, fmt.Sprintf("    at %s:%d", tpl.Module.Path, lineNum))
 	}
 
 	return stack

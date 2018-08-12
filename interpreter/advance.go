@@ -15,8 +15,10 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 	frameIndex := len(i.frames) - 1
 	f := i.frames[frameIndex]
-	n := len(f.stack) - 1
+
+	n := len(f.stack) - 1 // top of stack
 	opc := f.fn.Template().OpCodes
+	pool := f.fn.Template().Module.Pool
 
 	switch opc[f.ip] {
 
@@ -102,7 +104,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			f.stack = f.stack[:n-idx]
 			f.ip += 3
 
-			intp := NewInterpreter(i.homePath, i.builtInMgr, i.mod, i.pool)
+			intp := NewInterpreter(i.homePath, i.builtInMgr, i.mod)
 			locals := newLocals(fn.Template().NumLocals, params)
 			go (func() {
 				_, errTrace := intp.eval(fn, locals)
@@ -141,7 +143,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		// push a function
 		idx := index(opc, f.ip)
-		tpl := i.pool.Templates[idx]
+		tpl := pool.Templates[idx]
 		nf := g.NewBytecodeFunc(tpl)
 		f.stack = append(f.stack, nf)
 		f.ip += 3
@@ -174,7 +176,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 	case o.DefineStruct:
 
-		defs := i.pool.StructDefs[index(opc, f.ip)]
+		defs := pool.StructDefs[index(opc, f.ip)]
 		stc, err := g.DefineStruct(defs)
 		if err != nil {
 			return nil, err
@@ -272,7 +274,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case o.GetField:
 
 		idx := index(opc, f.ip)
-		key, ok := i.pool.Constants[idx].(g.Str)
+		key, ok := pool.Constants[idx].(g.Str)
 		assert(ok)
 
 		result, err := f.stack[n].GetField(i, key)
@@ -286,7 +288,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case o.InitField, o.SetField:
 
 		idx := index(opc, f.ip)
-		key, ok := i.pool.Constants[idx].(g.Str)
+		key, ok := pool.Constants[idx].(g.Str)
 		assert(ok)
 
 		// get struct from stack
@@ -318,7 +320,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case o.IncField:
 
 		idx := index(opc, f.ip)
-		key, ok := i.pool.Constants[idx].(g.Str)
+		key, ok := pool.Constants[idx].(g.Str)
 		assert(ok)
 
 		// get struct from stack
@@ -509,9 +511,9 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		panic("TODO")
 
-		//// get the module name from the i.pool.Constants
+		//// get the module name from the pool.Constants
 		//idx := index(opc, f.ip)
-		//name, ok := i.pool.Constants[idx].(g.Str)
+		//name, ok := pool.Constants[idx].(g.Str)
 		//assert(ok)
 
 		//// Lookup the module.
@@ -531,7 +533,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 	case o.LoadConst:
 		idx := index(opc, f.ip)
-		f.stack = append(f.stack, i.pool.Constants[idx])
+		f.stack = append(f.stack, pool.Constants[idx])
 		f.ip += 3
 
 	case o.LoadLocal:

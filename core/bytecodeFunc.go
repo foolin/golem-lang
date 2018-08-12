@@ -94,8 +94,7 @@ func (f *bytecodeFunc) Invoke(cx Context, values []Value) (Value, Error) {
 // instance.  Templates are created at compile time, and
 // are immutable at run time.
 type FuncTemplate struct {
-	ModuleName        string
-	ModulePath        string
+	Module            *Module
 	Arity             int // TODO MinArity, MaxArity
 	NumCaptures       int
 	NumLocals         int

@@ -33,8 +33,7 @@ func TestBytecodeFunc(t *testing.T) {
 func TestLineNumber(t *testing.T) {
 
 	tp := &FuncTemplate{
-		ModuleName:  "",
-		ModulePath:  "",
+		Module:      nil,
 		Arity:       0,
 		NumCaptures: 0,
 		NumLocals:   0,

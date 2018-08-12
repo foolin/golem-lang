@@ -18,14 +18,13 @@ import (
 type Compiler interface {
 	ast.Visitor
 
-	Compile() (*g.Module, *g.Pool)
+	Compile() *g.Module
 }
 
 type compiler struct {
 	poolBuilder *poolBuilder
 	builtInMgr  g.BuiltinManager
-	modName     string
-	modPath     string
+	mod         *g.Module
 
 	funcs   []*ast.FnExpr
 	funcIdx int
@@ -38,14 +37,18 @@ type compiler struct {
 // NewCompiler creates a new Compiler
 func NewCompiler(
 	builtInMgr g.BuiltinManager,
-	mod *ast.Module) Compiler {
+	astMod *ast.Module) Compiler {
+
+	mod := &g.Module{
+		Name: astMod.Name,
+		Path: astMod.Path,
+	}
 
 	return &compiler{
 		builtInMgr:  builtInMgr,
 		poolBuilder: newPoolBuilder(),
-		modName:     mod.Name,
-		modPath:     mod.Path,
-		funcs:       []*ast.FnExpr{mod.InitFunc},
+		mod:         mod,
+		funcs:       []*ast.FnExpr{astMod.InitFunc},
 		funcIdx:     0,
 		opc:         nil,
 		lnum:        nil,
@@ -54,7 +57,7 @@ func NewCompiler(
 }
 
 // Compile compiles a Module
-func (c *compiler) Compile() (*g.Module, *g.Pool) {
+func (c *compiler) Compile() *g.Module {
 
 	// compile all the funcs
 	for c.funcIdx < len(c.funcs) {
@@ -63,18 +66,12 @@ func (c *compiler) Compile() (*g.Module, *g.Pool) {
 	}
 
 	// done
-	mod := &g.Module{
-		Name:     c.modName,
-		Path:     c.modPath,
-		Contents: nil,
-		Refs:     nil,
-	}
-	mod.Contents = c.makeModuleContents(mod)
-
-	return mod, c.poolBuilder.build()
+	c.mod.Pool = c.poolBuilder.build()
+	c.mod.Contents = c.makeModuleContents()
+	return c.mod
 }
 
-func (c *compiler) makeModuleContents(mod *g.Module) g.Struct {
+func (c *compiler) makeModuleContents() g.Struct {
 
 	entries := []g.Field{}
 	stmts := c.funcs[0].Body.Statements
@@ -84,18 +81,18 @@ func (c *compiler) makeModuleContents(mod *g.Module) g.Struct {
 			for _, d := range t.Decls {
 				vbl := d.Ident.Variable
 				entries = append(entries, c.makeModuleProperty(
-					mod, d.Ident.Symbol.Text, vbl.Index(), vbl.IsConst()))
+					d.Ident.Symbol.Text, vbl.Index(), vbl.IsConst()))
 			}
 		case *ast.ConstStmt:
 			for _, d := range t.Decls {
 				vbl := d.Ident.Variable
 				entries = append(entries, c.makeModuleProperty(
-					mod, d.Ident.Symbol.Text, vbl.Index(), vbl.IsConst()))
+					d.Ident.Symbol.Text, vbl.Index(), vbl.IsConst()))
 			}
 		case *ast.NamedFnStmt:
 			vbl := t.Ident.Variable
 			entries = append(entries, c.makeModuleProperty(
-				mod, t.Ident.Symbol.Text, vbl.Index(), vbl.IsConst()))
+				t.Ident.Symbol.Text, vbl.Index(), vbl.IsConst()))
 		}
 	}
 
@@ -105,14 +102,13 @@ func (c *compiler) makeModuleContents(mod *g.Module) g.Struct {
 }
 
 func (c *compiler) makeModuleProperty(
-	mod *g.Module,
 	name string,
 	refIndex int,
 	isConst bool) g.Field {
 
 	getter := g.NewNativeFunc0(
 		func(cx g.Context) (g.Value, g.Error) {
-			return mod.Refs[refIndex].Val, nil
+			return c.mod.Refs[refIndex].Val, nil
 		})
 	if isConst {
 		prop, err := g.NewReadonlyNativeProperty(name, getter)
@@ -124,7 +120,7 @@ func (c *compiler) makeModuleProperty(
 
 	setter := g.NewNativeFuncValue(
 		func(cx g.Context, val g.Value) (g.Value, g.Error) {
-			mod.Refs[refIndex].Val = val
+			c.mod.Refs[refIndex].Val = val
 			return g.Null, nil
 		})
 	prop, err := g.NewNativeProperty(name, getter, setter)
@@ -138,8 +134,7 @@ func (c *compiler) compileFunc(fe *ast.FnExpr) *g.FuncTemplate {
 
 	arity := len(fe.FormalParams)
 	tpl := &g.FuncTemplate{
-		ModuleName:        c.modName,
-		ModulePath:        c.modPath,
+		Module:            c.mod,
 		Arity:             arity,
 		NumCaptures:       fe.Scope.NumCaptures(),
 		NumLocals:         fe.Scope.NumLocals(),

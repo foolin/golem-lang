@@ -22,8 +22,8 @@ func tassert(t *testing.T, flag bool) {
 }
 
 func okExpr(t *testing.T, source string, expect g.Value) {
-	mod, pool := newCompiler(source).Compile()
-	intp := NewInterpreter(".", builtinMgr, mod, pool)
+	mod := newCompiler(source).Compile()
+	intp := NewInterpreter(".", builtinMgr, mod)
 
 	result, err := intp.Init()
 	if err != nil {
@@ -51,8 +51,8 @@ func okRef(t *testing.T, intp *Interpreter, ref *g.Ref, expect g.Value) {
 }
 
 func okMod(t *testing.T, source string, expectResult g.Value, expectRefs []*g.Ref) {
-	mod, pool := newCompiler(source).Compile()
-	intp := NewInterpreter(".", builtinMgr, mod, pool)
+	mod := newCompiler(source).Compile()
+	intp := NewInterpreter(".", builtinMgr, mod)
 
 	result, err := intp.Init()
 	if err != nil {
@@ -74,8 +74,8 @@ func okMod(t *testing.T, source string, expectResult g.Value, expectRefs []*g.Re
 
 func failExpr(t *testing.T, source string, expect string) {
 
-	mod, pool := newCompiler(source).Compile()
-	intp := NewInterpreter(".", builtinMgr, mod, pool)
+	mod := newCompiler(source).Compile()
+	intp := NewInterpreter(".", builtinMgr, mod)
 
 	result, err := intp.Init()
 	if result != nil {
@@ -89,8 +89,8 @@ func failExpr(t *testing.T, source string, expect string) {
 
 func fail(t *testing.T, source string, err g.Error, stack []string) *g.Module {
 
-	mod, pool := newCompiler(source).Compile()
-	intp := NewInterpreter(".", builtinMgr, mod, pool)
+	mod := newCompiler(source).Compile()
+	intp := NewInterpreter(".", builtinMgr, mod)
 
 	expect := intp.makeErrorTrace(err, stack)
 
@@ -108,8 +108,8 @@ func fail(t *testing.T, source string, err g.Error, stack []string) *g.Module {
 
 func failErr(t *testing.T, source string, expect g.Error) {
 
-	mod, pool := newCompiler(source).Compile()
-	intp := NewInterpreter(".", builtinMgr, mod, pool)
+	mod := newCompiler(source).Compile()
+	intp := NewInterpreter(".", builtinMgr, mod)
 
 	result, err := intp.Init()
 	if result != nil {
@@ -172,8 +172,8 @@ func newCompiler(source string) compiler.Compiler {
 //	}
 //}
 
-func interpret(mod *g.Module, pool *g.Pool) *Interpreter {
-	intp := NewInterpreter(".", builtinMgr, mod, pool)
+func interpret(mod *g.Module) *Interpreter {
+	intp := NewInterpreter(".", builtinMgr, mod)
 	_, err := intp.Init()
 	if err != nil {
 		fmt.Printf("%v\n", err)
@@ -355,7 +355,7 @@ func TestWhile(t *testing.T) {
 	//    if (a == 4) { a = a + 2; break; }
 	//    a = a + 1;
 	//}`
-	//	mod, pool := newCompiler(source).Compile()
+	//	mod :=  newCompiler(source).Compile()
 	//	fmt.Println("----------------------------")
 	//	fmt.Println(source)
 	//	fmt.Println(mod)
@@ -408,8 +408,8 @@ let x = struct { a: 0 }
 let y = struct { a: 1, b: 2 }
 let z = struct { a: 3, b: 4, c: struct { d: 5 } }
 `
-	mod, pool := newCompiler(source).Compile()
-	i := interpret(mod, pool)
+	mod := newCompiler(source).Compile()
+	i := interpret(mod)
 
 	okRef(t, i, mod.Refs[0], newStruct([]g.Field{}))
 	okRef(t, i, mod.Refs[1], newStruct([]g.Field{
@@ -428,8 +428,8 @@ let x = struct { a: 5 }
 let y = x.a
 x.a = 6
 `
-	mod, pool = newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod = newCompiler(source).Compile()
+	interpret(mod)
 
 	okRef(t, i, mod.Refs[0], newStruct([]g.Field{
 		g.NewField("a", false, g.NewInt(6))}))
@@ -445,12 +445,12 @@ let a = struct {
 let b = a.plus()
 let c = a.minus()
 	`
-	mod, pool = newCompiler(source).Compile()
+	mod = newCompiler(source).Compile()
 	fmt.Println("----------------------------")
 	fmt.Println(source)
 	fmt.Println(mod)
 
-	interpret(mod, pool)
+	interpret(mod)
 	okRef(t, i, mod.Refs[2], g.NewInt(13))
 	okRef(t, i, mod.Refs[3], g.NewInt(3))
 
@@ -458,8 +458,8 @@ let c = a.minus()
 let a = null
 a = struct { x: 8 }.x = 5
 `
-	mod, pool = newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod = newCompiler(source).Compile()
+	interpret(mod)
 
 	okRef(t, i, mod.Refs[0], g.NewInt(5))
 
@@ -472,8 +472,8 @@ let b = struct { x: this has 'x', y: this has 'z' }
 assert(b.x)
 assert(!b.y)
 `
-	mod, pool = newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod = newCompiler(source).Compile()
+	interpret(mod)
 }
 
 func TestErrStack(t *testing.T) {
@@ -508,8 +508,8 @@ let b = 20
 let c = a++
 let d = b--
 `
-	mod, pool := newCompiler(source).Compile()
-	i := interpret(mod, pool)
+	mod := newCompiler(source).Compile()
+	i := interpret(mod)
 
 	okRef(t, i, mod.Refs[0], g.NewInt(11))
 	okRef(t, i, mod.Refs[1], g.NewInt(19))
@@ -522,8 +522,8 @@ let b = struct { y: 20 }
 let c = a.x++
 let d = b.y--
 `
-	mod, pool = newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod = newCompiler(source).Compile()
+	interpret(mod)
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
@@ -543,8 +543,8 @@ func TestTernaryIf(t *testing.T) {
 let a = true ? 3 : 4;
 let b = false ? 5 : 6;
 `
-	mod, pool := newCompiler(source).Compile()
-	i := interpret(mod, pool)
+	mod := newCompiler(source).Compile()
+	i := interpret(mod)
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
@@ -578,8 +578,8 @@ println(a,b);
 assert(print == print);
 assert(print != println);
 `
-	mod, pool := newCompiler(source).Compile()
-	i := interpret(mod, pool)
+	mod := newCompiler(source).Compile()
+	i := interpret(mod)
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
@@ -593,8 +593,8 @@ assert(print != println);
 	source = `
 let a = assert(true);
 `
-	mod, pool = newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod = newCompiler(source).Compile()
+	interpret(mod)
 	okRef(t, i, mod.Refs[0], g.True)
 
 	fail(t, "assert(1, 2);",
@@ -619,8 +619,8 @@ func TestDecl(t *testing.T) {
 let a, b = 0;
 const c = 1, d;
 `
-	mod, pool := newCompiler(source).Compile()
-	i := interpret(mod, pool)
+	mod := newCompiler(source).Compile()
+	i := interpret(mod)
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
@@ -641,8 +641,8 @@ for n in [1,2,3] {
 }
 assert(a == 6);
 `
-	mod, pool := newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod := newCompiler(source).Compile()
+	interpret(mod)
 
 	source = `
 let keys = '';
@@ -654,8 +654,8 @@ for (k, v)  in dict {'a': 1, 'b': 2, 'c': 3} {
 assert(keys == 'bac');
 assert(values == 6);
 `
-	mod, pool = newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod = newCompiler(source).Compile()
+	interpret(mod)
 
 	source = `
 let entries = '';
@@ -664,8 +664,8 @@ for e in dict {'a': 1, 'b': 2, 'c': 3} {
 }
 assert(entries == '(b, 2)(a, 1)(c, 3)');
 `
-	mod, pool = newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod = newCompiler(source).Compile()
+	interpret(mod)
 
 	source = `
 let keys = '';
@@ -677,8 +677,8 @@ for (k, v)  in [('a', 1), ('b', 2), ('c', 3)] {
 assert(keys == 'abc');
 assert(values == 6);
 `
-	mod, pool = newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod = newCompiler(source).Compile()
+	interpret(mod)
 
 	source = "for (k, v)  in [1, 2, 3] {}"
 	fail(t, source,
@@ -709,8 +709,8 @@ for i in range(0, 4) {
 }
 assert(s == 'abbc')
 `
-	mod, pool := newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod := newCompiler(source).Compile()
+	interpret(mod)
 
 	source = `
 let s = ''
@@ -725,8 +725,8 @@ for i in range(0, 4) {
 }
 assert(s == 'aab')
 `
-	mod, pool = newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod = newCompiler(source).Compile()
+	interpret(mod)
 
 	source = `
 let s = ''
@@ -741,8 +741,8 @@ for i in range(0, 4) {
 }
 assert(s == 'aab')
 `
-	mod, pool = newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod = newCompiler(source).Compile()
+	interpret(mod)
 }
 
 func TestGetField(t *testing.T) {
@@ -843,7 +843,7 @@ try {
     a++
 }
 `
-	//mod, pool = newCompiler(source).Compile()
+	//mod = newCompiler(source).Compile()
 	//fmt.Println("----------------------------")
 	//fmt.Println(source)
 	//fmt.Println(mod)
@@ -864,8 +864,8 @@ let b = fn() {
 };
 assert(b() == 1);
 `
-	mod, pool := newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod := newCompiler(source).Compile()
+	interpret(mod)
 
 	source = `
 let a = 1;
@@ -883,8 +883,8 @@ let b = fn() {
 assert(b() == 1);
 assert(a == 1);
 `
-	mod, pool = newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod = newCompiler(source).Compile()
+	interpret(mod)
 
 	source = `
 try {
@@ -921,8 +921,8 @@ try {
     assert(e.stackTrace == ['    at foo.glm:3']);
 }
 `
-	mod, pool := newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod := newCompiler(source).Compile()
+	interpret(mod)
 
 	source = `
 try {
@@ -937,8 +937,8 @@ try {
     assert(e.stackTrace == ['    at foo.glm:6']);
 }
 `
-	mod, pool = newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod = newCompiler(source).Compile()
+	interpret(mod)
 
 	source = `
 let a = 0;
@@ -956,8 +956,8 @@ try {
 assert(a == 1);
 assert(b == 2);
 `
-	mod, pool = newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod = newCompiler(source).Compile()
+	interpret(mod)
 
 	source = `
 try {
@@ -975,8 +975,8 @@ try {
     assert(e.msg == "Expected Hashable Type")
 }
 `
-	mod, pool = newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod = newCompiler(source).Compile()
+	interpret(mod)
 
 }
 
@@ -993,8 +993,8 @@ try {
 }
 assert(a == 2);
 `
-	mod, pool := newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod := newCompiler(source).Compile()
+	interpret(mod)
 
 	source = `
 let a = 0;
@@ -1011,8 +1011,8 @@ let b = f();
 assert(b == 1);
 assert(a == 2);
 `
-	mod, pool = newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod = newCompiler(source).Compile()
+	interpret(mod)
 
 	source = `
 let a = 0
@@ -1031,8 +1031,8 @@ try {
 assert(a == 1)
 assert(b == 2)
 `
-	mod, pool = newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod = newCompiler(source).Compile()
+	interpret(mod)
 }
 
 func TestThrow(t *testing.T) {
@@ -1045,8 +1045,8 @@ try {
     assert(e.stackTrace == ['    at foo.glm:3']);
 }
 `
-	mod, pool := newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod := newCompiler(source).Compile()
+	interpret(mod)
 }
 
 func TestIntrinsicAssign(t *testing.T) {
@@ -1058,8 +1058,8 @@ try {
     assert(e.msg == "Expected Struct");
 }
 `
-	mod, pool := newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod := newCompiler(source).Compile()
+	interpret(mod)
 }
 
 func okVal(t *testing.T, val g.Value, err g.Error, expect g.Value) {
@@ -1091,8 +1091,8 @@ let a = 0;
 const b = 1;
 fn main(args) {}
 `
-	mod, pool := newCompiler(source).Compile()
-	i := interpret(mod, pool)
+	mod := newCompiler(source).Compile()
+	i := interpret(mod)
 	tassert(t, reflect.DeepEqual(mod.Contents.FieldNames(), []string{"b", "a", "main"}))
 
 	v, err := mod.Contents.GetField(i, g.NewStr("a"))
@@ -1132,8 +1132,8 @@ assert(
     [type(dict{}), type(set{}), type(struct{}), type(chan())] ==
     ["Dict", "Set", "Struct", "Chan"]);
 `
-	mod, pool := newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod := newCompiler(source).Compile()
+	interpret(mod)
 }
 
 func TestRawString(t *testing.T) {
@@ -1148,8 +1148,8 @@ func TestRawString(t *testing.T) {
 			"\tassert(s[4:6] == 'cd')\n" +
 			"\tassert(s[7:-1] == 'efgh')"
 
-	mod, pool := newCompiler(source).Compile()
-	interpret(mod, pool)
+	mod := newCompiler(source).Compile()
+	interpret(mod)
 }
 
 //func TestImport(t *testing.T) {
@@ -1157,8 +1157,8 @@ func TestRawString(t *testing.T) {
 //import foo
 //assert(foo.a == 1)
 //`
-//	mod, pool := newCompiler(source).Compile()
-//	interpret(mod, pool)
+//	mod :=  newCompiler(source).Compile()
+//	interpret(mod)
 //
 //	source = `
 //import foo, bar

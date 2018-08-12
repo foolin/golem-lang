@@ -169,10 +169,10 @@ func main() {
 
 	// compile
 	cmp := compiler.NewCompiler(builtinMgr, astMod)
-	mod, pool := cmp.Compile()
+	mod := cmp.Compile()
 
 	// interpret with modules from standard library
-	intp := interpreter.NewInterpreter(homePath, builtinMgr, mod, pool)
+	intp := interpreter.NewInterpreter(homePath, builtinMgr, mod)
 	_, err := intp.Init()
 	if err != nil {
 		dumpError(intp, err)
