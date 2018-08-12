@@ -11,15 +11,16 @@ import (
 
 func TestStruct(t *testing.T) {
 
-	errors := newAnalyzer("this").Analyze()
+	mod := newModule("this")
+	errors := NewAnalyzer(mod).Analyze()
 	fail(t, errors, "['this' outside of struct, at foo.glm:1:1]")
 
 	source := `
 struct{ }
 `
-	anl := newAnalyzer(source)
-	errors = anl.Analyze()
-	ok(t, anl, errors, `
+	mod = newModule(source)
+	errors = NewAnalyzer(mod).Analyze()
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:0)
 .   BlockNode(Scope defs:{})
 .   .   ExprStmt
@@ -29,9 +30,9 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:0)
 	source = `
 struct{ a: 1 }
 `
-	anl = newAnalyzer(source)
-	errors = anl.Analyze()
-	ok(t, anl, errors, `
+	mod = newModule(source)
+	errors = NewAnalyzer(mod).Analyze()
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:0)
 .   BlockNode(Scope defs:{})
 .   .   ExprStmt
@@ -42,9 +43,9 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:0)
 	source = `
 struct{ a: this }
 `
-	anl = newAnalyzer(source)
-	errors = anl.Analyze()
-	ok(t, anl, errors, `
+	mod = newModule(source)
+	errors = NewAnalyzer(mod).Analyze()
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:1)
 .   BlockNode(Scope defs:{})
 .   .   ExprStmt
@@ -55,9 +56,9 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:1)
 	source = `
 struct{ a: struct { b: this } }
 `
-	anl = newAnalyzer(source)
-	errors = anl.Analyze()
-	ok(t, anl, errors, `
+	mod = newModule(source)
+	errors = NewAnalyzer(mod).Analyze()
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:1)
 .   BlockNode(Scope defs:{})
 .   .   ExprStmt
@@ -69,9 +70,9 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:1)
 	source = `
 struct{ a: struct { b: 1 }, c: this.a }
 `
-	anl = newAnalyzer(source)
-	errors = anl.Analyze()
-	ok(t, anl, errors, `
+	mod = newModule(source)
+	errors = NewAnalyzer(mod).Analyze()
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:1)
 .   BlockNode(Scope defs:{})
 .   .   ExprStmt
@@ -85,9 +86,9 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:1)
 	source = `
 struct{ a: struct { b: this }, c: this }
 `
-	anl = newAnalyzer(source)
-	errors = anl.Analyze()
-	ok(t, anl, errors, `
+	mod = newModule(source)
+	errors = NewAnalyzer(mod).Analyze()
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   BlockNode(Scope defs:{})
 .   .   ExprStmt
@@ -100,9 +101,9 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 	source = `
 struct{ a: this, b: struct { c: this } }
 `
-	anl = newAnalyzer(source)
-	errors = anl.Analyze()
-	ok(t, anl, errors, `
+	mod = newModule(source)
+	errors = NewAnalyzer(mod).Analyze()
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   BlockNode(Scope defs:{})
 .   .   ExprStmt
@@ -122,10 +123,10 @@ let a = struct {
 let b = a.plus()
 let c = a.minus()
 `
-	anl = newAnalyzer(source)
-	errors = anl.Analyze()
+	mod = newModule(source)
+	errors = NewAnalyzer(mod).Analyze()
 
-	ok(t, anl, errors, `
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:4)
 .   BlockNode(Scope defs:{a: v(3: a,1,false,false), b: v(4: b,2,false,false), c: v(5: c,3,false,false)})
 .   .   LetStmt
@@ -169,10 +170,10 @@ struct {
 	b: prop { || => y, |v| => y = v }
 }
 `
-	anl = newAnalyzer(source)
-	errors = anl.Analyze()
+	mod = newModule(source)
+	errors = NewAnalyzer(mod).Analyze()
 
-	ok(t, anl, errors, `
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   BlockNode(Scope defs:{x: v(0: x,0,false,false), y: v(1: y,1,false,false)})
 .   .   LetStmt
@@ -210,14 +211,14 @@ let u = struct {
 }
 println(u)
 `
-	anl = newAnalyzer(source)
-	errors = anl.Analyze()
+	mod = newModule(source)
+	errors = NewAnalyzer(mod).Analyze()
 
 	//println(source)
 	//println(ast.Dump(anl.Module()))
 	//println(errors)
 
-	ok(t, anl, errors, `
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:3)
 .   BlockNode(Scope defs:{u: v(4: u,2,false,false), x: v(0: x,0,false,false)})
 .   .   LetStmt

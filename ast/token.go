@@ -131,7 +131,6 @@ const (
 
 	Go
 
-	Module
 	Import
 
 	Reserved
@@ -289,8 +288,6 @@ func (t TokenKind) String() string {
 	case Go:
 		return "Go"
 
-	case Module:
-		return "Module"
 	case Import:
 		return "Import"
 

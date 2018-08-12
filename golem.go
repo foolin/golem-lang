@@ -158,7 +158,7 @@ func main() {
 	}
 
 	// analyze
-	anl := analyzer.NewAnalyzer(source.name, source.path, astMod)
+	anl := analyzer.NewAnalyzer(astMod)
 	errors := anl.Analyze()
 	if len(errors) > 0 {
 		for _, e := range errors {
@@ -168,7 +168,7 @@ func main() {
 	}
 
 	// compile
-	cmp := compiler.NewCompiler(builtinMgr, source.name, source.path, anl.Module())
+	cmp := compiler.NewCompiler(builtinMgr, astMod)
 	mod, pool := cmp.Compile()
 
 	// interpret with modules from standard library

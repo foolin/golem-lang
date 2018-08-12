@@ -35,7 +35,7 @@ func NewParser(scn *scanner.Scanner, isBuiltIn func(string) bool) *Parser {
 }
 
 // ParseModule parses a Golem module
-func (p *Parser) ParseModule() (fn *ast.FnExpr, err error) {
+func (p *Parser) ParseModule() (mod *ast.Module, err error) {
 
 	// In a recursive descent parser, errors can be generated deep
 	// in the call stack.  We are going to use panic-recover to handle them.
@@ -44,7 +44,7 @@ func (p *Parser) ParseModule() (fn *ast.FnExpr, err error) {
 			if _, ok := r.(runtime.Error); ok {
 				panic(r)
 			}
-			fn = nil
+			mod = nil
 			err = r.(error)
 		}
 	}()
@@ -54,30 +54,38 @@ func (p *Parser) ParseModule() (fn *ast.FnExpr, err error) {
 	p.next = p.advance()
 
 	// parse imports
-	stmts := p.imports()
+	imports := p.imports()
 
-	// parse the module
-	stmts = append(stmts, p.statements(ast.EOF)...)
+	// parse the rest of the statements
+	stmts := p.statements(ast.EOF)
 	p.expect(ast.EOF)
 
-	params := []*ast.FormalParam{}
-	block := &ast.BlockNode{
-		LBrace:     nil,
-		Statements: stmts,
-		RBrace:     nil,
-		Scope:      ast.NewScope(),
-	}
-	return &ast.FnExpr{
+	// create initialization function
+	initFunc := &ast.FnExpr{
 		Token:        nil,
-		FormalParams: params,
-		Body:         block,
-		Scope:        ast.NewFuncScope(),
-	}, err
+		FormalParams: []*ast.FormalParam{},
+		Body: &ast.BlockNode{
+			LBrace:     nil,
+			Statements: stmts,
+			RBrace:     nil,
+			Scope:      ast.NewScope(),
+		},
+		Scope: ast.NewFuncScope(),
+	}
+
+	// done
+	mod = &ast.Module{
+		Name:     p.scn.Name,
+		Path:     p.scn.Path,
+		Imports:  imports,
+		InitFunc: initFunc,
+	}
+	return
 }
 
-func (p *Parser) imports() []ast.Statement {
+func (p *Parser) imports() []*ast.ImportStmt {
 
-	stmts := []ast.Statement{}
+	imports := []*ast.ImportStmt{}
 
 	for {
 		if p.cur.token.Kind != ast.Import {
@@ -109,13 +117,13 @@ func (p *Parser) imports() []ast.Statement {
 		}
 
 		p.expectStatementDelimiter()
-		stmts = append(stmts, &ast.ImportStmt{
+		imports = append(imports, &ast.ImportStmt{
 			Token:  tok,
 			Idents: idents,
 		})
 	}
 
-	return stmts
+	return imports
 }
 
 // Parse a sequence of statements or expressions.

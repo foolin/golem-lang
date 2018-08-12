@@ -12,14 +12,14 @@ import (
 	"testing"
 )
 
-func ok(t *testing.T, anl Analyzer, errors []error, dump string) {
+func ok(t *testing.T, mod *ast.Module, errors []error, dump string) {
 
 	if len(errors) != 0 {
 		t.Error(errors)
 	}
 
-	if "\n"+ast.Dump(anl.Module()) != dump {
-		t.Error("\n"+ast.Dump(anl.Module()), " != ", dump)
+	if "\n"+ast.Dump(mod.InitFunc) != dump {
+		t.Error("\n"+ast.Dump(mod.InitFunc), " != ", dump)
 	}
 
 }
@@ -49,7 +49,7 @@ var isBuiltIn = func(s string) bool {
 	return ok
 }
 
-func newAnalyzer(source string) Analyzer {
+func newModule(source string) *ast.Module {
 
 	ast.InternalResetDebugging()
 
@@ -59,14 +59,15 @@ func newAnalyzer(source string) Analyzer {
 	if err != nil {
 		panic("analyzer_test: could not parse")
 	}
-	return NewAnalyzer("foo", "foo.glm", mod)
+
+	return mod
 }
 
 func TestFlat(t *testing.T) {
 
-	anl := newAnalyzer("let a = 1; const b = 2; a = b + 3;")
-	errors := anl.Analyze()
-	ok(t, anl, errors, `
+	mod := newModule("let a = 1; const b = 2; a = b + 3;")
+	errors := NewAnalyzer(mod).Analyze()
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   BlockNode(Scope defs:{a: v(0: a,0,false,false), b: v(1: b,1,true,false)})
 .   .   LetStmt
@@ -83,16 +84,16 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   .   .   .   .   BasicExpr(Int,"3")
 `)
 
-	errors = newAnalyzer("a;").Analyze()
+	errors = NewAnalyzer(newModule("a;")).Analyze()
 	fail(t, errors, "[Symbol 'a' is not defined, at foo.glm:1:1]")
 
-	errors = newAnalyzer("let a = 1;const a = 1;").Analyze()
+	errors = NewAnalyzer(newModule("let a = 1;const a = 1;")).Analyze()
 	fail(t, errors, "[Symbol 'a' is already defined, at foo.glm:1:17]")
 
-	errors = newAnalyzer("const a = 1;a = 1;").Analyze()
+	errors = NewAnalyzer(newModule("const a = 1;a = 1;")).Analyze()
 	fail(t, errors, "[Symbol 'a' is constant, at foo.glm:1:13]")
 
-	errors = newAnalyzer("a = a;").Analyze()
+	errors = NewAnalyzer(newModule("a = a;")).Analyze()
 	fail(t, errors, "[Symbol 'a' is not defined, at foo.glm:1:5 Symbol 'a' is not defined, at foo.glm:1:1]")
 }
 
@@ -107,10 +108,10 @@ if (true) {
     a = 3
     let b = 3
 }`
-	anl := newAnalyzer(source)
+	mod := newModule(source)
 
-	errors := anl.Analyze()
-	ok(t, anl, errors, `
+	errors := NewAnalyzer(mod).Analyze()
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:3)
 .   BlockNode(Scope defs:{a: v(0: a,0,false,false)})
 .   .   LetStmt
@@ -139,9 +140,9 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:3)
 
 func TestLoop(t *testing.T) {
 
-	anl := newAnalyzer("while true { 1 + 2; }")
-	errors := anl.Analyze()
-	ok(t, anl, errors, `
+	mod := newModule("while true { 1 + 2; }")
+	errors := NewAnalyzer(mod).Analyze()
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:0)
 .   BlockNode(Scope defs:{})
 .   .   WhileStmt
@@ -153,9 +154,9 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:0)
 .   .   .   .   .   .   BasicExpr(Int,"2")
 `)
 
-	anl = newAnalyzer("while true { 1 + 2; break; continue; }")
-	errors = anl.Analyze()
-	ok(t, anl, errors, `
+	mod = newModule("while true { 1 + 2; break; continue; }")
+	errors = NewAnalyzer(mod).Analyze()
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:0)
 .   BlockNode(Scope defs:{})
 .   .   WhileStmt
@@ -169,15 +170,15 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:0)
 .   .   .   .   ContinueStmt
 `)
 
-	errors = newAnalyzer("break;").Analyze()
+	errors = NewAnalyzer(newModule("break;")).Analyze()
 	fail(t, errors, "['break' outside of loop, at foo.glm:1:1]")
 
-	errors = newAnalyzer("continue;").Analyze()
+	errors = NewAnalyzer(newModule("continue;")).Analyze()
 	fail(t, errors, "['continue' outside of loop, at foo.glm:1:1]")
 
-	anl = newAnalyzer("let a; for b in [] { break; continue; }")
-	errors = anl.Analyze()
-	ok(t, anl, errors, `
+	mod = newModule("let a; for b in [] { break; continue; }")
+	errors = NewAnalyzer(mod).Analyze()
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:3)
 .   BlockNode(Scope defs:{a: v(0: a,0,false,false)})
 .   .   LetStmt
@@ -191,9 +192,9 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:3)
 .   .   .   .   ContinueStmt
 `)
 
-	anl = newAnalyzer("for (a, b) in [] { }")
-	errors = anl.Analyze()
-	ok(t, anl, errors, `
+	mod = newModule("for (a, b) in [] { }")
+	errors = NewAnalyzer(mod).Analyze()
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:3)
 .   BlockNode(Scope defs:{})
 .   .   ForStmt(Scope defs:{#iter0: v(2: #iter0,2,false,false), a: v(0: a,0,false,false), b: v(1: b,1,false,false)})
@@ -204,14 +205,14 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:3)
 .   .   .   BlockNode(Scope defs:{})
 `)
 
-	anl = newAnalyzer(`
+	mod = newModule(`
 for a in [] {
 	for b in [] {
 	}
 }
 `)
-	errors = anl.Analyze()
-	ok(t, anl, errors, `
+	errors = NewAnalyzer(mod).Analyze()
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:4)
 .   BlockNode(Scope defs:{})
 .   .   ForStmt(Scope defs:{#iter0: v(1: #iter0,1,false,false), a: v(0: a,0,false,false)})
@@ -226,13 +227,13 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:4)
 .   .   .   .   .   BlockNode(Scope defs:{})
 `)
 
-	anl = newAnalyzer(`
+	mod = newModule(`
 let a = 1
 for a in [] {
 }
 `)
-	errors = anl.Analyze()
-	ok(t, anl, errors, `
+	errors = NewAnalyzer(mod).Analyze()
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:3)
 .   BlockNode(Scope defs:{a: v(0: a,0,false,false)})
 .   .   LetStmt
@@ -261,10 +262,10 @@ y.z = x[2]++
 let g, h = 5
 const i = 6, j
 `
-	anl := newAnalyzer(source)
-	errors := anl.Analyze()
+	mod := newModule(source)
+	errors := NewAnalyzer(mod).Analyze()
 
-	ok(t, anl, errors, `
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:6)
 .   BlockNode(Scope defs:{g: v(2: g,2,false,false), h: v(3: h,3,false,false), i: v(4: i,4,true,false), j: v(5: j,5,true,false), x: v(0: x,0,false,false), y: v(1: y,1,false,false)})
 .   .   LetStmt
@@ -331,10 +332,10 @@ let b = ['x']
 b[0] = 3
 b[0]++
 `
-	anl := newAnalyzer(source)
-	errors := anl.Analyze()
+	mod := newModule(source)
+	errors := NewAnalyzer(mod).Analyze()
 
-	ok(t, anl, errors, `
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   BlockNode(Scope defs:{a: v(0: a,0,false,false), b: v(1: b,1,false,false)})
 .   .   LetStmt
@@ -364,10 +365,10 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 func TestTry(t *testing.T) {
 
 	source := "let a = 1; try { } catch e { } finally { }"
-	anl := newAnalyzer(source)
-	errors := anl.Analyze()
+	mod := newModule(source)
+	errors := NewAnalyzer(mod).Analyze()
 
-	ok(t, anl, errors, `
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   BlockNode(Scope defs:{a: v(0: a,0,false,false)})
 .   .   LetStmt
@@ -381,10 +382,10 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 `)
 
 	source = "let a = 1; try { } catch a { } finally { }"
-	anl = newAnalyzer(source)
-	errors = anl.Analyze()
+	mod = newModule(source)
+	errors = NewAnalyzer(mod).Analyze()
 
-	ok(t, anl, errors, `
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   BlockNode(Scope defs:{a: v(0: a,0,false,false)})
 .   .   LetStmt
@@ -400,16 +401,8 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 
 func TestFormalParams(t *testing.T) {
 
-	errors := newAnalyzer("fn(const a, b) { a = 1; };").Analyze()
+	errors := NewAnalyzer(newModule("fn(const a, b) { a = 1; };")).Analyze()
 	fail(t, errors, "[Symbol 'a' is constant, at foo.glm:1:18]")
-}
-
-func TestImport(t *testing.T) {
-	errors := newAnalyzer("import foo; let foo = 2;").Analyze()
-	fail(t, errors, "[Symbol 'foo' is already defined, at foo.glm:1:17]")
-
-	errors = newAnalyzer("import foo, zork; foo = 2;").Analyze()
-	fail(t, errors, "[Symbol 'foo' is constant, at foo.glm:1:19]")
 }
 
 func TestPureFunction(t *testing.T) {
@@ -426,10 +419,10 @@ let b = fn(x) {
     return c(3)
 }`
 
-	anl := newAnalyzer(source)
-	errors := anl.Analyze()
+	mod := newModule(source)
+	errors := NewAnalyzer(mod).Analyze()
 
-	ok(t, anl, errors, `
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   BlockNode(Scope defs:{a: v(0: a,0,false,false), b: v(6: b,1,false,false)})
 .   .   LetStmt
@@ -478,10 +471,10 @@ fn b() {
     return 42
 }
 `
-	anl := newAnalyzer(source)
-	errors := anl.Analyze()
+	mod := newModule(source)
+	errors := NewAnalyzer(mod).Analyze()
 
-	ok(t, anl, errors, `
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   BlockNode(Scope defs:{a: v(0: a,0,true,false), b: v(1: b,1,true,false)})
 .   .   NamedFnStmt
@@ -499,7 +492,7 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   .   .   .   .   .   BasicExpr(Int,"42")
 `)
 
-	errors = newAnalyzer("fn a() {}; const a = 1;").Analyze()
+	errors = NewAnalyzer(newModule("fn a() {}; const a = 1;")).Analyze()
 	fail(t, errors, "[Symbol 'a' is already defined, at foo.glm:1:18]")
 }
 
@@ -513,10 +506,10 @@ const accumGen = fn(n) {
     }
 }
 `
-	anl := newAnalyzer(source)
-	errors := anl.Analyze()
+	mod := newModule(source)
+	errors := NewAnalyzer(mod).Analyze()
 
-	ok(t, anl, errors, `
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:1)
 .   BlockNode(Scope defs:{accumGen: v(3: accumGen,0,true,false)})
 .   .   ConstStmt
@@ -548,10 +541,10 @@ const accumGen = fn(n) {
 	}
 }
 	`
-	anl = newAnalyzer(source)
-	errors = anl.Analyze()
+	mod = newModule(source)
+	errors = NewAnalyzer(mod).Analyze()
 
-	ok(t, anl, errors, `
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   BlockNode(Scope defs:{accumGen: v(6: accumGen,1,true,false), z: v(0: z,0,false,false)})
 .   .   LetStmt
@@ -592,10 +585,10 @@ fn foo() {
 }
 foo()
 `
-	anl = newAnalyzer(source)
-	errors = anl.Analyze()
+	mod = newModule(source)
+	errors = NewAnalyzer(mod).Analyze()
 
-	ok(t, anl, errors, `
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:3)
 .   BlockNode(Scope defs:{a: v(1: a,1,true,false), b: v(2: b,2,true,false), foo: v(0: foo,0,true,false)})
 .   .   ConstStmt
@@ -633,14 +626,14 @@ fn bar() {
 	let b = || => foo
 }
 `
-	anl = newAnalyzer(source)
-	errors = anl.Analyze()
+	mod = newModule(source)
+	errors = NewAnalyzer(mod).Analyze()
 
 	//println(source)
 	//println(ast.Dump(anl.Module()))
 	//println(errors)
 
-	ok(t, anl, errors, `
+	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   BlockNode(Scope defs:{bar: v(0: bar,0,true,false), foo: v(1: foo,1,true,false)})
 .   .   ConstStmt
@@ -663,4 +656,12 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   .   .   .   .   .   .   .   ExprStmt
 .   .   .   .   .   .   .   .   .   IdentExpr(foo,v(5: foo,0,true,true))
 `)
+}
+
+func TestImport(t *testing.T) {
+	errors := NewAnalyzer(newModule("import foo; let foo = 2;")).Analyze()
+	fail(t, errors, "[Symbol 'foo' is already defined, at foo.glm:1:17]")
+
+	errors = NewAnalyzer(newModule("import foo, zork; foo = 2;")).Analyze()
+	fail(t, errors, "[Symbol 'foo' is constant, at foo.glm:1:19]")
 }

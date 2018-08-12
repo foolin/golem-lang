@@ -310,7 +310,7 @@ func TestIdentOrKeyword(t *testing.T) {
 
 	s = NewScanner("", "", "go module import")
 	ok(t, s, ast.Go, "go", 1, 1)
-	ok(t, s, ast.Module, "module", 1, 4)
+	ok(t, s, ast.Reserved, "module", 1, 4)
 	ok(t, s, ast.Import, "import", 1, 11)
 	ok(t, s, ast.EOF, "", 1, 17)
 

@@ -393,8 +393,6 @@ func (s *Scanner) nextIdentOrKeyword() *ast.Token {
 		return &ast.Token{Kind: ast.Throw, Text: text, Position: pos}
 	case "go":
 		return &ast.Token{Kind: ast.Go, Text: text, Position: pos}
-	case "module":
-		return &ast.Token{Kind: ast.Module, Text: text, Position: pos}
 	case "import":
 		return &ast.Token{Kind: ast.Import, Text: text, Position: pos}
 	case "struct":
@@ -408,7 +406,7 @@ func (s *Scanner) nextIdentOrKeyword() *ast.Token {
 	case "has":
 		return &ast.Token{Kind: ast.Has, Text: text, Position: pos}
 
-	case "byte", "defer", "goto", "like", "native", "package",
+	case "module", "byte", "defer", "goto", "like", "native", "package",
 		"priv", "private", "prot", "protected", "pub", "public",
 		"rune", "select", "static", "sync", "rsync", "with", "yield":
 

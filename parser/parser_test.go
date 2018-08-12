@@ -18,8 +18,8 @@ func ok(t *testing.T, p *Parser, expect string) {
 	if err != nil {
 		t.Error(err, " != nil")
 		panic("ok")
-	} else if mod.String() != expect {
-		t.Error(mod, " != ", expect)
+	} else if mod.InitFunc.String() != expect {
+		t.Error(mod.InitFunc.String(), " != ", expect)
 		panic("ok")
 	}
 }
@@ -621,12 +621,12 @@ func okPos(t *testing.T, p *Parser, expectBegin ast.Pos, expectEnd ast.Pos) {
 		panic("okPos")
 	}
 
-	if len(mod.Body.Statements) != 1 {
-		t.Error("node count", len(mod.Body.Statements))
+	if len(mod.InitFunc.Body.Statements) != 1 {
+		t.Error("node count", len(mod.InitFunc.Body.Statements))
 		panic("okPos")
 	}
 
-	n := mod.Body.Statements[0]
+	n := mod.InitFunc.Body.Statements[0]
 	if n.Begin() != expectBegin {
 		t.Error(n.Begin(), " != ", expectBegin)
 		panic("okPos")
@@ -835,13 +835,13 @@ func TestSpawn(t *testing.T) {
 
 func TestImport(t *testing.T) {
 	p := newParser("import a;")
-	ok(t, p, "fn() { import a; }")
+	ok(t, p, "fn() {  }")
 
 	p = newParser("import a; import b;let z = 3; ")
-	ok(t, p, "fn() { import a; import b; let z = 3; }")
+	ok(t, p, "fn() { let z = 3; }")
 
 	p = newParser("import a, b,c")
-	ok(t, p, "fn() { import a, b, c; }")
+	ok(t, p, "fn() {  }")
 
 	p = newParser("let z = 3; import a;")
 	fail(t, p, "Unexpected Token 'import' at foo.glm:1:12")

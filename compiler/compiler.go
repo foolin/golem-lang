@@ -24,9 +24,9 @@ type Compiler interface {
 type compiler struct {
 	poolBuilder *poolBuilder
 	builtInMgr  g.BuiltinManager
+	modName     string
+	modPath     string
 
-	modName string
-	modPath string
 	funcs   []*ast.FnExpr
 	funcIdx int
 
@@ -38,18 +38,14 @@ type compiler struct {
 // NewCompiler creates a new Compiler
 func NewCompiler(
 	builtInMgr g.BuiltinManager,
-	modName string,
-	modPath string,
-	modInitFn *ast.FnExpr) Compiler {
-
-	// initialize
+	mod *ast.Module) Compiler {
 
 	return &compiler{
 		builtInMgr:  builtInMgr,
 		poolBuilder: newPoolBuilder(),
-		modName:     modName,
-		modPath:     modPath,
-		funcs:       []*ast.FnExpr{modInitFn},
+		modName:     mod.Name,
+		modPath:     mod.Path,
+		funcs:       []*ast.FnExpr{mod.InitFunc},
 		funcIdx:     0,
 		opc:         nil,
 		lnum:        nil,
