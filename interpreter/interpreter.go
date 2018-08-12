@@ -7,6 +7,7 @@ package interpreter
 import (
 	"fmt"
 
+	"github.com/mjarmy/golem-lang/compiler"
 	g "github.com/mjarmy/golem-lang/core"
 	o "github.com/mjarmy/golem-lang/core/opcodes"
 )
@@ -18,26 +19,32 @@ import (
 type Interpreter struct {
 	homePath   string
 	mod        *g.Module
+	pool       *compiler.Pool
 	builtInMgr g.BuiltinManager
-	//resolveImport func(homePath, name string) (g.Module, g.Error)
-	frames []*frame
+	frames     []*frame
 }
 
 // NewInterpreter creates a new Interpreter
 func NewInterpreter(
 	homePath string,
-	mod *g.Module,
 	builtInMgr g.BuiltinManager,
-	/*resolveImport func(homePath string, name string) (g.Module, g.Error)*/) *Interpreter {
+	mod *g.Module,
+	pool *compiler.Pool) *Interpreter {
 
-	return &Interpreter{homePath, mod, builtInMgr /*resolveImport,*/, []*frame{}}
+	return &Interpreter{
+		homePath:   homePath,
+		mod:        mod,
+		pool:       pool,
+		builtInMgr: builtInMgr,
+		frames:     []*frame{},
+	}
 }
 
 // Init initializes an interpreter, by interpreting its "init" function.
 func (i *Interpreter) Init() (g.Value, g.Error) {
 
 	// the init function is always the first template
-	initTpl := i.mod.Templates[0]
+	initTpl := i.pool.Templates[0]
 
 	// create empty locals
 	i.mod.Refs = newLocals(initTpl.NumLocals, nil)

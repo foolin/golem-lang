@@ -12,6 +12,7 @@ import (
 // Analyzer analyzes an AST.
 type Analyzer interface {
 	ast.Visitor
+	// this is the function that will initialize the module
 	Module() *ast.FnExpr
 	Analyze() []error
 }

@@ -148,10 +148,10 @@ func main() {
 	scanner := scanner.NewScanner(source.name, source.path, source.code)
 
 	// command line builtins
-	builtInMgr := g.NewBuiltinManager(g.CommandLineBuiltins)
+	builtinMgr := g.NewBuiltinManager(g.CommandLineBuiltins)
 
 	// parse
-	parser := parser.NewParser(scanner, builtInMgr.Contains)
+	parser := parser.NewParser(scanner, builtinMgr.Contains)
 	astMod, e := parser.ParseModule()
 	if e != nil {
 		abExit(e.Error())
@@ -168,11 +168,11 @@ func main() {
 	}
 
 	// compile
-	cmp := compiler.NewCompiler(source.name, source.path, anl.Module(), builtInMgr)
-	mod := cmp.Compile()
+	cmp := compiler.NewCompiler(builtinMgr, source.name, source.path, anl.Module())
+	mod, pool := cmp.Compile()
 
 	// interpret with modules from standard library
-	intp := interpreter.NewInterpreter(homePath, mod, builtInMgr /*, lookupModule*/)
+	intp := interpreter.NewInterpreter(homePath, builtinMgr, mod, pool)
 	_, err := intp.Init()
 	if err != nil {
 		dumpError(intp, err)

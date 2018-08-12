@@ -17,46 +17,53 @@ import (
 // Compiler compiles an AST into bytecode
 type Compiler interface {
 	ast.Visitor
-	Compile() *g.Module
+
+	Compile() (*g.Module, *Pool)
 }
 
 type compiler struct {
-	builtInMgr g.BuiltinManager
+	poolBuilder *poolBuilder
+	builtInMgr  g.BuiltinManager
 
-	pool     *g.HashMap
+	modName string
+	modPath string
+	funcs   []*ast.FnExpr
+	funcIdx int
+
 	opc      []byte
 	lnum     []g.LineNumberEntry
 	handlers []g.ExceptionHandler
-
-	modName    string
-	modPath    string
-	funcs      []*ast.FnExpr
-	templates  []*g.FuncTemplate
-	structDefs [][]*g.FieldDef
-	idx        int
 }
 
 // NewCompiler creates a new Compiler
-func NewCompiler(modName, modPath string, mod *ast.FnExpr, builtInMgr g.BuiltinManager) Compiler {
+func NewCompiler(
+	builtInMgr g.BuiltinManager,
+	modName string,
+	modPath string,
+	modInitFn *ast.FnExpr) Compiler {
 
-	// the "init" function for a module is always the first function
-	funcs := []*ast.FnExpr{mod}
-	templates := []*g.FuncTemplate{}
-	structDefs := [][]*g.FieldDef{}
+	// initialize
 
 	return &compiler{
-		builtInMgr, g.EmptyHashMap(), nil, nil, nil,
-		modName, modPath, funcs, templates, structDefs, 0}
+		builtInMgr:  builtInMgr,
+		poolBuilder: newPoolBuilder(),
+		modName:     modName,
+		modPath:     modPath,
+		funcs:       []*ast.FnExpr{modInitFn},
+		funcIdx:     0,
+		opc:         nil,
+		lnum:        nil,
+		handlers:    nil,
+	}
 }
 
-func (c *compiler) Compile() *g.Module {
+// Compile compiles a Module
+func (c *compiler) Compile() (*g.Module, *Pool) {
 
 	// compile all the funcs
-	for c.idx < len(c.funcs) {
-		c.templates = append(
-			c.templates,
-			c.compileFunc(c.funcs[c.idx]))
-		c.idx++
+	for c.funcIdx < len(c.funcs) {
+		c.poolBuilder.addTemplate(c.compileFunc(c.funcs[c.funcIdx]))
+		c.funcIdx++
 	}
 
 	// done
@@ -65,13 +72,10 @@ func (c *compiler) Compile() *g.Module {
 		Path:     c.modPath,
 		Contents: nil,
 		Refs:     nil,
-
-		Templates:  c.templates,
-		ConstPool:       makePoolSlice(c.pool),
-		StructDefs: c.structDefs,
 	}
 	mod.Contents = c.makeModuleContents(mod)
-	return mod
+
+	return mod, c.poolBuilder.build()
 }
 
 func (c *compiler) makeModuleContents(mod *g.Module) g.Struct {
@@ -331,7 +335,7 @@ func (c *compiler) visitImport(imp *ast.ImportStmt) {
 		c.pushIndex(
 			ident.Begin(),
 			o.ImportModule,
-			poolIndex(c.pool, g.NewStr(sym)))
+			c.poolBuilder.constIndex(g.NewStr(sym)))
 
 		// store module in identifer
 		v := ident.Variable
@@ -375,7 +379,7 @@ func (c *compiler) visitAssignment(asn *ast.AssignmentExpr) {
 		c.pushIndex(
 			t.Key.Position,
 			o.SetField,
-			poolIndex(c.pool, g.NewStr(t.Key.Text)))
+			c.poolBuilder.constIndex(g.NewStr(t.Key.Text)))
 
 	case *ast.IndexExpr:
 
@@ -426,7 +430,7 @@ func (c *compiler) visitPostfixExpr(pe *ast.PostfixExpr) {
 		c.pushIndex(
 			t.Key.Position,
 			o.IncField,
-			poolIndex(c.pool, g.NewStr(t.Key.Text)))
+			c.poolBuilder.constIndex(g.NewStr(t.Key.Text)))
 
 	case *ast.IndexExpr:
 
@@ -860,7 +864,7 @@ func (c *compiler) visitUnaryExpr(u *ast.UnaryExpr) {
 					c.pushIndex(
 						u.Op.Position,
 						o.LoadConst,
-						poolIndex(c.pool, g.NewInt(-i)))
+						c.poolBuilder.constIndex(g.NewInt(-i)))
 				}
 
 			default:
@@ -902,7 +906,7 @@ func (c *compiler) visitBasicExpr(basic *ast.BasicExpr) {
 		c.pushIndex(
 			basic.Token.Position,
 			o.LoadConst,
-			poolIndex(c.pool, g.NewStr(basic.Token.Text)))
+			c.poolBuilder.constIndex(g.NewStr(basic.Token.Text)))
 
 	case ast.Int:
 		c.loadInt(
@@ -914,7 +918,7 @@ func (c *compiler) visitBasicExpr(basic *ast.BasicExpr) {
 		c.pushIndex(
 			basic.Token.Position,
 			o.LoadConst,
-			poolIndex(c.pool, g.NewFloat(f)))
+			c.poolBuilder.constIndex(g.NewFloat(f)))
 
 	default:
 		panic("unreachable")
@@ -996,8 +1000,7 @@ func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 			})
 		}
 	}
-	defIdx := len(c.structDefs)
-	c.structDefs = append(c.structDefs, def)
+	defIdx := c.poolBuilder.structDefIndex(def)
 
 	// create new struct
 	c.pushIndex(stc.Begin(), o.DefineStruct, defIdx)
@@ -1016,7 +1019,7 @@ func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 		c.pushIndex(
 			v.Begin(),
 			o.InitField,
-			poolIndex(c.pool, g.NewStr(k.Text)))
+			c.poolBuilder.constIndex(g.NewStr(k.Text)))
 		c.push(k.Position, o.Pop)
 	}
 }
@@ -1048,7 +1051,7 @@ func (c *compiler) visitFieldExpr(fe *ast.FieldExpr) {
 	c.pushIndex(
 		fe.Key.Position,
 		o.GetField,
-		poolIndex(c.pool, g.NewStr(fe.Key.Text)))
+		c.poolBuilder.constIndex(g.NewStr(fe.Key.Text)))
 }
 
 func (c *compiler) visitIndexExpr(ie *ast.IndexExpr) {
@@ -1120,7 +1123,7 @@ func (c *compiler) loadInt(pos ast.Pos, i int64) {
 		c.pushIndex(
 			pos,
 			o.LoadConst,
-			poolIndex(c.pool, g.NewInt(i)))
+			c.poolBuilder.constIndex(g.NewInt(i)))
 	}
 }
 
@@ -1189,77 +1192,6 @@ func assert(flag bool) {
 	if !flag {
 		panic("assertion failure")
 	}
-}
-
-//--------------------------------------------------------------
-// pool
-
-func poolIndex(pool *g.HashMap, key g.Basic) int {
-
-	// Its OK for the Context to be nil here
-	// The key is always Basic, so the Context will never be used.
-	var cx g.Context
-
-	b, err := pool.ContainsKey(cx, key)
-	assert(err == nil)
-
-	if b.BoolVal() {
-		var v g.Value
-		v, err = pool.Get(cx, key)
-		assert(err == nil)
-
-		i, ok := v.(g.Int)
-		assert(ok)
-		return int(i.IntVal())
-	}
-	i := pool.Len()
-	err = pool.Put(cx, key, i)
-	assert(err == nil)
-	return int(i.IntVal())
-}
-
-// PoolItems is the contstant pool created by the compiler
-type PoolItems []*g.HEntry
-
-func (items PoolItems) Len() int {
-	return len(items)
-}
-
-func (items PoolItems) Less(i, j int) bool {
-
-	x, ok := items[i].Value.(g.Int)
-	assert(ok)
-
-	y, ok := items[j].Value.(g.Int)
-	assert(ok)
-
-	return x.IntVal() < y.IntVal()
-}
-
-func (items PoolItems) Swap(i, j int) {
-	items[i], items[j] = items[j], items[i]
-}
-
-func makePoolSlice(pool *g.HashMap) []g.Basic {
-
-	n := int(pool.Len().IntVal())
-
-	entries := make([]*g.HEntry, 0, n)
-	itr := pool.Iterator()
-	for itr.Next() {
-		entries = append(entries, itr.Get())
-	}
-
-	sort.Sort(PoolItems(entries))
-
-	slice := make([]g.Basic, n)
-	for i, e := range entries {
-		b, ok := e.Key.(g.Basic)
-		assert(ok)
-		slice[i] = b
-	}
-
-	return slice
 }
 
 //--------------------------------------------------------------

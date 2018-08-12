@@ -51,7 +51,7 @@ func DefineStruct(defs []*FieldDef) (Struct, Error) {
 // MergeStructs merges Structs together into one Struct.
 // Field name that are defined in more than one of the structs are combined so
 // that the value of the field is taken only from the first such Struct.
-// IfStmt any of the structs are frozen, then the resulting struct is also frozen.
+// If any of the structs are frozen, then the resulting struct is also frozen.
 func MergeStructs(structs []Struct) Struct {
 	if len(structs) < 2 {
 		panic("invalid struct merge")
