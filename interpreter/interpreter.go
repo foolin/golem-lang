@@ -17,7 +17,7 @@ import (
 // Interpreter interprets Golem bytecode.
 type Interpreter struct {
 	homePath   string
-	mod        *g.Module
+	modules    []*g.Module
 	builtInMgr g.BuiltinManager
 	frames     []*frame
 }
@@ -26,30 +26,43 @@ type Interpreter struct {
 func NewInterpreter(
 	homePath string,
 	builtInMgr g.BuiltinManager,
-	mod *g.Module) *Interpreter {
+	modules []*g.Module) *Interpreter {
 
 	return &Interpreter{
 		homePath:   homePath,
-		mod:        mod,
+		modules:    modules,
 		builtInMgr: builtInMgr,
 		frames:     []*frame{},
 	}
 }
 
-// Init initializes an interpreter, by interpreting its "init" function.
-func (i *Interpreter) Init() (g.Value, g.Error) {
+// InitModules initializes each of the Modules.  Note that the modules
+// are initialized in backwards order.
+func (i *Interpreter) InitModules() ([]g.Value, g.Error) {
 
-	// the init function is always the first template
-	initTpl := i.mod.Pool.Templates[0]
+	result := []g.Value{}
+	for j := len(i.modules) - 1; j >= 0; j-- {
+		mod := i.modules[j]
 
-	// create empty locals
-	i.mod.Refs = newLocals(initTpl.NumLocals, nil)
+		// the 'init' function is always the first template in the pool
+		initTpl := mod.Pool.Templates[0]
 
-	// make init function from template
-	initFn := g.NewBytecodeFunc(initTpl)
+		// create empty locals
+		mod.Refs = newLocals(initTpl.NumLocals, nil)
 
-	// invoke the "init" function
-	return i.eval(initFn, i.mod.Refs)
+		// make init function from template
+		initFn := g.NewBytecodeFunc(initTpl)
+
+		// invoke the "init" function
+		val, err := i.eval(initFn, mod.Refs)
+		if err != nil {
+			return nil, err
+		}
+
+		// prepend the value so that the result will be in the same order as i.modules
+		result = append([]g.Value{val}, result...)
+	}
+	return result, nil
 }
 
 //-------------------------------------------------------------------------

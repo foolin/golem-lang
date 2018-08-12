@@ -172,8 +172,8 @@ func main() {
 	mod := cmp.Compile()
 
 	// interpret with modules from standard library
-	intp := interpreter.NewInterpreter(homePath, builtinMgr, mod)
-	_, err := intp.Init()
+	intp := interpreter.NewInterpreter(homePath, builtinMgr, []*g.Module{mod})
+	_, err := intp.InitModules()
 	if err != nil {
 		dumpError(intp, err)
 		os.Exit(-1)

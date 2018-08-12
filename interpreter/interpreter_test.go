@@ -15,121 +15,6 @@ import (
 	"testing"
 )
 
-func tassert(t *testing.T, flag bool) {
-	if !flag {
-		t.Error("assertion failure")
-	}
-}
-
-func okExpr(t *testing.T, source string, expect g.Value) {
-	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(".", builtinMgr, mod)
-
-	result, err := intp.Init()
-	if err != nil {
-		panic(err)
-	}
-
-	b, err := result.Eq(intp, expect)
-	if err != nil {
-		panic("okExpr")
-	}
-	if !b.BoolVal() {
-		t.Error(result, " != ", expect)
-		panic("okExpr")
-	}
-}
-
-func okRef(t *testing.T, intp *Interpreter, ref *g.Ref, expect g.Value) {
-	b, err := ref.Val.Eq(intp, expect)
-	if err != nil {
-		panic("okRef")
-	}
-	if !b.BoolVal() {
-		t.Error(ref.Val, " != ", expect)
-	}
-}
-
-func okMod(t *testing.T, source string, expectResult g.Value, expectRefs []*g.Ref) {
-	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(".", builtinMgr, mod)
-
-	result, err := intp.Init()
-	if err != nil {
-		panic(err)
-	}
-
-	b, err := result.Eq(intp, expectResult)
-	if err != nil {
-		panic("okMod")
-	}
-	if !b.BoolVal() {
-		t.Error(result, " != ", expectResult)
-	}
-
-	if !reflect.DeepEqual(mod.Refs, expectRefs) {
-		t.Error(mod.Refs, " != ", expectRefs)
-	}
-}
-
-func failExpr(t *testing.T, source string, expect string) {
-
-	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(".", builtinMgr, mod)
-
-	result, err := intp.Init()
-	if result != nil {
-		panic(result)
-	}
-
-	if err.Error() != expect {
-		t.Error(err.Error(), " != ", expect)
-	}
-}
-
-func fail(t *testing.T, source string, err g.Error, stack []string) *g.Module {
-
-	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(".", builtinMgr, mod)
-
-	expect := intp.makeErrorTrace(err, stack)
-
-	result, err := intp.Init()
-	if result != nil {
-		panic(result)
-	}
-
-	if err.Error() != expect.Error() {
-		t.Error(err, " != ", expect)
-	}
-
-	return mod
-}
-
-func failErr(t *testing.T, source string, expect g.Error) {
-
-	mod := newCompiler(source).Compile()
-	intp := NewInterpreter(".", builtinMgr, mod)
-
-	result, err := intp.Init()
-	if result != nil {
-		panic(result)
-	}
-
-	if err.Error() != expect.Error() {
-		t.Error(err, " != ", expect)
-	}
-}
-
-func newStruct(entries []g.Field) g.Struct {
-
-	stc, err := g.NewStruct(entries, false)
-	if err != nil {
-		panic("invalid struct")
-	}
-	return stc
-}
-
 var builtinMgr = g.NewBuiltinManager(g.CommandLineBuiltins)
 
 func newCompiler(source string) compiler.Compiler {
@@ -147,39 +32,125 @@ func newCompiler(source string) compiler.Compiler {
 	return compiler.NewCompiler(builtinMgr, mod)
 }
 
-//type testModule struct {
-//	name     string
-//	contents g.Struct
-//}
-//
-//func (t *testModule) GetModuleName() string { return t.name }
-//func (t *testModule) GetContents() g.Struct { return t.contents }
-//
-//func importResolver() func(homePath string, name string) (g.Module, g.Error) {
-//	stc, err := g.NewStruct([]g.Field{
-//		g.NewField("a", true, g.One)},
-//		false)
-//	if err != nil {
-//		panic("invalid struct")
-//	}
-//
-//	foo := &testModule{"foo", stc}
-//	return func(homePath, name string) (g.Module, g.Error) {
-//		if name == "foo" {
-//			return foo, nil
-//		}
-//		return nil, g.UndefinedModuleError(name)
-//	}
-//}
+func tassert(t *testing.T, flag bool) {
+	if !flag {
+		t.Error("assertion failure")
+		panic("asdfasdf")
+	}
+}
+
+func okExpr(t *testing.T, source string, expect g.Value) {
+
+	mod := newCompiler(source).Compile()
+	intp := NewInterpreter(".", builtinMgr, []*g.Module{mod})
+
+	result, err := intp.InitModules()
+	tassert(t, err == nil)
+	tassert(t, len(result) == 1)
+
+	b, err := result[0].Eq(intp, expect)
+	tassert(t, err == nil)
+
+	if !b.BoolVal() {
+		t.Error(result, " != ", expect)
+	}
+}
+
+func failExpr(t *testing.T, source string, expect string) {
+
+	mod := newCompiler(source).Compile()
+	intp := NewInterpreter(".", builtinMgr, []*g.Module{mod})
+
+	result, err := intp.InitModules()
+	tassert(t, result == nil)
+
+	tassert(t, err != nil)
+	if err.Error() != expect {
+		t.Error(err.Error(), " != ", expect)
+	}
+}
+
+func okRef(t *testing.T, intp *Interpreter, ref *g.Ref, expect g.Value) {
+	b, err := ref.Val.Eq(intp, expect)
+	if err != nil {
+		panic("okRef")
+	}
+	if !b.BoolVal() {
+		t.Error(ref.Val, " != ", expect)
+	}
+}
+
+func okMod(t *testing.T, source string, expect g.Value, expectRefs []*g.Ref) {
+
+	mod := newCompiler(source).Compile()
+	intp := NewInterpreter(".", builtinMgr, []*g.Module{mod})
+
+	result, err := intp.InitModules()
+	tassert(t, err == nil)
+	tassert(t, len(result) == 1)
+
+	b, err := result[0].Eq(intp, expect)
+	tassert(t, err == nil)
+
+	if !b.BoolVal() {
+		t.Error(result, " != ", expect)
+	}
+
+	if !reflect.DeepEqual(mod.Refs, expectRefs) {
+		t.Error(mod.Refs, " != ", expectRefs)
+	}
+}
 
 func interpret(mod *g.Module) *Interpreter {
-	intp := NewInterpreter(".", builtinMgr, mod)
-	_, err := intp.Init()
+	intp := NewInterpreter(".", builtinMgr, []*g.Module{mod})
+	_, err := intp.InitModules()
 	if err != nil {
-		fmt.Printf("%v\n", err)
-		panic("interpreter failed")
+		panic(err)
 	}
 	return intp
+}
+
+func fail(t *testing.T, source string, err g.Error, stack []string) *g.Module {
+
+	mod := newCompiler(source).Compile()
+	intp := NewInterpreter(".", builtinMgr, []*g.Module{mod})
+
+	expect := intp.makeErrorTrace(err, stack)
+
+	result, err := intp.InitModules()
+	if result != nil {
+		panic(result)
+	}
+
+	if err.Error() != expect.Error() {
+		t.Error(err, " != ", expect)
+	}
+
+	return mod
+}
+
+func failErr(t *testing.T, source string, expect g.Error) {
+
+	mod := newCompiler(source).Compile()
+	intp := NewInterpreter(".", builtinMgr, []*g.Module{mod})
+
+	result, err := intp.InitModules()
+	if result != nil {
+		panic(result)
+	}
+
+	if err.Error() != expect.Error() {
+		t.Error(err, " != ", expect)
+	}
+}
+
+func newStruct(entries []g.Field) g.Struct {
+
+	stc, err := g.NewStruct(entries, false)
+	if err != nil {
+		panic("invalid struct")
+	}
+	return stc
 }
 
 func TestExpressions(t *testing.T) {
@@ -348,17 +319,6 @@ func TestIf(t *testing.T) {
 }
 
 func TestWhile(t *testing.T) {
-
-	//	source := `
-	//a = 1;
-	//while (a < 11) {
-	//    if (a == 4) { a = a + 2; break; }
-	//    a = a + 1;
-	//}`
-	//	mod :=  newCompiler(source).Compile()
-	//	fmt.Println("----------------------------")
-	//	fmt.Println(source)
-	//	fmt.Println(mod)
 
 	okMod(t, `
 let a = 1
@@ -1152,19 +1112,45 @@ func TestRawString(t *testing.T) {
 	interpret(mod)
 }
 
-//func TestImport(t *testing.T) {
-//	source := `
-//import foo
-//assert(foo.a == 1)
-//`
-//	mod :=  newCompiler(source).Compile()
-//	interpret(mod)
+////type testModule struct {
+////	name     string
+////	contents g.Struct
+////}
+////
+////func (t *testModule) GetModuleName() string { return t.name }
+////func (t *testModule) GetContents() g.Struct { return t.contents }
+////
+////func importResolver() func(homePath string, name string) (g.Module, g.Error) {
+////	stc, err := g.NewStruct([]g.Field{
+////		g.NewField("a", true, g.One)},
+////		false)
+////	if err != nil {
+////		panic("invalid struct")
+////	}
+////
+////	foo := &testModule{"foo", stc}
+////	return func(homePath, name string) (g.Module, g.Error) {
+////		if name == "foo" {
+////			return foo, nil
+////		}
+////		return nil, g.UndefinedModuleError(name)
+////	}
+////}
 //
-//	source = `
-//import foo, bar
-//`
-//	fail(t, source,
-//		g.UndefinedModuleError("bar"),
-//		[]string{
-//			"    at foo.glm:2"})
-//}
+
+////func TestImport(t *testing.T) {
+////	source := `
+////import foo
+////assert(foo.a == 1)
+////`
+////	mod :=  newCompiler(source).Compile()
+////	interpret(mod)
+////
+////	source = `
+////import foo, bar
+////`
+////	fail(t, source,
+////		g.UndefinedModuleError("bar"),
+////		[]string{
+////			"    at foo.glm:2"})
+////}

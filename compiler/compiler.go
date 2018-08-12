@@ -44,11 +44,14 @@ func NewCompiler(
 		Path: astMod.Path,
 	}
 
+	// the 'init' function is always the first function in the list
+	funcs := []*ast.FnExpr{astMod.InitFunc}
+
 	return &compiler{
 		builtInMgr:  builtInMgr,
 		poolBuilder: newPoolBuilder(),
 		mod:         mod,
-		funcs:       []*ast.FnExpr{astMod.InitFunc},
+		funcs:       funcs,
 		funcIdx:     0,
 		opc:         nil,
 		lnum:        nil,

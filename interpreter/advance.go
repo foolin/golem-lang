@@ -104,7 +104,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			f.stack = f.stack[:n-idx]
 			f.ip += 3
 
-			intp := NewInterpreter(i.homePath, i.builtInMgr, i.mod)
+			intp := NewInterpreter(i.homePath, i.builtInMgr, i.modules)
 			locals := newLocals(fn.Template().NumLocals, params)
 			go (func() {
 				_, errTrace := intp.eval(fn, locals)
