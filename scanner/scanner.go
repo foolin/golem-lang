@@ -22,11 +22,16 @@ type (
 		idx  int
 	}
 
-	// Scanner scans Golem source code and produces a stream of tokens.
-	Scanner struct {
+	// Source contains the name, path, and source code for a Golem Module
+	Source struct {
 		Name string
 		Path string
 		Code string
+	}
+
+	// Scanner scans Golem source code and produces a stream of tokens.
+	Scanner struct {
+		Source *Source
 
 		reader    io.RuneReader
 		cur       curRune
@@ -37,14 +42,11 @@ type (
 )
 
 // NewScanner creates a new Scanner
-func NewScanner(name, path, code string) *Scanner {
+func NewScanner(source *Source) *Scanner {
 
 	s := &Scanner{
-		Name: name,
-		Path: path,
-		Code: code,
-
-		reader:    strings.NewReader(code),
+		Source:    source,
+		reader:    strings.NewReader(source.Code),
 		cur:       curRune{r: 0, size: 1, idx: -1},
 		pos:       ast.Pos{Line: 1, Col: 0},
 		isDone:    false,
@@ -342,7 +344,7 @@ func (s *Scanner) nextIdentOrKeyword() *ast.Token {
 
 	s.acceptWhile(isIdentContinue)
 
-	text := s.Code[begin:s.cur.idx]
+	text := s.Source.Code[begin:s.cur.idx]
 	switch text {
 
 	case "_":
@@ -497,7 +499,7 @@ func (s *Scanner) unicodeRune() (rune, *ast.Token) {
 	s.acceptWhile(isHexDigit)
 	end := s.cur.idx
 
-	text := s.Code[begin:end]
+	text := s.Source.Code[begin:end]
 	if len(text) > 6 {
 		// too long
 		runes := []rune(text)
@@ -587,9 +589,9 @@ func (s *Scanner) nextNumber() *ast.Token {
 				return t
 			}
 			s.acceptWhile(isDigit)
-			return &ast.Token{Kind: ast.Float, Text: s.Code[begin:s.cur.idx], Position: pos}
+			return &ast.Token{Kind: ast.Float, Text: s.Source.Code[begin:s.cur.idx], Position: pos}
 		}
-		return &ast.Token{Kind: ast.Int, Text: s.Code[begin:s.cur.idx], Position: pos}
+		return &ast.Token{Kind: ast.Int, Text: s.Source.Code[begin:s.cur.idx], Position: pos}
 	}
 
 }
@@ -604,7 +606,7 @@ func (s *Scanner) nextHexInt(begin int, pos ast.Pos) *ast.Token {
 	}
 	s.acceptWhile(isHexDigit)
 
-	return &ast.Token{Kind: ast.Int, Text: s.Code[begin:s.cur.idx], Position: pos}
+	return &ast.Token{Kind: ast.Int, Text: s.Source.Code[begin:s.cur.idx], Position: pos}
 }
 
 func (s *Scanner) nextFloat(begin int, pos ast.Pos) *ast.Token {
@@ -627,7 +629,7 @@ func (s *Scanner) nextFloat(begin int, pos ast.Pos) *ast.Token {
 		s.acceptWhile(isDigit)
 	}
 
-	return &ast.Token{Kind: ast.Float, Text: s.Code[begin:s.cur.idx], Position: pos}
+	return &ast.Token{Kind: ast.Float, Text: s.Source.Code[begin:s.cur.idx], Position: pos}
 }
 
 // accept a rune that matches the given function

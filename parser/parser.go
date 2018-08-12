@@ -75,8 +75,8 @@ func (p *Parser) ParseModule() (mod *ast.Module, err error) {
 
 	// done
 	mod = &ast.Module{
-		Name:     p.scn.Name,
-		Path:     p.scn.Path,
+		Name:     p.scn.Source.Name,
+		Path:     p.scn.Source.Path,
 		InitFunc: initFunc,
 	}
 	return
@@ -433,7 +433,7 @@ func (p *Parser) tupleIdents() []*ast.IdentExpr {
 	}
 
 	if len(idents) < 2 {
-		panic(&parserError{path: p.scn.Path, kind: InvalidFor, token: lparen})
+		panic(&parserError{path: p.scn.Source.Path, kind: InvalidFor, token: lparen})
 	}
 
 	return idents
@@ -490,7 +490,7 @@ func (p *Parser) caseStmt() *ast.CaseNode {
 			colon := p.expect(ast.Colon)
 			body := p.statementsAny(ast.Case, ast.Default, ast.Rbrace)
 			if len(body) == 0 {
-				panic(&parserError{path: p.scn.Path, kind: InvalidSwitch, token: colon})
+				panic(&parserError{path: p.scn.Source.Path, kind: InvalidSwitch, token: colon})
 			}
 			return &ast.CaseNode{
 				Token:   token,
@@ -511,7 +511,7 @@ func (p *Parser) defaultStmt() *ast.DefaultNode {
 
 	body := p.statements(ast.Rbrace)
 	if len(body) == 0 {
-		panic(&parserError{path: p.scn.Path, kind: InvalidSwitch, token: colon})
+		panic(&parserError{path: p.scn.Source.Path, kind: InvalidSwitch, token: colon})
 	}
 
 	return &ast.DefaultNode{
@@ -585,7 +585,7 @@ func (p *Parser) tryStmt() *ast.TryStmt {
 
 	// make sure we got at least one of try or catch
 	if catchToken == nil && finallyToken == nil {
-		panic(&parserError{path: p.scn.Path, kind: InvalidTry, token: tryToken})
+		panic(&parserError{path: p.scn.Source.Path, kind: InvalidTry, token: tryToken})
 	}
 
 	// done
@@ -797,7 +797,7 @@ func (p *Parser) postfixExpr() ast.Expression {
 				Op:       tok,
 			}
 		} else {
-			panic(&parserError{path: p.scn.Path, kind: InvalidPostfix, token: p.cur.token})
+			panic(&parserError{path: p.scn.Source.Path, kind: InvalidPostfix, token: p.cur.token})
 		}
 	}
 
@@ -1159,14 +1159,14 @@ func (p *Parser) property() *ast.PropNode {
 
 	getter := p.propertyFunc()
 	if len(getter.FormalParams) != 0 {
-		panic(&parserError{path: p.scn.Path, kind: InvalidPropertyGetter, token: getter.Token})
+		panic(&parserError{path: p.scn.Source.Path, kind: InvalidPropertyGetter, token: getter.Token})
 	}
 
 	var setter *ast.FnExpr
 	if p.accept(ast.Comma) {
 		setter = p.propertyFunc()
 		if len(setter.FormalParams) != 1 {
-			panic(&parserError{path: p.scn.Path, kind: InvalidPropertySetter, token: setter.Token})
+			panic(&parserError{path: p.scn.Source.Path, kind: InvalidPropertySetter, token: setter.Token})
 		}
 	}
 
@@ -1454,10 +1454,10 @@ func (p *Parser) advance() tokenInfo {
 		switch token.Kind {
 
 		case ast.UnexpectedChar:
-			panic(&parserError{path: p.scn.Path, kind: UnexpectedChar, token: token})
+			panic(&parserError{path: p.scn.Source.Path, kind: UnexpectedChar, token: token})
 
 		case ast.UnexpectedEOF:
-			panic(&parserError{path: p.scn.Path, kind: UnexpectedEOF, token: token})
+			panic(&parserError{path: p.scn.Source.Path, kind: UnexpectedEOF, token: token})
 
 		default:
 			panic("unreachable")
@@ -1472,13 +1472,13 @@ func (p *Parser) advance() tokenInfo {
 func (p *Parser) unexpected() error {
 	switch p.cur.token.Kind {
 	case ast.EOF:
-		return &parserError{path: p.scn.Path, kind: UnexpectedEOF, token: p.cur.token}
+		return &parserError{path: p.scn.Source.Path, kind: UnexpectedEOF, token: p.cur.token}
 
 	case ast.Reserved:
-		return &parserError{path: p.scn.Path, kind: UnexpectedReservedWork, token: p.cur.token}
+		return &parserError{path: p.scn.Source.Path, kind: UnexpectedReservedWork, token: p.cur.token}
 
 	default:
-		return &parserError{path: p.scn.Path, kind: UnexpectedToken, token: p.cur.token}
+		return &parserError{path: p.scn.Source.Path, kind: UnexpectedToken, token: p.cur.token}
 	}
 }
 

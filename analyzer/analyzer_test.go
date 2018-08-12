@@ -1,5 +1,5 @@
 // Copyright 2018 The Golem Language Authors. All rights reserved.
-// Use of this source code is governed by a MIT-style
+// Use of this code code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
 package analyzer
@@ -49,11 +49,16 @@ var isBuiltIn = func(s string) bool {
 	return ok
 }
 
-func newModule(source string) *ast.Module {
+func newModule(code string) *ast.Module {
 
 	ast.InternalResetDebugging()
 
-	scanner := scanner.NewScanner("foo", "foo.glm", source)
+	scanner := scanner.NewScanner(
+		&scanner.Source{
+			Name: "foo",
+			Path: "foo.glm",
+			Code: code,
+		})
 	parser := parser.NewParser(scanner, isBuiltIn)
 	mod, err := parser.ParseModule()
 	if err != nil {
@@ -99,7 +104,7 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 
 func TestNested(t *testing.T) {
 
-	source := `
+	code := `
 let a = 1
 if (true) {
     a = 2
@@ -108,7 +113,7 @@ if (true) {
     a = 3
     let b = 3
 }`
-	mod := newModule(source)
+	mod := newModule(code)
 
 	errors := NewAnalyzer(mod).Analyze()
 	ok(t, mod, errors, `
@@ -249,7 +254,7 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:3)
 
 func TestAssignment(t *testing.T) {
 
-	source := `
+	code := `
 let x = struct { a: 0 }
 let y = x.a
 x.a = 3
@@ -262,7 +267,7 @@ y.z = x[2]++
 let g, h = 5
 const i = 6, j
 `
-	mod := newModule(source)
+	mod := newModule(code)
 	errors := NewAnalyzer(mod).Analyze()
 
 	ok(t, mod, errors, `
@@ -326,13 +331,13 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:6)
 
 func TestList(t *testing.T) {
 
-	source := `
+	code := `
 let a = ['x'][0]
 let b = ['x']
 b[0] = 3
 b[0]++
 `
-	mod := newModule(source)
+	mod := newModule(code)
 	errors := NewAnalyzer(mod).Analyze()
 
 	ok(t, mod, errors, `
@@ -364,8 +369,8 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 
 func TestTry(t *testing.T) {
 
-	source := "let a = 1; try { } catch e { } finally { }"
-	mod := newModule(source)
+	code := "let a = 1; try { } catch e { } finally { }"
+	mod := newModule(code)
 	errors := NewAnalyzer(mod).Analyze()
 
 	ok(t, mod, errors, `
@@ -381,8 +386,8 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   .   .   BlockNode(Scope defs:{})
 `)
 
-	source = "let a = 1; try { } catch a { } finally { }"
-	mod = newModule(source)
+	code = "let a = 1; try { } catch a { } finally { }"
+	mod = newModule(code)
 	errors = NewAnalyzer(mod).Analyze()
 
 	ok(t, mod, errors, `
@@ -406,7 +411,7 @@ func TestFormalParams(t *testing.T) {
 }
 
 func TestPureFunction(t *testing.T) {
-	source := `
+	code := `
 let a = 1
 let b = fn(x) {
     let c = fn(y, z) {
@@ -419,7 +424,7 @@ let b = fn(x) {
     return c(3)
 }`
 
-	mod := newModule(source)
+	mod := newModule(code)
 	errors := NewAnalyzer(mod).Analyze()
 
 	ok(t, mod, errors, `
@@ -463,7 +468,7 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 
 func TestNamedFunc(t *testing.T) {
 
-	source := `
+	code := `
 fn a() {
     return b()
 }
@@ -471,7 +476,7 @@ fn b() {
     return 42
 }
 `
-	mod := newModule(source)
+	mod := newModule(code)
 	errors := NewAnalyzer(mod).Analyze()
 
 	ok(t, mod, errors, `
@@ -498,7 +503,7 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 
 func TestCaptureFunction(t *testing.T) {
 
-	source := `
+	code := `
 const accumGen = fn(n) {
     return fn(i) {
         n = n + i
@@ -506,7 +511,7 @@ const accumGen = fn(n) {
     }
 }
 `
-	mod := newModule(source)
+	mod := newModule(code)
 	errors := NewAnalyzer(mod).Analyze()
 
 	ok(t, mod, errors, `
@@ -531,7 +536,7 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:1)
 .   .   .   .   .   .   .   .   .   IdentExpr(n,v(2: n,0,false,true))
 `)
 
-	source = `
+	code = `
 let z = 2
 const accumGen = fn(n) {
 	return fn(i) {
@@ -541,7 +546,7 @@ const accumGen = fn(n) {
 	}
 }
 	`
-	mod = newModule(source)
+	mod = newModule(code)
 	errors = NewAnalyzer(mod).Analyze()
 
 	ok(t, mod, errors, `
@@ -575,7 +580,7 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   .   .   .   .   .   .   .   .   IdentExpr(n,v(3: n,0,false,true))
 `)
 
-	source = `
+	code = `
 const a = 123
 const b = 456
 
@@ -585,7 +590,7 @@ fn foo() {
 }
 foo()
 `
-	mod = newModule(source)
+	mod = newModule(code)
 	errors = NewAnalyzer(mod).Analyze()
 
 	ok(t, mod, errors, `
@@ -618,7 +623,7 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:3)
 .   .   .   .   IdentExpr(foo,v(0: foo,0,true,false))
 `)
 
-	source = `
+	code = `
 const foo = 1
 
 fn bar() {
@@ -626,10 +631,10 @@ fn bar() {
 	let b = || => foo
 }
 `
-	mod = newModule(source)
+	mod = newModule(code)
 	errors = NewAnalyzer(mod).Analyze()
 
-	//println(source)
+	//println(code)
 	//println(ast.Dump(anl.Module()))
 	//println(errors)
 

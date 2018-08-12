@@ -1,5 +1,5 @@
 // Copyright 2018 The Golem Language Authors. All rights reserved.
-// Use of this source code is governed by a MIT-style
+// Use of this code code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
 package analyzer
@@ -15,10 +15,10 @@ func TestStruct(t *testing.T) {
 	errors := NewAnalyzer(mod).Analyze()
 	fail(t, errors, "['this' outside of struct, at foo.glm:1:1]")
 
-	source := `
+	code := `
 struct{ }
 `
-	mod = newModule(source)
+	mod = newModule(code)
 	errors = NewAnalyzer(mod).Analyze()
 	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:0)
@@ -27,10 +27,10 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:0)
 .   .   .   StructExpr([],StructScope defs:{})
 `)
 
-	source = `
+	code = `
 struct{ a: 1 }
 `
-	mod = newModule(source)
+	mod = newModule(code)
 	errors = NewAnalyzer(mod).Analyze()
 	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:0)
@@ -40,10 +40,10 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:0)
 .   .   .   .   BasicExpr(Int,"1")
 `)
 
-	source = `
+	code = `
 struct{ a: this }
 `
-	mod = newModule(source)
+	mod = newModule(code)
 	errors = NewAnalyzer(mod).Analyze()
 	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:1)
@@ -53,10 +53,10 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:1)
 .   .   .   .   ThisExpr(v(0: this,0,true,false))
 `)
 
-	source = `
+	code = `
 struct{ a: struct { b: this } }
 `
-	mod = newModule(source)
+	mod = newModule(code)
 	errors = NewAnalyzer(mod).Analyze()
 	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:1)
@@ -67,10 +67,10 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:1)
 .   .   .   .   .   ThisExpr(v(0: this,0,true,false))
 `)
 
-	source = `
+	code = `
 struct{ a: struct { b: 1 }, c: this.a }
 `
-	mod = newModule(source)
+	mod = newModule(code)
 	errors = NewAnalyzer(mod).Analyze()
 	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:1)
@@ -83,10 +83,10 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:1)
 .   .   .   .   .   ThisExpr(v(0: this,0,true,false))
 `)
 
-	source = `
+	code = `
 struct{ a: struct { b: this }, c: this }
 `
-	mod = newModule(source)
+	mod = newModule(code)
 	errors = NewAnalyzer(mod).Analyze()
 	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:2)
@@ -98,10 +98,10 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   .   .   .   ThisExpr(v(1: this,1,true,false))
 `)
 
-	source = `
+	code = `
 struct{ a: this, b: struct { c: this } }
 `
-	mod = newModule(source)
+	mod = newModule(code)
 	errors = NewAnalyzer(mod).Analyze()
 	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:2)
@@ -113,7 +113,7 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   .   .   .   .   ThisExpr(v(1: this,1,true,false))
 `)
 
-	source = `
+	code = `
 let a = struct {
 	x: 8,
 	y: 5,
@@ -123,7 +123,7 @@ let a = struct {
 let b = a.plus()
 let c = a.minus()
 `
-	mod = newModule(source)
+	mod = newModule(code)
 	errors = NewAnalyzer(mod).Analyze()
 
 	ok(t, mod, errors, `
@@ -162,7 +162,7 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:4)
 .   .   .   .   .   IdentExpr(a,v(3: a,1,false,false))
 `)
 
-	source = `
+	code = `
 let x = 1;
 let y = 2;
 struct {
@@ -170,7 +170,7 @@ struct {
 	b: prop { || => y, |v| => y = v }
 }
 `
-	mod = newModule(source)
+	mod = newModule(code)
 	errors = NewAnalyzer(mod).Analyze()
 
 	ok(t, mod, errors, `
@@ -203,7 +203,7 @@ FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   .   .   .   .   .   .   .   .   IdentExpr(v,v(4: v,0,false,false))
 `)
 
-	source = `
+	code = `
 let x = 1
 let u = struct {
 	a: prop { || => x },
@@ -211,10 +211,10 @@ let u = struct {
 }
 println(u)
 `
-	mod = newModule(source)
+	mod = newModule(code)
 	errors = NewAnalyzer(mod).Analyze()
 
-	//println(source)
+	//println(code)
 	//println(ast.Dump(anl.Module()))
 	//println(errors)
 

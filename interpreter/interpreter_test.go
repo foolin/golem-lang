@@ -1,5 +1,5 @@
 // Copyright 2018 The Golem Language Authors. All rights reserved.
-// Use of this source code is governed by a MIT-style
+// Use of this code code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
 package interpreter
@@ -17,8 +17,14 @@ import (
 
 var builtinMgr = g.NewBuiltinManager(g.CommandLineBuiltins)
 
-func newCompiler(source string) compiler.Compiler {
-	scanner := scanner.NewScanner("foo", "foo.glm", source)
+func newCompiler(code string) compiler.Compiler {
+
+	scanner := scanner.NewScanner(
+		&scanner.Source{
+			Name: "foo",
+			Path: "foo.glm",
+			Code: code,
+		})
 	parser := parser.NewParser(scanner, builtinMgr.Contains)
 	mod, err := parser.ParseModule()
 	if err != nil {
@@ -38,9 +44,9 @@ func tassert(t *testing.T, flag bool) {
 	}
 }
 
-func okExpr(t *testing.T, source string, expect g.Value) {
+func okExpr(t *testing.T, code string, expect g.Value) {
 
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	intp := NewInterpreter(".", builtinMgr, []*g.Module{mod})
 
 	result, err := intp.InitModules()
@@ -55,9 +61,9 @@ func okExpr(t *testing.T, source string, expect g.Value) {
 	}
 }
 
-func failExpr(t *testing.T, source string, expect string) {
+func failExpr(t *testing.T, code string, expect string) {
 
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	intp := NewInterpreter(".", builtinMgr, []*g.Module{mod})
 
 	result, err := intp.InitModules()
@@ -79,9 +85,9 @@ func okRef(t *testing.T, intp *Interpreter, ref *g.Ref, expect g.Value) {
 	}
 }
 
-func okMod(t *testing.T, source string, expect g.Value, expectRefs []*g.Ref) {
+func okMod(t *testing.T, code string, expect g.Value, expectRefs []*g.Ref) {
 
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	intp := NewInterpreter(".", builtinMgr, []*g.Module{mod})
 
 	result, err := intp.InitModules()
@@ -109,9 +115,9 @@ func interpret(mod *g.Module) *Interpreter {
 	return intp
 }
 
-func fail(t *testing.T, source string, err g.Error, stack []string) *g.Module {
+func fail(t *testing.T, code string, err g.Error, stack []string) *g.Module {
 
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	intp := NewInterpreter(".", builtinMgr, []*g.Module{mod})
 
 	expect := intp.makeErrorTrace(err, stack)
@@ -128,9 +134,9 @@ func fail(t *testing.T, source string, err g.Error, stack []string) *g.Module {
 	return mod
 }
 
-func failErr(t *testing.T, source string, expect g.Error) {
+func failErr(t *testing.T, code string, expect g.Error) {
 
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	intp := NewInterpreter(".", builtinMgr, []*g.Module{mod})
 
 	result, err := intp.InitModules()
@@ -361,13 +367,13 @@ let b = 5`,
 
 func TestStruct(t *testing.T) {
 
-	source := `
+	code := `
 let w = struct {}
 let x = struct { a: 0 }
 let y = struct { a: 1, b: 2 }
 let z = struct { a: 3, b: 4, c: struct { d: 5 } }
 `
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	i := interpret(mod)
 
 	okRef(t, i, mod.Refs[0], newStruct([]g.Field{}))
@@ -382,19 +388,19 @@ let z = struct { a: 3, b: 4, c: struct { d: 5 } }
 		g.NewField("c", false, newStruct([]g.Field{
 			g.NewField("d", false, g.NewInt(5))}))}))
 
-	source = `
+	code = `
 let x = struct { a: 5 }
 let y = x.a
 x.a = 6
 `
-	mod = newCompiler(source).Compile()
+	mod = newCompiler(code).Compile()
 	interpret(mod)
 
 	okRef(t, i, mod.Refs[0], newStruct([]g.Field{
 		g.NewField("a", false, g.NewInt(6))}))
 	okRef(t, i, mod.Refs[1], g.NewInt(5))
 
-	source = `
+	code = `
 let a = struct {
 	x: 8,
 	y: 5,
@@ -404,25 +410,25 @@ let a = struct {
 let b = a.plus()
 let c = a.minus()
 	`
-	mod = newCompiler(source).Compile()
+	mod = newCompiler(code).Compile()
 	fmt.Println("----------------------------")
-	fmt.Println(source)
+	fmt.Println(code)
 	fmt.Println(mod)
 
 	interpret(mod)
 	okRef(t, i, mod.Refs[2], g.NewInt(13))
 	okRef(t, i, mod.Refs[3], g.NewInt(3))
 
-	source = `
+	code = `
 let a = null
 a = struct { x: 8 }.x = 5
 `
-	mod = newCompiler(source).Compile()
+	mod = newCompiler(code).Compile()
 	interpret(mod)
 
 	okRef(t, i, mod.Refs[0], g.NewInt(5))
 
-	source = `
+	code = `
 let a = struct { x: 8 }
 assert(a has 'x')
 assert(!(a has 'z'))
@@ -431,29 +437,29 @@ let b = struct { x: this has 'x', y: this has 'z' }
 assert(b.x)
 assert(!b.y)
 `
-	mod = newCompiler(source).Compile()
+	mod = newCompiler(code).Compile()
 	interpret(mod)
 }
 
 func TestErrStack(t *testing.T) {
 
-	source := `
+	code := `
 let divide = fn(x, y) {
     return x / y
 }
 let a = divide(3, 0)
 `
-	fail(t, source,
+	fail(t, code,
 		g.DivideByZeroError(),
 		[]string{
 			"    at foo.glm:3",
 			"    at foo.glm:5"})
 
-	source = `
+	code = `
 let foo = fn(n) { n + n; }
 let a = foo(5, 6)
 	`
-	fail(t, source,
+	fail(t, code,
 		g.ArityMismatchError("1", 2),
 		[]string{
 			"    at foo.glm:3"})
@@ -461,13 +467,13 @@ let a = foo(5, 6)
 
 func TestPostfix(t *testing.T) {
 
-	source := `
+	code := `
 let a = 10
 let b = 20
 let c = a++
 let d = b--
 `
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	i := interpret(mod)
 
 	okRef(t, i, mod.Refs[0], g.NewInt(11))
@@ -475,17 +481,17 @@ let d = b--
 	okRef(t, i, mod.Refs[2], g.NewInt(10))
 	okRef(t, i, mod.Refs[3], g.NewInt(20))
 
-	source = `
+	code = `
 let a = struct { x: 10 }
 let b = struct { y: 20 }
 let c = a.x++
 let d = b.y--
 `
-	mod = newCompiler(source).Compile()
+	mod = newCompiler(code).Compile()
 	interpret(mod)
 
 	//fmt.Println("----------------------------")
-	//fmt.Println(source)
+	//fmt.Println(code)
 	//fmt.Println(mod)
 
 	okRef(t, i, mod.Refs[0], newStruct([]g.Field{
@@ -498,15 +504,15 @@ let d = b.y--
 
 func TestTernaryIf(t *testing.T) {
 
-	source := `
+	code := `
 let a = true ? 3 : 4;
 let b = false ? 5 : 6;
 `
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	i := interpret(mod)
 
 	//fmt.Println("----------------------------")
-	//fmt.Println(source)
+	//fmt.Println(code)
 	//fmt.Println(mod)
 
 	okRef(t, i, mod.Refs[0], g.NewInt(3))
@@ -523,7 +529,7 @@ func newRange(from int64, to int64, step int64) g.Range {
 
 func TestBuiltin(t *testing.T) {
 
-	source := `
+	code := `
 let a = len([4,5,6]);
 let b = str([4,5,6]);
 let c = range(0, 5);
@@ -537,11 +543,11 @@ println(a,b);
 assert(print == print);
 assert(print != println);
 `
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	i := interpret(mod)
 
 	//fmt.Println("----------------------------")
-	//fmt.Println(source)
+	//fmt.Println(code)
 	//fmt.Println(mod)
 
 	okRef(t, i, mod.Refs[0], g.NewInt(3))
@@ -549,10 +555,10 @@ assert(print != println);
 	okRef(t, i, mod.Refs[2], newRange(0, 5, 1))
 	okRef(t, i, mod.Refs[3], newRange(0, 5, 2))
 
-	source = `
+	code = `
 let a = assert(true);
 `
-	mod = newCompiler(source).Compile()
+	mod = newCompiler(code).Compile()
 	interpret(mod)
 	okRef(t, i, mod.Refs[0], g.True)
 
@@ -574,15 +580,15 @@ let a = assert(true);
 
 func TestDecl(t *testing.T) {
 
-	source := `
+	code := `
 let a, b = 0;
 const c = 1, d;
 `
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	i := interpret(mod)
 
 	//fmt.Println("----------------------------")
-	//fmt.Println(source)
+	//fmt.Println(code)
 	//fmt.Println(mod)
 
 	okRef(t, i, mod.Refs[0], g.Null)
@@ -593,17 +599,17 @@ const c = 1, d;
 
 func TestFor(t *testing.T) {
 
-	source := `
+	code := `
 let a = 0;
 for n in [1,2,3] {
     a += n;
 }
 assert(a == 6);
 `
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	interpret(mod)
 
-	source = `
+	code = `
 let keys = '';
 let values = 0;
 for (k, v)  in dict {'a': 1, 'b': 2, 'c': 3} {
@@ -613,20 +619,20 @@ for (k, v)  in dict {'a': 1, 'b': 2, 'c': 3} {
 assert(keys == 'bac');
 assert(values == 6);
 `
-	mod = newCompiler(source).Compile()
+	mod = newCompiler(code).Compile()
 	interpret(mod)
 
-	source = `
+	code = `
 let entries = '';
 for e in dict {'a': 1, 'b': 2, 'c': 3} {
     entries += str(e);
 }
 assert(entries == '(b, 2)(a, 1)(c, 3)');
 `
-	mod = newCompiler(source).Compile()
+	mod = newCompiler(code).Compile()
 	interpret(mod)
 
-	source = `
+	code = `
 let keys = '';
 let values = 0;
 for (k, v)  in [('a', 1), ('b', 2), ('c', 3)] {
@@ -636,23 +642,23 @@ for (k, v)  in [('a', 1), ('b', 2), ('c', 3)] {
 assert(keys == 'abc');
 assert(values == 6);
 `
-	mod = newCompiler(source).Compile()
+	mod = newCompiler(code).Compile()
 	interpret(mod)
 
-	source = "for (k, v)  in [1, 2, 3] {}"
-	fail(t, source,
+	code = "for (k, v)  in [1, 2, 3] {}"
+	fail(t, code,
 		g.TypeMismatchError("Expected Tuple"),
 		[]string{"    at foo.glm:1"})
 
-	source = "for (a, b, c)  in [('a', 1), ('b', 2), ('c', 3)] {}"
-	fail(t, source,
+	code = "for (a, b, c)  in [('a', 1), ('b', 2), ('c', 3)] {}"
+	fail(t, code,
 		g.InvalidArgumentError("Expected Tuple of length 3"),
 		[]string{"    at foo.glm:1"})
 }
 
 func TestSwitch(t *testing.T) {
 
-	source := `
+	code := `
 let s = ''
 for i in range(0, 4) {
     switch {
@@ -668,10 +674,10 @@ for i in range(0, 4) {
 }
 assert(s == 'abbc')
 `
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	interpret(mod)
 
-	source = `
+	code = `
 let s = ''
 for i in range(0, 4) {
     switch {
@@ -684,10 +690,10 @@ for i in range(0, 4) {
 }
 assert(s == 'aab')
 `
-	mod = newCompiler(source).Compile()
+	mod = newCompiler(code).Compile()
 	interpret(mod)
 
-	source = `
+	code = `
 let s = ''
 for i in range(0, 4) {
     switch i {
@@ -700,14 +706,14 @@ for i in range(0, 4) {
 }
 assert(s == 'aab')
 `
-	mod = newCompiler(source).Compile()
+	mod = newCompiler(code).Compile()
 	interpret(mod)
 }
 
 func TestGetField(t *testing.T) {
 
-	source := "null.bogus;"
-	fail(t, source,
+	code := "null.bogus;"
+	fail(t, code,
 		g.NullValueError(),
 		[]string{"    at foo.glm:1"})
 
@@ -729,7 +735,7 @@ func TestGetField(t *testing.T) {
 
 func TestFinally(t *testing.T) {
 
-	source := `
+	code := `
 let a = 1
 try {
     3 / 0
@@ -742,12 +748,12 @@ try {
     a = 3
 }
 `
-	fail(t, source,
+	fail(t, code,
 		g.DivideByZeroError(),
 		[]string{
 			"    at foo.glm:4"})
 
-	source = `
+	code = `
 let a = 1;
 try {
     try {
@@ -759,12 +765,12 @@ try {
     a++;
 }
 `
-	fail(t, source,
+	fail(t, code,
 		g.DivideByZeroError(),
 		[]string{
 			"    at foo.glm:5"})
 
-	source = `
+	code = `
 let a = 1;
 let b = fn() { a++; };
 try {
@@ -778,12 +784,12 @@ try {
     a++;
 }
 `
-	fail(t, source,
+	fail(t, code,
 		g.DivideByZeroError(),
 		[]string{
 			"    at foo.glm:6"})
 
-	source = `
+	code = `
 let a = 1
 let b = fn() {
     try {
@@ -802,18 +808,18 @@ try {
     a++
 }
 `
-	//mod = newCompiler(source).Compile()
+	//mod = newCompiler(code).Compile()
 	//fmt.Println("----------------------------")
-	//fmt.Println(source)
+	//fmt.Println(code)
 	//fmt.Println(mod)
 
-	fail(t, source,
+	fail(t, code,
 		g.DivideByZeroError(),
 		[]string{
 			"    at foo.glm:6",
 			"    at foo.glm:15"})
 
-	source = `
+	code = `
 let b = fn() {
     try {
     } finally {
@@ -823,10 +829,10 @@ let b = fn() {
 };
 assert(b() == 1);
 `
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	interpret(mod)
 
-	source = `
+	code = `
 let a = 1;
 let b = fn() {
     try {
@@ -842,28 +848,28 @@ let b = fn() {
 assert(b() == 1);
 assert(a == 1);
 `
-	mod = newCompiler(source).Compile()
+	mod = newCompiler(code).Compile()
 	interpret(mod)
 
-	source = `
+	code = `
 try {
     assert(1,2,3);
 } finally {
 }
 `
-	fail(t, source,
+	fail(t, code,
 		g.ArityMismatchError("1", 3),
 		[]string{
 			"    at foo.glm:3"})
 
-	source = `
+	code = `
 try {
     assert(1,2,3);
 } finally {
     1/0;
 }
 `
-	fail(t, source,
+	fail(t, code,
 		g.DivideByZeroError(),
 		[]string{
 			"    at foo.glm:5"})
@@ -871,7 +877,7 @@ try {
 
 func TestCatch(t *testing.T) {
 
-	source := `
+	code := `
 try {
     3 / 0;
 } catch e {
@@ -880,10 +886,10 @@ try {
     assert(e.stackTrace == ['    at foo.glm:3']);
 }
 `
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	interpret(mod)
 
-	source = `
+	code = `
 try {
     try {
         3 / 0;
@@ -896,10 +902,10 @@ try {
     assert(e.stackTrace == ['    at foo.glm:6']);
 }
 `
-	mod = newCompiler(source).Compile()
+	mod = newCompiler(code).Compile()
 	interpret(mod)
 
-	source = `
+	code = `
 let a = 0;
 let b = 0;
 try {
@@ -915,10 +921,10 @@ try {
 assert(a == 1);
 assert(b == 2);
 `
-	mod = newCompiler(source).Compile()
+	mod = newCompiler(code).Compile()
 	interpret(mod)
 
-	source = `
+	code = `
 try {
     let s = set {'a', 'b', null}
     assert(false)
@@ -934,14 +940,14 @@ try {
     assert(e.msg == "Expected Hashable Type")
 }
 `
-	mod = newCompiler(source).Compile()
+	mod = newCompiler(code).Compile()
 	interpret(mod)
 
 }
 
 func TestCatchFinally(t *testing.T) {
 
-	source := `
+	code := `
 let a = 0;
 try {
     3 / 0;
@@ -952,10 +958,10 @@ try {
 }
 assert(a == 2);
 `
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	interpret(mod)
 
-	source = `
+	code = `
 let a = 0;
 let f = fn() {
     try {
@@ -970,10 +976,10 @@ let b = f();
 assert(b == 1);
 assert(a == 2);
 `
-	mod = newCompiler(source).Compile()
+	mod = newCompiler(code).Compile()
 	interpret(mod)
 
-	source = `
+	code = `
 let a = 0
 let b = 0
 try {
@@ -990,13 +996,13 @@ try {
 assert(a == 1)
 assert(b == 2)
 `
-	mod = newCompiler(source).Compile()
+	mod = newCompiler(code).Compile()
 	interpret(mod)
 }
 
 func TestThrow(t *testing.T) {
 
-	source := `
+	code := `
 try {
     throw struct { foo: 'zork' };
 } catch e {
@@ -1004,12 +1010,12 @@ try {
     assert(e.stackTrace == ['    at foo.glm:3']);
 }
 `
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	interpret(mod)
 }
 
 func TestIntrinsicAssign(t *testing.T) {
-	source := `
+	code := `
 try {
     [].join = 456;
 } catch e {
@@ -1017,7 +1023,7 @@ try {
     assert(e.msg == "Expected Struct");
 }
 `
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	interpret(mod)
 }
 
@@ -1045,12 +1051,12 @@ func failVal(t *testing.T, val g.Value, err g.Error, expect string) {
 
 func TestModuleContents(t *testing.T) {
 
-	source := `
+	code := `
 let a = 0;
 const b = 1;
 fn main(args) {}
 `
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	i := interpret(mod)
 	tassert(t, reflect.DeepEqual(mod.Contents.FieldNames(), []string{"b", "a", "main"}))
 
@@ -1080,7 +1086,7 @@ fn main(args) {}
 
 func TestTypeOf(t *testing.T) {
 
-	source := `
+	code := `
 assert(
     [type(true), type(""), type(0), type(0.0)] ==
     ["Bool", "Str", "Int", "Float"]);
@@ -1091,13 +1097,13 @@ assert(
     [type(dict{}), type(set{}), type(struct{}), type(chan())] ==
     ["Dict", "Set", "Struct", "Chan"]);
 `
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	interpret(mod)
 }
 
 func TestRawString(t *testing.T) {
 
-	source :=
+	code :=
 		"let s = `\n" +
 			"ab\n" +
 			"cd\n" +
@@ -1107,7 +1113,7 @@ func TestRawString(t *testing.T) {
 			"\tassert(s[4:6] == 'cd')\n" +
 			"\tassert(s[7:-1] == 'efgh')"
 
-	mod := newCompiler(source).Compile()
+	mod := newCompiler(code).Compile()
 	interpret(mod)
 }
 
@@ -1138,17 +1144,17 @@ func TestRawString(t *testing.T) {
 //
 
 ////func TestImport(t *testing.T) {
-////	source := `
+////	code := `
 ////import foo
 ////assert(foo.a == 1)
 ////`
-////	mod :=  newCompiler(source).Compile()
+////	mod :=  newCompiler(code).Compile()
 ////	interpret(mod)
 ////
-////	source = `
+////	code = `
 ////import foo, bar
 ////`
-////	fail(t, source,
+////	fail(t, code,
 ////		g.UndefinedModuleError("bar"),
 ////		[]string{
 ////			"    at foo.glm:2"})

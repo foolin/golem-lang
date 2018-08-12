@@ -1,5 +1,5 @@
 // Copyright 2018 The Golem Language Authors. All rights reserved.
-// Use of this source code is governed by a MIT-style
+// Use of this code code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
 package compiler
@@ -57,9 +57,14 @@ func ok(t *testing.T, pool *g.Pool, expect *g.Pool) {
 
 var builtInMgr = g.NewBuiltinManager(g.CommandLineBuiltins)
 
-func newModule(source string) *ast.Module {
+func newModule(code string) *ast.Module {
 
-	scanner := scanner.NewScanner("foo", "foo.glm", source)
+	scanner := scanner.NewScanner(
+		&scanner.Source{
+			Name: "foo",
+			Path: "foo.glm",
+			Code: code,
+		})
 	parser := parser.NewParser(scanner, builtInMgr.Contains)
 	mod, err := parser.ParseModule()
 	if err != nil {
@@ -401,8 +406,8 @@ func TestShift(t *testing.T) {
 
 func TestIf(t *testing.T) {
 
-	source := "if (3 == 2) { let a = 42; }"
-	astMod := newModule(source)
+	code := "if (3 == 2) { let a = 42; }"
+	astMod := newModule(code)
 	mod := newCompiler(astMod).Compile()
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(3), g.NewInt(2), g.NewInt(42)},
@@ -429,7 +434,7 @@ func TestIf(t *testing.T) {
 			}},
 	})
 
-	source = `let a = 1
+	code = `let a = 1
 		if (false) {
 		    let b = 2
 		} else {
@@ -437,7 +442,7 @@ func TestIf(t *testing.T) {
 		}
 		let d = 4`
 
-	astMod = newModule(source)
+	astMod = newModule(code)
 	mod = newCompiler(astMod).Compile()
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(2), g.NewInt(3), g.NewInt(4)},
@@ -477,8 +482,8 @@ func TestIf(t *testing.T) {
 
 func TestWhile(t *testing.T) {
 
-	source := "let a = 1; while (0 < 1) { let b = 2; }"
-	mod := newCompiler(newModule(source)).Compile()
+	code := "let a = 1; while (0 < 1) { let b = 2; }"
+	mod := newCompiler(newModule(code)).Compile()
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(2)},
 		StructDefs: [][]*g.FieldDef{},
@@ -507,8 +512,8 @@ func TestWhile(t *testing.T) {
 			}},
 	})
 
-	source = "let a = 'z'; while (0 < 1) \n{ break; continue; let b = 2; }; let c = 3;"
-	mod = newCompiler(newModule(source)).Compile()
+	code = "let a = 'z'; while (0 < 1) \n{ break; continue; let b = 2; }; let c = 3;"
+	mod = newCompiler(newModule(code)).Compile()
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{g.NewStr("z"), g.NewInt(2), g.NewInt(3)},
 		StructDefs: [][]*g.FieldDef{},
@@ -545,8 +550,8 @@ func TestWhile(t *testing.T) {
 
 func TestReturn(t *testing.T) {
 
-	source := "let a = 1; return a \n- 2; a = 3;"
-	astMod := newModule(source)
+	code := "let a = 1; return a \n- 2; a = 3;"
+	astMod := newModule(code)
 	mod := newCompiler(astMod).Compile()
 
 	ok(t, mod.Pool, &g.Pool{
@@ -583,7 +588,7 @@ func TestReturn(t *testing.T) {
 
 func TestFunc(t *testing.T) {
 
-	source := `
+	code := `
 let a = fn() { 42; }
 let b = fn(x) {
     let c = fn(y) {
@@ -592,11 +597,11 @@ let b = fn(x) {
     x * x + c(x)
 }
 `
-	astMod := newModule(source)
+	astMod := newModule(code)
 	mod := newCompiler(astMod).Compile()
 
 	//fmt.Println("----------------------------")
-	//fmt.Println(source)
+	//fmt.Println(code)
 	//fmt.Println("----------------------------")
 	//fmt.Printf("%s\n", ast.Dump(astMod.Module()))
 	//fmt.Println(mod)
@@ -680,7 +685,7 @@ let b = fn(x) {
 			}},
 	})
 
-	source = `
+	code = `
 let a = fn() { }
 let b = fn(x) { x; }
 let c = fn(x, y) { let z = 4; x * y * z; }
@@ -688,11 +693,11 @@ a()
 b(1)
 c(2, 3)
 `
-	astMod = newModule(source)
+	astMod = newModule(code)
 	mod = newCompiler(astMod).Compile()
 
 	//fmt.Println("----------------------------")
-	//fmt.Println(source)
+	//fmt.Println(code)
 	//fmt.Println("----------------------------")
 	//fmt.Printf("%s\n", ast.Dump(astMod.Module()))
 	//fmt.Println(mod)
@@ -784,7 +789,7 @@ c(2, 3)
 
 func TestCapture(t *testing.T) {
 
-	source := `
+	code := `
 const accumGen = fn(n) {
     return fn(i) {
         n = n + i
@@ -792,7 +797,7 @@ const accumGen = fn(n) {
     }
 }`
 
-	astMod := newModule(source)
+	astMod := newModule(code)
 	mod := newCompiler(astMod).Compile()
 
 	ok(t, mod.Pool, &g.Pool{
@@ -850,7 +855,7 @@ const accumGen = fn(n) {
 		}},
 	})
 
-	source = `
+	code = `
 let z = 2
 const accumGen = fn(n) {
     return fn(i) {
@@ -859,10 +864,10 @@ const accumGen = fn(n) {
     }
 }`
 
-	astMod = newModule(source)
+	astMod = newModule(code)
 	mod = newCompiler(astMod).Compile()
 	//fmt.Println("----------------------------")
-	//fmt.Println(source)
+	//fmt.Println(code)
 	//fmt.Println("----------------------------")
 	//fmt.Printf("%s\n", ast.Dump(astMod.Module()))
 	//fmt.Println(mod)
@@ -932,16 +937,16 @@ const accumGen = fn(n) {
 
 func TestPostfix(t *testing.T) {
 
-	source := `
+	code := `
 let a = 10
 let b = 20
 let c = a++
 let d = b--
 `
-	astMod := newModule(source)
+	astMod := newModule(code)
 	mod := newCompiler(astMod).Compile()
 	//fmt.Println("----------------------------")
-	//fmt.Println(source)
+	//fmt.Println(code)
 	//fmt.Println("----------------------------")
 	//fmt.Printf("%s\n", ast.Dump(astMod.Module()))
 	//fmt.Println(mod)
@@ -986,7 +991,7 @@ let d = b--
 
 func TestTry(t *testing.T) {
 
-	source := `
+	code := `
 let a = 1
 try {
     a++
@@ -996,7 +1001,7 @@ finally {
 }
 assert(a == 2)
 `
-	astMod := newModule(source)
+	astMod := newModule(code)
 	mod := newCompiler(astMod).Compile()
 	tassert(t, mod.Pool.Templates[0].ExceptionHandlers[0] ==
 		g.ExceptionHandler{

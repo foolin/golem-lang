@@ -1,5 +1,5 @@
 // Copyright 2018 The Golem Language Authors. All rights reserved.
-// Use of this source code is governed by a MIT-style
+// Use of this code code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
 package parser
@@ -70,7 +70,7 @@ func failExpr(t *testing.T, p *Parser, expect string) {
 	}
 }
 
-func newParser(source string) *Parser {
+func newParser(code string) *Parser {
 	builtins := map[string]bool{
 		"print":   true,
 		"println": true,
@@ -89,7 +89,13 @@ func newParser(source string) *Parser {
 		return ok
 	}
 
-	return NewParser(scanner.NewScanner("foo", "foo.glm", source), isBuiltIn)
+	return NewParser(
+		scanner.NewScanner(
+			&scanner.Source{
+				Name: "foo",
+				Path: "foo.glm",
+				Code: code,
+			}), isBuiltIn)
 }
 
 func parseExpression(p *Parser) (expr ast.Expression, err error) {
@@ -877,8 +883,8 @@ a() {}`)
 	ok(t, p, "fn() { fn(a) { (a * a); }; }")
 }
 
-func parse(t *testing.T, source string) {
-	p := newParser(source)
+func parse(t *testing.T, code string) {
+	p := newParser(code)
 	_, err := p.ParseModule()
 	if err != nil {
 		t.Error(err, " != nil")

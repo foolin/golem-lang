@@ -99,13 +99,7 @@ func dumpError(cx g.Context, err g.Error) {
 	}
 }
 
-type source struct {
-	name string
-	path string
-	code string
-}
-
-func readSource(filename string) (*source, error) {
+func readSourceFromFile(filename string) (*scanner.Source, error) {
 
 	// code
 	buf, e := ioutil.ReadFile(filename)
@@ -128,7 +122,11 @@ func readSource(filename string) (*source, error) {
 	name := strings.TrimSuffix(filepath.Base(path), ext)
 
 	// done
-	return &source{name, path, code}, nil
+	return &scanner.Source{
+		Name: name,
+		Path: path,
+		Code: code,
+	}, nil
 }
 
 func main() {
@@ -141,11 +139,11 @@ func main() {
 	homePath := homePath()
 
 	// scan
-	source, e := readSource(os.Args[1])
+	source, e := readSourceFromFile(os.Args[1])
 	if e != nil {
 		abExit(e.Error())
 	}
-	scanner := scanner.NewScanner(source.name, source.path, source.code)
+	scanner := scanner.NewScanner(source)
 
 	// command line builtins
 	builtinMgr := g.NewBuiltinManager(g.CommandLineBuiltins)
