@@ -35,7 +35,6 @@ func newCompiler(source string) compiler.Compiler {
 func tassert(t *testing.T, flag bool) {
 	if !flag {
 		t.Error("assertion failure")
-		panic("asdfasdf")
 	}
 }
 

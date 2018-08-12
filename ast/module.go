@@ -10,3 +10,21 @@ type Module struct {
 	Path     string
 	InitFunc *FnExpr
 }
+
+// Imported returns the names of the Modules that are imported by this Module.
+func (m *Module) Imported() []string {
+
+	imports := []string{}
+
+	for _, stmt := range m.InitFunc.Body.Statements {
+		imp, ok := stmt.(*ImportStmt)
+		if !ok {
+			break
+		}
+		for _, ident := range imp.Idents {
+			imports = append(imports, ident.Symbol.Text)
+		}
+	}
+
+	return imports
+}

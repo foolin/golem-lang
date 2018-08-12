@@ -16,20 +16,27 @@ type Analyzer interface {
 }
 
 type analyzer struct {
-	mod     *ast.Module
-	scopes  []ast.Scope
-	loops   []ast.Loop
-	structs []*ast.StructExpr
-	errors  []error
+	mod         *ast.Module
+	scopeStack  []ast.Scope
+	loopStack   []ast.Loop
+	structStack []*ast.StructExpr
+
+	errors []error
 }
 
 // NewAnalyzer creates a new Analyzer
 func NewAnalyzer(mod *ast.Module) Analyzer {
 
-	return &analyzer{mod, []ast.Scope{mod.InitFunc.Scope}, []ast.Loop{}, []*ast.StructExpr{}, nil}
+	return &analyzer{
+		mod:         mod,
+		scopeStack:  []ast.Scope{mod.InitFunc.Scope},
+		loopStack:   []ast.Loop{},
+		structStack: []*ast.StructExpr{},
+		errors:      nil,
+	}
 }
 
-// Analyze analyzes an AST.
+// Analyze analyzes an AST. The names of any imported modules are returned.
 func (a *analyzer) Analyze() []error {
 
 	// visit InitFunc
@@ -70,23 +77,23 @@ func (a *analyzer) Visit(node ast.Node) {
 		a.visitIdentExpr(t)
 
 	case *ast.WhileStmt:
-		a.loops = append(a.loops, t)
+		a.loopStack = append(a.loopStack, t)
 		t.Traverse(a)
-		a.loops = a.loops[:len(a.loops)-1]
+		a.loopStack = a.loopStack[:len(a.loopStack)-1]
 
 	case *ast.ForStmt:
-		a.loops = append(a.loops, t)
+		a.loopStack = append(a.loopStack, t)
 		a.visitFor(t)
-		a.loops = a.loops[:len(a.loops)-1]
+		a.loopStack = a.loopStack[:len(a.loopStack)-1]
 
 	case *ast.BreakStmt:
-		if len(a.loops) == 0 {
+		if len(a.loopStack) == 0 {
 			a.errors = append(a.errors,
 				fmt.Errorf("'break' outside of loop, at %s:%v", a.mod.Path, t.Token.Position))
 		}
 
 	case *ast.ContinueStmt:
-		if len(a.loops) == 0 {
+		if len(a.loopStack) == 0 {
 			a.errors = append(a.errors,
 				fmt.Errorf("'continue' outside of loop, at %s:%v", a.mod.Path, t.Token.Position))
 		}
@@ -268,18 +275,18 @@ func (a *analyzer) visitIdentExpr(ident *ast.IdentExpr) {
 }
 
 func (a *analyzer) visitStructExpr(stc *ast.StructExpr) {
-	a.structs = append(a.structs, stc)
+	a.structStack = append(a.structStack, stc)
 
 	a.pushScope(stc.Scope)
 	stc.Traverse(a)
 	a.popScope()
 
-	a.structs = a.structs[:len(a.structs)-1]
+	a.structStack = a.structStack[:len(a.structStack)-1]
 }
 
 func (a *analyzer) visitThisExpr(this *ast.ThisExpr) {
 
-	n := len(a.structs)
+	n := len(a.structStack)
 	if n == 0 {
 		a.errors = append(a.errors,
 			fmt.Errorf("'this' outside of struct, at %s:%v", a.mod.Path, this.Token.Position))
@@ -293,24 +300,24 @@ func (a *analyzer) visitThisExpr(this *ast.ThisExpr) {
 //-----------------------------------------------------------------------------
 
 func (a *analyzer) pushScope(scope ast.Scope) {
-	a.scopes = append(a.scopes, scope)
+	a.scopeStack = append(a.scopeStack, scope)
 }
 
 func (a *analyzer) popScope() {
-	a.scopes = a.scopes[:len(a.scopes)-1]
+	a.scopeStack = a.scopeStack[:len(a.scopeStack)-1]
 }
 
 // Put a symbol entry into the current scope.
 func (a *analyzer) putVariable(sym string, isConst bool) ast.Variable {
 
-	s := a.scopes[len(a.scopes)-1]
+	s := a.scopeStack[len(a.scopeStack)-1]
 
 	if _, ok := s.GetVariable(sym); ok {
 		// its the caller's responsibility to ensure this never happens
 		panic("symbol is already defined")
 	}
 
-	v := ast.NewVariable(sym, a.incrementNumLocals(len(a.scopes)-1), isConst, false)
+	v := ast.NewVariable(sym, a.incrementNumLocals(len(a.scopeStack)-1), isConst, false)
 	s.PutVariable(sym, v)
 	return v
 }
@@ -320,7 +327,7 @@ func (a *analyzer) putVariable(sym string, isConst bool) ast.Variable {
 func (a *analyzer) incrementNumLocals(from int) int {
 
 	for i := from; i >= 0; i-- {
-		s := a.scopes[i]
+		s := a.scopeStack[i]
 
 		if f, ok := s.(ast.FuncScope); ok {
 			idx := f.NumLocals()
@@ -342,8 +349,8 @@ func (a *analyzer) getVariable(sym string) (ast.Variable, bool) {
 	// while we were looking for the variable
 	funcScopes := []ast.FuncScope{}
 
-	for i := len(a.scopes) - 1; i >= 0; i-- {
-		s := a.scopes[i]
+	for i := len(a.scopeStack) - 1; i >= 0; i-- {
+		s := a.scopeStack[i]
 
 		// we found the variable definition
 		if v, ok := s.GetVariable(sym); ok {
@@ -378,8 +385,8 @@ func (a *analyzer) applyCaptures(
 func (a *analyzer) putThis() ast.Variable {
 
 	// walk up the stack, looking for a StructScope
-	for i := len(a.scopes) - 1; i >= 0; i-- {
-		s := a.scopes[i]
+	for i := len(a.scopeStack) - 1; i >= 0; i-- {
+		s := a.scopeStack[i]
 
 		if _, ok := s.(ast.StructScope); ok {
 

@@ -662,6 +662,9 @@ func TestImport(t *testing.T) {
 	errors := NewAnalyzer(newModule("import foo; let foo = 2;")).Analyze()
 	fail(t, errors, "[Symbol 'foo' is already defined, at foo.glm:1:17]")
 
+	errors = NewAnalyzer(newModule("import foo; import foo;")).Analyze()
+	fail(t, errors, "[Symbol 'foo' is already defined, at foo.glm:1:20]")
+
 	errors = NewAnalyzer(newModule("import foo, zork; foo = 2;")).Analyze()
 	fail(t, errors, "[Symbol 'foo' is constant, at foo.glm:1:19]")
 }

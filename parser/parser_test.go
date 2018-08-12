@@ -5,6 +5,7 @@
 package parser
 
 import (
+	"reflect"
 	"runtime"
 	"testing"
 
@@ -12,7 +13,13 @@ import (
 	"github.com/mjarmy/golem-lang/scanner"
 )
 
-func ok(t *testing.T, p *Parser, expect string) {
+func tassert(t *testing.T, flag bool) {
+	if !flag {
+		t.Error("assertion failure")
+	}
+}
+
+func ok(t *testing.T, p *Parser, expect string) *ast.Module {
 
 	mod, err := p.ParseModule()
 	if err != nil {
@@ -22,6 +29,8 @@ func ok(t *testing.T, p *Parser, expect string) {
 		t.Error(mod.InitFunc.String(), " != ", expect)
 		panic("ok")
 	}
+
+	return mod
 }
 
 func fail(t *testing.T, p *Parser, expect string) {
@@ -834,14 +843,22 @@ func TestSpawn(t *testing.T) {
 }
 
 func TestImport(t *testing.T) {
-	p := newParser("import a;")
-	ok(t, p, "fn() { import a; }")
+
+	p := newParser("")
+	mod := ok(t, p, "fn() {  }")
+	tassert(t, reflect.DeepEqual([]string{}, mod.Imported()))
+
+	p = newParser("import a;")
+	mod = ok(t, p, "fn() { import a; }")
+	tassert(t, reflect.DeepEqual([]string{"a"}, mod.Imported()))
 
 	p = newParser("import a; import b;let z = 3; ")
-	ok(t, p, "fn() { import a; import b; let z = 3; }")
+	mod = ok(t, p, "fn() { import a; import b; let z = 3; }")
+	tassert(t, reflect.DeepEqual([]string{"a", "b"}, mod.Imported()))
 
-	p = newParser("import a, b,c")
-	ok(t, p, "fn() { import a, b, c; }")
+	p = newParser("import a, b,a; import c;   ")
+	mod = ok(t, p, "fn() { import a, b, a; import c; }")
+	tassert(t, reflect.DeepEqual([]string{"a", "b", "a", "c"}, mod.Imported()))
 
 	p = newParser("let z = 3; import a;")
 	fail(t, p, "Unexpected Token 'import' at foo.glm:1:12")
