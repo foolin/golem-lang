@@ -7,7 +7,6 @@ package interpreter
 import (
 	"fmt"
 
-	"github.com/mjarmy/golem-lang/compiler"
 	g "github.com/mjarmy/golem-lang/core"
 	o "github.com/mjarmy/golem-lang/core/opcodes"
 )
@@ -19,7 +18,7 @@ import (
 type Interpreter struct {
 	homePath   string
 	mod        *g.Module
-	pool       *compiler.Pool
+	pool       *g.Pool
 	builtInMgr g.BuiltinManager
 	frames     []*frame
 }
@@ -29,7 +28,7 @@ func NewInterpreter(
 	homePath string,
 	builtInMgr g.BuiltinManager,
 	mod *g.Module,
-	pool *compiler.Pool) *Interpreter {
+	pool *g.Pool) *Interpreter {
 
 	return &Interpreter{
 		homePath:   homePath,

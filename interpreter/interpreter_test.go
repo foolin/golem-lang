@@ -172,7 +172,7 @@ func newCompiler(source string) compiler.Compiler {
 //	}
 //}
 
-func interpret(mod *g.Module, pool *compiler.Pool) *Interpreter {
+func interpret(mod *g.Module, pool *g.Pool) *Interpreter {
 	intp := NewInterpreter(".", builtinMgr, mod, pool)
 	_, err := intp.Init()
 	if err != nil {

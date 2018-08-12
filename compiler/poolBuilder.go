@@ -10,14 +10,6 @@ import (
 	g "github.com/mjarmy/golem-lang/core"
 )
 
-// Pool is a pool of various globally defined items,
-// that is created when Modules are compiled.
-type Pool struct {
-	Constants  []g.Basic
-	Templates  []*g.FuncTemplate
-	StructDefs [][]*g.FieldDef
-}
-
 // poolBuilder builds a Pool
 type poolBuilder struct {
 	constants  *g.HashMap
@@ -69,8 +61,8 @@ func (p *poolBuilder) structDefIndex(def []*g.FieldDef) int {
 	return idx
 }
 
-func (p *poolBuilder) build() *Pool {
-	return &Pool{
+func (p *poolBuilder) build() *g.Pool {
+	return &g.Pool{
 		Constants:  p.makeConstants(),
 		Templates:  p.templates,
 		StructDefs: p.structDefs,

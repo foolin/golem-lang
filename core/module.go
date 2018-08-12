@@ -10,6 +10,10 @@ import (
 	//"github.com/mjarmy/golem-lang/core/opcodes"
 )
 
+//--------------------------------------------------------------
+// Module
+//--------------------------------------------------------------
+
 // Module is a namespace containing compiled Golem code.  Modules are the fundamental
 // unit of compilation in Golem.
 type Module struct {
@@ -21,6 +25,8 @@ type Module struct {
 	Contents Struct
 	// Refs is a list  containers for the values contained in the Contents
 	Refs []*Ref
+	// Pool is a pool of constants, function templates, and struct definitions
+	Pool *Pool
 }
 
 func (m *Module) String() string {
@@ -77,4 +83,35 @@ func (m *Module) String() string {
 	//}
 
 	return buf.String()
+}
+
+//--------------------------------------------------------------
+// Ref
+//--------------------------------------------------------------
+
+// Ref is a container for a Value.  Refs are used by the interpreter
+// as a place to store the value of a variable.
+type Ref struct {
+	Val Value
+}
+
+// NewRef creates a new Ref
+func NewRef(val Value) *Ref {
+	return &Ref{val}
+}
+
+func (r *Ref) String() string {
+	return fmt.Sprintf("Ref(%v)", r.Val)
+}
+
+//--------------------------------------------------------------
+// Pool
+//--------------------------------------------------------------
+
+// Pool is a pool of constants, function templates, and struct definitions
+// used by a given Module
+type Pool struct {
+	Constants  []Basic
+	Templates  []*FuncTemplate
+	StructDefs [][]*FieldDef
 }

@@ -23,7 +23,7 @@ func tassert(t *testing.T, flag bool) {
 	}
 }
 
-func ok(t *testing.T, pool *Pool, expect *Pool) {
+func ok(t *testing.T, pool *g.Pool, expect *g.Pool) {
 
 	if !reflect.DeepEqual(pool.Constants, expect.Constants) {
 		t.Error(pool, " != ", expect)
@@ -86,7 +86,7 @@ func newCompiler(mod *ast.Module) Compiler {
 func TestExpression(t *testing.T) {
 
 	_, pool := newCompiler(newModule("-2 + -1 + -0 + 0 + 1 + 2")).Compile()
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(int64(-2)), g.NewInt(int64(2))},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
@@ -117,7 +117,7 @@ func TestExpression(t *testing.T) {
 	})
 
 	_, pool = newCompiler(newModule("(2 + 3) * -4 / 10")).Compile()
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(int64(2)), g.NewInt(int64(3)), g.NewInt(int64(-4)), g.NewInt(int64(10))},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
@@ -144,7 +144,7 @@ func TestExpression(t *testing.T) {
 	})
 
 	_, pool = newCompiler(newModule("null / true + \nfalse")).Compile()
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
@@ -171,7 +171,7 @@ func TestExpression(t *testing.T) {
 	})
 
 	_, pool = newCompiler(newModule("'a' * 1.23e4")).Compile()
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{g.NewStr("a"), g.NewFloat(float64(12300))},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
@@ -194,7 +194,7 @@ func TestExpression(t *testing.T) {
 	})
 
 	_, pool = newCompiler(newModule("'a' == true")).Compile()
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{g.NewStr("a")},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
@@ -217,7 +217,7 @@ func TestExpression(t *testing.T) {
 	})
 
 	_, pool = newCompiler(newModule("true != false")).Compile()
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
@@ -240,7 +240,7 @@ func TestExpression(t *testing.T) {
 	})
 
 	_, pool = newCompiler(newModule("true > false; true >= false")).Compile()
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
@@ -266,7 +266,7 @@ func TestExpression(t *testing.T) {
 	})
 
 	_, pool = newCompiler(newModule("true < false; true <= false; true <=> false;")).Compile()
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
@@ -295,7 +295,7 @@ func TestExpression(t *testing.T) {
 	})
 
 	_, pool = newCompiler(newModule("let a = 2 && 3;")).Compile()
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(int64(2)), g.NewInt(int64(3))},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
@@ -323,7 +323,7 @@ func TestExpression(t *testing.T) {
 	})
 
 	_, pool = newCompiler(newModule("let a = 2 || 3;")).Compile()
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(int64(2)), g.NewInt(int64(3))},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
@@ -354,7 +354,7 @@ func TestExpression(t *testing.T) {
 func TestAssignment(t *testing.T) {
 
 	_, pool := newCompiler(newModule("let a = 1;\nconst b = \n2;a = 3;")).Compile()
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(2), g.NewInt(3)},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
@@ -404,7 +404,7 @@ func TestIf(t *testing.T) {
 	source := "if (3 == 2) { let a = 42; }"
 	anl := newModule(source)
 	_, pool := newCompiler(anl).Compile()
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(3), g.NewInt(2), g.NewInt(42)},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
@@ -439,7 +439,7 @@ func TestIf(t *testing.T) {
 
 	anl = newModule(source)
 	_, pool = newCompiler(anl).Compile()
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(2), g.NewInt(3), g.NewInt(4)},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
@@ -479,7 +479,7 @@ func TestWhile(t *testing.T) {
 
 	source := "let a = 1; while (0 < 1) { let b = 2; }"
 	_, pool := newCompiler(newModule(source)).Compile()
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(2)},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
@@ -509,7 +509,7 @@ func TestWhile(t *testing.T) {
 
 	source = "let a = 'z'; while (0 < 1) \n{ break; continue; let b = 2; }; let c = 3;"
 	_, pool = newCompiler(newModule(source)).Compile()
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{g.NewStr("z"), g.NewInt(2), g.NewInt(3)},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
@@ -549,7 +549,7 @@ func TestReturn(t *testing.T) {
 	anl := newModule(source)
 	_, pool := newCompiler(anl).Compile()
 
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(2), g.NewInt(3)},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
@@ -601,7 +601,7 @@ let b = fn(x) {
 	//fmt.Printf("%s\n", ast.Dump(anl.Module()))
 	//fmt.Println(mod)
 
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants: []g.Basic{
 			g.NewInt(42),
 			g.NewInt(7)},
@@ -697,7 +697,7 @@ c(2, 3)
 	//fmt.Printf("%s\n", ast.Dump(anl.Module()))
 	//fmt.Println(mod)
 
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(2), g.NewInt(3), g.NewInt(4)},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
@@ -795,7 +795,7 @@ const accumGen = fn(n) {
 	anl := newModule(source)
 	_, pool := newCompiler(anl).Compile()
 
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{&g.FuncTemplate{
@@ -867,7 +867,7 @@ const accumGen = fn(n) {
 	//fmt.Printf("%s\n", ast.Dump(anl.Module()))
 	//fmt.Println(mod)
 
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(2)},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{&g.FuncTemplate{
@@ -946,7 +946,7 @@ let d = b--
 	//fmt.Printf("%s\n", ast.Dump(anl.Module()))
 	//fmt.Println(mod)
 
-	ok(t, pool, &Pool{
+	ok(t, pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(int64(10)), g.NewInt(int64(20))},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{&g.FuncTemplate{

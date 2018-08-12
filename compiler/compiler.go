@@ -18,7 +18,7 @@ import (
 type Compiler interface {
 	ast.Visitor
 
-	Compile() (*g.Module, *Pool)
+	Compile() (*g.Module, *g.Pool)
 }
 
 type compiler struct {
@@ -54,7 +54,7 @@ func NewCompiler(
 }
 
 // Compile compiles a Module
-func (c *compiler) Compile() (*g.Module, *Pool) {
+func (c *compiler) Compile() (*g.Module, *g.Pool) {
 
 	// compile all the funcs
 	for c.funcIdx < len(c.funcs) {
