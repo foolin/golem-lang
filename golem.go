@@ -12,21 +12,23 @@ import (
 	"strings"
 	//"sync"
 
-	"github.com/mjarmy/golem-lang/analyzer"
 	"github.com/mjarmy/golem-lang/compiler"
 	g "github.com/mjarmy/golem-lang/core"
 	"github.com/mjarmy/golem-lang/interpreter"
-	"github.com/mjarmy/golem-lang/parser"
 	"github.com/mjarmy/golem-lang/scanner"
 )
 
 var version = "0.8.2"
 
-//var libModules = make(map[string]g.Module)
-//var libMutex = &sync.Mutex{}
+func exitError(e error) {
+	fmt.Printf("%s\n", e.Error())
+	os.Exit(-1)
+}
 
-func abExit(msg string) {
-	fmt.Printf("%s\n", msg)
+func exitErrors(errors []error) {
+	for _, e := range errors {
+		fmt.Printf("%s\n", e.Error())
+	}
 	os.Exit(-1)
 }
 
@@ -34,10 +36,13 @@ func abExit(msg string) {
 func homePath() string {
 	ex, err := os.Executable()
 	if err != nil {
-		abExit(err.Error())
+		exitError(err)
 	}
 	return filepath.Dir(ex)
 }
+
+//var libModules = make(map[string]g.Module)
+//var libMutex = &sync.Mutex{}
 
 //// lookupModule looks up a module by to loadng a plugin from the '$HOME/lib' directory.
 //func lookupModule(homePath, name string) (g.Module, g.Error) {
@@ -138,39 +143,23 @@ func main() {
 
 	homePath := homePath()
 
-	// scan
-	source, e := readSourceFromFile(os.Args[1])
-	if e != nil {
-		abExit(e.Error())
-	}
-	scanner := scanner.NewScanner(source)
-
 	// command line builtins
 	builtinMgr := g.NewBuiltinManager(g.CommandLineBuiltins)
 
-	// parse
-	parser := parser.NewParser(scanner, builtinMgr.Contains)
-	astMod, e := parser.ParseModule()
+	// read source
+	source, e := readSourceFromFile(os.Args[1])
 	if e != nil {
-		abExit(e.Error())
-	}
-
-	// analyze
-	anl := analyzer.NewAnalyzer(astMod)
-	errors := anl.Analyze()
-	if len(errors) > 0 {
-		for _, e := range errors {
-			fmt.Printf("%s\n", e)
-			os.Exit(-1)
-		}
+		exitError(e)
 	}
 
 	// compile
-	cmp := compiler.NewCompiler(builtinMgr, astMod)
-	mod := cmp.Compile()
+	mods, errs := compiler.CompileSourceFully(builtinMgr, source, nil)
+	if len(errs) > 0 {
+		exitErrors(errs)
+	}
 
-	// interpret with modules from standard library
-	intp := interpreter.NewInterpreter(homePath, builtinMgr, []*g.Module{mod})
+	// interpret
+	intp := interpreter.NewInterpreter(homePath, builtinMgr, mods)
 	_, err := intp.InitModules()
 	if err != nil {
 		dumpError(intp, err)
@@ -178,11 +167,11 @@ func main() {
 	}
 
 	// run main, if it exists
-	mainVal, mainErr := mod.Contents.GetField(intp, g.NewStr("main"))
+	mainVal, mainErr := mods[0].Contents.GetField(intp, g.NewStr("main"))
 	if mainErr == nil {
 		mainFn, ok := mainVal.(g.BytecodeFunc)
 		if !ok {
-			abExit("'main' is not a function")
+			exitError(fmt.Errorf("'main' is not a function"))
 		}
 
 		// gather up the command line arguments into a single list
@@ -197,7 +186,7 @@ func main() {
 			}
 			params = append(params, g.NewList(args))
 		} else if arity > 1 {
-			abExit("'main' has too many arguments")
+			exitError(fmt.Errorf("'main' has too many arguments"))
 		}
 
 		// evaluate the main function

@@ -18,6 +18,7 @@ import (
 type Interpreter struct {
 	homePath   string
 	modules    []*g.Module
+	modMap     map[string]*g.Module
 	builtInMgr g.BuiltinManager
 	frames     []*frame
 }
@@ -28,9 +29,15 @@ func NewInterpreter(
 	builtInMgr g.BuiltinManager,
 	modules []*g.Module) *Interpreter {
 
+	modMap := make(map[string]*g.Module)
+	for _, m := range modules {
+		modMap[m.Name] = m
+	}
+
 	return &Interpreter{
 		homePath:   homePath,
 		modules:    modules,
+		modMap:     modMap,
 		builtInMgr: builtInMgr,
 		frames:     []*frame{},
 	}
@@ -79,6 +86,13 @@ func (i *Interpreter) Eval(fn g.BytecodeFunc, params []g.Value) (g.Value, g.Erro
 }
 
 //-------------------------------------------------------------------------
+
+func (i *Interpreter) lookupModule(name string) (*g.Module, g.Error) {
+	if mod, ok := i.modMap[name]; ok {
+		return mod, nil
+	}
+	return nil, g.UndefinedModuleError(name)
+}
 
 func (i *Interpreter) eval(fn g.BytecodeFunc, locals []*g.Ref) (result g.Value, errTrace g.Error) {
 

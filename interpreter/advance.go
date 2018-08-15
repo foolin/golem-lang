@@ -509,22 +509,20 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 	case o.ImportModule:
 
-		panic("TODO")
+		// get the module name from the pool
+		idx := index(opc, f.ip)
+		name, ok := pool.Constants[idx].(g.Str)
+		assert(ok)
 
-		//// get the module name from the pool
-		//idx := index(opc, f.ip)
-		//name, ok := pool.Constants[idx].(g.Str)
-		//assert(ok)
+		// Lookup the module.
+		mod, err := i.lookupModule(name.String())
+		if err != nil {
+			return nil, err
+		}
 
-		//// Lookup the module.
-		//mod, err := i.lookupModule(name.String())
-		//if err != nil {
-		//	return nil, err
-		//}
-
-		//// Push the module's contents onto the stack
-		//f.stack = append(f.stack, mod.GetContents())
-		//f.ip += 3
+		// Push the module's contents onto the stack
+		f.stack = append(f.stack, mod.Contents)
+		f.ip += 3
 
 	case o.LoadBuiltin:
 		idx := index(opc, f.ip)

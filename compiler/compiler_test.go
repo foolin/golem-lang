@@ -9,11 +9,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/mjarmy/golem-lang/analyzer"
-	"github.com/mjarmy/golem-lang/ast"
 	g "github.com/mjarmy/golem-lang/core"
 	o "github.com/mjarmy/golem-lang/core/opcodes"
-	"github.com/mjarmy/golem-lang/parser"
 	"github.com/mjarmy/golem-lang/scanner"
 )
 
@@ -55,42 +52,21 @@ func ok(t *testing.T, pool *g.Pool, expect *g.Pool) {
 	}
 }
 
-var builtInMgr = g.NewBuiltinManager(g.CommandLineBuiltins)
+var builtinMgr = g.NewBuiltinManager(g.CommandLineBuiltins)
 
-func newModule(code string) *ast.Module {
+func testCompile(t *testing.T, code string) *g.Module {
 
-	scanner := scanner.NewScanner(
-		&scanner.Source{
-			Name: "foo",
-			Path: "foo.glm",
-			Code: code,
-		})
-	parser := parser.NewParser(scanner, builtInMgr.Contains)
-	mod, err := parser.ParseModule()
-	if err != nil {
-		panic(err)
-	}
+	source := &scanner.Source{Name: "foo", Path: "foo.glm", Code: code}
+	mods, errs := CompileSourceFully(builtinMgr, source, nil)
+	tassert(t, errs == nil)
+	tassert(t, len(mods) == 1)
 
-	anl := analyzer.NewAnalyzer(mod)
-	errors := anl.Analyze()
-	if len(errors) > 0 {
-		panic(err)
-	}
-	return mod
+	return mods[0]
 }
-
-func newCompiler(mod *ast.Module) Compiler {
-	return NewCompiler(builtInMgr, mod)
-}
-
-//func emptyContents() g.Struct {
-//	stc, _ := g.NewStruct([]g.Field{}, true)
-//	return stc
-//}
 
 func TestExpression(t *testing.T) {
 
-	mod := newCompiler(newModule("-2 + -1 + -0 + 0 + 1 + 2")).Compile()
+	mod := testCompile(t, "-2 + -1 + -0 + 0 + 1 + 2")
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(int64(-2)), g.NewInt(int64(2))},
 		StructDefs: [][]*g.FieldDef{},
@@ -121,7 +97,7 @@ func TestExpression(t *testing.T) {
 			}},
 	})
 
-	mod = newCompiler(newModule("(2 + 3) * -4 / 10")).Compile()
+	mod = testCompile(t, "(2 + 3) * -4 / 10")
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(int64(2)), g.NewInt(int64(3)), g.NewInt(int64(-4)), g.NewInt(int64(10))},
 		StructDefs: [][]*g.FieldDef{},
@@ -148,7 +124,7 @@ func TestExpression(t *testing.T) {
 			}},
 	})
 
-	mod = newCompiler(newModule("null / true + \nfalse")).Compile()
+	mod = testCompile(t, "null / true + \nfalse")
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{},
 		StructDefs: [][]*g.FieldDef{},
@@ -175,7 +151,7 @@ func TestExpression(t *testing.T) {
 			}},
 	})
 
-	mod = newCompiler(newModule("'a' * 1.23e4")).Compile()
+	mod = testCompile(t, "'a' * 1.23e4")
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{g.NewStr("a"), g.NewFloat(float64(12300))},
 		StructDefs: [][]*g.FieldDef{},
@@ -198,7 +174,7 @@ func TestExpression(t *testing.T) {
 			}},
 	})
 
-	mod = newCompiler(newModule("'a' == true")).Compile()
+	mod = testCompile(t, "'a' == true")
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{g.NewStr("a")},
 		StructDefs: [][]*g.FieldDef{},
@@ -221,7 +197,7 @@ func TestExpression(t *testing.T) {
 			}},
 	})
 
-	mod = newCompiler(newModule("true != false")).Compile()
+	mod = testCompile(t, "true != false")
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{},
 		StructDefs: [][]*g.FieldDef{},
@@ -244,7 +220,7 @@ func TestExpression(t *testing.T) {
 			}},
 	})
 
-	mod = newCompiler(newModule("true > false; true >= false")).Compile()
+	mod = testCompile(t, "true > false; true >= false")
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{},
 		StructDefs: [][]*g.FieldDef{},
@@ -270,7 +246,7 @@ func TestExpression(t *testing.T) {
 			}},
 	})
 
-	mod = newCompiler(newModule("true < false; true <= false; true <=> false;")).Compile()
+	mod = testCompile(t, "true < false; true <= false; true <=> false;")
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{},
 		StructDefs: [][]*g.FieldDef{},
@@ -299,7 +275,7 @@ func TestExpression(t *testing.T) {
 			}},
 	})
 
-	mod = newCompiler(newModule("let a = 2 && 3;")).Compile()
+	mod = testCompile(t, "let a = 2 && 3;")
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(int64(2)), g.NewInt(int64(3))},
 		StructDefs: [][]*g.FieldDef{},
@@ -327,7 +303,7 @@ func TestExpression(t *testing.T) {
 			}},
 	})
 
-	mod = newCompiler(newModule("let a = 2 || 3;")).Compile()
+	mod = testCompile(t, "let a = 2 || 3;")
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(int64(2)), g.NewInt(int64(3))},
 		StructDefs: [][]*g.FieldDef{},
@@ -358,7 +334,7 @@ func TestExpression(t *testing.T) {
 
 func TestAssignment(t *testing.T) {
 
-	mod := newCompiler(newModule("let a = 1;\nconst b = \n2;a = 3;")).Compile()
+	mod := testCompile(t, "let a = 1;\nconst b = \n2;a = 3;")
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(2), g.NewInt(3)},
 		StructDefs: [][]*g.FieldDef{},
@@ -407,8 +383,7 @@ func TestShift(t *testing.T) {
 func TestIf(t *testing.T) {
 
 	code := "if (3 == 2) { let a = 42; }"
-	astMod := newModule(code)
-	mod := newCompiler(astMod).Compile()
+	mod := testCompile(t, code)
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(3), g.NewInt(2), g.NewInt(42)},
 		StructDefs: [][]*g.FieldDef{},
@@ -442,8 +417,7 @@ func TestIf(t *testing.T) {
 		}
 		let d = 4`
 
-	astMod = newModule(code)
-	mod = newCompiler(astMod).Compile()
+	mod = testCompile(t, code)
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(2), g.NewInt(3), g.NewInt(4)},
 		StructDefs: [][]*g.FieldDef{},
@@ -483,7 +457,7 @@ func TestIf(t *testing.T) {
 func TestWhile(t *testing.T) {
 
 	code := "let a = 1; while (0 < 1) { let b = 2; }"
-	mod := newCompiler(newModule(code)).Compile()
+	mod := testCompile(t, code)
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(2)},
 		StructDefs: [][]*g.FieldDef{},
@@ -513,7 +487,7 @@ func TestWhile(t *testing.T) {
 	})
 
 	code = "let a = 'z'; while (0 < 1) \n{ break; continue; let b = 2; }; let c = 3;"
-	mod = newCompiler(newModule(code)).Compile()
+	mod = testCompile(t, code)
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{g.NewStr("z"), g.NewInt(2), g.NewInt(3)},
 		StructDefs: [][]*g.FieldDef{},
@@ -551,8 +525,7 @@ func TestWhile(t *testing.T) {
 func TestReturn(t *testing.T) {
 
 	code := "let a = 1; return a \n- 2; a = 3;"
-	astMod := newModule(code)
-	mod := newCompiler(astMod).Compile()
+	mod := testCompile(t, code)
 
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{g.NewInt(2), g.NewInt(3)},
@@ -597,8 +570,7 @@ let b = fn(x) {
     x * x + c(x)
 }
 `
-	astMod := newModule(code)
-	mod := newCompiler(astMod).Compile()
+	mod := testCompile(t, code)
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(code)
@@ -693,8 +665,7 @@ a()
 b(1)
 c(2, 3)
 `
-	astMod = newModule(code)
-	mod = newCompiler(astMod).Compile()
+	mod = testCompile(t, code)
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(code)
@@ -797,8 +768,7 @@ const accumGen = fn(n) {
     }
 }`
 
-	astMod := newModule(code)
-	mod := newCompiler(astMod).Compile()
+	mod := testCompile(t, code)
 
 	ok(t, mod.Pool, &g.Pool{
 		Constants:  []g.Basic{},
@@ -864,8 +834,7 @@ const accumGen = fn(n) {
     }
 }`
 
-	astMod = newModule(code)
-	mod = newCompiler(astMod).Compile()
+	mod = testCompile(t, code)
 	//fmt.Println("----------------------------")
 	//fmt.Println(code)
 	//fmt.Println("----------------------------")
@@ -943,8 +912,7 @@ let b = 20
 let c = a++
 let d = b--
 `
-	astMod := newModule(code)
-	mod := newCompiler(astMod).Compile()
+	mod := testCompile(t, code)
 	//fmt.Println("----------------------------")
 	//fmt.Println(code)
 	//fmt.Println("----------------------------")
@@ -1001,8 +969,7 @@ finally {
 }
 assert(a == 2)
 `
-	astMod := newModule(code)
-	mod := newCompiler(astMod).Compile()
+	mod := testCompile(t, code)
 	tassert(t, mod.Pool.Templates[0].ExceptionHandlers[0] ==
 		g.ExceptionHandler{
 			Begin:   5,
@@ -1010,4 +977,28 @@ assert(a == 2)
 			Catch:   -1,
 			Finally: 14,
 		})
+}
+
+func TestImport(t *testing.T) {
+
+	srcMain := &scanner.Source{Name: "foo", Path: "foo.glm", Code: "import a, b;"}
+	sourceMap := map[string]*scanner.Source{
+		"a": &scanner.Source{Name: "a", Path: "a.glm", Code: "import c;"},
+		"b": &scanner.Source{Name: "b", Path: "b.glm", Code: "import c;"},
+		"c": &scanner.Source{Name: "c", Path: "c.glm", Code: ""},
+	}
+	resolver := func(moduleName string) (*scanner.Source, error) {
+		if src, ok := sourceMap[moduleName]; ok {
+			return src, nil
+		}
+		return nil, g.UndefinedModuleError(moduleName)
+	}
+
+	mods, errs := CompileSourceFully(builtinMgr, srcMain, resolver)
+	tassert(t, errs == nil)
+	tassert(t, len(mods) == 4)
+	tassert(t, mods[0].Name == "foo")
+	tassert(t, mods[1].Name == "a")
+	tassert(t, mods[2].Name == "b")
+	tassert(t, mods[3].Name == "c")
 }

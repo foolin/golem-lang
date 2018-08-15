@@ -6,10 +6,8 @@ package interpreter
 
 import (
 	"fmt"
-	"github.com/mjarmy/golem-lang/analyzer"
 	"github.com/mjarmy/golem-lang/compiler"
 	g "github.com/mjarmy/golem-lang/core"
-	"github.com/mjarmy/golem-lang/parser"
 	"github.com/mjarmy/golem-lang/scanner"
 	"reflect"
 	"testing"
@@ -17,36 +15,26 @@ import (
 
 var builtinMgr = g.NewBuiltinManager(g.CommandLineBuiltins)
 
-func newCompiler(code string) compiler.Compiler {
-
-	scanner := scanner.NewScanner(
-		&scanner.Source{
-			Name: "foo",
-			Path: "foo.glm",
-			Code: code,
-		})
-	parser := parser.NewParser(scanner, builtinMgr.Contains)
-	mod, err := parser.ParseModule()
-	if err != nil {
-		panic(err.Error())
-	}
-	errors := analyzer.NewAnalyzer(mod).Analyze()
-	if len(errors) > 0 {
-		panic(fmt.Sprintf("%v", errors))
-	}
-
-	return compiler.NewCompiler(builtinMgr, mod)
-}
-
 func tassert(t *testing.T, flag bool) {
 	if !flag {
 		t.Error("assertion failure")
+		panic("assertion failure")
 	}
+}
+
+func testCompile(t *testing.T, code string) *g.Module {
+
+	source := &scanner.Source{Name: "foo", Path: "foo.glm", Code: code}
+	mods, errs := compiler.CompileSourceFully(builtinMgr, source, nil)
+	tassert(t, errs == nil)
+	tassert(t, len(mods) == 1)
+
+	return mods[0]
 }
 
 func okExpr(t *testing.T, code string, expect g.Value) {
 
-	mod := newCompiler(code).Compile()
+	mod := testCompile(t, code)
 	intp := NewInterpreter(".", builtinMgr, []*g.Module{mod})
 
 	result, err := intp.InitModules()
@@ -63,7 +51,7 @@ func okExpr(t *testing.T, code string, expect g.Value) {
 
 func failExpr(t *testing.T, code string, expect string) {
 
-	mod := newCompiler(code).Compile()
+	mod := testCompile(t, code)
 	intp := NewInterpreter(".", builtinMgr, []*g.Module{mod})
 
 	result, err := intp.InitModules()
@@ -87,7 +75,7 @@ func okRef(t *testing.T, intp *Interpreter, ref *g.Ref, expect g.Value) {
 
 func okMod(t *testing.T, code string, expect g.Value, expectRefs []*g.Ref) {
 
-	mod := newCompiler(code).Compile()
+	mod := testCompile(t, code)
 	intp := NewInterpreter(".", builtinMgr, []*g.Module{mod})
 
 	result, err := intp.InitModules()
@@ -106,8 +94,8 @@ func okMod(t *testing.T, code string, expect g.Value, expectRefs []*g.Ref) {
 	}
 }
 
-func interpret(mod *g.Module) *Interpreter {
-	intp := NewInterpreter(".", builtinMgr, []*g.Module{mod})
+func interpret(mods []*g.Module) *Interpreter {
+	intp := NewInterpreter(".", builtinMgr, mods)
 	_, err := intp.InitModules()
 	if err != nil {
 		panic(err)
@@ -117,7 +105,7 @@ func interpret(mod *g.Module) *Interpreter {
 
 func fail(t *testing.T, code string, err g.Error, stack []string) *g.Module {
 
-	mod := newCompiler(code).Compile()
+	mod := testCompile(t, code)
 	intp := NewInterpreter(".", builtinMgr, []*g.Module{mod})
 
 	expect := intp.makeErrorTrace(err, stack)
@@ -136,7 +124,7 @@ func fail(t *testing.T, code string, err g.Error, stack []string) *g.Module {
 
 func failErr(t *testing.T, code string, expect g.Error) {
 
-	mod := newCompiler(code).Compile()
+	mod := testCompile(t, code)
 	intp := NewInterpreter(".", builtinMgr, []*g.Module{mod})
 
 	result, err := intp.InitModules()
@@ -373,8 +361,8 @@ let x = struct { a: 0 }
 let y = struct { a: 1, b: 2 }
 let z = struct { a: 3, b: 4, c: struct { d: 5 } }
 `
-	mod := newCompiler(code).Compile()
-	i := interpret(mod)
+	mod := testCompile(t, code)
+	i := interpret([]*g.Module{mod})
 
 	okRef(t, i, mod.Refs[0], newStruct([]g.Field{}))
 	okRef(t, i, mod.Refs[1], newStruct([]g.Field{
@@ -393,8 +381,8 @@ let x = struct { a: 5 }
 let y = x.a
 x.a = 6
 `
-	mod = newCompiler(code).Compile()
-	interpret(mod)
+	mod = testCompile(t, code)
+	interpret([]*g.Module{mod})
 
 	okRef(t, i, mod.Refs[0], newStruct([]g.Field{
 		g.NewField("a", false, g.NewInt(6))}))
@@ -410,12 +398,12 @@ let a = struct {
 let b = a.plus()
 let c = a.minus()
 	`
-	mod = newCompiler(code).Compile()
+	mod = testCompile(t, code)
 	fmt.Println("----------------------------")
 	fmt.Println(code)
 	fmt.Println(mod)
 
-	interpret(mod)
+	interpret([]*g.Module{mod})
 	okRef(t, i, mod.Refs[2], g.NewInt(13))
 	okRef(t, i, mod.Refs[3], g.NewInt(3))
 
@@ -423,8 +411,8 @@ let c = a.minus()
 let a = null
 a = struct { x: 8 }.x = 5
 `
-	mod = newCompiler(code).Compile()
-	interpret(mod)
+	mod = testCompile(t, code)
+	interpret([]*g.Module{mod})
 
 	okRef(t, i, mod.Refs[0], g.NewInt(5))
 
@@ -437,8 +425,8 @@ let b = struct { x: this has 'x', y: this has 'z' }
 assert(b.x)
 assert(!b.y)
 `
-	mod = newCompiler(code).Compile()
-	interpret(mod)
+	mod = testCompile(t, code)
+	interpret([]*g.Module{mod})
 }
 
 func TestErrStack(t *testing.T) {
@@ -473,8 +461,8 @@ let b = 20
 let c = a++
 let d = b--
 `
-	mod := newCompiler(code).Compile()
-	i := interpret(mod)
+	mod := testCompile(t, code)
+	i := interpret([]*g.Module{mod})
 
 	okRef(t, i, mod.Refs[0], g.NewInt(11))
 	okRef(t, i, mod.Refs[1], g.NewInt(19))
@@ -487,8 +475,8 @@ let b = struct { y: 20 }
 let c = a.x++
 let d = b.y--
 `
-	mod = newCompiler(code).Compile()
-	interpret(mod)
+	mod = testCompile(t, code)
+	interpret([]*g.Module{mod})
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(code)
@@ -508,8 +496,8 @@ func TestTernaryIf(t *testing.T) {
 let a = true ? 3 : 4;
 let b = false ? 5 : 6;
 `
-	mod := newCompiler(code).Compile()
-	i := interpret(mod)
+	mod := testCompile(t, code)
+	i := interpret([]*g.Module{mod})
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(code)
@@ -543,8 +531,8 @@ println(a,b);
 assert(print == print);
 assert(print != println);
 `
-	mod := newCompiler(code).Compile()
-	i := interpret(mod)
+	mod := testCompile(t, code)
+	i := interpret([]*g.Module{mod})
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(code)
@@ -558,8 +546,8 @@ assert(print != println);
 	code = `
 let a = assert(true);
 `
-	mod = newCompiler(code).Compile()
-	interpret(mod)
+	mod = testCompile(t, code)
+	interpret([]*g.Module{mod})
 	okRef(t, i, mod.Refs[0], g.True)
 
 	fail(t, "assert(1, 2);",
@@ -584,8 +572,8 @@ func TestDecl(t *testing.T) {
 let a, b = 0;
 const c = 1, d;
 `
-	mod := newCompiler(code).Compile()
-	i := interpret(mod)
+	mod := testCompile(t, code)
+	i := interpret([]*g.Module{mod})
 
 	//fmt.Println("----------------------------")
 	//fmt.Println(code)
@@ -606,8 +594,8 @@ for n in [1,2,3] {
 }
 assert(a == 6);
 `
-	mod := newCompiler(code).Compile()
-	interpret(mod)
+	mod := testCompile(t, code)
+	interpret([]*g.Module{mod})
 
 	code = `
 let keys = '';
@@ -619,8 +607,8 @@ for (k, v)  in dict {'a': 1, 'b': 2, 'c': 3} {
 assert(keys == 'bac');
 assert(values == 6);
 `
-	mod = newCompiler(code).Compile()
-	interpret(mod)
+	mod = testCompile(t, code)
+	interpret([]*g.Module{mod})
 
 	code = `
 let entries = '';
@@ -629,8 +617,8 @@ for e in dict {'a': 1, 'b': 2, 'c': 3} {
 }
 assert(entries == '(b, 2)(a, 1)(c, 3)');
 `
-	mod = newCompiler(code).Compile()
-	interpret(mod)
+	mod = testCompile(t, code)
+	interpret([]*g.Module{mod})
 
 	code = `
 let keys = '';
@@ -642,8 +630,8 @@ for (k, v)  in [('a', 1), ('b', 2), ('c', 3)] {
 assert(keys == 'abc');
 assert(values == 6);
 `
-	mod = newCompiler(code).Compile()
-	interpret(mod)
+	mod = testCompile(t, code)
+	interpret([]*g.Module{mod})
 
 	code = "for (k, v)  in [1, 2, 3] {}"
 	fail(t, code,
@@ -674,8 +662,8 @@ for i in range(0, 4) {
 }
 assert(s == 'abbc')
 `
-	mod := newCompiler(code).Compile()
-	interpret(mod)
+	mod := testCompile(t, code)
+	interpret([]*g.Module{mod})
 
 	code = `
 let s = ''
@@ -690,8 +678,8 @@ for i in range(0, 4) {
 }
 assert(s == 'aab')
 `
-	mod = newCompiler(code).Compile()
-	interpret(mod)
+	mod = testCompile(t, code)
+	interpret([]*g.Module{mod})
 
 	code = `
 let s = ''
@@ -706,8 +694,8 @@ for i in range(0, 4) {
 }
 assert(s == 'aab')
 `
-	mod = newCompiler(code).Compile()
-	interpret(mod)
+	mod = testCompile(t, code)
+	interpret([]*g.Module{mod})
 }
 
 func TestGetField(t *testing.T) {
@@ -808,7 +796,7 @@ try {
     a++
 }
 `
-	//mod = newCompiler(code).Compile()
+	//mod = testCompile(t, code)
 	//fmt.Println("----------------------------")
 	//fmt.Println(code)
 	//fmt.Println(mod)
@@ -829,8 +817,8 @@ let b = fn() {
 };
 assert(b() == 1);
 `
-	mod := newCompiler(code).Compile()
-	interpret(mod)
+	mod := testCompile(t, code)
+	interpret([]*g.Module{mod})
 
 	code = `
 let a = 1;
@@ -848,8 +836,8 @@ let b = fn() {
 assert(b() == 1);
 assert(a == 1);
 `
-	mod = newCompiler(code).Compile()
-	interpret(mod)
+	mod = testCompile(t, code)
+	interpret([]*g.Module{mod})
 
 	code = `
 try {
@@ -886,8 +874,8 @@ try {
     assert(e.stackTrace == ['    at foo.glm:3']);
 }
 `
-	mod := newCompiler(code).Compile()
-	interpret(mod)
+	mod := testCompile(t, code)
+	interpret([]*g.Module{mod})
 
 	code = `
 try {
@@ -902,8 +890,8 @@ try {
     assert(e.stackTrace == ['    at foo.glm:6']);
 }
 `
-	mod = newCompiler(code).Compile()
-	interpret(mod)
+	mod = testCompile(t, code)
+	interpret([]*g.Module{mod})
 
 	code = `
 let a = 0;
@@ -921,8 +909,8 @@ try {
 assert(a == 1);
 assert(b == 2);
 `
-	mod = newCompiler(code).Compile()
-	interpret(mod)
+	mod = testCompile(t, code)
+	interpret([]*g.Module{mod})
 
 	code = `
 try {
@@ -940,8 +928,8 @@ try {
     assert(e.msg == "Expected Hashable Type")
 }
 `
-	mod = newCompiler(code).Compile()
-	interpret(mod)
+	mod = testCompile(t, code)
+	interpret([]*g.Module{mod})
 
 }
 
@@ -958,8 +946,8 @@ try {
 }
 assert(a == 2);
 `
-	mod := newCompiler(code).Compile()
-	interpret(mod)
+	mod := testCompile(t, code)
+	interpret([]*g.Module{mod})
 
 	code = `
 let a = 0;
@@ -976,8 +964,8 @@ let b = f();
 assert(b == 1);
 assert(a == 2);
 `
-	mod = newCompiler(code).Compile()
-	interpret(mod)
+	mod = testCompile(t, code)
+	interpret([]*g.Module{mod})
 
 	code = `
 let a = 0
@@ -996,8 +984,8 @@ try {
 assert(a == 1)
 assert(b == 2)
 `
-	mod = newCompiler(code).Compile()
-	interpret(mod)
+	mod = testCompile(t, code)
+	interpret([]*g.Module{mod})
 }
 
 func TestThrow(t *testing.T) {
@@ -1010,8 +998,8 @@ try {
     assert(e.stackTrace == ['    at foo.glm:3']);
 }
 `
-	mod := newCompiler(code).Compile()
-	interpret(mod)
+	mod := testCompile(t, code)
+	interpret([]*g.Module{mod})
 }
 
 func TestIntrinsicAssign(t *testing.T) {
@@ -1023,8 +1011,8 @@ try {
     assert(e.msg == "Expected Struct");
 }
 `
-	mod := newCompiler(code).Compile()
-	interpret(mod)
+	mod := testCompile(t, code)
+	interpret([]*g.Module{mod})
 }
 
 func okVal(t *testing.T, val g.Value, err g.Error, expect g.Value) {
@@ -1056,8 +1044,8 @@ let a = 0;
 const b = 1;
 fn main(args) {}
 `
-	mod := newCompiler(code).Compile()
-	i := interpret(mod)
+	mod := testCompile(t, code)
+	i := interpret([]*g.Module{mod})
 	tassert(t, reflect.DeepEqual(mod.Contents.FieldNames(), []string{"b", "a", "main"}))
 
 	v, err := mod.Contents.GetField(i, g.NewStr("a"))
@@ -1097,8 +1085,8 @@ assert(
     [type(dict{}), type(set{}), type(struct{}), type(chan())] ==
     ["Dict", "Set", "Struct", "Chan"]);
 `
-	mod := newCompiler(code).Compile()
-	interpret(mod)
+	mod := testCompile(t, code)
+	interpret([]*g.Module{mod})
 }
 
 func TestRawString(t *testing.T) {
@@ -1113,49 +1101,30 @@ func TestRawString(t *testing.T) {
 			"\tassert(s[4:6] == 'cd')\n" +
 			"\tassert(s[7:-1] == 'efgh')"
 
-	mod := newCompiler(code).Compile()
-	interpret(mod)
+	mod := testCompile(t, code)
+	interpret([]*g.Module{mod})
 }
 
-////type testModule struct {
-////	name     string
-////	contents g.Struct
-////}
-////
-////func (t *testModule) GetModuleName() string { return t.name }
-////func (t *testModule) GetContents() g.Struct { return t.contents }
-////
-////func importResolver() func(homePath string, name string) (g.Module, g.Error) {
-////	stc, err := g.NewStruct([]g.Field{
-////		g.NewField("a", true, g.One)},
-////		false)
-////	if err != nil {
-////		panic("invalid struct")
-////	}
-////
-////	foo := &testModule{"foo", stc}
-////	return func(homePath, name string) (g.Module, g.Error) {
-////		if name == "foo" {
-////			return foo, nil
-////		}
-////		return nil, g.UndefinedModuleError(name)
-////	}
-////}
-//
+func TestImport(t *testing.T) {
 
-////func TestImport(t *testing.T) {
-////	code := `
-////import foo
-////assert(foo.a == 1)
-////`
-////	mod :=  newCompiler(code).Compile()
-////	interpret(mod)
-////
-////	code = `
-////import foo, bar
-////`
-////	fail(t, code,
-////		g.UndefinedModuleError("bar"),
-////		[]string{
-////			"    at foo.glm:2"})
-////}
+	srcMain := &scanner.Source{Name: "foo", Path: "foo.glm", Code: `
+import a, b, c
+assert([1, 2, 3] == [a.x, b.y, c.z])
+`}
+	sourceMap := map[string]*scanner.Source{
+		"a": &scanner.Source{Name: "a", Path: "a.glm", Code: "import c; let x = 1;"},
+		"b": &scanner.Source{Name: "b", Path: "b.glm", Code: "import c; let y = c.z - 1;"},
+		"c": &scanner.Source{Name: "c", Path: "c.glm", Code: "let z = 3;"},
+	}
+	resolver := func(moduleName string) (*scanner.Source, error) {
+		if src, ok := sourceMap[moduleName]; ok {
+			return src, nil
+		}
+		return nil, g.UndefinedModuleError(moduleName)
+	}
+
+	mods, errs := compiler.CompileSourceFully(builtinMgr, srcMain, resolver)
+	tassert(t, errs == nil)
+	tassert(t, len(mods) == 4)
+	interpret(mods)
+}

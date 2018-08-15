@@ -11,8 +11,8 @@ type Module struct {
 	InitFunc *FnExpr
 }
 
-// Imported returns the names of the Modules that are imported by this Module.
-func (m *Module) Imported() []string {
+// Imports returns the names of the Modules that are imported by this Module.
+func (m *Module) Imports() []string {
 
 	imports := []string{}
 

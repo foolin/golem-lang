@@ -852,19 +852,19 @@ func TestImport(t *testing.T) {
 
 	p := newParser("")
 	mod := ok(t, p, "fn() {  }")
-	tassert(t, reflect.DeepEqual([]string{}, mod.Imported()))
+	tassert(t, reflect.DeepEqual([]string{}, mod.Imports()))
 
 	p = newParser("import a;")
 	mod = ok(t, p, "fn() { import a; }")
-	tassert(t, reflect.DeepEqual([]string{"a"}, mod.Imported()))
+	tassert(t, reflect.DeepEqual([]string{"a"}, mod.Imports()))
 
 	p = newParser("import a; import b;let z = 3; ")
 	mod = ok(t, p, "fn() { import a; import b; let z = 3; }")
-	tassert(t, reflect.DeepEqual([]string{"a", "b"}, mod.Imported()))
+	tassert(t, reflect.DeepEqual([]string{"a", "b"}, mod.Imports()))
 
 	p = newParser("import a, b,a; import c;   ")
 	mod = ok(t, p, "fn() { import a, b, a; import c; }")
-	tassert(t, reflect.DeepEqual([]string{"a", "b", "a", "c"}, mod.Imported()))
+	tassert(t, reflect.DeepEqual([]string{"a", "b", "a", "c"}, mod.Imports()))
 
 	p = newParser("let z = 3; import a;")
 	fail(t, p, "Unexpected Token 'import' at foo.glm:1:12")
