@@ -12,6 +12,7 @@ import (
 	"github.com/mjarmy/golem-lang/scanner"
 )
 
+// ImportResolverFunc resolves a module name into a Source
 type ImportResolverFunc func(moduleName string) (*scanner.Source, error)
 
 // CompileSourceFully compiles all of the Modules needed to run the program

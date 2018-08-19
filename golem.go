@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	//"sync"
+	"sync"
 
 	"github.com/mjarmy/golem-lang/compiler"
 	g "github.com/mjarmy/golem-lang/core"
@@ -40,47 +40,6 @@ func homePath() string {
 	}
 	return filepath.Dir(ex)
 }
-
-//var libModules = make(map[string]g.Module)
-//var libMutex = &sync.Mutex{}
-
-//// lookupModule looks up a module by to loadng a plugin from the '$HOME/lib' directory.
-//func lookupModule(homePath, name string) (g.Module, g.Error) {
-//
-//	libMutex.Lock()
-//	defer libMutex.Unlock()
-//
-//	if mod, ok := libModules[name]; ok {
-//		return mod, nil
-//	}
-//
-//	// open the plugin
-//	p, err := plugin.Open(homePath + "/lib/" + name + "/" + name + ".so")
-//	if err != nil {
-//		return nil, g.CouldNotLoadModuleError(name, err)
-//	}
-//
-//	// lookup the 'LoadModule' function
-//	f, err := p.Lookup("LoadModule")
-//	if err != nil {
-//		return nil, g.CouldNotLoadModuleError(name, err)
-//	}
-//	loader := f.(func() (g.Module, g.Error))
-//
-//	// load the module
-//	mod, gerr := loader()
-//	if gerr != nil {
-//		return nil, gerr
-//	}
-//	if mod.GetModuleName() != name {
-//		return nil, g.CouldNotLoadModuleError(
-//			name,
-//			fmt.Errorf("Module name mismatch %s != %s", mod.GetModuleName(), name))
-//	}
-//
-//	libModules[name] = mod
-//	return mod, nil
-//}
 
 func dumpError(cx g.Context, err g.Error) {
 	fmt.Printf("Error: %s\n", err.Error())
@@ -134,6 +93,27 @@ func readSourceFromFile(filename string) (*scanner.Source, error) {
 	}, nil
 }
 
+var sourceMap = make(map[string]*scanner.Source)
+var sourceMutex = &sync.Mutex{}
+
+func makeImportResolver(homePath string) compiler.ImportResolverFunc {
+	return func(name string) (*scanner.Source, error) {
+
+		sourceMutex.Lock()
+		defer sourceMutex.Unlock()
+		if src, ok := sourceMap[name]; ok {
+			return src, nil
+		}
+
+		src, err := readSourceFromFile(homePath + "/lib/" + name + "/" + name + ".glm")
+		if err != nil {
+			return nil, err
+		}
+		sourceMap[name] = src
+		return src, nil
+	}
+}
+
 func main() {
 
 	if len(os.Args) == 1 {
@@ -153,7 +133,7 @@ func main() {
 	}
 
 	// compile
-	mods, errs := compiler.CompileSourceFully(builtinMgr, source, nil)
+	mods, errs := compiler.CompileSourceFully(builtinMgr, source, makeImportResolver(homePath))
 	if len(errs) > 0 {
 		exitErrors(errs)
 	}

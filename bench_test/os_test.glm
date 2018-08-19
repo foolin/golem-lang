@@ -18,7 +18,7 @@ fn testExit() {
         assert(false)
     } catch e {
         assert(e.kind == 'ArityMismatch')
-        assert(e.msg == 'Expected at most 1 params, got 2')
+        assert(e.msg == 'Expected 1 params, got 2')
     }
 }
 

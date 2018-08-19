@@ -1,9 +1,0 @@
-//module temporary
-//
-//const plg = plugin("temporary")
-//
-//fn compile(expr) {
-//    let f = plg.lookup("Compile")
-//    return f(expr)
-//}
-

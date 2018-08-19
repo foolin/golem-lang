@@ -1,5 +1,5 @@
 
-default: bench_test
+default: build
 
 clean:
 	rm -rf build
@@ -12,7 +12,6 @@ lint:
 	gometalinter.v2 \
 		--disable=gocyclo \
 		--disable=goconst \
-		--exclude="lib/(.*)LoadModule is unused" \
 		--exclude="lib/(.*)is unused \(U1000\) \(megacheck\)" \
 		./...
 
@@ -25,26 +24,17 @@ test:
 compile: 
 	go build -o build/golem golem.go
 	mkdir -p build/lib
-#go build -buildmode=plugin -o build/lib/os/os.so lib/os/os.go
-#go build -buildmode=plugin -o build/lib/path/path.so lib/path/path.go
-#go build -buildmode=plugin -o build/lib/regexp/regexp.so lib/regexp/regexp.go
-	go build -buildmode=plugin -o build/lib/temporary/temporary.so lib/temporary/temporary.go
+	go build -buildmode=plugin -o build/lib/os/os.so lib/os/os.go
+	go build -buildmode=plugin -o build/lib/path/path.so lib/path/path.go
+	go build -buildmode=plugin -o build/lib/regexp/regexp.so lib/regexp/regexp.go
+	cp lib/os/os.glm build/lib/os/os.glm 
+	cp lib/path/path.glm build/lib/path/path.glm 
+	cp lib/regexp/regexp.glm build/lib/regexp/regexp.glm 
 
 bench_test: test compile
 	build/golem bench_test/core_test.glm
-#build/golem bench_test/os_test.glm
-#build/golem bench_test/path_test.glm
-#build/golem bench_test/regexp_test.glm
-	build/golem bench_test/temporary_test.glm
+	build/golem bench_test/os_test.glm
+	build/golem bench_test/path_test.glm
+	build/golem bench_test/regexp_test.glm
 
 build: clean fmt lint vet test compile bench_test
-
-#release: build
-#	mkdir -p release/golem/linux
-#	mkdir -p release/golem/mac
-#	mkdir -p release/golem/windows
-#	GOOS=linux   GOARCH=amd64 go build -o ./release/golem/linux/golem       golem.go
-#	GOOS=darwin  GOARCH=amd64 go build -o ./release/golem/mac/golem         golem.go
-#	GOOS=windows GOARCH=amd64 go build -o ./release/golem/windows/golem.exe golem.go
-#	cd release && zip -r ./golem-0.8.2.zip golem
-#	cd release && tar czf ./golem-0.8.2.tar.gz golem
