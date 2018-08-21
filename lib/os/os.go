@@ -14,21 +14,10 @@ import (
 )
 
 // Exit exits the program
-var Exit g.Value = g.NewNativeFunc(
-	0, 1,
-	func(cx g.Context, values []g.Value) (g.Value, g.Error) {
-		switch len(values) {
-		case 0:
-			os.Exit(0)
-		case 1:
-			if n, ok := values[0].(g.Int); ok {
-				os.Exit(int(n.IntVal()))
-			} else {
-				return nil, g.TypeMismatchError("Expected Int")
-			}
-		default:
-			return nil, g.ArityMismatchError("0 or 1", len(values))
-		}
+var Exit g.Value = g.NewNativeFuncInt(
+	func(cx g.Context, n g.Int) (g.Value, g.Error) {
+
+		os.Exit(int(n.IntVal()))
 
 		// we will never actually get here
 		return g.Null, nil
@@ -46,15 +35,8 @@ var Open g.Value = g.NewNativeFuncStr(
 	})
 
 // Stat stats a file
-var Stat g.Value = g.NewNativeFunc(
-	//1, 2,
-	1, 1,
-	func(cx g.Context, values []g.Value) (g.Value, g.Error) {
-
-		name, ok := values[0].(g.Str)
-		if !ok {
-			return nil, g.TypeMismatchError("Expected Str")
-		}
+var Stat g.Value = g.NewNativeFuncStr(
+	func(cx g.Context, s g.Str) (g.Value, g.Error) {
 
 		// TODO os.Lstat
 		// TODO followSymLink == false, same as os.Lstat
@@ -72,7 +54,7 @@ var Stat g.Value = g.NewNativeFunc(
 		//	fn = os.Lstat
 		//}
 
-		info, err := os.Stat(name.String())
+		info, err := os.Stat(s.String())
 		if err != nil {
 			return nil, g.NewError("OsError", err.Error())
 		}
