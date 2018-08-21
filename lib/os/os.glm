@@ -2,16 +2,8 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-const plg = plugin("os")
+const plg = openPlugin("os")
 
-fn exit(expr) {
-    plg.lookup("Exit")(expr)
-}
-
-fn open(expr) {
-    plg.lookup("Open")(expr)
-}
-
-fn stat(expr) {
-    plg.lookup("Stat")(expr)
-}
+const exit = plg.lookup("Exit")
+const open = plg.lookup("Open")
+const stat = plg.lookup("Stat")
