@@ -112,22 +112,20 @@ func makeModuleResolver(homeDir, localDir string) compiler.ModuleResolver {
 			return src, nil
 		}
 
-		homePath := homeDir + "/lib/" + name + "/" + name + ".glm"
-		localPath := localDir + "/" + name + ".glm"
-
-		switch {
-
-		case fileExists(homePath):
-			// check std lib first
-			return readSourceFromFile(homePath)
-
-		case fileExists(localPath):
-			// check local dir
-			return readSourceFromFile(localPath)
-
-		default:
-			return nil, fmt.Errorf("Cannot resolve module '%s'", name)
+		// check std lib first
+		libPath := homeDir + "/lib/" + name + "/" + name + ".glm"
+		if fileExists(libPath) {
+			return readSourceFromFile(libPath)
 		}
+
+		// check local dir
+		localPath := localDir + "/" + name + ".glm"
+		if fileExists(localPath) {
+			return readSourceFromFile(localPath)
+		}
+
+		// can't find file
+		return nil, fmt.Errorf("Cannot resolve module '%s'", name)
 	}
 }
 
