@@ -16,7 +16,7 @@ import (
 
 // Interpreter interprets Golem bytecode.
 type Interpreter struct {
-	homePath   string
+	homeDir    string
 	modules    []*g.Module
 	modMap     map[string]*g.Module
 	builtInMgr g.BuiltinManager
@@ -25,7 +25,7 @@ type Interpreter struct {
 
 // NewInterpreter creates a new Interpreter
 func NewInterpreter(
-	homePath string,
+	homeDir string,
 	builtInMgr g.BuiltinManager,
 	modules []*g.Module) *Interpreter {
 
@@ -35,7 +35,7 @@ func NewInterpreter(
 	}
 
 	return &Interpreter{
-		homePath:   homePath,
+		homeDir:    homeDir,
 		modules:    modules,
 		modMap:     modMap,
 		builtInMgr: builtInMgr,
@@ -77,7 +77,7 @@ func (i *Interpreter) InitModules() ([]g.Value, g.Error) {
 
 // HomePath returns the home directory path of the interpreter.
 func (i *Interpreter) HomePath() string {
-	return i.homePath
+	return i.homeDir
 }
 
 // Eval evaluates a given BytecodeFunc.

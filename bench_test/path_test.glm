@@ -13,14 +13,14 @@ fn testExt() {
 fn testWalk() {
 
     let list = []
-    path.filepath.walk('./bench_test/data', fn(name, info) {
+    path.filepath.walk('data', fn(name, info) {
         list.add((name, info.isDir, path.filepath.ext(name)))
     })
 
     assert([ 
-        ('./bench_test/data', true, ''), 
-        ('bench_test/data/empty', false, ''), 
-        ('bench_test/data/lines.txt', false, '.txt') ] == list)
+        ('data', true, ''), 
+        ('data/empty', false, ''), 
+        ('data/lines.txt', false, '.txt') ] == list)
 }
 
 fn main(args) {

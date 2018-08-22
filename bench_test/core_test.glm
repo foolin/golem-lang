@@ -2,6 +2,8 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
+import zork
+
 fn fail(func, kind) {
     try {
         func()
@@ -118,9 +120,9 @@ fn testCapture() {
 
     //---------------------
 
-    const zork = 1
-    let f1 = || => zork
-    let f2 = || => zork
+    const cap = 1
+    let f1 = || => cap
+    let f2 = || => cap
     assert([1, 1] == [f1(), f2()])
 }
 
@@ -726,6 +728,9 @@ fn testStruct() {
 }
 
 fn main(args) {
+
+    assert(42 == zork.quux)
+
     testFunc()
     testCapture()
     testNamedFunc()

@@ -32,15 +32,6 @@ func exitErrors(errors []error) {
 	os.Exit(-1)
 }
 
-// homePath looks up the path of the golem executable
-func homePath() string {
-	ex, err := os.Executable()
-	if err != nil {
-		exitError(err)
-	}
-	return filepath.Dir(ex)
-}
-
 func dumpError(cx g.Context, err g.Error) {
 	fmt.Printf("Error: %s\n", err.Error())
 
@@ -62,6 +53,18 @@ func dumpError(cx g.Context, err g.Error) {
 		fmt.Printf("%s\n", v.ToStr(cx))
 	}
 }
+
+// homeDir looks up the path of the golem executable
+func homeDir() string {
+	ex, err := os.Executable()
+	if err != nil {
+		exitError(err)
+	}
+	return filepath.Dir(ex)
+}
+
+var sourceMap = make(map[string]*scanner.Source)
+var sourceMutex = &sync.Mutex{}
 
 func readSourceFromFile(filename string) (*scanner.Source, error) {
 
@@ -86,17 +89,21 @@ func readSourceFromFile(filename string) (*scanner.Source, error) {
 	name := strings.TrimSuffix(filepath.Base(path), ext)
 
 	// done
-	return &scanner.Source{
+	src := &scanner.Source{
 		Name: name,
 		Path: path,
 		Code: code,
-	}, nil
+	}
+	sourceMap[src.Name] = src
+	return src, nil
 }
 
-var sourceMap = make(map[string]*scanner.Source)
-var sourceMutex = &sync.Mutex{}
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
 
-func makeImportResolver(homePath string) compiler.ImportResolverFunc {
+func makeModuleResolver(homeDir, localDir string) compiler.ModuleResolver {
 	return func(name string) (*scanner.Source, error) {
 
 		sourceMutex.Lock()
@@ -105,12 +112,22 @@ func makeImportResolver(homePath string) compiler.ImportResolverFunc {
 			return src, nil
 		}
 
-		src, err := readSourceFromFile(homePath + "/lib/" + name + "/" + name + ".glm")
-		if err != nil {
-			return nil, err
+		homePath := homeDir + "/lib/" + name + "/" + name + ".glm"
+		localPath := localDir + "/" + name + ".glm"
+
+		switch {
+
+		case fileExists(homePath):
+			// check std lib first
+			return readSourceFromFile(homePath)
+
+		case fileExists(localPath):
+			// check local dir
+			return readSourceFromFile(localPath)
+
+		default:
+			return nil, fmt.Errorf("Cannot resolve module '%s'", name)
 		}
-		sourceMap[name] = src
-		return src, nil
 	}
 }
 
@@ -121,25 +138,30 @@ func main() {
 		os.Exit(0)
 	}
 
-	homePath := homePath()
+	homeDir := homeDir()
+	localDir, e := os.Getwd()
+	if e != nil {
+		exitError(e)
+	}
 
 	// command line builtins
 	builtinMgr := g.NewBuiltinManager(g.CommandLineBuiltins)
 
 	// read source
-	source, e := readSourceFromFile(os.Args[1])
+	src, e := readSourceFromFile(os.Args[1])
 	if e != nil {
 		exitError(e)
 	}
 
 	// compile
-	mods, errs := compiler.CompileSourceFully(builtinMgr, source, makeImportResolver(homePath))
+	resolver := makeModuleResolver(homeDir, localDir)
+	mods, errs := compiler.CompileSourceFully(builtinMgr, src, resolver)
 	if len(errs) > 0 {
 		exitErrors(errs)
 	}
 
 	// interpret
-	intp := interpreter.NewInterpreter(homePath, builtinMgr, mods)
+	intp := interpreter.NewInterpreter(homeDir, builtinMgr, mods)
 	_, err := intp.InitModules()
 	if err != nil {
 		dumpError(intp, err)

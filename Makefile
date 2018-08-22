@@ -31,9 +31,9 @@ compile:
 	cp lib/regexp/regexp.glm build/lib/regexp/regexp.glm 
 
 bench_test: test compile
-	build/golem bench_test/core_test.glm
-	build/golem bench_test/os_test.glm
-	build/golem bench_test/path_test.glm
-	build/golem bench_test/regexp_test.glm
+	cd bench_test && ../build/golem core_test.glm
+	cd bench_test && ../build/golem os_test.glm
+	cd bench_test && ../build/golem path_test.glm
+	cd bench_test && ../build/golem regexp_test.glm
 
 build: clean fmt lint vet test compile bench_test

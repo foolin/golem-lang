@@ -12,15 +12,15 @@ import (
 	"github.com/mjarmy/golem-lang/scanner"
 )
 
-// ImportResolverFunc resolves a module name into a Source
-type ImportResolverFunc func(moduleName string) (*scanner.Source, error)
+// ModuleResolver resolves a module name into a Source
+type ModuleResolver func(moduleName string) (*scanner.Source, error)
 
 // CompileSourceFully compiles all of the Modules needed to run the program
 // that is defined in the provided Source.
 func CompileSourceFully(
 	builtinMgr g.BuiltinManager,
 	source *scanner.Source,
-	resolver ImportResolverFunc) ([]*g.Module, []error) {
+	resolver ModuleResolver) ([]*g.Module, []error) {
 
 	sources := []*scanner.Source{source}
 	sourceSet := map[string]bool{source.Name: true}
