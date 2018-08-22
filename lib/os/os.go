@@ -58,7 +58,7 @@ var Stat g.Value = g.NewNativeFuncStr(
 		if err != nil {
 			return nil, g.NewError("OsError", err.Error())
 		}
-		return osutil.NewInfo(info), nil
+		return osutil.NewFileInfo(info), nil
 	})
 
 //-------------------------------------------------------------------------

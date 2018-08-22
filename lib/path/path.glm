@@ -2,9 +2,9 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-const plg = openPlugin("path")
+const _plugin = openPlugin("path")
 
 const filepath = struct {
-    ext: plg.lookup("Ext"),
-    walk: plg.lookup("Walk")
+    ext: _plugin.lookup("Ext"),
+    walk: _plugin.lookup("Walk")
 }

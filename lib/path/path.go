@@ -43,7 +43,7 @@ var Walk g.Value = g.NewNativeFunc(
 					return err
 				}
 				_, gerr := callback.Invoke(cx,
-					[]g.Value{g.NewStr(path), osutil.NewInfo(info)})
+					[]g.Value{g.NewStr(path), osutil.NewFileInfo(info)})
 				return gerr
 			})
 

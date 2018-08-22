@@ -9,8 +9,8 @@ import (
 	"os"
 )
 
-// NewInfo creates a struct for 'os.FileInfo'
-func NewInfo(info os.FileInfo) g.Struct {
+// NewFileInfo creates a struct for 'os.FileInfo'
+func NewFileInfo(info os.FileInfo) g.Struct {
 
 	stc, err := g.NewStruct([]g.Field{
 		g.NewField("name", true, g.NewStr(info.Name())),
