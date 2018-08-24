@@ -6,9 +6,6 @@ the concurrency of Go, the flexibility of Javascript, and the embeddability of L
 
 **Golem is currently in alpha.  Its not yet ready for production use.**  
 
-You can download the latest release from the 
-[release](https://github.com/mjarmy/golem-lang/releases) directory.
-
 Please read the [Tutorial](https://github.com/mjarmy/golem-lang/wiki/Tutorial) 
 to learn about Golem.
 
