@@ -2,7 +2,7 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-package main
+package regexp
 
 import (
 	"regexp"
@@ -10,8 +10,21 @@ import (
 	g "github.com/mjarmy/golem-lang/core"
 )
 
-// Compile compiles a regex expression
-var Compile g.Value = g.NewNativeFuncStr(
+// Regexp is the "regexp" module in the standard library
+var Regexp g.Struct
+
+func init() {
+	var err error
+	Regexp, err = g.NewStruct([]g.Field{
+		g.NewField("compile", true, compile),
+	}, true)
+	if err != nil {
+		panic("unreachable")
+	}
+}
+
+// compile compiles a regex expression
+var compile g.Value = g.NewNativeFuncStr(
 	func(cx g.Context, s g.Str) (g.Value, g.Error) {
 
 		rgx, err := regexp.Compile(s.String())

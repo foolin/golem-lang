@@ -2,8 +2,8 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-const _plugin = openPlugin("os")
+const _os = _lib("os")
 
-const exit = _plugin.lookup("Exit")
-const open = _plugin.lookup("Open")
-const stat = _plugin.lookup("Stat")
+const exit = _os.exit
+const open = _os.open
+const stat = _os.stat

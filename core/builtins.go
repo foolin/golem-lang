@@ -6,8 +6,6 @@ package core
 
 import (
 	"fmt"
-	"plugin"
-	"reflect"
 )
 
 //-----------------------------------------------------------------
@@ -64,7 +62,7 @@ func (b *builtinManager) IndexOf(s string) int {
 
 //-----------------------------------------------------------------
 
-// SandboxBuiltins is the 'standard' list of built-ins that are
+// SandboxBuiltins containts the built-ins that are
 // pure functions.  These functions do not do any form of I/O.
 var SandboxBuiltins = []*BuiltinEntry{
 	{"str", BuiltinStr},
@@ -82,13 +80,11 @@ var SandboxBuiltins = []*BuiltinEntry{
 	{"arity", BuiltinArity},
 }
 
-// CommandLineBuiltins consists of the SandboxBuiltins, plus print(), println() and openPlugin().
-var CommandLineBuiltins = append(
-	SandboxBuiltins,
-	[]*BuiltinEntry{
-		{"print", BuiltinPrint},
-		{"println", BuiltinPrintln},
-		{"openPlugin", BuiltinOpenPlugin}}...)
+// CommandLineBuiltins consists of the print(), and println()
+var CommandLineBuiltins = []*BuiltinEntry{
+	{"print", BuiltinPrint},
+	{"println", BuiltinPrintln},
+}
 
 //-----------------------------------------------------------------
 
@@ -287,45 +283,45 @@ var BuiltinArity = NewNativeFuncFunc(
 		return st, nil
 	})
 
-// BuiltinOpenPlugin wraps a plugin in a struct
-var BuiltinOpenPlugin = NewNativeFuncStr(
-	func(cx Context, name Str) (Value, Error) {
-
-		// open up the plugin
-		plugPath := cx.HomePath() + "/lib/" + name.String() + "/" + name.String() + ".so"
-		plug, err := plugin.Open(plugPath)
-		if err != nil {
-			return nil, PluginError(name.String(), err)
-		}
-
-		// define lookup function
-		lookup := NewNativeFuncStr(
-			func(cx Context, s Str) (Value, Error) {
-
-				name := s.String()
-
-				sym, e2 := plug.Lookup(name)
-				if e2 != nil {
-					return nil, PluginError(name, e2)
-				}
-
-				value, ok := sym.(*Value)
-				if !ok {
-					return nil, PluginError(name, fmt.Errorf(
-						"plugin symbol '%s' is not a Value: %s",
-						s.String(),
-						reflect.TypeOf(sym)))
-				}
-				return *value, nil
-			})
-
-		// done
-		stc, err := NewStruct([]Field{
-			NewField("lookup", true, lookup),
-		}, true)
-		if err != nil {
-			panic("unreachable")
-		}
-
-		return stc, nil
-	})
+//// BuiltinOpenPlugin wraps a plugin in a struct
+//var BuiltinOpenPlugin = NewNativeFuncStr(
+//	func(cx Context, name Str) (Value, Error) {
+//
+//		// open up the plugin
+//		plugPath := cx.HomePath() + "/lib/" + name.String() + "/" + name.String() + ".so"
+//		plug, err := plugin.Open(plugPath)
+//		if err != nil {
+//			return nil, PluginError(name.String(), err)
+//		}
+//
+//		// define lookup function
+//		lookup := NewNativeFuncStr(
+//			func(cx Context, s Str) (Value, Error) {
+//
+//				name := s.String()
+//
+//				sym, e2 := plug.Lookup(name)
+//				if e2 != nil {
+//					return nil, PluginError(name, e2)
+//				}
+//
+//				value, ok := sym.(*Value)
+//				if !ok {
+//					return nil, PluginError(name, fmt.Errorf(
+//						"plugin symbol '%s' is not a Value: %s",
+//						s.String(),
+//						reflect.TypeOf(sym)))
+//				}
+//				return *value, nil
+//			})
+//
+//		// done
+//		stc, err := NewStruct([]Field{
+//			NewField("lookup", true, lookup),
+//		}, true)
+//		if err != nil {
+//			panic("unreachable")
+//		}
+//
+//		return stc, nil
+//	})

@@ -13,7 +13,10 @@ import (
 	"testing"
 )
 
-var builtinMgr = g.NewBuiltinManager(g.CommandLineBuiltins)
+var builtins []*g.BuiltinEntry = append(
+	g.SandboxBuiltins,
+	g.CommandLineBuiltins...)
+var builtinMgr = g.NewBuiltinManager(builtins)
 
 func tassert(t *testing.T, flag bool) {
 	if !flag {

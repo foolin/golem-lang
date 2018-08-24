@@ -2,7 +2,7 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-package main
+package os
 
 import (
 	"bufio"
@@ -10,11 +10,25 @@ import (
 	"os"
 
 	g "github.com/mjarmy/golem-lang/core"
-	osutil "github.com/mjarmy/golem-lang/lib/os/util"
 )
 
-// Exit exits the program
-var Exit g.Value = g.NewNativeFuncInt(
+// Os is the "os" module in the standard library
+var Os g.Struct
+
+func init() {
+	var err error
+	Os, err = g.NewStruct([]g.Field{
+		g.NewField("exit", true, exit),
+		g.NewField("open", true, open),
+		g.NewField("stat", true, stat),
+	}, true)
+	if err != nil {
+		panic("unreachable")
+	}
+}
+
+// exit exits the program
+var exit g.Value = g.NewNativeFuncInt(
 	func(cx g.Context, n g.Int) (g.Value, g.Error) {
 
 		os.Exit(int(n.IntVal()))
@@ -23,8 +37,8 @@ var Exit g.Value = g.NewNativeFuncInt(
 		return g.Null, nil
 	})
 
-// Open opens a file
-var Open g.Value = g.NewNativeFuncStr(
+// open opens a file
+var open g.Value = g.NewNativeFuncStr(
 	func(cx g.Context, s g.Str) (g.Value, g.Error) {
 
 		f, err := os.Open(s.String())
@@ -34,8 +48,8 @@ var Open g.Value = g.NewNativeFuncStr(
 		return newFile(f), nil
 	})
 
-// Stat stats a file
-var Stat g.Value = g.NewNativeFuncStr(
+// stat stats a file
+var stat g.Value = g.NewNativeFuncStr(
 	func(cx g.Context, s g.Str) (g.Value, g.Error) {
 
 		// TODO os.Lstat
@@ -58,8 +72,27 @@ var Stat g.Value = g.NewNativeFuncStr(
 		if err != nil {
 			return nil, g.NewError("OsError", err.Error())
 		}
-		return osutil.NewFileInfo(info), nil
+		return NewFileInfo(info), nil
 	})
+
+//-------------------------------------------------------------------------
+
+// NewFileInfo creates a struct for 'os.FileInfo'
+func NewFileInfo(info os.FileInfo) g.Struct {
+
+	stc, err := g.NewStruct([]g.Field{
+		g.NewField("name", true, g.NewStr(info.Name())),
+		g.NewField("size", true, g.NewInt(info.Size())),
+		g.NewField("mode", true, g.NewInt(int64(info.Mode()))),
+		//g.NewField("modTime", true, ModTime() time.Time TODO
+		g.NewField("isDir", true, g.NewBool(info.IsDir())),
+	}, true)
+	if err != nil {
+		panic("unreachable")
+	}
+
+	return stc
+}
 
 //-------------------------------------------------------------------------
 

@@ -15,10 +15,11 @@ import (
 	"github.com/mjarmy/golem-lang/compiler"
 	g "github.com/mjarmy/golem-lang/core"
 	"github.com/mjarmy/golem-lang/interpreter"
+	"github.com/mjarmy/golem-lang/lib"
 	"github.com/mjarmy/golem-lang/scanner"
 )
 
-var version = "0.8.2"
+var version = "0.1.0"
 
 func exitError(e error) {
 	fmt.Printf("%s\n", e.Error())
@@ -143,7 +144,13 @@ func main() {
 	}
 
 	// command line builtins
-	builtinMgr := g.NewBuiltinManager(g.CommandLineBuiltins)
+	var builtins []*g.BuiltinEntry = append(
+		g.SandboxBuiltins,
+		g.CommandLineBuiltins...)
+	builtins = append(
+		builtins,
+		&g.BuiltinEntry{Name: "_lib", Value: lib.BuiltinLib})
+	builtinMgr := g.NewBuiltinManager(builtins)
 
 	// read source
 	src, e := readSourceFromFile(os.Args[1])

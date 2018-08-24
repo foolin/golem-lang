@@ -172,10 +172,3 @@ func UndefinedModuleError(name string) Error {
 		"UndefinedModule",
 		fmt.Sprintf("Module '%s' is not defined", name))
 }
-
-// PluginError creates a Plugin Error
-func PluginError(name string, err error) Error {
-	return NewError(
-		"Plugin",
-		fmt.Sprintf("Plugin '%s': %s", name, err.Error()))
-}

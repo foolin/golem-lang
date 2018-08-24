@@ -5,7 +5,7 @@
 package compiler
 
 import (
-	//"fmt"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -52,7 +52,10 @@ func ok(t *testing.T, pool *g.Pool, expect *g.Pool) {
 	}
 }
 
-var builtinMgr = g.NewBuiltinManager(g.CommandLineBuiltins)
+var builtins []*g.BuiltinEntry = append(
+	g.SandboxBuiltins,
+	g.CommandLineBuiltins...)
+var builtinMgr = g.NewBuiltinManager(builtins)
 
 func testCompile(t *testing.T, code string) *g.Module {
 
@@ -60,6 +63,8 @@ func testCompile(t *testing.T, code string) *g.Module {
 	mods, errs := CompileSourceFully(builtinMgr, source, nil)
 	tassert(t, errs == nil)
 	tassert(t, len(mods) == 1)
+
+	fmt.Printf("%v\n", mods)
 
 	return mods[0]
 }
