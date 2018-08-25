@@ -11,10 +11,8 @@ Python and Javascript.
 
 **Golem is currently in alpha.  Its not yet ready for production use.**  
 
-Please read the [Tutorial](Tutorial) 
+Please read the [Tutorial](https://github.com/mjarmy/golem-lang/wiki/Tutorial) 
 to learn about Golem.
-
-Consult the [Language Reference](Language-Reference) 
+ 
+Consult the [Language Reference](https://github.com/mjarmy/golem-lang/wiki/Language-Reference) 
 for a thorough description of Golem's features.
-
-
