@@ -288,7 +288,11 @@ type Type int
 
 // All possible kinds of Type
 const (
-	NullType Type = iota
+	// AnyType is a special type that we use when we don't care what the actual type is.
+	// It is used in conjuction with type-checking for certain kinds of function invocations.
+	AnyType Type = iota
+
+	NullType
 	BoolType
 	StrType
 	IntType
