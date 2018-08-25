@@ -135,7 +135,7 @@ func (c *compiler) makeModuleProperty(
 
 func (c *compiler) compileFunc(fe *ast.FnExpr) *g.FuncTemplate {
 
-	arity := len(fe.FormalParams)
+	arity := len(fe.RequiredParams)
 	tpl := &g.FuncTemplate{
 		Module:            c.mod,
 		Arity:             arity,
@@ -734,12 +734,12 @@ func (c *compiler) visitBinaryExpr(b *ast.BinaryExpr) {
 
 	switch b.Op.Kind {
 
-	case ast.DblPipe:
+	case ast.DoublePipe:
 		c.visitOr(b.LHS, b.RHS)
-	case ast.DblAmp:
+	case ast.DoubleAmp:
 		c.visitAnd(b.LHS, b.RHS)
 
-	case ast.DblEq:
+	case ast.DoubleEq:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.Eq)
 	case ast.NotEq:
@@ -790,10 +790,10 @@ func (c *compiler) visitBinaryExpr(b *ast.BinaryExpr) {
 	case ast.Caret:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.BitXor)
-	case ast.DblLt:
+	case ast.DoubleLt:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.LeftShift)
-	case ast.DblGt:
+	case ast.DoubleGt:
 		b.Traverse(c)
 		c.push(b.Op.Position, o.RightShift)
 

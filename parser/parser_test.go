@@ -990,3 +990,18 @@ let b = fn(x) {
 }
 `)
 }
+
+func TestArity(t *testing.T) {
+
+	p := newParser("fn(a... ) {}")
+	okExpr(t, p, "fn(a...) {  }")
+
+	p = newParser("fn(a, b   ...) {}")
+	okExpr(t, p, "fn(a, b...) {  }")
+
+	p = newParser("fn(a, b, c  ... ) {}")
+	okExpr(t, p, "fn(a, b, c...) {  }")
+
+	p = newParser("fn(a..., b) {}")
+	fail(t, p, "Unexpected Token ',' at foo.glm:1:8")
+}

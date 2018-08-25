@@ -138,7 +138,7 @@ func (s *Scanner) Next() *ast.Token {
 			r = s.cur.r
 			if r == '+' {
 				s.consume()
-				return &ast.Token{Kind: ast.DblPlus, Text: "++", Position: pos}
+				return &ast.Token{Kind: ast.DoublePlus, Text: "++", Position: pos}
 			} else if r == '=' {
 				s.consume()
 				return &ast.Token{Kind: ast.PlusEq, Text: "+=", Position: pos}
@@ -151,7 +151,7 @@ func (s *Scanner) Next() *ast.Token {
 			r = s.cur.r
 			if r == '-' {
 				s.consume()
-				return &ast.Token{Kind: ast.DblMinus, Text: "--", Position: pos}
+				return &ast.Token{Kind: ast.DoubleMinus, Text: "--", Position: pos}
 			} else if r == '=' {
 				s.consume()
 				return &ast.Token{Kind: ast.MinusEq, Text: "-=", Position: pos}
@@ -195,9 +195,26 @@ func (s *Scanner) Next() *ast.Token {
 		case r == ',':
 			s.consume()
 			return &ast.Token{Kind: ast.Comma, Text: ",", Position: pos}
+
 		case r == '.':
 			s.consume()
-			return &ast.Token{Kind: ast.Dot, Text: ".", Position: pos}
+			r = s.cur.r
+			if r == '.' {
+
+				s.consume()
+				r = s.cur.r
+				if r == '.' {
+					s.consume()
+					return &ast.Token{Kind: ast.TripleDot, Text: "...", Position: pos}
+					//} else {
+					//	// "DoubleDot" isn't actually used for anything right now
+					//	return &ast.Token{Kind: ast.DoubleDot, Text: "..", Position: pos}
+				}
+
+			} else {
+				return &ast.Token{Kind: ast.Dot, Text: ".", Position: pos}
+			}
+
 		case r == '?':
 			s.consume()
 			return &ast.Token{Kind: ast.Hook, Text: "?", Position: pos}
@@ -229,7 +246,7 @@ func (s *Scanner) Next() *ast.Token {
 			r = s.cur.r
 			if r == '=' {
 				s.consume()
-				return &ast.Token{Kind: ast.DblEq, Text: "==", Position: pos}
+				return &ast.Token{Kind: ast.DoubleEq, Text: "==", Position: pos}
 			} else if r == '>' {
 				s.consume()
 				return &ast.Token{Kind: ast.EqGt, Text: "=>", Position: pos}
@@ -256,9 +273,9 @@ func (s *Scanner) Next() *ast.Token {
 				r = s.cur.r
 				if r == '=' {
 					s.consume()
-					return &ast.Token{Kind: ast.DblGtEq, Text: ">>=", Position: pos}
+					return &ast.Token{Kind: ast.DoubleGtEq, Text: ">>=", Position: pos}
 				}
-				return &ast.Token{Kind: ast.DblGt, Text: ">>", Position: pos}
+				return &ast.Token{Kind: ast.DoubleGt, Text: ">>", Position: pos}
 			} else {
 				return &ast.Token{Kind: ast.Gt, Text: ">", Position: pos}
 			}
@@ -278,9 +295,9 @@ func (s *Scanner) Next() *ast.Token {
 				r = s.cur.r
 				if r == '=' {
 					s.consume()
-					return &ast.Token{Kind: ast.DblLtEq, Text: "<<=", Position: pos}
+					return &ast.Token{Kind: ast.DoubleLtEq, Text: "<<=", Position: pos}
 				}
-				return &ast.Token{Kind: ast.DblLt, Text: "<<", Position: pos}
+				return &ast.Token{Kind: ast.DoubleLt, Text: "<<", Position: pos}
 			} else {
 				return &ast.Token{Kind: ast.Lt, Text: "<", Position: pos}
 			}
@@ -290,7 +307,7 @@ func (s *Scanner) Next() *ast.Token {
 			r = s.cur.r
 			if r == '|' {
 				s.consume()
-				return &ast.Token{Kind: ast.DblPipe, Text: "||", Position: pos}
+				return &ast.Token{Kind: ast.DoublePipe, Text: "||", Position: pos}
 			} else if r == '=' {
 				s.consume()
 				return &ast.Token{Kind: ast.PipeEq, Text: "|=", Position: pos}
@@ -302,7 +319,7 @@ func (s *Scanner) Next() *ast.Token {
 			r = s.cur.r
 			if r == '&' {
 				s.consume()
-				return &ast.Token{Kind: ast.DblAmp, Text: "&&", Position: pos}
+				return &ast.Token{Kind: ast.DoubleAmp, Text: "&&", Position: pos}
 			} else if r == '=' {
 				s.consume()
 				return &ast.Token{Kind: ast.AmpEq, Text: "&=", Position: pos}

@@ -634,10 +634,6 @@ fn bar() {
 	mod = newModule(code)
 	errors = NewAnalyzer(mod).Analyze()
 
-	//println(code)
-	//println(ast.Dump(anl.Module()))
-	//println(errors)
-
 	ok(t, mod, errors, `
 FnExpr(FuncScope defs:{} captures:{} numLocals:2)
 .   BlockNode(Scope defs:{bar: v(0: bar,0,true,false), foo: v(1: foo,1,true,false)})
@@ -672,4 +668,28 @@ func TestImport(t *testing.T) {
 
 	errors = NewAnalyzer(newModule("import foo, zork; foo = 2;")).Analyze()
 	fail(t, errors, "[Symbol 'foo' is constant, at foo.glm:1:19]")
+}
+
+func TestArity(t *testing.T) {
+
+	code := `
+fn(a...) {
+}
+`
+	mod := newModule(code)
+	errors := NewAnalyzer(mod).Analyze()
+
+	//println(code)
+	//println(ast.Dump(mod.InitFunc))
+	//println(errors)
+
+	ok(t, mod, errors, `
+FnExpr(FuncScope defs:{} captures:{} numLocals:0)
+.   BlockNode(Scope defs:{})
+.   .   ExprStmt
+.   .   .   FnExpr(FuncScope defs:{a: v(0: a,0,false,false)} captures:{} numLocals:1)
+.   .   .   .   IdentExpr(a,v(0: a,0,false,false))
+.   .   .   .   BlockNode(Scope defs:{})
+`)
+
 }

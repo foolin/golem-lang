@@ -235,12 +235,37 @@ type (
 //---------------------------------------------------------------
 // Func
 
+// ArityKind defines the various kinds of Arity for a Func
+type ArityKind int
+
+// The various types of arity
+const (
+
+	// FixedArity means a function always takes a fixed number of parameters
+	FixedArity ArityKind = iota
+
+	// VariadicArity means that any extra parameters supplied upon invocation will
+	// be collected together into a list.
+	VariadicArity
+
+	// OptionalArity means that some of the parameters can be omitted, in which case
+	// predifined values will be substituted.
+	OptionalArity
+)
+
+// Arity defines the arity of a function
+type Arity struct {
+	Kind           ArityKind
+	RequiredParams int
+	// OptionalParams is nil unless Kind is OptionalArity
+	OptionalParams []Basic
+}
+
 // Func is a function
 type Func interface {
 	Value
 	MinArity() int
 	MaxArity() int // by convention, -1 means variadic
-
 	Invoke(Context, []Value) (Value, Error)
 
 	funcMarker()

@@ -237,9 +237,10 @@ type (
 
 	// FnExpr is a function expression
 	FnExpr struct {
-		Token        *Token
-		FormalParams []*FormalParam
-		Body         *BlockNode
+		Token          *Token
+		RequiredParams []*FormalParam
+		VariadicParam  *FormalParam
+		Body           *BlockNode
 
 		Scope FuncScope
 	}
@@ -749,8 +750,9 @@ func (n *NamedFnStmt) String() string {
 	buf := new(bytes.Buffer)
 	buf.WriteString("fn ")
 	buf.WriteString(n.Ident.String())
-	buf.WriteString(stringFormalParams(n.Func.FormalParams))
-	buf.WriteString(" ")
+	buf.WriteString("(")
+	buf.WriteString(stringFormalParams(n.Func.RequiredParams, n.Func.VariadicParam))
+	buf.WriteString(") ")
 	buf.WriteString(n.Func.Body.String())
 	buf.WriteString(";")
 	return buf.String()
@@ -943,17 +945,22 @@ func (n *FnExpr) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString("fn")
-	buf.WriteString(stringFormalParams(n.FormalParams))
-	buf.WriteString(" ")
+	buf.WriteString("(")
+	buf.WriteString(stringFormalParams(n.RequiredParams, n.VariadicParam))
+	buf.WriteString(") ")
 	buf.WriteString(n.Body.String())
 
 	return buf.String()
 }
 
-func stringFormalParams(params []*FormalParam) string {
+func stringFormalParams(required []*FormalParam, variadic *FormalParam) string {
 	var buf bytes.Buffer
 
-	buf.WriteString("(")
+	params := required
+	if variadic != nil {
+		params = append(params, variadic)
+	}
+
 	for idx, p := range params {
 		if idx > 0 {
 			buf.WriteString(", ")
@@ -963,7 +970,10 @@ func stringFormalParams(params []*FormalParam) string {
 		}
 		buf.WriteString(p.Ident.String())
 	}
-	buf.WriteString(")")
+
+	if variadic != nil {
+		buf.WriteString("...")
+	}
 
 	return buf.String()
 }

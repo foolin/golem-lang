@@ -62,8 +62,8 @@ func (p *Parser) ParseModule() (mod *ast.Module, err error) {
 
 	// create initialization function
 	initFunc := &ast.FnExpr{
-		Token:        nil,
-		FormalParams: []*ast.FormalParam{},
+		Token:          nil,
+		RequiredParams: []*ast.FormalParam{},
 		Body: &ast.BlockNode{
 			LBrace:     nil,
 			Statements: stmts,
@@ -697,7 +697,7 @@ func (p *Parser) ternaryExpr() ast.Expression {
 func (p *Parser) orExpr() ast.Expression {
 
 	lhs := p.andExpr()
-	for p.cur.token.Kind == ast.DblPipe {
+	for p.cur.token.Kind == ast.DoublePipe {
 		tok := p.cur.token
 		p.consume()
 		lhs = &ast.BinaryExpr{
@@ -712,7 +712,7 @@ func (p *Parser) orExpr() ast.Expression {
 func (p *Parser) andExpr() ast.Expression {
 
 	lhs := p.comparativeExpr()
-	for p.cur.token.Kind == ast.DblAmp {
+	for p.cur.token.Kind == ast.DoubleAmp {
 		tok := p.cur.token
 		p.consume()
 		lhs = &ast.BinaryExpr{
@@ -929,7 +929,7 @@ func (p *Parser) primary() ast.Expression {
 	case p.cur.token.Kind == ast.Pipe:
 		return p.lambda()
 
-	case p.cur.token.Kind == ast.DblPipe:
+	case p.cur.token.Kind == ast.DoublePipe:
 		return p.lambdaZero()
 
 	case p.cur.token.Kind == ast.Struct:
@@ -963,10 +963,10 @@ func (p *Parser) fnExpr(token *ast.Token) *ast.FnExpr {
 	p.expect(ast.Lparen)
 	if p.accept(ast.Rparen) {
 		return &ast.FnExpr{
-			Token:        token,
-			FormalParams: nil,
-			Body:         p.block(),
-			Scope:        ast.NewFuncScope(),
+			Token:          token,
+			RequiredParams: nil,
+			Body:           p.block(),
+			Scope:          ast.NewFuncScope(),
 		}
 	}
 	params := []*ast.FormalParam{}
@@ -990,15 +990,31 @@ func (p *Parser) fnExpr(token *ast.Token) *ast.FnExpr {
 		}
 
 		switch p.cur.token.Kind {
+
 		case ast.Comma:
 			p.consume()
+
+		// Variadic
+		case ast.TripleDot:
+			p.consume()
+			p.expect(ast.Rparen)
+
+			n := len(params) - 1
+			return &ast.FnExpr{
+				Token:          token,
+				RequiredParams: params[:n],
+				VariadicParam:  params[n],
+				Body:           p.block(),
+				Scope:          ast.NewFuncScope(),
+			}
+
 		case ast.Rparen:
 			p.consume()
 			return &ast.FnExpr{
-				Token:        token,
-				FormalParams: params,
-				Body:         p.block(),
-				Scope:        ast.NewFuncScope(),
+				Token:          token,
+				RequiredParams: params,
+				Body:           p.block(),
+				Scope:          ast.NewFuncScope(),
 			}
 		default:
 			panic(p.unexpected())
@@ -1009,7 +1025,7 @@ func (p *Parser) fnExpr(token *ast.Token) *ast.FnExpr {
 
 func (p *Parser) lambdaZero() *ast.FnExpr {
 
-	token := p.expect(ast.DblPipe)
+	token := p.expect(ast.DoublePipe)
 
 	p.expect(ast.EqGt)
 	params := []*ast.FormalParam{}
@@ -1021,10 +1037,10 @@ func (p *Parser) lambdaZero() *ast.FnExpr {
 		Scope:      ast.NewScope(),
 	}
 	return &ast.FnExpr{
-		Token:        token,
-		FormalParams: params,
-		Body:         block,
-		Scope:        ast.NewFuncScope(),
+		Token:          token,
+		RequiredParams: params,
+		Body:           block,
+		Scope:          ast.NewFuncScope(),
 	}
 }
 
@@ -1077,10 +1093,10 @@ func (p *Parser) lambda() *ast.FnExpr {
 		Scope:      ast.NewScope(),
 	}
 	return &ast.FnExpr{
-		Token:        token,
-		FormalParams: params,
-		Body:         block,
-		Scope:        ast.NewFuncScope(),
+		Token:          token,
+		RequiredParams: params,
+		Body:           block,
+		Scope:          ast.NewFuncScope(),
 	}
 }
 
@@ -1158,14 +1174,14 @@ func (p *Parser) property() *ast.PropNode {
 	lbrace := p.expect(ast.Lbrace)
 
 	getter := p.propertyFunc()
-	if len(getter.FormalParams) != 0 {
+	if len(getter.RequiredParams) != 0 {
 		panic(&parserError{path: p.scn.Source.Path, kind: InvalidPropertyGetter, token: getter.Token})
 	}
 
 	var setter *ast.FnExpr
 	if p.accept(ast.Comma) {
 		setter = p.propertyFunc()
-		if len(setter.FormalParams) != 1 {
+		if len(setter.RequiredParams) != 1 {
 			panic(&parserError{path: p.scn.Source.Path, kind: InvalidPropertySetter, token: setter.Token})
 		}
 	}
@@ -1186,7 +1202,7 @@ func (p *Parser) propertyFunc() *ast.FnExpr {
 	case ast.Fn:
 		return p.fnExpr(p.consume().token)
 
-	case ast.DblPipe:
+	case ast.DoublePipe:
 		return p.lambdaZero()
 
 	case ast.Pipe:
@@ -1485,7 +1501,7 @@ func (p *Parser) unexpected() error {
 func isComparative(kind ast.TokenKind) bool {
 	switch kind {
 	case
-		ast.DblEq,
+		ast.DoubleEq,
 		ast.NotEq,
 		ast.Gt,
 		ast.GtEq,
@@ -1521,8 +1537,8 @@ func isMultiplicative(kind ast.TokenKind) bool {
 		ast.Slash,
 		ast.Percent,
 		ast.Amp,
-		ast.DblLt,
-		ast.DblGt:
+		ast.DoubleLt,
+		ast.DoubleGt:
 
 		return true
 	default:
@@ -1548,8 +1564,8 @@ func isPostfix(kind ast.TokenKind) bool {
 
 	switch kind {
 	case
-		ast.DblPlus,
-		ast.DblMinus:
+		ast.DoublePlus,
+		ast.DoubleMinus:
 
 		return true
 	default:
@@ -1568,8 +1584,8 @@ func isAssignOp(kind ast.TokenKind) bool {
 		ast.CaretEq,
 		ast.AmpEq,
 		ast.PipeEq,
-		ast.DblLtEq,
-		ast.DblGtEq:
+		ast.DoubleLtEq,
+		ast.DoubleGtEq:
 
 		return true
 	default:
@@ -1596,10 +1612,10 @@ func fromAssignOp(t *ast.Token) *ast.Token {
 		return &ast.Token{Kind: ast.Amp, Text: "&", Position: t.Position}
 	case ast.PipeEq:
 		return &ast.Token{Kind: ast.Pipe, Text: "|", Position: t.Position}
-	case ast.DblLtEq:
-		return &ast.Token{Kind: ast.DblLt, Text: "<<", Position: t.Position}
-	case ast.DblGtEq:
-		return &ast.Token{Kind: ast.DblGt, Text: ">>", Position: t.Position}
+	case ast.DoubleLtEq:
+		return &ast.Token{Kind: ast.DoubleLt, Text: "<<", Position: t.Position}
+	case ast.DoubleGtEq:
+		return &ast.Token{Kind: ast.DoubleGt, Text: ">>", Position: t.Position}
 
 	default:
 		panic("invalid op")

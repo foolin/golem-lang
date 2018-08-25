@@ -39,9 +39,9 @@ const (
 	LineFeed
 
 	Plus
-	DblPlus
+	DoublePlus
 	Minus
-	DblMinus
+	DoubleMinus
 
 	Star
 	Slash
@@ -55,25 +55,27 @@ const (
 	Colon
 	Comma
 	Dot
+	//DoubleDot
+	TripleDot
 	Hook
 
 	Eq
-	DblEq
+	DoubleEq
 	EqGt
 	Not
 	NotEq
 	Gt
-	DblGt
+	DoubleGt
 	GtEq
 	Lt
-	DblLt
+	DoubleLt
 	LtEq
 	Cmp
 
 	Pipe
-	DblPipe
+	DoublePipe
 	Amp
-	DblAmp
+	DoubleAmp
 
 	Percent
 	Caret
@@ -87,8 +89,8 @@ const (
 	CaretEq
 	AmpEq
 	PipeEq
-	DblLtEq
-	DblGtEq
+	DoubleLtEq
+	DoubleGtEq
 
 	basicBegin
 	Null
@@ -150,12 +152,12 @@ func (t TokenKind) String() string {
 
 	case Plus:
 		return "Plus"
-	case DblPlus:
-		return "DblPlus"
+	case DoublePlus:
+		return "DoublePlus"
 	case Minus:
 		return "Minus"
-	case DblMinus:
-		return "DblMinus"
+	case DoubleMinus:
+		return "DoubleMinus"
 	case Star:
 		return "Star"
 	case Slash:
@@ -175,8 +177,8 @@ func (t TokenKind) String() string {
 
 	case Eq:
 		return "Eq"
-	case DblEq:
-		return "DblEq"
+	case DoubleEq:
+		return "DoubleEq"
 	case EqGt:
 		return "EqGt"
 	case Semicolon:
@@ -187,6 +189,10 @@ func (t TokenKind) String() string {
 		return "Comma"
 	case Dot:
 		return "Dot"
+		//	case DoubleDot:
+		//		return "DoubleDot"
+	case TripleDot:
+		return "TripleDot"
 	case Hook:
 		return "Hook"
 
@@ -213,10 +219,10 @@ func (t TokenKind) String() string {
 		return "AmpEq"
 	case PipeEq:
 		return "PipeEq"
-	case DblLtEq:
-		return "DblLtEq"
-	case DblGtEq:
-		return "DblGtEq"
+	case DoubleLtEq:
+		return "DoubleLtEq"
+	case DoubleGtEq:
+		return "DoubleGtEq"
 
 	case Null:
 		return "Null"
