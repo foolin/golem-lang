@@ -5,8 +5,8 @@ functions and a dynamic type system.  Golem's primary use case is to be
 embedded inside a Go program, similar to how Lua is designed to be 
 embedded inside a C program.
 
-Golem aims to combine the concurrency system of Go with the embeddability 
-of Lua, while borrowing many good ideas from other scripting languages like
+Golem combines the concurrency system of Go with the embeddability 
+of Lua, while borrowing many ideas from other scripting languages like
 Python and Javascript.
 
 **Golem is currently in alpha.  Its not yet ready for production use.**  
