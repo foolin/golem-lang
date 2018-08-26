@@ -134,8 +134,8 @@ var BuiltinAssert = NewFixedNativeFunc(
 	})
 
 // BuiltinMerge merges structs together.
-var BuiltinMerge = NewObsoleteFunc(
-	2, -1,
+var BuiltinMerge = NewVariadicNativeFunc(
+	[]Type{StructType, StructType},
 	func(cx Context, values []Value) (Value, Error) {
 		structs := make([]Struct, len(values))
 		for i, v := range values {
@@ -257,8 +257,8 @@ var UnsandboxedBuiltins = []*BuiltinEntry{
 }
 
 // BuiltinPrint prints to stdout.
-var BuiltinPrint = NewObsoleteFunc(
-	0, -1,
+var BuiltinPrint = NewVariadicNativeFunc(
+	[]Type{},
 	func(cx Context, values []Value) (Value, Error) {
 		for _, v := range values {
 			fmt.Print(v.ToStr(cx).String())
@@ -268,8 +268,8 @@ var BuiltinPrint = NewObsoleteFunc(
 	})
 
 // BuiltinPrintln prints to stdout.
-var BuiltinPrintln = NewObsoleteFunc(
-	0, -1,
+var BuiltinPrintln = NewVariadicNativeFunc(
+	[]Type{},
 	func(cx Context, values []Value) (Value, Error) {
 		for _, v := range values {
 			fmt.Print(v.ToStr(cx).String())

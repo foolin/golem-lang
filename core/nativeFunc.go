@@ -111,3 +111,68 @@ func (f *nativeFixedFunc) Invoke(cx Context, values []Value) (Value, Error) {
 
 	return f.invoke(cx, values)
 }
+
+//--------------------------------------------------------------
+
+type nativeVariadicFunc struct {
+	*nativeBaseFunc
+
+	types  []Type
+	invoke func(Context, []Value) (Value, Error)
+}
+
+// NewVariadicNativeFunc creates a new NativeFunc with variadic arity
+func NewVariadicNativeFunc(
+	types []Type,
+	invoke func(Context, []Value) (Value, Error)) NativeFunc {
+
+	arity := &Arity{
+		Kind:           VariadicArity,
+		RequiredParams: len(types),
+		OptionalParams: nil,
+	}
+
+	return &nativeVariadicFunc{&nativeBaseFunc{arity}, types, invoke}
+}
+
+func (f *nativeVariadicFunc) Freeze() (Value, Error) {
+	return f, nil
+}
+
+func (f *nativeVariadicFunc) Eq(cx Context, v Value) (Bool, Error) {
+	switch t := v.(type) {
+	case *nativeVariadicFunc:
+		// equality is based on identity
+		return NewBool(f == t), nil
+	default:
+		return False, nil
+	}
+}
+
+func (f *nativeVariadicFunc) Invoke(cx Context, values []Value) (Value, Error) {
+
+	// arity mismatch
+	if len(values) < len(f.types) {
+		return nil, ArityMismatchError(
+			fmt.Sprintf("at least %d", len(f.types)),
+			len(values))
+	}
+
+	// type mismatch
+	for i, t := range f.types {
+		// accept 'any' type
+		if t == AnyType {
+			continue
+		}
+		// skip over null values
+		if values[i].Type() == NullType {
+			continue
+		}
+
+		if values[i].Type() != t {
+			return nil, TypeMismatchError(fmt.Sprintf("Expected %s", t.String()))
+		}
+	}
+
+	return f.invoke(cx, values)
+}
