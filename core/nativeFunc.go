@@ -100,6 +100,7 @@ func (f *nativeFunc) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
+func (f *nativeFunc) Arity() *Arity { panic("Arity") }
 func (f *nativeFunc) MinArity() int { return f.minArity }
 func (f *nativeFunc) MaxArity() int { return f.maxArity }
 
@@ -151,6 +152,7 @@ func (f *nativeFunc0) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
+func (f *nativeFunc0) Arity() *Arity { panic("Arity") }
 func (f *nativeFunc0) MinArity() int { return 0 }
 func (f *nativeFunc0) MaxArity() int { return 0 }
 
@@ -191,6 +193,7 @@ func (f *nativeFuncValue) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
+func (f *nativeFuncValue) Arity() *Arity { panic("Arity") }
 func (f *nativeFuncValue) MinArity() int { return 1 }
 func (f *nativeFuncValue) MaxArity() int { return 1 }
 
@@ -231,6 +234,7 @@ func (f *nativeFuncStr) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
+func (f *nativeFuncStr) Arity() *Arity { panic("Arity") }
 func (f *nativeFuncStr) MinArity() int { return 1 }
 func (f *nativeFuncStr) MaxArity() int { return 1 }
 
@@ -276,6 +280,7 @@ func (f *nativeFuncInt) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
+func (f *nativeFuncInt) Arity() *Arity { panic("Arity") }
 func (f *nativeFuncInt) MinArity() int { return 1 }
 func (f *nativeFuncInt) MaxArity() int { return 1 }
 
@@ -321,6 +326,7 @@ func (f *nativeFuncFunc) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
+func (f *nativeFuncFunc) Arity() *Arity { panic("Arity") }
 func (f *nativeFuncFunc) MinArity() int { return 1 }
 func (f *nativeFuncFunc) MaxArity() int { return 1 }
 
@@ -366,6 +372,7 @@ func (f *nativeFuncBool) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
+func (f *nativeFuncBool) Arity() *Arity { panic("Arity") }
 func (f *nativeFuncBool) MinArity() int { return 1 }
 func (f *nativeFuncBool) MaxArity() int { return 1 }
 
@@ -411,6 +418,7 @@ func (f *nativeFuncStruct) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
+func (f *nativeFuncStruct) Arity() *Arity { panic("Arity") }
 func (f *nativeFuncStruct) MinArity() int { return 1 }
 func (f *nativeFuncStruct) MaxArity() int { return 1 }
 

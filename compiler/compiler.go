@@ -135,7 +135,12 @@ func (c *compiler) makeModuleProperty(
 
 func (c *compiler) compileFunc(fe *ast.FnExpr) *g.FuncTemplate {
 
-	arity := len(fe.RequiredParams)
+	arity := &g.Arity{
+		Kind:           g.FixedArity,
+		RequiredParams: len(fe.RequiredParams),
+		OptionalParams: nil,
+	}
+
 	tpl := &g.FuncTemplate{
 		Module:            c.mod,
 		Arity:             arity,

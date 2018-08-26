@@ -185,15 +185,17 @@ func main() {
 		// that will be passed into the main function
 		params := []g.Value{}
 		arity := mainFn.Template().Arity
-		if arity == 1 {
+		if arity.Kind != g.FixedArity {
+			exitError(fmt.Errorf("'main' arity must be fixed"))
+		} else if arity.RequiredParams != 1 {
+			exitError(fmt.Errorf("'main' must have exactly one argument"))
+		} else {
 			osArgs := os.Args[2:]
 			args := make([]g.Value, len(osArgs))
 			for i, a := range osArgs {
 				args[i] = g.NewStr(a)
 			}
 			params = append(params, g.NewList(args))
-		} else if arity > 1 {
-			exitError(fmt.Errorf("'main' has too many arguments"))
 		}
 
 		// evaluate the main function

@@ -274,13 +274,14 @@ var BuiltinSetVal = NewNativeFunc(
 // BuiltinArity returns the arity of a function.
 var BuiltinArity = NewNativeFuncFunc(
 	func(cx Context, f Func) (Value, Error) {
-		st, err := NewStruct([]Field{
-			NewField("min", true, NewInt(int64(f.MinArity()))),
-			NewField("max", true, NewInt(int64(f.MaxArity())))}, true)
-		if err != nil {
-			panic("invalid struct")
-		}
-		return st, nil
+		//		st, err := NewStruct([]Field{
+		//			NewField("min", true, NewInt(int64(f.MinArity()))),
+		//			NewField("max", true, NewInt(int64(f.MaxArity())))}, true)
+		//		if err != nil {
+		//			panic("invalid struct")
+		//		}
+		//		return st, nil
+		return Null, nil
 	})
 
 //// BuiltinOpenPlugin wraps a plugin in a struct

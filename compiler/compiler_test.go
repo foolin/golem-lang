@@ -5,7 +5,7 @@
 package compiler
 
 import (
-	"fmt"
+	//"fmt"
 	"reflect"
 	"testing"
 
@@ -35,7 +35,7 @@ func ok(t *testing.T, pool *g.Pool, expect *g.Pool) {
 		mt := pool.Templates[i]
 		et := expect.Templates[i]
 
-		if (mt.Arity != et.Arity) || (mt.NumCaptures != et.NumCaptures) || (mt.NumLocals != et.NumLocals) {
+		if !reflect.DeepEqual(mt.Arity, et.Arity) || (mt.NumCaptures != et.NumCaptures) || (mt.NumLocals != et.NumLocals) {
 			t.Error(pool, " != ", expect)
 		}
 
@@ -64,9 +64,15 @@ func testCompile(t *testing.T, code string) *g.Module {
 	tassert(t, errs == nil)
 	tassert(t, len(mods) == 1)
 
-	fmt.Printf("%v\n", mods)
-
 	return mods[0]
+}
+
+func fixedArity(numParams int) *g.Arity {
+	return &g.Arity{
+		Kind:           g.FixedArity,
+		RequiredParams: numParams,
+		OptionalParams: nil,
+	}
 }
 
 func TestExpression(t *testing.T) {
@@ -77,7 +83,7 @@ func TestExpression(t *testing.T) {
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
 				OpCodes: []byte{
@@ -108,7 +114,7 @@ func TestExpression(t *testing.T) {
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
 				OpCodes: []byte{
@@ -135,7 +141,7 @@ func TestExpression(t *testing.T) {
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
 				OpCodes: []byte{
@@ -162,7 +168,7 @@ func TestExpression(t *testing.T) {
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
 				OpCodes: []byte{
@@ -185,7 +191,7 @@ func TestExpression(t *testing.T) {
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
 				OpCodes: []byte{
@@ -208,7 +214,7 @@ func TestExpression(t *testing.T) {
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
 				OpCodes: []byte{
@@ -231,7 +237,7 @@ func TestExpression(t *testing.T) {
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
 				OpCodes: []byte{
@@ -257,7 +263,7 @@ func TestExpression(t *testing.T) {
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
 				OpCodes: []byte{
@@ -286,7 +292,7 @@ func TestExpression(t *testing.T) {
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   1,
 				OpCodes: []byte{
@@ -314,7 +320,7 @@ func TestExpression(t *testing.T) {
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   1,
 				OpCodes: []byte{
@@ -345,7 +351,7 @@ func TestAssignment(t *testing.T) {
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   2,
 				OpCodes: []byte{
@@ -394,7 +400,7 @@ func TestIf(t *testing.T) {
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   1,
 				OpCodes: []byte{
@@ -428,7 +434,7 @@ func TestIf(t *testing.T) {
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   4,
 				OpCodes: []byte{
@@ -468,7 +474,7 @@ func TestWhile(t *testing.T) {
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   2,
 				OpCodes: []byte{
@@ -498,7 +504,7 @@ func TestWhile(t *testing.T) {
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   3,
 				OpCodes: []byte{
@@ -537,7 +543,7 @@ func TestReturn(t *testing.T) {
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   1,
 				OpCodes: []byte{
@@ -590,7 +596,7 @@ let b = fn(x) {
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   2,
 				OpCodes: []byte{
@@ -608,7 +614,7 @@ let b = fn(x) {
 				ExceptionHandlers: nil,
 			},
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
 				OpCodes: []byte{
@@ -622,7 +628,7 @@ let b = fn(x) {
 				ExceptionHandlers: nil,
 			},
 			&g.FuncTemplate{
-				Arity:       1,
+				Arity:       fixedArity(1),
 				NumCaptures: 0,
 				NumLocals:   2,
 				OpCodes: []byte{
@@ -645,7 +651,7 @@ let b = fn(x) {
 				ExceptionHandlers: nil,
 			},
 			&g.FuncTemplate{
-				Arity:       1,
+				Arity:       fixedArity(1),
 				NumCaptures: 0,
 				NumLocals:   1,
 				OpCodes: []byte{
@@ -683,7 +689,7 @@ c(2, 3)
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   3,
 				OpCodes: []byte{
@@ -716,7 +722,7 @@ c(2, 3)
 				ExceptionHandlers: nil,
 			},
 			&g.FuncTemplate{
-				Arity:       0,
+				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
 				OpCodes: []byte{
@@ -727,7 +733,7 @@ c(2, 3)
 				ExceptionHandlers: nil,
 			},
 			&g.FuncTemplate{
-				Arity:       1,
+				Arity:       fixedArity(1),
 				NumCaptures: 0,
 				NumLocals:   1,
 				OpCodes: []byte{
@@ -741,7 +747,7 @@ c(2, 3)
 				ExceptionHandlers: nil,
 			},
 			&g.FuncTemplate{
-				Arity:       2,
+				Arity:       fixedArity(2),
 				NumCaptures: 0,
 				NumLocals:   3,
 				OpCodes: []byte{
@@ -779,7 +785,7 @@ const accumGen = fn(n) {
 		Constants:  []g.Basic{},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{&g.FuncTemplate{
-			Arity:       0,
+			Arity:       fixedArity(0),
 			NumCaptures: 0,
 			NumLocals:   1,
 			OpCodes: []byte{
@@ -793,7 +799,7 @@ const accumGen = fn(n) {
 				{Index: 7, LineNum: 0}},
 			ExceptionHandlers: nil,
 		}, &g.FuncTemplate{
-			Arity:       1,
+			Arity:       fixedArity(1),
 			NumCaptures: 0,
 			NumLocals:   1,
 			OpCodes: []byte{
@@ -808,7 +814,7 @@ const accumGen = fn(n) {
 				{Index: 8, LineNum: 0}},
 			ExceptionHandlers: nil,
 		}, &g.FuncTemplate{
-			Arity:       1,
+			Arity:       fixedArity(1),
 			NumCaptures: 1,
 			NumLocals:   1,
 			OpCodes: []byte{
@@ -850,7 +856,7 @@ const accumGen = fn(n) {
 		Constants:  []g.Basic{g.NewInt(2)},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{&g.FuncTemplate{
-			Arity:       0,
+			Arity:       fixedArity(0),
 			NumCaptures: 0,
 			NumLocals:   2,
 			OpCodes: []byte{
@@ -868,7 +874,7 @@ const accumGen = fn(n) {
 				{Index: 16, LineNum: 0}},
 			ExceptionHandlers: nil,
 		}, &g.FuncTemplate{
-			Arity:       1,
+			Arity:       fixedArity(1),
 			NumCaptures: 1,
 			NumLocals:   1,
 			OpCodes: []byte{
@@ -884,7 +890,7 @@ const accumGen = fn(n) {
 				{Index: 11, LineNum: 0}},
 			ExceptionHandlers: nil,
 		}, &g.FuncTemplate{
-			Arity:       1,
+			Arity:       fixedArity(1),
 			NumCaptures: 2,
 			NumLocals:   1,
 			OpCodes: []byte{
@@ -928,7 +934,7 @@ let d = b--
 		Constants:  []g.Basic{g.NewInt(int64(10)), g.NewInt(int64(20))},
 		StructDefs: [][]*g.FieldDef{},
 		Templates: []*g.FuncTemplate{&g.FuncTemplate{
-			Arity:       0,
+			Arity:       fixedArity(0),
 			NumCaptures: 0,
 			NumLocals:   4,
 			OpCodes: []byte{

@@ -72,8 +72,9 @@ func (f *bytecodeFunc) Template() *FuncTemplate {
 	return f.template
 }
 
-func (f *bytecodeFunc) MinArity() int { return f.template.Arity }
-func (f *bytecodeFunc) MaxArity() int { return f.template.Arity }
+func (f *bytecodeFunc) MinArity() int { panic("MinArity") }
+func (f *bytecodeFunc) MaxArity() int { panic("MaxArity") }
+func (f *bytecodeFunc) Arity() *Arity { return f.template.Arity }
 
 func (f *bytecodeFunc) GetCapture(idx int) *Ref {
 	return f.captures[idx]
@@ -95,7 +96,7 @@ func (f *bytecodeFunc) Invoke(cx Context, values []Value) (Value, Error) {
 // are immutable at run time.
 type FuncTemplate struct {
 	Module            *Module
-	Arity             int // TODO MinArity, MaxArity
+	Arity             *Arity
 	NumCaptures       int
 	NumLocals         int
 	OpCodes           []byte

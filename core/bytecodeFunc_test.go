@@ -34,7 +34,7 @@ func TestLineNumber(t *testing.T) {
 
 	tp := &FuncTemplate{
 		Module:      nil,
-		Arity:       0,
+		Arity:       nil,
 		NumCaptures: 0,
 		NumLocals:   0,
 		OpCodes:     nil,

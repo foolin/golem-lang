@@ -31,11 +31,17 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		case g.BytecodeFunc:
 
 			// check arity
-			arity := len(params)
-			if arity != fn.Template().Arity {
-				err := g.ArityMismatchError(
-					fmt.Sprintf("%d", fn.Template().Arity), arity)
-				return nil, err
+			numParams := len(params)
+			arity := fn.Template().Arity
+			switch arity.Kind {
+			case g.FixedArity:
+				if numParams != arity.RequiredParams {
+					err := g.ArityMismatchError(
+						fmt.Sprintf("%d", arity.RequiredParams), numParams)
+					return nil, err
+				}
+			default:
+				panic("unreachable")
 			}
 
 			// pop from stack

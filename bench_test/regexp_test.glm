@@ -24,6 +24,6 @@ fn testCompile() {
     }
 }
 
-fn main() {
+fn main(args) {
     testCompile()
 }

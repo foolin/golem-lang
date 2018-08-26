@@ -1061,7 +1061,8 @@ fn main(args) {}
 	tassert(t, err == nil)
 	f, ok := v.(g.BytecodeFunc)
 	tassert(t, ok)
-	tassert(t, f.Template().Arity == 1)
+	tassert(t, f.Template().Arity.Kind == g.FixedArity)
+	tassert(t, f.Template().Arity.RequiredParams == 1)
 
 	err = mod.Contents.SetField(i, g.NewStr("a"), g.NegOne)
 	tassert(t, err == nil)
