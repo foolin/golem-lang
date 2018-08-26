@@ -53,8 +53,8 @@ func ok(t *testing.T, pool *g.Pool, expect *g.Pool) {
 }
 
 var builtins []*g.BuiltinEntry = append(
-	g.SandboxBuiltins,
-	g.CommandLineBuiltins...)
+	g.StandardBuiltins,
+	g.UnsandboxedBuiltins...)
 var builtinMgr = g.NewBuiltinManager(builtins)
 
 func testCompile(t *testing.T, code string) *g.Module {

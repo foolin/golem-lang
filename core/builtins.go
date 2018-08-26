@@ -8,8 +8,6 @@ import (
 	"fmt"
 )
 
-//-----------------------------------------------------------------
-
 type (
 	// BuiltinManager manages the built-in functions (and other built-in values)
 	// for a given instance of the Interpreter
@@ -62,9 +60,9 @@ func (b *builtinManager) IndexOf(s string) int {
 
 //-----------------------------------------------------------------
 
-// SandboxBuiltins containts the built-ins that are
+// StandardBuiltins containts the built-ins that are
 // pure functions.  These functions do not do any form of I/O.
-var SandboxBuiltins = []*BuiltinEntry{
+var StandardBuiltins = []*BuiltinEntry{
 	{"str", BuiltinStr},
 	{"len", BuiltinLen},
 	{"range", BuiltinRange},
@@ -80,48 +78,18 @@ var SandboxBuiltins = []*BuiltinEntry{
 	{"arity", BuiltinArity},
 }
 
-// CommandLineBuiltins consists of the print(), and println()
-var CommandLineBuiltins = []*BuiltinEntry{
-	{"print", BuiltinPrint},
-	{"println", BuiltinPrintln},
-}
-
-//-----------------------------------------------------------------
-
-// BuiltinPrint prints to stdout.
-var BuiltinPrint = NewObsoleteFunc(
-	0, -1,
-	func(cx Context, values []Value) (Value, Error) {
-		for _, v := range values {
-			fmt.Print(v.ToStr(cx).String())
-		}
-
-		return Null, nil
-	})
-
-// BuiltinPrintln prints to stdout.
-var BuiltinPrintln = NewObsoleteFunc(
-	0, -1,
-	func(cx Context, values []Value) (Value, Error) {
-		for _, v := range values {
-			fmt.Print(v.ToStr(cx).String())
-		}
-		fmt.Println()
-
-		return Null, nil
-	})
-
 //-----------------------------------------------------------------
 
 // BuiltinStr converts a single value to a Str
-var BuiltinStr = NewObsoleteFuncValue(
-	func(cx Context, val Value) (Value, Error) {
-		return val.ToStr(cx), nil
+var BuiltinStr = NewFixedNativeFunc(
+	[]Type{AnyType},
+	func(cx Context, values []Value) (Value, Error) {
+		return values[0].ToStr(cx), nil
 	})
 
 // BuiltinLen returns the length of a single Lenable
-var BuiltinLen = NewObsoleteFunc(
-	1, 1,
+var BuiltinLen = NewFixedNativeFunc(
+	[]Type{AnyType},
 	func(cx Context, values []Value) (Value, Error) {
 		if ln, ok := values[0].(Lenable); ok {
 			return ln.Len(), nil
@@ -155,8 +123,10 @@ var BuiltinRange = NewObsoleteFunc(
 	})
 
 // BuiltinAssert asserts that a single Bool is True
-var BuiltinAssert = NewObsoleteFuncBool(
-	func(cx Context, b Bool) (Value, Error) {
+var BuiltinAssert = NewFixedNativeFunc(
+	[]Type{BoolType},
+	func(cx Context, values []Value) (Value, Error) {
+		b := values[0].(Bool)
 		if b.BoolVal() {
 			return True, nil
 		}
@@ -200,33 +170,38 @@ var BuiltinChan = NewObsoleteFunc(
 	})
 
 // BuiltinType returns the Str representation of the Type of a single Value
-var BuiltinType = NewObsoleteFuncValue(
-	func(cx Context, val Value) (Value, Error) {
+var BuiltinType = NewFixedNativeFunc(
+	[]Type{AnyType},
+	func(cx Context, values []Value) (Value, Error) {
 		// Null has a type, but for the purposes of type()
 		// we are going to pretend that it doesn't
-		if val == Null {
+		if values[0] == Null {
 			return nil, NullValueError()
 		}
-		t := val.Type()
+		t := values[0].Type()
 		return NewStr(t.String()), nil
 	})
 
 // BuiltinFreeze freezes a single Value.
-var BuiltinFreeze = NewObsoleteFuncValue(
-	func(cx Context, val Value) (Value, Error) {
-		return val.Freeze()
+var BuiltinFreeze = NewFixedNativeFunc(
+	[]Type{AnyType},
+	func(cx Context, values []Value) (Value, Error) {
+		return values[0].Freeze()
 	})
 
 // BuiltinFrozen returns whether a single Value is Frozen.
-var BuiltinFrozen = NewObsoleteFuncValue(
-	func(cx Context, val Value) (Value, Error) {
-		return val.Frozen()
+var BuiltinFrozen = NewFixedNativeFunc(
+	[]Type{AnyType},
+	func(cx Context, values []Value) (Value, Error) {
+		return values[0].Frozen()
 	})
 
 // BuiltinFields returns the fields of a Struct
-var BuiltinFields = NewObsoleteFuncStruct(
-	func(cx Context, st Struct) (Value, Error) {
-		fields := st.(*_struct).smap.fieldNames()
+var BuiltinFields = NewFixedNativeFunc(
+	[]Type{StructType},
+	func(cx Context, values []Value) (Value, Error) {
+		st := values[0].(*_struct)
+		fields := st.smap.fieldNames()
 		result := make([]Value, len(fields))
 		for i, k := range fields {
 			result[i] = NewStr(k)
@@ -235,33 +210,21 @@ var BuiltinFields = NewObsoleteFuncStruct(
 	})
 
 // BuiltinGetVal gets the Value associated with a Struct's field name.
-var BuiltinGetVal = NewObsoleteFunc(
-	2, 2,
+var BuiltinGetVal = NewFixedNativeFunc(
+	[]Type{StructType, StrType},
 	func(cx Context, values []Value) (Value, Error) {
-		st, ok := values[0].(*_struct)
-		if !ok {
-			return nil, TypeMismatchError("Expected Struct")
-		}
-		field, ok := values[1].(Str)
-		if !ok {
-			return nil, TypeMismatchError("Expected Str")
-		}
+		st := values[0].(*_struct)
+		field := values[1].(Str)
 
 		return st.GetField(cx, field)
 	})
 
 // BuiltinSetVal sets the Value associated with a Struct's field name.
-var BuiltinSetVal = NewObsoleteFunc(
-	3, 3,
+var BuiltinSetVal = NewFixedNativeFunc(
+	[]Type{StructType, StrType, AnyType},
 	func(cx Context, values []Value) (Value, Error) {
-		st, ok := values[0].(*_struct)
-		if !ok {
-			return nil, TypeMismatchError("Expected Struct")
-		}
-		field, ok := values[1].(Str)
-		if !ok {
-			return nil, TypeMismatchError("Expected Str")
-		}
+		st := values[0].(*_struct)
+		field := values[1].(Str)
 		val := values[2]
 
 		err := st.SetField(cx, field, val)
@@ -272,8 +235,9 @@ var BuiltinSetVal = NewObsoleteFunc(
 	})
 
 // BuiltinArity returns the arity of a function.
-var BuiltinArity = NewObsoleteFuncFunc(
-	func(cx Context, f Func) (Value, Error) {
+var BuiltinArity = NewFixedNativeFunc(
+	[]Type{FuncType},
+	func(cx Context, values []Value) (Value, Error) {
 		//		st, err := NewStruct([]Field{
 		//			NewField("min", true, NewInt(int64(f.MinArity()))),
 		//			NewField("max", true, NewInt(int64(f.MaxArity())))}, true)
@@ -281,6 +245,37 @@ var BuiltinArity = NewObsoleteFuncFunc(
 		//			panic("invalid struct")
 		//		}
 		//		return st, nil
+		panic("TODO")
+	})
+
+//-----------------------------------------------------------------
+
+// UnsandboxedBuiltins are builtins that are not pure functions
+var UnsandboxedBuiltins = []*BuiltinEntry{
+	{"print", BuiltinPrint},
+	{"println", BuiltinPrintln},
+}
+
+// BuiltinPrint prints to stdout.
+var BuiltinPrint = NewObsoleteFunc(
+	0, -1,
+	func(cx Context, values []Value) (Value, Error) {
+		for _, v := range values {
+			fmt.Print(v.ToStr(cx).String())
+		}
+
+		return Null, nil
+	})
+
+// BuiltinPrintln prints to stdout.
+var BuiltinPrintln = NewObsoleteFunc(
+	0, -1,
+	func(cx Context, values []Value) (Value, Error) {
+		for _, v := range values {
+			fmt.Print(v.ToStr(cx).String())
+		}
+		fmt.Println()
+
 		return Null, nil
 	})
 

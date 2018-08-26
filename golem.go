@@ -145,8 +145,8 @@ func main() {
 
 	// command line builtins
 	var builtins []*g.BuiltinEntry = append(
-		g.SandboxBuiltins,
-		g.CommandLineBuiltins...)
+		g.StandardBuiltins,
+		g.UnsandboxedBuiltins...)
 	builtins = append(
 		builtins,
 		&g.BuiltinEntry{Name: "_lib", Value: lib.BuiltinLib})

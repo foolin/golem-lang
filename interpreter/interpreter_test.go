@@ -14,8 +14,8 @@ import (
 )
 
 var builtins []*g.BuiltinEntry = append(
-	g.SandboxBuiltins,
-	g.CommandLineBuiltins...)
+	g.StandardBuiltins,
+	g.UnsandboxedBuiltins...)
 var builtinMgr = g.NewBuiltinManager(builtins)
 
 func tassert(t *testing.T, flag bool) {

@@ -16,7 +16,7 @@ func builtinOk(t *testing.T, flag bool) {
 
 func TestBuiltins(t *testing.T) {
 
-	mgr := NewBuiltinManager(SandboxBuiltins)
+	mgr := NewBuiltinManager(StandardBuiltins)
 	builtinOk(t, !mgr.Contains("foo"))
 	builtinOk(t, mgr.Contains("str"))
 	builtinOk(t, mgr.Contains("len"))
