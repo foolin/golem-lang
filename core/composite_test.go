@@ -476,8 +476,8 @@ func TestRangeIterator(t *testing.T) {
 
 	itr = ibl.NewIterator(cx)
 	n = 1
-	for structInvokeBoolFunc(t, itr, NewStr("nextValue")).BoolVal() {
-		v := structInvokeFunc(t, itr, NewStr("getValue"))
+	for structInvokeBoolFunc(t, itr, NewStr("next")).BoolVal() {
+		v := structInvokeFunc(t, itr, NewStr("get"))
 
 		i, ok := v.(Int)
 		tassert(t, ok)
@@ -508,14 +508,14 @@ func TestListIterator(t *testing.T) {
 	fail(t, v, err, "NoSuchElement")
 
 	itr = ibl.NewIterator(cx)
-	err = itr.SetField(cx, NewStr("nextValue"), Null)
+	err = itr.SetField(cx, NewStr("next"), Null)
 	fail(t, nil, err, "ImmutableValue")
-	err = itr.SetField(cx, NewStr("getValue"), Null)
+	err = itr.SetField(cx, NewStr("get"), Null)
 	fail(t, nil, err, "ImmutableValue")
 
 	n = 1
-	for structInvokeBoolFunc(t, itr, NewStr("nextValue")).BoolVal() {
-		v := structInvokeFunc(t, itr, NewStr("getValue"))
+	for structInvokeBoolFunc(t, itr, NewStr("next")).BoolVal() {
+		v := structInvokeFunc(t, itr, NewStr("get"))
 
 		i, ok := v.(Int)
 		tassert(t, ok)
@@ -550,8 +550,8 @@ func TestDictIterator(t *testing.T) {
 
 	itr = ibl.NewIterator(cx)
 	s = NewStr("")
-	for structInvokeBoolFunc(t, itr, NewStr("nextValue")).BoolVal() {
-		v := structInvokeFunc(t, itr, NewStr("getValue"))
+	for structInvokeBoolFunc(t, itr, NewStr("next")).BoolVal() {
+		v := structInvokeFunc(t, itr, NewStr("get"))
 
 		tp, ok := v.(Tuple)
 		tassert(t, ok)
@@ -581,8 +581,8 @@ func TestSetIterator(t *testing.T) {
 
 	itr = ibl.NewIterator(cx)
 	s = NewStr("")
-	for structInvokeBoolFunc(t, itr, NewStr("nextValue")).BoolVal() {
-		v := structInvokeFunc(t, itr, NewStr("getValue"))
+	for structInvokeBoolFunc(t, itr, NewStr("next")).BoolVal() {
+		v := structInvokeFunc(t, itr, NewStr("get"))
 
 		s = s.Concat(v.ToStr(cx))
 	}

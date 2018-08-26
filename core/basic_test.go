@@ -440,8 +440,8 @@ func TestStrIterator(t *testing.T) {
 
 	itr = ibl.NewIterator(cx)
 	s = NewStr("")
-	for structInvokeBoolFunc(t, itr, NewStr("nextValue")).BoolVal() {
-		v := structInvokeFunc(t, itr, NewStr("getValue"))
+	for structInvokeBoolFunc(t, itr, NewStr("next")).BoolVal() {
+		v := structInvokeFunc(t, itr, NewStr("get"))
 		s = s.Concat(v.ToStr(cx))
 	}
 	ok(t, s, nil, NewStr("abc"))

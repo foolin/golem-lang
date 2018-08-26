@@ -98,8 +98,8 @@ func newIteratorStruct() Struct {
 
 	// create a struct with fields that have placeholder Null values
 	stc, err := NewStruct([]Field{
-		NewField("nextValue", true, Null),
-		NewField("getValue", true, Null)}, true)
+		NewField("next", true, Null),
+		NewField("get", true, Null)}, true)
 	if err != nil {
 		panic("invalid iterator")
 	}
@@ -110,7 +110,7 @@ func initIteratorStruct(cx Context, itr Iterator) Iterator {
 
 	// initialize the struct fields with functions that refer back to the iterator
 	err := itr.InitField(
-		cx, NewStr("nextValue"),
+		cx, NewStr("next"),
 		NewFixedNativeFunc(
 			[]Type{}, false,
 			func(cx Context, values []Value) (Value, Error) {
@@ -121,7 +121,7 @@ func initIteratorStruct(cx Context, itr Iterator) Iterator {
 	}
 
 	err = itr.InitField(
-		cx, NewStr("getValue"),
+		cx, NewStr("get"),
 		NewFixedNativeFunc(
 			[]Type{}, false,
 			func(cx Context, values []Value) (Value, Error) {
