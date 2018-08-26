@@ -178,9 +178,10 @@ func (s *set) GetField(cx Context, key Str) (Value, Error) {
 	switch sn := key.String(); sn {
 
 	case "add":
-		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncValue(
-			func(cx Context, val Value) (Value, Error) {
-				err := s.Add(cx, val)
+		return &virtualFunc{s, sn, NewFixedNativeFunc(
+			[]Type{AnyType}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				err := s.Add(cx, values[0])
 				if err != nil {
 					return nil, err
 				}
@@ -188,9 +189,10 @@ func (s *set) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "addAll":
-		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncValue(
-			func(cx Context, val Value) (Value, Error) {
-				err := s.AddAll(cx, val)
+		return &virtualFunc{s, sn, NewFixedNativeFunc(
+			[]Type{AnyType}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				err := s.AddAll(cx, values[0])
 				if err != nil {
 					return nil, err
 				}
@@ -198,8 +200,9 @@ func (s *set) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "clear":
-		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFunc0(
-			func(cx Context) (Value, Error) {
+		return &virtualFunc{s, sn, NewFixedNativeFunc(
+			[]Type{}, false,
+			func(cx Context, values []Value) (Value, Error) {
 				err := s.Clear()
 				if err != nil {
 					return nil, err
@@ -208,21 +211,24 @@ func (s *set) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "isEmpty":
-		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFunc0(
-			func(cx Context) (Value, Error) {
+		return &virtualFunc{s, sn, NewFixedNativeFunc(
+			[]Type{}, false,
+			func(cx Context, values []Value) (Value, Error) {
 				return s.IsEmpty(), nil
 			})}, nil
 
 	case "contains":
-		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncValue(
-			func(cx Context, val Value) (Value, Error) {
-				return s.Contains(cx, val)
+		return &virtualFunc{s, sn, NewFixedNativeFunc(
+			[]Type{AnyType}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				return s.Contains(cx, values[0])
 			})}, nil
 
 	case "remove":
-		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncValue(
-			func(cx Context, val Value) (Value, Error) {
-				return s.Remove(cx, val)
+		return &virtualFunc{s, sn, NewFixedNativeFunc(
+			[]Type{AnyType}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				return s.Remove(cx, values[0])
 			})}, nil
 
 	default:
