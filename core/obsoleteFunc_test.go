@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestNative(t *testing.T) {
+func TestObsolete(t *testing.T) {
 
 	a := BuiltinStr
 	b := BuiltinLen

@@ -27,6 +27,7 @@ func ok(t *testing.T, val Value, err Error, expect Value) {
 
 	if !reflect.DeepEqual(val, expect) {
 		t.Error(val, " != ", expect)
+		panic("ok")
 	}
 }
 

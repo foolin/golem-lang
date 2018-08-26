@@ -16,7 +16,10 @@ type NativeFunc interface {
 //--------------------------------------------------------------
 
 type nativeBaseFunc struct {
-	arity *Arity
+	arity         *Arity
+	requiredTypes []Type
+	allowNull     bool
+	invoke        func(Context, []Value) (Value, Error)
 }
 
 func (f *nativeBaseFunc) funcMarker() {}
@@ -47,27 +50,51 @@ func (f *nativeBaseFunc) MinArity() int { panic("MinArity") }
 func (f *nativeBaseFunc) MaxArity() int { panic("MaxArity") }
 func (f *nativeBaseFunc) Arity() *Arity { return f.arity }
 
+func checkType(value Value, typ Type, allowNull bool) Error {
+
+	// accept 'any' type
+	if typ == AnyType {
+		return nil
+	}
+
+	// skip over null values
+	if value.Type() == NullType {
+		if allowNull {
+			return nil
+		}
+		return NullValueError()
+	}
+
+	// check type
+	if value.Type() != typ {
+		return TypeMismatchError(fmt.Sprintf("Expected %s", typ.String()))
+	}
+
+	// invoke
+	return nil
+}
+
 //--------------------------------------------------------------
 
 type nativeFixedFunc struct {
 	*nativeBaseFunc
-
-	types  []Type
-	invoke func(Context, []Value) (Value, Error)
 }
 
 // NewFixedNativeFunc creates a new NativeFunc with fixed arity
 func NewFixedNativeFunc(
-	types []Type,
+	requiredTypes []Type,
+	allowNull bool,
 	invoke func(Context, []Value) (Value, Error)) NativeFunc {
 
 	arity := &Arity{
 		Kind:           FixedArity,
-		RequiredParams: len(types),
+		RequiredParams: len(requiredTypes),
 		OptionalParams: nil,
 	}
 
-	return &nativeFixedFunc{&nativeBaseFunc{arity}, types, invoke}
+	return &nativeFixedFunc{
+		&nativeBaseFunc{arity, requiredTypes, allowNull, invoke},
+	}
 }
 
 func (f *nativeFixedFunc) Freeze() (Value, Error) {
@@ -86,26 +113,21 @@ func (f *nativeFixedFunc) Eq(cx Context, v Value) (Bool, Error) {
 
 func (f *nativeFixedFunc) Invoke(cx Context, values []Value) (Value, Error) {
 
+	numValues := len(values)
+	numReqs := len(f.requiredTypes)
+
 	// arity mismatch
-	if len(values) != len(f.types) {
+	if numValues != numReqs {
 		return nil, ArityMismatchError(
-			fmt.Sprintf("%d", len(f.types)),
-			len(values))
+			fmt.Sprintf("%d", numReqs),
+			numValues)
 	}
 
-	// type mismatch
-	for i, t := range f.types {
-		// accept 'any' type
-		if t == AnyType {
-			continue
-		}
-		// skip over null values
-		if values[i].Type() == NullType {
-			continue
-		}
-
-		if values[i].Type() != t {
-			return nil, TypeMismatchError(fmt.Sprintf("Expected %s", t.String()))
+	// check types on required values
+	for i := 0; i < numReqs; i++ {
+		err := checkType(values[i], f.requiredTypes[i], f.allowNull)
+		if err != nil {
+			return nil, err
 		}
 	}
 
@@ -116,23 +138,26 @@ func (f *nativeFixedFunc) Invoke(cx Context, values []Value) (Value, Error) {
 
 type nativeVariadicFunc struct {
 	*nativeBaseFunc
-
-	types  []Type
-	invoke func(Context, []Value) (Value, Error)
+	variadicType Type
 }
 
 // NewVariadicNativeFunc creates a new NativeFunc with variadic arity
 func NewVariadicNativeFunc(
-	types []Type,
+	requiredTypes []Type,
+	variadicType Type,
+	allowNull bool,
 	invoke func(Context, []Value) (Value, Error)) NativeFunc {
 
 	arity := &Arity{
 		Kind:           VariadicArity,
-		RequiredParams: len(types),
+		RequiredParams: len(requiredTypes),
 		OptionalParams: nil,
 	}
 
-	return &nativeVariadicFunc{&nativeBaseFunc{arity}, types, invoke}
+	return &nativeVariadicFunc{
+		&nativeBaseFunc{arity, requiredTypes, allowNull, invoke},
+		variadicType,
+	}
 }
 
 func (f *nativeVariadicFunc) Freeze() (Value, Error) {
@@ -151,28 +176,115 @@ func (f *nativeVariadicFunc) Eq(cx Context, v Value) (Bool, Error) {
 
 func (f *nativeVariadicFunc) Invoke(cx Context, values []Value) (Value, Error) {
 
+	numValues := len(values)
+	numReqs := len(f.requiredTypes)
+
 	// arity mismatch
-	if len(values) < len(f.types) {
+	if numValues < numReqs {
 		return nil, ArityMismatchError(
-			fmt.Sprintf("at least %d", len(f.types)),
-			len(values))
+			fmt.Sprintf("at least %d", numReqs),
+			numValues)
 	}
 
-	// type mismatch
-	for i, t := range f.types {
-		// accept 'any' type
-		if t == AnyType {
-			continue
-		}
-		// skip over null values
-		if values[i].Type() == NullType {
-			continue
-		}
-
-		if values[i].Type() != t {
-			return nil, TypeMismatchError(fmt.Sprintf("Expected %s", t.String()))
+	// check types on required values
+	for i := 0; i < numReqs; i++ {
+		err := checkType(values[i], f.requiredTypes[i], f.allowNull)
+		if err != nil {
+			return nil, err
 		}
 	}
 
+	// check types on variadic values
+	for i := numReqs; i < numValues; i++ {
+		err := checkType(values[i], f.variadicType, f.allowNull)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// invoke
+	return f.invoke(cx, values)
+}
+
+//--------------------------------------------------------------
+
+type nativeMultipleFunc struct {
+	*nativeBaseFunc
+	optionalValues []Basic
+}
+
+// NewMultipleNativeFunc creates a new NativeFunc with fixed arity
+func NewMultipleNativeFunc(
+	requiredTypes []Type,
+	optionalValues []Basic,
+	allowNull bool,
+	invoke func(Context, []Value) (Value, Error)) NativeFunc {
+
+	arity := &Arity{
+		Kind:           MultipleArity,
+		RequiredParams: len(requiredTypes),
+		OptionalParams: nil,
+	}
+
+	return &nativeMultipleFunc{
+		&nativeBaseFunc{arity, requiredTypes, allowNull, invoke},
+		optionalValues,
+	}
+}
+
+func (f *nativeMultipleFunc) Freeze() (Value, Error) {
+	return f, nil
+}
+
+func (f *nativeMultipleFunc) Eq(cx Context, v Value) (Bool, Error) {
+	switch t := v.(type) {
+	case *nativeMultipleFunc:
+		// equality is based on identity
+		return NewBool(f == t), nil
+	default:
+		return False, nil
+	}
+}
+
+func (f *nativeMultipleFunc) Invoke(cx Context, values []Value) (Value, Error) {
+
+	numValues := len(values)
+	numReqs := len(f.requiredTypes)
+	numOpts := len(f.optionalValues)
+
+	// arity mismatch
+	if numValues < numReqs {
+		return nil, ArityMismatchError(
+			fmt.Sprintf("at least %d", numReqs),
+			numValues)
+	}
+	if numValues > (numReqs + numOpts) {
+		return nil, ArityMismatchError(
+			fmt.Sprintf("at most %d", numReqs+numOpts),
+			numValues)
+	}
+
+	// check types on required values
+	for i := 0; i < numReqs; i++ {
+		err := checkType(values[i], f.requiredTypes[i], f.allowNull)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// check types on optional values
+	for i := numReqs; i < numValues; i++ {
+		err := checkType(values[i], f.optionalValues[i-numReqs].Type(), f.allowNull)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// add missing values from optional values
+	for len(values) < (numReqs + numOpts) {
+		values = append(values, f.optionalValues[len(values)-numReqs])
+	}
+
+	// invoke
 	return f.invoke(cx, values)
 }

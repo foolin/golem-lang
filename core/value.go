@@ -248,16 +248,16 @@ const (
 	// be collected together into a list.
 	VariadicArity
 
-	// OptionalArity means that some of the parameters can be omitted, in which case
-	// predifined values will be substituted.
-	OptionalArity
+	// MultipleArity means that some of the parameters can be omitted, in which case
+	// predifined optional values will be substituted.
+	MultipleArity
 )
 
 // Arity defines the arity of a function
 type Arity struct {
 	Kind           ArityKind
 	RequiredParams int
-	// OptionalParams is nil unless Kind is OptionalArity
+	// OptionalParams is nil unless Kind is MultipleArity
 	OptionalParams []Basic
 }
 
