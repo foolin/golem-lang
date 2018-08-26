@@ -27,13 +27,13 @@ func init() {
 }
 
 // ext returns a file extension
-var ext g.Value = g.NewNativeFuncStr(
+var ext g.Value = g.NewObsoleteFuncStr(
 	func(cx g.Context, name g.Str) (g.Value, g.Error) {
 		return g.NewStr(filepath.Ext(name.String())), nil
 	})
 
 //// wal walks a directory path
-//var walk g.Value = g.NewNativeFunc(
+//var walk g.Value = g.NewObsoleteFunc(
 //	2, 2,
 //	func(cx g.Context, values []g.Value) (g.Value, g.Error) {
 //

@@ -89,7 +89,7 @@ var CommandLineBuiltins = []*BuiltinEntry{
 //-----------------------------------------------------------------
 
 // BuiltinPrint prints to stdout.
-var BuiltinPrint = NewNativeFunc(
+var BuiltinPrint = NewObsoleteFunc(
 	0, -1,
 	func(cx Context, values []Value) (Value, Error) {
 		for _, v := range values {
@@ -100,7 +100,7 @@ var BuiltinPrint = NewNativeFunc(
 	})
 
 // BuiltinPrintln prints to stdout.
-var BuiltinPrintln = NewNativeFunc(
+var BuiltinPrintln = NewObsoleteFunc(
 	0, -1,
 	func(cx Context, values []Value) (Value, Error) {
 		for _, v := range values {
@@ -114,13 +114,13 @@ var BuiltinPrintln = NewNativeFunc(
 //-----------------------------------------------------------------
 
 // BuiltinStr converts a single value to a Str
-var BuiltinStr = NewNativeFuncValue(
+var BuiltinStr = NewObsoleteFuncValue(
 	func(cx Context, val Value) (Value, Error) {
 		return val.ToStr(cx), nil
 	})
 
 // BuiltinLen returns the length of a single Lenable
-var BuiltinLen = NewNativeFunc(
+var BuiltinLen = NewObsoleteFunc(
 	1, 1,
 	func(cx Context, values []Value) (Value, Error) {
 		if ln, ok := values[0].(Lenable); ok {
@@ -130,7 +130,7 @@ var BuiltinLen = NewNativeFunc(
 	})
 
 // BuiltinRange creates a new Range
-var BuiltinRange = NewNativeFunc(
+var BuiltinRange = NewObsoleteFunc(
 	2, 3,
 	func(cx Context, values []Value) (Value, Error) {
 		from, ok := values[0].(Int)
@@ -155,7 +155,7 @@ var BuiltinRange = NewNativeFunc(
 	})
 
 // BuiltinAssert asserts that a single Bool is True
-var BuiltinAssert = NewNativeFuncBool(
+var BuiltinAssert = NewObsoleteFuncBool(
 	func(cx Context, b Bool) (Value, Error) {
 		if b.BoolVal() {
 			return True, nil
@@ -164,7 +164,7 @@ var BuiltinAssert = NewNativeFuncBool(
 	})
 
 // BuiltinMerge merges structs together.
-var BuiltinMerge = NewNativeFunc(
+var BuiltinMerge = NewObsoleteFunc(
 	2, -1,
 	func(cx Context, values []Value) (Value, Error) {
 		structs := make([]Struct, len(values))
@@ -181,7 +181,7 @@ var BuiltinMerge = NewNativeFunc(
 
 // BuiltinChan creates a new Chan.  If an Int is passed in,
 // it is used to create a buffered Chan.
-var BuiltinChan = NewNativeFunc(
+var BuiltinChan = NewObsoleteFunc(
 	0, 1,
 	func(cx Context, values []Value) (Value, Error) {
 		switch len(values) {
@@ -200,7 +200,7 @@ var BuiltinChan = NewNativeFunc(
 	})
 
 // BuiltinType returns the Str representation of the Type of a single Value
-var BuiltinType = NewNativeFuncValue(
+var BuiltinType = NewObsoleteFuncValue(
 	func(cx Context, val Value) (Value, Error) {
 		// Null has a type, but for the purposes of type()
 		// we are going to pretend that it doesn't
@@ -212,19 +212,19 @@ var BuiltinType = NewNativeFuncValue(
 	})
 
 // BuiltinFreeze freezes a single Value.
-var BuiltinFreeze = NewNativeFuncValue(
+var BuiltinFreeze = NewObsoleteFuncValue(
 	func(cx Context, val Value) (Value, Error) {
 		return val.Freeze()
 	})
 
 // BuiltinFrozen returns whether a single Value is Frozen.
-var BuiltinFrozen = NewNativeFuncValue(
+var BuiltinFrozen = NewObsoleteFuncValue(
 	func(cx Context, val Value) (Value, Error) {
 		return val.Frozen()
 	})
 
 // BuiltinFields returns the fields of a Struct
-var BuiltinFields = NewNativeFuncStruct(
+var BuiltinFields = NewObsoleteFuncStruct(
 	func(cx Context, st Struct) (Value, Error) {
 		fields := st.(*_struct).smap.fieldNames()
 		result := make([]Value, len(fields))
@@ -235,7 +235,7 @@ var BuiltinFields = NewNativeFuncStruct(
 	})
 
 // BuiltinGetVal gets the Value associated with a Struct's field name.
-var BuiltinGetVal = NewNativeFunc(
+var BuiltinGetVal = NewObsoleteFunc(
 	2, 2,
 	func(cx Context, values []Value) (Value, Error) {
 		st, ok := values[0].(*_struct)
@@ -251,7 +251,7 @@ var BuiltinGetVal = NewNativeFunc(
 	})
 
 // BuiltinSetVal sets the Value associated with a Struct's field name.
-var BuiltinSetVal = NewNativeFunc(
+var BuiltinSetVal = NewObsoleteFunc(
 	3, 3,
 	func(cx Context, values []Value) (Value, Error) {
 		st, ok := values[0].(*_struct)
@@ -272,7 +272,7 @@ var BuiltinSetVal = NewNativeFunc(
 	})
 
 // BuiltinArity returns the arity of a function.
-var BuiltinArity = NewNativeFuncFunc(
+var BuiltinArity = NewObsoleteFuncFunc(
 	func(cx Context, f Func) (Value, Error) {
 		//		st, err := NewStruct([]Field{
 		//			NewField("min", true, NewInt(int64(f.MinArity()))),
@@ -285,7 +285,7 @@ var BuiltinArity = NewNativeFuncFunc(
 	})
 
 //// BuiltinOpenPlugin wraps a plugin in a struct
-//var BuiltinOpenPlugin = NewNativeFuncStr(
+//var BuiltinOpenPlugin = NewObsoleteFuncStr(
 //	func(cx Context, name Str) (Value, Error) {
 //
 //		// open up the plugin
@@ -296,7 +296,7 @@ var BuiltinArity = NewNativeFuncFunc(
 //		}
 //
 //		// define lookup function
-//		lookup := NewNativeFuncStr(
+//		lookup := NewObsoleteFuncStr(
 //			func(cx Context, s Str) (Value, Error) {
 //
 //				name := s.String()

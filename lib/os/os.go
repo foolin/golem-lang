@@ -28,7 +28,7 @@ func init() {
 }
 
 // exit exits the program
-var exit g.Value = g.NewNativeFuncInt(
+var exit g.Value = g.NewObsoleteFuncInt(
 	func(cx g.Context, n g.Int) (g.Value, g.Error) {
 
 		os.Exit(int(n.IntVal()))
@@ -38,7 +38,7 @@ var exit g.Value = g.NewNativeFuncInt(
 	})
 
 // open opens a file
-var open g.Value = g.NewNativeFuncStr(
+var open g.Value = g.NewObsoleteFuncStr(
 	func(cx g.Context, s g.Str) (g.Value, g.Error) {
 
 		f, err := os.Open(s.String())
@@ -49,7 +49,7 @@ var open g.Value = g.NewNativeFuncStr(
 	})
 
 // stat stats a file
-var stat g.Value = g.NewNativeFuncStr(
+var stat g.Value = g.NewObsoleteFuncStr(
 	func(cx g.Context, s g.Str) (g.Value, g.Error) {
 
 		// TODO os.Lstat
@@ -109,8 +109,8 @@ func newFile(f *os.File) g.Struct {
 	return stc
 }
 
-func readLines(f io.Reader) g.NativeFunc {
-	return g.NewNativeFunc0(
+func readLines(f io.Reader) g.ObsoleteFunc {
+	return g.NewObsoleteFunc0(
 		func(cx g.Context) (g.Value, g.Error) {
 
 			lines := []g.Value{}
@@ -127,8 +127,8 @@ func readLines(f io.Reader) g.NativeFunc {
 		})
 }
 
-func close(f io.Closer) g.NativeFunc {
-	return g.NewNativeFunc0(
+func close(f io.Closer) g.ObsoleteFunc {
+	return g.NewObsoleteFunc0(
 		func(cx g.Context) (g.Value, g.Error) {
 			err := f.Close()
 			if err != nil {

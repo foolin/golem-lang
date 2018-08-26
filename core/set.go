@@ -178,7 +178,7 @@ func (s *set) GetField(cx Context, key Str) (Value, Error) {
 	switch sn := key.String(); sn {
 
 	case "add":
-		return &intrinsicFunc{s, sn, NewNativeFuncValue(
+		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncValue(
 			func(cx Context, val Value) (Value, Error) {
 				err := s.Add(cx, val)
 				if err != nil {
@@ -188,7 +188,7 @@ func (s *set) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "addAll":
-		return &intrinsicFunc{s, sn, NewNativeFuncValue(
+		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncValue(
 			func(cx Context, val Value) (Value, Error) {
 				err := s.AddAll(cx, val)
 				if err != nil {
@@ -198,7 +198,7 @@ func (s *set) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "clear":
-		return &intrinsicFunc{s, sn, NewNativeFunc0(
+		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFunc0(
 			func(cx Context) (Value, Error) {
 				err := s.Clear()
 				if err != nil {
@@ -208,19 +208,19 @@ func (s *set) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "isEmpty":
-		return &intrinsicFunc{s, sn, NewNativeFunc0(
+		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFunc0(
 			func(cx Context) (Value, Error) {
 				return s.IsEmpty(), nil
 			})}, nil
 
 	case "contains":
-		return &intrinsicFunc{s, sn, NewNativeFuncValue(
+		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncValue(
 			func(cx Context, val Value) (Value, Error) {
 				return s.Contains(cx, val)
 			})}, nil
 
 	case "remove":
-		return &intrinsicFunc{s, sn, NewNativeFuncValue(
+		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncValue(
 			func(cx Context, val Value) (Value, Error) {
 				return s.Remove(cx, val)
 			})}, nil

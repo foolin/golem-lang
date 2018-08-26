@@ -160,37 +160,37 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 	switch sn := key.String(); sn {
 
 	case "contains":
-		return &intrinsicFunc{s, sn, NewNativeFuncStr(
+		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncStr(
 			func(cx Context, z Str) (Value, Error) {
 				return NewBool(strings.Contains(string(s), z.String())), nil
 			})}, nil
 
 	case "index":
-		return &intrinsicFunc{s, sn, NewNativeFuncStr(
+		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncStr(
 			func(cx Context, z Str) (Value, Error) {
 				return NewInt(int64(strings.Index(string(s), z.String()))), nil
 			})}, nil
 
 	case "lastIndex":
-		return &intrinsicFunc{s, sn, NewNativeFuncStr(
+		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncStr(
 			func(cx Context, z Str) (Value, Error) {
 				return NewInt(int64(strings.LastIndex(string(s), z.String()))), nil
 			})}, nil
 
 	case "startsWith":
-		return &intrinsicFunc{s, sn, NewNativeFuncStr(
+		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncStr(
 			func(cx Context, z Str) (Value, Error) {
 				return NewBool(strings.HasPrefix(string(s), z.String())), nil
 			})}, nil
 
 	case "endsWith":
-		return &intrinsicFunc{s, sn, NewNativeFuncStr(
+		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncStr(
 			func(cx Context, z Str) (Value, Error) {
 				return NewBool(strings.HasSuffix(string(s), z.String())), nil
 			})}, nil
 
 	case "replace":
-		return &intrinsicFunc{s, sn, NewNativeFunc(
+		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFunc(
 			2, 3,
 			func(cx Context, values []Value) (Value, Error) {
 				a, ok := values[0].(str)
@@ -213,7 +213,7 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "split":
-		return &intrinsicFunc{s, sn, NewNativeFuncStr(
+		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncStr(
 			func(cx Context, z Str) (Value, Error) {
 				tokens := strings.Split(string(s), z.String())
 				result := make([]Value, len(tokens))

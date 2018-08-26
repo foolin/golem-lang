@@ -14,7 +14,7 @@ import (
 )
 
 // BuiltinLib looks up modules in the standard library
-var BuiltinLib = g.NewNativeFuncStr(
+var BuiltinLib = g.NewObsoleteFuncStr(
 	func(cx g.Context, name g.Str) (g.Value, g.Error) {
 
 		switch name.String() {

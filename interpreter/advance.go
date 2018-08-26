@@ -51,7 +51,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			locals := newLocals(fn.Template().NumLocals, params)
 			i.frames = append(i.frames, &frame{fn, locals, []g.Value{}, 0})
 
-		case g.NativeFunc:
+		case g.ObsoleteFunc:
 
 			val, err := fn.Invoke(i, params)
 			if err != nil {
@@ -119,7 +119,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 				}
 			})()
 
-		case g.NativeFunc:
+		case g.ObsoleteFunc:
 			f.stack = f.stack[:n-idx]
 			f.ip += 3
 

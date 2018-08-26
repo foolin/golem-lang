@@ -397,10 +397,10 @@ func TestBasicHashCode(t *testing.T) {
 	ok(t, h, err, NewInt(1928994870288439732))
 }
 
-func structFuncField(t *testing.T, stc Struct, name Str) NativeFunc {
+func structFuncField(t *testing.T, stc Struct, name Str) ObsoleteFunc {
 	v, err := stc.GetField(cx, name)
 	tassert(t, err == nil)
-	f, ok := v.(NativeFunc)
+	f, ok := v.(ObsoleteFunc)
 	tassert(t, ok)
 	return f
 }

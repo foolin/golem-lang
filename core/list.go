@@ -302,7 +302,7 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 	switch sn := key.String(); sn {
 
 	case "add":
-		return &intrinsicFunc{ls, sn, NewNativeFuncValue(
+		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFuncValue(
 			func(cx Context, val Value) (Value, Error) {
 				err := ls.Add(cx, val)
 				if err != nil {
@@ -312,7 +312,7 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "addAll":
-		return &intrinsicFunc{ls, sn, NewNativeFuncValue(
+		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFuncValue(
 			func(cx Context, val Value) (Value, Error) {
 				err := ls.AddAll(cx, val)
 				if err != nil {
@@ -322,7 +322,7 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "remove":
-		return &intrinsicFunc{ls, sn, NewNativeFuncInt(
+		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFuncInt(
 			func(cx Context, i Int) (Value, Error) {
 				err := ls.Remove(cx, i)
 				if err != nil {
@@ -332,7 +332,7 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "clear":
-		return &intrinsicFunc{ls, sn, NewNativeFunc0(
+		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFunc0(
 			func(cx Context) (Value, Error) {
 				err := ls.Clear()
 				if err != nil {
@@ -342,25 +342,25 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "isEmpty":
-		return &intrinsicFunc{ls, sn, NewNativeFunc0(
+		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFunc0(
 			func(cx Context) (Value, Error) {
 				return ls.IsEmpty(), nil
 			})}, nil
 
 	case "contains":
-		return &intrinsicFunc{ls, sn, NewNativeFuncValue(
+		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFuncValue(
 			func(cx Context, val Value) (Value, Error) {
 				return ls.Contains(cx, val)
 			})}, nil
 
 	case "indexOf":
-		return &intrinsicFunc{ls, sn, NewNativeFuncValue(
+		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFuncValue(
 			func(cx Context, val Value) (Value, Error) {
 				return ls.IndexOf(cx, val)
 			})}, nil
 
 	case "join":
-		return &intrinsicFunc{ls, sn, NewNativeFunc(
+		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFunc(
 			0, 1,
 			func(cx Context, values []Value) (Value, Error) {
 				var delim Str
@@ -381,7 +381,7 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "map":
-		return &intrinsicFunc{ls, sn, NewNativeFuncValue(
+		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFuncValue(
 			func(cx Context, val Value) (Value, Error) {
 
 				if f, ok := val.(Func); ok {
@@ -394,7 +394,7 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "reduce":
-		return &intrinsicFunc{ls, sn, NewNativeFunc(
+		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFunc(
 			2, 2,
 			func(cx Context, values []Value) (Value, Error) {
 
@@ -408,7 +408,7 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "filter":
-		return &intrinsicFunc{ls, sn, NewNativeFuncFunc(
+		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFuncFunc(
 			func(cx Context, f Func) (Value, Error) {
 
 				return ls.Filter(cx, func(v Value) (Value, Error) {

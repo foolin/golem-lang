@@ -44,7 +44,7 @@ func NewField(name string, isReadonly bool, value Value) Field {
 
 // NewReadonlyNativeProperty creates a readonly Property using a 'getter' function.
 // The 'getter' function must have an arity of 0.
-func NewReadonlyNativeProperty(name string, getter NativeFunc) (Field, Error) {
+func NewReadonlyNativeProperty(name string, getter ObsoleteFunc) (Field, Error) {
 
 	if getter.MinArity() != 0 || getter.MaxArity() != 0 {
 		return nil, ArityMismatchError("0", getter.MaxArity())
@@ -57,7 +57,7 @@ func NewReadonlyNativeProperty(name string, getter NativeFunc) (Field, Error) {
 // The 'getter' function must have an arity of 0, and the 'setter' function
 // must have an arity of 1.  By convention the setter function should
 // return 'Null'; its return value will be ignored.
-func NewNativeProperty(name string, getter NativeFunc, setter NativeFunc) (Field, Error) {
+func NewNativeProperty(name string, getter ObsoleteFunc, setter ObsoleteFunc) (Field, Error) {
 
 	if getter.MinArity() != 0 || getter.MaxArity() != 0 {
 		return nil, ArityMismatchError("0", getter.MaxArity())

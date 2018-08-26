@@ -121,25 +121,25 @@ func (r *rng) GetField(cx Context, key Str) (Value, Error) {
 	switch sn := key.String(); sn {
 
 	case "from":
-		return &intrinsicFunc{r, sn, NewNativeFunc0(
+		return &obsoleteIntrinsicFunc{r, sn, NewObsoleteFunc0(
 			func(cx Context) (Value, Error) {
 				return NewInt(r.from), nil
 			})}, nil
 
 	case "to":
-		return &intrinsicFunc{r, sn, NewNativeFunc0(
+		return &obsoleteIntrinsicFunc{r, sn, NewObsoleteFunc0(
 			func(cx Context) (Value, Error) {
 				return NewInt(r.to), nil
 			})}, nil
 
 	case "step":
-		return &intrinsicFunc{r, sn, NewNativeFunc0(
+		return &obsoleteIntrinsicFunc{r, sn, NewObsoleteFunc0(
 			func(cx Context) (Value, Error) {
 				return NewInt(r.step), nil
 			})}, nil
 
 	case "count":
-		return &intrinsicFunc{r, sn, NewNativeFunc0(
+		return &obsoleteIntrinsicFunc{r, sn, NewObsoleteFunc0(
 			func(cx Context) (Value, Error) {
 				return NewInt(r.count), nil
 			})}, nil

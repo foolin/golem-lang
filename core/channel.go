@@ -63,14 +63,14 @@ func (ch *channel) GetField(cx Context, key Str) (Value, Error) {
 	switch sn := key.String(); sn {
 
 	case "send":
-		return &intrinsicFunc{ch, sn, NewNativeFuncValue(
+		return &obsoleteIntrinsicFunc{ch, sn, NewObsoleteFuncValue(
 			func(cx Context, val Value) (Value, Error) {
 				ch.ch <- val
 				return Null, nil
 			})}, nil
 
 	case "recv":
-		return &intrinsicFunc{ch, sn, NewNativeFunc0(
+		return &obsoleteIntrinsicFunc{ch, sn, NewObsoleteFunc0(
 			func(cx Context) (Value, Error) {
 				val := <-ch.ch
 				return val, nil

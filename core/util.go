@@ -109,7 +109,7 @@ func newIteratorStruct() Struct {
 func initIteratorStruct(cx Context, itr Iterator) Iterator {
 
 	// initialize the struct fields with functions that refer back to the iterator
-	err := itr.InitField(cx, NewStr("nextValue"), NewNativeFunc0(
+	err := itr.InitField(cx, NewStr("nextValue"), NewObsoleteFunc0(
 		func(cx Context) (Value, Error) {
 			return itr.IterNext(), nil
 		}))
@@ -117,7 +117,7 @@ func initIteratorStruct(cx Context, itr Iterator) Iterator {
 		panic("invalid iterator")
 	}
 
-	err = itr.InitField(cx, NewStr("getValue"), NewNativeFunc0(
+	err = itr.InitField(cx, NewStr("getValue"), NewObsoleteFunc0(
 		func(cx Context) (Value, Error) {
 			return itr.IterGet()
 		}))

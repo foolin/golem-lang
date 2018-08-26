@@ -109,7 +109,7 @@ func (c *compiler) makeModuleProperty(
 	refIndex int,
 	isConst bool) g.Field {
 
-	getter := g.NewNativeFunc0(
+	getter := g.NewObsoleteFunc0(
 		func(cx g.Context) (g.Value, g.Error) {
 			return c.mod.Refs[refIndex].Val, nil
 		})
@@ -121,7 +121,7 @@ func (c *compiler) makeModuleProperty(
 		return prop
 	}
 
-	setter := g.NewNativeFuncValue(
+	setter := g.NewObsoleteFuncValue(
 		func(cx g.Context, val g.Value) (g.Value, g.Error) {
 			c.mod.Refs[refIndex].Val = val
 			return g.Null, nil
