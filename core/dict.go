@@ -128,29 +128,31 @@ func (d *dict) AddAll(cx Context, val Value) Error {
 		return ImmutableValueError()
 	}
 
-	if ibl, ok := val.(Iterable); ok {
-		itr := ibl.NewIterator(cx)
-		for itr.IterNext().BoolVal() {
-			v, err := itr.IterGet()
-			if err != nil {
-				return err
-			}
-			if tp, ok := v.(tuple); ok {
-				if len(tp) == 2 {
-					err = d.hashMap.Put(cx, tp[0], tp[1])
-					if err != nil {
-						return err
-					}
-				} else {
-					return TupleLengthError(2, len(tp))
+	ibl, ok := val.(Iterable)
+	if !ok {
+		return TypeMismatchError("Expected Iterable Type")
+	}
+
+	itr := ibl.NewIterator(cx)
+	for itr.IterNext().BoolVal() {
+		v, err := itr.IterGet()
+		if err != nil {
+			return err
+		}
+		if tp, ok := v.(tuple); ok {
+			if len(tp) == 2 {
+				err = d.hashMap.Put(cx, tp[0], tp[1])
+				if err != nil {
+					return err
 				}
 			} else {
-				return TypeMismatchError("Expected Tuple")
+				return TupleLengthError(2, len(tp))
 			}
+		} else {
+			return TypeMismatchError("Expected Tuple")
 		}
-		return nil
 	}
-	return TypeMismatchError("Expected Iterable Type")
+	return nil
 }
 
 //---------------------------------------------------------------
@@ -189,9 +191,10 @@ func (d *dict) GetField(cx Context, key Str) (Value, Error) {
 	switch sn := key.String(); sn {
 
 	case "addAll":
-		return &obsoleteIntrinsicFunc{d, sn, NewObsoleteFuncValue(
-			func(cx Context, val Value) (Value, Error) {
-				err := d.AddAll(cx, val)
+		return &virtualFunc{d, sn, NewFixedNativeFunc(
+			[]Type{AnyType}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				err := d.AddAll(cx, values[0])
 				if err != nil {
 					return nil, err
 				}
@@ -199,8 +202,9 @@ func (d *dict) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "clear":
-		return &obsoleteIntrinsicFunc{d, sn, NewObsoleteFunc0(
-			func(cx Context) (Value, Error) {
+		return &virtualFunc{d, sn, NewFixedNativeFunc(
+			[]Type{}, false,
+			func(cx Context, values []Value) (Value, Error) {
 				err := d.Clear()
 				if err != nil {
 					return nil, err
@@ -209,21 +213,24 @@ func (d *dict) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "isEmpty":
-		return &obsoleteIntrinsicFunc{d, sn, NewObsoleteFunc0(
-			func(cx Context) (Value, Error) {
+		return &virtualFunc{d, sn, NewFixedNativeFunc(
+			[]Type{}, false,
+			func(cx Context, values []Value) (Value, Error) {
 				return d.IsEmpty(), nil
 			})}, nil
 
 	case "containsKey":
-		return &obsoleteIntrinsicFunc{d, sn, NewObsoleteFuncValue(
-			func(cx Context, val Value) (Value, Error) {
-				return d.ContainsKey(cx, val)
+		return &virtualFunc{d, sn, NewFixedNativeFunc(
+			[]Type{AnyType}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				return d.ContainsKey(cx, values[0])
 			})}, nil
 
 	case "remove":
-		return &obsoleteIntrinsicFunc{d, sn, NewObsoleteFuncValue(
-			func(cx Context, val Value) (Value, Error) {
-				return d.Remove(cx, val)
+		return &virtualFunc{d, sn, NewFixedNativeFunc(
+			[]Type{AnyType}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				return d.Remove(cx, values[0])
 			})}, nil
 
 	default:

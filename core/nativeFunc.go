@@ -14,6 +14,8 @@ type NativeFunc interface {
 }
 
 //--------------------------------------------------------------
+// nativeBaseFunc
+//--------------------------------------------------------------
 
 type nativeBaseFunc struct {
 	arity         *Arity
@@ -75,6 +77,8 @@ func checkType(value Value, typ Type, allowNull bool) Error {
 }
 
 //--------------------------------------------------------------
+// nativeFixedFunc
+//--------------------------------------------------------------
 
 type nativeFixedFunc struct {
 	*nativeBaseFunc
@@ -134,6 +138,8 @@ func (f *nativeFixedFunc) Invoke(cx Context, values []Value) (Value, Error) {
 	return f.invoke(cx, values)
 }
 
+//--------------------------------------------------------------
+// nativeVariadicFunc
 //--------------------------------------------------------------
 
 type nativeVariadicFunc struct {
@@ -206,6 +212,8 @@ func (f *nativeVariadicFunc) Invoke(cx Context, values []Value) (Value, Error) {
 	return f.invoke(cx, values)
 }
 
+//--------------------------------------------------------------
+// nativeMultipleFunc
 //--------------------------------------------------------------
 
 type nativeMultipleFunc struct {
@@ -287,4 +295,32 @@ func (f *nativeMultipleFunc) Invoke(cx Context, values []Value) (Value, Error) {
 
 	// invoke
 	return f.invoke(cx, values)
+}
+
+//--------------------------------------------------------------
+// virtualFunc
+//--------------------------------------------------------------
+
+// A virtual function is a function that is an intrinsic
+// part of a given Type. To reduce the overhead required to make
+// new values, these functions are created on the fly.
+type virtualFunc struct {
+	owner Value
+	name  string
+	NativeFunc
+}
+
+func (f *virtualFunc) Eq(cx Context, v Value) (Bool, Error) {
+	switch t := v.(type) {
+	case *virtualFunc:
+		// equality for intrinsic functions is based on whether
+		// they have the same owner, and the same name
+		ownerEq, err := f.owner.Eq(cx, t.owner)
+		if err != nil {
+			return nil, err
+		}
+		return NewBool(ownerEq.BoolVal() && (f.name == t.name)), nil
+	default:
+		return False, nil
+	}
 }
