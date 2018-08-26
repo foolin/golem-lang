@@ -100,27 +100,14 @@ var BuiltinLen = NewFixedNativeFunc(
 	})
 
 // BuiltinRange creates a new Range
-var BuiltinRange = NewObsoleteFunc(
-	2, 3,
+var BuiltinRange = NewMultipleNativeFunc(
+	[]Type{IntType, IntType},
+	[]Basic{One},
+	false,
 	func(cx Context, values []Value) (Value, Error) {
-		from, ok := values[0].(Int)
-		if !ok {
-			return nil, TypeMismatchError("Expected Int")
-		}
-
-		to, ok := values[1].(Int)
-		if !ok {
-			return nil, TypeMismatchError("Expected Int")
-		}
-
-		step := One
-		if len(values) == 3 {
-			step, ok = values[2].(Int)
-			if !ok {
-				return nil, TypeMismatchError("Expected Int")
-			}
-		}
-
+		from := values[0].(Int)
+		to := values[1].(Int)
+		step := values[2].(Int)
 		return NewRange(from.IntVal(), to.IntVal(), step.IntVal())
 	})
 
@@ -156,22 +143,18 @@ var BuiltinMerge = NewVariadicNativeFunc(
 
 // BuiltinChan creates a new Chan.  If an Int is passed in,
 // it is used to create a buffered Chan.
-var BuiltinChan = NewObsoleteFunc(
-	0, 1,
+var BuiltinChan = NewMultipleNativeFunc(
+	[]Type{},
+	[]Basic{One},
+	true,
 	func(cx Context, values []Value) (Value, Error) {
-		switch len(values) {
-		case 0:
-			return NewChan(), nil
-		case 1:
-			size, ok := values[0].(Int)
-			if !ok {
-				return nil, TypeMismatchError("Expected Int")
-			}
-			return NewBufferedChan(int(size.IntVal())), nil
 
-		default:
-			panic("arity mismatch")
+		if values[0] == Null {
+			return NewChan(), nil
 		}
+
+		size := values[0].(Int)
+		return NewBufferedChan(int(size.IntVal())), nil
 	})
 
 // BuiltinType returns the Str representation of the Type of a single Value
@@ -291,46 +274,3 @@ var BuiltinPrintln = NewVariadicNativeFunc(
 
 		return Null, nil
 	})
-
-//// BuiltinOpenPlugin wraps a plugin in a struct
-//var BuiltinOpenPlugin = NewObsoleteFuncStr(
-//	func(cx Context, name Str) (Value, Error) {
-//
-//		// open up the plugin
-//		plugPath := cx.HomePath() + "/lib/" + name.String() + "/" + name.String() + ".so"
-//		plug, err := plugin.Open(plugPath)
-//		if err != nil {
-//			return nil, PluginError(name.String(), err)
-//		}
-//
-//		// define lookup function
-//		lookup := NewObsoleteFuncStr(
-//			func(cx Context, s Str) (Value, Error) {
-//
-//				name := s.String()
-//
-//				sym, e2 := plug.Lookup(name)
-//				if e2 != nil {
-//					return nil, PluginError(name, e2)
-//				}
-//
-//				value, ok := sym.(*Value)
-//				if !ok {
-//					return nil, PluginError(name, fmt.Errorf(
-//						"plugin symbol '%s' is not a Value: %s",
-//						s.String(),
-//						reflect.TypeOf(sym)))
-//				}
-//				return *value, nil
-//			})
-//
-//		// done
-//		stc, err := NewStruct([]Field{
-//			NewField("lookup", true, lookup),
-//		}, true)
-//		if err != nil {
-//			panic("unreachable")
-//		}
-//
-//		return stc, nil
-//	})
