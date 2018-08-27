@@ -160,61 +160,62 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 	switch sn := key.String(); sn {
 
 	case "contains":
-		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncStr(
-			func(cx Context, z Str) (Value, Error) {
+		return &virtualFunc{s, sn, NewFixedNativeFunc(
+			[]Type{StrType}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				z := values[0].(Str)
 				return NewBool(strings.Contains(string(s), z.String())), nil
 			})}, nil
 
 	case "index":
-		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncStr(
-			func(cx Context, z Str) (Value, Error) {
+		return &virtualFunc{s, sn, NewFixedNativeFunc(
+			[]Type{StrType}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				z := values[0].(Str)
 				return NewInt(int64(strings.Index(string(s), z.String()))), nil
 			})}, nil
 
 	case "lastIndex":
-		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncStr(
-			func(cx Context, z Str) (Value, Error) {
+		return &virtualFunc{s, sn, NewFixedNativeFunc(
+			[]Type{StrType}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				z := values[0].(Str)
 				return NewInt(int64(strings.LastIndex(string(s), z.String()))), nil
 			})}, nil
 
 	case "startsWith":
-		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncStr(
-			func(cx Context, z Str) (Value, Error) {
+		return &virtualFunc{s, sn, NewFixedNativeFunc(
+			[]Type{StrType}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				z := values[0].(Str)
 				return NewBool(strings.HasPrefix(string(s), z.String())), nil
 			})}, nil
 
 	case "endsWith":
-		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncStr(
-			func(cx Context, z Str) (Value, Error) {
+		return &virtualFunc{s, sn, NewFixedNativeFunc(
+			[]Type{StrType}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				z := values[0].(Str)
 				return NewBool(strings.HasSuffix(string(s), z.String())), nil
 			})}, nil
 
 	case "replace":
-		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFunc(
-			2, 3,
+		return &virtualFunc{s, sn, NewMultipleNativeFunc(
+			[]Type{StrType, StrType},
+			[]Basic{NegOne},
+			false,
 			func(cx Context, values []Value) (Value, Error) {
-				a, ok := values[0].(str)
-				if !ok {
-					return nil, TypeMismatchError("Expected Str")
-				}
-				b, ok := values[1].(str)
-				if !ok {
-					return nil, TypeMismatchError("Expected Str")
-				}
-				n := -1
-				if len(values) == 3 {
-					z, ok := values[2].(_int)
-					if !ok {
-						return nil, TypeMismatchError("Expected Int")
-					}
-					n = int(z)
-				}
-				return NewStr(strings.Replace(string(s), string(a), string(b), n)), nil
+				a := (values[0].(Str)).String()
+				b := (values[1].(Str)).String()
+				n := int((values[2].(Int)).IntVal())
+				return NewStr(strings.Replace(string(s), a, b, n)), nil
 			})}, nil
 
 	case "split":
-		return &obsoleteIntrinsicFunc{s, sn, NewObsoleteFuncStr(
-			func(cx Context, z Str) (Value, Error) {
+		return &virtualFunc{s, sn, NewFixedNativeFunc(
+			[]Type{StrType}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				z := values[0].(Str)
 				tokens := strings.Split(string(s), z.String())
 				result := make([]Value, len(tokens))
 				for i, t := range tokens {
@@ -224,7 +225,6 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 
 			})}, nil
 
-		//func Split(s, sep string) []string
 	default:
 		return nil, NoSuchFieldError(key.String())
 	}

@@ -368,7 +368,7 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "join":
-		return &obsoleteIntrinsicFunc{ls, sn, NewMultipleNativeFunc(
+		return &virtualFunc{ls, sn, NewMultipleNativeFunc(
 			[]Type{},
 			[]Basic{NewStr("")},
 			false,
