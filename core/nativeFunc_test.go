@@ -119,9 +119,18 @@ func TestMultipleNativeFunc(t *testing.T) {
 
 	fn := NewMultipleNativeFunc(
 		[]Type{IntType},
-		[]Basic{NewStr("a"), False},
+		[]Type{StrType, BoolType},
 		false,
 		func(cx Context, values []Value) (Value, Error) {
+
+			if len(values) == 1 {
+				values = append(values, NewStr("a"))
+			}
+
+			if len(values) == 2 {
+				values = append(values, False)
+			}
+
 			return NewList(values), nil
 		})
 

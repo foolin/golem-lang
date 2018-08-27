@@ -216,13 +216,13 @@ func (f *nativeVariadicFunc) Invoke(cx Context, values []Value) (Value, Error) {
 
 type nativeMultipleFunc struct {
 	*nativeBaseFunc
-	optionalValues []Basic
+	optionalTypes []Type
 }
 
-// NewMultipleNativeFunc creates a new NativeFunc with fixed arity
+// NewMultipleNativeFunc creates a new NativeFunc with multiple arity
 func NewMultipleNativeFunc(
 	requiredTypes []Type,
-	optionalValues []Basic,
+	optionalTypes []Type,
 	allowNull bool,
 	invoke func(Context, []Value) (Value, Error)) NativeFunc {
 
@@ -234,7 +234,7 @@ func NewMultipleNativeFunc(
 
 	return &nativeMultipleFunc{
 		&nativeBaseFunc{arity, requiredTypes, allowNull, invoke},
-		optionalValues,
+		optionalTypes,
 	}
 }
 
@@ -256,7 +256,7 @@ func (f *nativeMultipleFunc) Invoke(cx Context, values []Value) (Value, Error) {
 
 	numValues := len(values)
 	numReqs := len(f.requiredTypes)
-	numOpts := len(f.optionalValues)
+	numOpts := len(f.optionalTypes)
 
 	// arity mismatch
 	if numValues < numReqs {
@@ -280,15 +280,10 @@ func (f *nativeMultipleFunc) Invoke(cx Context, values []Value) (Value, Error) {
 
 	// check types on optional values
 	for i := numReqs; i < numValues; i++ {
-		err := checkType(values[i], f.optionalValues[i-numReqs].Type(), f.allowNull)
+		err := checkType(values[i], f.optionalTypes[i-numReqs], f.allowNull)
 		if err != nil {
 			return nil, err
 		}
-	}
-
-	// add missing values from optional values
-	for len(values) < (numReqs + numOpts) {
-		values = append(values, f.optionalValues[len(values)-numReqs])
 	}
 
 	// invoke

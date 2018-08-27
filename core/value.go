@@ -240,7 +240,6 @@ type ArityKind int
 
 // The various types of arity
 const (
-
 	// FixedArity means a function always takes a fixed number of parameters
 	FixedArity ArityKind = iota
 

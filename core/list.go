@@ -370,10 +370,14 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 	case "join":
 		return &virtualFunc{ls, sn, NewMultipleNativeFunc(
 			[]Type{},
-			[]Basic{NewStr("")},
+			[]Type{StrType},
 			false,
 			func(cx Context, values []Value) (Value, Error) {
-				delim := values[0].(Str)
+				delim := NewStr("")
+				if len(values) == 1 {
+					delim = values[0].(Str)
+				}
+
 				return ls.Join(cx, delim), nil
 			})}, nil
 

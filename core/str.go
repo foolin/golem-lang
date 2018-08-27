@@ -202,13 +202,20 @@ func (s str) GetField(cx Context, key Str) (Value, Error) {
 	case "replace":
 		return &virtualFunc{s, sn, NewMultipleNativeFunc(
 			[]Type{StrType, StrType},
-			[]Basic{NegOne},
+			[]Type{IntType},
 			false,
 			func(cx Context, values []Value) (Value, Error) {
-				a := (values[0].(Str)).String()
-				b := (values[1].(Str)).String()
-				n := int((values[2].(Int)).IntVal())
-				return NewStr(strings.Replace(string(s), a, b, n)), nil
+				a := values[0].(Str)
+				b := values[1].(Str)
+				n := NegOne
+				if len(values) == 3 {
+					n = values[2].(Int)
+				}
+				return NewStr(strings.Replace(
+					string(s),
+					a.String(),
+					b.String(),
+					int(n.IntVal()))), nil
 			})}, nil
 
 	case "split":

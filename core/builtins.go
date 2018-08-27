@@ -102,12 +102,16 @@ var BuiltinLen = NewFixedNativeFunc(
 // BuiltinRange creates a new Range
 var BuiltinRange = NewMultipleNativeFunc(
 	[]Type{IntType, IntType},
-	[]Basic{One},
+	[]Type{IntType},
 	false,
 	func(cx Context, values []Value) (Value, Error) {
 		from := values[0].(Int)
 		to := values[1].(Int)
-		step := values[2].(Int)
+		step := One
+		if len(values) == 3 {
+			step = values[2].(Int)
+
+		}
 		return NewRange(from.IntVal(), to.IntVal(), step.IntVal())
 	})
 
@@ -145,11 +149,11 @@ var BuiltinMerge = NewVariadicNativeFunc(
 // it is used to create a buffered Chan.
 var BuiltinChan = NewMultipleNativeFunc(
 	[]Type{},
-	[]Basic{One},
+	[]Type{IntType},
 	true,
 	func(cx Context, values []Value) (Value, Error) {
 
-		if values[0] == Null {
+		if len(values) == 0 {
 			return NewChan(), nil
 		}
 
