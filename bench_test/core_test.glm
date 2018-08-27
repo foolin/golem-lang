@@ -731,6 +731,66 @@ fn testStruct() {
     assert([s.a, s.b, x, s.c()] == [1, 4, 4, 5])
 }
 
+fn testIterator() {
+    
+    // list
+    fail(|| => [].iterator().get(), 'NoSuchElement')
+    let count = 0
+    let itr = [1, 2, 3].iterator()
+    fail(|| => itr.get(), 'NoSuchElement')
+    while itr.next() {
+        count += itr.get()
+    }
+    assert(6 == count)
+    fail(|| => itr.get(), 'NoSuchElement')
+
+    // range
+    fail(|| => range(0, 0).iterator().get(), 'NoSuchElement')
+    count = 0
+    itr = range(1, 5).iterator()
+    fail(|| => itr.get(), 'NoSuchElement')
+    while itr.next() {
+        count += itr.get()
+    }
+    assert(10 == count)
+    fail(|| => itr.get(), 'NoSuchElement')
+
+    // dict
+    fail(|| => dict{}.iterator().get(), 'NoSuchElement')
+    count = 0
+    itr = dict{"a": 1, "b": 2}.iterator()
+    fail(|| => itr.get(), 'NoSuchElement')
+    while itr.next() {
+        let e = itr.get()
+        // let (k, v) = itr.get() TODO this would be cool
+        count += e[1]
+    }
+    assert(3 == count)
+    fail(|| => itr.get(), 'NoSuchElement')
+
+    // set
+    fail(|| => set{}.iterator().get(), 'NoSuchElement')
+    count = 0
+    itr = set{3, 4, 1, 4}.iterator()
+    fail(|| => itr.get(), 'NoSuchElement')
+    while itr.next() {
+        count += itr.get()
+    }
+    assert(8 == count)
+    fail(|| => itr.get(), 'NoSuchElement')
+
+    // str
+    fail(|| => "".iterator().get(), 'NoSuchElement')
+    count = ""
+    itr = "abcde".iterator()
+    fail(|| => itr.get(), 'NoSuchElement')
+    while itr.next() {
+        count = itr.get() + count
+    }
+    assert("edcba" == count)
+    fail(|| => itr.get(), 'NoSuchElement')
+}
+
 fn main(args) {
 
     assert(42 == zork.quux)
@@ -754,5 +814,6 @@ fn main(args) {
     testSlice()
     testUnicodeEscape()
     testStruct()
+    testIterator()
 }
 

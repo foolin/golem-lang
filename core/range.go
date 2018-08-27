@@ -148,6 +148,13 @@ func (r *rng) GetField(cx Context, key Str) (Value, Error) {
 				return NewInt(r.count), nil
 			})}, nil
 
+	case "iterator":
+		return &virtualFunc{r, sn, NewFixedNativeFunc(
+			[]Type{}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				return r.NewIterator(cx), nil
+			})}, nil
+
 	default:
 		return nil, NoSuchFieldError(key.String())
 	}

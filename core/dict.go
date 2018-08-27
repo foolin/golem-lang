@@ -233,6 +233,13 @@ func (d *dict) GetField(cx Context, key Str) (Value, Error) {
 				return d.Remove(cx, values[0])
 			})}, nil
 
+	case "iterator":
+		return &virtualFunc{d, sn, NewFixedNativeFunc(
+			[]Type{}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				return d.NewIterator(cx), nil
+			})}, nil
+
 	default:
 		return nil, NoSuchFieldError(key.String())
 	}

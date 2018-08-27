@@ -417,6 +417,13 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 
 			})}, nil
 
+	case "iterator":
+		return &virtualFunc{ls, sn, NewFixedNativeFunc(
+			[]Type{}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				return ls.NewIterator(cx), nil
+			})}, nil
+
 	default:
 		return nil, NoSuchFieldError(key.String())
 	}
