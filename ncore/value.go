@@ -68,10 +68,10 @@ type (
 		basicMarker()
 	}
 
-	//	// Nil is the null value.
-	//	Nil interface {
-	//		Basic
-	//	}
+	// Nil is the null value.
+	Nil interface {
+		Basic
+	}
 
 	// Bool is the boolean value -- true or false
 	Bool interface {

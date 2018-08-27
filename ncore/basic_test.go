@@ -46,23 +46,23 @@ func okType(t *testing.T, val Value, expected Type) {
 	tassert(t, val.Type() == expected)
 }
 
-//func TestNull(t *testing.T) {
-//	okType(t, Null, NullType)
-//
-//	var v Value
-//	var err Error
-//
-//	v = Null.ToStr(cx)
-//	ok(t, v, nil, NewStr("null"))
-//
-//	v, err = Null.Eq(cx, Null)
-//	ok(t, v, err, True)
-//	v, err = Null.Eq(cx, True)
-//	ok(t, v, err, False)
-//
-//	v, err = Null.Cmp(cx, True)
-//	fail(t, v, err, "NullValue")
-//}
+func TestNull(t *testing.T) {
+	okType(t, Null, NullType)
+
+	var v Value
+	var err Error
+
+	//	v = Null.ToStr(cx)
+	//	ok(t, v, nil, NewStr("null"))
+
+	v, err = Null.Eq(cx, Null)
+	ok(t, v, err, True)
+	v, err = Null.Eq(cx, True)
+	ok(t, v, err, False)
+
+	//	v, err = Null.Cmp(cx, True)
+	//	fail(t, v, err, "NullValue")
+}
 
 func TestBool(t *testing.T) {
 

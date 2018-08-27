@@ -5,8 +5,13 @@
 package ncore
 
 import (
-//"fmt"
+	"fmt"
 )
 
 // Error is an error
 type Error error
+
+// NullValueError creates a NullValue Error
+func NullValueError() Error {
+	return fmt.Errorf("NullValue")
+}
