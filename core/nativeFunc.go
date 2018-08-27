@@ -48,8 +48,6 @@ func (f *nativeBaseFunc) ToStr(cx Context) Str {
 	return NewStr(fmt.Sprintf("nativeFunc<%p>", f))
 }
 
-func (f *nativeBaseFunc) MinArity() int { panic("MinArity") }
-func (f *nativeBaseFunc) MaxArity() int { panic("MaxArity") }
 func (f *nativeBaseFunc) Arity() *Arity { return f.arity }
 
 func checkType(value Value, typ Type, allowNull bool) Error {

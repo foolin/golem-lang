@@ -72,8 +72,6 @@ func (f *bytecodeFunc) Template() *FuncTemplate {
 	return f.template
 }
 
-func (f *bytecodeFunc) MinArity() int { panic("MinArity") }
-func (f *bytecodeFunc) MaxArity() int { panic("MaxArity") }
 func (f *bytecodeFunc) Arity() *Arity { return f.template.Arity }
 
 func (f *bytecodeFunc) GetCapture(idx int) *Ref {

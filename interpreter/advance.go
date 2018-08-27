@@ -62,17 +62,6 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			f.stack = append(f.stack, val)
 			f.ip += 3
 
-		case g.ObsoleteFunc:
-
-			val, err := fn.Invoke(i, params)
-			if err != nil {
-				return nil, err
-			}
-
-			f.stack = f.stack[:n-idx]
-			f.stack = append(f.stack, val)
-			f.ip += 3
-
 		default:
 			return nil, g.TypeMismatchError("Expected Func")
 		}
@@ -130,7 +119,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 				}
 			})()
 
-		case g.ObsoleteFunc:
+		case g.NativeFunc:
 			f.stack = f.stack[:n-idx]
 			f.ip += 3
 

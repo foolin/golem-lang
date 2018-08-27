@@ -266,8 +266,6 @@ type Func interface {
 	Value
 
 	Arity() *Arity
-	MinArity() int
-	MaxArity() int // by convention, -1 means variadic
 	Invoke(Context, []Value) (Value, Error)
 
 	funcMarker()
