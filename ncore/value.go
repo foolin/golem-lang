@@ -127,6 +127,44 @@ type (
 	}
 )
 
+//---------------------------------------------------------------
+// Func
+
+// ArityKind defines the various kinds of Arity for a Func
+type ArityKind int
+
+// The various types of arity
+const (
+	// FixedArity means a function always takes a fixed number of parameters
+	FixedArity ArityKind = iota
+
+	// VariadicArity means that any extra parameters supplied upon invocation will
+	// be collected together into a list.
+	VariadicArity
+
+	// MultipleArity means that some of the parameters can be omitted, in which case
+	// predifined optional values will be substituted.
+	MultipleArity
+)
+
+// Arity defines the arity of a function
+type Arity struct {
+	Kind           ArityKind
+	RequiredParams int
+	// OptionalParams is nil unless Kind is MultipleArity
+	OptionalParams []Basic
+}
+
+// Func is a function
+type Func interface {
+	Value
+
+	Arity() *Arity
+	Invoke(Context, []Value) (Value, Error)
+
+	funcMarker()
+}
+
 ////---------------------------------------------------------------
 //// Composite
 //
@@ -232,44 +270,6 @@ type (
 //		IterGet() (Value, Error)
 //	}
 //)
-//
-////---------------------------------------------------------------
-//// Func
-//
-//// ArityKind defines the various kinds of Arity for a Func
-//type ArityKind int
-//
-//// The various types of arity
-//const (
-//	// FixedArity means a function always takes a fixed number of parameters
-//	FixedArity ArityKind = iota
-//
-//	// VariadicArity means that any extra parameters supplied upon invocation will
-//	// be collected together into a list.
-//	VariadicArity
-//
-//	// MultipleArity means that some of the parameters can be omitted, in which case
-//	// predifined optional values will be substituted.
-//	MultipleArity
-//)
-//
-//// Arity defines the arity of a function
-//type Arity struct {
-//	Kind           ArityKind
-//	RequiredParams int
-//	// OptionalParams is nil unless Kind is MultipleArity
-//	OptionalParams []Basic
-//}
-//
-//// Func is a function
-//type Func interface {
-//	Value
-//
-//	Arity() *Arity
-//	Invoke(Context, []Value) (Value, Error)
-//
-//	funcMarker()
-//}
 //
 ////---------------------------------------------------------------
 //// Chan

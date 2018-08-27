@@ -34,3 +34,9 @@ func InvalidArgumentError(msg string) Error {
 func IndexOutOfBoundsError(val int) Error {
 	return fmt.Errorf("IndexOutOfBounds: %d", val)
 }
+
+func ArityMismatchError(expected string, actual int) Error {
+	return fmt.Errorf(
+		"ArityMismatch: Expected %s params, got %d",
+		expected, actual)
+}
