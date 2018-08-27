@@ -36,13 +36,13 @@ func (b _bool) Frozen(cx Context) (Bool, Error) {
 	return True, nil
 }
 
-//func (b _bool) ToStr(cx Context) Str {
-//	if b {
-//		return NewStr("true")
-//	}
-//	return NewStr("false")
-//}
-//
+func (b _bool) ToStr(cx Context) Str {
+	if b {
+		return NewStr("true")
+	}
+	return NewStr("false")
+}
+
 //func (b _bool) HashCode(cx Context) (Int, Error) {
 //	if b {
 //		return NewInt(1009), nil

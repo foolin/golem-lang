@@ -24,8 +24,8 @@ func (n *null) basicMarker() {}
 
 func (n *null) Type() Type { return NullType }
 
-//func (n *null) ToStr(cx Context) Str { return NewStr("null") }
-//
+func (n *null) ToStr(cx Context) Str { return NewStr("null") }
+
 //func (n *null) HashCode(cx Context) (Int, Error) { return nil, NullValueError() }
 //
 //func (n *null) GetField(cx Context, key Str) (Value, Error) { return nil, NullValueError() }

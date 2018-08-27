@@ -52,8 +52,8 @@ func TestNull(t *testing.T) {
 	var v Value
 	var err Error
 
-	//	v = Null.ToStr(cx)
-	//	ok(t, v, nil, NewStr("null"))
+	v = Null.ToStr(cx)
+	ok(t, v, nil, NewStr("null"))
 
 	v, err = Null.Eq(cx, Null)
 	ok(t, v, err, True)
@@ -66,10 +66,10 @@ func TestNull(t *testing.T) {
 
 func TestBool(t *testing.T) {
 
-	//	s := True.ToStr(cx)
-	//	ok(t, s, nil, NewStr("true"))
-	//	s = False.ToStr(cx)
-	//	ok(t, s, nil, NewStr("false"))
+	s := True.ToStr(cx)
+	ok(t, s, nil, NewStr("true"))
+	s = False.ToStr(cx)
+	ok(t, s, nil, NewStr("false"))
 
 	okType(t, True, BoolType)
 	okType(t, False, BoolType)
@@ -85,8 +85,8 @@ func TestBool(t *testing.T) {
 	ok(t, b, err, False)
 	b, err = False.Eq(cx, True)
 	ok(t, b, err, False)
-	// b, err = False.Eq(cx, NewStr("a"))
-	// ok(t, b, err, False)
+	b, err = False.Eq(cx, NewStr("a"))
+	ok(t, b, err, False)
 
 	//	i, err := True.Cmp(cx, False)
 	//	ok(t, i, err, One)
@@ -105,69 +105,69 @@ func TestBool(t *testing.T) {
 	ok(t, val, nil, True)
 }
 
-//func TestStr(t *testing.T) {
-//	a := NewStr("a")
-//	b := NewStr("b")
-//
-//	var v Value
-//	var err Error
-//
-//	v = a.ToStr(cx)
-//	ok(t, v, nil, NewStr("a"))
-//	v = b.ToStr(cx)
-//	ok(t, v, nil, NewStr("b"))
-//
-//	okType(t, a, StrType)
-//	v, err = a.Eq(cx, b)
-//	ok(t, v, err, False)
-//	v, err = b.Eq(cx, a)
-//	ok(t, v, err, False)
-//	v, err = a.Eq(cx, a)
-//	ok(t, v, err, True)
-//	v, err = a.Eq(cx, NewStr("a"))
-//	ok(t, v, err, True)
-//
-//	v, err = a.Cmp(cx, NewInt(1))
-//	fail(t, v, err, "TypeMismatch: Expected Comparable Type")
-//	v, err = a.Cmp(cx, a)
-//	ok(t, v, err, NewInt(0))
-//	v, err = a.Cmp(cx, b)
-//	ok(t, v, err, NewInt(-1))
-//	v, err = b.Cmp(cx, a)
-//	ok(t, v, err, NewInt(1))
-//
-//	ab := NewStr("ab")
-//	v, err = ab.Get(cx, NewInt(0))
-//	ok(t, v, err, a)
-//	v, err = ab.Get(cx, NewInt(1))
-//	ok(t, v, err, b)
-//
-//	v, err = ab.Get(cx, NewInt(-1))
-//	ok(t, v, err, b)
-//
-//	v, err = ab.Get(cx, NewInt(2))
-//	fail(t, v, err, "IndexOutOfBounds: 2")
-//
-//	v = NewStr("").Len(nil)
-//	ok(t, v, nil, Zero)
-//
-//	v = NewStr("a").Len(nil)
-//	ok(t, v, nil, One)
-//
-//	v = NewStr("abcde").Len(nil)
-//	ok(t, v, nil, NewInt(5))
-//
-//	//////////////////////////////
-//	// unicode
-//
-//	a = NewStr("日本語")
-//	v = a.Len(nil)
-//	ok(t, v, nil, NewInt(3))
-//
-//	v, err = a.Get(cx, NewInt(2))
-//	ok(t, v, err, NewStr("語"))
-//}
-//
+func TestStr(t *testing.T) {
+	a := NewStr("a")
+	b := NewStr("b")
+
+	var v Value
+	var err Error
+
+	v = a.ToStr(cx)
+	ok(t, v, nil, NewStr("a"))
+	v = b.ToStr(cx)
+	ok(t, v, nil, NewStr("b"))
+
+	okType(t, a, StrType)
+	v, err = a.Eq(cx, b)
+	ok(t, v, err, False)
+	v, err = b.Eq(cx, a)
+	ok(t, v, err, False)
+	v, err = a.Eq(cx, a)
+	ok(t, v, err, True)
+	v, err = a.Eq(cx, NewStr("a"))
+	ok(t, v, err, True)
+
+	//	v, err = a.Cmp(cx, NewInt(1))
+	//	fail(t, v, err, "TypeMismatch: Expected Comparable Type")
+	//	v, err = a.Cmp(cx, a)
+	//	ok(t, v, err, NewInt(0))
+	//	v, err = a.Cmp(cx, b)
+	//	ok(t, v, err, NewInt(-1))
+	//	v, err = b.Cmp(cx, a)
+	//	ok(t, v, err, NewInt(1))
+	//
+	//	ab := NewStr("ab")
+	//	v, err = ab.Get(cx, NewInt(0))
+	//	ok(t, v, err, a)
+	//	v, err = ab.Get(cx, NewInt(1))
+	//	ok(t, v, err, b)
+	//
+	//	v, err = ab.Get(cx, NewInt(-1))
+	//	ok(t, v, err, b)
+	//
+	//	v, err = ab.Get(cx, NewInt(2))
+	//	fail(t, v, err, "IndexOutOfBounds: 2")
+	//
+	//	v = NewStr("").Len(nil)
+	//	ok(t, v, nil, Zero)
+	//
+	//	v = NewStr("a").Len(nil)
+	//	ok(t, v, nil, One)
+	//
+	//	v = NewStr("abcde").Len(nil)
+	//	ok(t, v, nil, NewInt(5))
+	//
+	//	//////////////////////////////
+	//	// unicode
+	//
+	//	a = NewStr("日本語")
+	//	v = a.Len(nil)
+	//	ok(t, v, nil, NewInt(3))
+	//
+	//	v, err = a.Get(cx, NewInt(2))
+	//	ok(t, v, err, NewStr("語"))
+}
+
 //func TestInt(t *testing.T) {
 //	a := NewInt(0)
 //	b := NewInt(1)

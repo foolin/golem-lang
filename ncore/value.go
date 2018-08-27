@@ -5,7 +5,7 @@
 package ncore
 
 import (
-//"fmt"
+	"fmt"
 )
 
 //---------------------------------------------------------------
@@ -20,43 +20,43 @@ type Value interface {
 
 	Eq(Context, Value) (Bool, Error)
 	//	HashCode(Context) (Int, Error)
-	//	ToStr(Context) Str
+	ToStr(Context) Str
 	//	Cmp(Context, Value) (Int, Error)
 	//	GetField(Context, Str) (Value, Error)
 }
 
-////---------------------------------------------------------------
-//// Shared Interfaces
-//
-//type (
-//	// Indexable is a value that supports the index operator
-//	Indexable interface {
-//		Get(Context, Value) (Value, Error)
-//	}
-//
-//	// IndexAssignable is a value that supports index assignment
-//	IndexAssignable interface {
-//		Indexable
-//		Set(Context, Value, Value) Error
-//	}
-//
-//	// Lenable is a value that has a length
-//	Lenable interface {
-//		Len(Context) Int
-//	}
-//
-//	// Sliceable is a value that can be sliced
-//	Sliceable interface {
-//		Slice(Context, Value, Value) (Value, Error)
-//		SliceFrom(Context, Value) (Value, Error)
-//		SliceTo(Context, Value) (Value, Error)
-//	}
-//
-//	// Iterable is a value that can be iterated
-//	Iterable interface {
-//		NewIterator(Context) Iterator
-//	}
-//)
+//---------------------------------------------------------------
+// Shared Interfaces
+
+type (
+	// Indexable is a value that supports the index operator
+	Indexable interface {
+		Get(Context, Value) (Value, Error)
+	}
+
+	// IndexAssignable is a value that supports index assignment
+	IndexAssignable interface {
+		Indexable
+		Set(Context, Value, Value) Error
+	}
+
+	//// Lenable is a value that has a length
+	//Lenable interface {
+	//	Len(Context) Int
+	//}
+
+	//// Sliceable is a value that can be sliced
+	//Sliceable interface {
+	//	Slice(Context, Value, Value) (Value, Error)
+	//	SliceFrom(Context, Value) (Value, Error)
+	//	SliceTo(Context, Value) (Value, Error)
+	//}
+
+	//// Iterable is a value that can be iterated
+	//Iterable interface {
+	//	NewIterator(Context) Iterator
+	//}
+)
 
 //---------------------------------------------------------------
 // Basic
@@ -76,24 +76,24 @@ type (
 	// Bool is the boolean value -- true or false
 	Bool interface {
 		Basic
-		BoolVal() bool
 
+		BoolVal() bool
 		Not() Bool
 	}
 
-//	// Str is a string -- defined in golem as a sequence of runes
-//	Str interface {
-//		Basic
-//		fmt.Stringer
-//
-//		Indexable
-//		Lenable
-//		Sliceable
-//		Iterable
-//
-//		Concat(Str) Str
-//	}
-//
+	// Str is a string -- defined in golem as a sequence of runes
+	Str interface {
+		Basic
+		fmt.Stringer
+
+		//Indexable
+		//Lenable
+		//Sliceable
+		//Iterable
+
+		Concat(Str) Str
+	}
+
 //	// Number is a number
 //	Number interface {
 //		Basic
