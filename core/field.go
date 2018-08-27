@@ -6,6 +6,7 @@ package core
 
 import (
 	"fmt"
+	"reflect"
 )
 
 type (
@@ -42,12 +43,15 @@ func NewField(name string, isReadonly bool, value Value) Field {
 	return &field{name, isReadonly, false, value}
 }
 
+var getterArity = &Arity{Kind: FixedArity, RequiredParams: 0, OptionalParams: nil}
+var setterArity = &Arity{Kind: FixedArity, RequiredParams: 1, OptionalParams: nil}
+
 // NewReadonlyNativeProperty creates a readonly Property using a 'getter' function.
 // The 'getter' function must have an arity of 0.
-func NewReadonlyNativeProperty(name string, getter ObsoleteFunc) (Field, Error) {
+func NewReadonlyNativeProperty(name string, getter NativeFunc) (Field, Error) {
 
-	if getter.MinArity() != 0 || getter.MaxArity() != 0 {
-		return nil, ArityMismatchError("0", getter.MaxArity())
+	if !reflect.DeepEqual(getterArity, getter.Arity()) {
+		return nil, ArityMismatchError("0", getter.Arity().RequiredParams)
 	}
 
 	return &field{name, true, true, NewTuple([]Value{getter, Null})}, nil
@@ -57,14 +61,14 @@ func NewReadonlyNativeProperty(name string, getter ObsoleteFunc) (Field, Error) 
 // The 'getter' function must have an arity of 0, and the 'setter' function
 // must have an arity of 1.  By convention the setter function should
 // return 'Null'; its return value will be ignored.
-func NewNativeProperty(name string, getter ObsoleteFunc, setter ObsoleteFunc) (Field, Error) {
+func NewNativeProperty(name string, getter NativeFunc, setter NativeFunc) (Field, Error) {
 
-	if getter.MinArity() != 0 || getter.MaxArity() != 0 {
-		return nil, ArityMismatchError("0", getter.MaxArity())
+	if !reflect.DeepEqual(getterArity, getter.Arity()) {
+		return nil, ArityMismatchError("0", getter.Arity().RequiredParams)
 	}
 
-	if setter.MinArity() != 1 || setter.MaxArity() != 1 {
-		return nil, ArityMismatchError("1", setter.MaxArity())
+	if !reflect.DeepEqual(setterArity, setter.Arity()) {
+		return nil, ArityMismatchError("0", setter.Arity().RequiredParams)
 	}
 
 	return &field{name, false, true, NewTuple([]Value{getter, setter})}, nil

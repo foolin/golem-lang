@@ -117,14 +117,16 @@ func TestNativeProp(t *testing.T) {
 
 	var propValue Value = Zero
 
-	getter := NewObsoleteFunc0(
-		func(cx Context) (Value, Error) {
+	getter := NewFixedNativeFunc(
+		[]Type{}, false,
+		func(cx Context, values []Value) (Value, Error) {
 			return propValue, nil
 		})
 
-	setter := NewObsoleteFuncValue(
-		func(cx Context, val Value) (Value, Error) {
-			propValue = val
+	setter := NewFixedNativeFunc(
+		[]Type{AnyType}, false,
+		func(cx Context, values []Value) (Value, Error) {
+			propValue = values[0]
 			return Null, nil
 		})
 
