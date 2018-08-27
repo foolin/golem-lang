@@ -28,8 +28,10 @@ func init() {
 }
 
 // exit exits the program
-var exit g.Value = g.NewObsoleteFuncInt(
-	func(cx g.Context, n g.Int) (g.Value, g.Error) {
+var exit g.Value = g.NewFixedNativeFunc(
+	[]g.Type{g.IntType}, false,
+	func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+		n := values[0].(g.Int)
 
 		os.Exit(int(n.IntVal()))
 
@@ -38,8 +40,10 @@ var exit g.Value = g.NewObsoleteFuncInt(
 	})
 
 // open opens a file
-var open g.Value = g.NewObsoleteFuncStr(
-	func(cx g.Context, s g.Str) (g.Value, g.Error) {
+var open g.Value = g.NewFixedNativeFunc(
+	[]g.Type{g.StrType}, false,
+	func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+		s := values[0].(g.Str)
 
 		f, err := os.Open(s.String())
 		if err != nil {
@@ -49,8 +53,10 @@ var open g.Value = g.NewObsoleteFuncStr(
 	})
 
 // stat stats a file
-var stat g.Value = g.NewObsoleteFuncStr(
-	func(cx g.Context, s g.Str) (g.Value, g.Error) {
+var stat g.Value = g.NewFixedNativeFunc(
+	[]g.Type{g.StrType}, false,
+	func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+		s := values[0].(g.Str)
 
 		// TODO os.Lstat
 		// TODO followSymLink == false, same as os.Lstat
@@ -109,9 +115,10 @@ func newFile(f *os.File) g.Struct {
 	return stc
 }
 
-func readLines(f io.Reader) g.ObsoleteFunc {
-	return g.NewObsoleteFunc0(
-		func(cx g.Context) (g.Value, g.Error) {
+func readLines(f io.Reader) g.NativeFunc {
+	return g.NewFixedNativeFunc(
+		[]g.Type{}, false,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
 
 			lines := []g.Value{}
 			scanner := bufio.NewScanner(f)
@@ -127,9 +134,11 @@ func readLines(f io.Reader) g.ObsoleteFunc {
 		})
 }
 
-func close(f io.Closer) g.ObsoleteFunc {
-	return g.NewObsoleteFunc0(
-		func(cx g.Context) (g.Value, g.Error) {
+func close(f io.Closer) g.NativeFunc {
+	return g.NewFixedNativeFunc(
+		[]g.Type{}, false,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+
 			err := f.Close()
 			if err != nil {
 				return nil, g.NewError("OsError", err.Error())

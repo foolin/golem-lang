@@ -5,11 +5,11 @@
 package path
 
 import (
-	//"os"
+	"os"
 	"path/filepath"
 
 	g "github.com/mjarmy/golem-lang/core"
-	//libOs "github.com/mjarmy/golem-lang/lib/os"
+	libOs "github.com/mjarmy/golem-lang/lib/os"
 )
 
 // Path is the "path" module in the standard library
@@ -19,7 +19,7 @@ func init() {
 	var err error
 	Path, err = g.NewStruct([]g.Field{
 		g.NewField("ext", true, ext),
-		//		g.NewField("walk", true, walk),
+		g.NewField("walk", true, walk),
 	}, true)
 	if err != nil {
 		panic("unreachable")
@@ -27,45 +27,42 @@ func init() {
 }
 
 // ext returns a file extension
-var ext g.Value = g.NewObsoleteFuncStr(
-	func(cx g.Context, name g.Str) (g.Value, g.Error) {
-		return g.NewStr(filepath.Ext(name.String())), nil
+var ext g.Value = g.NewFixedNativeFunc(
+	[]g.Type{g.StrType}, false,
+	func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+		s := values[0].(g.Str)
+		return g.NewStr(filepath.Ext(s.String())), nil
 	})
 
-//// wal walks a directory path
-//var walk g.Value = g.NewObsoleteFunc(
-//	2, 2,
-//	func(cx g.Context, values []g.Value) (g.Value, g.Error) {
-//
-//		dir, ok := values[0].(g.Str)
-//		if !ok {
-//			return nil, g.TypeMismatchError("Expected Str")
-//		}
-//
-//		callback, ok := values[1].(g.Func)
-//		if !ok {
-//			return nil, g.TypeMismatchError("Expected Func")
-//		}
-//		if callback.MinArity() != 2 || callback.MaxArity() != 2 {
-//			return nil, g.ArityMismatchError("2", callback.MinArity())
-//		}
-//
-//		err := filepath.Walk(
-//			dir.String(),
-//			func(path string, info os.FileInfo, err error) error {
-//				if err != nil {
-//					return err
-//				}
-//				_, gerr := callback.Invoke(cx,
-//					[]g.Value{g.NewStr(path), libOs.NewFileInfo(info)})
-//				return gerr
-//			})
-//
-//		if err != nil {
-//			if gerr, ok := err.(g.Error); ok {
-//				return nil, gerr
-//			}
-//			return nil, g.NewError("PathError", err.Error())
-//		}
-//		return g.Null, nil
-//	})
+// walk walks a directory path
+var walk g.Value = g.NewFixedNativeFunc(
+	[]g.Type{g.StrType, g.FuncType}, false,
+	func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+
+		dir := values[0].(g.Str)
+		callback := values[1].(g.Func)
+
+		arity := callback.Arity()
+		if arity.Kind != g.FixedArity || arity.RequiredParams != 2 {
+			return nil, g.ArityMismatchError("2", arity.RequiredParams)
+		}
+
+		err := filepath.Walk(
+			dir.String(),
+			func(path string, info os.FileInfo, err error) error {
+				if err != nil {
+					return err
+				}
+				_, gerr := callback.Invoke(cx,
+					[]g.Value{g.NewStr(path), libOs.NewFileInfo(info)})
+				return gerr
+			})
+
+		if err != nil {
+			if gerr, ok := err.(g.Error); ok {
+				return nil, gerr
+			}
+			return nil, g.NewError("PathError", err.Error())
+		}
+		return g.Null, nil
+	})

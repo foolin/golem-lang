@@ -24,8 +24,10 @@ func init() {
 }
 
 // compile compiles a regex expression
-var compile g.Value = g.NewObsoleteFuncStr(
-	func(cx g.Context, s g.Str) (g.Value, g.Error) {
+var compile g.Value = g.NewFixedNativeFunc(
+	[]g.Type{g.StrType}, false,
+	func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+		s := values[0].(g.Str)
 
 		rgx, err := regexp.Compile(s.String())
 		if err != nil {
@@ -37,8 +39,10 @@ var compile g.Value = g.NewObsoleteFuncStr(
 
 func makeRegexp(rgx *regexp.Regexp) g.Struct {
 
-	matchString := g.NewObsoleteFuncStr(
-		func(cx g.Context, s g.Str) (g.Value, g.Error) {
+	matchString := g.NewFixedNativeFunc(
+		[]g.Type{g.StrType}, false,
+		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+			s := values[0].(g.Str)
 			return g.NewBool(rgx.MatchString(s.String())), nil
 		})
 

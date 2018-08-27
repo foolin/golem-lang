@@ -14,8 +14,11 @@ import (
 )
 
 // BuiltinLib looks up modules in the standard library
-var BuiltinLib = g.NewObsoleteFuncStr(
-	func(cx g.Context, name g.Str) (g.Value, g.Error) {
+var BuiltinLib = g.NewFixedNativeFunc(
+	[]g.Type{g.StrType}, false,
+	func(cx g.Context, values []g.Value) (g.Value, g.Error) {
+
+		name := values[0].(g.Str)
 
 		switch name.String() {
 		case "os":
