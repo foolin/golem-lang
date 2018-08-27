@@ -25,11 +25,11 @@ func (s str) basicMarker() {}
 
 func (s str) Type() Type { return StrType }
 
-func (s str) Freeze() (Value, Error) {
+func (s str) Freeze(cx Context) (Value, Error) {
 	return s, nil
 }
 
-func (s str) Frozen() (Bool, Error) {
+func (s str) Frozen(cx Context) (Bool, Error) {
 	return True, nil
 }
 
@@ -75,7 +75,7 @@ func (s str) Get(cx Context, index Value) (Value, Error) {
 	return str(string(runes[idx])), nil
 }
 
-func (s str) Len() Int {
+func (s str) Len(cx Context) Int {
 	n := utf8.RuneCountInString(string(s))
 	return NewInt(int64(n))
 }

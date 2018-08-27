@@ -28,11 +28,11 @@ func (b _bool) basicMarker() {}
 
 func (b _bool) Type() Type { return BoolType }
 
-func (b _bool) Freeze() (Value, Error) {
+func (b _bool) Freeze(cx Context) (Value, Error) {
 	return b, nil
 }
 
-func (b _bool) Frozen() (Bool, Error) {
+func (b _bool) Frozen(cx Context) (Bool, Error) {
 	return True, nil
 }
 

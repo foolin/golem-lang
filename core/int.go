@@ -43,11 +43,11 @@ func (i _int) basicMarker() {}
 
 func (i _int) Type() Type { return IntType }
 
-func (i _int) Freeze() (Value, Error) {
+func (i _int) Freeze(cx Context) (Value, Error) {
 	return i, nil
 }
 
-func (i _int) Frozen() (Bool, Error) {
+func (i _int) Frozen(cx Context) (Bool, Error) {
 	return True, nil
 }
 

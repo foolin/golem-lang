@@ -148,20 +148,20 @@ func TestStr(t *testing.T) {
 	v, err = ab.Get(cx, NewInt(2))
 	fail(t, v, err, "IndexOutOfBounds: 2")
 
-	v = NewStr("").Len()
+	v = NewStr("").Len(nil)
 	ok(t, v, nil, Zero)
 
-	v = NewStr("a").Len()
+	v = NewStr("a").Len(nil)
 	ok(t, v, nil, One)
 
-	v = NewStr("abcde").Len()
+	v = NewStr("abcde").Len(nil)
 	ok(t, v, nil, NewInt(5))
 
 	//////////////////////////////
 	// unicode
 
 	a = NewStr("日本語")
-	v = a.Len()
+	v = a.Len(nil)
 	ok(t, v, nil, NewInt(3))
 
 	v, err = a.Get(cx, NewInt(2))

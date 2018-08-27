@@ -15,8 +15,8 @@ import (
 type Value interface {
 	Type() Type
 
-	Freeze() (Value, Error)
-	Frozen() (Bool, Error)
+	Freeze(Context) (Value, Error)
+	Frozen(Context) (Bool, Error)
 
 	Eq(Context, Value) (Bool, Error)
 	HashCode(Context) (Int, Error)
@@ -42,7 +42,7 @@ type (
 
 	// Lenable is a value that has a length
 	Lenable interface {
-		Len() Int
+		Len(Context) Int
 	}
 
 	// Sliceable is a value that can be sliced
@@ -218,7 +218,7 @@ type (
 		Composite
 
 		FieldNames() []string
-		Has(Value) (Bool, Error)
+		Has(Context, Value) (Bool, Error)
 
 		InitField(Context, Str, Value) Error
 		SetField(Context, Str, Value) Error

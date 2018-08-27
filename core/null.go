@@ -41,10 +41,10 @@ func (n *null) Eq(cx Context, v Value) (Bool, Error) {
 
 func (n *null) Cmp(cx Context, v Value) (Int, Error) { return nil, NullValueError() }
 
-func (n *null) Freeze() (Value, Error) {
+func (n *null) Freeze(cx Context) (Value, Error) {
 	return nil, NullValueError()
 }
 
-func (n *null) Frozen() (Bool, Error) {
+func (n *null) Frozen(cx Context) (Bool, Error) {
 	return nil, NullValueError()
 }

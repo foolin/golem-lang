@@ -79,12 +79,12 @@ func (st *_struct) compositeMarker() {}
 
 func (st *_struct) Type() Type { return StructType }
 
-func (st *_struct) Freeze() (Value, Error) {
+func (st *_struct) Freeze(cx Context) (Value, Error) {
 	st.frozen = true
 	return st, nil
 }
 
-func (st *_struct) Frozen() (Bool, Error) {
+func (st *_struct) Frozen(cx Context) (Bool, Error) {
 	return NewBool(st.frozen), nil
 }
 
@@ -172,7 +172,7 @@ func (st *_struct) FieldNames() []string {
 	return st.smap.fieldNames()
 }
 
-func (st *_struct) Has(name Value) (Bool, Error) {
+func (st *_struct) Has(cx Context, name Value) (Bool, Error) {
 	if s, ok := name.(Str); ok {
 		_, has := st.smap.get(s.String())
 		return NewBool(has), nil

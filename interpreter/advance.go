@@ -236,7 +236,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		// and make sure its of the expected length
 		expectedLen := index(opc, f.ip)
-		tpLen := tp.Len()
+		tpLen := tp.Len(i)
 		if expectedLen != int(tpLen.IntVal()) {
 			return nil, g.InvalidArgumentError(
 				fmt.Sprintf("Expected Tuple of length %d", expectedLen))
@@ -662,7 +662,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			return nil, g.TypeMismatchError("Expected Struct")
 		}
 
-		val, err := stc.Has(f.stack[n])
+		val, err := stc.Has(i, f.stack[n])
 		if err != nil {
 			return nil, err
 		}

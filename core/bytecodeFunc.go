@@ -34,11 +34,11 @@ func (f *bytecodeFunc) funcMarker() {}
 
 func (f *bytecodeFunc) Type() Type { return FuncType }
 
-func (f *bytecodeFunc) Freeze() (Value, Error) {
+func (f *bytecodeFunc) Freeze(cx Context) (Value, Error) {
 	return f, nil
 }
 
-func (f *bytecodeFunc) Frozen() (Bool, Error) {
+func (f *bytecodeFunc) Frozen(cx Context) (Bool, Error) {
 	return True, nil
 }
 

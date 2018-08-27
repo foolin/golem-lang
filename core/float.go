@@ -29,11 +29,11 @@ func (f _float) basicMarker() {}
 
 func (f _float) Type() Type { return FloatType }
 
-func (f _float) Freeze() (Value, Error) {
+func (f _float) Freeze(cx Context) (Value, Error) {
 	return f, nil
 }
 
-func (f _float) Frozen() (Bool, Error) {
+func (f _float) Frozen(cx Context) (Bool, Error) {
 	return True, nil
 }
 

@@ -41,11 +41,11 @@ func (r *rng) compositeMarker() {}
 
 func (r *rng) Type() Type { return RangeType }
 
-func (r *rng) Freeze() (Value, Error) {
+func (r *rng) Freeze(cx Context) (Value, Error) {
 	return r, nil
 }
 
-func (r *rng) Frozen() (Bool, Error) {
+func (r *rng) Frozen(cx Context) (Bool, Error) {
 	return True, nil
 }
 
@@ -78,7 +78,7 @@ func (r *rng) Get(cx Context, index Value) (Value, Error) {
 	return NewInt(r.from + int64(idx)*r.step), nil
 }
 
-func (r *rng) Len() Int {
+func (r *rng) Len(cx Context) Int {
 	return NewInt(r.count)
 }
 

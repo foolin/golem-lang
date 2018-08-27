@@ -26,12 +26,12 @@ func (ls *list) compositeMarker() {}
 
 func (ls *list) Type() Type { return ListType }
 
-func (ls *list) Freeze() (Value, Error) {
+func (ls *list) Freeze(cx Context) (Value, Error) {
 	ls.frozen = true
 	return ls, nil
 }
 
-func (ls *list) Frozen() (Bool, Error) {
+func (ls *list) Frozen(cx Context) (Bool, Error) {
 	return NewBool(ls.frozen), nil
 }
 
@@ -107,7 +107,7 @@ func (ls *list) IsEmpty() Bool {
 	return NewBool(len(ls.array) == 0)
 }
 
-func (ls *list) Len() Int {
+func (ls *list) Len(cx Context) Int {
 	return NewInt(int64(len(ls.array)))
 }
 

@@ -26,11 +26,11 @@ func (ch *channel) chanMarker() {}
 
 func (ch *channel) Type() Type { return ChanType }
 
-func (ch *channel) Freeze() (Value, Error) {
+func (ch *channel) Freeze(cx Context) (Value, Error) {
 	return ch, nil
 }
 
-func (ch *channel) Frozen() (Bool, Error) {
+func (ch *channel) Frozen(cx Context) (Bool, Error) {
 	return True, nil
 }
 

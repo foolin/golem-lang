@@ -247,7 +247,7 @@ func (i *Interpreter) makeErrorTrace(err g.Error, stackTrace []string) g.Error {
 	for i, s := range stackTrace {
 		vals[i] = g.NewStr(s)
 	}
-	list, e := g.NewList(vals).Freeze()
+	list, e := g.NewList(vals).Freeze(i)
 	assert(e == nil)
 
 	stc, e := g.NewStruct([]g.Field{g.NewField("stackTrace", true, list)}, true)

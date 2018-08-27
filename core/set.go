@@ -31,12 +31,12 @@ func (s *set) compositeMarker() {}
 
 func (s *set) Type() Type { return SetType }
 
-func (s *set) Freeze() (Value, Error) {
+func (s *set) Freeze(cx Context) (Value, Error) {
 	s.frozen = true
 	return s, nil
 }
 
-func (s *set) Frozen() (Bool, Error) {
+func (s *set) Frozen(cx Context) (Bool, Error) {
 	return NewBool(s.frozen), nil
 }
 
@@ -80,7 +80,7 @@ func (s *set) Cmp(cx Context, v Value) (Int, Error) {
 	return nil, TypeMismatchError("Expected Comparable Type")
 }
 
-func (s *set) Len() Int {
+func (s *set) Len(cx Context) Int {
 	return s.hashMap.Len()
 }
 

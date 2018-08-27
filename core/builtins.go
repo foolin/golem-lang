@@ -94,7 +94,7 @@ var BuiltinLen = NewFixedNativeFunc(
 	false,
 	func(cx Context, values []Value) (Value, Error) {
 		if ln, ok := values[0].(Lenable); ok {
-			return ln.Len(), nil
+			return ln.Len(cx), nil
 		}
 		return nil, TypeMismatchError("Expected Lenable Type")
 	})
@@ -177,7 +177,7 @@ var BuiltinFreeze = NewFixedNativeFunc(
 	[]Type{AnyType},
 	false,
 	func(cx Context, values []Value) (Value, Error) {
-		return values[0].Freeze()
+		return values[0].Freeze(cx)
 	})
 
 // BuiltinFrozen returns whether a single Value is Frozen.
@@ -185,7 +185,7 @@ var BuiltinFrozen = NewFixedNativeFunc(
 	[]Type{AnyType},
 	false,
 	func(cx Context, values []Value) (Value, Error) {
-		return values[0].Frozen()
+		return values[0].Frozen(cx)
 	})
 
 // BuiltinFields returns the fields of a Struct

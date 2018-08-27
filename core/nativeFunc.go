@@ -28,7 +28,7 @@ func (f *nativeBaseFunc) funcMarker() {}
 
 func (f *nativeBaseFunc) Type() Type { return FuncType }
 
-func (f *nativeBaseFunc) Frozen() (Bool, Error) {
+func (f *nativeBaseFunc) Frozen(cx Context) (Bool, Error) {
 	return True, nil
 }
 
@@ -99,7 +99,7 @@ func NewFixedNativeFunc(
 	}
 }
 
-func (f *nativeFixedFunc) Freeze() (Value, Error) {
+func (f *nativeFixedFunc) Freeze(cx Context) (Value, Error) {
 	return f, nil
 }
 
@@ -164,7 +164,7 @@ func NewVariadicNativeFunc(
 	}
 }
 
-func (f *nativeVariadicFunc) Freeze() (Value, Error) {
+func (f *nativeVariadicFunc) Freeze(cx Context) (Value, Error) {
 	return f, nil
 }
 
@@ -238,7 +238,7 @@ func NewMultipleNativeFunc(
 	}
 }
 
-func (f *nativeMultipleFunc) Freeze() (Value, Error) {
+func (f *nativeMultipleFunc) Freeze(cx Context) (Value, Error) {
 	return f, nil
 }
 

@@ -26,12 +26,12 @@ func (d *dict) compositeMarker() {}
 
 func (d *dict) Type() Type { return DictType }
 
-func (d *dict) Freeze() (Value, Error) {
+func (d *dict) Freeze(cx Context) (Value, Error) {
 	d.frozen = true
 	return d, nil
 }
 
-func (d *dict) Frozen() (Bool, Error) {
+func (d *dict) Frozen(cx Context) (Bool, Error) {
 	return NewBool(d.frozen), nil
 }
 
@@ -83,7 +83,7 @@ func (d *dict) Get(cx Context, key Value) (Value, Error) {
 	return d.hashMap.Get(cx, key)
 }
 
-func (d *dict) Len() Int {
+func (d *dict) Len(cx Context) Int {
 	return d.hashMap.Len()
 }
 

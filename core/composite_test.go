@@ -89,13 +89,13 @@ func TestStruct(t *testing.T) {
 	val, err = stc.GetField(cx, NewStr("a"))
 	ok(t, val, err, NewInt(456))
 
-	val, err = stc.Has(NewStr("a"))
+	val, err = stc.Has(nil, NewStr("a"))
 	ok(t, val, err, True)
 
-	val, err = stc.Has(NewStr("abc"))
+	val, err = stc.Has(nil, NewStr("abc"))
 	ok(t, val, err, False)
 
-	val, err = stc.Has(Zero)
+	val, err = stc.Has(nil, Zero)
 	fail(t, val, err, "TypeMismatch: Expected Str")
 
 	stc, err = NewStruct([]Field{NewField("a", true, Null)}, false)
@@ -167,7 +167,7 @@ func TestList(t *testing.T) {
 	v, err = ls.Eq(cx, Null)
 	ok(t, v, err, False)
 
-	v = ls.Len()
+	v = ls.Len(nil)
 	ok(t, v, nil, Zero)
 
 	err = ls.Add(cx, NewStr("a"))
@@ -179,7 +179,7 @@ func TestList(t *testing.T) {
 	v, err = ls.Eq(cx, NewList([]Value{NewStr("a")}))
 	ok(t, v, err, True)
 
-	v = ls.Len()
+	v = ls.Len(nil)
 	ok(t, v, nil, One)
 
 	v, err = ls.Get(cx, Zero)
@@ -248,7 +248,7 @@ func TestDict(t *testing.T) {
 	v, err = d.Eq(cx, Null)
 	ok(t, v, err, False)
 
-	v = d.Len()
+	v = d.Len(nil)
 	ok(t, v, nil, Zero)
 
 	v, err = d.Get(cx, NewStr("a"))
@@ -266,7 +266,7 @@ func TestDict(t *testing.T) {
 	v, err = d.Eq(cx, newDict(cx, []*HEntry{{NewStr("a"), One}}))
 	ok(t, v, err, True)
 
-	v = d.Len()
+	v = d.Len(nil)
 	ok(t, v, nil, One)
 
 	v = d.ToStr(cx)
@@ -324,7 +324,7 @@ func TestSet(t *testing.T) {
 	v, err = s.Eq(cx, Null)
 	ok(t, v, err, False)
 
-	v = s.Len()
+	v = s.Len(nil)
 	ok(t, v, nil, Zero)
 
 	s = newSet(cx, []Value{One})
@@ -341,7 +341,7 @@ func TestSet(t *testing.T) {
 	v, err = s.Eq(cx, Null)
 	ok(t, v, err, False)
 
-	v = s.Len()
+	v = s.Len(nil)
 	ok(t, v, nil, One)
 
 	s = newSet(cx, []Value{One, Zero, Zero, One})
@@ -349,7 +349,7 @@ func TestSet(t *testing.T) {
 	v = s.ToStr(cx)
 	ok(t, v, err, NewStr("set { 0, 1 }"))
 
-	v = s.Len()
+	v = s.Len(nil)
 	ok(t, v, nil, NewInt(2))
 
 	s, err = NewSet(cx, []Value{Null})
@@ -390,7 +390,7 @@ func TestTuple(t *testing.T) {
 	v = tp.ToStr(cx)
 	ok(t, v, nil, NewStr("(1, 0)"))
 
-	v = tp.Len()
+	v = tp.Len(nil)
 	ok(t, v, nil, NewInt(2))
 }
 
@@ -418,29 +418,29 @@ func TestRange(t *testing.T) {
 	v, err = r.Eq(cx, Null)
 	ok(t, v, err, False)
 
-	v = r.Len()
+	v = r.Len(nil)
 	ok(t, v, nil, NewInt(5))
 
-	v = newRange(0, 6, 3).Len()
+	v = newRange(0, 6, 3).Len(nil)
 	ok(t, v, nil, NewInt(2))
-	v = newRange(0, 7, 3).Len()
+	v = newRange(0, 7, 3).Len(nil)
 	ok(t, v, nil, NewInt(3))
-	v = newRange(0, 8, 3).Len()
+	v = newRange(0, 8, 3).Len(nil)
 	ok(t, v, nil, NewInt(3))
-	v = newRange(0, 9, 3).Len()
+	v = newRange(0, 9, 3).Len(nil)
 	ok(t, v, nil, NewInt(3))
 
-	v = newRange(0, 0, 3).Len()
+	v = newRange(0, 0, 3).Len(nil)
 	ok(t, v, nil, NewInt(0))
-	v = newRange(1, 0, 1).Len()
+	v = newRange(1, 0, 1).Len(nil)
 	ok(t, v, nil, NewInt(0))
 
 	v, err = NewRange(1, 0, 0)
 	fail(t, v, err, "InvalidArgument: step cannot be 0")
 
-	v = newRange(0, -5, -1).Len()
+	v = newRange(0, -5, -1).Len(nil)
 	ok(t, v, nil, NewInt(5))
-	v = newRange(-1, -8, -3).Len()
+	v = newRange(-1, -8, -3).Len(nil)
 	ok(t, v, nil, NewInt(3))
 
 	r = newRange(0, 5, 1)

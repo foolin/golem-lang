@@ -25,11 +25,11 @@ func (tp tuple) compositeMarker() {}
 
 func (tp tuple) Type() Type { return TupleType }
 
-func (tp tuple) Freeze() (Value, Error) {
+func (tp tuple) Freeze(cx Context) (Value, Error) {
 	return tp, nil
 }
 
-func (tp tuple) Frozen() (Bool, Error) {
+func (tp tuple) Frozen(cx Context) (Bool, Error) {
 	return True, nil
 }
 
@@ -90,6 +90,6 @@ func (tp tuple) Get(cx Context, index Value) (Value, Error) {
 	return tp[idx], nil
 }
 
-func (tp tuple) Len() Int {
+func (tp tuple) Len(cx Context) Int {
 	return NewInt(int64(len(tp)))
 }
