@@ -302,9 +302,10 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 	switch sn := key.String(); sn {
 
 	case "add":
-		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFuncValue(
-			func(cx Context, val Value) (Value, Error) {
-				err := ls.Add(cx, val)
+		return &virtualFunc{ls, sn, NewFixedNativeFunc(
+			[]Type{AnyType}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				err := ls.Add(cx, values[0])
 				if err != nil {
 					return nil, err
 				}
@@ -312,9 +313,10 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "addAll":
-		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFuncValue(
-			func(cx Context, val Value) (Value, Error) {
-				err := ls.AddAll(cx, val)
+		return &virtualFunc{ls, sn, NewFixedNativeFunc(
+			[]Type{AnyType}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				err := ls.AddAll(cx, values[0])
 				if err != nil {
 					return nil, err
 				}
@@ -322,8 +324,10 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "remove":
-		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFuncInt(
-			func(cx Context, i Int) (Value, Error) {
+		return &virtualFunc{ls, sn, NewFixedNativeFunc(
+			[]Type{IntType}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				i := values[0].(Int)
 				err := ls.Remove(cx, i)
 				if err != nil {
 					return nil, err
@@ -332,8 +336,9 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "clear":
-		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFunc0(
-			func(cx Context) (Value, Error) {
+		return &virtualFunc{ls, sn, NewFixedNativeFunc(
+			[]Type{}, false,
+			func(cx Context, values []Value) (Value, Error) {
 				err := ls.Clear()
 				if err != nil {
 					return nil, err
@@ -342,77 +347,72 @@ func (ls *list) GetField(cx Context, key Str) (Value, Error) {
 			})}, nil
 
 	case "isEmpty":
-		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFunc0(
-			func(cx Context) (Value, Error) {
+		return &virtualFunc{ls, sn, NewFixedNativeFunc(
+			[]Type{}, false,
+			func(cx Context, values []Value) (Value, Error) {
 				return ls.IsEmpty(), nil
 			})}, nil
 
 	case "contains":
-		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFuncValue(
-			func(cx Context, val Value) (Value, Error) {
-				return ls.Contains(cx, val)
+		return &virtualFunc{ls, sn, NewFixedNativeFunc(
+			[]Type{AnyType}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				return ls.Contains(cx, values[0])
 			})}, nil
 
 	case "indexOf":
-		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFuncValue(
-			func(cx Context, val Value) (Value, Error) {
-				return ls.IndexOf(cx, val)
+		return &virtualFunc{ls, sn, NewFixedNativeFunc(
+			[]Type{AnyType}, false,
+			func(cx Context, values []Value) (Value, Error) {
+				return ls.IndexOf(cx, values[0])
 			})}, nil
 
 	case "join":
-		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFunc(
-			0, 1,
+		return &obsoleteIntrinsicFunc{ls, sn, NewMultipleNativeFunc(
+			[]Type{},
+			[]Basic{NewStr("")},
+			false,
 			func(cx Context, values []Value) (Value, Error) {
-				var delim Str
-				switch len(values) {
-				case 0:
-					delim = NewStr("")
-				case 1:
-					if s, ok := values[0].(Str); ok {
-						delim = s
-					} else {
-						return nil, TypeMismatchError("Expected Str")
-					}
-				default:
-					panic("arity mismatch")
-				}
-
+				delim := values[0].(Str)
 				return ls.Join(cx, delim), nil
 			})}, nil
 
 	case "map":
-		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFuncValue(
-			func(cx Context, val Value) (Value, Error) {
+		return &virtualFunc{ls, sn, NewFixedNativeFunc(
+			[]Type{FuncType}, false,
+			func(cx Context, values []Value) (Value, Error) {
 
-				if f, ok := val.(Func); ok {
-					return ls.Map(cx, func(v Value) (Value, Error) {
-						return f.Invoke(cx, []Value{v})
-					})
-				}
-				return nil, TypeMismatchError("Expected Func")
+				fn := values[0].(Func)
+				return ls.Map(cx, func(v Value) (Value, Error) {
+					return fn.Invoke(cx, []Value{v})
+				})
 
 			})}, nil
 
 	case "reduce":
-		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFunc(
-			2, 2,
+		return &virtualFunc{ls, sn, NewFixedNativeFunc(
+			[]Type{AnyType, FuncType}, true,
 			func(cx Context, values []Value) (Value, Error) {
 
-				initial := values[0]
-				if f, ok := values[1].(Func); ok {
-					return ls.Reduce(cx, initial, func(acc Value, v Value) (Value, Error) {
-						return f.Invoke(cx, []Value{acc, v})
-					})
+				if values[1] == Null {
+					return nil, NullValueError()
 				}
-				return nil, TypeMismatchError("Expected Func")
+
+				initial := values[0]
+				fn := values[1].(Func)
+				return ls.Reduce(cx, initial, func(acc Value, v Value) (Value, Error) {
+					return fn.Invoke(cx, []Value{acc, v})
+				})
 			})}, nil
 
 	case "filter":
-		return &obsoleteIntrinsicFunc{ls, sn, NewObsoleteFuncFunc(
-			func(cx Context, f Func) (Value, Error) {
+		return &virtualFunc{ls, sn, NewFixedNativeFunc(
+			[]Type{FuncType}, false,
+			func(cx Context, values []Value) (Value, Error) {
 
+				fn := values[0].(Func)
 				return ls.Filter(cx, func(v Value) (Value, Error) {
-					return f.Invoke(cx, []Value{v})
+					return fn.Invoke(cx, []Value{v})
 				})
 
 			})}, nil
