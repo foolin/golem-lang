@@ -5,9 +5,8 @@
 package ncore
 
 import (
-//"fmt"
-//"strings"
-//"unicode/utf8"
+	"strings"
+	"unicode/utf8"
 )
 
 type str string
@@ -35,10 +34,10 @@ func (s str) Frozen(cx Context) (Bool, Error) {
 
 func (s str) ToStr(cx Context) Str { return s }
 
-//func (s str) HashCode(cx Context) (Int, Error) {
-//	h := strHash(string(s))
-//	return NewInt(int64(h)), nil
-//}
+func (s str) HashCode(cx Context) (Int, Error) {
+	h := strHash(string(s))
+	return NewInt(int64(h)), nil
+}
 
 func (s str) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
@@ -51,79 +50,72 @@ func (s str) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
-//func (s str) Cmp(cx Context, v Value) (Int, Error) {
-//	switch t := v.(type) {
-//
-//	case str:
-//		cmp := strings.Compare(string(s), string(t))
-//		return NewInt(int64(cmp)), nil
-//
-//	default:
-//		return nil, TypeMismatchError("Expected Comparable Type")
-//	}
-//}
+func (s str) Cmp(cx Context, v Value) (Int, Error) {
+	switch t := v.(type) {
 
-//func (s str) Get(cx Context, index Value) (Value, Error) {
-//	// TODO implement this more efficiently
-//	runes := []rune(string(s))
-//
-//	idx, err := boundedIndex(index, len(runes))
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return str(string(runes[idx])), nil
-//}
+	case str:
+		cmp := strings.Compare(string(s), string(t))
+		return NewInt(int64(cmp)), nil
 
-//func (s str) Len(cx Context) Int {
-//	n := utf8.RuneCountInString(string(s))
-//	return NewInt(int64(n))
-//}
+	default:
+		return nil, TypeMismatchError("Expected Comparable Type")
+	}
+}
 
-//func (s str) Slice(cx Context, from Value, to Value) (Value, Error) {
-//	runes := []rune(string(s))
-//
-//	f, t, err := sliceIndices(from, to, len(runes))
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return str(string(runes[f:t])), nil
-//}
+func (s str) Get(cx Context, index Value) (Value, Error) {
+	// TODO implement this more efficiently
+	runes := []rune(string(s))
 
-//func (s str) SliceFrom(cx Context, from Value) (Value, Error) {
-//	runes := []rune(string(s))
-//
-//	f, _, err := sliceIndices(from, NegOne, len(runes))
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return str(string(runes[f:])), nil
-//}
-//
-//func (s str) SliceTo(cx Context, to Value) (Value, Error) {
-//	runes := []rune(string(s))
-//
-//	_, t, err := sliceIndices(Zero, to, len(runes))
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return str(string(runes[:t])), nil
-//}
+	idx, err := boundedIndex(index, len(runes))
+	if err != nil {
+		return nil, err
+	}
+
+	return str(string(runes[idx])), nil
+}
+
+func (s str) Len(cx Context) Int {
+	n := utf8.RuneCountInString(string(s))
+	return NewInt(int64(n))
+}
+
+func (s str) Slice(cx Context, from Value, to Value) (Value, Error) {
+	runes := []rune(string(s))
+
+	f, t, err := sliceIndices(from, to, len(runes))
+	if err != nil {
+		return nil, err
+	}
+
+	return str(string(runes[f:t])), nil
+}
+
+func (s str) SliceFrom(cx Context, from Value) (Value, Error) {
+	runes := []rune(string(s))
+
+	f, _, err := sliceIndices(from, NegOne, len(runes))
+	if err != nil {
+		return nil, err
+	}
+
+	return str(string(runes[f:])), nil
+}
+
+func (s str) SliceTo(cx Context, to Value) (Value, Error) {
+	runes := []rune(string(s))
+
+	_, t, err := sliceIndices(Zero, to, len(runes))
+	if err != nil {
+		return nil, err
+	}
+
+	return str(string(runes[:t])), nil
+}
 
 func (s str) Concat(that Str) Str {
 	a := string(s)
 	b := string(that.(str))
 	return str(strcpy(a) + strcpy(b))
-}
-
-// copy to avoid memory leaks
-func strcpy(s string) string {
-	c := make([]byte, len(s))
-	copy(c, s)
-	return string(c)
 }
 
 ////---------------------------------------------------------------

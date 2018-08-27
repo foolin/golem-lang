@@ -19,9 +19,10 @@ type Value interface {
 	Frozen(Context) (Bool, Error)
 
 	Eq(Context, Value) (Bool, Error)
-	//	HashCode(Context) (Int, Error)
+	HashCode(Context) (Int, Error)
 	ToStr(Context) Str
-	//	Cmp(Context, Value) (Int, Error)
+	Cmp(Context, Value) (Int, Error)
+
 	//	GetField(Context, Str) (Value, Error)
 }
 
@@ -40,17 +41,17 @@ type (
 		Set(Context, Value, Value) Error
 	}
 
-	//// Lenable is a value that has a length
-	//Lenable interface {
-	//	Len(Context) Int
-	//}
+	// Lenable is a value that has a length
+	Lenable interface {
+		Len(Context) Int
+	}
 
-	//// Sliceable is a value that can be sliced
-	//Sliceable interface {
-	//	Slice(Context, Value, Value) (Value, Error)
-	//	SliceFrom(Context, Value) (Value, Error)
-	//	SliceTo(Context, Value) (Value, Error)
-	//}
+	// Sliceable is a value that can be sliced
+	Sliceable interface {
+		Slice(Context, Value, Value) (Value, Error)
+		SliceFrom(Context, Value) (Value, Error)
+		SliceTo(Context, Value) (Value, Error)
+	}
 
 	//// Iterable is a value that can be iterated
 	//Iterable interface {
@@ -86,44 +87,44 @@ type (
 		Basic
 		fmt.Stringer
 
-		//Indexable
-		//Lenable
-		//Sliceable
+		Indexable
+		Lenable
+		Sliceable
 		//Iterable
 
 		Concat(Str) Str
 	}
 
-//	// Number is a number
-//	Number interface {
-//		Basic
-//		FloatVal() float64
-//		IntVal() int64
-//
-//		Add(Value) (Number, Error)
-//		Sub(Value) (Number, Error)
-//		Mul(Value) (Number, Error)
-//		Div(Value) (Number, Error)
-//		Negate() Number
-//	}
-//
-//	// Float is a float64
-//	Float interface {
-//		Number
-//	}
-//
-//	// Int is an int64
-//	Int interface {
-//		Number
-//
-//		Rem(Value) (Int, Error)
-//		BitAnd(Value) (Int, Error)
-//		BitOr(Value) (Int, Error)
-//		BitXOr(Value) (Int, Error)
-//		LeftShift(Value) (Int, Error)
-//		RightShift(Value) (Int, Error)
-//		Complement() Int
-//	}
+	// Number is a number
+	Number interface {
+		Basic
+		FloatVal() float64
+		IntVal() int64
+
+		Add(Value) (Number, Error)
+		Sub(Value) (Number, Error)
+		Mul(Value) (Number, Error)
+		Div(Value) (Number, Error)
+		Negate() Number
+	}
+
+	// Float is a float64
+	Float interface {
+		Number
+	}
+
+	// Int is an int64
+	Int interface {
+		Number
+
+		Rem(Value) (Int, Error)
+		BitAnd(Value) (Int, Error)
+		BitOr(Value) (Int, Error)
+		BitXOr(Value) (Int, Error)
+		LeftShift(Value) (Int, Error)
+		RightShift(Value) (Int, Error)
+		Complement() Int
+	}
 )
 
 ////---------------------------------------------------------------

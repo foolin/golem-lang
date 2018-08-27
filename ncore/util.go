@@ -6,58 +6,81 @@ package ncore
 
 import ()
 
-//func posIndex(val Value, length int) (int, Error) {
-//	i, ok := val.(Int)
-//	if !ok {
-//		return -1, TypeMismatchError("Expected Int")
-//	}
-//
-//	n := int(i.IntVal())
-//	if n < 0 {
-//		n = length + n
-//	}
-//	return n, nil
-//}
+func posIndex(val Value, length int) (int, Error) {
+	i, ok := val.(Int)
+	if !ok {
+		return -1, TypeMismatchError("Expected Int")
+	}
 
-//func boundedIndex(val Value, length int) (int, Error) {
-//	n, err := posIndex(val, length)
-//	if err != nil {
-//		return -1, err
-//	}
-//
-//	switch {
-//	case n < 0:
-//		return -1, IndexOutOfBoundsError(n)
-//	case n >= length:
-//		return -1, IndexOutOfBoundsError(n)
-//	default:
-//		return n, nil
-//	}
-//}
-//
-//func sliceBounds(n int, length int) int {
-//	switch {
-//	case n < 0:
-//		return 0
-//	case n > length:
-//		return length
-//	default:
-//		return n
-//	}
-//}
-//
-//func sliceIndices(from Value, to Value, length int) (int, int, Error) {
-//	f, err := posIndex(from, length)
-//	if err != nil {
-//		return 0, 0, TypeMismatchError("Expected Int")
-//	}
-//	t, err := posIndex(to, length)
-//	if err != nil {
-//		return 0, 0, TypeMismatchError("Expected Int")
-//	}
-//
-//	return sliceBounds(f, length), sliceBounds(t, length), nil
-//}
+	n := int(i.IntVal())
+	if n < 0 {
+		n = length + n
+	}
+	return n, nil
+}
+
+func boundedIndex(val Value, length int) (int, Error) {
+	n, err := posIndex(val, length)
+	if err != nil {
+		return -1, err
+	}
+
+	switch {
+	case n < 0:
+		return -1, IndexOutOfBoundsError(n)
+	case n >= length:
+		return -1, IndexOutOfBoundsError(n)
+	default:
+		return n, nil
+	}
+}
+
+func sliceBounds(n int, length int) int {
+	switch {
+	case n < 0:
+		return 0
+	case n > length:
+		return length
+	default:
+		return n
+	}
+}
+
+func sliceIndices(from Value, to Value, length int) (int, int, Error) {
+	f, err := posIndex(from, length)
+	if err != nil {
+		return 0, 0, TypeMismatchError("Expected Int")
+	}
+	t, err := posIndex(to, length)
+	if err != nil {
+		return 0, 0, TypeMismatchError("Expected Int")
+	}
+
+	return sliceBounds(f, length), sliceBounds(t, length), nil
+}
+
+// https://en.wikipedia.org/wiki/Jenkins_hash_function
+func strHash(s string) int {
+
+	var hash int
+	bytes := []byte(s)
+	for _, b := range bytes {
+		hash += int(b)
+		hash += hash << 10
+		hash ^= hash >> 6
+	}
+	hash += hash << 3
+	hash ^= hash >> 11
+	hash += hash << 15
+	return hash
+}
+
+// copy to avoid memory leaks
+func strcpy(s string) string {
+	c := make([]byte, len(s))
+	copy(c, s)
+	return string(c)
+}
 
 //func valuesEq(cx Context, as []Value, bs []Value) (Bool, Error) {
 //
@@ -77,23 +100,7 @@ import ()
 //
 //	return True, nil
 //}
-//
-//func strHash(s string) int {
-//
-//	// https://en.wikipedia.org/wiki/Jenkins_hash_function
-//	var hash int
-//	bytes := []byte(s)
-//	for _, b := range bytes {
-//		hash += int(b)
-//		hash += hash << 10
-//		hash ^= hash >> 6
-//	}
-//	hash += hash << 3
-//	hash ^= hash >> 11
-//	hash += hash << 15
-//	return hash
-//}
-//
+
 //func newIteratorStruct() Struct {
 //
 //	// create a struct with fields that have placeholder Null values

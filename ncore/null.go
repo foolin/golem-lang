@@ -26,8 +26,8 @@ func (n *null) Type() Type { return NullType }
 
 func (n *null) ToStr(cx Context) Str { return NewStr("null") }
 
-//func (n *null) HashCode(cx Context) (Int, Error) { return nil, NullValueError() }
-//
+func (n *null) HashCode(cx Context) (Int, Error) { return nil, NullValueError() }
+
 //func (n *null) GetField(cx Context, key Str) (Value, Error) { return nil, NullValueError() }
 
 func (n *null) Eq(cx Context, v Value) (Bool, Error) {
@@ -39,7 +39,7 @@ func (n *null) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
-//func (n *null) Cmp(cx Context, v Value) (Int, Error) { return nil, NullValueError() }
+func (n *null) Cmp(cx Context, v Value) (Int, Error) { return nil, NullValueError() }
 
 func (n *null) Freeze(cx Context) (Value, Error) {
 	return nil, NullValueError()

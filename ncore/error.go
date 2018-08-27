@@ -15,3 +15,22 @@ type Error error
 func NullValueError() Error {
 	return fmt.Errorf("NullValue")
 }
+
+// TypeMismatchError creates a TypeMismatch Error
+func TypeMismatchError(msg string) Error {
+	return fmt.Errorf("TypeMismatch: %s", msg)
+}
+
+// DivideByZeroError creates a DivideByZero Error
+func DivideByZeroError() Error {
+	return fmt.Errorf("DivideByZero")
+}
+
+// InvalidArgumentError creates an InvalidArgument Error
+func InvalidArgumentError(msg string) Error {
+	return fmt.Errorf("InvalidArgument: %s", msg)
+}
+
+func IndexOutOfBoundsError(val int) Error {
+	return fmt.Errorf("IndexOutOfBounds: %d", val)
+}

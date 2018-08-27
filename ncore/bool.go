@@ -43,12 +43,12 @@ func (b _bool) ToStr(cx Context) Str {
 	return NewStr("false")
 }
 
-//func (b _bool) HashCode(cx Context) (Int, Error) {
-//	if b {
-//		return NewInt(1009), nil
-//	}
-//	return NewInt(1013), nil
-//}
+func (b _bool) HashCode(cx Context) (Int, Error) {
+	if b {
+		return NewInt(1009), nil
+	}
+	return NewInt(1013), nil
+}
 
 func (b _bool) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
@@ -65,23 +65,23 @@ func (b _bool) Eq(cx Context, v Value) (Bool, Error) {
 //func (b _bool) GetField(cx Context, key Str) (Value, Error) {
 //	return nil, NoSuchFieldError(key.String())
 //}
-//
-//func (b _bool) Cmp(cx Context, v Value) (Int, Error) {
-//	switch t := v.(type) {
-//
-//	case _bool:
-//		if b == t {
-//			return Zero, nil
-//		} else if b {
-//			return One, nil
-//		} else {
-//			return NegOne, nil
-//		}
-//
-//	default:
-//		return nil, TypeMismatchError("Expected Comparable Type")
-//	}
-//}
+
+func (b _bool) Cmp(cx Context, v Value) (Int, Error) {
+	switch t := v.(type) {
+
+	case _bool:
+		if b == t {
+			return Zero, nil
+		} else if b {
+			return One, nil
+		} else {
+			return NegOne, nil
+		}
+
+	default:
+		return nil, TypeMismatchError("Expected Comparable Type")
+	}
+}
 
 func (b _bool) Not() Bool {
 	return !b
