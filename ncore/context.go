@@ -4,7 +4,7 @@
 
 package ncore
 
-// Context evaluates functions (including functions defined via bytecode).
+// Context evaluates functions that are defined via bytecode.
 // In practice, this means that a Context is actually a full-fledged instance
 // of the Golem Interpreter.
 type Context interface {

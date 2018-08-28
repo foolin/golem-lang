@@ -31,12 +31,21 @@ func InvalidArgumentError(msg string) Error {
 	return fmt.Errorf("InvalidArgument: %s", msg)
 }
 
+// IndexOutOfBoundsError creates an IndexOutOfBounds Error
 func IndexOutOfBoundsError(val int) Error {
 	return fmt.Errorf("IndexOutOfBounds: %d", val)
 }
 
+// ArityMismatchError creates an ArityMismatch Error
 func ArityMismatchError(expected string, actual int) Error {
 	return fmt.Errorf(
 		"ArityMismatch: Expected %s params, got %d",
 		expected, actual)
+}
+
+// ReadonlyFieldError creates a ReadonlyField Error
+func ReadonlyFieldError(field string) Error {
+	return fmt.Errorf(
+		"ReadonlyField: Field '%s' is readonly",
+		field)
 }
