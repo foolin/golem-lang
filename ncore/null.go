@@ -48,3 +48,11 @@ func (n *null) Freeze(cx Context) (Value, Error) {
 func (n *null) Frozen(cx Context) (Bool, Error) {
 	return nil, NullValueError()
 }
+
+func (n *null) FieldNames() ([]string, Error) {
+	return nil, NullValueError()
+}
+
+func (n *null) HasField(Context, Value) (Bool, Error) {
+	return nil, NullValueError()
+}

@@ -6,6 +6,7 @@ package bytecode
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 
 	g "github.com/mjarmy/golem-lang/ncore"
@@ -18,7 +19,7 @@ func tassert(t *testing.T, flag bool) {
 	}
 }
 
-func ok(t *testing.T, val g.Value, err g.Error, expect g.Value) {
+func ok(t *testing.T, val interface{}, err g.Error, expect interface{}) {
 
 	if err != nil {
 		t.Error(err, " != ", nil)
@@ -28,6 +29,19 @@ func ok(t *testing.T, val g.Value, err g.Error, expect g.Value) {
 		t.Error(val, " != ", expect)
 		panic("ok")
 	}
+}
+
+func okNames(t *testing.T, val []string, err g.Error, expect []string) {
+
+	sort.Slice(val, func(i, j int) bool {
+		return val[i] < val[j]
+	})
+
+	sort.Slice(expect, func(i, j int) bool {
+		return expect[i] < expect[j]
+	})
+
+	ok(t, val, err, expect)
 }
 
 func okType(t *testing.T, val g.Value, expected g.Type) {
@@ -53,6 +67,12 @@ func TestBytecodeFunc(t *testing.T) {
 
 	v, err = b.Eq(nil, a)
 	ok(t, v, err, g.False)
+
+	names, err := a.FieldNames()
+	okNames(t, names, err, []string{})
+
+	has, err := a.HasField(nil, g.NewStr("a"))
+	ok(t, has, err, g.False)
 }
 
 func TestLineNumber(t *testing.T) {

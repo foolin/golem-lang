@@ -246,9 +246,13 @@ func (i _int) Complement() Int {
 	return ^i
 }
 
-////--------------------------------------------------------------
-//// intrinsic functions
-//
-//func (i _int) GetField(cx Context, key Str) (Value, Error) {
-//	return nil, NoSuchFieldError(key.String())
-//}
+//--------------------------------------------------------------
+// fields
+
+func (i _int) FieldNames() ([]string, Error) {
+	return []string{}, nil
+}
+
+func (i _int) HasField(Context, Value) (Bool, Error) {
+	return False, nil
+}

@@ -167,9 +167,13 @@ func (f _float) Negate() Number {
 	return 0 - f
 }
 
-////--------------------------------------------------------------
-//// intrinsic functions
-//
-//func (f _float) GetField(cx Context, key Str) (Value, Error) {
-//	return nil, NoSuchFieldError(key.String())
-//}
+//--------------------------------------------------------------
+// fields
+
+func (f _float) FieldNames() ([]string, Error) {
+	return []string{}, nil
+}
+
+func (f _float) HasField(Context, Value) (Bool, Error) {
+	return False, nil
+}

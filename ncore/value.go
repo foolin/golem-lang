@@ -23,7 +23,11 @@ type Value interface {
 	ToStr(Context) Str
 	Cmp(Context, Value) (Int, Error)
 
-	//	GetField(Context, Str) (Value, Error)
+	FieldNames() ([]string, Error)
+	HasField(Context, Value) (Bool, Error)
+	//GetField(Context, Str) (Value, Error)
+	//InvokeField(Context, Str, []Value) (Value, Error)
+	//SetField(Context, Str, Value) Error
 }
 
 //---------------------------------------------------------------

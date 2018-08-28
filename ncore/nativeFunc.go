@@ -49,6 +49,14 @@ func (f *nativeBaseFunc) ToStr(cx Context) Str {
 	return NewStr(fmt.Sprintf("nativeFunc<%p>", f))
 }
 
+func (f *nativeBaseFunc) FieldNames() ([]string, Error) {
+	return []string{}, nil
+}
+
+func (f *nativeBaseFunc) HasField(Context, Value) (Bool, Error) {
+	return False, nil
+}
+
 func (f *nativeBaseFunc) Arity() *Arity { return f.arity }
 
 func checkType(value Value, typ Type, allowNull bool) Error {
@@ -291,30 +299,30 @@ func (f *nativeMultipleFunc) Invoke(cx Context, values []Value) (Value, Error) {
 	return f.invoke(cx, values)
 }
 
-//--------------------------------------------------------------
-// virtualFunc
-//--------------------------------------------------------------
-
-// A virtual function is a function that is an intrinsic
-// part of a given Type. To reduce the overhead required to make
-// new values, these functions are created on the fly.
-type virtualFunc struct {
-	owner Value
-	name  string
-	NativeFunc
-}
-
-func (f *virtualFunc) Eq(cx Context, v Value) (Bool, Error) {
-	switch t := v.(type) {
-	case *virtualFunc:
-		// equality for intrinsic functions is based on whether
-		// they have the same owner, and the same name
-		ownerEq, err := f.owner.Eq(cx, t.owner)
-		if err != nil {
-			return nil, err
-		}
-		return NewBool(ownerEq.BoolVal() && (f.name == t.name)), nil
-	default:
-		return False, nil
-	}
-}
+////--------------------------------------------------------------
+//// virtualFunc
+////--------------------------------------------------------------
+//
+//// A virtual function is a function that is an intrinsic
+//// part of a given Type. To reduce the overhead required to make
+//// new values, these functions are created on the fly.
+//type virtualFunc struct {
+//	owner Value
+//	name  string
+//	NativeFunc
+//}
+//
+//func (f *virtualFunc) Eq(cx Context, v Value) (Bool, Error) {
+//	switch t := v.(type) {
+//	case *virtualFunc:
+//		// equality for intrinsic functions is based on whether
+//		// they have the same owner, and the same name
+//		ownerEq, err := f.owner.Eq(cx, t.owner)
+//		if err != nil {
+//			return nil, err
+//		}
+//		return NewBool(ownerEq.BoolVal() && (f.name == t.name)), nil
+//	default:
+//		return False, nil
+//	}
+//}

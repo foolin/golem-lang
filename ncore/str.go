@@ -146,7 +146,34 @@ func (s str) Concat(that Str) Str {
 //}
 
 //--------------------------------------------------------------
-// intrinsic functions
+// fields
+
+var strFields = map[string]bool{
+	"contains":   true,
+	"index":      true,
+	"lastIndex":  true,
+	"startsWith": true,
+	"endsWith":   true,
+	"replace":    true,
+	"split":      true,
+	//"iterator":   true,
+}
+
+func (s str) FieldNames() ([]string, Error) {
+	names := make([]string, 0, len(strFields))
+	for k, _ := range strFields {
+		names = append(names, k)
+	}
+	return names, nil
+}
+
+func (s str) HasField(cx Context, val Value) (Bool, Error) {
+	if s, ok := val.(Str); ok {
+		_, has := strFields[s.String()]
+		return NewBool(has), nil
+	}
+	return nil, TypeMismatchError("Expected Str")
+}
 
 //func (s str) GetField(cx Context, key Str) (Value, Error) {
 //	switch sn := key.String(); sn {

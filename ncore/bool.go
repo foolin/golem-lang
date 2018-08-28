@@ -86,3 +86,14 @@ func (b _bool) Cmp(cx Context, v Value) (Int, Error) {
 func (b _bool) Not() Bool {
 	return !b
 }
+
+//--------------------------------------------------------------
+// fields
+
+func (b _bool) FieldNames() ([]string, Error) {
+	return []string{}, nil
+}
+
+func (b _bool) HasField(Context, Value) (Bool, Error) {
+	return False, nil
+}
