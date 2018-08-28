@@ -256,3 +256,11 @@ func (i _int) FieldNames() ([]string, Error) {
 func (i _int) HasField(Context, Value) (Bool, Error) {
 	return False, nil
 }
+
+func (i _int) GetField(cx Context, name Str) (Value, Error) {
+	return nil, NoSuchFieldError(name.String())
+}
+
+func (i _int) InvokeField(cx Context, name Str, params []Value) (Value, Error) {
+	return nil, NoSuchFieldError(name.String())
+}

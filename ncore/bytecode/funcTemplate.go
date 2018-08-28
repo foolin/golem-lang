@@ -13,7 +13,7 @@ import (
 // are immutable at run time.
 type FuncTemplate struct {
 	Module            *Module
-	Arity             *g.Arity
+	Arity             g.Arity
 	NumCaptures       int
 	NumLocals         int
 	OpCodes           []byte

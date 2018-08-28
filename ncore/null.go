@@ -49,10 +49,21 @@ func (n *null) Frozen(cx Context) (Bool, Error) {
 	return nil, NullValueError()
 }
 
+//--------------------------------------------------------------
+// fields
+
 func (n *null) FieldNames() ([]string, Error) {
 	return nil, NullValueError()
 }
 
 func (n *null) HasField(Context, Value) (Bool, Error) {
+	return nil, NullValueError()
+}
+
+func (n *null) GetField(cx Context, name Str) (Value, Error) {
+	return nil, NullValueError()
+}
+
+func (n *null) InvokeField(cx Context, name Str, params []Value) (Value, Error) {
 	return nil, NullValueError()
 }

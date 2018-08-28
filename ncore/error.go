@@ -44,8 +44,11 @@ func ArityMismatchError(expected string, actual int) Error {
 }
 
 // ReadonlyFieldError creates a ReadonlyField Error
-func ReadonlyFieldError(field string) Error {
-	return fmt.Errorf(
-		"ReadonlyField: Field '%s' is readonly",
-		field)
+func ReadonlyFieldError(name string) Error {
+	return fmt.Errorf("ReadonlyField: Field '%s' is readonly", name)
+}
+
+// NoSuchFieldError creates a NoSuchField Error
+func NoSuchFieldError(name string) Error {
+	return fmt.Errorf("NoSuchField: Field '%s' not found", name)
 }

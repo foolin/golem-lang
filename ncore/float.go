@@ -177,3 +177,11 @@ func (f _float) FieldNames() ([]string, Error) {
 func (f _float) HasField(Context, Value) (Bool, Error) {
 	return False, nil
 }
+
+func (f _float) GetField(cx Context, name Str) (Value, Error) {
+	return nil, NoSuchFieldError(name.String())
+}
+
+func (f _float) InvokeField(cx Context, name Str, params []Value) (Value, Error) {
+	return nil, NoSuchFieldError(name.String())
+}

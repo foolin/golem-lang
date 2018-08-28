@@ -97,3 +97,11 @@ func (b _bool) FieldNames() ([]string, Error) {
 func (b _bool) HasField(Context, Value) (Bool, Error) {
 	return False, nil
 }
+
+func (b _bool) GetField(cx Context, name Str) (Value, Error) {
+	return nil, NoSuchFieldError(name.String())
+}
+
+func (b _bool) InvokeField(cx Context, name Str, params []Value) (Value, Error) {
+	return nil, NoSuchFieldError(name.String())
+}

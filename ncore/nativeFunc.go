@@ -15,14 +15,96 @@ type NativeFunc interface {
 }
 
 //--------------------------------------------------------------
+// nativeSimpleFunc
+//--------------------------------------------------------------
+
+type nativeSimpleFunc struct {
+	arity  Arity
+	invoke Invoker
+}
+
+// NewNativeFunc creates a NativeFunc
+func NewNativeFunc(arity Arity, invoke Invoker) NativeFunc {
+	return &nativeSimpleFunc{arity, invoke}
+}
+
+func (f *nativeSimpleFunc) nativeFuncMarker() {}
+
+func (f *nativeSimpleFunc) Type() Type { return FuncType }
+
+func (f *nativeSimpleFunc) Frozen(cx Context) (Bool, Error) {
+	return True, nil
+}
+func (f *nativeSimpleFunc) Freeze(cx Context) (Value, Error) {
+	return f, nil
+}
+
+func (f *nativeSimpleFunc) Eq(cx Context, v Value) (Bool, Error) {
+	switch t := v.(type) {
+	case *nativeSimpleFunc:
+		// equality is based on identity
+		return NewBool(f == t), nil
+	default:
+		return False, nil
+	}
+}
+
+func (f *nativeSimpleFunc) HashCode(cx Context) (Int, Error) {
+	return nil, TypeMismatchError("Expected Hashable Type")
+}
+
+//func (f *nativeSimpleFunc) GetField(cx Context, key Str) (Value, Error) {
+//	return nil, NoSuchFieldError(key.String())
+//}
+
+func (f *nativeSimpleFunc) Cmp(cx Context, v Value) (Int, Error) {
+	return nil, TypeMismatchError("Expected Comparable Type")
+}
+
+func (f *nativeSimpleFunc) ToStr(cx Context) Str {
+	return NewStr(fmt.Sprintf("nativeFunc<%p>", f))
+}
+
+//--------------------------------
+// fields
+
+func (f *nativeSimpleFunc) FieldNames() ([]string, Error) {
+	return []string{}, nil
+}
+
+func (f *nativeSimpleFunc) HasField(Context, Value) (Bool, Error) {
+	return False, nil
+}
+
+func (f *nativeSimpleFunc) GetField(cx Context, name Str) (Value, Error) {
+	return nil, NoSuchFieldError(name.String())
+}
+
+func (f *nativeSimpleFunc) InvokeField(cx Context, name Str, params []Value) (Value, Error) {
+	return nil, NoSuchFieldError(name.String())
+}
+
+//--------------------------------
+// func
+
+func (f *nativeSimpleFunc) Arity() Arity {
+	return f.arity
+}
+
+func (f *nativeSimpleFunc) Invoke(cx Context, params []Value) (Value, Error) {
+
+	return f.invoke(cx, params)
+}
+
+//--------------------------------------------------------------
 // nativeBaseFunc
 //--------------------------------------------------------------
 
 type nativeBaseFunc struct {
-	arity         *Arity
+	arity         Arity
 	requiredTypes []Type
 	allowNull     bool
-	invoke        func(Context, []Value) (Value, Error)
+	invoke        Invoker
 }
 
 func (f *nativeBaseFunc) nativeFuncMarker() {}
@@ -49,6 +131,9 @@ func (f *nativeBaseFunc) ToStr(cx Context) Str {
 	return NewStr(fmt.Sprintf("nativeFunc<%p>", f))
 }
 
+//--------------------------------
+// fields
+
 func (f *nativeBaseFunc) FieldNames() ([]string, Error) {
 	return []string{}, nil
 }
@@ -57,31 +142,18 @@ func (f *nativeBaseFunc) HasField(Context, Value) (Bool, Error) {
 	return False, nil
 }
 
-func (f *nativeBaseFunc) Arity() *Arity { return f.arity }
-
-func checkType(value Value, typ Type, allowNull bool) Error {
-
-	// accept 'any' type
-	if typ == AnyType {
-		return nil
-	}
-
-	// skip over null values
-	if value.Type() == NullType {
-		if allowNull {
-			return nil
-		}
-		return NullValueError()
-	}
-
-	// check type
-	if value.Type() != typ {
-		return TypeMismatchError(fmt.Sprintf("Expected %s", typ.String()))
-	}
-
-	// invoke
-	return nil
+func (f *nativeBaseFunc) GetField(cx Context, name Str) (Value, Error) {
+	return nil, NoSuchFieldError(name.String())
 }
+
+func (f *nativeBaseFunc) InvokeField(cx Context, name Str, params []Value) (Value, Error) {
+	return nil, NoSuchFieldError(name.String())
+}
+
+//--------------------------------
+// func
+
+func (f *nativeBaseFunc) Arity() Arity { return f.arity }
 
 //--------------------------------------------------------------
 // nativeFixedFunc
@@ -91,16 +163,16 @@ type nativeFixedFunc struct {
 	*nativeBaseFunc
 }
 
-// NewFixedNativeFunc creates a new NativeFunc with fixed arity
+// NewFixedNativeFunc is a convenience function for creating
+// a NativeFunc with fixed arity
 func NewFixedNativeFunc(
 	requiredTypes []Type,
 	allowNull bool,
-	invoke func(Context, []Value) (Value, Error)) NativeFunc {
+	invoke Invoker) NativeFunc {
 
-	arity := &Arity{
+	arity := Arity{
 		Kind:           FixedArity,
-		RequiredParams: len(requiredTypes),
-		OptionalParams: nil,
+		RequiredParams: uint16(len(requiredTypes)),
 	}
 
 	return &nativeFixedFunc{
@@ -122,27 +194,14 @@ func (f *nativeFixedFunc) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
-func (f *nativeFixedFunc) Invoke(cx Context, values []Value) (Value, Error) {
+func (f *nativeFixedFunc) Invoke(cx Context, params []Value) (Value, Error) {
 
-	numValues := len(values)
-	numReqs := len(f.requiredTypes)
-
-	// arity mismatch
-	if numValues != numReqs {
-		return nil, ArityMismatchError(
-			fmt.Sprintf("%d", numReqs),
-			numValues)
+	err := VetFixedFuncParams(f.requiredTypes, f.allowNull, params)
+	if err != nil {
+		return nil, err
 	}
 
-	// check types on required values
-	for i := 0; i < numReqs; i++ {
-		err := checkType(values[i], f.requiredTypes[i], f.allowNull)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return f.invoke(cx, values)
+	return f.invoke(cx, params)
 }
 
 //--------------------------------------------------------------
@@ -154,17 +213,17 @@ type nativeVariadicFunc struct {
 	variadicType Type
 }
 
-// NewVariadicNativeFunc creates a new NativeFunc with variadic arity
+// NewVariadicNativeFunc is a convenience function for creating
+// a NativeFunc with variadic arity
 func NewVariadicNativeFunc(
 	requiredTypes []Type,
 	variadicType Type,
 	allowNull bool,
-	invoke func(Context, []Value) (Value, Error)) NativeFunc {
+	invoke Invoker) NativeFunc {
 
-	arity := &Arity{
+	arity := Arity{
 		Kind:           VariadicArity,
-		RequiredParams: len(requiredTypes),
-		OptionalParams: nil,
+		RequiredParams: uint16(len(requiredTypes)),
 	}
 
 	return &nativeVariadicFunc{
@@ -187,9 +246,9 @@ func (f *nativeVariadicFunc) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
-func (f *nativeVariadicFunc) Invoke(cx Context, values []Value) (Value, Error) {
+func (f *nativeVariadicFunc) Invoke(cx Context, params []Value) (Value, Error) {
 
-	numValues := len(values)
+	numValues := len(params)
 	numReqs := len(f.requiredTypes)
 
 	// arity mismatch
@@ -199,24 +258,24 @@ func (f *nativeVariadicFunc) Invoke(cx Context, values []Value) (Value, Error) {
 			numValues)
 	}
 
-	// check types on required values
+	// check types on required params
 	for i := 0; i < numReqs; i++ {
-		err := checkType(values[i], f.requiredTypes[i], f.allowNull)
+		err := VetFuncParam(f.requiredTypes[i], f.allowNull, params[i])
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	// check types on variadic values
+	// check types on variadic params
 	for i := numReqs; i < numValues; i++ {
-		err := checkType(values[i], f.variadicType, f.allowNull)
+		err := VetFuncParam(f.variadicType, f.allowNull, params[i])
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	// invoke
-	return f.invoke(cx, values)
+	return f.invoke(cx, params)
 }
 
 //--------------------------------------------------------------
@@ -228,17 +287,18 @@ type nativeMultipleFunc struct {
 	optionalTypes []Type
 }
 
-// NewMultipleNativeFunc creates a new NativeFunc with multiple arity
+// NewMultipleNativeFunc is a convenience function for creating
+// a NativeFunc with multiple arity
 func NewMultipleNativeFunc(
 	requiredTypes []Type,
 	optionalTypes []Type,
 	allowNull bool,
-	invoke func(Context, []Value) (Value, Error)) NativeFunc {
+	invoke Invoker) NativeFunc {
 
-	arity := &Arity{
+	arity := Arity{
 		Kind:           MultipleArity,
-		RequiredParams: len(requiredTypes),
-		OptionalParams: nil,
+		RequiredParams: uint16(len(requiredTypes)),
+		OptionalParams: uint16(len(optionalTypes)),
 	}
 
 	return &nativeMultipleFunc{
@@ -261,9 +321,9 @@ func (f *nativeMultipleFunc) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
-func (f *nativeMultipleFunc) Invoke(cx Context, values []Value) (Value, Error) {
+func (f *nativeMultipleFunc) Invoke(cx Context, params []Value) (Value, Error) {
 
-	numValues := len(values)
+	numValues := len(params)
 	numReqs := len(f.requiredTypes)
 	numOpts := len(f.optionalTypes)
 
@@ -279,24 +339,73 @@ func (f *nativeMultipleFunc) Invoke(cx Context, values []Value) (Value, Error) {
 			numValues)
 	}
 
-	// check types on required values
+	// check types on required params
 	for i := 0; i < numReqs; i++ {
-		err := checkType(values[i], f.requiredTypes[i], f.allowNull)
+		err := VetFuncParam(f.requiredTypes[i], f.allowNull, params[i])
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	// check types on optional values
+	// check types on optional params
 	for i := numReqs; i < numValues; i++ {
-		err := checkType(values[i], f.optionalTypes[i-numReqs], f.allowNull)
+		err := VetFuncParam(f.optionalTypes[i-numReqs], f.allowNull, params[i])
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	// invoke
-	return f.invoke(cx, values)
+	return f.invoke(cx, params)
+}
+
+//--------------------------------------------------------------
+
+func VetFixedFuncParams(requiredTypes []Type, allowNull bool, params []Value) Error {
+
+	numValues := len(params)
+	numReqs := len(requiredTypes)
+
+	// arity mismatch
+	if numValues != numReqs {
+		return ArityMismatchError(
+			fmt.Sprintf("%d", numReqs),
+			numValues)
+	}
+
+	// check types on required params
+	for i := 0; i < numReqs; i++ {
+		err := VetFuncParam(requiredTypes[i], allowNull, params[i])
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func VetFuncParam(typ Type, allowNull bool, param Value) Error {
+
+	// accept 'any' type
+	if typ == AnyType {
+		return nil
+	}
+
+	// skip over null params
+	if param.Type() == NullType {
+		if allowNull {
+			return nil
+		}
+		return NullValueError()
+	}
+
+	// check type
+	if param.Type() != typ {
+		return TypeMismatchError(fmt.Sprintf("Expected %s", typ.String()))
+	}
+
+	// invoke
+	return nil
 }
 
 ////--------------------------------------------------------------

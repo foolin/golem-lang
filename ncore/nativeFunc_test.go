@@ -13,9 +13,11 @@ func TestFixedNativeFunc(t *testing.T) {
 	fn := NewFixedNativeFunc(
 		[]Type{},
 		false,
-		func(cx Context, values []Value) (Value, Error) {
+		func(cx Context, params []Value) (Value, Error) {
 			return Zero, nil
 		})
+
+	ok(t, fn.Arity(), nil, Arity{FixedArity, 0, 0})
 
 	val, err := fn.Invoke(nil, []Value{})
 	ok(t, val, err, Zero)
@@ -28,10 +30,12 @@ func TestFixedNativeFunc(t *testing.T) {
 	fn = NewFixedNativeFunc(
 		[]Type{IntType},
 		false,
-		func(cx Context, values []Value) (Value, Error) {
-			n := values[0].(Int)
+		func(cx Context, params []Value) (Value, Error) {
+			n := params[0].(Int)
 			return n.Add(One)
 		})
+
+	ok(t, fn.Arity(), nil, Arity{FixedArity, 1, 0})
 
 	val, err = fn.Invoke(nil, []Value{NewInt(3)})
 	ok(t, val, err, NewInt(4))
@@ -50,12 +54,13 @@ func TestFixedNativeFunc(t *testing.T) {
 	fn = NewFixedNativeFunc(
 		[]Type{IntType},
 		true,
-		func(cx Context, values []Value) (Value, Error) {
-			if values[0] == Null {
+		func(cx Context, params []Value) (Value, Error) {
+			if params[0] == Null {
 				return True, nil
 			}
 			return False, nil
 		})
+	ok(t, fn.Arity(), nil, Arity{FixedArity, 1, 0})
 
 	val, err = fn.Invoke(nil, []Value{Zero})
 	ok(t, val, err, False)
@@ -76,9 +81,11 @@ func TestVariadicNativeFunc(t *testing.T) {
 		[]Type{},
 		AnyType,
 		true,
-		func(cx Context, values []Value) (Value, Error) {
-			return NewInt(int64(len(values))), nil
+		func(cx Context, params []Value) (Value, Error) {
+			return NewInt(int64(len(params))), nil
 		})
+
+	ok(t, fn.Arity(), nil, Arity{VariadicArity, 0, 0})
 
 	val, err := fn.Invoke(nil, []Value{})
 	ok(t, val, err, Zero)
@@ -92,9 +99,10 @@ func TestVariadicNativeFunc(t *testing.T) {
 		[]Type{IntType},
 		BoolType,
 		false,
-		func(cx Context, values []Value) (Value, Error) {
-			return NewInt(int64(len(values))), nil
+		func(cx Context, params []Value) (Value, Error) {
+			return NewInt(int64(len(params))), nil
 		})
+	ok(t, fn.Arity(), nil, Arity{VariadicArity, 1, 0})
 
 	val, err = fn.Invoke(nil, []Value{})
 	fail(t, val, err, "ArityMismatch: Expected at least 1 params, got 0")
@@ -121,22 +129,24 @@ func TestMultipleNativeFunc(t *testing.T) {
 		[]Type{IntType},
 		[]Type{StrType, BoolType},
 		false,
-		func(cx Context, values []Value) (Value, Error) {
+		func(cx Context, params []Value) (Value, Error) {
 
-			if len(values) == 1 {
-				values = append(values, NewStr("a"))
+			if len(params) == 1 {
+				params = append(params, NewStr("a"))
 			}
 
-			if len(values) == 2 {
-				values = append(values, False)
+			if len(params) == 2 {
+				params = append(params, False)
 			}
 
 			str := NewStr("")
-			for _, v := range values {
+			for _, v := range params {
 				str = str.Concat(v.ToStr(cx))
 			}
 			return str, nil
 		})
+
+	ok(t, fn.Arity(), nil, Arity{MultipleArity, 1, 2})
 
 	val, err := fn.Invoke(nil, []Value{})
 	fail(t, val, err, "ArityMismatch: Expected at least 1 params, got 0")

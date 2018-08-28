@@ -68,6 +68,9 @@ func (f *bytecodeFunc) Eq(cx g.Context, v g.Value) (g.Bool, g.Error) {
 	}
 }
 
+//--------------------------------------------------------------
+// fields
+
 func (f *bytecodeFunc) FieldNames() ([]string, g.Error) {
 	return []string{}, nil
 }
@@ -76,10 +79,21 @@ func (f *bytecodeFunc) HasField(g.Context, g.Value) (g.Bool, g.Error) {
 	return g.False, nil
 }
 
-func (f *bytecodeFunc) Arity() *g.Arity { return f.template.Arity }
+func (f *bytecodeFunc) GetField(cx g.Context, name g.Str) (g.Value, g.Error) {
+	return nil, g.NoSuchFieldError(name.String())
+}
 
-func (f *bytecodeFunc) Invoke(cx g.Context, values []g.Value) (g.Value, g.Error) {
-	return cx.Eval(f, values)
+func (f *bytecodeFunc) InvokeField(cx g.Context, name g.Str, params []g.Value) (g.Value, g.Error) {
+	return nil, g.NoSuchFieldError(name.String())
+}
+
+//--------------------------------------------------------------
+// func
+
+func (f *bytecodeFunc) Arity() g.Arity { return f.template.Arity }
+
+func (f *bytecodeFunc) Invoke(cx g.Context, params []g.Value) (g.Value, g.Error) {
+	return cx.Eval(f, params)
 }
 
 //---------------------------------------------------------------

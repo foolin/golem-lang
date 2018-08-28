@@ -175,46 +175,88 @@ func (s str) HasField(cx Context, val Value) (Bool, Error) {
 	return nil, TypeMismatchError("Expected Str")
 }
 
+func (s str) GetField(cx Context, name Str) (Value, Error) {
+
+	arity, inv, err := s.lookupFunc(name)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewNativeFunc(arity, inv), nil
+}
+
+func (s str) InvokeField(cx Context, name Str, params []Value) (Value, Error) {
+
+	_, inv, err := s.lookupFunc(name)
+	if err != nil {
+		return nil, err
+	}
+
+	return inv(cx, params)
+}
+
+func (s str) lookupFunc(name Str) (Arity, Invoker, Error) {
+	switch name.String() {
+
+	case "contains":
+		return Arity{FixedArity, 1, 0}, s.Contains, nil
+
+	default:
+		return Arity{}, nil, NoSuchFieldError(name.String())
+	}
+}
+
+func (s str) Contains(cx Context, params []Value) (Value, Error) {
+
+	err := VetFixedFuncParams([]Type{StrType}, false, params)
+	if err != nil {
+		return nil, err
+	}
+
+	z := params[0].(Str)
+	return NewBool(strings.Contains(s.String(), z.String())), nil
+}
+
 //func (s str) GetField(cx Context, key Str) (Value, Error) {
 //	switch sn := key.String(); sn {
 //
 //	case "contains":
 //		return &virtualFunc{s, sn, NewFixedNativeFunc(
 //			[]Type{StrType}, false,
-//			func(cx Context, values []Value) (Value, Error) {
-//				z := values[0].(Str)
+//			func(cx Context, params []Value) (Value, Error) {
+//				z := params[0].(Str)
 //				return NewBool(strings.Contains(string(s), z.String())), nil
 //			})}, nil
 //
 //	case "index":
 //		return &virtualFunc{s, sn, NewFixedNativeFunc(
 //			[]Type{StrType}, false,
-//			func(cx Context, values []Value) (Value, Error) {
-//				z := values[0].(Str)
+//			func(cx Context, params []Value) (Value, Error) {
+//				z := params[0].(Str)
 //				return NewInt(int64(strings.Index(string(s), z.String()))), nil
 //			})}, nil
 //
 //	case "lastIndex":
 //		return &virtualFunc{s, sn, NewFixedNativeFunc(
 //			[]Type{StrType}, false,
-//			func(cx Context, values []Value) (Value, Error) {
-//				z := values[0].(Str)
+//			func(cx Context, params []Value) (Value, Error) {
+//				z := params[0].(Str)
 //				return NewInt(int64(strings.LastIndex(string(s), z.String()))), nil
 //			})}, nil
 //
 //	case "startsWith":
 //		return &virtualFunc{s, sn, NewFixedNativeFunc(
 //			[]Type{StrType}, false,
-//			func(cx Context, values []Value) (Value, Error) {
-//				z := values[0].(Str)
+//			func(cx Context, params []Value) (Value, Error) {
+//				z := params[0].(Str)
 //				return NewBool(strings.HasPrefix(string(s), z.String())), nil
 //			})}, nil
 //
 //	case "endsWith":
 //		return &virtualFunc{s, sn, NewFixedNativeFunc(
 //			[]Type{StrType}, false,
-//			func(cx Context, values []Value) (Value, Error) {
-//				z := values[0].(Str)
+//			func(cx Context, params []Value) (Value, Error) {
+//				z := params[0].(Str)
 //				return NewBool(strings.HasSuffix(string(s), z.String())), nil
 //			})}, nil
 //
@@ -223,12 +265,12 @@ func (s str) HasField(cx Context, val Value) (Bool, Error) {
 //			[]Type{StrType, StrType},
 //			[]Type{IntType},
 //			false,
-//			func(cx Context, values []Value) (Value, Error) {
-//				a := values[0].(Str)
-//				b := values[1].(Str)
+//			func(cx Context, params []Value) (Value, Error) {
+//				a := params[0].(Str)
+//				b := params[1].(Str)
 //				n := NegOne
-//				if len(values) == 3 {
-//					n = values[2].(Int)
+//				if len(params) == 3 {
+//					n = params[2].(Int)
 //				}
 //				return NewStr(strings.Replace(
 //					string(s),
@@ -240,8 +282,8 @@ func (s str) HasField(cx Context, val Value) (Bool, Error) {
 //	case "split":
 //		return &virtualFunc{s, sn, NewFixedNativeFunc(
 //			[]Type{StrType}, false,
-//			func(cx Context, values []Value) (Value, Error) {
-//				z := values[0].(Str)
+//			func(cx Context, params []Value) (Value, Error) {
+//				z := params[0].(Str)
 //				tokens := strings.Split(string(s), z.String())
 //				result := make([]Value, len(tokens))
 //				for i, t := range tokens {
@@ -254,7 +296,7 @@ func (s str) HasField(cx Context, val Value) (Bool, Error) {
 //	case "iterator":
 //		return &virtualFunc{s, sn, NewFixedNativeFunc(
 //			[]Type{}, false,
-//			func(cx Context, values []Value) (Value, Error) {
+//			func(cx Context, params []Value) (Value, Error) {
 //				return s.NewIterator(cx), nil
 //			})}, nil
 //

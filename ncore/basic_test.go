@@ -62,25 +62,31 @@ func okType(t *testing.T, val Value, expected Type) {
 func TestNull(t *testing.T) {
 	okType(t, Null, NullType)
 
-	var v Value
+	var val Value
 	var err Error
 
-	v = Null.ToStr(nil)
-	ok(t, v, nil, NewStr("null"))
+	val = Null.ToStr(nil)
+	ok(t, val, nil, NewStr("null"))
 
-	v, err = Null.Eq(nil, Null)
-	ok(t, v, err, True)
-	v, err = Null.Eq(nil, True)
-	ok(t, v, err, False)
+	val, err = Null.Eq(nil, Null)
+	ok(t, val, err, True)
+	val, err = Null.Eq(nil, True)
+	ok(t, val, err, False)
 
-	v, err = Null.Cmp(nil, True)
-	fail(t, v, err, "NullValue")
+	val, err = Null.Cmp(nil, True)
+	fail(t, val, err, "NullValue")
 
 	_, err = Null.FieldNames()
 	fail(t, nil, err, "NullValue")
 
-	v, err = Null.HasField(nil, NewStr("a"))
-	fail(t, v, err, "NullValue")
+	val, err = Null.HasField(nil, NewStr("a"))
+	fail(t, val, err, "NullValue")
+
+	val, err = Null.GetField(nil, NewStr("a"))
+	fail(t, val, err, "NullValue")
+
+	val, err = Null.InvokeField(nil, NewStr("a"), []Value{})
+	fail(t, val, err, "NullValue")
 }
 
 func TestBool(t *testing.T) {
@@ -96,29 +102,32 @@ func TestBool(t *testing.T) {
 	tassert(t, True.BoolVal())
 	tassert(t, !False.BoolVal())
 
-	b, err := True.Eq(nil, True)
-	ok(t, b, err, True)
-	b, err = False.Eq(nil, False)
-	ok(t, b, err, True)
-	b, err = True.Eq(nil, False)
-	ok(t, b, err, False)
-	b, err = False.Eq(nil, True)
-	ok(t, b, err, False)
-	b, err = False.Eq(nil, NewStr("a"))
-	ok(t, b, err, False)
+	var val Value
+	var err Error
 
-	i, err := True.Cmp(nil, False)
-	ok(t, i, err, One)
-	i, err = False.Cmp(nil, True)
-	ok(t, i, err, NegOne)
-	i, err = True.Cmp(nil, True)
-	ok(t, i, err, Zero)
-	i, err = False.Cmp(nil, False)
-	ok(t, i, err, Zero)
-	i, err = True.Cmp(nil, NewInt(1))
-	fail(t, i, err, "TypeMismatch: Expected Comparable Type")
+	val, err = True.Eq(nil, True)
+	ok(t, val, err, True)
+	val, err = False.Eq(nil, False)
+	ok(t, val, err, True)
+	val, err = True.Eq(nil, False)
+	ok(t, val, err, False)
+	val, err = False.Eq(nil, True)
+	ok(t, val, err, False)
+	val, err = False.Eq(nil, NewStr("a"))
+	ok(t, val, err, False)
 
-	val := True.Not()
+	val, err = True.Cmp(nil, False)
+	ok(t, val, err, One)
+	val, err = False.Cmp(nil, True)
+	ok(t, val, err, NegOne)
+	val, err = True.Cmp(nil, True)
+	ok(t, val, err, Zero)
+	val, err = False.Cmp(nil, False)
+	ok(t, val, err, Zero)
+	val, err = True.Cmp(nil, NewInt(1))
+	fail(t, val, err, "TypeMismatch: Expected Comparable Type")
+
+	val = True.Not()
 	ok(t, val, nil, False)
 	val = False.Not()
 	ok(t, val, nil, True)
@@ -128,67 +137,73 @@ func TestBool(t *testing.T) {
 
 	val, err = True.HasField(nil, NewStr("a"))
 	ok(t, val, err, False)
+
+	val, err = True.GetField(nil, NewStr("a"))
+	fail(t, val, err, "NoSuchField: Field 'a' not found")
+
+	val, err = True.InvokeField(nil, NewStr("a"), []Value{})
+	fail(t, val, err, "NoSuchField: Field 'a' not found")
 }
 
 func TestStr(t *testing.T) {
 	a := NewStr("a")
 	b := NewStr("b")
 
-	var v Value
+	var val Value
 	var err Error
 
-	v = a.ToStr(nil)
-	ok(t, v, nil, NewStr("a"))
-	v = b.ToStr(nil)
-	ok(t, v, nil, NewStr("b"))
+	val = a.ToStr(nil)
+	ok(t, val, nil, NewStr("a"))
+	val = b.ToStr(nil)
+	ok(t, val, nil, NewStr("b"))
 
 	okType(t, a, StrType)
-	v, err = a.Eq(nil, b)
-	ok(t, v, err, False)
-	v, err = b.Eq(nil, a)
-	ok(t, v, err, False)
-	v, err = a.Eq(nil, a)
-	ok(t, v, err, True)
-	v, err = a.Eq(nil, NewStr("a"))
-	ok(t, v, err, True)
+	val, err = a.Eq(nil, b)
+	ok(t, val, err, False)
+	val, err = b.Eq(nil, a)
+	ok(t, val, err, False)
+	val, err = a.Eq(nil, a)
+	ok(t, val, err, True)
+	val, err = a.Eq(nil, NewStr("a"))
+	ok(t, val, err, True)
 
-	v, err = a.Cmp(nil, NewInt(1))
-	fail(t, v, err, "TypeMismatch: Expected Comparable Type")
-	v, err = a.Cmp(nil, a)
-	ok(t, v, err, NewInt(0))
-	v, err = a.Cmp(nil, b)
-	ok(t, v, err, NewInt(-1))
-	v, err = b.Cmp(nil, a)
-	ok(t, v, err, NewInt(1))
+	val, err = a.Cmp(nil, NewInt(1))
+	fail(t, val, err, "TypeMismatch: Expected Comparable Type")
+	val, err = a.Cmp(nil, a)
+	ok(t, val, err, NewInt(0))
+	val, err = a.Cmp(nil, b)
+	ok(t, val, err, NewInt(-1))
+	val, err = b.Cmp(nil, a)
+	ok(t, val, err, NewInt(1))
 
 	ab := NewStr("ab")
-	v, err = ab.Get(nil, NewInt(0))
-	ok(t, v, err, a)
-	v, err = ab.Get(nil, NewInt(1))
-	ok(t, v, err, b)
+	val, err = ab.Get(nil, NewInt(0))
+	ok(t, val, err, a)
+	val, err = ab.Get(nil, NewInt(1))
+	ok(t, val, err, b)
 
-	v, err = ab.Get(nil, NewInt(-1))
-	ok(t, v, err, b)
+	val, err = ab.Get(nil, NewInt(-1))
+	ok(t, val, err, b)
 
-	v, err = ab.Get(nil, NewInt(2))
-	fail(t, v, err, "IndexOutOfBounds: 2")
+	val, err = ab.Get(nil, NewInt(2))
+	fail(t, val, err, "IndexOutOfBounds: 2")
 
-	v = NewStr("").Len(nil)
-	ok(t, v, nil, Zero)
+	val = NewStr("").Len(nil)
+	ok(t, val, nil, Zero)
 
-	v = NewStr("a").Len(nil)
-	ok(t, v, nil, One)
+	val = NewStr("a").Len(nil)
+	ok(t, val, nil, One)
 
-	v = NewStr("abcde").Len(nil)
-	ok(t, v, nil, NewInt(5))
+	val = NewStr("abcde").Len(nil)
+	ok(t, val, nil, NewInt(5))
 
 	// unicode
 	a = NewStr("日本語")
-	v = a.Len(nil)
-	ok(t, v, nil, NewInt(3))
+	val = a.Len(nil)
+	ok(t, val, nil, NewInt(3))
 
-	v, err = a.Get(nil, NewInt(2))
-	ok(t, v, err, NewStr("語"))
+	val, err = a.Get(nil, NewInt(2))
+	ok(t, val, err, NewStr("語"))
 
 	//////////////////////////////
 
@@ -203,54 +218,57 @@ func TestStr(t *testing.T) {
 		"split",
 	})
 
-	v, err = a.HasField(nil, NewStr("a"))
-	ok(t, v, err, False)
+	val, err = a.HasField(nil, NewStr("a"))
+	ok(t, val, err, False)
 
-	v, err = a.HasField(nil, NewStr("contains"))
-	ok(t, v, err, True)
+	val, err = a.HasField(nil, NewStr("contains"))
+	ok(t, val, err, True)
 }
 
 func TestInt(t *testing.T) {
 	a := NewInt(0)
 	b := NewInt(1)
 
-	s := a.ToStr(nil)
-	ok(t, s, nil, NewStr("0"))
-	s = b.ToStr(nil)
-	ok(t, s, nil, NewStr("1"))
+	var val Value
+	var err Error
+
+	val = a.ToStr(nil)
+	ok(t, val, nil, NewStr("0"))
+	val = b.ToStr(nil)
+	ok(t, val, nil, NewStr("1"))
 
 	okType(t, a, IntType)
 
-	z, err := a.Eq(nil, b)
-	ok(t, z, err, False)
-	z, err = b.Eq(nil, a)
-	ok(t, z, err, False)
-	z, err = a.Eq(nil, a)
-	ok(t, z, err, True)
-	z, err = a.Eq(nil, NewInt(0))
-	ok(t, z, err, True)
-	z, err = a.Eq(nil, NewFloat(0.0))
-	ok(t, z, err, True)
+	val, err = a.Eq(nil, b)
+	ok(t, val, err, False)
+	val, err = b.Eq(nil, a)
+	ok(t, val, err, False)
+	val, err = a.Eq(nil, a)
+	ok(t, val, err, True)
+	val, err = a.Eq(nil, NewInt(0))
+	ok(t, val, err, True)
+	val, err = a.Eq(nil, NewFloat(0.0))
+	ok(t, val, err, True)
 
-	n, err := a.Cmp(nil, True)
-	fail(t, n, err, "TypeMismatch: Expected Comparable Type")
-	n, err = a.Cmp(nil, a)
-	ok(t, n, err, NewInt(0))
-	n, err = a.Cmp(nil, b)
-	ok(t, n, err, NewInt(-1))
-	n, err = b.Cmp(nil, a)
-	ok(t, n, err, NewInt(1))
+	val, err = a.Cmp(nil, True)
+	fail(t, val, err, "TypeMismatch: Expected Comparable Type")
+	val, err = a.Cmp(nil, a)
+	ok(t, val, err, NewInt(0))
+	val, err = a.Cmp(nil, b)
+	ok(t, val, err, NewInt(-1))
+	val, err = b.Cmp(nil, a)
+	ok(t, val, err, NewInt(1))
 
 	f := NewFloat(0.0)
 	g := NewFloat(1.0)
-	n, err = a.Cmp(nil, f)
-	ok(t, n, err, NewInt(0))
-	n, err = a.Cmp(nil, g)
-	ok(t, n, err, NewInt(-1))
-	n, err = g.Cmp(nil, a)
-	ok(t, n, err, NewInt(1))
+	val, err = a.Cmp(nil, f)
+	ok(t, val, err, NewInt(0))
+	val, err = a.Cmp(nil, g)
+	ok(t, val, err, NewInt(-1))
+	val, err = g.Cmp(nil, a)
+	ok(t, val, err, NewInt(1))
 
-	val := a.Negate()
+	val = a.Negate()
 	ok(t, val, nil, NewInt(0))
 
 	val = b.Negate()
@@ -321,52 +339,62 @@ func TestInt(t *testing.T) {
 	names, err := One.FieldNames()
 	okNames(t, names, err, []string{})
 
-	has, err := One.HasField(nil, NewStr("a"))
-	ok(t, has, err, False)
+	val, err = One.HasField(nil, NewStr("a"))
+	ok(t, val, err, False)
+
+	val, err = One.GetField(nil, NewStr("a"))
+	fail(t, val, err, "NoSuchField: Field 'a' not found")
+
+	val, err = One.InvokeField(nil, NewStr("a"), []Value{})
+	fail(t, val, err, "NoSuchField: Field 'a' not found")
 }
 
 func TestFloat(t *testing.T) {
 	a := NewFloat(0.1)
 	b := NewFloat(1.2)
 
-	s := a.ToStr(nil)
-	ok(t, s, nil, NewStr("0.1"))
-	s = b.ToStr(nil)
-	ok(t, s, nil, NewStr("1.2"))
-
 	okType(t, a, FloatType)
-	z, err := a.Eq(nil, b)
-	ok(t, z, err, False)
-	z, err = b.Eq(nil, a)
-	ok(t, z, err, False)
-	z, err = a.Eq(nil, a)
-	ok(t, z, err, True)
-	z, err = a.Eq(nil, NewFloat(0.1))
-	ok(t, z, err, True)
+
+	var val Value
+	var err Error
+
+	val = a.ToStr(nil)
+	ok(t, val, nil, NewStr("0.1"))
+	val = b.ToStr(nil)
+	ok(t, val, nil, NewStr("1.2"))
+
+	val, err = a.Eq(nil, b)
+	ok(t, val, err, False)
+	val, err = b.Eq(nil, a)
+	ok(t, val, err, False)
+	val, err = a.Eq(nil, a)
+	ok(t, val, err, True)
+	val, err = a.Eq(nil, NewFloat(0.1))
+	ok(t, val, err, True)
 
 	f := NewFloat(0.0)
 	g := NewFloat(1.0)
 	i := NewInt(0)
 	j := NewInt(1)
-	n, err := f.Cmp(nil, NewStr("f"))
-	fail(t, n, err, "TypeMismatch: Expected Comparable Type")
-	n, err = f.Cmp(nil, f)
-	ok(t, n, err, NewInt(0))
-	n, err = f.Cmp(nil, g)
-	ok(t, n, err, NewInt(-1))
-	n, err = g.Cmp(nil, f)
-	ok(t, n, err, NewInt(1))
-	n, err = f.Cmp(nil, i)
-	ok(t, n, err, NewInt(0))
-	n, err = f.Cmp(nil, j)
-	ok(t, n, err, NewInt(-1))
-	n, err = j.Cmp(nil, f)
-	ok(t, n, err, NewInt(1))
+	val, err = f.Cmp(nil, NewStr("f"))
+	fail(t, val, err, "TypeMismatch: Expected Comparable Type")
+	val, err = f.Cmp(nil, f)
+	ok(t, val, err, NewInt(0))
+	val, err = f.Cmp(nil, g)
+	ok(t, val, err, NewInt(-1))
+	val, err = g.Cmp(nil, f)
+	ok(t, val, err, NewInt(1))
+	val, err = f.Cmp(nil, i)
+	ok(t, val, err, NewInt(0))
+	val, err = f.Cmp(nil, j)
+	ok(t, val, err, NewInt(-1))
+	val, err = j.Cmp(nil, f)
+	ok(t, val, err, NewInt(1))
 
-	z, err = NewFloat(1.0).Eq(nil, NewInt(1))
-	ok(t, z, err, True)
+	val, err = NewFloat(1.0).Eq(nil, NewInt(1))
+	ok(t, val, err, True)
 
-	val := a.Negate()
+	val = a.Negate()
 	ok(t, val, nil, NewFloat(-0.1))
 
 	val, err = NewFloat(3.3).Sub(NewInt(2))
@@ -410,44 +438,98 @@ func TestFloat(t *testing.T) {
 	names, err := a.FieldNames()
 	okNames(t, names, err, []string{})
 
-	has, err := a.HasField(nil, NewStr("a"))
-	ok(t, has, err, False)
+	val, err = a.HasField(nil, NewStr("a"))
+	ok(t, val, err, False)
+
+	val, err = a.GetField(nil, NewStr("a"))
+	fail(t, val, err, "NoSuchField: Field 'a' not found")
+
+	val, err = a.InvokeField(nil, NewStr("a"), []Value{})
+	fail(t, val, err, "NoSuchField: Field 'a' not found")
 }
 
-//func TestBasic(t *testing.T) {
-//	// make sure all the Basic types can be used as hashmap key
-//	entries := make(map[Basic]Value)
-//	entries[Null] = True
-//	entries[Zero] = True
-//	entries[NewFloat(0.123)] = True
-//	entries[False] = True
+func TestBasic(t *testing.T) {
+	// make sure all the Basic types can be used as hashmap key
+	entries := make(map[Basic]Value)
+	entries[Null] = True
+	entries[Zero] = True
+	entries[NewFloat(0.123)] = True
+	entries[False] = True
+}
+
+func TestBasicHashCode(t *testing.T) {
+	h, err := Null.HashCode(nil)
+	fail(t, h, err, "NullValue")
+
+	h, err = True.HashCode(nil)
+	ok(t, h, err, NewInt(1009))
+
+	h, err = False.HashCode(nil)
+	ok(t, h, err, NewInt(1013))
+
+	h, err = NewInt(123).HashCode(nil)
+	ok(t, h, err, NewInt(123))
+
+	h, err = NewFloat(0).HashCode(nil)
+	ok(t, h, err, NewInt(0))
+
+	h, err = NewFloat(1.0).HashCode(nil)
+	ok(t, h, err, NewInt(4607182418800017408))
+
+	h, err = NewFloat(-1.23e45).HashCode(nil)
+	ok(t, h, err, NewInt(-3941894481896550236))
+
+	h, err = NewStr("").HashCode(nil)
+	ok(t, h, err, NewInt(0))
+
+	h, err = NewStr("abcdef").HashCode(nil)
+	ok(t, h, err, NewInt(1928994870288439732))
+}
+
+func show(val Value) {
+	//println(val.ToStr(nil).String())
+}
+
+//func TestDirectCall(t *testing.T) {
+//	s := NewStr("abcdef")
+//
+//	var val Value
+//	var err Error
+//
+//	for i := 0; i < 10*1000*1000; i++ {
+//		val, err = s.Contains(nil, []Value{NewStr("cd")})
+//		ok(t, val, err, True)
+//		show(val)
+//	}
 //}
 //
-//func TestBasicHashCode(t *testing.T) {
-//	h, err := Null.HashCode(nil)
-//	fail(t, h, err, "NullValue")
+//func TestInvokeCall(t *testing.T) {
+//	s := NewStr("abcdef")
 //
-//	h, err = True.HashCode(nil)
-//	ok(t, h, err, NewInt(1009))
+//	var val Value
+//	var err Error
 //
-//	h, err = False.HashCode(nil)
-//	ok(t, h, err, NewInt(1013))
+//	for i := 0; i < 10*1000*1000; i++ {
+//		val, err = s.InvokeField(nil, NewStr("contains"), []Value{NewStr("cd")})
+//		ok(t, val, err, True)
+//		show(val)
+//	}
+//}
 //
-//	h, err = NewInt(123).HashCode(nil)
-//	ok(t, h, err, NewInt(123))
+//func TestGetCall(t *testing.T) {
+//	s := NewStr("abcdef")
 //
-//	h, err = NewFloat(0).HashCode(nil)
-//	ok(t, h, err, NewInt(0))
+//	var val Value
+//	var err Error
+//	var field Value
 //
-//	h, err = NewFloat(1.0).HashCode(nil)
-//	ok(t, h, err, NewInt(4607182418800017408))
+//	for i := 0; i < 10*1000*1000; i++ {
+//		field, err = s.GetField(nil, NewStr("contains"))
+//		tassert(t, err == nil)
 //
-//	h, err = NewFloat(-1.23e45).HashCode(nil)
-//	ok(t, h, err, NewInt(-3941894481896550236))
-//
-//	h, err = NewStr("").HashCode(nil)
-//	ok(t, h, err, NewInt(0))
-//
-//	h, err = NewStr("abcdef").HashCode(nil)
-//	ok(t, h, err, NewInt(1928994870288439732))
+//		fn := field.(Func)
+//		val, err = fn.Invoke(nil, []Value{NewStr("cd")})
+//		ok(t, val, err, True)
+//		show(val)
+//	}
 //}

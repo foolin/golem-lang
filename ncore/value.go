@@ -25,9 +25,8 @@ type Value interface {
 
 	FieldNames() ([]string, Error)
 	HasField(Context, Value) (Bool, Error)
-	//GetField(Context, Str) (Value, Error)
-	//InvokeField(Context, Str, []Value) (Value, Error)
-	//SetField(Context, Str, Value) Error
+	GetField(Context, Str) (Value, Error)
+	InvokeField(Context, Str, []Value) (Value, Error)
 }
 
 //---------------------------------------------------------------
@@ -97,6 +96,8 @@ type (
 		//Iterable
 
 		Concat(Str) Str
+
+		Contains(Context, []Value) (Value, Error)
 	}
 
 	// Number is a number
@@ -134,8 +135,29 @@ type (
 //---------------------------------------------------------------
 // Func
 
-// ArityKind defines the various kinds of Arity for a Func
-type ArityKind int
+type (
+	// ArityKind defines the various kinds of Arity for a Func
+	ArityKind uint16
+
+	// Arity defines the arity of a function
+	Arity struct {
+		Kind           ArityKind
+		RequiredParams uint16
+		// For FixedArity and VariadicArity, this value is ignored and should be
+		// set to 0.  For MultipleArity, it must be set to a non-zero integer.
+		OptionalParams uint16
+	}
+
+	Invoker func(Context, []Value) (Value, Error)
+
+	// Func is a function
+	Func interface {
+		Value
+
+		Arity() Arity
+		Invoke(Context, []Value) (Value, Error)
+	}
+)
 
 // The various types of arity
 const (
@@ -150,22 +172,6 @@ const (
 	// predifined optional values will be substituted.
 	MultipleArity
 )
-
-// Arity defines the arity of a function
-type Arity struct {
-	Kind           ArityKind
-	RequiredParams int
-	// OptionalParams is nil unless Kind is MultipleArity
-	OptionalParams []Basic
-}
-
-// Func is a function
-type Func interface {
-	Value
-
-	Arity() *Arity
-	Invoke(Context, []Value) (Value, Error)
-}
 
 ////---------------------------------------------------------------
 //// Composite
