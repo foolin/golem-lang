@@ -161,8 +161,6 @@ type Func interface {
 
 	Arity() *Arity
 	Invoke(Context, []Value) (Value, Error)
-
-	funcMarker()
 }
 
 ////---------------------------------------------------------------

@@ -11,6 +11,7 @@ import (
 // NativeFunc is a Func that is implemented in Go rather than Golem
 type NativeFunc interface {
 	Func
+	nativeFuncMarker()
 }
 
 //--------------------------------------------------------------
@@ -24,7 +25,7 @@ type nativeBaseFunc struct {
 	invoke        func(Context, []Value) (Value, Error)
 }
 
-func (f *nativeBaseFunc) funcMarker() {}
+func (f *nativeBaseFunc) nativeFuncMarker() {}
 
 func (f *nativeBaseFunc) Type() Type { return FuncType }
 
