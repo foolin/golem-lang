@@ -10,8 +10,7 @@ import (
 	g "github.com/mjarmy/golem-lang/ncore"
 )
 
-// BytecodeFunc represents a function that is defined
-// via Golem source code
+// BytecodeFunc is a Func that is implemented in Golem
 type BytecodeFunc interface {
 	g.Func
 

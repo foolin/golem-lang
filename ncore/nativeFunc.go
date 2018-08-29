@@ -8,92 +8,10 @@ import (
 	"fmt"
 )
 
-// NativeFunc is a Func that is implemented in Go rather than Golem
+// NativeFunc is a Func that is implemented in Go
 type NativeFunc interface {
 	Func
 	nativeFuncMarker()
-}
-
-//--------------------------------------------------------------
-// nativeSimpleFunc
-//--------------------------------------------------------------
-
-type nativeSimpleFunc struct {
-	arity  Arity
-	invoke Invoke
-}
-
-// NewNativeFunc creates a NativeFunc
-func NewNativeFunc(arity Arity, invoke Invoke) NativeFunc {
-	return &nativeSimpleFunc{arity, invoke}
-}
-
-func (f *nativeSimpleFunc) nativeFuncMarker() {}
-
-func (f *nativeSimpleFunc) Type() Type { return FuncType }
-
-func (f *nativeSimpleFunc) Frozen(cx Context) (Bool, Error) {
-	return True, nil
-}
-func (f *nativeSimpleFunc) Freeze(cx Context) (Value, Error) {
-	return f, nil
-}
-
-func (f *nativeSimpleFunc) Eq(cx Context, v Value) (Bool, Error) {
-	switch t := v.(type) {
-	case *nativeSimpleFunc:
-		// equality is based on identity
-		return NewBool(f == t), nil
-	default:
-		return False, nil
-	}
-}
-
-func (f *nativeSimpleFunc) HashCode(cx Context) (Int, Error) {
-	return nil, TypeMismatchError("Expected Hashable Type")
-}
-
-//func (f *nativeSimpleFunc) GetField(cx Context, key Str) (Value, Error) {
-//	return nil, NoSuchFieldError(key.String())
-//}
-
-func (f *nativeSimpleFunc) Cmp(cx Context, v Value) (Int, Error) {
-	return nil, TypeMismatchError("Expected Comparable Type")
-}
-
-func (f *nativeSimpleFunc) ToStr(cx Context) Str {
-	return NewStr(fmt.Sprintf("nativeFunc<%p>", f))
-}
-
-//--------------------------------
-// fields
-
-func (f *nativeSimpleFunc) FieldNames() ([]string, Error) {
-	return []string{}, nil
-}
-
-func (f *nativeSimpleFunc) HasField(name string) (bool, Error) {
-	return false, nil
-}
-
-func (f nativeSimpleFunc) GetField(name string, cx Context) (Value, Error) {
-	return nil, NoSuchFieldError(name)
-}
-
-func (f nativeSimpleFunc) InvokeField(name string, cx Context, params []Value) (Value, Error) {
-	return nil, NoSuchFieldError(name)
-}
-
-//--------------------------------
-// func
-
-func (f *nativeSimpleFunc) Arity() Arity {
-	return f.arity
-}
-
-func (f *nativeSimpleFunc) Invoke(cx Context, params []Value) (Value, Error) {
-
-	return f.invoke(cx, params)
 }
 
 //--------------------------------------------------------------
@@ -101,10 +19,8 @@ func (f *nativeSimpleFunc) Invoke(cx Context, params []Value) (Value, Error) {
 //--------------------------------------------------------------
 
 type nativeBaseFunc struct {
-	arity         Arity
-	requiredTypes []Type
-	allowNull     bool
-	invoke        Invoke
+	arity  Arity
+	invoke Invoke
 }
 
 func (f *nativeBaseFunc) nativeFuncMarker() {}
@@ -156,11 +72,46 @@ func (f *nativeBaseFunc) InvokeField(name string, cx Context, params []Value) (V
 func (f *nativeBaseFunc) Arity() Arity { return f.arity }
 
 //--------------------------------------------------------------
+// nativeFunc
+//--------------------------------------------------------------
+
+type nativeFunc struct {
+	*nativeBaseFunc
+}
+
+// NewNativeFunc creates a NativeFunc
+func NewNativeFunc(arity Arity, invoke Invoke) NativeFunc {
+	return &nativeFunc{
+		&nativeBaseFunc{arity, invoke},
+	}
+}
+
+func (f *nativeFunc) Freeze(cx Context) (Value, Error) {
+	return f, nil
+}
+
+func (f *nativeFunc) Eq(cx Context, v Value) (Bool, Error) {
+	switch t := v.(type) {
+	case *nativeFunc:
+		// equality is based on identity
+		return NewBool(f == t), nil
+	default:
+		return False, nil
+	}
+}
+
+func (f *nativeFunc) Invoke(cx Context, params []Value) (Value, Error) {
+	return f.invoke(cx, params)
+}
+
+//--------------------------------------------------------------
 // nativeFixedFunc
 //--------------------------------------------------------------
 
 type nativeFixedFunc struct {
 	*nativeBaseFunc
+	requiredTypes []Type
+	allowNull     bool
 }
 
 // NewFixedNativeFunc is a convenience function for creating
@@ -176,7 +127,8 @@ func NewFixedNativeFunc(
 	}
 
 	return &nativeFixedFunc{
-		&nativeBaseFunc{arity, requiredTypes, allowNull, invoke},
+		&nativeBaseFunc{arity, invoke},
+		requiredTypes, allowNull,
 	}
 }
 
@@ -210,7 +162,9 @@ func (f *nativeFixedFunc) Invoke(cx Context, params []Value) (Value, Error) {
 
 type nativeVariadicFunc struct {
 	*nativeBaseFunc
-	variadicType Type
+	requiredTypes []Type
+	allowNull     bool
+	variadicType  Type
 }
 
 // NewVariadicNativeFunc is a convenience function for creating
@@ -227,8 +181,8 @@ func NewVariadicNativeFunc(
 	}
 
 	return &nativeVariadicFunc{
-		&nativeBaseFunc{arity, requiredTypes, allowNull, invoke},
-		variadicType,
+		&nativeBaseFunc{arity, invoke},
+		requiredTypes, allowNull, variadicType,
 	}
 }
 
@@ -284,6 +238,8 @@ func (f *nativeVariadicFunc) Invoke(cx Context, params []Value) (Value, Error) {
 
 type nativeMultipleFunc struct {
 	*nativeBaseFunc
+	requiredTypes []Type
+	allowNull     bool
 	optionalTypes []Type
 }
 
@@ -302,8 +258,8 @@ func NewMultipleNativeFunc(
 	}
 
 	return &nativeMultipleFunc{
-		&nativeBaseFunc{arity, requiredTypes, allowNull, invoke},
-		optionalTypes,
+		&nativeBaseFunc{arity, invoke},
+		requiredTypes, allowNull, optionalTypes,
 	}
 }
 
@@ -407,31 +363,3 @@ func VetFuncParam(typ Type, allowNull bool, param Value) Error {
 	// invoke
 	return nil
 }
-
-////--------------------------------------------------------------
-//// virtualFunc
-////--------------------------------------------------------------
-//
-//// A virtual function is a function that is an intrinsic
-//// part of a given Type. To reduce the overhead required to make
-//// new values, these functions are created on the fly.
-//type virtualFunc struct {
-//	owner Value
-//	name  string
-//	NativeFunc
-//}
-//
-//func (f *virtualFunc) Eq(cx Context, v Value) (Bool, Error) {
-//	switch t := v.(type) {
-//	case *virtualFunc:
-//		// equality for intrinsic functions is based on whether
-//		// they have the same owner, and the same name
-//		ownerEq, err := f.owner.Eq(cx, t.owner)
-//		if err != nil {
-//			return nil, err
-//		}
-//		return NewBool(ownerEq.BoolVal() && (f.name == t.name)), nil
-//	default:
-//		return False, nil
-//	}
-//}
