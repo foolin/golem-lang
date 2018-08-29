@@ -22,6 +22,7 @@ func ok(t *testing.T, val interface{}, err Error, expect interface{}) {
 
 	if err != nil {
 		t.Error(err, " != ", nil)
+		panic("ok")
 	}
 
 	if !reflect.DeepEqual(val, expect) {
@@ -79,13 +80,13 @@ func TestNull(t *testing.T) {
 	_, err = Null.FieldNames()
 	fail(t, nil, err, "NullValue")
 
-	val, err = Null.HasField(nil, NewStr("a"))
+	_, err = Null.HasField("a")
+	fail(t, nil, err, "NullValue")
+
+	val, err = Null.GetField("a", nil)
 	fail(t, val, err, "NullValue")
 
-	val, err = Null.GetField(nil, NewStr("a"))
-	fail(t, val, err, "NullValue")
-
-	val, err = Null.InvokeField(nil, NewStr("a"), []Value{})
+	val, err = Null.InvokeField("a", nil, []Value{})
 	fail(t, val, err, "NullValue")
 }
 
@@ -135,13 +136,10 @@ func TestBool(t *testing.T) {
 	names, err := True.FieldNames()
 	okNames(t, names, err, []string{})
 
-	val, err = True.HasField(nil, NewStr("a"))
-	ok(t, val, err, False)
-
-	val, err = True.GetField(nil, NewStr("a"))
+	val, err = True.GetField("a", nil)
 	fail(t, val, err, "NoSuchField: Field 'a' not found")
 
-	val, err = True.InvokeField(nil, NewStr("a"), []Value{})
+	val, err = True.InvokeField("a", nil, []Value{})
 	fail(t, val, err, "NoSuchField: Field 'a' not found")
 }
 
@@ -149,6 +147,7 @@ func TestStr(t *testing.T) {
 	a := NewStr("a")
 	b := NewStr("b")
 
+	var bv bool
 	var val Value
 	var err Error
 
@@ -210,25 +209,26 @@ func TestStr(t *testing.T) {
 	names, err := a.FieldNames()
 	okNames(t, names, err, []string{
 		"contains",
-		"index",
-		"lastIndex",
-		"startsWith",
-		"endsWith",
-		"replace",
-		"split",
+		//"index",
+		//"lastIndex",
+		//"startsWith",
+		//"endsWith",
+		//"replace",
+		//"split",
 	})
 
-	val, err = a.HasField(nil, NewStr("a"))
-	ok(t, val, err, False)
+	bv, err = a.HasField("a")
+	ok(t, bv, err, false)
 
-	val, err = a.HasField(nil, NewStr("contains"))
-	ok(t, val, err, True)
+	bv, err = a.HasField("contains")
+	ok(t, bv, err, true)
 }
 
 func TestInt(t *testing.T) {
 	a := NewInt(0)
 	b := NewInt(1)
 
+	var bv bool
 	var val Value
 	var err Error
 
@@ -339,13 +339,13 @@ func TestInt(t *testing.T) {
 	names, err := One.FieldNames()
 	okNames(t, names, err, []string{})
 
-	val, err = One.HasField(nil, NewStr("a"))
-	ok(t, val, err, False)
+	bv, err = One.HasField("a")
+	ok(t, bv, err, false)
 
-	val, err = One.GetField(nil, NewStr("a"))
+	val, err = One.GetField("a", nil)
 	fail(t, val, err, "NoSuchField: Field 'a' not found")
 
-	val, err = One.InvokeField(nil, NewStr("a"), []Value{})
+	val, err = One.InvokeField("a", nil, []Value{})
 	fail(t, val, err, "NoSuchField: Field 'a' not found")
 }
 
@@ -355,6 +355,7 @@ func TestFloat(t *testing.T) {
 
 	okType(t, a, FloatType)
 
+	var bv bool
 	var val Value
 	var err Error
 
@@ -438,13 +439,13 @@ func TestFloat(t *testing.T) {
 	names, err := a.FieldNames()
 	okNames(t, names, err, []string{})
 
-	val, err = a.HasField(nil, NewStr("a"))
-	ok(t, val, err, False)
+	bv, err = a.HasField("a")
+	ok(t, bv, err, false)
 
-	val, err = a.GetField(nil, NewStr("a"))
+	val, err = a.GetField("a", nil)
 	fail(t, val, err, "NoSuchField: Field 'a' not found")
 
-	val, err = a.InvokeField(nil, NewStr("a"), []Value{})
+	val, err = a.InvokeField("a", nil, []Value{})
 	fail(t, val, err, "NoSuchField: Field 'a' not found")
 }
 
@@ -486,9 +487,9 @@ func TestBasicHashCode(t *testing.T) {
 	ok(t, h, err, NewInt(1928994870288439732))
 }
 
-func show(val Value) {
-	//println(val.ToStr(nil).String())
-}
+//func show(val Value) {
+//	//println(val.ToStr(nil).String())
+//}
 
 //func TestDirectCall(t *testing.T) {
 //	s := NewStr("abcdef")
@@ -510,7 +511,7 @@ func show(val Value) {
 //	var err Error
 //
 //	for i := 0; i < 10*1000*1000; i++ {
-//		val, err = s.InvokeField(nil, NewStr("contains"), []Value{NewStr("cd")})
+//		val, err = s.InvokeField("contains", nil, []Value{NewStr("cd")})
 //		ok(t, val, err, True)
 //		show(val)
 //	}
@@ -524,7 +525,7 @@ func show(val Value) {
 //	var field Value
 //
 //	for i := 0; i < 10*1000*1000; i++ {
-//		field, err = s.GetField(nil, NewStr("contains"))
+//		field, err = s.GetField("contains", nil)
 //		tassert(t, err == nil)
 //
 //		fn := field.(Func)

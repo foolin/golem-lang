@@ -75,16 +75,16 @@ func (f *bytecodeFunc) FieldNames() ([]string, g.Error) {
 	return []string{}, nil
 }
 
-func (f *bytecodeFunc) HasField(g.Context, g.Value) (g.Bool, g.Error) {
-	return g.False, nil
+func (f *bytecodeFunc) HasField(name string) (bool, g.Error) {
+	return false, nil
 }
 
-func (f *bytecodeFunc) GetField(cx g.Context, name g.Str) (g.Value, g.Error) {
-	return nil, g.NoSuchFieldError(name.String())
+func (f *bytecodeFunc) GetField(name string, cx g.Context) (g.Value, g.Error) {
+	return nil, g.NoSuchFieldError(name)
 }
 
-func (f *bytecodeFunc) InvokeField(cx g.Context, name g.Str, params []g.Value) (g.Value, g.Error) {
-	return nil, g.NoSuchFieldError(name.String())
+func (f *bytecodeFunc) InvokeField(name string, cx g.Context, params []g.Value) (g.Value, g.Error) {
+	return nil, g.NoSuchFieldError(name)
 }
 
 //--------------------------------------------------------------

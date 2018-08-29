@@ -56,14 +56,14 @@ func (n *null) FieldNames() ([]string, Error) {
 	return nil, NullValueError()
 }
 
-func (n *null) HasField(Context, Value) (Bool, Error) {
+func (n *null) HasField(name string) (bool, Error) {
+	return false, NullValueError()
+}
+
+func (n *null) GetField(name string, cx Context) (Value, Error) {
 	return nil, NullValueError()
 }
 
-func (n *null) GetField(cx Context, name Str) (Value, Error) {
-	return nil, NullValueError()
-}
-
-func (n *null) InvokeField(cx Context, name Str, params []Value) (Value, Error) {
+func (n *null) InvokeField(name string, cx Context, params []Value) (Value, Error) {
 	return nil, NullValueError()
 }

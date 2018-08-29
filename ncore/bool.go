@@ -94,14 +94,14 @@ func (b _bool) FieldNames() ([]string, Error) {
 	return []string{}, nil
 }
 
-func (b _bool) HasField(Context, Value) (Bool, Error) {
-	return False, nil
+func (b _bool) HasField(name string) (bool, Error) {
+	return false, nil
 }
 
-func (b _bool) GetField(cx Context, name Str) (Value, Error) {
-	return nil, NoSuchFieldError(name.String())
+func (b _bool) GetField(name string, cx Context) (Value, Error) {
+	return nil, NoSuchFieldError(name)
 }
 
-func (b _bool) InvokeField(cx Context, name Str, params []Value) (Value, Error) {
-	return nil, NoSuchFieldError(name.String())
+func (b _bool) InvokeField(name string, cx Context, params []Value) (Value, Error) {
+	return nil, NoSuchFieldError(name)
 }

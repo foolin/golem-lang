@@ -174,14 +174,14 @@ func (f _float) FieldNames() ([]string, Error) {
 	return []string{}, nil
 }
 
-func (f _float) HasField(Context, Value) (Bool, Error) {
-	return False, nil
+func (f _float) HasField(name string) (bool, Error) {
+	return false, nil
 }
 
-func (f _float) GetField(cx Context, name Str) (Value, Error) {
-	return nil, NoSuchFieldError(name.String())
+func (f _float) GetField(name string, cx Context) (Value, Error) {
+	return nil, NoSuchFieldError(name)
 }
 
-func (f _float) InvokeField(cx Context, name Str, params []Value) (Value, Error) {
-	return nil, NoSuchFieldError(name.String())
+func (f _float) InvokeField(name string, cx Context, params []Value) (Value, Error) {
+	return nil, NoSuchFieldError(name)
 }

@@ -5,46 +5,46 @@
 package ncore
 
 import (
-	"testing"
+//"testing"
 )
 
-func TestField(t *testing.T) {
-
-	var num Value = NewInt(3)
-	getter := func() (Value, Error) {
-		return num, nil
-	}
-	setter := func(val Value) Error {
-		num = val
-		return nil
-	}
-
-	field := NewField("foo", getter, setter)
-	tassert(t, field.Name() == "foo")
-
-	val, err := field.Getter()()
-	ok(t, val, err, NewInt(3))
-
-	err = field.Setter()(NewInt(4))
-	tassert(t, err == nil)
-
-	val, err = field.Getter()()
-	ok(t, val, err, NewInt(4))
-}
-
-func TestReadonlyField(t *testing.T) {
-
-	var num Value = NewInt(3)
-	getter := func() (Value, Error) {
-		return num, nil
-	}
-
-	field := NewReadonlyField("foo", getter)
-	tassert(t, field.Name() == "foo")
-
-	val, err := field.Getter()()
-	ok(t, val, err, NewInt(3))
-
-	err = field.Setter()(NewInt(4))
-	fail(t, nil, err, "ReadonlyField: Field 'foo' is readonly")
-}
+//func TestField(t *testing.T) {
+//
+//	var num Value = NewInt(3)
+//	getter := func() (Value, Error) {
+//		return num, nil
+//	}
+//	setter := func(val Value) Error {
+//		num = val
+//		return nil
+//	}
+//
+//	field := NewField("foo", getter, setter)
+//	tassert(t, field.Name() == "foo")
+//
+//	val, err := field.Getter()()
+//	ok(t, val, err, NewInt(3))
+//
+//	err = field.Setter()(NewInt(4))
+//	tassert(t, err == nil)
+//
+//	val, err = field.Getter()()
+//	ok(t, val, err, NewInt(4))
+//}
+//
+//func TestReadonlyField(t *testing.T) {
+//
+//	var num Value = NewInt(3)
+//	getter := func() (Value, Error) {
+//		return num, nil
+//	}
+//
+//	field := NewReadonlyField("foo", getter)
+//	tassert(t, field.Name() == "foo")
+//
+//	val, err := field.Getter()()
+//	ok(t, val, err, NewInt(3))
+//
+//	err = field.Setter()(NewInt(4))
+//	fail(t, nil, err, "ReadonlyField: Field 'foo' is readonly")
+//}

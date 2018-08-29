@@ -253,14 +253,14 @@ func (i _int) FieldNames() ([]string, Error) {
 	return []string{}, nil
 }
 
-func (i _int) HasField(Context, Value) (Bool, Error) {
-	return False, nil
+func (i _int) HasField(name string) (bool, Error) {
+	return false, nil
 }
 
-func (i _int) GetField(cx Context, name Str) (Value, Error) {
-	return nil, NoSuchFieldError(name.String())
+func (i _int) GetField(name string, cx Context) (Value, Error) {
+	return nil, NoSuchFieldError(name)
 }
 
-func (i _int) InvokeField(cx Context, name Str, params []Value) (Value, Error) {
-	return nil, NoSuchFieldError(name.String())
+func (i _int) InvokeField(name string, cx Context, params []Value) (Value, Error) {
+	return nil, NoSuchFieldError(name)
 }

@@ -20,11 +20,11 @@ type NativeFunc interface {
 
 type nativeSimpleFunc struct {
 	arity  Arity
-	invoke Invoker
+	invoke Invoke
 }
 
 // NewNativeFunc creates a NativeFunc
-func NewNativeFunc(arity Arity, invoke Invoker) NativeFunc {
+func NewNativeFunc(arity Arity, invoke Invoke) NativeFunc {
 	return &nativeSimpleFunc{arity, invoke}
 }
 
@@ -72,16 +72,16 @@ func (f *nativeSimpleFunc) FieldNames() ([]string, Error) {
 	return []string{}, nil
 }
 
-func (f *nativeSimpleFunc) HasField(Context, Value) (Bool, Error) {
-	return False, nil
+func (f *nativeSimpleFunc) HasField(name string) (bool, Error) {
+	return false, nil
 }
 
-func (f *nativeSimpleFunc) GetField(cx Context, name Str) (Value, Error) {
-	return nil, NoSuchFieldError(name.String())
+func (f nativeSimpleFunc) GetField(name string, cx Context) (Value, Error) {
+	return nil, NoSuchFieldError(name)
 }
 
-func (f *nativeSimpleFunc) InvokeField(cx Context, name Str, params []Value) (Value, Error) {
-	return nil, NoSuchFieldError(name.String())
+func (f nativeSimpleFunc) InvokeField(name string, cx Context, params []Value) (Value, Error) {
+	return nil, NoSuchFieldError(name)
 }
 
 //--------------------------------
@@ -104,7 +104,7 @@ type nativeBaseFunc struct {
 	arity         Arity
 	requiredTypes []Type
 	allowNull     bool
-	invoke        Invoker
+	invoke        Invoke
 }
 
 func (f *nativeBaseFunc) nativeFuncMarker() {}
@@ -138,16 +138,16 @@ func (f *nativeBaseFunc) FieldNames() ([]string, Error) {
 	return []string{}, nil
 }
 
-func (f *nativeBaseFunc) HasField(Context, Value) (Bool, Error) {
-	return False, nil
+func (f *nativeBaseFunc) HasField(name string) (bool, Error) {
+	return false, nil
 }
 
-func (f *nativeBaseFunc) GetField(cx Context, name Str) (Value, Error) {
-	return nil, NoSuchFieldError(name.String())
+func (f *nativeBaseFunc) GetField(name string, cx Context) (Value, Error) {
+	return nil, NoSuchFieldError(name)
 }
 
-func (f *nativeBaseFunc) InvokeField(cx Context, name Str, params []Value) (Value, Error) {
-	return nil, NoSuchFieldError(name.String())
+func (f *nativeBaseFunc) InvokeField(name string, cx Context, params []Value) (Value, Error) {
+	return nil, NoSuchFieldError(name)
 }
 
 //--------------------------------
@@ -168,7 +168,7 @@ type nativeFixedFunc struct {
 func NewFixedNativeFunc(
 	requiredTypes []Type,
 	allowNull bool,
-	invoke Invoker) NativeFunc {
+	invoke Invoke) NativeFunc {
 
 	arity := Arity{
 		Kind:           FixedArity,
@@ -219,7 +219,7 @@ func NewVariadicNativeFunc(
 	requiredTypes []Type,
 	variadicType Type,
 	allowNull bool,
-	invoke Invoker) NativeFunc {
+	invoke Invoke) NativeFunc {
 
 	arity := Arity{
 		Kind:           VariadicArity,
@@ -293,7 +293,7 @@ func NewMultipleNativeFunc(
 	requiredTypes []Type,
 	optionalTypes []Type,
 	allowNull bool,
-	invoke Invoker) NativeFunc {
+	invoke Invoke) NativeFunc {
 
 	arity := Arity{
 		Kind:           MultipleArity,

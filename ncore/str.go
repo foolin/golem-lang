@@ -149,13 +149,13 @@ func (s str) Concat(that Str) Str {
 // fields
 
 var strFields = map[string]bool{
-	"contains":   true,
-	"index":      true,
-	"lastIndex":  true,
-	"startsWith": true,
-	"endsWith":   true,
-	"replace":    true,
-	"split":      true,
+	"contains": true,
+	//"index":      true,
+	//"lastIndex":  true,
+	//"startsWith": true,
+	//"endsWith":   true,
+	//"replace":    true,
+	//"split":      true,
 	//"iterator":   true,
 }
 
@@ -167,15 +167,12 @@ func (s str) FieldNames() ([]string, Error) {
 	return names, nil
 }
 
-func (s str) HasField(cx Context, val Value) (Bool, Error) {
-	if s, ok := val.(Str); ok {
-		_, has := strFields[s.String()]
-		return NewBool(has), nil
-	}
-	return nil, TypeMismatchError("Expected Str")
+func (s str) HasField(name string) (bool, Error) {
+	_, ok := strFields[name]
+	return ok, nil
 }
 
-func (s str) GetField(cx Context, name Str) (Value, Error) {
+func (s str) GetField(name string, cx Context) (Value, Error) {
 
 	arity, inv, err := s.lookupFunc(name)
 	if err != nil {
@@ -185,7 +182,7 @@ func (s str) GetField(cx Context, name Str) (Value, Error) {
 	return NewNativeFunc(arity, inv), nil
 }
 
-func (s str) InvokeField(cx Context, name Str, params []Value) (Value, Error) {
+func (s str) InvokeField(name string, cx Context, params []Value) (Value, Error) {
 
 	_, inv, err := s.lookupFunc(name)
 	if err != nil {
@@ -195,14 +192,14 @@ func (s str) InvokeField(cx Context, name Str, params []Value) (Value, Error) {
 	return inv(cx, params)
 }
 
-func (s str) lookupFunc(name Str) (Arity, Invoker, Error) {
-	switch name.String() {
+func (s str) lookupFunc(name string) (Arity, Invoke, Error) {
+	switch name {
 
 	case "contains":
 		return Arity{FixedArity, 1, 0}, s.Contains, nil
 
 	default:
-		return Arity{}, nil, NoSuchFieldError(name.String())
+		return Arity{}, nil, NoSuchFieldError(name)
 	}
 }
 

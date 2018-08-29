@@ -23,6 +23,7 @@ func ok(t *testing.T, val interface{}, err g.Error, expect interface{}) {
 
 	if err != nil {
 		t.Error(err, " != ", nil)
+		panic("ok")
 	}
 
 	if !reflect.DeepEqual(val, expect) {
@@ -71,8 +72,8 @@ func TestBytecodeFunc(t *testing.T) {
 	names, err := a.FieldNames()
 	okNames(t, names, err, []string{})
 
-	has, err := a.HasField(nil, g.NewStr("a"))
-	ok(t, has, err, g.False)
+	has, err := a.HasField("a")
+	ok(t, has, err, false)
 }
 
 func TestLineNumber(t *testing.T) {

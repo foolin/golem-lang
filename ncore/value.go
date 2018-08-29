@@ -24,9 +24,9 @@ type Value interface {
 	Cmp(Context, Value) (Int, Error)
 
 	FieldNames() ([]string, Error)
-	HasField(Context, Value) (Bool, Error)
-	GetField(Context, Str) (Value, Error)
-	InvokeField(Context, Str, []Value) (Value, Error)
+	HasField(string) (bool, Error)
+	GetField(string, Context) (Value, Error)
+	InvokeField(string, Context, []Value) (Value, Error)
 }
 
 //---------------------------------------------------------------
@@ -97,6 +97,7 @@ type (
 
 		Concat(Str) Str
 
+		// Fields
 		Contains(Context, []Value) (Value, Error)
 	}
 
@@ -148,7 +149,7 @@ type (
 		OptionalParams uint16
 	}
 
-	Invoker func(Context, []Value) (Value, Error)
+	Invoke func(Context, []Value) (Value, Error)
 
 	// Func is a function
 	Func interface {
@@ -264,11 +265,11 @@ const (
 //	Struct interface {
 //		Composite
 //
-//		FieldNames() []string
-//		Has(Context, Value) (Bool, Error)
+//		SetField(string, Context, Value) Error
 //
-//		InitField(Context, Str, Value) Error
-//		SetField(Context, Str, Value) Error
+//		// InternalReplaceField is a 'secret' internal function.
+//		// Please pretend its not here.
+//		InternalReplaceField(string, Field) Error
 //	}
 //
 //	// Iterator iterates over a sequence of values
