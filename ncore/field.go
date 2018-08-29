@@ -15,18 +15,6 @@ type (
 		Invoke(Context, []Value) (Value, Error)
 		Set(Context, Value) Error
 	}
-
-	FieldMap interface {
-		Names() []string
-		Has(string) bool
-		Get(string, Context) (Value, Error)
-		Invoke(string, Context, []Value) (Value, Error)
-		Set(string, Context, Value) Error
-
-		// InternalReplace is a 'secret' internal function that is used
-		// by the Interpreter.  Please pretend its not here.
-		InternalReplace(string, Field) Error
-	}
 )
 
 //--------------------------------------------------------------

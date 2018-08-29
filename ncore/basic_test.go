@@ -209,7 +209,7 @@ func TestStr(t *testing.T) {
 	names, err := a.FieldNames()
 	okNames(t, names, err, []string{
 		"contains",
-		//"index",
+		"index",
 		//"lastIndex",
 		//"startsWith",
 		//"endsWith",
@@ -222,6 +222,37 @@ func TestStr(t *testing.T) {
 
 	bv, err = a.HasField("contains")
 	ok(t, bv, err, true)
+
+	bv, err = a.HasField("index")
+	ok(t, bv, err, true)
+
+	val, err = a.GetField("a", nil)
+	fail(t, val, err, "NoSuchField: Field 'a' not found")
+
+	c1, err := a.GetField("contains", nil)
+	tassert(t, err == nil)
+	c2, err := a.GetField("contains", nil)
+	tassert(t, err == nil)
+
+	i1, err := a.GetField("index", nil)
+	tassert(t, err == nil)
+	i2, err := a.GetField("index", nil)
+	tassert(t, err == nil)
+
+	val, err = c1.Eq(nil, i1)
+	ok(t, val, err, False)
+	val, err = c1.Eq(nil, i2)
+	ok(t, val, err, False)
+	val, err = c2.Eq(nil, i1)
+	ok(t, val, err, False)
+	val, err = c2.Eq(nil, i2)
+	ok(t, val, err, False)
+
+	val, err = c1.Eq(nil, c2)
+	ok(t, val, err, True)
+
+	val, err = i1.Eq(nil, i2)
+	ok(t, val, err, True)
 }
 
 func TestInt(t *testing.T) {

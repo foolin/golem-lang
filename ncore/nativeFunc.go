@@ -316,6 +316,52 @@ func (f *nativeMultipleFunc) Invoke(cx Context, params []Value) (Value, Error) {
 }
 
 //--------------------------------------------------------------
+// virtualFunc
+//--------------------------------------------------------------
+
+// A virtual function is a function that is created only if
+// we need to pass it around as a first class value.
+// The 'same' virtual func can be instantiated more than once,
+// so it has a special Eq() implementation.
+type virtualFunc struct {
+	owner Value
+	name  string
+	*nativeBaseFunc
+}
+
+func newVirtualFunc(owner Value, name string, arity Arity, invoke Invoke) NativeFunc {
+	return &virtualFunc{
+		owner, name,
+		&nativeBaseFunc{arity, invoke},
+	}
+}
+
+func (f *virtualFunc) Freeze(cx Context) (Value, Error) {
+	return f, nil
+}
+
+func (f *virtualFunc) Eq(cx Context, v Value) (Bool, Error) {
+	switch t := v.(type) {
+	case *virtualFunc:
+		// equality for virtual functions is based on whether
+		// they have the same owner, and the same name
+		ownerEq, err := f.owner.Eq(cx, t.owner)
+		if err != nil {
+			return nil, err
+		}
+		return NewBool(ownerEq.BoolVal() && (f.name == t.name)), nil
+	default:
+		return False, nil
+	}
+}
+
+func (f *virtualFunc) Invoke(cx Context, params []Value) (Value, Error) {
+	return f.invoke(cx, params)
+}
+
+//--------------------------------------------------------------
+// Vet
+//--------------------------------------------------------------
 
 func VetFixedFuncParams(requiredTypes []Type, allowNull bool, params []Value) Error {
 

@@ -148,70 +148,76 @@ func (s str) Concat(that Str) Str {
 //--------------------------------------------------------------
 // fields
 
-var strFields = map[string]bool{
-	"contains": true,
-	//"index":      true,
-	//"lastIndex":  true,
-	//"startsWith": true,
-	//"endsWith":   true,
-	//"replace":    true,
-	//"split":      true,
-	//"iterator":   true,
+var strFields = []string{
+	"contains",
+	"index",
+	//"lastIndex",
+	//"startsWith",
+	//"endsWith",
+	//"replace",
+	//"split",
+	//"iterator",
 }
 
 func (s str) FieldNames() ([]string, Error) {
-	names := make([]string, 0, len(strFields))
-	for k, _ := range strFields {
-		names = append(names, k)
-	}
-	return names, nil
+	return strFields, nil
 }
 
 func (s str) HasField(name string) (bool, Error) {
-	_, ok := strFields[name]
+	_, _, ok := s.lookupFunc(name)
 	return ok, nil
 }
 
 func (s str) GetField(name string, cx Context) (Value, Error) {
 
-	arity, inv, err := s.lookupFunc(name)
-	if err != nil {
-		return nil, err
+	arity, inv, ok := s.lookupFunc(name)
+	if !ok {
+		return nil, NoSuchFieldError(name)
 	}
 
-	return NewNativeFunc(arity, inv), nil
+	return newVirtualFunc(s, name, arity, inv), nil
 }
 
 func (s str) InvokeField(name string, cx Context, params []Value) (Value, Error) {
 
-	_, inv, err := s.lookupFunc(name)
-	if err != nil {
-		return nil, err
+	_, inv, ok := s.lookupFunc(name)
+	if !ok {
+		return nil, NoSuchFieldError(name)
 	}
 
 	return inv(cx, params)
 }
 
-func (s str) lookupFunc(name string) (Arity, Invoke, Error) {
+func (s str) lookupFunc(name string) (Arity, Invoke, bool) {
 	switch name {
 
 	case "contains":
-		return Arity{FixedArity, 1, 0}, s.Contains, nil
+		return Arity{FixedArity, 1, 0},
+			func(cx Context, params []Value) (Value, Error) {
+				err := VetFixedFuncParams([]Type{StrType}, false, params)
+				if err != nil {
+					return nil, err
+				}
+
+				z := params[0].(Str)
+				return NewBool(strings.Contains(s.String(), z.String())), nil
+			}, true
+
+	case "index":
+		return Arity{FixedArity, 1, 0},
+			func(cx Context, params []Value) (Value, Error) {
+				err := VetFixedFuncParams([]Type{StrType}, false, params)
+				if err != nil {
+					return nil, err
+				}
+
+				z := params[0].(Str)
+				return NewInt(int64(strings.Index(string(s), z.String()))), nil
+			}, true
 
 	default:
-		return Arity{}, nil, NoSuchFieldError(name)
+		return Arity{}, nil, false
 	}
-}
-
-func (s str) Contains(cx Context, params []Value) (Value, Error) {
-
-	err := VetFixedFuncParams([]Type{StrType}, false, params)
-	if err != nil {
-		return nil, err
-	}
-
-	z := params[0].(Str)
-	return NewBool(strings.Contains(s.String(), z.String())), nil
 }
 
 //func (s str) GetField(cx Context, key Str) (Value, Error) {

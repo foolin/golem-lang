@@ -96,9 +96,6 @@ type (
 		//Iterable
 
 		Concat(Str) Str
-
-		// Fields
-		Contains(Context, []Value) (Value, Error)
 	}
 
 	// Number is a number
@@ -291,8 +288,9 @@ func (k ArityKind) String() string {
 //
 //		SetField(string, Context, Value) Error
 //
-//		// InternalReplaceField is a 'secret' internal function.
-//		// Please pretend its not here.
+// InternalReplace is a 'secret' internal function that is used
+// in certain situations by the Interpreter.
+// You should never use it yourself, since it will panic if not used properly.
 //		InternalReplaceField(string, Field) Error
 //	}
 //
