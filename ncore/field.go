@@ -5,6 +5,7 @@
 package ncore
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -12,37 +13,32 @@ type (
 	Field interface {
 		Get(Context) (Value, Error)
 		Invoke(Context, []Value) (Value, Error)
-		Set(Context, Value) (bool, Error)
+		Set(Context, Value) Error
 	}
 
-	Fields interface {
+	FieldMap interface {
 		Names() []string
 		Has(string) bool
 		Get(string, Context) (Value, Error)
 		Invoke(string, Context, []Value) (Value, Error)
 		Set(string, Context, Value) Error
 
-		// InternalReplace is a 'secret' internal function.
-		// Please pretend its not here.
+		// InternalReplace is a 'secret' internal function that is used
+		// by the Interpreter.  Please pretend its not here.
 		InternalReplace(string, Field) Error
 	}
 )
 
 //--------------------------------------------------------------
-// Value Field
+// Field
 //--------------------------------------------------------------
 
 type field struct {
-	value    Value
-	readonly bool
+	value Value
 }
 
 func NewField(val Value) Field {
-	return &field{val, false}
-}
-
-func NewReadonlyField(val Value) Field {
-	return &field{val, true}
+	return &field{val}
 }
 
 func (f *field) Get(cx Context) (Value, Error) {
@@ -57,12 +53,37 @@ func (f *field) Invoke(cx Context, params []Value) (Value, Error) {
 	return fn.Invoke(cx, params)
 }
 
-func (f *field) Set(cx Context, val Value) (bool, Error) {
-	if f.readonly {
-		return false, nil
-	}
+func (f *field) Set(cx Context, val Value) Error {
 	f.value = val
-	return true, nil
+	return nil
+}
+
+//--------------------------------------------------------------
+// Readonly Field
+//--------------------------------------------------------------
+
+type readonlyField struct {
+	value Value
+}
+
+func NewReadonlyField(val Value) Field {
+	return &readonlyField{val}
+}
+
+func (f *readonlyField) Get(cx Context) (Value, Error) {
+	return f.value, nil
+}
+
+func (f *readonlyField) Invoke(cx Context, params []Value) (Value, Error) {
+	fn, ok := f.value.(Func)
+	if !ok {
+		return nil, TypeMismatchError("Expected Func")
+	}
+	return fn.Invoke(cx, params)
+}
+
+func (f *readonlyField) Set(cx Context, val Value) Error {
+	return fmt.Errorf("ReadonlyField")
 }
 
 //--------------------------------------------------------------
@@ -70,37 +91,21 @@ func (f *field) Set(cx Context, val Value) (bool, Error) {
 //--------------------------------------------------------------
 
 type property struct {
-	get      Func
-	set      Func
-	readonly bool
+	get Func
+	set Func
 }
 
 func NewProperty(get Func, set Func) (Field, Error) {
 
 	if !reflect.DeepEqual(Arity{FixedArity, 0, 0}, get.Arity()) {
-		return nil, ArityMismatchError(
-			"FixedArity(0)",
-			int(get.Arity().RequiredParams))
+		return nil, fmt.Errorf("InvalidGetterArity: %s", get.Arity().String())
 	}
 
 	if !reflect.DeepEqual(Arity{FixedArity, 1, 0}, set.Arity()) {
-		return nil, ArityMismatchError(
-			"FixedArity(1)",
-			int(get.Arity().RequiredParams))
+		return nil, fmt.Errorf("InvalidSetterArity: %s", set.Arity().String())
 	}
 
-	return &property{get, set, false}, nil
-}
-
-func NewReadonlyProperty(get Func) (Field, Error) {
-
-	if !reflect.DeepEqual(Arity{FixedArity, 0, 0}, get.Arity()) {
-		return nil, ArityMismatchError(
-			"FixedArity(0)",
-			int(get.Arity().RequiredParams))
-	}
-
-	return &property{get, nil, false}, nil
+	return &property{get, set}, nil
 }
 
 func (p *property) Get(cx Context) (Value, Error) {
@@ -121,10 +126,46 @@ func (p *property) Invoke(cx Context, params []Value) (Value, Error) {
 	return fn.Invoke(cx, params)
 }
 
-func (p *property) Set(cx Context, val Value) (bool, Error) {
-	if p.readonly {
-		return false, nil
-	}
+func (p *property) Set(cx Context, val Value) Error {
 	_, err := p.set.Invoke(cx, []Value{val})
-	return true, err
+	return err
+}
+
+//--------------------------------------------------------------
+// Readonly Property
+//--------------------------------------------------------------
+
+type readonlyProperty struct {
+	get Func
+}
+
+func NewReadonlyProperty(get Func) (Field, Error) {
+
+	if !reflect.DeepEqual(Arity{FixedArity, 0, 0}, get.Arity()) {
+		return nil, fmt.Errorf("InvalidGetterArity: %s", get.Arity().String())
+	}
+
+	return &readonlyProperty{get}, nil
+}
+
+func (p *readonlyProperty) Get(cx Context) (Value, Error) {
+	return p.get.Invoke(cx, []Value{})
+}
+
+func (p *readonlyProperty) Invoke(cx Context, params []Value) (Value, Error) {
+
+	val, err := p.get.Invoke(cx, []Value{})
+	if err != nil {
+		return nil, err
+	}
+
+	fn, ok := val.(Func)
+	if !ok {
+		return nil, TypeMismatchError("Expected Func")
+	}
+	return fn.Invoke(cx, params)
+}
+
+func (p *readonlyProperty) Set(cx Context, val Value) Error {
+	return fmt.Errorf("ReadonlyField")
 }

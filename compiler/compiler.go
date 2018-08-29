@@ -961,6 +961,14 @@ func (c *compiler) visitFunc(fe *ast.FnExpr) {
 
 func (c *compiler) visitInvoke(inv *ast.InvokeExpr) {
 
+	// o.InvokeField:
+	//
+	// InvokeExpr
+	// .   FieldExpr(add)
+	// .   .   IdentExpr(s,<nil>)
+	// .   BasicExpr(Int,"2")
+	// .   BasicExpr(Int,"3")
+
 	c.Visit(inv.Operand)
 	for _, n := range inv.Params {
 		c.Visit(n)

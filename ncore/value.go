@@ -174,6 +174,30 @@ const (
 	MultipleArity
 )
 
+func (a Arity) String() string {
+
+	return fmt.Sprintf(
+		"Arity(%s,%d,%d)",
+		a.Kind.String(),
+		a.RequiredParams,
+		a.OptionalParams)
+}
+
+func (k ArityKind) String() string {
+
+	switch k {
+	case FixedArity:
+		return "Fixed"
+	case VariadicArity:
+		return "Variadic"
+	case MultipleArity:
+		return "Multiple"
+
+	default:
+		panic("unreachable")
+	}
+}
+
 ////---------------------------------------------------------------
 //// Composite
 //
