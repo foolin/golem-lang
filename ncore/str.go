@@ -148,9 +148,11 @@ func (s str) Concat(that Str) Str {
 //--------------------------------------------------------------
 // fields
 
-var strFields = []string{
-	"contains",
+var strMethods = map[string]Method{
+
+	//"contains",
 	//"index",
+
 	//"lastIndex",
 	//"startsWith",
 	//"endsWith",
@@ -160,78 +162,34 @@ var strFields = []string{
 }
 
 func (s str) FieldNames() ([]string, Error) {
-	return strFields, nil
+	names := make([]string, 0, len(strMethods))
+	for name, _ := range strMethods {
+		names = append(names, name)
+	}
+	return names, nil
 }
 
 func (s str) HasField(name string) (bool, Error) {
-
-	panic("TODO")
-
-	//_, ok := s.lookupMethod(name)
-	//return ok, nil
+	_, ok := strMethods[name]
+	return ok, nil
 }
 
 func (s str) GetField(name string, cx Context) (Value, Error) {
-	panic("TODO")
-
-	//if _, ok := s.lookupMethod(name); ok {
-	//	return newVirtualFunc(s, name, Method.Arity, Method.Invoke), nil
-	//}
-	//return nil, NoSuchFieldError(name)
+	if method, ok := strMethods[name]; ok {
+		return method.ToFunc(s), nil
+	}
+	return nil, NoSuchFieldError(name)
 }
-
-//func (s str) InvokeField(name string, cx Context, params []Value) (Value, Error) {
-//
-//	_, inv, ok := s.lookupMethod(name)
-//	if !ok {
-//		return nil, NoSuchFieldError(name)
-//	}
-//
-//	return inv(cx, params)
-//}
-//
-//func (s str) lookupMethod(name string) (Arity, Invoke, bool) {
-//	switch name {
-//
-//	case "contains":
-//
-//		arity, invoker := NewFixedFuncDef(
-//			[]Type{StrType}, false, s.Contains)
-//		return arity, invoker, true
-//
-//	default:
-//		return Arity{}, nil, false
-//	}
-//}
-
-func (s str) directContains(cx Context, params []Value) (Value, Error) {
-	substr := params[0].(Str)
-	return NewBool(strings.Contains(s.String(), substr.String())), nil
-}
-
-//--------------------------------------------------------------
 
 func (s str) InvokeField(name string, cx Context, params []Value) (Value, Error) {
-	panic("TODO")
 
-	//	if _, method, ok := s.lookupMethod(name); ok {
-	//		return method(cx, s, params)
-	//	}
-	//	return nil, NoSuchFieldError(name)
+	if method, ok := strMethods[name]; ok {
+		return method.Invoke(s, cx, params)
+	}
+	return nil, NoSuchFieldError(name)
 }
 
-//func (s str) lookupMethod(name string) (Method, bool) {
-//	switch name {
-//
-//	case "contains":
-//		return containsMethod, true
-//
-//	default:
-//		return nil, false
-//	}
-//}
-//
-//var containsMethod = NewFixedMethod(
+//var containsMethod Method = nil //NewFixedMethod(
 //	StrType, []Type{StrType}, false,
 //	func(cx Context, self Value, params []Value) (Value, Error) {
 //		s := self.(Str)
@@ -245,6 +203,14 @@ func (s str) InvokeField(name string, cx Context, params []Value) (Value, Error)
 //		return func(cx Context, params []Value) (Value, Error) {
 //		return self.Contains(params[0].(Str)), nil
 //	})
+
+//	case "index":
+//		return &virtualFunc{s, sn, NewFixedNativeFunc(
+//			[]Type{StrType}, false,
+//			func(cx Context, params []Value) (Value, Error) {
+//				z := params[0].(Str)
+//				return NewInt(int64(strings.Index(string(s), z.String()))), nil
+//			})}, nil
 
 //--------------------------------------------------------------
 
