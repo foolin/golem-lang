@@ -30,31 +30,61 @@ type (
 	}
 )
 
-//// NewFixedMethod creates a new Method with fixed arity
-//func NewFixedMethod(
-//	requiredTypes []Type,
-//	allowNull bool,
-//	invoke func(interface{}, Context, []Value) (Value, Error)) Method {
-//}
+// NewFixedMethod creates a new Method with fixed arity
+func NewFixedMethod(
+	requiredTypes []Type,
+	allowNull bool,
+	invoke func(interface{}, Context, []Value) (Value, Error)) Method {
+
+	arity := Arity{
+		Kind:           FixedArity,
+		RequiredParams: uint16(len(requiredTypes)),
+		OptionalParams: 0,
+	}
+
+	return &fixedMethod{
+		&method{arity, invoke},
+		requiredTypes, allowNull,
+	}
+}
+
+func (m *fixedMethod) Invoke(self interface{}, cx Context, params []Value) (Value, Error) {
+
+	err := vetFixedParams(params, m.requiredTypes, m.allowNull)
+	if err != nil {
+		return nil, err
+	}
+	return m.invoke(self, cx, params)
+}
+
+func (m *fixedMethod) ToFunc(self interface{}) NativeFunc {
+
+	return NewFixedNativeFunc(
+		m.requiredTypes,
+		m.allowNull,
+		func(cx Context, params []Value) (Value, Error) {
+			return m.invoke(self, cx, params)
+		})
+}
 
 //--------------------------------------------------------------
-// virtualFunc
+// methodFunc
 //--------------------------------------------------------------
 
-// A virtual function is a function that is created only
-// when we really need to have it. The 'same' virtual function can end up
+// A methodFunc is a function that is created only
+// when we really need to have it. The 'same' methodFunc can end up
 // being created more than once, so equality is based on whether
 // the two funcs have the same owner, and the same name
-type virtualFunc struct {
+type methodFunc struct {
 	*nativeFunc
 
 	owner Value
 	name  string
 }
 
-func (f *virtualFunc) Eq(cx Context, v Value) (Bool, Error) {
+func (f *methodFunc) Eq(cx Context, v Value) (Bool, Error) {
 	switch t := v.(type) {
-	case *virtualFunc:
+	case *methodFunc:
 		ownerEq, err := f.owner.Eq(cx, t.owner)
 		if err != nil {
 			return nil, err
