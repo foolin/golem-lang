@@ -150,7 +150,7 @@ func (s str) Concat(that Str) Str {
 
 var strFields = []string{
 	"contains",
-	"index",
+	//"index",
 	//"lastIndex",
 	//"startsWith",
 	//"endsWith",
@@ -164,61 +164,89 @@ func (s str) FieldNames() ([]string, Error) {
 }
 
 func (s str) HasField(name string) (bool, Error) {
-	_, _, ok := s.lookupFunc(name)
-	return ok, nil
+
+	panic("TODO")
+
+	//_, ok := s.lookupMethod(name)
+	//return ok, nil
 }
 
 func (s str) GetField(name string, cx Context) (Value, Error) {
+	panic("TODO")
 
-	arity, inv, ok := s.lookupFunc(name)
-	if !ok {
-		return nil, NoSuchFieldError(name)
-	}
-
-	return newVirtualFunc(s, name, arity, inv), nil
+	//if _, ok := s.lookupMethod(name); ok {
+	//	return newVirtualFunc(s, name, Method.Arity, Method.Invoke), nil
+	//}
+	//return nil, NoSuchFieldError(name)
 }
+
+//func (s str) InvokeField(name string, cx Context, params []Value) (Value, Error) {
+//
+//	_, inv, ok := s.lookupMethod(name)
+//	if !ok {
+//		return nil, NoSuchFieldError(name)
+//	}
+//
+//	return inv(cx, params)
+//}
+//
+//func (s str) lookupMethod(name string) (Arity, Invoke, bool) {
+//	switch name {
+//
+//	case "contains":
+//
+//		arity, invoker := NewFixedFuncDef(
+//			[]Type{StrType}, false, s.Contains)
+//		return arity, invoker, true
+//
+//	default:
+//		return Arity{}, nil, false
+//	}
+//}
+
+func (s str) directContains(cx Context, params []Value) (Value, Error) {
+	substr := params[0].(Str)
+	return NewBool(strings.Contains(s.String(), substr.String())), nil
+}
+
+//--------------------------------------------------------------
 
 func (s str) InvokeField(name string, cx Context, params []Value) (Value, Error) {
+	panic("TODO")
 
-	_, inv, ok := s.lookupFunc(name)
-	if !ok {
-		return nil, NoSuchFieldError(name)
-	}
-
-	return inv(cx, params)
+	//	if _, method, ok := s.lookupMethod(name); ok {
+	//		return method(cx, s, params)
+	//	}
+	//	return nil, NoSuchFieldError(name)
 }
 
-func (s str) lookupFunc(name string) (Arity, Invoke, bool) {
-	switch name {
+//func (s str) lookupMethod(name string) (Method, bool) {
+//	switch name {
+//
+//	case "contains":
+//		return containsMethod, true
+//
+//	default:
+//		return nil, false
+//	}
+//}
+//
+//var containsMethod = NewFixedMethod(
+//	StrType, []Type{StrType}, false,
+//	func(cx Context, self Value, params []Value) (Value, Error) {
+//		s := self.(Str)
+//		substr := params[0].(Str)
+//		return NewBool(strings.Contains(s.String(), substr.String())), nil
+//	}), true
 
-	case "contains":
-		return Arity{FixedArity, 1, 0},
-			func(cx Context, params []Value) (Value, Error) {
-				err := VetFixedFuncParams([]Type{StrType}, false, params)
-				if err != nil {
-					return nil, err
-				}
+//var containsMethod = NewFixedMethod(
+//	[]Type{StrType}, false,
+//	func(cx Context, self Value, params []Value) Invoke {
+//		return func(cx Context, params []Value) (Value, Error) {
+//		return self.Contains(params[0].(Str)), nil
+//	})
 
-				z := params[0].(Str)
-				return NewBool(strings.Contains(s.String(), z.String())), nil
-			}, true
-
-	case "index":
-		return Arity{FixedArity, 1, 0},
-			func(cx Context, params []Value) (Value, Error) {
-				err := VetFixedFuncParams([]Type{StrType}, false, params)
-				if err != nil {
-					return nil, err
-				}
-
-				z := params[0].(Str)
-				return NewInt(int64(strings.Index(string(s), z.String()))), nil
-			}, true
-
-	default:
-		return Arity{}, nil, false
-	}
-}
+//--------------------------------------------------------------
 
 //func (s str) GetField(cx Context, key Str) (Value, Error) {
 //	switch sn := key.String(); sn {

@@ -147,7 +147,6 @@ func TestStr(t *testing.T) {
 	a := NewStr("a")
 	b := NewStr("b")
 
-	var bv bool
 	var val Value
 	var err Error
 
@@ -209,7 +208,7 @@ func TestStr(t *testing.T) {
 	names, err := a.FieldNames()
 	okNames(t, names, err, []string{
 		"contains",
-		"index",
+		//"index",
 		//"lastIndex",
 		//"startsWith",
 		//"endsWith",
@@ -217,42 +216,41 @@ func TestStr(t *testing.T) {
 		//"split",
 	})
 
-	bv, err = a.HasField("a")
-	ok(t, bv, err, false)
+	//var bv bool
+	//bv, err = a.HasField("a")
+	//ok(t, bv, err, false)
 
-	bv, err = a.HasField("contains")
-	ok(t, bv, err, true)
+	//bv, err = a.HasField("contains")
+	//ok(t, bv, err, true)
 
-	bv, err = a.HasField("index")
-	ok(t, bv, err, true)
+	////bv, err = a.HasField("index")
+	////ok(t, bv, err, true)
 
-	val, err = a.GetField("a", nil)
-	fail(t, val, err, "NoSuchField: Field 'a' not found")
+	//val, err = a.GetField("a", nil)
+	//fail(t, val, err, "NoSuchField: Field 'a' not found")
 
-	c1, err := a.GetField("contains", nil)
-	tassert(t, err == nil)
-	c2, err := a.GetField("contains", nil)
-	tassert(t, err == nil)
+	//c1, err := a.GetField("contains", nil)
+	//tassert(t, err == nil)
+	//c2, err := a.GetField("contains", nil)
+	//tassert(t, err == nil)
+	//val, err = c1.Eq(nil, c2)
+	//ok(t, val, err, True)
 
-	i1, err := a.GetField("index", nil)
-	tassert(t, err == nil)
-	i2, err := a.GetField("index", nil)
-	tassert(t, err == nil)
+	////i1, err := a.GetField("index", nil)
+	////tassert(t, err == nil)
+	////i2, err := a.GetField("index", nil)
+	////tassert(t, err == nil)
+	////val, err = i1.Eq(nil, i2)
+	////ok(t, val, err, True)
 
-	val, err = c1.Eq(nil, i1)
-	ok(t, val, err, False)
-	val, err = c1.Eq(nil, i2)
-	ok(t, val, err, False)
-	val, err = c2.Eq(nil, i1)
-	ok(t, val, err, False)
-	val, err = c2.Eq(nil, i2)
-	ok(t, val, err, False)
-
-	val, err = c1.Eq(nil, c2)
-	ok(t, val, err, True)
-
-	val, err = i1.Eq(nil, i2)
-	ok(t, val, err, True)
+	////val, err = c1.Eq(nil, i1)
+	////ok(t, val, err, False)
+	////val, err = c1.Eq(nil, i2)
+	////ok(t, val, err, False)
+	////val, err = c2.Eq(nil, i1)
+	////ok(t, val, err, False)
+	////val, err = c2.Eq(nil, i2)
+	////ok(t, val, err, False)
 }
 
 func TestInt(t *testing.T) {
@@ -518,49 +516,59 @@ func TestBasicHashCode(t *testing.T) {
 	ok(t, h, err, NewInt(1928994870288439732))
 }
 
-//func show(val Value) {
-//	//println(val.ToStr(nil).String())
-//}
+//--------------------------------------------------------------
 
-//func TestDirectCall(t *testing.T) {
-//	s := NewStr("abcdef")
-//
-//	var val Value
-//	var err Error
-//
-//	for i := 0; i < 10*1000*1000; i++ {
-//		val, err = s.Contains(nil, []Value{NewStr("cd")})
-//		ok(t, val, err, True)
-//		show(val)
-//	}
-//}
-//
+func show(val Value) {
+	//println(val.ToStr(nil).String())
+}
+
+const iterate = 4 * 1000 * 1000
+
+func TestDirectCall(t *testing.T) {
+
+	s := NewStr("abcdef")
+	substr := NewStr("cd")
+
+	var val Value
+	var err Error
+
+	for i := 0; i < iterate; i++ {
+		val, err = s.(str).directContains(nil, []Value{substr})
+		ok(t, val, err, True)
+		show(val)
+	}
+}
+
 //func TestInvokeCall(t *testing.T) {
+//
 //	s := NewStr("abcdef")
+//	substr := NewStr("cd")
 //
 //	var val Value
 //	var err Error
 //
-//	for i := 0; i < 10*1000*1000; i++ {
-//		val, err = s.InvokeField("contains", nil, []Value{NewStr("cd")})
+//	for i := 0; i < iterate; i++ {
+//		val, err = s.InvokeField("contains", nil, []Value{substr})
 //		ok(t, val, err, True)
 //		show(val)
 //	}
 //}
 //
 //func TestGetCall(t *testing.T) {
+//
 //	s := NewStr("abcdef")
+//	substr := NewStr("cd")
 //
 //	var val Value
 //	var err Error
 //	var field Value
 //
-//	for i := 0; i < 10*1000*1000; i++ {
+//	for i := 0; i < iterate; i++ {
 //		field, err = s.GetField("contains", nil)
 //		tassert(t, err == nil)
 //
 //		fn := field.(Func)
-//		val, err = fn.Invoke(nil, []Value{NewStr("cd")})
+//		val, err = fn.Invoke(nil, []Value{substr})
 //		ok(t, val, err, True)
 //		show(val)
 //	}

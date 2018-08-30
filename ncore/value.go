@@ -96,6 +96,8 @@ type (
 		//Iterable
 
 		Concat(Str) Str
+
+		//Contains(Context, []Value) (Value, Error)
 	}
 
 	// Number is a number
@@ -145,8 +147,6 @@ type (
 		// set to 0.  For MultipleArity, it must be set to a non-zero integer.
 		OptionalParams uint16
 	}
-
-	Invoke func(Context, []Value) (Value, Error)
 
 	// Func is a function
 	Func interface {
