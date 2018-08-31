@@ -101,6 +101,31 @@ func TestFixedMethod(t *testing.T) {
 	fail(t, val, err, "TypeMismatch: Expected Int")
 }
 
+func TestVariadicMethod(t *testing.T) {
+
+	m := NewVariadicMethod(
+		[]Type{},
+		IntType,
+		false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			n := self.(int)
+			for _, p := range params {
+				n += int(p.(Int).IntVal())
+			}
+			return NewInt(int64(n)), nil
+		})
+
+	val, err := m.Invoke(10, nil, []Value{NewInt(2), NewInt(3)})
+	ok(t, val, err, NewInt(15))
+
+	fn := m.ToFunc(10, "foo")
+
+	ok(t, fn.Arity(), nil, Arity{VariadicArity, 0, 0})
+
+	val, err = fn.Invoke(nil, []Value{NewInt(2), NewInt(3)})
+	ok(t, val, err, NewInt(15))
+}
+
 //--------------------------------------------------------------
 
 func show(val Value) {
