@@ -8,10 +8,13 @@ import (
 	"fmt"
 )
 
-// NativeFunc is a Func that is implemented in Go rather than Golem
-type NativeFunc interface {
-	Func
-}
+type (
+	// NativeFunc is a Func that is implemented in Go rather than Golem
+	NativeFunc interface {
+		Func
+	}
+	Invoke func(Evaluator, []Value) (Value, Error)
+)
 
 //--------------------------------------------------------------
 // nativeFunc
@@ -19,7 +22,7 @@ type NativeFunc interface {
 
 type nativeFunc struct {
 	arity  Arity
-	invoke func(Evaluator, []Value) (Value, Error)
+	invoke Invoke
 }
 
 func (f *nativeFunc) funcMarker() {}
@@ -91,7 +94,7 @@ type nativeFixedFunc struct {
 func NewFixedNativeFunc(
 	requiredTypes []Type,
 	allowNull bool,
-	invoke func(Evaluator, []Value) (Value, Error)) NativeFunc {
+	invoke Invoke) NativeFunc {
 
 	arity := Arity{
 		Kind:           FixedArity,
@@ -145,7 +148,7 @@ func NewVariadicNativeFunc(
 	requiredTypes []Type,
 	variadicType Type,
 	allowNull bool,
-	invoke func(Evaluator, []Value) (Value, Error)) NativeFunc {
+	invoke Invoke) NativeFunc {
 
 	arity := Arity{
 		Kind:           VariadicArity,
@@ -199,7 +202,7 @@ func NewMultipleNativeFunc(
 	requiredTypes []Type,
 	optionalTypes []Type,
 	allowNull bool,
-	invoke func(Evaluator, []Value) (Value, Error)) NativeFunc {
+	invoke Invoke) NativeFunc {
 
 	arity := Arity{
 		Kind:           MultipleArity,

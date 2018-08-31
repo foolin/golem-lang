@@ -18,9 +18,11 @@ type (
 		ToFunc(interface{}, string) NativeFunc
 	}
 
+	MethodInvoke func(interface{}, Evaluator, []Value) (Value, Error)
+
 	method struct {
 		arity  Arity
-		invoke func(interface{}, Evaluator, []Value) (Value, Error)
+		invoke MethodInvoke
 	}
 )
 
@@ -38,7 +40,7 @@ type fixedMethod struct {
 func NewFixedMethod(
 	requiredTypes []Type,
 	allowNull bool,
-	invoke func(interface{}, Evaluator, []Value) (Value, Error)) Method {
+	invoke MethodInvoke) Method {
 
 	arity := Arity{
 		Kind:           FixedArity,
@@ -92,7 +94,7 @@ func NewVariadicMethod(
 	requiredTypes []Type,
 	variadicType Type,
 	allowNull bool,
-	invoke func(interface{}, Evaluator, []Value) (Value, Error)) Method {
+	invoke MethodInvoke) Method {
 
 	arity := Arity{
 		Kind:           VariadicArity,
@@ -147,7 +149,7 @@ func NewMultipleMethod(
 	requiredTypes []Type,
 	optionalTypes []Type,
 	allowNull bool,
-	invoke func(interface{}, Evaluator, []Value) (Value, Error)) Method {
+	invoke MethodInvoke) Method {
 
 	arity := Arity{
 		Kind:           MultipleArity,
