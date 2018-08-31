@@ -11,13 +11,6 @@ import (
 	"testing"
 )
 
-func tassert(t *testing.T, flag bool) {
-	if !flag {
-		t.Error("assertion failure")
-		panic("tassert")
-	}
-}
-
 func ok(t *testing.T, val interface{}, err Error, expect interface{}) {
 
 	if err != nil {
@@ -57,7 +50,7 @@ func fail(t *testing.T, val interface{}, err Error, expect string) {
 }
 
 func okType(t *testing.T, val Value, expected Type) {
-	tassert(t, val.Type() == expected)
+	Tassert(t, val.Type() == expected)
 }
 
 func TestNull(t *testing.T) {
@@ -103,8 +96,8 @@ func TestBool(t *testing.T) {
 	okType(t, True, BoolType)
 	okType(t, False, BoolType)
 
-	tassert(t, True.BoolVal())
-	tassert(t, !False.BoolVal())
+	Tassert(t, True.BoolVal())
+	Tassert(t, !False.BoolVal())
 
 	val, err = True.Eq(nil, True)
 	ok(t, val, err, True)
@@ -238,7 +231,7 @@ func TestStr(t *testing.T) {
 	ok(t, val, err, False)
 
 	val, err = a.GetField("contains", nil)
-	tassert(t, err == nil)
+	Tassert(t, err == nil)
 	fn := val.(Func)
 
 	val, err = fn.Invoke(nil, []Value{NewStr("語")})
@@ -256,7 +249,7 @@ func TestStr(t *testing.T) {
 	ok(t, val, err, NewInt(-1))
 
 	val, err = a.GetField("index", nil)
-	tassert(t, err == nil)
+	Tassert(t, err == nil)
 	fn = val.(Func)
 
 	val, err = fn.Invoke(nil, []Value{NewStr("本語")})

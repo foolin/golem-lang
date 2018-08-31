@@ -24,10 +24,10 @@ func TestStruct(t *testing.T) {
 			"a": NewField(NewInt(0)),
 			"b": NewField(NewInt(1)),
 		}, true)
-	tassert(t, err == nil)
+	Tassert(t, err == nil)
 
 	val, err = fs.ToStr(nil)
-	tassert(t, err == nil)
+	Tassert(t, err == nil)
 	println(val.(Str).String())
 
 	method := NewFixedMethod(
@@ -47,10 +47,10 @@ func TestStruct(t *testing.T) {
 		map[string]Method{
 			"a": method,
 		}, true)
-	tassert(t, err == nil)
+	Tassert(t, err == nil)
 
 	val, err = vs.ToStr(nil)
-	tassert(t, err == nil)
+	Tassert(t, err == nil)
 	println(val.(Str).String())
 }
 
@@ -81,7 +81,7 @@ func TestStruct(t *testing.T) {
 //	ok(t, v, nil, Zero)
 //
 //	err = ls.Add(cx, NewStr("a"))
-//	tassert(t, err == nil)
+//	Tassert(t, err == nil)
 //
 //	v, err = ls.Eq(cx, NewList([]Value{}))
 //	ok(t, v, err, False)
@@ -96,7 +96,7 @@ func TestStruct(t *testing.T) {
 //	ok(t, v, err, NewStr("a"))
 //
 //	err = ls.Set(cx, Zero, NewStr("b"))
-//	tassert(t, err == nil)
+//	Tassert(t, err == nil)
 //
 //	v, err = ls.Get(cx, Zero)
 //	ok(t, v, err, NewStr("b"))
@@ -108,7 +108,7 @@ func TestStruct(t *testing.T) {
 //	fail(t, v, err, "IndexOutOfBounds: 1")
 //
 //	err = ls.Set(cx, NegOne, True)
-//	tassert(t, err == nil)
+//	Tassert(t, err == nil)
 //
 //	err = ls.Set(cx, One, True)
 //	fail(t, nil, err, "IndexOutOfBounds: 1")
@@ -117,7 +117,7 @@ func TestStruct(t *testing.T) {
 //	ok(t, v, nil, NewStr("[ true ]"))
 //
 //	err = ls.Add(cx, NewStr("z"))
-//	tassert(t, err == nil)
+//	Tassert(t, err == nil)
 //
 //	v = ls.ToStr(cx)
 //	ok(t, v, nil, NewStr("[ true, z ]"))
@@ -165,7 +165,7 @@ func TestStruct(t *testing.T) {
 //	ok(t, v, err, Null)
 //
 //	err = d.Set(cx, NewStr("a"), One)
-//	tassert(t, err == nil)
+//	Tassert(t, err == nil)
 //
 //	v, err = d.Get(cx, NewStr("a"))
 //	ok(t, v, err, One)
@@ -183,7 +183,7 @@ func TestStruct(t *testing.T) {
 //	ok(t, v, nil, NewStr("dict { a: 1 }"))
 //
 //	err = d.Set(cx, NewStr("b"), NewInt(2))
-//	tassert(t, err == nil)
+//	Tassert(t, err == nil)
 //
 //	v, err = d.Get(cx, NewStr("b"))
 //	ok(t, v, err, NewInt(2))

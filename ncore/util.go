@@ -4,7 +4,22 @@
 
 package ncore
 
-import ()
+import (
+	"testing"
+)
+
+func Assert(flag bool) {
+	if !flag {
+		panic("assertion failure")
+	}
+}
+
+func Tassert(t *testing.T, flag bool) {
+	if !flag {
+		t.Error("assertion failure")
+		panic("Tassert")
+	}
+}
 
 func posIndex(val Value, length int) (int, Error) {
 	i, ok := val.(Int)
@@ -139,10 +154,4 @@ func strcpy(s string) string {
 //	}
 //
 //	return itr
-//}
-//
-//func assert(flag bool) {
-//	if !flag {
-//		panic("assertion failure")
-//	}
 //}

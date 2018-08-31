@@ -23,8 +23,8 @@ type Module struct {
 	// Refs is a list of Refs for the values contained in the Contents
 	Refs []*Ref
 
-	//// Contents is the top level exported values of the module
-	//Contents Struct
+	// Contents is the top level exported values of the module
+	Contents g.Struct
 }
 
 func (m *Module) String() string {
@@ -47,8 +47,7 @@ func (m *Module) String() string {
 // used by a given Module.  Pools are created at compile time, and
 // are immutable at run time.
 type Pool struct {
-	Constants []g.Basic
-	Templates []*FuncTemplate
-
-	//StructDefs [][]*FieldDef
+	Constants  []g.Basic
+	Templates  []*FuncTemplate
+	StructDefs [][]string
 }
