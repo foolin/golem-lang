@@ -62,10 +62,6 @@ func (b _bool) Eq(ev Evaluator, v Value) (Bool, Error) {
 	}
 }
 
-//func (b _bool) GetField(ev Evaluator, key Str) (Value, Error) {
-//	return nil, NoSuchFieldError(key.String())
-//}
-
 func (b _bool) Cmp(ev Evaluator, v Value) (Int, Error) {
 	switch t := v.(type) {
 

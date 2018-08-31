@@ -96,8 +96,6 @@ type (
 		//Iterable
 
 		Concat(Str) Str
-
-		//Contains(Evaluator, []Value) (Value, Error)
 	}
 
 	// Number is a number

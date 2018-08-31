@@ -72,7 +72,7 @@ func (m *fixedMethod) ToFunc(self interface{}, methodName string) NativeFunc {
 			return m.invoke(self, ev, params)
 		})
 
-	return &fixedMethodFunc{
+	return &fixedVirtualFunc{
 		self,
 		methodName,
 		nf.(*nativeFixedFunc)}
@@ -127,7 +127,7 @@ func (m *variadicMethod) ToFunc(self interface{}, methodName string) NativeFunc 
 			return m.invoke(self, ev, params)
 		})
 
-	return &variadicMethodFunc{
+	return &variadicVirtualFunc{
 		self,
 		methodName,
 		nf.(*nativeVariadicFunc)}
@@ -182,18 +182,18 @@ func (m *multipleMethod) ToFunc(self interface{}, methodName string) NativeFunc 
 			return m.invoke(self, ev, params)
 		})
 
-	return &multipleMethodFunc{
+	return &multipleVirtualFunc{
 		self,
 		methodName,
 		nf.(*nativeMultipleFunc)}
 }
 
 //--------------------------------------------------------------
-// methodFunc
+// virtualFunc
 //--------------------------------------------------------------
 
-// A methodFunc is a function that is created only
-// when we really need to have it. The 'same' methodFunc can end up
+// A virtualFunc is a function that is created only
+// when we really need to have it. The 'same' virtualFunc can end up
 // being created more than once, so equality has special semantics.
 
 // For self parameters that are Values, equality is based on Eq(),
@@ -218,15 +218,15 @@ func selfEq(ev Evaluator, this, that interface{}) (Bool, Error) {
 //---------------------------------------------
 // fixed
 
-type fixedMethodFunc struct {
+type fixedVirtualFunc struct {
 	self interface{}
 	name string
 	*nativeFixedFunc
 }
 
-func (f *fixedMethodFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
+func (f *fixedVirtualFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
 	switch t := v.(type) {
-	case *fixedMethodFunc:
+	case *fixedVirtualFunc:
 		// Equality is based on whether the two funcs have the same self,
 		// and the same name.
 		eq, err := selfEq(ev, f.self, t.self)
@@ -242,15 +242,15 @@ func (f *fixedMethodFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
 //---------------------------------------------
 // variadic
 
-type variadicMethodFunc struct {
+type variadicVirtualFunc struct {
 	self interface{}
 	name string
 	*nativeVariadicFunc
 }
 
-func (f *variadicMethodFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
+func (f *variadicVirtualFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
 	switch t := v.(type) {
-	case *variadicMethodFunc:
+	case *variadicVirtualFunc:
 		// Equality is based on whether the two funcs have the same self,
 		// and the same name.
 		eq, err := selfEq(ev, f.self, t.self)
@@ -266,15 +266,15 @@ func (f *variadicMethodFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
 //---------------------------------------------
 // multiple
 
-type multipleMethodFunc struct {
+type multipleVirtualFunc struct {
 	self interface{}
 	name string
 	*nativeMultipleFunc
 }
 
-func (f *multipleMethodFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
+func (f *multipleVirtualFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
 	switch t := v.(type) {
-	case *multipleMethodFunc:
+	case *multipleVirtualFunc:
 		// Equality is based on whether the two funcs have the same self,
 		// and the same name.
 		eq, err := selfEq(ev, f.self, t.self)

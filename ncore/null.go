@@ -28,8 +28,6 @@ func (n *null) ToStr(ev Evaluator) Str { return NewStr("null") }
 
 func (n *null) HashCode(ev Evaluator) (Int, Error) { return nil, NullValueError() }
 
-//func (n *null) GetField(ev Evaluator, key Str) (Value, Error) { return nil, NullValueError() }
-
 func (n *null) Eq(ev Evaluator, v Value) (Bool, Error) {
 	switch v.(type) {
 	case *null:
