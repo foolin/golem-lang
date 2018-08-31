@@ -141,7 +141,12 @@ func TestMultipleNativeFunc(t *testing.T) {
 
 			str := NewStr("")
 			for _, v := range params {
-				str = str.Concat(v.ToStr(ev))
+				val, err := v.ToStr(ev)
+				if err != nil {
+					return nil, err
+				}
+
+				str = str.Concat(val)
 			}
 			return str, nil
 		})

@@ -24,12 +24,12 @@ func (n *null) basicMarker() {}
 
 func (n *null) Type() Type { return NullType }
 
-func (n *null) ToStr(ev Evaluator) Str { return NewStr("null") }
+func (n *null) ToStr(ev Evaluator) (Str, Error) { return NewStr("null"), nil }
 
 func (n *null) HashCode(ev Evaluator) (Int, Error) { return nil, NullValueError() }
 
-func (n *null) Eq(ev Evaluator, v Value) (Bool, Error) {
-	switch v.(type) {
+func (n *null) Eq(ev Evaluator, val Value) (Bool, Error) {
+	switch val.(type) {
 	case *null:
 		return True, nil
 	default:
@@ -37,7 +37,7 @@ func (n *null) Eq(ev Evaluator, v Value) (Bool, Error) {
 	}
 }
 
-func (n *null) Cmp(ev Evaluator, v Value) (Int, Error) { return nil, NullValueError() }
+func (n *null) Cmp(ev Evaluator, val Value) (Int, Error) { return nil, NullValueError() }
 
 func (n *null) Freeze(ev Evaluator) (Value, Error) {
 	return nil, NullValueError()

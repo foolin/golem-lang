@@ -66,8 +66,8 @@ func TestNull(t *testing.T) {
 	var val Value
 	var err Error
 
-	val = Null.ToStr(nil)
-	ok(t, val, nil, NewStr("null"))
+	val, err = Null.ToStr(nil)
+	ok(t, val, err, NewStr("null"))
 
 	val, err = Null.Eq(nil, Null)
 	ok(t, val, err, True)
@@ -92,19 +92,19 @@ func TestNull(t *testing.T) {
 
 func TestBool(t *testing.T) {
 
-	s := True.ToStr(nil)
-	ok(t, s, nil, NewStr("true"))
-	s = False.ToStr(nil)
-	ok(t, s, nil, NewStr("false"))
+	var val Value
+	var err Error
+
+	val, err = True.ToStr(nil)
+	ok(t, val, err, NewStr("true"))
+	val, err = False.ToStr(nil)
+	ok(t, val, err, NewStr("false"))
 
 	okType(t, True, BoolType)
 	okType(t, False, BoolType)
 
 	tassert(t, True.BoolVal())
 	tassert(t, !False.BoolVal())
-
-	var val Value
-	var err Error
 
 	val, err = True.Eq(nil, True)
 	ok(t, val, err, True)
@@ -150,10 +150,10 @@ func TestStr(t *testing.T) {
 	var val Value
 	var err Error
 
-	val = a.ToStr(nil)
-	ok(t, val, nil, NewStr("a"))
-	val = b.ToStr(nil)
-	ok(t, val, nil, NewStr("b"))
+	val, err = a.ToStr(nil)
+	ok(t, val, err, NewStr("a"))
+	val, err = b.ToStr(nil)
+	ok(t, val, err, NewStr("b"))
 
 	okType(t, a, StrType)
 	val, err = a.Eq(nil, b)
@@ -274,10 +274,10 @@ func TestInt(t *testing.T) {
 	var val Value
 	var err Error
 
-	val = a.ToStr(nil)
-	ok(t, val, nil, NewStr("0"))
-	val = b.ToStr(nil)
-	ok(t, val, nil, NewStr("1"))
+	val, err = a.ToStr(nil)
+	ok(t, val, err, NewStr("0"))
+	val, err = b.ToStr(nil)
+	ok(t, val, err, NewStr("1"))
 
 	okType(t, a, IntType)
 
@@ -401,10 +401,10 @@ func TestFloat(t *testing.T) {
 	var val Value
 	var err Error
 
-	val = a.ToStr(nil)
-	ok(t, val, nil, NewStr("0.1"))
-	val = b.ToStr(nil)
-	ok(t, val, nil, NewStr("1.2"))
+	val, err = a.ToStr(nil)
+	ok(t, val, err, NewStr("0.1"))
+	val, err = b.ToStr(nil)
+	ok(t, val, err, NewStr("1.2"))
 
 	val, err = a.Eq(nil, b)
 	ok(t, val, err, False)

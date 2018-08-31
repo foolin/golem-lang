@@ -304,7 +304,7 @@ func (c *compiler) visitBlock(blk *ast.BlockNode) {
 	//
 	// However, at the moment we do not have a Control Flow Graph, and thus
 	// have no way of knowing which expressions should be popped.
-	// So we need to write the Control Flow Graph to fix this problem.
+	// We need to write the Control Flow Graph to fix this problem.
 
 	for _, stmt := range blk.Statements {
 		c.Visit(stmt)

@@ -20,7 +20,7 @@ type Value interface {
 
 	Eq(Evaluator, Value) (Bool, Error)
 	HashCode(Evaluator) (Int, Error)
-	ToStr(Evaluator) Str
+	ToStr(Evaluator) (Str, Error)
 	Cmp(Evaluator, Value) (Int, Error)
 
 	FieldNames() ([]string, Error)
@@ -193,113 +193,111 @@ func (k ArityKind) String() string {
 	}
 }
 
-////---------------------------------------------------------------
-//// Composite
-//
-//type (
-//	// Composite is a Value that is composed of other values -- List, Range, Tuple,
-//	// Dict, Set, Struct
-//	Composite interface {
-//		Value
-//		compositeMarker()
-//	}
-//
-//	// List is an indexable sequence of values
-//	List interface {
-//		Composite
-//		IndexAssignable
-//		Lenable
-//		Iterable
-//		Sliceable
-//
-//		IsEmpty() Bool
-//		Clear() Error
-//
-//		Contains(Evaluator, Value) (Bool, Error)
-//		IndexOf(Evaluator, Value) (Int, Error)
-//		Join(Evaluator, Str) Str
-//
-//		Add(Evaluator, Value) Error
-//		AddAll(Evaluator, Value) Error
-//		Remove(Evaluator, Int) Error
-//
-//		Values() []Value
-//
-//		Map(Evaluator, func(Value) (Value, Error)) (Value, Error)
-//		Reduce(Evaluator, Value, func(Value, Value) (Value, Error)) (Value, Error)
-//		Filter(Evaluator, func(Value) (Value, Error)) (Value, Error)
-//	}
-//
-//	// Range is an immutable, iterable representation of a  sequence of integers
-//	Range interface {
-//		Composite
-//		Indexable
-//		Lenable
-//		Iterable
-//
-//		From() Int
-//		To() Int
-//		Step() Int
-//		Count() Int
-//	}
-//
-//	// Tuple is an immutable sequence of two or more values
-//	Tuple interface {
-//		Composite
-//		Indexable
-//		Lenable
-//	}
-//
-//	// Dict is an associative array, a.k.a Hash Map
-//	Dict interface {
-//		Composite
-//		IndexAssignable
-//		Lenable
-//		Iterable
-//
-//		IsEmpty() Bool
-//		Clear() Error
-//
-//		ContainsKey(Evaluator, Value) (Bool, Error)
-//		AddAll(Evaluator, Value) Error
-//		Remove(Evaluator, Value) (Bool, Error)
-//	}
-//
-//	// Set is a set of unique values
-//	Set interface {
-//		Composite
-//		Lenable
-//		Iterable
-//
-//		IsEmpty() Bool
-//		Clear() Error
-//
-//		Contains(Evaluator, Value) (Bool, Error)
-//		Add(Evaluator, Value) Error
-//		AddAll(Evaluator, Value) Error
-//		Remove(Evaluator, Value) (Bool, Error)
-//	}
-//
-//	// Struct is a composite collection of names values
-//	Struct interface {
-//		Composite
-//
-//		SetField(string, Evaluator, Value) Error
-//
-// InternalReplace is a 'secret' internal function that is used
-// in certain situations by the Interpreter.
-// You should never use it yourself, since it will panic if not used properly.
-//		InternalReplaceField(string, Field) Error
-//	}
-//
+//---------------------------------------------------------------
+// Composite
+
+type (
+	// Composite is a Value that is composed of other values -- List, Range, Tuple,
+	// Dict, Set, Struct
+	Composite interface {
+		Value
+		compositeMarker()
+	}
+
+	//	// List is an indexable sequence of values
+	//	List interface {
+	//		Composite
+	//		IndexAssignable
+	//		Lenable
+	//		Iterable
+	//		Sliceable
+	//
+	//		IsEmpty() Bool
+	//		Clear() Error
+	//
+	//		Contains(Evaluator, Value) (Bool, Error)
+	//		IndexOf(Evaluator, Value) (Int, Error)
+	//		Join(Evaluator, Str) Str
+	//
+	//		Add(Evaluator, Value) Error
+	//		AddAll(Evaluator, Value) Error
+	//		Remove(Evaluator, Int) Error
+	//
+	//		Values() []Value
+	//
+	//		Map(Evaluator, func(Value) (Value, Error)) (Value, Error)
+	//		Reduce(Evaluator, Value, func(Value, Value) (Value, Error)) (Value, Error)
+	//		Filter(Evaluator, func(Value) (Value, Error)) (Value, Error)
+	//	}
+	//
+	//	// Range is an immutable, iterable representation of a  sequence of integers
+	//	Range interface {
+	//		Composite
+	//		Indexable
+	//		Lenable
+	//		Iterable
+	//
+	//		From() Int
+	//		To() Int
+	//		Step() Int
+	//		Count() Int
+	//	}
+	//
+	//	// Tuple is an immutable sequence of two or more values
+	//	Tuple interface {
+	//		Composite
+	//		Indexable
+	//		Lenable
+	//	}
+	//
+	//	// Dict is an associative array, a.k.a Hash Map
+	//	Dict interface {
+	//		Composite
+	//		IndexAssignable
+	//		Lenable
+	//		Iterable
+	//
+	//		IsEmpty() Bool
+	//		Clear() Error
+	//
+	//		ContainsKey(Evaluator, Value) (Bool, Error)
+	//		AddAll(Evaluator, Value) Error
+	//		Remove(Evaluator, Value) (Bool, Error)
+	//	}
+	//
+	//	// Set is a set of unique values
+	//	Set interface {
+	//		Composite
+	//		Lenable
+	//		Iterable
+	//
+	//		IsEmpty() Bool
+	//		Clear() Error
+	//
+	//		Contains(Evaluator, Value) (Bool, Error)
+	//		Add(Evaluator, Value) Error
+	//		AddAll(Evaluator, Value) Error
+	//		Remove(Evaluator, Value) (Bool, Error)
+	//	}
+
+	// Struct is a composite collection of names values
+	Struct interface {
+		Composite
+
+		SetField(string, Evaluator, Value) Error
+
+		//// Internal is for use only by the Golem Compiler
+		//Internal([]interface{})
+	}
+
 //	// Iterator iterates over a sequence of values
 //	Iterator interface {
 //		Struct
 //		IterNext() Bool
 //		IterGet() (Value, Error)
 //	}
-//)
-//
+)
+
 ////---------------------------------------------------------------
 //// Chan
 //

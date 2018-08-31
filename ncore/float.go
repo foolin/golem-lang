@@ -37,8 +37,8 @@ func (f _float) Frozen(ev Evaluator) (Bool, Error) {
 	return True, nil
 }
 
-func (f _float) ToStr(ev Evaluator) Str {
-	return NewStr(fmt.Sprintf("%g", f))
+func (f _float) ToStr(ev Evaluator) (Str, Error) {
+	return NewStr(fmt.Sprintf("%g", f)), nil
 }
 
 func (f _float) HashCode(ev Evaluator) (Int, Error) {
@@ -60,8 +60,8 @@ func (f _float) HashCode(ev Evaluator) (Int, Error) {
 	return NewInt(hashCode), nil
 }
 
-func (f _float) Eq(ev Evaluator, v Value) (Bool, Error) {
-	switch t := v.(type) {
+func (f _float) Eq(ev Evaluator, val Value) (Bool, Error) {
+	switch t := val.(type) {
 
 	case _float:
 		return NewBool(f == t), nil
@@ -74,8 +74,8 @@ func (f _float) Eq(ev Evaluator, v Value) (Bool, Error) {
 	}
 }
 
-func (f _float) Cmp(ev Evaluator, v Value) (Int, Error) {
-	switch t := v.(type) {
+func (f _float) Cmp(ev Evaluator, val Value) (Int, Error) {
+	switch t := val.(type) {
 
 	case _float:
 		if f < t {
@@ -101,8 +101,8 @@ func (f _float) Cmp(ev Evaluator, v Value) (Int, Error) {
 	}
 }
 
-func (f _float) Add(v Value) (Number, Error) {
-	switch t := v.(type) {
+func (f _float) Add(val Value) (Number, Error) {
+	switch t := val.(type) {
 
 	case _int:
 		return f + _float(t), nil
@@ -115,8 +115,8 @@ func (f _float) Add(v Value) (Number, Error) {
 	}
 }
 
-func (f _float) Sub(v Value) (Number, Error) {
-	switch t := v.(type) {
+func (f _float) Sub(val Value) (Number, Error) {
+	switch t := val.(type) {
 
 	case _int:
 		return f - _float(t), nil
@@ -129,8 +129,8 @@ func (f _float) Sub(v Value) (Number, Error) {
 	}
 }
 
-func (f _float) Mul(v Value) (Number, Error) {
-	switch t := v.(type) {
+func (f _float) Mul(val Value) (Number, Error) {
+	switch t := val.(type) {
 
 	case _int:
 		return f * _float(t), nil
@@ -143,8 +143,8 @@ func (f _float) Mul(v Value) (Number, Error) {
 	}
 }
 
-func (f _float) Div(v Value) (Number, Error) {
-	switch t := v.(type) {
+func (f _float) Div(val Value) (Number, Error) {
+	switch t := val.(type) {
 
 	case _int:
 		if t == 0 {

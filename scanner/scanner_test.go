@@ -11,6 +11,13 @@ import (
 	"testing"
 )
 
+func tassert(t *testing.T, flag bool) {
+	if !flag {
+		t.Error("assertion failure")
+		panic("tassert")
+	}
+}
+
 func ok(t *testing.T, s *Scanner, tokenKind ast.TokenKind, text string, line int, col int) {
 
 	token := &ast.Token{
@@ -380,4 +387,24 @@ func TestUnicode(t *testing.T) {
 	ok(t, s, ast.Str, "💖", 1, 1)
 	s = NewScanner(&Source{"", "", "'\\u{1f496}\\u{2665}\\u{24}'"})
 	ok(t, s, ast.Str, "💖♥$", 1, 1)
+}
+
+func TestIdentKeyword(t *testing.T) {
+
+	tassert(t, IsKeyword("struct"))
+	tassert(t, IsKeyword("yield"))
+	tassert(t, !IsKeyword("abc"))
+	tassert(t, !IsKeyword("這是我們"))
+
+	tassert(t, !IsIdentifier("struct"))
+	tassert(t, !IsIdentifier("yield"))
+	tassert(t, !IsIdentifier("_"))
+	tassert(t, !IsIdentifier("a "))
+	tassert(t, !IsIdentifier(" a"))
+	tassert(t, !IsIdentifier("1a"))
+
+	tassert(t, IsIdentifier("abc"))
+	tassert(t, IsIdentifier("_a_bc"))
+	tassert(t, IsIdentifier("a1"))
+	tassert(t, IsIdentifier("這是我們"))
 }

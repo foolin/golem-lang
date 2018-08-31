@@ -10,7 +10,6 @@ import (
 	"io"
 	"strconv"
 	"strings"
-	"unicode"
 )
 
 const eof rune = -1
@@ -339,7 +338,7 @@ func (s *Scanner) Next() *ast.Token {
 		case isDigit(r):
 			return s.nextNumber()
 
-		case isIdentStart(r):
+		case IsIdentStart(r):
 			return s.nextIdentOrKeyword()
 
 		case r == eof:
@@ -359,82 +358,19 @@ func (s *Scanner) nextIdentOrKeyword() *ast.Token {
 	begin := s.cur.idx
 	s.consume()
 
-	s.acceptWhile(isIdentContinue)
+	s.acceptWhile(IsIdentContinue)
 
 	text := s.Source.Code[begin:s.cur.idx]
-	switch text {
 
-	case "_":
-		return &ast.Token{Kind: ast.BlankIdent, Text: text, Position: pos}
-	case "null":
-		return &ast.Token{Kind: ast.Null, Text: text, Position: pos}
-	case "true":
-		return &ast.Token{Kind: ast.True, Text: text, Position: pos}
-	case "false":
-		return &ast.Token{Kind: ast.False, Text: text, Position: pos}
-	case "if":
-		return &ast.Token{Kind: ast.If, Text: text, Position: pos}
-	case "else":
-		return &ast.Token{Kind: ast.Else, Text: text, Position: pos}
-	case "while":
-		return &ast.Token{Kind: ast.While, Text: text, Position: pos}
-	case "break":
-		return &ast.Token{Kind: ast.Break, Text: text, Position: pos}
-	case "continue":
-		return &ast.Token{Kind: ast.Continue, Text: text, Position: pos}
-	case "fn":
-		return &ast.Token{Kind: ast.Fn, Text: text, Position: pos}
-	case "return":
-		return &ast.Token{Kind: ast.Return, Text: text, Position: pos}
-	case "const":
-		return &ast.Token{Kind: ast.Const, Text: text, Position: pos}
-	case "let":
-		return &ast.Token{Kind: ast.Let, Text: text, Position: pos}
-	case "for":
-		return &ast.Token{Kind: ast.For, Text: text, Position: pos}
-	case "in":
-		return &ast.Token{Kind: ast.In, Text: text, Position: pos}
-	case "switch":
-		return &ast.Token{Kind: ast.Switch, Text: text, Position: pos}
-	case "case":
-		return &ast.Token{Kind: ast.Case, Text: text, Position: pos}
-	case "default":
-		return &ast.Token{Kind: ast.Default, Text: text, Position: pos}
-	case "prop":
-		return &ast.Token{Kind: ast.Prop, Text: text, Position: pos}
-	case "try":
-		return &ast.Token{Kind: ast.Try, Text: text, Position: pos}
-	case "catch":
-		return &ast.Token{Kind: ast.Catch, Text: text, Position: pos}
-	case "finally":
-		return &ast.Token{Kind: ast.Finally, Text: text, Position: pos}
-	case "throw":
-		return &ast.Token{Kind: ast.Throw, Text: text, Position: pos}
-	case "go":
-		return &ast.Token{Kind: ast.Go, Text: text, Position: pos}
-	case "import":
-		return &ast.Token{Kind: ast.Import, Text: text, Position: pos}
-	case "struct":
-		return &ast.Token{Kind: ast.Struct, Text: text, Position: pos}
-	case "dict":
-		return &ast.Token{Kind: ast.Dict, Text: text, Position: pos}
-	case "set":
-		return &ast.Token{Kind: ast.Set, Text: text, Position: pos}
-	case "this":
-		return &ast.Token{Kind: ast.This, Text: text, Position: pos}
-	case "has":
-		return &ast.Token{Kind: ast.Has, Text: text, Position: pos}
-
-	case "module", "byte", "defer", "goto", "like", "native", "package",
-		"priv", "private", "prot", "protected", "pub", "public",
-		"rune", "select", "static", "sync", "rsync", "with", "yield":
-
-		// reserve a bunch of keywords just in case
-		return &ast.Token{Kind: ast.Reserved, Text: text, Position: pos}
-
-	default:
-		return &ast.Token{Kind: ast.Ident, Text: text, Position: pos}
+	if kind, ok := keywords[text]; ok {
+		return &ast.Token{Kind: kind, Text: text, Position: pos}
 	}
+
+	if _, ok := reservedWords[text]; ok {
+		return &ast.Token{Kind: ast.Reserved, Text: text, Position: pos}
+	}
+
+	return &ast.Token{Kind: ast.Ident, Text: text, Position: pos}
 }
 
 func (s *Scanner) nextStr(delim rune) *ast.Token {
@@ -734,14 +670,6 @@ func isHexDigit(r rune) bool {
 	return (r >= '0') && (r <= '9') ||
 		(r >= 'a') && (r <= 'f') ||
 		(r >= 'A') && (r <= 'F')
-}
-
-func isIdentStart(r rune) bool {
-	return unicode.IsLetter(r) || r == '_'
-}
-
-func isIdentContinue(r rune) bool {
-	return unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_'
 }
 
 func isExp(r rune) bool {

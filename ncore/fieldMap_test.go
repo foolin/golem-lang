@@ -112,24 +112,6 @@ func getMap(t *testing.T, fm fieldMap) map[string]Value {
 	return result
 }
 
-//func getMap(t *testing.T, fm fieldMap) map[string]Value {
-//
-//	result := make(map[string]Value)
-//	names := fm.names()
-//	for _, n := range names {
-//
-//		val, err := fm.get(n, nil)
-//		tassert(t, err == nil)
-//		fn := val.(Func)
-//
-//		val, err = fn.Invoke(nil, nil)
-//		tassert(t, err == nil)
-//		result[n] = val
-//	}
-//
-//	return result
-//}
-
 func TestMergeFieldMaps(t *testing.T) {
 
 	var x fieldMap = &hashFieldMap{
@@ -140,6 +122,7 @@ func TestMergeFieldMaps(t *testing.T) {
 			"f": NewField(next()),
 		},
 		true}
+	tassert(t, x.(*hashFieldMap).replacable)
 
 	var y fieldMap = &virtualFieldMap{
 		next(),
@@ -172,6 +155,7 @@ func TestMergeFieldMaps(t *testing.T) {
 			"f": NewField(next()),
 		},
 		true}
+	tassert(t, z.(*hashFieldMap).replacable)
 
 	w := mergeFieldMaps([]fieldMap{x, y, z})
 
@@ -180,6 +164,7 @@ func TestMergeFieldMaps(t *testing.T) {
 		return strings.Compare(names[i], names[j]) < 0
 	})
 	tassert(t, reflect.DeepEqual([]string{"a", "b", "c", "d", "e", "f"}, names))
+	tassert(t, !w.(*hashFieldMap).replacable)
 
 	//------------------------------------------------
 

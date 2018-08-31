@@ -32,7 +32,9 @@ func (s str) Frozen(ev Evaluator) (Bool, Error) {
 	return True, nil
 }
 
-func (s str) ToStr(ev Evaluator) Str { return s }
+func (s str) ToStr(ev Evaluator) (Str, Error) {
+	return s, nil
+}
 
 func (s str) HashCode(ev Evaluator) (Int, Error) {
 	h := strHash(string(s))

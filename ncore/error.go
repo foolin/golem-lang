@@ -52,3 +52,13 @@ func ReadonlyFieldError(name string) Error {
 func NoSuchFieldError(name string) Error {
 	return fmt.Errorf("NoSuchField: Field '%s' not found", name)
 }
+
+// ImmutableValueError creates an ImmutableValue Error
+func ImmutableValueError() Error {
+	return fmt.Errorf("ImmutableValue")
+}
+
+// InvalidStructKeyError creates a ReadonlyField Error
+func InvalidStructKeyError(key string) Error {
+	return fmt.Errorf("InvalidStructKey: '%s' is not a valid struct key.", key)
+}

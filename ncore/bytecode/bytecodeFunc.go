@@ -45,20 +45,16 @@ func (f *bytecodeFunc) HashCode(ev g.Evaluator) (g.Int, g.Error) {
 	return nil, g.TypeMismatchError("Expected Hashable Type")
 }
 
-//func (f *bytecodeFunc) GetField(ev g.Evaluator, key g.Str) (g.Value, g.Error) {
-//	return nil, NoSuchFieldError(key.String())
-//}
-
-func (f *bytecodeFunc) Cmp(ev g.Evaluator, v g.Value) (g.Int, g.Error) {
+func (f *bytecodeFunc) Cmp(ev g.Evaluator, val g.Value) (g.Int, g.Error) {
 	return nil, g.TypeMismatchError("Expected Comparable Type")
 }
 
-func (f *bytecodeFunc) ToStr(ev g.Evaluator) g.Str {
-	return g.NewStr(fmt.Sprintf("func<%p>", f))
+func (f *bytecodeFunc) ToStr(ev g.Evaluator) (g.Str, g.Error) {
+	return g.NewStr(fmt.Sprintf("func<%p>", f)), nil
 }
 
-func (f *bytecodeFunc) Eq(ev g.Evaluator, v g.Value) (g.Bool, g.Error) {
-	switch t := v.(type) {
+func (f *bytecodeFunc) Eq(ev g.Evaluator, val g.Value) (g.Bool, g.Error) {
+	switch t := val.(type) {
 	case BytecodeFunc:
 		// equality is based on identity
 		return g.NewBool(f == t), nil

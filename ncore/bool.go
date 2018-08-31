@@ -36,11 +36,11 @@ func (b _bool) Frozen(ev Evaluator) (Bool, Error) {
 	return True, nil
 }
 
-func (b _bool) ToStr(ev Evaluator) Str {
+func (b _bool) ToStr(ev Evaluator) (Str, Error) {
 	if b {
-		return NewStr("true")
+		return NewStr("true"), nil
 	}
-	return NewStr("false")
+	return NewStr("false"), nil
 }
 
 func (b _bool) HashCode(ev Evaluator) (Int, Error) {
@@ -50,8 +50,8 @@ func (b _bool) HashCode(ev Evaluator) (Int, Error) {
 	return NewInt(1013), nil
 }
 
-func (b _bool) Eq(ev Evaluator, v Value) (Bool, Error) {
-	switch t := v.(type) {
+func (b _bool) Eq(ev Evaluator, val Value) (Bool, Error) {
+	switch t := val.(type) {
 	case _bool:
 		if b == t {
 			return _bool(true), nil
@@ -62,8 +62,8 @@ func (b _bool) Eq(ev Evaluator, v Value) (Bool, Error) {
 	}
 }
 
-func (b _bool) Cmp(ev Evaluator, v Value) (Int, Error) {
-	switch t := v.(type) {
+func (b _bool) Cmp(ev Evaluator, val Value) (Int, Error) {
+	switch t := val.(type) {
 
 	case _bool:
 		if b == t {

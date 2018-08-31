@@ -29,8 +29,8 @@ func (f *nativeFunc) funcMarker() {}
 
 func (f *nativeFunc) Type() Type { return FuncType }
 
-func (f *nativeFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
-	switch t := v.(type) {
+func (f *nativeFunc) Eq(ev Evaluator, val Value) (Bool, Error) {
+	switch t := val.(type) {
 	case *nativeFunc:
 		// equality is based on identity
 		return NewBool(f == t), nil
@@ -51,12 +51,12 @@ func (f *nativeFunc) HashCode(ev Evaluator) (Int, Error) {
 	return nil, TypeMismatchError("Expected Hashable Type")
 }
 
-func (f *nativeFunc) Cmp(ev Evaluator, v Value) (Int, Error) {
+func (f *nativeFunc) Cmp(ev Evaluator, val Value) (Int, Error) {
 	return nil, TypeMismatchError("Expected Comparable Type")
 }
 
-func (f *nativeFunc) ToStr(ev Evaluator) Str {
-	return NewStr(fmt.Sprintf("nativeFunc<%p>", f))
+func (f *nativeFunc) ToStr(ev Evaluator) (Str, Error) {
+	return NewStr(fmt.Sprintf("nativeFunc<%p>", f)), nil
 }
 
 func (f *nativeFunc) Arity() Arity { return f.arity }
@@ -112,8 +112,8 @@ func (f *nativeFixedFunc) Freeze(ev Evaluator) (Value, Error) {
 	return f, nil
 }
 
-func (f *nativeFixedFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
-	switch t := v.(type) {
+func (f *nativeFixedFunc) Eq(ev Evaluator, val Value) (Bool, Error) {
+	switch t := val.(type) {
 	case *nativeFixedFunc:
 		// equality is based on identity
 		return NewBool(f == t), nil
@@ -166,8 +166,8 @@ func (f *nativeVariadicFunc) Freeze(ev Evaluator) (Value, Error) {
 	return f, nil
 }
 
-func (f *nativeVariadicFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
-	switch t := v.(type) {
+func (f *nativeVariadicFunc) Eq(ev Evaluator, val Value) (Bool, Error) {
+	switch t := val.(type) {
 	case *nativeVariadicFunc:
 		// equality is based on identity
 		return NewBool(f == t), nil
@@ -220,8 +220,8 @@ func (f *nativeMultipleFunc) Freeze(ev Evaluator) (Value, Error) {
 	return f, nil
 }
 
-func (f *nativeMultipleFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
-	switch t := v.(type) {
+func (f *nativeMultipleFunc) Eq(ev Evaluator, val Value) (Bool, Error) {
+	switch t := val.(type) {
 	case *nativeMultipleFunc:
 		// equality is based on identity
 		return NewBool(f == t), nil
