@@ -51,8 +51,8 @@ func okType(t *testing.T, val g.Value, expected g.Type) {
 
 func TestBytecodeFunc(t *testing.T) {
 
-	a := NewBytecodeFunc(&FuncTemplate{})
-	b := NewBytecodeFunc(&FuncTemplate{})
+	var a g.Func = NewBytecodeFunc(&FuncTemplate{})
+	var b g.Func = NewBytecodeFunc(&FuncTemplate{})
 
 	okType(t, a, g.FuncType)
 	okType(t, b, g.FuncType)

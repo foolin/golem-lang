@@ -11,6 +11,10 @@ import (
 // Error is an error
 type Error error
 
+func NewError(s string) Error {
+	return fmt.Errorf(s)
+}
+
 // NullValueError creates a NullValue Error
 func NullValueError() Error {
 	return fmt.Errorf("NullValue")
@@ -61,4 +65,9 @@ func ImmutableValueError() Error {
 // InvalidStructKeyError creates a ReadonlyField Error
 func InvalidStructKeyError(key string) Error {
 	return fmt.Errorf("InvalidStructKey: '%s' is not a valid struct key.", key)
+}
+
+// UndefinedModuleError creates a UndefinedModule Error
+func UndefinedModuleError(name string) Error {
+	return fmt.Errorf("UndefinedModule: Module '%s' is not defined", name)
 }
