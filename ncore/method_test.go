@@ -8,15 +8,7 @@ import (
 	"testing"
 )
 
-func TestMethodEq(t *testing.T) {
-
-	m := NewFixedMethod(
-		[]Type{},
-		false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
-			return Null, nil
-		})
-
+func testMethodEq(t *testing.T, m Method) {
 	a1 := m.ToFunc(1, "foo")
 	a2 := m.ToFunc(1, "foo")
 	a3 := m.ToFunc(2, "foo")
@@ -56,6 +48,7 @@ func TestFixedMethod(t *testing.T) {
 			n := self.(int)
 			return NewInt(int64(n * n)), nil
 		})
+	testMethodEq(t, m)
 
 	val, err := m.Invoke(10, nil, []Value{})
 	ok(t, val, err, NewInt(100))
@@ -114,6 +107,7 @@ func TestVariadicMethod(t *testing.T) {
 			}
 			return NewInt(int64(n)), nil
 		})
+	testMethodEq(t, m)
 
 	val, err := m.Invoke(10, nil, []Value{NewInt(2), NewInt(3)})
 	ok(t, val, err, NewInt(15))
@@ -126,13 +120,47 @@ func TestVariadicMethod(t *testing.T) {
 	ok(t, val, err, NewInt(15))
 }
 
+func TestMultipleMethod(t *testing.T) {
+
+	m := NewMultipleMethod(
+		[]Type{IntType},
+		[]Type{IntType},
+		false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			n := self.(int)
+			n += int(params[0].(Int).IntVal())
+			if len(params) == 2 {
+				n += int(params[1].(Int).IntVal())
+			}
+
+			return NewInt(int64(n)), nil
+		})
+	testMethodEq(t, m)
+
+	val, err := m.Invoke(10, nil, []Value{NewInt(2)})
+	ok(t, val, err, NewInt(12))
+
+	val, err = m.Invoke(10, nil, []Value{NewInt(2), NewInt(3)})
+	ok(t, val, err, NewInt(15))
+
+	fn := m.ToFunc(10, "foo")
+
+	ok(t, fn.Arity(), nil, Arity{MultipleArity, 1, 1})
+
+	val, err = fn.Invoke(nil, []Value{NewInt(2)})
+	ok(t, val, err, NewInt(12))
+
+	val, err = fn.Invoke(nil, []Value{NewInt(2), NewInt(3)})
+	ok(t, val, err, NewInt(15))
+}
+
 //--------------------------------------------------------------
 
 func show(val Value) {
 	//println(val.ToStr(nil).String())
 }
 
-const iterate = 4 * 1000 * 1000
+const iterate = 2 * 1000 * 1000
 
 //const iterate = 4
 

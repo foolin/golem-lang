@@ -132,6 +132,61 @@ func (m *variadicMethod) ToFunc(self interface{}, methodName string) NativeFunc 
 }
 
 //--------------------------------------------------------------
+// MultipleMethod
+//--------------------------------------------------------------
+
+type multipleMethod struct {
+	*method
+	requiredTypes []Type
+	optionalTypes []Type
+	allowNull     bool
+}
+
+// NewMultipleMethod creates a new Method with multiple arity
+func NewMultipleMethod(
+	requiredTypes []Type,
+	optionalTypes []Type,
+	allowNull bool,
+	invoke func(interface{}, Evaluator, []Value) (Value, Error)) Method {
+
+	arity := Arity{
+		Kind:           MultipleArity,
+		RequiredParams: uint16(len(requiredTypes)),
+		OptionalParams: uint16(len(optionalTypes)),
+	}
+
+	return &multipleMethod{
+		&method{arity, invoke},
+		requiredTypes, optionalTypes, allowNull,
+	}
+}
+
+func (m *multipleMethod) Invoke(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+
+	err := vetMultipleParams(params, m.requiredTypes, m.optionalTypes, m.allowNull)
+	if err != nil {
+		return nil, err
+	}
+	return m.invoke(self, ev, params)
+}
+
+func (m *multipleMethod) ToFunc(self interface{}, methodName string) NativeFunc {
+
+	nf := NewMultipleNativeFunc(
+		m.requiredTypes,
+		m.optionalTypes,
+		m.allowNull,
+		func(ev Evaluator, params []Value) (Value, Error) {
+			return m.invoke(self, ev, params)
+		})
+
+	return &multipleMethodFunc{
+		self,
+		methodName,
+		nf.(*nativeMultipleFunc)}
+}
+
+//--------------------------------------------------------------
 // methodFunc
 //--------------------------------------------------------------
 
@@ -194,6 +249,30 @@ type variadicMethodFunc struct {
 func (f *variadicMethodFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *variadicMethodFunc:
+		// Equality is based on whether the two funcs have the same self,
+		// and the same name.
+		eq, err := selfEq(ev, f.self, t.self)
+		if err != nil {
+			return nil, err
+		}
+		return NewBool(eq.BoolVal() && (f.name == t.name)), nil
+	default:
+		return False, nil
+	}
+}
+
+//---------------------------------------------
+// multiple
+
+type multipleMethodFunc struct {
+	self interface{}
+	name string
+	*nativeMultipleFunc
+}
+
+func (f *multipleMethodFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
+	switch t := v.(type) {
+	case *multipleMethodFunc:
 		// Equality is based on whether the two funcs have the same self,
 		// and the same name.
 		eq, err := selfEq(ev, f.self, t.self)
