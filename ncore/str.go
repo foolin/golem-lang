@@ -148,10 +148,35 @@ func (s str) Concat(that Str) Str {
 //--------------------------------------------------------------
 // fields
 
+// This is some chinese text that we are going to use for testing purposes.
+// 這是我們將用於測試目的的一些中文文本。
+
 var strMethods = map[string]Method{
 
-	//"contains",
-	//"index",
+	"contains": NewFixedMethod(
+		[]Type{StrType}, false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+
+			s := self.(Str).String()
+			substr := params[0].(Str).String()
+			result := strings.Contains(s, substr)
+			return NewBool(result), nil
+		}),
+
+	"index": NewFixedMethod(
+		[]Type{StrType}, false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+
+			// TODO implement this more efficiently
+			s := self.(Str).String()
+			substr := params[0].(Str).String()
+			result := strings.Index(s, substr)
+			if result == -1 {
+				return NegOne, nil
+			}
+			result = utf8.RuneCountInString(s[:result])
+			return NewInt(int64(result)), nil
+		}),
 
 	//"lastIndex",
 	//"startsWith",
@@ -188,29 +213,6 @@ func (s str) InvokeField(name string, ev Evaluator, params []Value) (Value, Erro
 	}
 	return nil, NoSuchFieldError(name)
 }
-
-//var containsMethod Method = nil //NewFixedMethod(
-//	StrType, []Type{StrType}, false,
-//	func(ev Evaluator, self Value, params []Value) (Value, Error) {
-//		s := self.(Str)
-//		substr := params[0].(Str)
-//		return NewBool(strings.Contains(s.String(), substr.String())), nil
-//	}), true
-
-//var containsMethod = NewFixedMethod(
-//	[]Type{StrType}, false,
-//	func(ev Evaluator, self Value, params []Value) Invoke {
-//		return func(ev Evaluator, params []Value) (Value, Error) {
-//		return self.Contains(params[0].(Str)), nil
-//	})
-
-//	case "index":
-//		return &virtualFunc{s, sn, NewFixedNativeFunc(
-//			[]Type{StrType}, false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//				z := params[0].(Str)
-//				return NewInt(int64(strings.Index(string(s), z.String()))), nil
-//			})}, nil
 
 //--------------------------------------------------------------
 
