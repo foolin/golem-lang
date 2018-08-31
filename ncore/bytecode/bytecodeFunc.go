@@ -33,31 +33,31 @@ func NewBytecodeFunc(template *FuncTemplate) BytecodeFunc {
 
 func (f *bytecodeFunc) Type() g.Type { return g.FuncType }
 
-func (f *bytecodeFunc) Freeze(cx g.Context) (g.Value, g.Error) {
+func (f *bytecodeFunc) Freeze(ev g.Evaluator) (g.Value, g.Error) {
 	return f, nil
 }
 
-func (f *bytecodeFunc) Frozen(cx g.Context) (g.Bool, g.Error) {
+func (f *bytecodeFunc) Frozen(ev g.Evaluator) (g.Bool, g.Error) {
 	return g.True, nil
 }
 
-func (f *bytecodeFunc) HashCode(cx g.Context) (g.Int, g.Error) {
+func (f *bytecodeFunc) HashCode(ev g.Evaluator) (g.Int, g.Error) {
 	return nil, g.TypeMismatchError("Expected Hashable Type")
 }
 
-//func (f *bytecodeFunc) GetField(cx g.Context, key g.Str) (g.Value, g.Error) {
+//func (f *bytecodeFunc) GetField(ev g.Evaluator, key g.Str) (g.Value, g.Error) {
 //	return nil, NoSuchFieldError(key.String())
 //}
 
-func (f *bytecodeFunc) Cmp(cx g.Context, v g.Value) (g.Int, g.Error) {
+func (f *bytecodeFunc) Cmp(ev g.Evaluator, v g.Value) (g.Int, g.Error) {
 	return nil, g.TypeMismatchError("Expected Comparable Type")
 }
 
-func (f *bytecodeFunc) ToStr(cx g.Context) g.Str {
+func (f *bytecodeFunc) ToStr(ev g.Evaluator) g.Str {
 	return g.NewStr(fmt.Sprintf("func<%p>", f))
 }
 
-func (f *bytecodeFunc) Eq(cx g.Context, v g.Value) (g.Bool, g.Error) {
+func (f *bytecodeFunc) Eq(ev g.Evaluator, v g.Value) (g.Bool, g.Error) {
 	switch t := v.(type) {
 	case BytecodeFunc:
 		// equality is based on identity
@@ -78,11 +78,11 @@ func (f *bytecodeFunc) HasField(name string) (bool, g.Error) {
 	return false, nil
 }
 
-func (f *bytecodeFunc) GetField(name string, cx g.Context) (g.Value, g.Error) {
+func (f *bytecodeFunc) GetField(name string, ev g.Evaluator) (g.Value, g.Error) {
 	return nil, g.NoSuchFieldError(name)
 }
 
-func (f *bytecodeFunc) InvokeField(name string, cx g.Context, params []g.Value) (g.Value, g.Error) {
+func (f *bytecodeFunc) InvokeField(name string, ev g.Evaluator, params []g.Value) (g.Value, g.Error) {
 	return nil, g.NoSuchFieldError(name)
 }
 
@@ -91,8 +91,8 @@ func (f *bytecodeFunc) InvokeField(name string, cx g.Context, params []g.Value) 
 
 func (f *bytecodeFunc) Arity() g.Arity { return f.template.Arity }
 
-func (f *bytecodeFunc) Invoke(cx g.Context, params []g.Value) (g.Value, g.Error) {
-	return cx.Eval(f, params)
+func (f *bytecodeFunc) Invoke(ev g.Evaluator, params []g.Value) (g.Value, g.Error) {
+	return ev.Eval(f, params)
 }
 
 //---------------------------------------------------------------

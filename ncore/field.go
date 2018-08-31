@@ -11,9 +11,9 @@ import (
 
 type (
 	Field interface {
-		Get(Context) (Value, Error)
-		Invoke(Context, []Value) (Value, Error)
-		Set(Context, Value) Error
+		Get(Evaluator) (Value, Error)
+		Invoke(Evaluator, []Value) (Value, Error)
+		Set(Evaluator, Value) Error
 	}
 )
 
@@ -29,19 +29,19 @@ func NewField(val Value) Field {
 	return &field{val}
 }
 
-func (f *field) Get(cx Context) (Value, Error) {
+func (f *field) Get(ev Evaluator) (Value, Error) {
 	return f.value, nil
 }
 
-func (f *field) Invoke(cx Context, params []Value) (Value, Error) {
+func (f *field) Invoke(ev Evaluator, params []Value) (Value, Error) {
 	fn, ok := f.value.(Func)
 	if !ok {
 		return nil, TypeMismatchError("Expected Func")
 	}
-	return fn.Invoke(cx, params)
+	return fn.Invoke(ev, params)
 }
 
-func (f *field) Set(cx Context, val Value) Error {
+func (f *field) Set(ev Evaluator, val Value) Error {
 	f.value = val
 	return nil
 }
@@ -58,19 +58,19 @@ func NewReadonlyField(val Value) Field {
 	return &readonlyField{val}
 }
 
-func (f *readonlyField) Get(cx Context) (Value, Error) {
+func (f *readonlyField) Get(ev Evaluator) (Value, Error) {
 	return f.value, nil
 }
 
-func (f *readonlyField) Invoke(cx Context, params []Value) (Value, Error) {
+func (f *readonlyField) Invoke(ev Evaluator, params []Value) (Value, Error) {
 	fn, ok := f.value.(Func)
 	if !ok {
 		return nil, TypeMismatchError("Expected Func")
 	}
-	return fn.Invoke(cx, params)
+	return fn.Invoke(ev, params)
 }
 
-func (f *readonlyField) Set(cx Context, val Value) Error {
+func (f *readonlyField) Set(ev Evaluator, val Value) Error {
 	return fmt.Errorf("ReadonlyField")
 }
 
@@ -96,13 +96,13 @@ func NewProperty(get Func, set Func) (Field, Error) {
 	return &property{get, set}, nil
 }
 
-func (p *property) Get(cx Context) (Value, Error) {
-	return p.get.Invoke(cx, []Value{})
+func (p *property) Get(ev Evaluator) (Value, Error) {
+	return p.get.Invoke(ev, []Value{})
 }
 
-func (p *property) Invoke(cx Context, params []Value) (Value, Error) {
+func (p *property) Invoke(ev Evaluator, params []Value) (Value, Error) {
 
-	val, err := p.get.Invoke(cx, []Value{})
+	val, err := p.get.Invoke(ev, []Value{})
 	if err != nil {
 		return nil, err
 	}
@@ -111,11 +111,11 @@ func (p *property) Invoke(cx Context, params []Value) (Value, Error) {
 	if !ok {
 		return nil, TypeMismatchError("Expected Func")
 	}
-	return fn.Invoke(cx, params)
+	return fn.Invoke(ev, params)
 }
 
-func (p *property) Set(cx Context, val Value) Error {
-	_, err := p.set.Invoke(cx, []Value{val})
+func (p *property) Set(ev Evaluator, val Value) Error {
+	_, err := p.set.Invoke(ev, []Value{val})
 	return err
 }
 
@@ -136,13 +136,13 @@ func NewReadonlyProperty(get Func) (Field, Error) {
 	return &readonlyProperty{get}, nil
 }
 
-func (p *readonlyProperty) Get(cx Context) (Value, Error) {
-	return p.get.Invoke(cx, []Value{})
+func (p *readonlyProperty) Get(ev Evaluator) (Value, Error) {
+	return p.get.Invoke(ev, []Value{})
 }
 
-func (p *readonlyProperty) Invoke(cx Context, params []Value) (Value, Error) {
+func (p *readonlyProperty) Invoke(ev Evaluator, params []Value) (Value, Error) {
 
-	val, err := p.get.Invoke(cx, []Value{})
+	val, err := p.get.Invoke(ev, []Value{})
 	if err != nil {
 		return nil, err
 	}
@@ -151,9 +151,9 @@ func (p *readonlyProperty) Invoke(cx Context, params []Value) (Value, Error) {
 	if !ok {
 		return nil, TypeMismatchError("Expected Func")
 	}
-	return fn.Invoke(cx, params)
+	return fn.Invoke(ev, params)
 }
 
-func (p *readonlyProperty) Set(cx Context, val Value) Error {
+func (p *readonlyProperty) Set(ev Evaluator, val Value) Error {
 	return fmt.Errorf("ReadonlyField")
 }

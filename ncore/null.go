@@ -24,13 +24,13 @@ func (n *null) basicMarker() {}
 
 func (n *null) Type() Type { return NullType }
 
-func (n *null) ToStr(cx Context) Str { return NewStr("null") }
+func (n *null) ToStr(ev Evaluator) Str { return NewStr("null") }
 
-func (n *null) HashCode(cx Context) (Int, Error) { return nil, NullValueError() }
+func (n *null) HashCode(ev Evaluator) (Int, Error) { return nil, NullValueError() }
 
-//func (n *null) GetField(cx Context, key Str) (Value, Error) { return nil, NullValueError() }
+//func (n *null) GetField(ev Evaluator, key Str) (Value, Error) { return nil, NullValueError() }
 
-func (n *null) Eq(cx Context, v Value) (Bool, Error) {
+func (n *null) Eq(ev Evaluator, v Value) (Bool, Error) {
 	switch v.(type) {
 	case *null:
 		return True, nil
@@ -39,13 +39,13 @@ func (n *null) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
-func (n *null) Cmp(cx Context, v Value) (Int, Error) { return nil, NullValueError() }
+func (n *null) Cmp(ev Evaluator, v Value) (Int, Error) { return nil, NullValueError() }
 
-func (n *null) Freeze(cx Context) (Value, Error) {
+func (n *null) Freeze(ev Evaluator) (Value, Error) {
 	return nil, NullValueError()
 }
 
-func (n *null) Frozen(cx Context) (Bool, Error) {
+func (n *null) Frozen(ev Evaluator) (Bool, Error) {
 	return nil, NullValueError()
 }
 
@@ -60,10 +60,10 @@ func (n *null) HasField(name string) (bool, Error) {
 	return false, NullValueError()
 }
 
-func (n *null) GetField(name string, cx Context) (Value, Error) {
+func (n *null) GetField(name string, ev Evaluator) (Value, Error) {
 	return nil, NullValueError()
 }
 
-func (n *null) InvokeField(name string, cx Context, params []Value) (Value, Error) {
+func (n *null) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
 	return nil, NullValueError()
 }

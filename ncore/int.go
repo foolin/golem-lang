@@ -42,23 +42,23 @@ func (i _int) basicMarker() {}
 
 func (i _int) Type() Type { return IntType }
 
-func (i _int) Freeze(cx Context) (Value, Error) {
+func (i _int) Freeze(ev Evaluator) (Value, Error) {
 	return i, nil
 }
 
-func (i _int) Frozen(cx Context) (Bool, Error) {
+func (i _int) Frozen(ev Evaluator) (Bool, Error) {
 	return True, nil
 }
 
-func (i _int) ToStr(cx Context) Str {
+func (i _int) ToStr(ev Evaluator) Str {
 	return NewStr(fmt.Sprintf("%d", i))
 }
 
-func (i _int) HashCode(cx Context) (Int, Error) {
+func (i _int) HashCode(ev Evaluator) (Int, Error) {
 	return i, nil
 }
 
-func (i _int) Eq(cx Context, v Value) (Bool, Error) {
+func (i _int) Eq(ev Evaluator, v Value) (Bool, Error) {
 	switch t := v.(type) {
 
 	case _int:
@@ -74,7 +74,7 @@ func (i _int) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
-func (i _int) Cmp(cx Context, v Value) (Int, Error) {
+func (i _int) Cmp(ev Evaluator, v Value) (Int, Error) {
 	switch t := v.(type) {
 
 	case _int:
@@ -257,10 +257,10 @@ func (i _int) HasField(name string) (bool, Error) {
 	return false, nil
 }
 
-func (i _int) GetField(name string, cx Context) (Value, Error) {
+func (i _int) GetField(name string, ev Evaluator) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
 
-func (i _int) InvokeField(name string, cx Context, params []Value) (Value, Error) {
+func (i _int) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }

@@ -31,7 +31,7 @@ import (
 //
 //	fn := NewFixedNativeFunc(
 //		[]Type{IntType}, false,
-//		func(cx Context, values []Value) (Value, Error) {
+//		func(ev Evaluator, values []Value) (Value, Error) {
 //			n := values[0].(Int)
 //			return n.Add(One)
 //		})
@@ -70,7 +70,7 @@ import (
 //
 //	fn := NewFixedNativeFunc(
 //		[]Type{IntType}, false,
-//		func(cx Context, values []Value) (Value, Error) {
+//		func(ev Evaluator, values []Value) (Value, Error) {
 //			n := values[0].(Int)
 //			return n.Add(One)
 //		})
@@ -92,20 +92,20 @@ import (
 //
 //	get := NewFixedNativeFunc(
 //		[]Type{}, false,
-//		func(cx Context, values []Value) (Value, Error) {
+//		func(ev Evaluator, values []Value) (Value, Error) {
 //			return propVal, nil
 //		})
 //
 //	set := NewFixedNativeFunc(
 //		[]Type{IntType}, false,
-//		func(cx Context, values []Value) (Value, Error) {
+//		func(ev Evaluator, values []Value) (Value, Error) {
 //			propVal = values[0]
 //			return Null, nil
 //		})
 //
 //	bogus := NewFixedNativeFunc(
 //		[]Type{AnyType, AnyType}, false,
-//		func(cx Context, values []Value) (Value, Error) {
+//		func(ev Evaluator, values []Value) (Value, Error) {
 //			panic("unreachable")
 //		})
 //
@@ -137,7 +137,7 @@ import (
 //
 //	propVal = NewFixedNativeFunc(
 //		[]Type{IntType}, false,
-//		func(cx Context, values []Value) (Value, Error) {
+//		func(ev Evaluator, values []Value) (Value, Error) {
 //			n := values[0].(Int)
 //			return n.Add(One)
 //		})
@@ -164,13 +164,13 @@ import (
 //
 //	get := NewFixedNativeFunc(
 //		[]Type{}, false,
-//		func(cx Context, values []Value) (Value, Error) {
+//		func(ev Evaluator, values []Value) (Value, Error) {
 //			return propVal, nil
 //		})
 //
 //	bogus := NewFixedNativeFunc(
 //		[]Type{AnyType, AnyType}, false,
-//		func(cx Context, values []Value) (Value, Error) {
+//		func(ev Evaluator, values []Value) (Value, Error) {
 //			panic("unreachable")
 //		})
 //
@@ -193,7 +193,7 @@ import (
 //
 //	propVal = NewFixedNativeFunc(
 //		[]Type{IntType}, false,
-//		func(cx Context, values []Value) (Value, Error) {
+//		func(ev Evaluator, values []Value) (Value, Error) {
 //			n := values[0].(Int)
 //			return n.Add(One)
 //		})

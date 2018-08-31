@@ -15,18 +15,18 @@ import (
 type Value interface {
 	Type() Type
 
-	Freeze(Context) (Value, Error)
-	Frozen(Context) (Bool, Error)
+	Freeze(Evaluator) (Value, Error)
+	Frozen(Evaluator) (Bool, Error)
 
-	Eq(Context, Value) (Bool, Error)
-	HashCode(Context) (Int, Error)
-	ToStr(Context) Str
-	Cmp(Context, Value) (Int, Error)
+	Eq(Evaluator, Value) (Bool, Error)
+	HashCode(Evaluator) (Int, Error)
+	ToStr(Evaluator) Str
+	Cmp(Evaluator, Value) (Int, Error)
 
 	FieldNames() ([]string, Error)
 	HasField(string) (bool, Error)
-	GetField(string, Context) (Value, Error)
-	InvokeField(string, Context, []Value) (Value, Error)
+	GetField(string, Evaluator) (Value, Error)
+	InvokeField(string, Evaluator, []Value) (Value, Error)
 }
 
 //---------------------------------------------------------------
@@ -35,30 +35,30 @@ type Value interface {
 type (
 	// Indexable is a value that supports the index operator
 	Indexable interface {
-		Get(Context, Value) (Value, Error)
+		Get(Evaluator, Value) (Value, Error)
 	}
 
 	// IndexAssignable is a value that supports index assignment
 	IndexAssignable interface {
 		Indexable
-		Set(Context, Value, Value) Error
+		Set(Evaluator, Value, Value) Error
 	}
 
 	// Lenable is a value that has a length
 	Lenable interface {
-		Len(Context) Int
+		Len(Evaluator) Int
 	}
 
 	// Sliceable is a value that can be sliced
 	Sliceable interface {
-		Slice(Context, Value, Value) (Value, Error)
-		SliceFrom(Context, Value) (Value, Error)
-		SliceTo(Context, Value) (Value, Error)
+		Slice(Evaluator, Value, Value) (Value, Error)
+		SliceFrom(Evaluator, Value) (Value, Error)
+		SliceTo(Evaluator, Value) (Value, Error)
 	}
 
 	//// Iterable is a value that can be iterated
 	//Iterable interface {
-	//	NewIterator(Context) Iterator
+	//	NewIterator(Evaluator) Iterator
 	//}
 )
 
@@ -97,7 +97,7 @@ type (
 
 		Concat(Str) Str
 
-		//Contains(Context, []Value) (Value, Error)
+		//Contains(Evaluator, []Value) (Value, Error)
 	}
 
 	// Number is a number
@@ -153,7 +153,7 @@ type (
 		Value
 
 		Arity() Arity
-		Invoke(Context, []Value) (Value, Error)
+		Invoke(Evaluator, []Value) (Value, Error)
 	}
 )
 
@@ -217,19 +217,19 @@ func (k ArityKind) String() string {
 //		IsEmpty() Bool
 //		Clear() Error
 //
-//		Contains(Context, Value) (Bool, Error)
-//		IndexOf(Context, Value) (Int, Error)
-//		Join(Context, Str) Str
+//		Contains(Evaluator, Value) (Bool, Error)
+//		IndexOf(Evaluator, Value) (Int, Error)
+//		Join(Evaluator, Str) Str
 //
-//		Add(Context, Value) Error
-//		AddAll(Context, Value) Error
-//		Remove(Context, Int) Error
+//		Add(Evaluator, Value) Error
+//		AddAll(Evaluator, Value) Error
+//		Remove(Evaluator, Int) Error
 //
 //		Values() []Value
 //
-//		Map(Context, func(Value) (Value, Error)) (Value, Error)
-//		Reduce(Context, Value, func(Value, Value) (Value, Error)) (Value, Error)
-//		Filter(Context, func(Value) (Value, Error)) (Value, Error)
+//		Map(Evaluator, func(Value) (Value, Error)) (Value, Error)
+//		Reduce(Evaluator, Value, func(Value, Value) (Value, Error)) (Value, Error)
+//		Filter(Evaluator, func(Value) (Value, Error)) (Value, Error)
 //	}
 //
 //	// Range is an immutable, iterable representation of a  sequence of integers
@@ -262,9 +262,9 @@ func (k ArityKind) String() string {
 //		IsEmpty() Bool
 //		Clear() Error
 //
-//		ContainsKey(Context, Value) (Bool, Error)
-//		AddAll(Context, Value) Error
-//		Remove(Context, Value) (Bool, Error)
+//		ContainsKey(Evaluator, Value) (Bool, Error)
+//		AddAll(Evaluator, Value) Error
+//		Remove(Evaluator, Value) (Bool, Error)
 //	}
 //
 //	// Set is a set of unique values
@@ -276,17 +276,17 @@ func (k ArityKind) String() string {
 //		IsEmpty() Bool
 //		Clear() Error
 //
-//		Contains(Context, Value) (Bool, Error)
-//		Add(Context, Value) Error
-//		AddAll(Context, Value) Error
-//		Remove(Context, Value) (Bool, Error)
+//		Contains(Evaluator, Value) (Bool, Error)
+//		Add(Evaluator, Value) Error
+//		AddAll(Evaluator, Value) Error
+//		Remove(Evaluator, Value) (Bool, Error)
 //	}
 //
 //	// Struct is a composite collection of names values
 //	Struct interface {
 //		Composite
 //
-//		SetField(string, Context, Value) Error
+//		SetField(string, Evaluator, Value) Error
 //
 // InternalReplace is a 'secret' internal function that is used
 // in certain situations by the Interpreter.

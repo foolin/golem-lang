@@ -82,14 +82,14 @@ func strcpy(s string) string {
 	return string(c)
 }
 
-//func valuesEq(cx Context, as []Value, bs []Value) (Bool, Error) {
+//func valuesEq(ev Evaluator, as []Value, bs []Value) (Bool, Error) {
 //
 //	if len(as) != len(bs) {
 //		return False, nil
 //	}
 //
 //	for i, a := range as {
-//		eq, err := a.Eq(cx, bs[i])
+//		eq, err := a.Eq(ev, bs[i])
 //		if err != nil {
 //			return nil, err
 //		}
@@ -113,14 +113,14 @@ func strcpy(s string) string {
 //	return stc
 //}
 //
-//func initIteratorStruct(cx Context, itr Iterator) Iterator {
+//func initIteratorStruct(ev Evaluator, itr Iterator) Iterator {
 //
 //	// initialize the struct fields with functions that refer back to the iterator
 //	err := itr.InitField(
-//		cx, NewStr("next"),
+//		ev, NewStr("next"),
 //		NewFixedNativeFunc(
 //			[]Type{}, false,
-//			func(cx Context, values []Value) (Value, Error) {
+//			func(ev Evaluator, values []Value) (Value, Error) {
 //				return itr.IterNext(), nil
 //			}))
 //	if err != nil {
@@ -128,10 +128,10 @@ func strcpy(s string) string {
 //	}
 //
 //	err = itr.InitField(
-//		cx, NewStr("get"),
+//		ev, NewStr("get"),
 //		NewFixedNativeFunc(
 //			[]Type{}, false,
-//			func(cx Context, values []Value) (Value, Error) {
+//			func(ev Evaluator, values []Value) (Value, Error) {
 //				return itr.IterGet()
 //			}))
 //	if err != nil {

@@ -19,14 +19,14 @@ type NativeFunc interface {
 
 type nativeFunc struct {
 	arity  Arity
-	invoke func(Context, []Value) (Value, Error)
+	invoke func(Evaluator, []Value) (Value, Error)
 }
 
 func (f *nativeFunc) funcMarker() {}
 
 func (f *nativeFunc) Type() Type { return FuncType }
 
-func (f *nativeFunc) Eq(cx Context, v Value) (Bool, Error) {
+func (f *nativeFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *nativeFunc:
 		// equality is based on identity
@@ -36,23 +36,23 @@ func (f *nativeFunc) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
-func (f *nativeFunc) Freeze(cx Context) (Value, Error) {
+func (f *nativeFunc) Freeze(ev Evaluator) (Value, Error) {
 	return f, nil
 }
 
-func (f *nativeFunc) Frozen(cx Context) (Bool, Error) {
+func (f *nativeFunc) Frozen(ev Evaluator) (Bool, Error) {
 	return True, nil
 }
 
-func (f *nativeFunc) HashCode(cx Context) (Int, Error) {
+func (f *nativeFunc) HashCode(ev Evaluator) (Int, Error) {
 	return nil, TypeMismatchError("Expected Hashable Type")
 }
 
-func (f *nativeFunc) Cmp(cx Context, v Value) (Int, Error) {
+func (f *nativeFunc) Cmp(ev Evaluator, v Value) (Int, Error) {
 	return nil, TypeMismatchError("Expected Comparable Type")
 }
 
-func (f *nativeFunc) ToStr(cx Context) Str {
+func (f *nativeFunc) ToStr(ev Evaluator) Str {
 	return NewStr(fmt.Sprintf("nativeFunc<%p>", f))
 }
 
@@ -69,11 +69,11 @@ func (f *nativeFunc) HasField(name string) (bool, Error) {
 	return false, nil
 }
 
-func (f *nativeFunc) GetField(name string, cx Context) (Value, Error) {
+func (f *nativeFunc) GetField(name string, ev Evaluator) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
 
-func (f *nativeFunc) InvokeField(name string, cx Context, params []Value) (Value, Error) {
+func (f *nativeFunc) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
 
@@ -91,7 +91,7 @@ type nativeFixedFunc struct {
 func NewFixedNativeFunc(
 	requiredTypes []Type,
 	allowNull bool,
-	invoke func(Context, []Value) (Value, Error)) NativeFunc {
+	invoke func(Evaluator, []Value) (Value, Error)) NativeFunc {
 
 	arity := Arity{
 		Kind:           FixedArity,
@@ -105,11 +105,11 @@ func NewFixedNativeFunc(
 	}
 }
 
-func (f *nativeFixedFunc) Freeze(cx Context) (Value, Error) {
+func (f *nativeFixedFunc) Freeze(ev Evaluator) (Value, Error) {
 	return f, nil
 }
 
-func (f *nativeFixedFunc) Eq(cx Context, v Value) (Bool, Error) {
+func (f *nativeFixedFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *nativeFixedFunc:
 		// equality is based on identity
@@ -119,13 +119,14 @@ func (f *nativeFixedFunc) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
-func (f *nativeFixedFunc) Invoke(cx Context, params []Value) (Value, Error) {
+func (f *nativeFixedFunc) Invoke(ev Evaluator, params []Value) (Value, Error) {
 
 	err := vetFixedParams(params, f.requiredTypes, f.allowNull)
 	if err != nil {
 		return nil, err
 	}
-	return f.invoke(cx, params)
+
+	return f.invoke(ev, params)
 }
 
 //--------------------------------------------------------------
@@ -135,8 +136,8 @@ func (f *nativeFixedFunc) Invoke(cx Context, params []Value) (Value, Error) {
 type nativeVariadicFunc struct {
 	*nativeFunc
 	requiredTypes []Type
-	allowNull     bool
 	variadicType  Type
+	allowNull     bool
 }
 
 // NewVariadicNativeFunc creates a new NativeFunc with variadic arity
@@ -144,7 +145,7 @@ func NewVariadicNativeFunc(
 	requiredTypes []Type,
 	variadicType Type,
 	allowNull bool,
-	invoke func(Context, []Value) (Value, Error)) NativeFunc {
+	invoke func(Evaluator, []Value) (Value, Error)) NativeFunc {
 
 	arity := Arity{
 		Kind:           VariadicArity,
@@ -154,16 +155,15 @@ func NewVariadicNativeFunc(
 
 	return &nativeVariadicFunc{
 		&nativeFunc{arity, invoke},
-		requiredTypes, allowNull,
-		variadicType,
+		requiredTypes, variadicType, allowNull,
 	}
 }
 
-func (f *nativeVariadicFunc) Freeze(cx Context) (Value, Error) {
+func (f *nativeVariadicFunc) Freeze(ev Evaluator) (Value, Error) {
 	return f, nil
 }
 
-func (f *nativeVariadicFunc) Eq(cx Context, v Value) (Bool, Error) {
+func (f *nativeVariadicFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *nativeVariadicFunc:
 		// equality is based on identity
@@ -173,36 +173,14 @@ func (f *nativeVariadicFunc) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
-func (f *nativeVariadicFunc) Invoke(cx Context, params []Value) (Value, Error) {
+func (f *nativeVariadicFunc) Invoke(ev Evaluator, params []Value) (Value, Error) {
 
-	numValues := len(params)
-	numReqs := len(f.requiredTypes)
-
-	// arity mismatch
-	if numValues < numReqs {
-		return nil, ArityMismatchError(
-			fmt.Sprintf("at least %d", numReqs),
-			numValues)
+	err := vetVariadicParams(params, f.requiredTypes, f.variadicType, f.allowNull)
+	if err != nil {
+		return nil, err
 	}
 
-	// check types on required params
-	for i := 0; i < numReqs; i++ {
-		err := vetParam(params[i], f.requiredTypes[i], f.allowNull)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// check types on variadic params
-	for i := numReqs; i < numValues; i++ {
-		err := vetParam(params[i], f.variadicType, f.allowNull)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// invoke
-	return f.invoke(cx, params)
+	return f.invoke(ev, params)
 }
 
 //--------------------------------------------------------------
@@ -212,8 +190,8 @@ func (f *nativeVariadicFunc) Invoke(cx Context, params []Value) (Value, Error) {
 type nativeMultipleFunc struct {
 	*nativeFunc
 	requiredTypes []Type
-	allowNull     bool
 	optionalTypes []Type
+	allowNull     bool
 }
 
 // NewMultipleNativeFunc creates a new NativeFunc with multiple arity
@@ -221,7 +199,7 @@ func NewMultipleNativeFunc(
 	requiredTypes []Type,
 	optionalTypes []Type,
 	allowNull bool,
-	invoke func(Context, []Value) (Value, Error)) NativeFunc {
+	invoke func(Evaluator, []Value) (Value, Error)) NativeFunc {
 
 	arity := Arity{
 		Kind:           MultipleArity,
@@ -231,15 +209,15 @@ func NewMultipleNativeFunc(
 
 	return &nativeMultipleFunc{
 		&nativeFunc{arity, invoke},
-		requiredTypes, allowNull, optionalTypes,
+		requiredTypes, optionalTypes, allowNull,
 	}
 }
 
-func (f *nativeMultipleFunc) Freeze(cx Context) (Value, Error) {
+func (f *nativeMultipleFunc) Freeze(ev Evaluator) (Value, Error) {
 	return f, nil
 }
 
-func (f *nativeMultipleFunc) Eq(cx Context, v Value) (Bool, Error) {
+func (f *nativeMultipleFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *nativeMultipleFunc:
 		// equality is based on identity
@@ -249,49 +227,24 @@ func (f *nativeMultipleFunc) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
-func (f *nativeMultipleFunc) Invoke(cx Context, params []Value) (Value, Error) {
+func (f *nativeMultipleFunc) Invoke(ev Evaluator, params []Value) (Value, Error) {
 
-	numValues := len(params)
-	numReqs := len(f.requiredTypes)
-	numOpts := len(f.optionalTypes)
-
-	// arity mismatch
-	if numValues < numReqs {
-		return nil, ArityMismatchError(
-			fmt.Sprintf("at least %d", numReqs),
-			numValues)
-	}
-	if numValues > (numReqs + numOpts) {
-		return nil, ArityMismatchError(
-			fmt.Sprintf("at most %d", numReqs+numOpts),
-			numValues)
+	err := vetMultipleParams(params, f.requiredTypes, f.optionalTypes, f.allowNull)
+	if err != nil {
+		return nil, err
 	}
 
-	// check types on required params
-	for i := 0; i < numReqs; i++ {
-		err := vetParam(params[i], f.requiredTypes[i], f.allowNull)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// check types on optional params
-	for i := numReqs; i < numValues; i++ {
-		err := vetParam(params[i], f.optionalTypes[i-numReqs], f.allowNull)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// invoke
-	return f.invoke(cx, params)
+	return f.invoke(ev, params)
 }
 
 //--------------------------------------------------------------
 // vet params
 //--------------------------------------------------------------
 
-func vetFixedParams(params []Value, requiredTypes []Type, allowNull bool) Error {
+func vetFixedParams(
+	params []Value,
+	requiredTypes []Type,
+	allowNull bool) Error {
 
 	numValues := len(params)
 	numReqs := len(requiredTypes)
@@ -306,6 +259,82 @@ func vetFixedParams(params []Value, requiredTypes []Type, allowNull bool) Error 
 	// check types on required params
 	for i := 0; i < numReqs; i++ {
 		err := vetParam(params[i], requiredTypes[i], allowNull)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func vetVariadicParams(
+	params []Value,
+	requiredTypes []Type,
+	variadicType Type,
+	allowNull bool) Error {
+
+	numValues := len(params)
+	numReqs := len(requiredTypes)
+
+	// arity mismatch
+	if numValues < numReqs {
+		return ArityMismatchError(
+			fmt.Sprintf("at least %d", numReqs),
+			numValues)
+	}
+
+	// check types on required params
+	for i := 0; i < numReqs; i++ {
+		err := vetParam(params[i], requiredTypes[i], allowNull)
+		if err != nil {
+			return err
+		}
+	}
+
+	// check types on variadic params
+	for i := numReqs; i < numValues; i++ {
+		err := vetParam(params[i], variadicType, allowNull)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func vetMultipleParams(
+	params []Value,
+	requiredTypes []Type,
+	optionalTypes []Type,
+	allowNull bool) Error {
+
+	numValues := len(params)
+	numReqs := len(requiredTypes)
+	numOpts := len(optionalTypes)
+
+	// arity mismatch
+	if numValues < numReqs {
+		return ArityMismatchError(
+			fmt.Sprintf("at least %d", numReqs),
+			numValues)
+	}
+	if numValues > (numReqs + numOpts) {
+		return ArityMismatchError(
+			fmt.Sprintf("at most %d", numReqs+numOpts),
+			numValues)
+	}
+
+	// check types on required params
+	for i := 0; i < numReqs; i++ {
+		err := vetParam(params[i], requiredTypes[i], allowNull)
+		if err != nil {
+			return err
+		}
+	}
+
+	// check types on optional params
+	for i := numReqs; i < numValues; i++ {
+		err := vetParam(params[i], optionalTypes[i-numReqs], allowNull)
 		if err != nil {
 			return err
 		}
@@ -334,6 +363,5 @@ func vetParam(value Value, typ Type, allowNull bool) Error {
 		return TypeMismatchError(fmt.Sprintf("Expected %s", typ.String()))
 	}
 
-	// invoke
 	return nil
 }

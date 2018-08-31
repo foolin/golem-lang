@@ -24,22 +24,22 @@ func (s str) basicMarker() {}
 
 func (s str) Type() Type { return StrType }
 
-func (s str) Freeze(cx Context) (Value, Error) {
+func (s str) Freeze(ev Evaluator) (Value, Error) {
 	return s, nil
 }
 
-func (s str) Frozen(cx Context) (Bool, Error) {
+func (s str) Frozen(ev Evaluator) (Bool, Error) {
 	return True, nil
 }
 
-func (s str) ToStr(cx Context) Str { return s }
+func (s str) ToStr(ev Evaluator) Str { return s }
 
-func (s str) HashCode(cx Context) (Int, Error) {
+func (s str) HashCode(ev Evaluator) (Int, Error) {
 	h := strHash(string(s))
 	return NewInt(int64(h)), nil
 }
 
-func (s str) Eq(cx Context, v Value) (Bool, Error) {
+func (s str) Eq(ev Evaluator, v Value) (Bool, Error) {
 	switch t := v.(type) {
 
 	case str:
@@ -50,7 +50,7 @@ func (s str) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
-func (s str) Cmp(cx Context, v Value) (Int, Error) {
+func (s str) Cmp(ev Evaluator, v Value) (Int, Error) {
 	switch t := v.(type) {
 
 	case str:
@@ -62,7 +62,7 @@ func (s str) Cmp(cx Context, v Value) (Int, Error) {
 	}
 }
 
-func (s str) Get(cx Context, index Value) (Value, Error) {
+func (s str) Get(ev Evaluator, index Value) (Value, Error) {
 	// TODO implement this more efficiently
 	runes := []rune(string(s))
 
@@ -74,12 +74,12 @@ func (s str) Get(cx Context, index Value) (Value, Error) {
 	return str(string(runes[idx])), nil
 }
 
-func (s str) Len(cx Context) Int {
+func (s str) Len(ev Evaluator) Int {
 	n := utf8.RuneCountInString(string(s))
 	return NewInt(int64(n))
 }
 
-func (s str) Slice(cx Context, from Value, to Value) (Value, Error) {
+func (s str) Slice(ev Evaluator, from Value, to Value) (Value, Error) {
 	runes := []rune(string(s))
 
 	f, t, err := sliceIndices(from, to, len(runes))
@@ -90,7 +90,7 @@ func (s str) Slice(cx Context, from Value, to Value) (Value, Error) {
 	return str(string(runes[f:t])), nil
 }
 
-func (s str) SliceFrom(cx Context, from Value) (Value, Error) {
+func (s str) SliceFrom(ev Evaluator, from Value) (Value, Error) {
 	runes := []rune(string(s))
 
 	f, _, err := sliceIndices(from, NegOne, len(runes))
@@ -101,7 +101,7 @@ func (s str) SliceFrom(cx Context, from Value) (Value, Error) {
 	return str(string(runes[f:])), nil
 }
 
-func (s str) SliceTo(cx Context, to Value) (Value, Error) {
+func (s str) SliceTo(ev Evaluator, to Value) (Value, Error) {
 	runes := []rune(string(s))
 
 	_, t, err := sliceIndices(Zero, to, len(runes))
@@ -127,8 +127,8 @@ func (s str) Concat(that Str) Str {
 //	n     int
 //}
 //
-//func (s str) NewIterator(cx Context) Iterator {
-//	return initIteratorStruct(cx,
+//func (s str) NewIterator(ev Evaluator) Iterator {
+//	return initIteratorStruct(ev,
 //		&strIterator{newIteratorStruct(), []rune(string(s)), -1})
 //}
 //
@@ -174,24 +174,24 @@ func (s str) HasField(name string) (bool, Error) {
 	return ok, nil
 }
 
-func (s str) GetField(name string, cx Context) (Value, Error) {
+func (s str) GetField(name string, ev Evaluator) (Value, Error) {
 	if method, ok := strMethods[name]; ok {
-		return method.ToFunc(s), nil
+		return method.ToFunc(s, name), nil
 	}
 	return nil, NoSuchFieldError(name)
 }
 
-func (s str) InvokeField(name string, cx Context, params []Value) (Value, Error) {
+func (s str) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
 
 	if method, ok := strMethods[name]; ok {
-		return method.Invoke(s, cx, params)
+		return method.Invoke(s, ev, params)
 	}
 	return nil, NoSuchFieldError(name)
 }
 
 //var containsMethod Method = nil //NewFixedMethod(
 //	StrType, []Type{StrType}, false,
-//	func(cx Context, self Value, params []Value) (Value, Error) {
+//	func(ev Evaluator, self Value, params []Value) (Value, Error) {
 //		s := self.(Str)
 //		substr := params[0].(Str)
 //		return NewBool(strings.Contains(s.String(), substr.String())), nil
@@ -199,28 +199,28 @@ func (s str) InvokeField(name string, cx Context, params []Value) (Value, Error)
 
 //var containsMethod = NewFixedMethod(
 //	[]Type{StrType}, false,
-//	func(cx Context, self Value, params []Value) Invoke {
-//		return func(cx Context, params []Value) (Value, Error) {
+//	func(ev Evaluator, self Value, params []Value) Invoke {
+//		return func(ev Evaluator, params []Value) (Value, Error) {
 //		return self.Contains(params[0].(Str)), nil
 //	})
 
 //	case "index":
 //		return &virtualFunc{s, sn, NewFixedNativeFunc(
 //			[]Type{StrType}, false,
-//			func(cx Context, params []Value) (Value, Error) {
+//			func(ev Evaluator, params []Value) (Value, Error) {
 //				z := params[0].(Str)
 //				return NewInt(int64(strings.Index(string(s), z.String()))), nil
 //			})}, nil
 
 //--------------------------------------------------------------
 
-//func (s str) GetField(cx Context, key Str) (Value, Error) {
+//func (s str) GetField(ev Evaluator, key Str) (Value, Error) {
 //	switch sn := key.String(); sn {
 //
 //	case "contains":
 //		return &virtualFunc{s, sn, NewFixedNativeFunc(
 //			[]Type{StrType}, false,
-//			func(cx Context, params []Value) (Value, Error) {
+//			func(ev Evaluator, params []Value) (Value, Error) {
 //				z := params[0].(Str)
 //				return NewBool(strings.Contains(string(s), z.String())), nil
 //			})}, nil
@@ -228,7 +228,7 @@ func (s str) InvokeField(name string, cx Context, params []Value) (Value, Error)
 //	case "index":
 //		return &virtualFunc{s, sn, NewFixedNativeFunc(
 //			[]Type{StrType}, false,
-//			func(cx Context, params []Value) (Value, Error) {
+//			func(ev Evaluator, params []Value) (Value, Error) {
 //				z := params[0].(Str)
 //				return NewInt(int64(strings.Index(string(s), z.String()))), nil
 //			})}, nil
@@ -236,7 +236,7 @@ func (s str) InvokeField(name string, cx Context, params []Value) (Value, Error)
 //	case "lastIndex":
 //		return &virtualFunc{s, sn, NewFixedNativeFunc(
 //			[]Type{StrType}, false,
-//			func(cx Context, params []Value) (Value, Error) {
+//			func(ev Evaluator, params []Value) (Value, Error) {
 //				z := params[0].(Str)
 //				return NewInt(int64(strings.LastIndex(string(s), z.String()))), nil
 //			})}, nil
@@ -244,7 +244,7 @@ func (s str) InvokeField(name string, cx Context, params []Value) (Value, Error)
 //	case "startsWith":
 //		return &virtualFunc{s, sn, NewFixedNativeFunc(
 //			[]Type{StrType}, false,
-//			func(cx Context, params []Value) (Value, Error) {
+//			func(ev Evaluator, params []Value) (Value, Error) {
 //				z := params[0].(Str)
 //				return NewBool(strings.HasPrefix(string(s), z.String())), nil
 //			})}, nil
@@ -252,7 +252,7 @@ func (s str) InvokeField(name string, cx Context, params []Value) (Value, Error)
 //	case "endsWith":
 //		return &virtualFunc{s, sn, NewFixedNativeFunc(
 //			[]Type{StrType}, false,
-//			func(cx Context, params []Value) (Value, Error) {
+//			func(ev Evaluator, params []Value) (Value, Error) {
 //				z := params[0].(Str)
 //				return NewBool(strings.HasSuffix(string(s), z.String())), nil
 //			})}, nil
@@ -262,7 +262,7 @@ func (s str) InvokeField(name string, cx Context, params []Value) (Value, Error)
 //			[]Type{StrType, StrType},
 //			[]Type{IntType},
 //			false,
-//			func(cx Context, params []Value) (Value, Error) {
+//			func(ev Evaluator, params []Value) (Value, Error) {
 //				a := params[0].(Str)
 //				b := params[1].(Str)
 //				n := NegOne
@@ -279,7 +279,7 @@ func (s str) InvokeField(name string, cx Context, params []Value) (Value, Error)
 //	case "split":
 //		return &virtualFunc{s, sn, NewFixedNativeFunc(
 //			[]Type{StrType}, false,
-//			func(cx Context, params []Value) (Value, Error) {
+//			func(ev Evaluator, params []Value) (Value, Error) {
 //				z := params[0].(Str)
 //				tokens := strings.Split(string(s), z.String())
 //				result := make([]Value, len(tokens))
@@ -293,8 +293,8 @@ func (s str) InvokeField(name string, cx Context, params []Value) (Value, Error)
 //	case "iterator":
 //		return &virtualFunc{s, sn, NewFixedNativeFunc(
 //			[]Type{}, false,
-//			func(cx Context, params []Value) (Value, Error) {
-//				return s.NewIterator(cx), nil
+//			func(ev Evaluator, params []Value) (Value, Error) {
+//				return s.NewIterator(ev), nil
 //			})}, nil
 //
 //	default:

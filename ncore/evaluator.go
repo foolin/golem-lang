@@ -4,9 +4,9 @@
 
 package ncore
 
-// Context evaluates functions that are defined via bytecode.
-// In practice, this means that a Context is actually a full-fledged instance
+// Evaluator evaluates functions that are defined via bytecode.
+// In practice, this means that an Evaluator is actually a full-fledged instance
 // of the Golem Interpreter.
-type Context interface {
+type Evaluator interface {
 	Eval(Func, []Value) (Value, Error)
 }

@@ -5,16 +5,103 @@
 package ncore
 
 import (
-	"strings"
 	"testing"
 )
 
-//--------------------------------------------------------------
+func TestMethodEq(t *testing.T) {
 
-func (s str) strContains(cx Context, params []Value) (Value, Error) {
-	substr := params[0].(Str)
-	return NewBool(strings.Contains(s.String(), substr.String())), nil
+	m := NewFixedMethod(
+		[]Type{},
+		false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			return Null, nil
+		})
+
+	a1 := m.ToFunc(1, "foo")
+	a2 := m.ToFunc(1, "foo")
+	a3 := m.ToFunc(2, "foo")
+
+	val, err := a1.Eq(nil, a2)
+	ok(t, val, err, True)
+
+	val, err = a1.Eq(nil, a3)
+	ok(t, val, err, False)
+
+	val, err = a2.Eq(nil, a3)
+	ok(t, val, err, False)
+
+	b1 := m.ToFunc(NewInt(1), "foo")
+	b2 := m.ToFunc(NewInt(1), "foo")
+	b3 := m.ToFunc(NewInt(2), "foo")
+
+	val, err = b1.Eq(nil, b2)
+	ok(t, val, err, True)
+
+	val, err = b1.Eq(nil, b3)
+	ok(t, val, err, False)
+
+	val, err = b2.Eq(nil, b3)
+	ok(t, val, err, False)
+
+	val, err = a1.Eq(nil, b1)
+	ok(t, val, err, False)
 }
+
+func TestFixedMethod(t *testing.T) {
+
+	m := NewFixedMethod(
+		[]Type{},
+		false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			n := self.(int)
+			return NewInt(int64(n * n)), nil
+		})
+
+	val, err := m.Invoke(10, nil, []Value{})
+	ok(t, val, err, NewInt(100))
+
+	fn := m.ToFunc(10, "foo")
+
+	ok(t, fn.Arity(), nil, Arity{FixedArity, 0, 0})
+
+	val, err = fn.Invoke(nil, []Value{})
+	ok(t, val, err, NewInt(100))
+
+	val, err = fn.Invoke(nil, []Value{One})
+	fail(t, val, err, "ArityMismatch: Expected 0 params, got 1")
+
+	//----------------------------------------------
+
+	m = NewFixedMethod(
+		[]Type{IntType},
+		false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			n := self.(Int)
+			p := params[0].(Int)
+			return n.Add(p)
+		})
+
+	val, err = m.Invoke(NewInt(2), nil, []Value{NewInt(3)})
+	ok(t, val, err, NewInt(5))
+
+	fn = m.ToFunc(NewInt(3), "foo")
+
+	ok(t, fn.Arity(), nil, Arity{FixedArity, 1, 0})
+
+	val, err = fn.Invoke(nil, []Value{NewInt(3)})
+	ok(t, val, err, NewInt(6))
+
+	val, err = fn.Invoke(nil, []Value{Null})
+	fail(t, val, err, "NullValue")
+
+	val, err = fn.Invoke(nil, []Value{})
+	fail(t, val, err, "ArityMismatch: Expected 1 params, got 0")
+
+	val, err = fn.Invoke(nil, []Value{NewStr("a")})
+	fail(t, val, err, "TypeMismatch: Expected Int")
+}
+
+//--------------------------------------------------------------
 
 func show(val Value) {
 	//println(val.ToStr(nil).String())
@@ -22,56 +109,76 @@ func show(val Value) {
 
 const iterate = 4 * 1000 * 1000
 
-func TestDirectCall(t *testing.T) {
+//const iterate = 4
 
-	s := NewStr("abcdef")
-	substr := NewStr("cd")
+func TestBenchmarkDirectInvoke(t *testing.T) {
 
-	var val Value
-	var err Error
+	var i1 Int = NewInt(1)
+	var i2 Int = NewInt(2)
 
 	for i := 0; i < iterate; i++ {
-		val, err = s.(str).strContains(nil, []Value{substr})
-		ok(t, val, err, True)
+		val, _ := i1.Add(i2)
 		show(val)
 	}
 }
 
-///////////////////////////////////////
-// test hash lookup vs switch
-///////////////////////////////////////
+func TestBenchmarkFuncInvoke(t *testing.T) {
 
-//func TestInvokeCall(t *testing.T) {
-//
-//	s := NewStr("abcdef")
-//	substr := NewStr("cd")
-//
-//	var val Value
-//	var err Error
-//
-//	for i := 0; i < iterate; i++ {
-//		val, err = s.InvokeField("contains", nil, []Value{substr})
-//		ok(t, val, err, True)
-//		show(val)
-//	}
-//}
-//
-//func TestGetCall(t *testing.T) {
-//
-//	s := NewStr("abcdef")
-//	substr := NewStr("cd")
-//
-//	var val Value
-//	var err Error
-//	var field Value
-//
-//	for i := 0; i < iterate; i++ {
-//		field, err = s.GetField("contains", nil)
-//		tassert(t, err == nil)
-//
-//		fn := field.(Func)
-//		val, err = fn.Invoke(nil, []Value{substr})
-//		ok(t, val, err, True)
-//		show(val)
-//	}
-//}
+	fn := NewFixedNativeFunc(
+		[]Type{IntType, IntType},
+		false,
+		func(ev Evaluator, params []Value) (Value, Error) {
+			a := params[0].(Int)
+			b := params[1].(Int)
+			return a.Add(b)
+		})
+
+	var i1 Int = NewInt(1)
+	var i2 Int = NewInt(2)
+
+	for i := 0; i < iterate; i++ {
+		val, _ := fn.Invoke(nil, []Value{i1, i2})
+		show(val)
+	}
+}
+
+func TestBenchmarkMethodInvoke(t *testing.T) {
+
+	m := NewFixedMethod(
+		[]Type{IntType},
+		false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			n := self.(Int)
+			p := params[0].(Int)
+			return n.Add(p)
+		})
+
+	var i1 Int = NewInt(1)
+	var i2 Int = NewInt(2)
+
+	for i := 0; i < iterate; i++ {
+		val, _ := m.Invoke(i1, nil, []Value{i2})
+		show(val)
+	}
+}
+
+func TestBenchmarkMethodFuncInvoke(t *testing.T) {
+
+	m := NewFixedMethod(
+		[]Type{IntType},
+		false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			n := self.(Int)
+			p := params[0].(Int)
+			return n.Add(p)
+		})
+
+	var i1 Int = NewInt(1)
+	var i2 Int = NewInt(2)
+
+	for i := 0; i < iterate; i++ {
+		fn := m.ToFunc(i1, "foo")
+		val, _ := fn.Invoke(nil, []Value{i2})
+		show(val)
+	}
+}

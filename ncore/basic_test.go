@@ -228,29 +228,6 @@ func TestStr(t *testing.T) {
 
 	//val, err = a.GetField("a", nil)
 	//fail(t, val, err, "NoSuchField: Field 'a' not found")
-
-	//c1, err := a.GetField("contains", nil)
-	//tassert(t, err == nil)
-	//c2, err := a.GetField("contains", nil)
-	//tassert(t, err == nil)
-	//val, err = c1.Eq(nil, c2)
-	//ok(t, val, err, True)
-
-	////i1, err := a.GetField("index", nil)
-	////tassert(t, err == nil)
-	////i2, err := a.GetField("index", nil)
-	////tassert(t, err == nil)
-	////val, err = i1.Eq(nil, i2)
-	////ok(t, val, err, True)
-
-	////val, err = c1.Eq(nil, i1)
-	////ok(t, val, err, False)
-	////val, err = c1.Eq(nil, i2)
-	////ok(t, val, err, False)
-	////val, err = c2.Eq(nil, i1)
-	////ok(t, val, err, False)
-	////val, err = c2.Eq(nil, i2)
-	////ok(t, val, err, False)
 }
 
 func TestInt(t *testing.T) {

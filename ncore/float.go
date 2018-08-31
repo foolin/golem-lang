@@ -29,19 +29,19 @@ func (f _float) basicMarker() {}
 
 func (f _float) Type() Type { return FloatType }
 
-func (f _float) Freeze(cx Context) (Value, Error) {
+func (f _float) Freeze(ev Evaluator) (Value, Error) {
 	return f, nil
 }
 
-func (f _float) Frozen(cx Context) (Bool, Error) {
+func (f _float) Frozen(ev Evaluator) (Bool, Error) {
 	return True, nil
 }
 
-func (f _float) ToStr(cx Context) Str {
+func (f _float) ToStr(ev Evaluator) Str {
 	return NewStr(fmt.Sprintf("%g", f))
 }
 
-func (f _float) HashCode(cx Context) (Int, Error) {
+func (f _float) HashCode(ev Evaluator) (Int, Error) {
 
 	writer := new(bytes.Buffer)
 	err := binary.Write(writer, binary.LittleEndian, f.FloatVal())
@@ -60,7 +60,7 @@ func (f _float) HashCode(cx Context) (Int, Error) {
 	return NewInt(hashCode), nil
 }
 
-func (f _float) Eq(cx Context, v Value) (Bool, Error) {
+func (f _float) Eq(ev Evaluator, v Value) (Bool, Error) {
 	switch t := v.(type) {
 
 	case _float:
@@ -74,7 +74,7 @@ func (f _float) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
-func (f _float) Cmp(cx Context, v Value) (Int, Error) {
+func (f _float) Cmp(ev Evaluator, v Value) (Int, Error) {
 	switch t := v.(type) {
 
 	case _float:
@@ -178,10 +178,10 @@ func (f _float) HasField(name string) (bool, Error) {
 	return false, nil
 }
 
-func (f _float) GetField(name string, cx Context) (Value, Error) {
+func (f _float) GetField(name string, ev Evaluator) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
 
-func (f _float) InvokeField(name string, cx Context, params []Value) (Value, Error) {
+func (f _float) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }

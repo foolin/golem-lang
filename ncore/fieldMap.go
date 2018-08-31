@@ -12,9 +12,9 @@ type (
 	fieldMap interface {
 		names() []string
 		has(string) bool
-		get(string, Context) (Value, Error)
-		invoke(string, Context, []Value) (Value, Error)
-		set(string, Context, Value) Error
+		get(string, Evaluator) (Value, Error)
+		invoke(string, Evaluator, []Value) (Value, Error)
+		set(string, Evaluator, Value) Error
 		internalReplace(string, Field)
 	}
 )

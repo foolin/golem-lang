@@ -28,29 +28,29 @@ func (b _bool) basicMarker() {}
 
 func (b _bool) Type() Type { return BoolType }
 
-func (b _bool) Freeze(cx Context) (Value, Error) {
+func (b _bool) Freeze(ev Evaluator) (Value, Error) {
 	return b, nil
 }
 
-func (b _bool) Frozen(cx Context) (Bool, Error) {
+func (b _bool) Frozen(ev Evaluator) (Bool, Error) {
 	return True, nil
 }
 
-func (b _bool) ToStr(cx Context) Str {
+func (b _bool) ToStr(ev Evaluator) Str {
 	if b {
 		return NewStr("true")
 	}
 	return NewStr("false")
 }
 
-func (b _bool) HashCode(cx Context) (Int, Error) {
+func (b _bool) HashCode(ev Evaluator) (Int, Error) {
 	if b {
 		return NewInt(1009), nil
 	}
 	return NewInt(1013), nil
 }
 
-func (b _bool) Eq(cx Context, v Value) (Bool, Error) {
+func (b _bool) Eq(ev Evaluator, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case _bool:
 		if b == t {
@@ -62,11 +62,11 @@ func (b _bool) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
-//func (b _bool) GetField(cx Context, key Str) (Value, Error) {
+//func (b _bool) GetField(ev Evaluator, key Str) (Value, Error) {
 //	return nil, NoSuchFieldError(key.String())
 //}
 
-func (b _bool) Cmp(cx Context, v Value) (Int, Error) {
+func (b _bool) Cmp(ev Evaluator, v Value) (Int, Error) {
 	switch t := v.(type) {
 
 	case _bool:
@@ -98,10 +98,10 @@ func (b _bool) HasField(name string) (bool, Error) {
 	return false, nil
 }
 
-func (b _bool) GetField(name string, cx Context) (Value, Error) {
+func (b _bool) GetField(name string, ev Evaluator) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
 
-func (b _bool) InvokeField(name string, cx Context, params []Value) (Value, Error) {
+func (b _bool) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
