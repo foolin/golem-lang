@@ -7,7 +7,7 @@ package bytecode
 import (
 	"fmt"
 
-	g "github.com/mjarmy/golem-lang/ncore"
+	g "github.com/mjarmy/golem-lang/core"
 )
 
 // BytecodeFunc is a Func that is implemented in Golem

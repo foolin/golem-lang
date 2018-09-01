@@ -5,7 +5,7 @@
 package bytecode
 
 import (
-	g "github.com/mjarmy/golem-lang/ncore"
+	g "github.com/mjarmy/golem-lang/core"
 )
 
 // FuncTemplate represents the information needed to invoke a function

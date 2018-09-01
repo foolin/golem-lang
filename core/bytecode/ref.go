@@ -7,7 +7,7 @@ package bytecode
 import (
 	"fmt"
 
-	g "github.com/mjarmy/golem-lang/ncore"
+	g "github.com/mjarmy/golem-lang/core"
 )
 
 // Ref is a container for a Value.  Refs are used by the interpreter

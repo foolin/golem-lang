@@ -5,7 +5,7 @@
 package core
 
 type (
-	// HashMap is an associative array
+	// HashMap is an associative array of Values
 	HashMap struct {
 		buckets [][]*HEntry
 		size    int
@@ -25,13 +25,13 @@ func EmptyHashMap() *HashMap {
 }
 
 // NewHashMap creates an empty HashMap
-func NewHashMap(cx Context, entries []*HEntry) (*HashMap, Error) {
+func NewHashMap(ev Evaluator, entries []*HEntry) (*HashMap, Error) {
 	capacity := 5
 	buckets := make([][]*HEntry, capacity)
 	hm := &HashMap{buckets, 0}
 
 	for _, e := range entries {
-		err := hm.Put(cx, e.Key, e.Value)
+		err := hm.Put(ev, e.Key, e.Value)
 		if err != nil {
 			return nil, err
 		}
@@ -40,7 +40,7 @@ func NewHashMap(cx Context, entries []*HEntry) (*HashMap, Error) {
 }
 
 // Eq tests whether two HashMaps are equal
-func (hm *HashMap) Eq(cx Context, that *HashMap) (Bool, Error) {
+func (hm *HashMap) Eq(ev Evaluator, that *HashMap) (Bool, Error) {
 
 	if hm.size != that.size {
 		return False, nil
@@ -50,12 +50,12 @@ func (hm *HashMap) Eq(cx Context, that *HashMap) (Bool, Error) {
 	for itr.Next() {
 		entry := itr.Get()
 
-		v, err := that.Get(cx, entry.Key)
+		v, err := that.Get(ev, entry.Key)
 		if err != nil {
 			return nil, err
 		}
 
-		eq, err := entry.Value.Eq(cx, v)
+		eq, err := entry.Value.Eq(ev, v)
 		if err != nil {
 			return nil, err
 		}
@@ -69,7 +69,7 @@ func (hm *HashMap) Eq(cx Context, that *HashMap) (Bool, Error) {
 }
 
 // Get retrieves a value, or returns Null if the value is not present
-func (hm *HashMap) Get(cx Context, key Value) (value Value, err Error) {
+func (hm *HashMap) Get(ev Evaluator, key Value) (value Value, err Error) {
 
 	// recover from an un-hashable value
 	defer func() {
@@ -83,8 +83,8 @@ func (hm *HashMap) Get(cx Context, key Value) (value Value, err Error) {
 		}
 	}()
 
-	b := hm.buckets[hm._lookupBucket(cx, key)]
-	n := hm._indexOf(cx, b, key)
+	b := hm.buckets[hm._lookupBucket(ev, key)]
+	n := hm._indexOf(ev, b, key)
 	if n == -1 {
 		return Null, nil
 	}
@@ -92,7 +92,7 @@ func (hm *HashMap) Get(cx Context, key Value) (value Value, err Error) {
 }
 
 // ContainsKey returns whether the HashMap contains an Entry for the given key
-func (hm *HashMap) ContainsKey(cx Context, key Value) (flag Bool, err Error) {
+func (hm *HashMap) ContainsKey(ev Evaluator, key Value) (flag Bool, err Error) {
 
 	// recover from an un-hashable value
 	defer func() {
@@ -106,8 +106,8 @@ func (hm *HashMap) ContainsKey(cx Context, key Value) (flag Bool, err Error) {
 		}
 	}()
 
-	b := hm.buckets[hm._lookupBucket(cx, key)]
-	n := hm._indexOf(cx, b, key)
+	b := hm.buckets[hm._lookupBucket(ev, key)]
+	n := hm._indexOf(ev, b, key)
 	if n == -1 {
 		return False, nil
 	}
@@ -116,7 +116,7 @@ func (hm *HashMap) ContainsKey(cx Context, key Value) (flag Bool, err Error) {
 
 // Remove removes the value associated with the given key, if the key
 // is present.  Remove returns whether or not the key was present.
-func (hm *HashMap) Remove(cx Context, key Value) (flag Bool, err Error) {
+func (hm *HashMap) Remove(ev Evaluator, key Value) (flag Bool, err Error) {
 
 	// recover from an un-hashable value
 	defer func() {
@@ -130,9 +130,9 @@ func (hm *HashMap) Remove(cx Context, key Value) (flag Bool, err Error) {
 		}
 	}()
 
-	h := hm._lookupBucket(cx, key)
+	h := hm._lookupBucket(ev, key)
 	b := hm.buckets[h]
-	n := hm._indexOf(cx, b, key)
+	n := hm._indexOf(ev, b, key)
 	if n == -1 {
 		return False, nil
 	}
@@ -142,7 +142,7 @@ func (hm *HashMap) Remove(cx Context, key Value) (flag Bool, err Error) {
 }
 
 // Put adds a new key-value pair to the HashMap
-func (hm *HashMap) Put(cx Context, key Value, value Value) (err Error) {
+func (hm *HashMap) Put(ev Evaluator, key Value, value Value) (err Error) {
 
 	// recover from an un-hashable value
 	defer func() {
@@ -155,12 +155,12 @@ func (hm *HashMap) Put(cx Context, key Value, value Value) (err Error) {
 		}
 	}()
 
-	h := hm._lookupBucket(cx, key)
-	n := hm._indexOf(cx, hm.buckets[h], key)
+	h := hm._lookupBucket(ev, key)
+	n := hm._indexOf(ev, hm.buckets[h], key)
 	if n == -1 {
 		if hm._tooFull() {
-			hm._rehash(cx)
-			h = hm._lookupBucket(cx, key)
+			hm._rehash(ev)
+			h = hm._lookupBucket(ev, key)
 		}
 		hm.buckets[h] = append(hm.buckets[h], &HEntry{key, value})
 		hm.size++
@@ -180,10 +180,10 @@ func (hm *HashMap) Len() Int {
 //--------------------------------------------------------------
 // these are internal methods -- don't call them directly
 
-func (hm *HashMap) _indexOf(cx Context, b []*HEntry, key Value) int {
+func (hm *HashMap) _indexOf(ev Evaluator, b []*HEntry, key Value) int {
 	for i, e := range b {
 
-		eq, err := e.Key.Eq(cx, key)
+		eq, err := e.Key.Eq(ev, key)
 		if err != nil {
 			panic(err)
 		}
@@ -200,23 +200,23 @@ func (hm *HashMap) _tooFull() bool {
 	return headroom > len(hm.buckets)
 }
 
-func (hm *HashMap) _rehash(cx Context) {
+func (hm *HashMap) _rehash(ev Evaluator) {
 	oldBuckets := hm.buckets
 
 	capacity := len(hm.buckets)<<1 + 1
 	hm.buckets = make([][]*HEntry, capacity)
 	for _, b := range oldBuckets {
 		for _, e := range b {
-			h := hm._lookupBucket(cx, e.Key)
+			h := hm._lookupBucket(ev, e.Key)
 			hm.buckets[h] = append(hm.buckets[h], e)
 		}
 	}
 }
 
-func (hm *HashMap) _lookupBucket(cx Context, key Value) int {
+func (hm *HashMap) _lookupBucket(ev Evaluator, key Value) int {
 
 	// panic on an un-hashable value
-	hc, err := key.HashCode(cx)
+	hc, err := key.HashCode(ev)
 	if err != nil {
 		panic(err)
 	}

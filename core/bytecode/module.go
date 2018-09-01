@@ -2,17 +2,14 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-package core
+package bytecode
 
 import (
 	"bytes"
 	"fmt"
-	//"github.com/mjarmy/golem-lang/core/opcodes"
-)
 
-//--------------------------------------------------------------
-// Module
-//--------------------------------------------------------------
+	g "github.com/mjarmy/golem-lang/core"
+)
 
 // Module is a namespace containing compiled Golem code.  Modules are the fundamental
 // unit of compilation in Golem.
@@ -23,10 +20,11 @@ type Module struct {
 	Path string
 	// Pool is a pool of constants, function templates, and struct definitions
 	Pool *Pool
-	// Contents is the top level exported values of the module
-	Contents Struct
 	// Refs is a list of Refs for the values contained in the Contents
 	Refs []*Ref
+
+	// Contents is the top level exported values of the module
+	Contents g.Struct
 }
 
 func (m *Module) String() string {
@@ -45,34 +43,11 @@ func (m *Module) String() string {
 	return buf.String()
 }
 
-//--------------------------------------------------------------
-// Ref
-//--------------------------------------------------------------
-
-// Ref is a container for a Value.  Refs are used by the interpreter
-// as a place to store the value of a variable.
-type Ref struct {
-	Val Value
-}
-
-// NewRef creates a new Ref
-func NewRef(val Value) *Ref {
-	return &Ref{val}
-}
-
-func (r *Ref) String() string {
-	return fmt.Sprintf("Ref(%v)", r.Val)
-}
-
-//--------------------------------------------------------------
-// Pool
-//--------------------------------------------------------------
-
 // Pool is a pool of the constants, function templates, and struct definitions
 // used by a given Module.  Pools are created at compile time, and
 // are immutable at run time.
 type Pool struct {
-	Constants  []Basic
+	Constants  []g.Basic
 	Templates  []*FuncTemplate
-	StructDefs [][]*FieldDef
+	StructDefs [][]string
 }

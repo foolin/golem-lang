@@ -6,7 +6,6 @@ package core
 
 import (
 	"fmt"
-	//	"strings"
 )
 
 type _int int64
@@ -20,17 +19,17 @@ var One = NewInt(1)
 // NegOne is the integer -1
 var NegOne = NewInt(-1)
 
+// NewInt creates a new Int
+func NewInt(i int64) Int {
+	return _int(i)
+}
+
 func (i _int) IntVal() int64 {
 	return int64(i)
 }
 
 func (i _int) FloatVal() float64 {
 	return float64(i)
-}
-
-// NewInt creates a new Int
-func NewInt(i int64) Int {
-	return _int(i)
 }
 
 //--------------------------------------------------------------
@@ -43,24 +42,24 @@ func (i _int) basicMarker() {}
 
 func (i _int) Type() Type { return IntType }
 
-func (i _int) Freeze(cx Context) (Value, Error) {
+func (i _int) Freeze(ev Evaluator) (Value, Error) {
 	return i, nil
 }
 
-func (i _int) Frozen(cx Context) (Bool, Error) {
+func (i _int) Frozen(ev Evaluator) (Bool, Error) {
 	return True, nil
 }
 
-func (i _int) ToStr(cx Context) Str {
-	return NewStr(fmt.Sprintf("%d", i))
+func (i _int) ToStr(ev Evaluator) (Str, Error) {
+	return NewStr(fmt.Sprintf("%d", i)), nil
 }
 
-func (i _int) HashCode(cx Context) (Int, Error) {
+func (i _int) HashCode(ev Evaluator) (Int, Error) {
 	return i, nil
 }
 
-func (i _int) Eq(cx Context, v Value) (Bool, Error) {
-	switch t := v.(type) {
+func (i _int) Eq(ev Evaluator, val Value) (Bool, Error) {
+	switch t := val.(type) {
 
 	case _int:
 		return NewBool(i == t), nil
@@ -75,8 +74,8 @@ func (i _int) Eq(cx Context, v Value) (Bool, Error) {
 	}
 }
 
-func (i _int) Cmp(cx Context, v Value) (Int, Error) {
-	switch t := v.(type) {
+func (i _int) Cmp(ev Evaluator, val Value) (Int, Error) {
+	switch t := val.(type) {
 
 	case _int:
 		if i < t {
@@ -103,8 +102,8 @@ func (i _int) Cmp(cx Context, v Value) (Int, Error) {
 	}
 }
 
-func (i _int) Add(v Value) (Number, Error) {
-	switch t := v.(type) {
+func (i _int) Add(val Value) (Number, Error) {
+	switch t := val.(type) {
 
 	case _int:
 		return i + t, nil
@@ -122,8 +121,8 @@ func (i _int) Add(v Value) (Number, Error) {
 //--------------------------------------------------------------
 // Number
 
-func (i _int) Sub(v Value) (Number, Error) {
-	switch t := v.(type) {
+func (i _int) Sub(val Value) (Number, Error) {
+	switch t := val.(type) {
 
 	case _int:
 		return i - t, nil
@@ -138,8 +137,8 @@ func (i _int) Sub(v Value) (Number, Error) {
 	}
 }
 
-func (i _int) Mul(v Value) (Number, Error) {
-	switch t := v.(type) {
+func (i _int) Mul(val Value) (Number, Error) {
+	switch t := val.(type) {
 
 	case _int:
 		return i * t, nil
@@ -154,8 +153,8 @@ func (i _int) Mul(v Value) (Number, Error) {
 	}
 }
 
-func (i _int) Div(v Value) (Number, Error) {
-	switch t := v.(type) {
+func (i _int) Div(val Value) (Number, Error) {
+	switch t := val.(type) {
 
 	case _int:
 		if t == 0 {
@@ -183,8 +182,8 @@ func (i _int) Negate() Number {
 //--------------------------------------------------------------
 // Int
 
-func (i _int) Rem(v Value) (Int, Error) {
-	switch t := v.(type) {
+func (i _int) Rem(val Value) (Int, Error) {
+	switch t := val.(type) {
 	case _int:
 		return i % t, nil
 	default:
@@ -192,8 +191,8 @@ func (i _int) Rem(v Value) (Int, Error) {
 	}
 }
 
-func (i _int) BitAnd(v Value) (Int, Error) {
-	switch t := v.(type) {
+func (i _int) BitAnd(val Value) (Int, Error) {
+	switch t := val.(type) {
 	case _int:
 		return i & t, nil
 	default:
@@ -201,8 +200,8 @@ func (i _int) BitAnd(v Value) (Int, Error) {
 	}
 }
 
-func (i _int) BitOr(v Value) (Int, Error) {
-	switch t := v.(type) {
+func (i _int) BitOr(val Value) (Int, Error) {
+	switch t := val.(type) {
 	case _int:
 		return i | t, nil
 	default:
@@ -210,8 +209,8 @@ func (i _int) BitOr(v Value) (Int, Error) {
 	}
 }
 
-func (i _int) BitXOr(v Value) (Int, Error) {
-	switch t := v.(type) {
+func (i _int) BitXOr(val Value) (Int, Error) {
+	switch t := val.(type) {
 	case _int:
 		return i ^ t, nil
 	default:
@@ -219,8 +218,8 @@ func (i _int) BitXOr(v Value) (Int, Error) {
 	}
 }
 
-func (i _int) LeftShift(v Value) (Int, Error) {
-	switch t := v.(type) {
+func (i _int) LeftShift(val Value) (Int, Error) {
+	switch t := val.(type) {
 	case _int:
 		if t < 0 {
 			return nil, InvalidArgumentError("Shift count cannot be less than zero")
@@ -231,8 +230,8 @@ func (i _int) LeftShift(v Value) (Int, Error) {
 	}
 }
 
-func (i _int) RightShift(v Value) (Int, Error) {
-	switch t := v.(type) {
+func (i _int) RightShift(val Value) (Int, Error) {
+	switch t := val.(type) {
 	case _int:
 		if t < 0 {
 			return nil, InvalidArgumentError("Shift count cannot be less than zero")
@@ -248,8 +247,20 @@ func (i _int) Complement() Int {
 }
 
 //--------------------------------------------------------------
-// intrinsic functions
+// fields
 
-func (i _int) GetField(cx Context, key Str) (Value, Error) {
-	return nil, NoSuchFieldError(key.String())
+func (i _int) FieldNames() ([]string, Error) {
+	return []string{}, nil
+}
+
+func (i _int) HasField(name string) (bool, Error) {
+	return false, nil
+}
+
+func (i _int) GetField(name string, ev Evaluator) (Value, Error) {
+	return nil, NoSuchFieldError(name)
+}
+
+func (i _int) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
+	return nil, NoSuchFieldError(name)
 }

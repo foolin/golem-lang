@@ -6,169 +6,68 @@ package core
 
 import (
 	"fmt"
-	"strings"
 )
 
-// Error represent an error
-type Error interface {
-	error
-	Struct() Struct
-}
+// Error is an error
+type Error error
 
-type serror struct {
-	st  Struct
-	str string
-}
-
-func (e *serror) Error() string {
-	return e.str
-}
-
-func (e *serror) Struct() Struct {
-	return e.st
-}
-
-// NewError creates a new error
-func NewError(kind string, msg string) Error {
-
-	var st Struct
-	var err Error
-	var str string
-
-	if msg == "" {
-		st, err = NewStruct([]Field{
-			NewField("kind", true, NewStr(kind))}, true)
-		str = kind
-	} else {
-		st, err = NewStruct([]Field{
-			NewField("kind", true, NewStr(kind)),
-			NewField("msg", true, NewStr(msg))}, true)
-
-		str = strings.Join([]string{kind, ": ", msg}, "")
-	}
-	if err != nil {
-		panic("invalid struct")
-	}
-
-	return &serror{st, str}
-}
-
-// NewErrorFromStruct creates an error from a Struct.  This
-// is used in Golem code to do a 'throw'.
-func NewErrorFromStruct(cx Context, st Struct) Error {
-
-	var str string
-	kind, kerr := st.GetField(cx, NewStr("kind"))
-	msg, merr := st.GetField(cx, NewStr("msg"))
-
-	if kerr == nil {
-		if merr == nil {
-			str = strings.Join([]string{
-				kind.ToStr(cx).String(), ": ", msg.ToStr(cx).String()}, "")
-		} else {
-			str = kind.ToStr(cx).String()
-		}
-	} else {
-		str = st.ToStr(cx).String()
-	}
-
-	return &serror{st, str}
+func NewError(s string) Error {
+	return fmt.Errorf(s)
 }
 
 // NullValueError creates a NullValue Error
 func NullValueError() Error {
-	return NewError("NullValue", "")
+	return fmt.Errorf("NullValue")
 }
 
 // TypeMismatchError creates a TypeMismatch Error
 func TypeMismatchError(msg string) Error {
-	return NewError("TypeMismatch", msg)
-}
-
-// ArityMismatchError creates an ArityMismatch Error
-func ArityMismatchError(expected string, actual int) Error {
-	return NewError(
-		"ArityMismatch",
-		fmt.Sprintf("Expected %s params, got %d", expected, actual))
-}
-
-// TupleLengthError creates a TupleLength Error
-func TupleLengthError(expected int, actual int) Error {
-	return NewError(
-		"TupleLength",
-		fmt.Sprintf("Expected Tuple of length %d, got %d", expected, actual))
+	return fmt.Errorf("TypeMismatch: %s", msg)
 }
 
 // DivideByZeroError creates a DivideByZero Error
 func DivideByZeroError() Error {
-	return NewError("DivideByZero", "")
-}
-
-// IndexOutOfBoundsError creates an IndexOutOfBounds Error
-func IndexOutOfBoundsError(val int) Error {
-	return NewError(
-		"IndexOutOfBounds",
-		fmt.Sprintf("%d", val))
-}
-
-// NoSuchFieldError creates a NoSuchField Error
-func NoSuchFieldError(field string) Error {
-	return NewError(
-		"NoSuchField",
-		fmt.Sprintf("Field '%s' not found", field))
-}
-
-// ReadonlyFieldError creates a ReadonlyField Error
-func ReadonlyFieldError(field string) Error {
-	return NewError(
-		"ReadonlyField",
-		fmt.Sprintf("Field '%s' is readonly", field))
-}
-
-// DuplicateFieldError creates a DuplicateField Error
-func DuplicateFieldError(field string) Error {
-	return NewError(
-		"DuplicateField",
-		fmt.Sprintf("Field '%s' is a duplicate", field))
+	return fmt.Errorf("DivideByZero")
 }
 
 // InvalidArgumentError creates an InvalidArgument Error
 func InvalidArgumentError(msg string) Error {
-	return NewError("InvalidArgument", msg)
+	return fmt.Errorf("InvalidArgument: %s", msg)
 }
 
-// NoSuchElementError creates a NoSuchElement Error
-func NoSuchElementError() Error {
-	return NewError("NoSuchElement", "")
+// IndexOutOfBoundsError creates an IndexOutOfBounds Error
+func IndexOutOfBoundsError(val int) Error {
+	return fmt.Errorf("IndexOutOfBounds: %d", val)
 }
 
-// AssertionFailedError creates an AssertionFailed Error
-func AssertionFailedError() Error {
-	return NewError("AssertionFailed", "")
+// ArityMismatchError creates an ArityMismatch Error
+func ArityMismatchError(expected string, actual int) Error {
+	return fmt.Errorf(
+		"ArityMismatch: Expected %s params, got %d",
+		expected, actual)
 }
 
-// ConstSymbolError creates a ConstSymbol Error
-func ConstSymbolError(name string) Error {
-	return NewError(
-		"ConstSymbol",
-		fmt.Sprintf("Symbol '%s' is const", name))
+// ReadonlyFieldError creates a ReadonlyField Error
+func ReadonlyFieldError(name string) Error {
+	return fmt.Errorf("ReadonlyField: Field '%s' is readonly", name)
 }
 
-// UndefinedSymbolError creates a UndefinedSymbol Error
-func UndefinedSymbolError(name string) Error {
-	return NewError(
-		"UndefinedSymbol",
-		fmt.Sprintf("Symbol '%s' is not defined", name))
+// NoSuchFieldError creates a NoSuchField Error
+func NoSuchFieldError(name string) Error {
+	return fmt.Errorf("NoSuchField: Field '%s' not found", name)
 }
 
 // ImmutableValueError creates an ImmutableValue Error
 func ImmutableValueError() Error {
-	return NewError("ImmutableValue", "")
+	return fmt.Errorf("ImmutableValue")
+}
+
+// InvalidStructKeyError creates a ReadonlyField Error
+func InvalidStructKeyError(key string) Error {
+	return fmt.Errorf("InvalidStructKey: '%s' is not a valid struct key.", key)
 }
 
 // UndefinedModuleError creates a UndefinedModule Error
 func UndefinedModuleError(name string) Error {
-	return NewError(
-		"UndefinedModule",
-		fmt.Sprintf("Module '%s' is not defined", name))
+	return fmt.Errorf("UndefinedModule: Module '%s' is not defined", name)
 }

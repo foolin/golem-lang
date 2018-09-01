@@ -9,7 +9,7 @@ import (
 	"sort"
 	"testing"
 
-	g "github.com/mjarmy/golem-lang/ncore"
+	g "github.com/mjarmy/golem-lang/core"
 )
 
 func Tassert(t *testing.T, flag bool) {

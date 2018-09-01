@@ -15,14 +15,14 @@ func TestPool(t *testing.T) {
 
 	pb := newPoolBuilder()
 
-	tassert(t, pb.constIndex(g.NewInt(4)) == 0)
-	tassert(t, pb.constIndex(g.NewStr("a")) == 1)
-	tassert(t, pb.constIndex(g.NewFloat(1.0)) == 2)
-	tassert(t, pb.constIndex(g.NewStr("a")) == 1)
-	tassert(t, pb.constIndex(g.NewInt(4)) == 0)
+	g.Tassert(t, pb.constIndex(g.NewInt(4)) == 0)
+	g.Tassert(t, pb.constIndex(g.NewStr("a")) == 1)
+	g.Tassert(t, pb.constIndex(g.NewFloat(1.0)) == 2)
+	g.Tassert(t, pb.constIndex(g.NewStr("a")) == 1)
+	g.Tassert(t, pb.constIndex(g.NewInt(4)) == 0)
 
 	constants := pb.makeConstants()
-	tassert(t, reflect.DeepEqual(
+	g.Tassert(t, reflect.DeepEqual(
 		constants,
 		[]g.Basic{
 			g.NewInt(4),

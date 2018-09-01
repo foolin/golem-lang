@@ -8,6 +8,7 @@ import (
 	"github.com/mjarmy/golem-lang/analyzer"
 	"github.com/mjarmy/golem-lang/ast"
 	g "github.com/mjarmy/golem-lang/core"
+	bc "github.com/mjarmy/golem-lang/core/bytecode"
 	"github.com/mjarmy/golem-lang/parser"
 	"github.com/mjarmy/golem-lang/scanner"
 )
@@ -20,11 +21,11 @@ type ModuleResolver func(moduleName string) (*scanner.Source, error)
 func CompileSourceFully(
 	builtinMgr g.BuiltinManager,
 	source *scanner.Source,
-	resolver ModuleResolver) ([]*g.Module, []error) {
+	resolver ModuleResolver) ([]*bc.Module, []error) {
 
 	sources := []*scanner.Source{source}
 	sourceSet := map[string]bool{source.Name: true}
-	result := []*g.Module{}
+	result := []*bc.Module{}
 
 	idx := 0
 	for idx < len(sources) {
@@ -58,7 +59,7 @@ func CompileSourceFully(
 // CompileSource compiles a Module from Source
 func CompileSource(
 	builtinMgr g.BuiltinManager,
-	source *scanner.Source) (*ast.Module, *g.Module, []error) {
+	source *scanner.Source) (*ast.Module, *bc.Module, []error) {
 
 	// scan
 	scanner := scanner.NewScanner(source)

@@ -10,70 +10,150 @@ import (
 )
 
 type (
-	// Field is a name-value pair in a Struct
 	Field interface {
-		Name() string
-		fieldMarker()
-	}
-
-	// FieldDef defines a name-value pair in a Struct
-	FieldDef struct {
-		Name       string
-		IsReadonly bool
-		IsProperty bool
-	}
-
-	field struct {
-		name       string
-		isReadonly bool
-		isProperty bool
-		value      Value
+		Get(Evaluator) (Value, Error)
+		Invoke(Evaluator, []Value) (Value, Error)
+		Set(Evaluator, Value) Error
 	}
 )
 
-// Name returns the name of a field
-func (f *field) Name() string {
-	return f.name
+//--------------------------------------------------------------
+// Field
+//--------------------------------------------------------------
+
+type field struct {
+	value Value
 }
 
-func (f *field) fieldMarker() {}
-
-// NewField creates a name-value pair.
-func NewField(name string, isReadonly bool, value Value) Field {
-	return &field{name, isReadonly, false, value}
+func NewField(val Value) Field {
+	return &field{val}
 }
 
-var getterArity = &Arity{Kind: FixedArity, RequiredParams: 0, OptionalParams: nil}
-var setterArity = &Arity{Kind: FixedArity, RequiredParams: 1, OptionalParams: nil}
+func (f *field) Get(ev Evaluator) (Value, Error) {
+	return f.value, nil
+}
 
-// NewReadonlyNativeProperty creates a readonly Property using a 'getter' function.
-// The 'getter' function must have an arity of 0.
-func NewReadonlyNativeProperty(name string, getter NativeFunc) (Field, Error) {
+func (f *field) Invoke(ev Evaluator, params []Value) (Value, Error) {
+	fn, ok := f.value.(Func)
+	if !ok {
+		return nil, TypeMismatchError("Expected Func")
+	}
+	return fn.Invoke(ev, params)
+}
 
-	if !reflect.DeepEqual(getterArity, getter.Arity()) {
-		return nil, ArityMismatchError("0", getter.Arity().RequiredParams)
+func (f *field) Set(ev Evaluator, val Value) Error {
+	f.value = val
+	return nil
+}
+
+//--------------------------------------------------------------
+// Readonly Field
+//--------------------------------------------------------------
+
+type readonlyField struct {
+	value Value
+}
+
+func NewReadonlyField(val Value) Field {
+	return &readonlyField{val}
+}
+
+func (f *readonlyField) Get(ev Evaluator) (Value, Error) {
+	return f.value, nil
+}
+
+func (f *readonlyField) Invoke(ev Evaluator, params []Value) (Value, Error) {
+	fn, ok := f.value.(Func)
+	if !ok {
+		return nil, TypeMismatchError("Expected Func")
+	}
+	return fn.Invoke(ev, params)
+}
+
+func (f *readonlyField) Set(ev Evaluator, val Value) Error {
+	return fmt.Errorf("ReadonlyField")
+}
+
+//--------------------------------------------------------------
+// Property
+//--------------------------------------------------------------
+
+type property struct {
+	get Func
+	set Func
+}
+
+func NewProperty(get Func, set Func) (Field, Error) {
+
+	if !reflect.DeepEqual(Arity{FixedArity, 0, 0}, get.Arity()) {
+		return nil, fmt.Errorf("InvalidGetterArity: %s", get.Arity().String())
 	}
 
-	return &field{name, true, true, NewTuple([]Value{getter, Null})}, nil
-}
-
-// NewNativeProperty creates a Property using 'getter' and 'setter' functions.
-// The 'getter' function must have an arity of 0, and the 'setter' function
-// must have an arity of 1.  By convention the setter function should
-// return 'Null'; its return value will be ignored.
-func NewNativeProperty(name string, getter NativeFunc, setter NativeFunc) (Field, Error) {
-
-	if !reflect.DeepEqual(getterArity, getter.Arity()) {
-		return nil, ArityMismatchError("0", getter.Arity().RequiredParams)
+	if !reflect.DeepEqual(Arity{FixedArity, 1, 0}, set.Arity()) {
+		return nil, fmt.Errorf("InvalidSetterArity: %s", set.Arity().String())
 	}
 
-	if !reflect.DeepEqual(setterArity, setter.Arity()) {
-		return nil, ArityMismatchError("0", setter.Arity().RequiredParams)
-	}
-
-	return &field{name, false, true, NewTuple([]Value{getter, setter})}, nil
+	return &property{get, set}, nil
 }
 
-func (fd *FieldDef) String() string {
-	return fmt.Sprintf("fieldDef(%s %v %v)", fd.Name, fd.IsReadonly, fd.IsProperty)
+func (p *property) Get(ev Evaluator) (Value, Error) {
+	return p.get.Invoke(ev, []Value{})
+}
+
+func (p *property) Invoke(ev Evaluator, params []Value) (Value, Error) {
+
+	val, err := p.get.Invoke(ev, []Value{})
+	if err != nil {
+		return nil, err
+	}
+
+	fn, ok := val.(Func)
+	if !ok {
+		return nil, TypeMismatchError("Expected Func")
+	}
+	return fn.Invoke(ev, params)
+}
+
+func (p *property) Set(ev Evaluator, val Value) Error {
+	_, err := p.set.Invoke(ev, []Value{val})
+	return err
+}
+
+//--------------------------------------------------------------
+// Readonly Property
+//--------------------------------------------------------------
+
+type readonlyProperty struct {
+	get Func
+}
+
+func NewReadonlyProperty(get Func) (Field, Error) {
+
+	if !reflect.DeepEqual(Arity{FixedArity, 0, 0}, get.Arity()) {
+		return nil, fmt.Errorf("InvalidGetterArity: %s", get.Arity().String())
+	}
+
+	return &readonlyProperty{get}, nil
+}
+
+func (p *readonlyProperty) Get(ev Evaluator) (Value, Error) {
+	return p.get.Invoke(ev, []Value{})
+}
+
+func (p *readonlyProperty) Invoke(ev Evaluator, params []Value) (Value, Error) {
+
+	val, err := p.get.Invoke(ev, []Value{})
+	if err != nil {
+		return nil, err
+	}
+
+	fn, ok := val.(Func)
+	if !ok {
+		return nil, TypeMismatchError("Expected Func")
+	}
+	return fn.Invoke(ev, params)
+}
+
+func (p *readonlyProperty) Set(ev Evaluator, val Value) Error {
+	return fmt.Errorf("ReadonlyField")
 }

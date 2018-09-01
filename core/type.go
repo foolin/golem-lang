@@ -2,7 +2,7 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-package ncore
+package core
 
 // Type represents all of the possible types of a Golem Value
 type Type int

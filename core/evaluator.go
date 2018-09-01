@@ -2,7 +2,7 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-package ncore
+package core
 
 // Evaluator evaluates functions that are defined via bytecode.
 // In practice, this means that an Evaluator is actually a full-fledged instance

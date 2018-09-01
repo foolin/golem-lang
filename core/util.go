@@ -4,7 +4,22 @@
 
 package core
 
-import ()
+import (
+	"testing"
+)
+
+func Assert(flag bool) {
+	if !flag {
+		panic("assertion failure")
+	}
+}
+
+func Tassert(t *testing.T, flag bool) {
+	if !flag {
+		t.Error("assertion failure")
+		panic("Tassert")
+	}
+}
 
 func posIndex(val Value, length int) (int, Error) {
 	i, ok := val.(Int)
@@ -59,28 +74,9 @@ func sliceIndices(from Value, to Value, length int) (int, int, Error) {
 	return sliceBounds(f, length), sliceBounds(t, length), nil
 }
 
-func valuesEq(cx Context, as []Value, bs []Value) (Bool, Error) {
-
-	if len(as) != len(bs) {
-		return False, nil
-	}
-
-	for i, a := range as {
-		eq, err := a.Eq(cx, bs[i])
-		if err != nil {
-			return nil, err
-		}
-		if eq == False {
-			return False, nil
-		}
-	}
-
-	return True, nil
-}
-
+// https://en.wikipedia.org/wiki/Jenkins_hash_function
 func strHash(s string) int {
 
-	// https://en.wikipedia.org/wiki/Jenkins_hash_function
 	var hash int
 	bytes := []byte(s)
 	for _, b := range bytes {
@@ -94,48 +90,68 @@ func strHash(s string) int {
 	return hash
 }
 
-func newIteratorStruct() Struct {
-
-	// create a struct with fields that have placeholder Null values
-	stc, err := NewStruct([]Field{
-		NewField("next", true, Null),
-		NewField("get", true, Null)}, true)
-	if err != nil {
-		panic("invalid iterator")
-	}
-	return stc
+// copy to avoid memory leaks
+func strcpy(s string) string {
+	c := make([]byte, len(s))
+	copy(c, s)
+	return string(c)
 }
 
-func initIteratorStruct(cx Context, itr Iterator) Iterator {
+//func valuesEq(ev Evaluator, as []Value, bs []Value) (Bool, Error) {
+//
+//	if len(as) != len(bs) {
+//		return False, nil
+//	}
+//
+//	for i, a := range as {
+//		eq, err := a.Eq(ev, bs[i])
+//		if err != nil {
+//			return nil, err
+//		}
+//		if eq == False {
+//			return False, nil
+//		}
+//	}
+//
+//	return True, nil
+//}
 
-	// initialize the struct fields with functions that refer back to the iterator
-	err := itr.InitField(
-		cx, NewStr("next"),
-		NewFixedNativeFunc(
-			[]Type{}, false,
-			func(cx Context, values []Value) (Value, Error) {
-				return itr.IterNext(), nil
-			}))
-	if err != nil {
-		panic("invalid iterator")
-	}
-
-	err = itr.InitField(
-		cx, NewStr("get"),
-		NewFixedNativeFunc(
-			[]Type{}, false,
-			func(cx Context, values []Value) (Value, Error) {
-				return itr.IterGet()
-			}))
-	if err != nil {
-		panic("invalid iterator")
-	}
-
-	return itr
-}
-
-func assert(flag bool) {
-	if !flag {
-		panic("assertion failure")
-	}
-}
+//func newIteratorStruct() Struct {
+//
+//	// create a struct with fields that have placeholder Null values
+//	stc, err := NewStruct([]Field{
+//		NewField("next", true, Null),
+//		NewField("get", true, Null)}, true)
+//	if err != nil {
+//		panic("invalid iterator")
+//	}
+//	return stc
+//}
+//
+//func initIteratorStruct(ev Evaluator, itr Iterator) Iterator {
+//
+//	// initialize the struct fields with functions that refer back to the iterator
+//	err := itr.InitField(
+//		ev, NewStr("next"),
+//		NewFixedNativeFunc(
+//			[]Type{}, false,
+//			func(ev Evaluator, values []Value) (Value, Error) {
+//				return itr.IterNext(), nil
+//			}))
+//	if err != nil {
+//		panic("invalid iterator")
+//	}
+//
+//	err = itr.InitField(
+//		ev, NewStr("get"),
+//		NewFixedNativeFunc(
+//			[]Type{}, false,
+//			func(ev Evaluator, values []Value) (Value, Error) {
+//				return itr.IterGet()
+//			}))
+//	if err != nil {
+//		panic("invalid iterator")
+//	}
+//
+//	return itr
+//}

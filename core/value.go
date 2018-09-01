@@ -15,14 +15,18 @@ import (
 type Value interface {
 	Type() Type
 
-	Freeze(Context) (Value, Error)
-	Frozen(Context) (Bool, Error)
+	Freeze(Evaluator) (Value, Error)
+	Frozen(Evaluator) (Bool, Error)
 
-	Eq(Context, Value) (Bool, Error)
-	HashCode(Context) (Int, Error)
-	ToStr(Context) Str
-	Cmp(Context, Value) (Int, Error)
-	GetField(Context, Str) (Value, Error)
+	Eq(Evaluator, Value) (Bool, Error)
+	HashCode(Evaluator) (Int, Error)
+	ToStr(Evaluator) (Str, Error)
+	Cmp(Evaluator, Value) (Int, Error)
+
+	FieldNames() ([]string, Error)
+	HasField(string) (bool, Error)
+	GetField(string, Evaluator) (Value, Error)
+	InvokeField(string, Evaluator, []Value) (Value, Error)
 }
 
 //---------------------------------------------------------------
@@ -31,31 +35,31 @@ type Value interface {
 type (
 	// Indexable is a value that supports the index operator
 	Indexable interface {
-		Get(Context, Value) (Value, Error)
+		Get(Evaluator, Value) (Value, Error)
 	}
 
 	// IndexAssignable is a value that supports index assignment
 	IndexAssignable interface {
 		Indexable
-		Set(Context, Value, Value) Error
+		Set(Evaluator, Value, Value) Error
 	}
 
 	// Lenable is a value that has a length
 	Lenable interface {
-		Len(Context) Int
+		Len(Evaluator) Int
 	}
 
 	// Sliceable is a value that can be sliced
 	Sliceable interface {
-		Slice(Context, Value, Value) (Value, Error)
-		SliceFrom(Context, Value) (Value, Error)
-		SliceTo(Context, Value) (Value, Error)
+		Slice(Evaluator, Value, Value) (Value, Error)
+		SliceFrom(Evaluator, Value) (Value, Error)
+		SliceTo(Evaluator, Value) (Value, Error)
 	}
 
-	// Iterable is a value that can be iterated
-	Iterable interface {
-		NewIterator(Context) Iterator
-	}
+	//// Iterable is a value that can be iterated
+	//Iterable interface {
+	//	NewIterator(Evaluator) Iterator
+	//}
 )
 
 //---------------------------------------------------------------
@@ -76,8 +80,8 @@ type (
 	// Bool is the boolean value -- true or false
 	Bool interface {
 		Basic
-		BoolVal() bool
 
+		BoolVal() bool
 		Not() Bool
 	}
 
@@ -89,7 +93,7 @@ type (
 		Indexable
 		Lenable
 		Sliceable
-		Iterable
+		//Iterable
 
 		Concat(Str) Str
 	}
@@ -127,116 +131,29 @@ type (
 )
 
 //---------------------------------------------------------------
-// Composite
-
-type (
-	// Composite is a Value that is composed of other values -- List, Range, Tuple,
-	// Dict, Set, Struct
-	Composite interface {
-		Value
-		compositeMarker()
-	}
-
-	// List is an indexable sequence of values
-	List interface {
-		Composite
-		IndexAssignable
-		Lenable
-		Iterable
-		Sliceable
-
-		IsEmpty() Bool
-		Clear() Error
-
-		Contains(Context, Value) (Bool, Error)
-		IndexOf(Context, Value) (Int, Error)
-		Join(Context, Str) Str
-
-		Add(Context, Value) Error
-		AddAll(Context, Value) Error
-		Remove(Context, Int) Error
-
-		Values() []Value
-
-		Map(Context, func(Value) (Value, Error)) (Value, Error)
-		Reduce(Context, Value, func(Value, Value) (Value, Error)) (Value, Error)
-		Filter(Context, func(Value) (Value, Error)) (Value, Error)
-	}
-
-	// Range is an immutable, iterable representation of a  sequence of integers
-	Range interface {
-		Composite
-		Indexable
-		Lenable
-		Iterable
-
-		From() Int
-		To() Int
-		Step() Int
-		Count() Int
-	}
-
-	// Tuple is an immutable sequence of two or more values
-	Tuple interface {
-		Composite
-		Indexable
-		Lenable
-	}
-
-	// Dict is an associative array, a.k.a Hash Map
-	Dict interface {
-		Composite
-		IndexAssignable
-		Lenable
-		Iterable
-
-		IsEmpty() Bool
-		Clear() Error
-
-		ContainsKey(Context, Value) (Bool, Error)
-		AddAll(Context, Value) Error
-		Remove(Context, Value) (Bool, Error)
-	}
-
-	// Set is a set of unique values
-	Set interface {
-		Composite
-		Lenable
-		Iterable
-
-		IsEmpty() Bool
-		Clear() Error
-
-		Contains(Context, Value) (Bool, Error)
-		Add(Context, Value) Error
-		AddAll(Context, Value) Error
-		Remove(Context, Value) (Bool, Error)
-	}
-
-	// Struct is a composite collection of names values
-	Struct interface {
-		Composite
-
-		FieldNames() []string
-		Has(Context, Value) (Bool, Error)
-
-		InitField(Context, Str, Value) Error
-		SetField(Context, Str, Value) Error
-	}
-
-	// Iterator iterates over a sequence of values
-	Iterator interface {
-		Struct
-		IterNext() Bool
-		IterGet() (Value, Error)
-	}
-)
-
-//---------------------------------------------------------------
 // Func
 
-// ArityKind defines the various kinds of Arity for a Func
-type ArityKind int
+type (
+	// ArityKind defines the various kinds of Arity for a Func
+	ArityKind uint16
+
+	// Arity defines the arity of a function
+	Arity struct {
+		Kind           ArityKind
+		RequiredParams uint16
+		// For FixedArity and VariadicArity, this value is ignored and should be
+		// set to 0.  For MultipleArity, it must be set to a non-zero integer.
+		OptionalParams uint16
+	}
+
+	// Func is a function
+	Func interface {
+		Value
+
+		Arity() Arity
+		Invoke(Evaluator, []Value) (Value, Error)
+	}
+)
 
 // The various types of arity
 const (
@@ -252,91 +169,140 @@ const (
 	MultipleArity
 )
 
-// Arity defines the arity of a function
-type Arity struct {
-	Kind           ArityKind
-	RequiredParams int
-	// OptionalParams is nil unless Kind is MultipleArity
-	OptionalParams []Basic
+func (a Arity) String() string {
+
+	return fmt.Sprintf(
+		"Arity(%s,%d,%d)",
+		a.Kind.String(),
+		a.RequiredParams,
+		a.OptionalParams)
 }
 
-// Func is a function
-type Func interface {
-	Value
+func (k ArityKind) String() string {
 
-	Arity() *Arity
-	Invoke(Context, []Value) (Value, Error)
-
-	funcMarker()
-}
-
-//---------------------------------------------------------------
-// Chan
-
-// Chan is a goroutine channel
-type Chan interface {
-	Value
-	chanMarker()
-}
-
-//---------------------------------------------------------------
-// Type
-
-// Type represents all of the possible types of a Golem Value
-type Type int
-
-// All possible kinds of Type
-const (
-	// AnyType is a special type that we use when we don't care what the actual type is.
-	// It is used in conjuction with type-checking for certain kinds of function invocations.
-	AnyType Type = iota
-
-	NullType
-	BoolType
-	StrType
-	IntType
-	FloatType
-	FuncType
-	ListType
-	RangeType
-	TupleType
-	DictType
-	SetType
-	StructType
-	ChanType
-)
-
-func (t Type) String() string {
-
-	switch t {
-	case NullType:
-		return "Null"
-	case BoolType:
-		return "Bool"
-	case StrType:
-		return "Str"
-	case IntType:
-		return "Int"
-	case FloatType:
-		return "Float"
-	case FuncType:
-		return "Func"
-	case ListType:
-		return "List"
-	case RangeType:
-		return "Range"
-	case TupleType:
-		return "Tuple"
-	case DictType:
-		return "Dict"
-	case SetType:
-		return "Set"
-	case StructType:
-		return "Struct"
-	case ChanType:
-		return "Chan"
+	switch k {
+	case FixedArity:
+		return "Fixed"
+	case VariadicArity:
+		return "Variadic"
+	case MultipleArity:
+		return "Multiple"
 
 	default:
 		panic("unreachable")
 	}
 }
+
+//---------------------------------------------------------------
+// Composite
+
+type (
+	// Composite is a Value that is composed of other values -- List, Range, Tuple,
+	// Dict, Set, Struct
+	Composite interface {
+		Value
+		compositeMarker()
+	}
+
+	//	// List is an indexable sequence of values
+	//	List interface {
+	//		Composite
+	//		IndexAssignable
+	//		Lenable
+	//		Iterable
+	//		Sliceable
+	//
+	//		IsEmpty() Bool
+	//		Clear() Error
+	//
+	//		Contains(Evaluator, Value) (Bool, Error)
+	//		IndexOf(Evaluator, Value) (Int, Error)
+	//		Join(Evaluator, Str) Str
+	//
+	//		Add(Evaluator, Value) Error
+	//		AddAll(Evaluator, Value) Error
+	//		Remove(Evaluator, Int) Error
+	//
+	//		Values() []Value
+	//
+	//		Map(Evaluator, func(Value) (Value, Error)) (Value, Error)
+	//		Reduce(Evaluator, Value, func(Value, Value) (Value, Error)) (Value, Error)
+	//		Filter(Evaluator, func(Value) (Value, Error)) (Value, Error)
+	//	}
+	//
+	//	// Range is an immutable, iterable representation of a  sequence of integers
+	//	Range interface {
+	//		Composite
+	//		Indexable
+	//		Lenable
+	//		Iterable
+	//
+	//		From() Int
+	//		To() Int
+	//		Step() Int
+	//		Count() Int
+	//	}
+	//
+	//	// Tuple is an immutable sequence of two or more values
+	//	Tuple interface {
+	//		Composite
+	//		Indexable
+	//		Lenable
+	//	}
+	//
+	//	// Dict is an associative array, a.k.a Hash Map
+	//	Dict interface {
+	//		Composite
+	//		IndexAssignable
+	//		Lenable
+	//		Iterable
+	//
+	//		IsEmpty() Bool
+	//		Clear() Error
+	//
+	//		ContainsKey(Evaluator, Value) (Bool, Error)
+	//		AddAll(Evaluator, Value) Error
+	//		Remove(Evaluator, Value) (Bool, Error)
+	//	}
+	//
+	//	// Set is a set of unique values
+	//	Set interface {
+	//		Composite
+	//		Lenable
+	//		Iterable
+	//
+	//		IsEmpty() Bool
+	//		Clear() Error
+	//
+	//		Contains(Evaluator, Value) (Bool, Error)
+	//		Add(Evaluator, Value) Error
+	//		AddAll(Evaluator, Value) Error
+	//		Remove(Evaluator, Value) (Bool, Error)
+	//	}
+
+	// Struct is a composite collection of names values
+	Struct interface {
+		Composite
+
+		SetField(string, Evaluator, Value) Error
+
+		//// Internal is for use only by the Golem Compiler
+		//Internal([]interface{})
+	}
+
+//	// Iterator iterates over a sequence of values
+//	Iterator interface {
+//		Struct
+//		IterNext() Bool
+//		IterGet() (Value, Error)
+//	}
+)
+
+////---------------------------------------------------------------
+//// Chan
+//
+//// Chan is a goroutine channel
+//type Chan interface {
+//	Value
+//	chanMarker()
+//}

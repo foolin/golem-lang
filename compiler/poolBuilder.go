@@ -8,61 +8,61 @@ import (
 	"sort"
 
 	g "github.com/mjarmy/golem-lang/core"
+	bc "github.com/mjarmy/golem-lang/core/bytecode"
 )
 
 // poolBuilder builds a Pool
 type poolBuilder struct {
 	constants  *g.HashMap
-	templates  []*g.FuncTemplate
-	structDefs [][]*g.FieldDef
+	templates  []*bc.FuncTemplate
+	structDefs [][]string
 }
 
 func newPoolBuilder() *poolBuilder {
 	return &poolBuilder{
 		constants:  g.EmptyHashMap(),
-		templates:  []*g.FuncTemplate{},
-		structDefs: [][]*g.FieldDef{},
+		templates:  []*bc.FuncTemplate{},
+		structDefs: [][]string{},
 	}
 }
 
 func (p *poolBuilder) constIndex(key g.Basic) int {
 
-	// Its OK for the Context to be nil here.
-	// The key is always g.Basic, so the Context will never be used.
-	var cx g.Context
+	// Its OK for the Evaluator to be nil here.
+	// The key is always g.Basic, so the Evaluator will never be used.
+	var ev g.Evaluator
 
-	b, err := p.constants.ContainsKey(cx, key)
-	assert(err == nil)
+	b, err := p.constants.ContainsKey(ev, key)
+	g.Assert(err == nil)
 
 	if b.BoolVal() {
 		var v g.Value
-		v, err = p.constants.Get(cx, key)
-		assert(err == nil)
+		v, err = p.constants.Get(ev, key)
+		g.Assert(err == nil)
 
 		i, ok := v.(g.Int)
-		assert(ok)
+		g.Assert(ok)
 		return int(i.IntVal())
 	}
 	i := p.constants.Len()
-	err = p.constants.Put(cx, key, i)
-	assert(err == nil)
+	err = p.constants.Put(ev, key, i)
+	g.Assert(err == nil)
 	return int(i.IntVal())
 }
 
-func (p *poolBuilder) addTemplate(tpl *g.FuncTemplate) {
+func (p *poolBuilder) addTemplate(tpl *bc.FuncTemplate) {
 	p.templates = append(p.templates, tpl)
 }
 
-func (p *poolBuilder) structDefIndex(def []*g.FieldDef) int {
+func (p *poolBuilder) structDefIndex(def []string) int {
 
-	// TODO build up a hash map of common field defs
 	idx := len(p.structDefs)
 	p.structDefs = append(p.structDefs, def)
 	return idx
 }
 
-func (p *poolBuilder) build() *g.Pool {
-	return &g.Pool{
+func (p *poolBuilder) build() *bc.Pool {
+	return &bc.Pool{
 		Constants:  p.makeConstants(),
 		Templates:  p.templates,
 		StructDefs: p.structDefs,
@@ -80,10 +80,10 @@ func (items constEntries) Len() int {
 func (items constEntries) Less(i, j int) bool {
 
 	x, ok := items[i].Value.(g.Int)
-	assert(ok)
+	g.Assert(ok)
 
 	y, ok := items[j].Value.(g.Int)
-	assert(ok)
+	g.Assert(ok)
 
 	return x.IntVal() < y.IntVal()
 }
@@ -107,7 +107,7 @@ func (p *poolBuilder) makeConstants() []g.Basic {
 	constants := make([]g.Basic, n)
 	for i, e := range entries {
 		b, ok := e.Key.(g.Basic)
-		assert(ok)
+		g.Assert(ok)
 		constants[i] = b
 	}
 
