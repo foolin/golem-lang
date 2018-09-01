@@ -46,7 +46,7 @@ type (
 
 	// Lenable is a value that has a length
 	Lenable interface {
-		Len(Evaluator) Int
+		Len(Evaluator) (Int, Error)
 	}
 
 	// Sliceable is a value that can be sliced
@@ -204,32 +204,32 @@ type (
 		compositeMarker()
 	}
 
-	//	// List is an indexable sequence of values
-	//	List interface {
-	//		Composite
-	//		IndexAssignable
-	//		Lenable
-	//		Iterable
-	//		Sliceable
-	//
-	//		IsEmpty() Bool
-	//		Clear() Error
-	//
-	//		Contains(Evaluator, Value) (Bool, Error)
-	//		IndexOf(Evaluator, Value) (Int, Error)
-	//		Join(Evaluator, Str) Str
-	//
-	//		Add(Evaluator, Value) Error
-	//		AddAll(Evaluator, Value) Error
-	//		Remove(Evaluator, Int) Error
-	//
-	//		Values() []Value
-	//
-	//		Map(Evaluator, func(Value) (Value, Error)) (Value, Error)
-	//		Reduce(Evaluator, Value, func(Value, Value) (Value, Error)) (Value, Error)
-	//		Filter(Evaluator, func(Value) (Value, Error)) (Value, Error)
-	//	}
-	//
+	// List is an indexable sequence of values
+	List interface {
+		Composite
+		IndexAssignable
+		Lenable
+		//Iterable
+		Sliceable
+
+		IsEmpty() Bool
+		Clear() Error
+
+		Contains(Evaluator, Value) (Bool, Error)
+		IndexOf(Evaluator, Value) (Int, Error)
+		Join(Evaluator, Str) (Str, Error)
+
+		Add(Evaluator, Value) Error
+		//AddAll(Evaluator, Value) Error
+		Remove(Evaluator, Int) Error
+
+		Values() []Value
+
+		Map(Evaluator, func(Value) (Value, Error)) (Value, Error)
+		Reduce(Evaluator, Value, func(Value, Value) (Value, Error)) (Value, Error)
+		Filter(Evaluator, func(Value) (Value, Error)) (Value, Error)
+	}
+
 	//	// Range is an immutable, iterable representation of a  sequence of integers
 	//	Range interface {
 	//		Composite

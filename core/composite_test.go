@@ -54,77 +54,78 @@ func TestStruct(t *testing.T) {
 	println(val.(Str).String())
 }
 
+func TestList(t *testing.T) {
+	ls := NewList([]Value{})
+	okType(t, ls, ListType)
+
+	var v Value
+	var err Error
+
+	v, err = ls.ToStr(nil)
+	ok(t, v, err, NewStr("[ ]"))
+
+	v, err = ls.Eq(nil, NewList([]Value{}))
+	ok(t, v, err, True)
+
+	v, err = ls.Eq(nil, NewList([]Value{NewStr("a")}))
+	ok(t, v, err, False)
+
+	v, err = ls.Eq(nil, Null)
+	ok(t, v, err, False)
+
+	v, err = ls.Len(nil)
+	ok(t, v, err, Zero)
+
+	err = ls.Add(nil, NewStr("a"))
+	Tassert(t, err == nil)
+
+	v, err = ls.Eq(nil, NewList([]Value{}))
+	ok(t, v, err, False)
+
+	v, err = ls.Eq(nil, NewList([]Value{NewStr("a")}))
+	ok(t, v, err, True)
+
+	v, err = ls.Len(nil)
+	ok(t, v, err, One)
+
+	v, err = ls.Get(nil, Zero)
+	ok(t, v, err, NewStr("a"))
+
+	err = ls.Set(nil, Zero, NewStr("b"))
+	Tassert(t, err == nil)
+
+	v, err = ls.Get(nil, Zero)
+	ok(t, v, err, NewStr("b"))
+
+	v, err = ls.Get(nil, NegOne)
+	ok(t, v, err, NewStr("b"))
+
+	v, err = ls.Get(nil, One)
+	fail(t, v, err, "IndexOutOfBounds: 1")
+
+	err = ls.Set(nil, NegOne, True)
+	Tassert(t, err == nil)
+
+	err = ls.Set(nil, One, True)
+	fail(t, nil, err, "IndexOutOfBounds: 1")
+
+	v, err = ls.ToStr(nil)
+	ok(t, v, err, NewStr("[ true ]"))
+
+	err = ls.Add(nil, NewStr("z"))
+	Tassert(t, err == nil)
+
+	v, err = ls.ToStr(nil)
+	ok(t, v, err, NewStr("[ true, z ]"))
+}
+
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 
-//func TestList(t *testing.T) {
-//	ls := NewList([]Value{})
-//	okType(t, ls, ListType)
 //
-//	var v Value
-//	var err Error
-//
-//	v = ls.ToStr(cx)
-//	ok(t, v, nil, NewStr("[ ]"))
-//
-//	v, err = ls.Eq(cx, NewList([]Value{}))
-//	ok(t, v, err, True)
-//
-//	v, err = ls.Eq(cx, NewList([]Value{NewStr("a")}))
-//	ok(t, v, err, False)
-//
-//	v, err = ls.Eq(cx, Null)
-//	ok(t, v, err, False)
-//
-//	v = ls.Len(nil)
-//	ok(t, v, nil, Zero)
-//
-//	err = ls.Add(cx, NewStr("a"))
-//	Tassert(t, err == nil)
-//
-//	v, err = ls.Eq(cx, NewList([]Value{}))
-//	ok(t, v, err, False)
-//
-//	v, err = ls.Eq(cx, NewList([]Value{NewStr("a")}))
-//	ok(t, v, err, True)
-//
-//	v = ls.Len(nil)
-//	ok(t, v, nil, One)
-//
-//	v, err = ls.Get(cx, Zero)
-//	ok(t, v, err, NewStr("a"))
-//
-//	err = ls.Set(cx, Zero, NewStr("b"))
-//	Tassert(t, err == nil)
-//
-//	v, err = ls.Get(cx, Zero)
-//	ok(t, v, err, NewStr("b"))
-//
-//	v, err = ls.Get(cx, NegOne)
-//	ok(t, v, err, NewStr("b"))
-//
-//	v, err = ls.Get(cx, One)
-//	fail(t, v, err, "IndexOutOfBounds: 1")
-//
-//	err = ls.Set(cx, NegOne, True)
-//	Tassert(t, err == nil)
-//
-//	err = ls.Set(cx, One, True)
-//	fail(t, nil, err, "IndexOutOfBounds: 1")
-//
-//	v = ls.ToStr(cx)
-//	ok(t, v, nil, NewStr("[ true ]"))
-//
-//	err = ls.Add(cx, NewStr("z"))
-//	Tassert(t, err == nil)
-//
-//	v = ls.ToStr(cx)
-//	ok(t, v, nil, NewStr("[ true, z ]"))
-//}
-//
-//func newDict(cx Context, entries []*HEntry) Dict {
-//	dict, err := NewDict(cx, entries)
+//func newDict(nil Context, entries []*HEntry) Dict {
+//	dict, err := NewDict(nil, entries)
 //	if err != nil {
 //		panic(err)
 //	}
@@ -132,83 +133,83 @@ func TestStruct(t *testing.T) {
 //}
 //
 //func TestCompositeHashCode(t *testing.T) {
-//	h, err := newDict(cx, []*HEntry{}).HashCode(cx)
+//	h, err := newDict(nil, []*HEntry{}).HashCode(nil)
 //	fail(t, h, err, "TypeMismatch: Expected Hashable Type")
 //
-//	h, err = NewList([]Value{}).HashCode(cx)
+//	h, err = NewList([]Value{}).HashCode(nil)
 //	fail(t, h, err, "TypeMismatch: Expected Hashable Type")
 //
-//	h, err = newStruct([]Field{}).HashCode(cx)
+//	h, err = newStruct([]Field{}).HashCode(nil)
 //	fail(t, h, err, "TypeMismatch: Expected Hashable Type")
 //}
 //
 //func TestDict(t *testing.T) {
-//	d := newDict(cx, []*HEntry{})
+//	d := newDict(nil, []*HEntry{})
 //	okType(t, d, DictType)
 //
 //	var v Value
 //	var err Error
 //
-//	v = d.ToStr(cx)
+//	v = d.ToStr(nil)
 //	ok(t, v, err, NewStr("dict { }"))
 //
-//	v, err = d.Eq(cx, newDict(cx, []*HEntry{}))
+//	v, err = d.Eq(nil, newDict(nil, []*HEntry{}))
 //	ok(t, v, err, True)
 //
-//	v, err = d.Eq(cx, Null)
+//	v, err = d.Eq(nil, Null)
 //	ok(t, v, err, False)
 //
 //	v = d.Len(nil)
 //	ok(t, v, nil, Zero)
 //
-//	v, err = d.Get(cx, NewStr("a"))
+//	v, err = d.Get(nil, NewStr("a"))
 //	ok(t, v, err, Null)
 //
-//	err = d.Set(cx, NewStr("a"), One)
+//	err = d.Set(nil, NewStr("a"), One)
 //	Tassert(t, err == nil)
 //
-//	v, err = d.Get(cx, NewStr("a"))
+//	v, err = d.Get(nil, NewStr("a"))
 //	ok(t, v, err, One)
 //
-//	v, err = d.Eq(cx, newDict(cx, []*HEntry{}))
+//	v, err = d.Eq(nil, newDict(nil, []*HEntry{}))
 //	ok(t, v, err, False)
 //
-//	v, err = d.Eq(cx, newDict(cx, []*HEntry{{NewStr("a"), One}}))
+//	v, err = d.Eq(nil, newDict(nil, []*HEntry{{NewStr("a"), One}}))
 //	ok(t, v, err, True)
 //
 //	v = d.Len(nil)
 //	ok(t, v, nil, One)
 //
-//	v = d.ToStr(cx)
+//	v = d.ToStr(nil)
 //	ok(t, v, nil, NewStr("dict { a: 1 }"))
 //
-//	err = d.Set(cx, NewStr("b"), NewInt(2))
+//	err = d.Set(nil, NewStr("b"), NewInt(2))
 //	Tassert(t, err == nil)
 //
-//	v, err = d.Get(cx, NewStr("b"))
+//	v, err = d.Get(nil, NewStr("b"))
 //	ok(t, v, err, NewInt(2))
 //
-//	v = d.ToStr(cx)
+//	v = d.ToStr(nil)
 //	ok(t, v, nil, NewStr("dict { b: 2, a: 1 }"))
 //
 //	tp := NewTuple([]Value{One, Zero})
-//	d = newDict(cx, []*HEntry{{tp, True}})
+//	d = newDict(nil, []*HEntry{{tp, True}})
 //
-//	v = d.ToStr(cx)
+//	v = d.ToStr(nil)
 //	ok(t, v, nil, NewStr("dict { (1, 0): true }"))
 //
-//	v, err = d.Get(cx, tp)
+//	v, err = d.Get(nil, tp)
 //	ok(t, v, err, True)
 //
-//	d, err = NewDict(cx, []*HEntry{{Null, True}})
+//	d, err = NewDict(nil, []*HEntry{{Null, True}})
 //	fail(t, d, err, "NullValue")
 //
-//	d, err = NewDict(cx, []*HEntry{{NewList([]Value{}), True}})
+//	d, err = NewDict(nil, []*HEntry{{NewList([]Value{}), True}})
 //	fail(t, d, err, "TypeMismatch: Expected Hashable Type")
 //}
 //
-//func newSet(cx Context, values []Value) Set {
-//	set, err := NewSet(cx, values)
+//func newSet(nil Context, values []Value) Set {
+//	set, err := NewSet(nil, values)
 //	if err != nil {
 //		panic(err)
 //	}
@@ -216,56 +217,56 @@ func TestStruct(t *testing.T) {
 //}
 //
 //func TestSet(t *testing.T) {
-//	s := newSet(cx, []Value{})
+//	s := newSet(nil, []Value{})
 //	okType(t, s, SetType)
 //
 //	var v Value
 //	var err Error
 //
-//	v = s.ToStr(cx)
+//	v = s.ToStr(nil)
 //	ok(t, v, err, NewStr("set { }"))
 //
-//	v, err = s.Eq(cx, newSet(cx, []Value{}))
+//	v, err = s.Eq(nil, newSet(nil, []Value{}))
 //	ok(t, v, err, True)
 //
-//	v, err = s.Eq(cx, newSet(cx, []Value{One}))
+//	v, err = s.Eq(nil, newSet(nil, []Value{One}))
 //	ok(t, v, err, False)
 //
-//	v, err = s.Eq(cx, Null)
+//	v, err = s.Eq(nil, Null)
 //	ok(t, v, err, False)
 //
 //	v = s.Len(nil)
 //	ok(t, v, nil, Zero)
 //
-//	s = newSet(cx, []Value{One})
+//	s = newSet(nil, []Value{One})
 //
-//	v = s.ToStr(cx)
+//	v = s.ToStr(nil)
 //	ok(t, v, err, NewStr("set { 1 }"))
 //
-//	v, err = s.Eq(cx, newSet(cx, []Value{}))
+//	v, err = s.Eq(nil, newSet(nil, []Value{}))
 //	ok(t, v, err, False)
 //
-//	v, err = s.Eq(cx, newSet(cx, []Value{One, One, One}))
+//	v, err = s.Eq(nil, newSet(nil, []Value{One, One, One}))
 //	ok(t, v, err, True)
 //
-//	v, err = s.Eq(cx, Null)
+//	v, err = s.Eq(nil, Null)
 //	ok(t, v, err, False)
 //
 //	v = s.Len(nil)
 //	ok(t, v, nil, One)
 //
-//	s = newSet(cx, []Value{One, Zero, Zero, One})
+//	s = newSet(nil, []Value{One, Zero, Zero, One})
 //
-//	v = s.ToStr(cx)
+//	v = s.ToStr(nil)
 //	ok(t, v, err, NewStr("set { 0, 1 }"))
 //
 //	v = s.Len(nil)
 //	ok(t, v, nil, NewInt(2))
 //
-//	s, err = NewSet(cx, []Value{Null})
+//	s, err = NewSet(nil, []Value{Null})
 //	fail(t, s, err, "NullValue")
 //
-//	s, err = NewSet(cx, []Value{NewList([]Value{})})
+//	s, err = NewSet(nil, []Value{NewList([]Value{})})
 //	fail(t, s, err, "TypeMismatch: Expected Hashable Type")
 //}
 //
@@ -276,28 +277,28 @@ func TestStruct(t *testing.T) {
 //	tp := NewTuple([]Value{One, Zero})
 //	okType(t, tp, TupleType)
 //
-//	v, err = tp.Eq(cx, NewTuple([]Value{Zero, Zero}))
+//	v, err = tp.Eq(nil, NewTuple([]Value{Zero, Zero}))
 //	ok(t, v, err, False)
 //
-//	v, err = tp.Eq(cx, NewTuple([]Value{One, Zero}))
+//	v, err = tp.Eq(nil, NewTuple([]Value{One, Zero}))
 //	ok(t, v, err, True)
 //
-//	v, err = tp.Eq(cx, Null)
+//	v, err = tp.Eq(nil, Null)
 //	ok(t, v, err, False)
 //
-//	v, err = tp.Get(cx, Zero)
+//	v, err = tp.Get(nil, Zero)
 //	ok(t, v, err, One)
 //
-//	v, err = tp.Get(cx, One)
+//	v, err = tp.Get(nil, One)
 //	ok(t, v, err, Zero)
 //
-//	v, err = tp.Get(cx, NegOne)
+//	v, err = tp.Get(nil, NegOne)
 //	ok(t, v, err, Zero)
 //
-//	v, err = tp.Get(cx, NewInt(2))
+//	v, err = tp.Get(nil, NewInt(2))
 //	fail(t, v, err, "IndexOutOfBounds: 2")
 //
-//	v = tp.ToStr(cx)
+//	v = tp.ToStr(nil)
 //	ok(t, v, nil, NewStr("(1, 0)"))
 //
 //	v = tp.Len(nil)
@@ -319,13 +320,13 @@ func TestStruct(t *testing.T) {
 //	r := newRange(0, 5, 1)
 //	okType(t, r, RangeType)
 //
-//	v, err = r.Eq(cx, newRange(0, 5, 2))
+//	v, err = r.Eq(nil, newRange(0, 5, 2))
 //	ok(t, v, err, False)
 //
-//	v, err = r.Eq(cx, newRange(0, 5, 1))
+//	v, err = r.Eq(nil, newRange(0, 5, 1))
 //	ok(t, v, err, True)
 //
-//	v, err = r.Eq(cx, Null)
+//	v, err = r.Eq(nil, Null)
 //	ok(t, v, err, False)
 //
 //	v = r.Len(nil)
@@ -354,14 +355,14 @@ func TestStruct(t *testing.T) {
 //	ok(t, v, nil, NewInt(3))
 //
 //	r = newRange(0, 5, 1)
-//	v, err = r.Get(cx, One)
+//	v, err = r.Get(nil, One)
 //	ok(t, v, err, NewInt(1))
 //
 //	r = newRange(3, 9, 2)
-//	v, err = r.Get(cx, NewInt(2))
+//	v, err = r.Get(nil, NewInt(2))
 //	ok(t, v, err, NewInt(7))
 //
 //	r = newRange(-9, -13, -1)
-//	v, err = r.Get(cx, One)
+//	v, err = r.Get(nil, One)
 //	ok(t, v, err, NewInt(-10))
 //}

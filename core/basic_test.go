@@ -179,19 +179,19 @@ func TestStr(t *testing.T) {
 	val, err = ab.Get(nil, NewInt(2))
 	fail(t, val, err, "IndexOutOfBounds: 2")
 
-	val = NewStr("").Len(nil)
-	ok(t, val, nil, Zero)
+	val, err = NewStr("").Len(nil)
+	ok(t, val, err, Zero)
 
-	val = NewStr("a").Len(nil)
-	ok(t, val, nil, One)
+	val, err = NewStr("a").Len(nil)
+	ok(t, val, err, One)
 
-	val = NewStr("abcde").Len(nil)
-	ok(t, val, nil, NewInt(5))
+	val, err = NewStr("abcde").Len(nil)
+	ok(t, val, err, NewInt(5))
 
 	// unicode
 	a = NewStr("日本語")
-	val = a.Len(nil)
-	ok(t, val, nil, NewInt(3))
+	val, err = a.Len(nil)
+	ok(t, val, err, NewInt(3))
 
 	val, err = a.Get(nil, NewInt(2))
 	ok(t, val, err, NewStr("語"))

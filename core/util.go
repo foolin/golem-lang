@@ -97,24 +97,24 @@ func strcpy(s string) string {
 	return string(c)
 }
 
-//func valuesEq(ev Evaluator, as []Value, bs []Value) (Bool, Error) {
-//
-//	if len(as) != len(bs) {
-//		return False, nil
-//	}
-//
-//	for i, a := range as {
-//		eq, err := a.Eq(ev, bs[i])
-//		if err != nil {
-//			return nil, err
-//		}
-//		if eq == False {
-//			return False, nil
-//		}
-//	}
-//
-//	return True, nil
-//}
+func valuesEq(ev Evaluator, as []Value, bs []Value) (Bool, Error) {
+
+	if len(as) != len(bs) {
+		return False, nil
+	}
+
+	for i, a := range as {
+		eq, err := a.Eq(ev, bs[i])
+		if err != nil {
+			return nil, err
+		}
+		if eq == False {
+			return False, nil
+		}
+	}
+
+	return True, nil
+}
 
 //func newIteratorStruct() Struct {
 //

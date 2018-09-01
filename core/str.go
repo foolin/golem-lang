@@ -76,9 +76,9 @@ func (s str) Get(ev Evaluator, index Value) (Value, Error) {
 	return str(string(runes[idx])), nil
 }
 
-func (s str) Len(ev Evaluator) Int {
+func (s str) Len(ev Evaluator) (Int, Error) {
 	n := utf8.RuneCountInString(string(s))
-	return NewInt(int64(n))
+	return NewInt(int64(n)), nil
 }
 
 func (s str) Slice(ev Evaluator, from Value, to Value) (Value, Error) {
