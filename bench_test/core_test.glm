@@ -13,6 +13,96 @@ fn fail(func, error) {
     }
 }
 
+fn testExpressions() {
+
+	assert((2 + 3) * -4 / 10 == -2)
+	assert((2*2*2*2 + 2*3*(8 - 1) + 2) / (17 - 2*2*2 - -1) == 6)
+
+	assert(true + 'a' == 'truea')
+	assert('a' + true == 'atrue')
+	assert('a' + null == 'anull')
+	assert(null + 'a' == 'nulla')
+
+	fail(|| => true + null, 'TypeMismatch: Expected Number Type')
+	fail(|| => 1 + null, 'TypeMismatch: Expected Number Type')
+	fail(|| => null + 1, 'TypeMismatch: Expected Number Type')
+
+	assert((true == 'a') == false)
+	assert((3 * 7 + 4 == 5 * 5) == true)
+	assert((1 != 1) == false)
+	assert((1 != 2) == true)
+
+	assert(!false == true)
+	assert(!true == false)
+	fail(|| => !null, 'TypeMismatch: Expected Bool')
+	fail(|| => !'a', 'TypeMismatch: Expected Bool')
+	fail(|| => !1, 'TypeMismatch: Expected Bool')
+	fail(|| => !1.0, 'TypeMismatch: Expected Bool')
+
+	assert(1 < 2 == true)
+	assert(1 <= 2 == true)
+	assert(1 > 2 == false)
+	assert(1 >= 2 == false)
+
+	assert(2 < 2 == false)
+	assert(2 <= 2 == true)
+	assert(2 > 2 == false)
+	assert(2 >= 2 == true)
+
+	assert(1 <=> 2 == -1)
+	assert(2 <=> 2 == 0)
+	assert(2 <=> 1 == 1)
+
+	assert((true  && true) == true)
+	assert((true  && false) == false)
+	assert((false && true) == false)
+	assert((false && 12) == false)
+	fail(|| => 12 && false, 'TypeMismatch: Expected Bool')
+
+	assert(true  || (true == true))
+	assert(true  || (false == true))
+	assert(false || (true == true))
+	assert(false || (false == false))
+	assert(true  || (12 == true))
+	fail(|| => 12  || true, 'TypeMismatch: Expected Bool')
+
+	assert(~0 == -1)
+	assert(8 % 2 == 0)
+	assert(8 & 2 == 0)
+	assert(8 | 2 == 10)
+	assert(8 ^ 2 == 10)
+	assert(8 << 2 == 32)
+	assert(8 >> 2 == 2)
+
+	assert([true][0] == true)
+	assert('abc'[1] == 'b')
+	assert('abc'[-1] == 'c')
+	fail(|| => [true][2], 'IndexOutOfBounds: 2')
+
+	assert('abc'[1:] == 'bc')
+	assert('abc'[:1] == 'a')
+	assert('abcd'[1:3] == 'bc')
+	assert('abcd'[1:1] == '')
+
+	assert([6,7,8][1:] == [7,8])
+	assert([6,7,8][:1] == [6])
+	assert([6,7,8,9][1:3] == [7,8])
+	assert([6,7,8,9][1:1] == [])
+
+//	assert(struct{a: 1} has 'a' == true)
+//	assert(struct{a: 1} has 'b' == false)
+//
+//	fail(|| => struct{a: 1, a: 2}, 'DuplicateField: Field 'a' is a duplicate')
+//
+//	assert(struct{} == struct{} == true)
+//	assert(struct{a:1} == struct{a:1} == true)
+//	assert(struct{a:1,b:2} == struct{a:1,b:2} == true)
+//	assert(struct{a:1} != struct{a:1,b:2} == true)
+//	assert(struct{a:1,b:2} != struct{b:2} == true)
+//	assert(struct{a:1,b:2} != struct{a:3,b:2} == true)
+
+}
+
 //fn testFunc() {
 //
 //    let a = fn(x) { x; }
@@ -175,7 +265,7 @@ fn fail(func, error) {
 //	failMsg(|| => 'abc'.replace('a', 0), 'TypeMismatch', 'Expected Str')
 //	failMsg(|| => 'abc'.replace('a', 'b', 'c'), 'TypeMismatch', 'Expected Int')
 //
-//	failMsg(|| => 'abc'.bogus(), 'NoSuchField', "Field 'bogus' not found")
+//	failMsg(|| => 'abc'.bogus(), 'NoSuchField', 'Field 'bogus' not found')
 //}
 //
 //fn testMerge() {
@@ -438,12 +528,12 @@ fn testList() {
 //        },
 //        fn () {
 //            let a = dict{}
-//            failMsg(|| => a.addAll(false), "TypeMismatch", "Expected Iterable Type")
-//            failMsg(|| => a.addAll([false]), "TypeMismatch", "Expected Tuple")
-//            failMsg(|| => a.addAll([(1,2,3)]), "TupleLength", "Expected Tuple of length 2, got 3")
-//            failMsg(|| => a[[1,2]], "TypeMismatch", "Expected Hashable Type")
-//            failMsg(|| => a[[1,2]] = 3, "TypeMismatch", "Expected Hashable Type")
-//            failMsg(|| => a.containsKey([1,2]), "TypeMismatch", "Expected Hashable Type")
+//            failMsg(|| => a.addAll(false), 'TypeMismatch', 'Expected Iterable Type')
+//            failMsg(|| => a.addAll([false]), 'TypeMismatch', 'Expected Tuple')
+//            failMsg(|| => a.addAll([(1,2,3)]), 'TupleLength', 'Expected Tuple of length 2, got 3')
+//            failMsg(|| => a[[1,2]], 'TypeMismatch', 'Expected Hashable Type')
+//            failMsg(|| => a[[1,2]] = 3, 'TypeMismatch', 'Expected Hashable Type')
+//            failMsg(|| => a.containsKey([1,2]), 'TypeMismatch', 'Expected Hashable Type')
 //        },
 //        fn () {
 //            let a = dict {};
@@ -477,8 +567,8 @@ fn testList() {
 //            assert(len(d) == 0);
 //        },
 //        fn () {
-//            fail(|| => dict {null: 'b'}, "NullValue")
-//            failMsg(|| => dict {[]: 'b'}, "TypeMismatch", "Expected Hashable Type")
+//            fail(|| => dict {null: 'b'}, 'NullValue')
+//            failMsg(|| => dict {[]: 'b'}, 'TypeMismatch', 'Expected Hashable Type')
 //        }
 //    ]
 //    for f in funcs { f(); }
@@ -517,10 +607,10 @@ fn testList() {
 //            assert(a.add != a.addAll);
 //        },
 //        fn () {
-//            failMsg(fn() { let a = set{}; a.addAll(false); },   "TypeMismatch", "Expected Iterable Type")
-//            failMsg(fn() { let a = set{}; a.add(3,4); },        "ArityMismatch", "Expected 1 params, got 2")
-//            failMsg(fn() { let a = set{}; a.add([1,2]); },      "TypeMismatch", "Expected Hashable Type")
-//            failMsg(fn() { let a = set{}; a.contains([1,2]); }, "TypeMismatch", "Expected Hashable Type")
+//            failMsg(fn() { let a = set{}; a.addAll(false); },   'TypeMismatch', 'Expected Iterable Type')
+//            failMsg(fn() { let a = set{}; a.add(3,4); },        'ArityMismatch', 'Expected 1 params, got 2')
+//            failMsg(fn() { let a = set{}; a.add([1,2]); },      'TypeMismatch', 'Expected Hashable Type')
+//            failMsg(fn() { let a = set{}; a.contains([1,2]); }, 'TypeMismatch', 'Expected Hashable Type')
 //        },
 //        fn () {
 //            let a = set{};
@@ -560,18 +650,18 @@ fn testList() {
 //    assert(c == 5)
 //    assert(len(a) == 2)
 //
-//    failMsg(|| => a[2], "IndexOutOfBounds", "2")
+//    failMsg(|| => a[2], 'IndexOutOfBounds', '2')
 //}
 //
 //fn testTypes() {
 //    let values = [
-//        true, "", 0, 0.0, fn(){}, 
+//        true, '', 0, 0.0, fn(){}, 
 //        [], range(0,1), (0,1), dict{}, set{}, 
 //        struct{}, chan()]
 //
 //    assert(
-//        [ "Bool", "Str", "Int", "Float", "Func", "List", "Range", 
-//          "Tuple", "Dict", "Set", "Struct", "Chan"] == 
+//        [ 'Bool', 'Str', 'Int', 'Float', 'Func', 'List', 'Range', 
+//          'Tuple', 'Dict', 'Set', 'Struct', 'Chan'] == 
 //        values.map(type))
 //}
 //
@@ -703,7 +793,7 @@ fn testList() {
 //        assert(false) // we will never get here.
 //    } catch e {
 //        assert(e.kind == 'ReadonlyField')
-//        assert(e.msg == "Field 'a' is readonly")
+//        assert(e.msg == 'Field 'a' is readonly')
 //    }
 //
 //    assert([s.a, s.b, x, s.c()] == [1, 2, 2, 3])
@@ -742,7 +832,7 @@ fn testIterator() {
 //    // dict
 //    fail(|| => dict{}.iterator().get(), 'NoSuchElement')
 //    count = 0
-//    itr = dict{"a": 1, "b": 2}.iterator()
+//    itr = dict{'a': 1, 'b': 2}.iterator()
 //    fail(|| => itr.get(), 'NoSuchElement')
 //    while itr.next() {
 //        let e = itr.get()
@@ -764,21 +854,21 @@ fn testIterator() {
 //    fail(|| => itr.get(), 'NoSuchElement')
 //
 //    // str
-//    fail(|| => "".iterator().get(), 'NoSuchElement')
-//    count = ""
-//    itr = "abcde".iterator()
+//    fail(|| => ''.iterator().get(), 'NoSuchElement')
+//    count = ''
+//    itr = 'abcde'.iterator()
 //    fail(|| => itr.get(), 'NoSuchElement')
 //    while itr.next() {
 //        count = itr.get() + count
 //    }
-//    assert("edcba" == count)
+//    assert('edcba' == count)
 //    fail(|| => itr.get(), 'NoSuchElement')
 }
 
 fn main(args) {
-//
-//    assert(42 == zork.quux)
-//
+
+    testExpressions()
+
 //    testFunc()
 //    testCapture()
 //    testNamedFunc()
@@ -799,5 +889,9 @@ fn main(args) {
 //    testUnicodeEscape()
 //    testStruct()
     testIterator()
+
+//
+//    assert(42 == zork.quux)
+//
 }
 

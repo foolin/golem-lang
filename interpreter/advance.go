@@ -111,12 +111,11 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			f.ip += 3
 
 			intp := NewInterpreter(i.builtInMgr, i.modules)
-			locals := newLocals(fn.Template().NumLocals, params)
 			go (func() {
-				_, errTrace := intp.eval(fn, locals)
-				if errTrace != nil {
+				_, errStruct := intp.EvalBytecode(fn, params)
+				if errStruct != nil {
 					panic("TODO")
-					//fmt.Printf("%v\n", errTrace.Error())
+					//fmt.Printf("%v\n", errStruct.Error())
 				}
 			})()
 

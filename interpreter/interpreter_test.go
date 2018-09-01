@@ -42,8 +42,8 @@ fn c() {}
 
 	intp := NewInterpreter(builtinMgr, []*bc.Module{mod})
 
-	result, err := intp.InitModules()
-	g.Tassert(t, err == nil && len(result) == 1)
+	result, errStruct := intp.InitModules()
+	g.Tassert(t, errStruct == nil && len(result) == 1)
 
 	stc := mod.Contents
 

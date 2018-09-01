@@ -42,7 +42,7 @@ func NewInterpreter(
 
 // InitModules initializes each of the Modules.  Note that the modules
 // are initialized in reverse order.
-func (i *Interpreter) InitModules() ([]g.Value, g.Error) {
+func (i *Interpreter) InitModules() ([]g.Value, g.ErrorStruct) {
 
 	result := []g.Value{}
 	for j := len(i.modules) - 1; j >= 0; j-- {
@@ -60,7 +60,7 @@ func (i *Interpreter) InitModules() ([]g.Value, g.Error) {
 		// invoke the "init" function
 		val, err := i.eval(initFn, mod.Refs)
 		if err != nil {
-			return nil, err.Error()
+			return nil, err
 		}
 
 		// prepend the value so that the result will be in the same order as i.modules
@@ -78,9 +78,9 @@ func (i *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
 	switch t := fn.(type) {
 
 	case bc.BytecodeFunc:
-		val, err := i.eval(t, newLocals(t.Template().NumLocals, params))
-		if err != nil {
-			return nil, err.Error()
+		val, errStruct := i.EvalBytecode(t, params)
+		if errStruct != nil {
+			return nil, errStruct.Error()
 		}
 		return val, nil
 
@@ -92,14 +92,15 @@ func (i *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
 	}
 }
 
-//-------------------------------------------------------------------------
-
-func (i *Interpreter) lookupModule(name string) (*bc.Module, g.Error) {
-	if mod, ok := i.modMap[name]; ok {
-		return mod, nil
+func (i *Interpreter) EvalBytecode(fn bc.BytecodeFunc, params []g.Value) (g.Value, g.ErrorStruct) {
+	val, err := i.eval(fn, newLocals(fn.Template().NumLocals, params))
+	if err != nil {
+		return nil, err
 	}
-	return nil, g.UndefinedModuleError(name)
+	return val, nil
 }
+
+//-------------------------------------------------------------------------
 
 func (i *Interpreter) eval(
 	fn bc.BytecodeFunc,
@@ -236,6 +237,13 @@ func newLocals(numLocals int, params []g.Value) []*bc.Ref {
 		}
 	}
 	return locals
+}
+
+func (i *Interpreter) lookupModule(name string) (*bc.Module, g.Error) {
+	if mod, ok := i.modMap[name]; ok {
+		return mod, nil
+	}
+	return nil, g.UndefinedModuleError(name)
 }
 
 //---------------------------------------------------------------

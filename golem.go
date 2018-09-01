@@ -34,27 +34,11 @@ func exitErrors(errors []error) {
 	os.Exit(-1)
 }
 
-func dumpError(ev g.Evaluator, err g.Error) {
-	panic("TODO")
-	//	fmt.Printf("Error: %s\n", err.Error())
-	//
-	//	v, e := err.Struct().GetField(ev, g.NewStr("stackTrace"))
-	//	if e != nil {
-	//		return
-	//	}
-	//	ls, ok := v.(g.List)
-	//	if !ok {
-	//		return
-	//	}
-	//
-	//	itr := ls.NewIterator(ev)
-	//	for itr.IterNext().BoolVal() {
-	//		v, e = itr.IterGet()
-	//		if e != nil {
-	//			return
-	//		}
-	//		fmt.Printf("%s\n", v.ToStr(ev))
-	//	}
+func dumpError(ev g.Evaluator, err g.ErrorStruct) {
+	fmt.Printf("Error: %s\n", err.Error())
+	for _, s := range err.StackTrace() {
+		fmt.Printf("%s\n", s)
+	}
 }
 
 // homeDir looks up the path of the golem executable
@@ -201,9 +185,9 @@ func main() {
 		}
 
 		// evaluate the main function
-		_, err := intp.Eval(mainFn, params)
-		if err != nil {
-			dumpError(intp, err)
+		_, errStruct := intp.EvalBytecode(mainFn, params)
+		if errStruct != nil {
+			dumpError(intp, errStruct)
 			os.Exit(-1)
 		}
 	}
