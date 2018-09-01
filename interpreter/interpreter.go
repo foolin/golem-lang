@@ -16,7 +16,6 @@ import (
 
 // Interpreter interprets Golem bytecode.
 type Interpreter struct {
-	homeDir    string
 	modules    []*bc.Module
 	modMap     map[string]*bc.Module
 	builtInMgr g.BuiltinManager
@@ -25,7 +24,6 @@ type Interpreter struct {
 
 // NewInterpreter creates a new Interpreter
 func NewInterpreter(
-	homeDir string,
 	builtInMgr g.BuiltinManager,
 	modules []*bc.Module) *Interpreter {
 
@@ -35,7 +33,6 @@ func NewInterpreter(
 	}
 
 	return &Interpreter{
-		homeDir:    homeDir,
 		modules:    modules,
 		modMap:     modMap,
 		builtInMgr: builtInMgr,
@@ -44,7 +41,7 @@ func NewInterpreter(
 }
 
 // InitModules initializes each of the Modules.  Note that the modules
-// are initialized in backwards order.
+// are initialized in reverse order.
 func (i *Interpreter) InitModules() ([]g.Value, g.Error) {
 
 	result := []g.Value{}
@@ -74,11 +71,6 @@ func (i *Interpreter) InitModules() ([]g.Value, g.Error) {
 
 //-------------------------------------------------------------------------
 // Context
-
-// HomePath returns the home directory path of the interpreter.
-func (i *Interpreter) HomePath() string {
-	return i.homeDir
-}
 
 // Eval evaluates a given BytecodeFunc.
 func (i *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
@@ -267,11 +259,11 @@ type frame struct {
 //	return g.NewErrorFromStruct(i, merge)
 //}
 
-func assert(flag bool) {
-	if !flag {
-		panic("assertion failure")
-	}
-}
+//func assert(flag bool) {
+//	if !flag {
+//		panic("assertion failure")
+//	}
+//}
 
 ////---------------------------------------------------------------
 //

@@ -17,29 +17,37 @@ func TestHashFieldMap(t *testing.T) {
 	var fm fieldMap = &hashFieldMap{
 		map[string]Field{
 			"a": NewField(Zero),
+			"b": NewReadonlyField(One),
 		},
 		true}
 
-	Tassert(t, reflect.DeepEqual([]string{"a"}, fm.names()))
+	Tassert(t, reflect.DeepEqual([]string{"a", "b"}, fm.names()))
 	Tassert(t, fm.has("a"))
-	Tassert(t, !fm.has("b"))
+	Tassert(t, fm.has("b"))
+	Tassert(t, !fm.has("c"))
 
 	val, err := fm.get("a", nil)
 	ok(t, val, err, Zero)
 	val, err = fm.get("b", nil)
-	fail(t, val, err, "NoSuchField: Field 'b' not found")
+	ok(t, val, err, One)
+	val, err = fm.get("c", nil)
+	fail(t, val, err, "NoSuchField: Field 'c' not found")
 
 	val, err = fm.invoke("a", nil, []Value{})
 	fail(t, val, err, "TypeMismatch: Expected Func")
 	val, err = fm.invoke("b", nil, []Value{})
-	fail(t, val, err, "NoSuchField: Field 'b' not found")
+	fail(t, val, err, "TypeMismatch: Expected Func")
+	val, err = fm.invoke("c", nil, []Value{})
+	fail(t, val, err, "NoSuchField: Field 'c' not found")
 
 	err = fm.set("a", nil, One)
 	Tassert(t, err == nil)
 	val, err = fm.get("a", nil)
 	ok(t, val, err, One)
 	err = fm.set("b", nil, One)
-	fail(t, nil, err, "NoSuchField: Field 'b' not found")
+	fail(t, nil, err, "ReadonlyField: Field 'b' is readonly")
+	err = fm.set("c", nil, One)
+	fail(t, nil, err, "NoSuchField: Field 'c' not found")
 
 	fm.replace("a", NewField(NewStr("abc")))
 	val, err = fm.get("a", nil)

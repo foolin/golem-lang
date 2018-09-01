@@ -79,7 +79,7 @@ func (st *_struct) ToStr(ev Evaluator) (Str, Error) {
 		buf.WriteString(name)
 		buf.WriteString(": ")
 
-		v, err := st.fieldMap.get(name, ev)
+		v, err := st.GetField(name, ev)
 		if err != nil {
 			return nil, err
 		}

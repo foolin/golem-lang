@@ -70,73 +70,69 @@ func (c *compiler) Compile() *bc.Module {
 
 	// done
 	c.mod.Pool = c.poolBuilder.build()
-	c.mod.Contents = nil //c.makeModuleContents()
+	c.mod.Contents = c.makeModuleContents()
 	return c.mod
 }
 
 func (c *compiler) makeModuleContents() g.Struct {
 
-	panic("TODO")
+	fields := make(map[string]g.Field)
 
-	//	entries := []g.Field{}
-	//	stmts := c.funcs[0].Body.Statements
-	//	for _, st := range stmts {
-	//		switch t := st.(type) {
-	//		case *ast.LetStmt:
-	//			for _, d := range t.Decls {
-	//				vbl := d.Ident.Variable
-	//				entries = append(entries, c.makeModuleProperty(
-	//					d.Ident.Symbol.Text, vbl.Index(), vbl.IsConst()))
-	//			}
-	//		case *ast.ConstStmt:
-	//			for _, d := range t.Decls {
-	//				vbl := d.Ident.Variable
-	//				entries = append(entries, c.makeModuleProperty(
-	//					d.Ident.Symbol.Text, vbl.Index(), vbl.IsConst()))
-	//			}
-	//		case *ast.NamedFnStmt:
-	//			vbl := t.Ident.Variable
-	//			entries = append(entries, c.makeModuleProperty(
-	//				t.Ident.Symbol.Text, vbl.Index(), vbl.IsConst()))
-	//		}
-	//	}
-	//
-	//	stc, err := g.NewStruct(entries, false)
-	//	assert(err == nil)
-	//	return stc
+	stmts := c.funcs[0].Body.Statements
+	for _, st := range stmts {
+		switch t := st.(type) {
+		case *ast.LetStmt:
+			for _, d := range t.Decls {
+				name := d.Ident.Symbol.Text
+				vbl := d.Ident.Variable
+				fields[name] = c.makeModuleProperty(vbl.Index(), vbl.IsConst())
+			}
+		case *ast.ConstStmt:
+			for _, d := range t.Decls {
+				name := d.Ident.Symbol.Text
+				vbl := d.Ident.Variable
+				fields[name] = c.makeModuleProperty(vbl.Index(), vbl.IsConst())
+			}
+		case *ast.NamedFnStmt:
+			name := t.Ident.Symbol.Text
+			vbl := t.Ident.Variable
+			fields[name] = c.makeModuleProperty(vbl.Index(), vbl.IsConst())
+		}
+	}
+
+	stc, err := g.NewFieldStruct(fields, false)
+	assert(err == nil)
+	return stc
 }
 
-//func (c *compiler) makeModuleProperty(
-//	name string,
-//	refIndex int,
-//	isConst bool) g.Field {
-//
-//	getter := g.NewFixedNativeFunc(
-//		[]g.Type{}, false,
-//		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
-//			return c.mod.Refs[refIndex].Val, nil
-//		})
-//
-//	if isConst {
-//		prop, err := g.NewReadonlyNativeProperty(name, getter)
-//		if err != nil {
-//			panic("unreachable")
-//		}
-//		return prop
-//	}
-//
-//	setter := g.NewFixedNativeFunc(
-//		[]g.Type{g.AnyType}, false,
-//		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
-//			c.mod.Refs[refIndex].Val = values[0]
-//			return g.Null, nil
-//		})
-//	prop, err := g.NewNativeProperty(name, getter, setter)
-//	if err != nil {
-//		panic("unreachable")
-//	}
-//	return prop
-//}
+func (c *compiler) makeModuleProperty(index int, isConst bool) g.Field {
+
+	get := g.NewFixedNativeFunc(
+		[]g.Type{}, false,
+		func(ev g.Evaluator, values []g.Value) (g.Value, g.Error) {
+			return c.mod.Refs[index].Val, nil
+		})
+
+	if isConst {
+		prop, err := g.NewReadonlyProperty(get)
+		if err != nil {
+			panic("unreachable")
+		}
+		return prop
+	}
+
+	set := g.NewFixedNativeFunc(
+		[]g.Type{g.AnyType}, false,
+		func(ev g.Evaluator, values []g.Value) (g.Value, g.Error) {
+			c.mod.Refs[index].Val = values[0]
+			return g.Null, nil
+		})
+	prop, err := g.NewProperty(get, set)
+	if err != nil {
+		panic("unreachable")
+	}
+	return prop
+}
 
 func (c *compiler) compileFunc(fe *ast.FnExpr) *bc.FuncTemplate {
 

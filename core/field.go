@@ -13,6 +13,7 @@ type (
 	Field interface {
 		Get(Evaluator) (Value, Error)
 		Invoke(Evaluator, []Value) (Value, Error)
+		IsReadonly() bool
 		Set(Evaluator, Value) Error
 	}
 )
@@ -39,6 +40,10 @@ func (f *field) Invoke(ev Evaluator, params []Value) (Value, Error) {
 		return nil, TypeMismatchError("Expected Func")
 	}
 	return fn.Invoke(ev, params)
+}
+
+func (f *field) IsReadonly() bool {
+	return false
 }
 
 func (f *field) Set(ev Evaluator, val Value) Error {
@@ -68,6 +73,10 @@ func (f *readonlyField) Invoke(ev Evaluator, params []Value) (Value, Error) {
 		return nil, TypeMismatchError("Expected Func")
 	}
 	return fn.Invoke(ev, params)
+}
+
+func (f *readonlyField) IsReadonly() bool {
+	return true
 }
 
 func (f *readonlyField) Set(ev Evaluator, val Value) Error {
@@ -114,6 +123,10 @@ func (p *property) Invoke(ev Evaluator, params []Value) (Value, Error) {
 	return fn.Invoke(ev, params)
 }
 
+func (p *property) IsReadonly() bool {
+	return false
+}
+
 func (p *property) Set(ev Evaluator, val Value) Error {
 	_, err := p.set.Invoke(ev, []Value{val})
 	return err
@@ -152,6 +165,10 @@ func (p *readonlyProperty) Invoke(ev Evaluator, params []Value) (Value, Error) {
 		return nil, TypeMismatchError("Expected Func")
 	}
 	return fn.Invoke(ev, params)
+}
+
+func (p *readonlyProperty) IsReadonly() bool {
+	return true
 }
 
 func (p *readonlyProperty) Set(ev Evaluator, val Value) Error {

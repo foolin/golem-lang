@@ -20,10 +20,13 @@ type Module struct {
 	Path string
 	// Pool is a pool of constants, function templates, and struct definitions
 	Pool *Pool
-	// Refs is a list of Refs for the values contained in the Contents
+
+	// Refs is a list of Refs for the values contained in the Contents.
+	// The Refs are populated when the Interpreter instantiates the module.
 	Refs []*Ref
 
-	// Contents is the top level exported values of the module
+	// Contents is the top level exported values of the module.
+	// The Contents are populated when the Interpreter instantiates the module.
 	Contents g.Struct
 }
 

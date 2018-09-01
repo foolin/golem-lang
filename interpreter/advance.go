@@ -110,7 +110,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			f.stack = f.stack[:n-idx]
 			f.ip += 3
 
-			intp := NewInterpreter(i.homeDir, i.builtInMgr, i.modules)
+			intp := NewInterpreter(i.builtInMgr, i.modules)
 			locals := newLocals(fn.Template().NumLocals, params)
 			go (func() {
 				_, errTrace := intp.eval(fn, locals)
@@ -281,7 +281,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//
 		//		idx := index(opc, f.ip)
 		//		key, ok := pool.Constants[idx].(g.Str)
-		//		assert(ok)
+		//		g.Assert(ok)
 		//
 		//		result, err := f.stack[n].GetField(i, key)
 		//		if err != nil {
@@ -295,7 +295,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//
 		//		idx := index(opc, f.ip)
 		//		key, ok := pool.Constants[idx].(g.Str)
-		//		assert(ok)
+		//		g.Assert(ok)
 		//
 		//		// get struct from stack
 		//		stc, ok := f.stack[n-1].(g.Struct)
@@ -327,7 +327,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//
 		//		idx := index(opc, f.ip)
 		//		key, ok := pool.Constants[idx].(g.Str)
-		//		assert(ok)
+		//		g.Assert(ok)
 		//
 		//		// get struct from stack
 		//		stc, ok := f.stack[n-1].(g.Struct)
@@ -518,7 +518,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get the module name from the pool
 		idx := index(opc, f.ip)
 		name, ok := pool.Constants[idx].(g.Str)
-		assert(ok)
+		g.Assert(ok)
 
 		// Lookup the module.
 		mod, err := i.lookupModule(name.String())
@@ -839,7 +839,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//	case bc.Iter:
 		//
 		//		ibl, ok := f.stack[n].(g.Iterable)
-		//		assert(ok)
+		//		g.Assert(ok)
 		//
 		//		f.stack[n] = ibl.NewIterator(i)
 		//		f.ip++
@@ -847,7 +847,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//	case bc.IterNext:
 		//
 		//		itr, ok := f.stack[n].(g.Iterator)
-		//		assert(ok)
+		//		g.Assert(ok)
 		//
 		//		f.stack[n] = itr.IterNext()
 		//		f.ip++
@@ -855,7 +855,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//	case bc.IterGet:
 		//
 		//		itr, ok := f.stack[n].(g.Iterator)
-		//		assert(ok)
+		//		g.Assert(ok)
 		//
 		//		val, err := itr.IterGet()
 		//		if err != nil {

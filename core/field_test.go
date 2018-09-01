@@ -18,6 +18,7 @@ func TestField(t *testing.T) {
 	val, err = field.Invoke(nil, []Value{})
 	fail(t, val, err, "TypeMismatch: Expected Func")
 
+	Tassert(t, !field.IsReadonly())
 	err = field.Set(nil, One)
 	Tassert(t, err == nil)
 
@@ -43,6 +44,7 @@ func TestField(t *testing.T) {
 	val, err = field.Invoke(nil, []Value{Zero})
 	ok(t, val, err, One)
 
+	Tassert(t, !field.IsReadonly())
 	err = field.Set(nil, One)
 	Tassert(t, err == nil)
 
@@ -63,6 +65,7 @@ func TestReadonlyField(t *testing.T) {
 	val, err = field.Invoke(nil, []Value{})
 	fail(t, val, err, "TypeMismatch: Expected Func")
 
+	Tassert(t, field.IsReadonly())
 	err = field.Set(nil, One)
 	fail(t, nil, err, "ReadonlyField")
 
@@ -82,6 +85,7 @@ func TestReadonlyField(t *testing.T) {
 	val, err = field.Invoke(nil, []Value{Zero})
 	ok(t, val, err, One)
 
+	Tassert(t, field.IsReadonly())
 	err = field.Set(nil, One)
 	fail(t, nil, err, "ReadonlyField")
 }
@@ -124,6 +128,7 @@ func TestPropertyField(t *testing.T) {
 	val, err = field.Invoke(nil, []Value{})
 	fail(t, val, err, "TypeMismatch: Expected Func")
 
+	Tassert(t, !field.IsReadonly())
 	err = field.Set(nil, One)
 	Tassert(t, err == nil)
 
@@ -148,6 +153,7 @@ func TestPropertyField(t *testing.T) {
 	val, err = field.Invoke(nil, []Value{Zero})
 	ok(t, val, err, One)
 
+	Tassert(t, !field.IsReadonly())
 	err = field.Set(nil, One)
 	Tassert(t, err == nil)
 
@@ -186,6 +192,7 @@ func TestReadonlyPropertyField(t *testing.T) {
 	val, err = field.Invoke(nil, []Value{})
 	fail(t, val, err, "TypeMismatch: Expected Func")
 
+	Tassert(t, field.IsReadonly())
 	err = field.Set(nil, One)
 	fail(t, nil, err, "ReadonlyField")
 
@@ -204,6 +211,7 @@ func TestReadonlyPropertyField(t *testing.T) {
 	val, err = field.Invoke(nil, []Value{Zero})
 	ok(t, val, err, One)
 
+	Tassert(t, field.IsReadonly())
 	err = field.Set(nil, One)
 	fail(t, nil, err, "ReadonlyField")
 }

@@ -87,6 +87,9 @@ func (fm *hashFieldMap) invoke(name string, ev Evaluator, params []Value) (Value
 
 func (fm *hashFieldMap) set(name string, ev Evaluator, val Value) Error {
 	if f, ok := fm.fields[name]; ok {
+		if f.IsReadonly() {
+			return ReadonlyFieldError(name)
+		}
 		return f.Set(ev, val)
 	}
 	return NoSuchFieldError(name)

@@ -5,7 +5,6 @@
 package compiler
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -975,10 +974,10 @@ finally {
 `
 	mod := testCompile(t, code)
 
-	fmt.Println("----------------------------")
-	fmt.Println(code)
-	fmt.Println("----------------------------")
-	fmt.Println(mod)
+	//fmt.Println("----------------------------")
+	//fmt.Println(code)
+	//fmt.Println("----------------------------")
+	//fmt.Println(mod)
 
 	g.Tassert(t, mod.Pool.Templates[0].ExceptionHandlers[0] ==
 		bc.ExceptionHandler{
