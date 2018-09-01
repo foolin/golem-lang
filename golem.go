@@ -14,7 +14,7 @@ import (
 
 	"github.com/mjarmy/golem-lang/compiler"
 	g "github.com/mjarmy/golem-lang/core"
-	//bc "github.com/mjarmy/golem-lang/core/bytecode"
+	bc "github.com/mjarmy/golem-lang/core/bytecode"
 	"github.com/mjarmy/golem-lang/interpreter"
 	//"github.com/mjarmy/golem-lang/lib"
 	"github.com/mjarmy/golem-lang/scanner"
@@ -175,36 +175,36 @@ func main() {
 		os.Exit(-1)
 	}
 
-	//	// run main, if it exists
-	//	mainVal, mainErr := mods[0].Contents.GetField("main", intp)
-	//	if mainErr == nil {
-	//		mainFn, ok := mainVal.(bc.BytecodeFunc)
-	//		if !ok {
-	//			exitError(fmt.Errorf("'main' is not a function"))
-	//		}
-	//
-	//		// gather up the command line arguments into a single list
-	//		// that will be passed into the main function
-	//		params := []g.Value{}
-	//		arity := mainFn.Template().Arity
-	//		if arity.Kind != g.FixedArity {
-	//			exitError(fmt.Errorf("'main' arity must be fixed"))
-	//		} else if arity.RequiredParams != 1 {
-	//			exitError(fmt.Errorf("'main' must have exactly one argument"))
-	//		} else {
-	//			osArgs := os.Args[2:]
-	//			args := make([]g.Value, len(osArgs))
-	//			for i, a := range osArgs {
-	//				args[i] = g.NewStr(a)
-	//			}
-	//			params = append(params, g.NewList(args))
-	//		}
-	//
-	//		// evaluate the main function
-	//		_, err := intp.Eval(mainFn, params)
-	//		if err != nil {
-	//			dumpError(intp, err)
-	//			os.Exit(-1)
-	//		}
-	//	}
+	// run main, if it exists
+	mainVal, mainErr := mods[0].Contents.GetField("main", intp)
+	if mainErr == nil {
+		mainFn, ok := mainVal.(bc.BytecodeFunc)
+		if !ok {
+			exitError(fmt.Errorf("'main' is not a function"))
+		}
+
+		// gather up the command line arguments into a single list
+		// that will be passed into the main function
+		params := []g.Value{}
+		arity := mainFn.Template().Arity
+		if arity.Kind != g.FixedArity {
+			exitError(fmt.Errorf("'main' arity must be fixed"))
+		} else if arity.RequiredParams != 1 {
+			exitError(fmt.Errorf("'main' must have exactly one argument"))
+		} else {
+			osArgs := os.Args[2:]
+			args := make([]g.Value, len(osArgs))
+			for i, a := range osArgs {
+				args[i] = g.NewStr(a)
+			}
+			params = append(params, g.NewList(args))
+		}
+
+		// evaluate the main function
+		_, err := intp.Eval(mainFn, params)
+		if err != nil {
+			dumpError(intp, err)
+			os.Exit(-1)
+		}
+	}
 }

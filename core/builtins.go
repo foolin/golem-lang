@@ -5,7 +5,7 @@
 package core
 
 import (
-//	"fmt"
+	"fmt"
 )
 
 type (
@@ -63,19 +63,19 @@ func (b *builtinManager) IndexOf(s string) int {
 // StandardBuiltins containts the built-ins that are
 // pure functions.  These functions do not do any form of I/O.
 var StandardBuiltins = []*BuiltinEntry{
-	//{"str", BuiltinStr},
-	//{"len", BuiltinLen},
-	//{"range", BuiltinRange},
-	//{"assert", BuiltinAssert},
-	//{"merge", BuiltinMerge},
+	//{"arity", BuiltinArity},
+	{"assert", BuiltinAssert},
 	//{"chan", BuiltinChan},
-	//{"type", BuiltinType},
+	//{"fields", BuiltinFields},
 	//{"freeze", BuiltinFreeze},
 	//{"frozen", BuiltinFrozen},
-	//{"fields", BuiltinFields},
 	//{"getval", BuiltinGetVal},
+	//{"len", BuiltinLen},
+	//{"merge", BuiltinMerge},
+	//{"range", BuiltinRange},
 	//{"setval", BuiltinSetVal},
-	//{"arity", BuiltinArity},
+	//{"str", BuiltinStr},
+	//{"type", BuiltinType},
 }
 
 ////-----------------------------------------------------------------
@@ -84,17 +84,17 @@ var StandardBuiltins = []*BuiltinEntry{
 //var BuiltinStr = NewFixedNativeFunc(
 //	[]Type{AnyType},
 //	false,
-//	func(cx Context, values []Value) (Value, Error) {
-//		return values[0].ToStr(cx), nil
+//	func(ev Evaluator, values []Value) (Value, Error) {
+//		return values[0].ToStr(ev), nil
 //	})
 //
 //// BuiltinLen returns the length of a single Lenable
 //var BuiltinLen = NewFixedNativeFunc(
 //	[]Type{AnyType},
 //	false,
-//	func(cx Context, values []Value) (Value, Error) {
+//	func(ev Evaluator, values []Value) (Value, Error) {
 //		if ln, ok := values[0].(Lenable); ok {
-//			return ln.Len(cx), nil
+//			return ln.Len(ev), nil
 //		}
 //		return nil, TypeMismatchError("Expected Lenable Type")
 //	})
@@ -104,7 +104,7 @@ var StandardBuiltins = []*BuiltinEntry{
 //	[]Type{IntType, IntType},
 //	[]Type{IntType},
 //	false,
-//	func(cx Context, values []Value) (Value, Error) {
+//	func(ev Evaluator, values []Value) (Value, Error) {
 //		from := values[0].(Int)
 //		to := values[1].(Int)
 //		step := One
@@ -114,25 +114,24 @@ var StandardBuiltins = []*BuiltinEntry{
 //		}
 //		return NewRange(from.IntVal(), to.IntVal(), step.IntVal())
 //	})
-//
-//// BuiltinAssert asserts that a single Bool is True
-//var BuiltinAssert = NewFixedNativeFunc(
-//	[]Type{BoolType},
-//	false,
-//	func(cx Context, values []Value) (Value, Error) {
-//		b := values[0].(Bool)
-//		if b.BoolVal() {
-//			return True, nil
-//		}
-//		return nil, AssertionFailedError()
-//	})
-//
+
+// BuiltinAssert asserts that a single Bool is True
+var BuiltinAssert = NewFixedNativeFunc(
+	[]Type{BoolType}, false,
+	func(ev Evaluator, values []Value) (Value, Error) {
+		b := values[0].(Bool)
+		if b.BoolVal() {
+			return True, nil
+		}
+		return nil, AssertionFailedError()
+	})
+
 //// BuiltinMerge merges structs together.
 //var BuiltinMerge = NewVariadicNativeFunc(
 //	[]Type{StructType, StructType},
 //	StructType,
 //	false,
-//	func(cx Context, values []Value) (Value, Error) {
+//	func(ev Evaluator, values []Value) (Value, Error) {
 //		structs := make([]Struct, len(values))
 //		for i, v := range values {
 //			if s, ok := v.(Struct); ok {
@@ -151,7 +150,7 @@ var StandardBuiltins = []*BuiltinEntry{
 //	[]Type{},
 //	[]Type{IntType},
 //	true,
-//	func(cx Context, values []Value) (Value, Error) {
+//	func(ev Evaluator, values []Value) (Value, Error) {
 //
 //		if len(values) == 0 {
 //			return NewChan(), nil
@@ -167,7 +166,7 @@ var StandardBuiltins = []*BuiltinEntry{
 //	// Subtlety: Null has a type, but for the purposes of type()
 //	// we are going to pretend that it doesn't
 //	false,
-//	func(cx Context, values []Value) (Value, Error) {
+//	func(ev Evaluator, values []Value) (Value, Error) {
 //		t := values[0].Type()
 //		return NewStr(t.String()), nil
 //	})
@@ -176,53 +175,53 @@ var StandardBuiltins = []*BuiltinEntry{
 //var BuiltinFreeze = NewFixedNativeFunc(
 //	[]Type{AnyType},
 //	false,
-//	func(cx Context, values []Value) (Value, Error) {
-//		return values[0].Freeze(cx)
+//	func(ev Evaluator, values []Value) (Value, Error) {
+//		return values[0].Freeze(ev)
 //	})
 //
 //// BuiltinFrozen returns whether a single Value is Frozen.
 //var BuiltinFrozen = NewFixedNativeFunc(
 //	[]Type{AnyType},
 //	false,
-//	func(cx Context, values []Value) (Value, Error) {
-//		return values[0].Frozen(cx)
+//	func(ev Evaluator, values []Value) (Value, Error) {
+//		return values[0].Frozen(ev)
 //	})
 //
 //// BuiltinFields returns the fields of a Struct
 //var BuiltinFields = NewFixedNativeFunc(
 //	[]Type{StructType},
 //	false,
-//	func(cx Context, values []Value) (Value, Error) {
+//	func(ev Evaluator, values []Value) (Value, Error) {
 //		st := values[0].(*_struct)
 //		fields := st.smap.fieldNames()
 //		result := make([]Value, len(fields))
 //		for i, k := range fields {
 //			result[i] = NewStr(k)
 //		}
-//		return NewSet(cx, result)
+//		return NewSet(ev, result)
 //	})
 //
 //// BuiltinGetVal gets the Value associated with a Struct's field name.
 //var BuiltinGetVal = NewFixedNativeFunc(
 //	[]Type{StructType, StrType},
 //	false,
-//	func(cx Context, values []Value) (Value, Error) {
+//	func(ev Evaluator, values []Value) (Value, Error) {
 //		st := values[0].(*_struct)
 //		field := values[1].(Str)
 //
-//		return st.GetField(cx, field)
+//		return st.GetField(ev, field)
 //	})
 //
 //// BuiltinSetVal sets the Value associated with a Struct's field name.
 //var BuiltinSetVal = NewFixedNativeFunc(
 //	[]Type{StructType, StrType, AnyType},
 //	false,
-//	func(cx Context, values []Value) (Value, Error) {
+//	func(ev Evaluator, values []Value) (Value, Error) {
 //		st := values[0].(*_struct)
 //		field := values[1].(Str)
 //		val := values[2]
 //
-//		err := st.SetField(cx, field, val)
+//		err := st.SetField(ev, field, val)
 //		if err != nil {
 //			return nil, err
 //		}
@@ -233,7 +232,7 @@ var StandardBuiltins = []*BuiltinEntry{
 //var BuiltinArity = NewFixedNativeFunc(
 //	[]Type{FuncType},
 //	false,
-//	func(cx Context, values []Value) (Value, Error) {
+//	func(ev Evaluator, values []Value) (Value, Error) {
 //		//		st, err := NewStruct([]Field{
 //		//			NewField("min", true, NewInt(int64(f.MinArity()))),
 //		//			NewField("max", true, NewInt(int64(f.MaxArity())))}, true)
@@ -248,33 +247,37 @@ var StandardBuiltins = []*BuiltinEntry{
 
 // UnsandboxedBuiltins are builtins that are not pure functions
 var UnsandboxedBuiltins = []*BuiltinEntry{
-	//{"print", BuiltinPrint},
-	//{"println", BuiltinPrintln},
+	{"print", BuiltinPrint},
+	{"println", BuiltinPrintln},
 }
 
-//// BuiltinPrint prints to stdout.
-//var BuiltinPrint = NewVariadicNativeFunc(
-//	[]Type{},
-//	AnyType,
-//	true,
-//	func(cx Context, values []Value) (Value, Error) {
-//		for _, v := range values {
-//			fmt.Print(v.ToStr(cx).String())
-//		}
-//
-//		return Null, nil
-//	})
-//
-//// BuiltinPrintln prints to stdout.
-//var BuiltinPrintln = NewVariadicNativeFunc(
-//	[]Type{},
-//	AnyType,
-//	true,
-//	func(cx Context, values []Value) (Value, Error) {
-//		for _, v := range values {
-//			fmt.Print(v.ToStr(cx).String())
-//		}
-//		fmt.Println()
-//
-//		return Null, nil
-//	})
+// BuiltinPrint prints to stdout.
+var BuiltinPrint = NewVariadicNativeFunc(
+	[]Type{}, AnyType, true,
+	func(ev Evaluator, values []Value) (Value, Error) {
+		for _, v := range values {
+			s, err := v.ToStr(ev)
+			if err != nil {
+				return nil, err
+			}
+			fmt.Print(s.String())
+		}
+
+		return Null, nil
+	})
+
+// BuiltinPrintln prints to stdout.
+var BuiltinPrintln = NewVariadicNativeFunc(
+	[]Type{}, AnyType, true,
+	func(ev Evaluator, values []Value) (Value, Error) {
+		for _, v := range values {
+			s, err := v.ToStr(ev)
+			if err != nil {
+				return nil, err
+			}
+			fmt.Print(s.String())
+		}
+		fmt.Println()
+
+		return Null, nil
+	})

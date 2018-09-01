@@ -4,9 +4,10 @@
 
 package core
 
-// Evaluator evaluates functions that are defined via bytecode.
-// In practice, this means that an Evaluator is actually a full-fledged instance
-// of the Golem Interpreter.
+// Evaluator evaluates Funcs. If the function is a BytecodeFunc, then the
+// Evaluator will evaluate the function's bytecode.  In practice, this means that an
+// Evaluator is actually a full-fledged instance of the Golem Interpreter.
 type Evaluator interface {
+	// Eval evaluates a Func.
 	Eval(Func, []Value) (Value, Error)
 }

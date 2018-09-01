@@ -506,61 +506,59 @@ func (c *compiler) visitWhile(w *ast.WhileStmt) {
 
 func (c *compiler) visitFor(f *ast.ForStmt) {
 
-	panic("TODO")
+	tok := f.Iterable.Begin()
+	idx := f.IterableIdent.Variable.Index()
 
-	//	tok := f.Iterable.Begin()
-	//	idx := f.IterableIdent.Variable.Index()
-	//
-	//	// put Iterable expression on stack
-	//	c.Visit(f.Iterable)
-	//
-	//	// call NewIterator()
-	//	c.push(tok, bc.Iter)
-	//
-	//	// store iterator
-	//	c.pushIndex(tok, bc.StoreLocal, idx)
-	//
-	//	// top of loop: load iterator and call IterNext()
-	//	begin := c.opcLen()
-	//	c.pushIndex(tok, bc.LoadLocal, idx)
-	//	c.push(tok, bc.IterNext)
-	//	j0 := c.push(tok, bc.JumpFalse, 0xFF, 0xFF)
-	//
-	//	// load iterator and call IterGet()
-	//	c.pushIndex(tok, bc.LoadLocal, idx)
-	//	c.push(tok, bc.IterGet)
-	//
-	//	if len(f.Idents) == 1 {
-	//		// perform StoreLocal on the current item
-	//		ident := f.Idents[0]
-	//		c.pushIndex(ident.Begin(), bc.StoreLocal, ident.Variable.Index())
-	//	} else {
-	//		// make sure the current item is really a tuple,
-	//		// and is of the proper length
-	//		c.pushIndex(tok, bc.CheckTuple, len(f.Idents))
-	//
-	//		// perform StoreLocal on each tuple element
-	//		for i, ident := range f.Idents {
-	//			c.push(tok, bc.Dup)
-	//			c.loadInt(tok, int64(i))
-	//			c.push(tok, bc.GetIndex)
-	//			c.pushIndex(ident.Begin(), bc.StoreLocal, ident.Variable.Index())
-	//		}
-	//
-	//		// pop the tuple
-	//		c.push(tok, bc.Pop)
-	//	}
-	//
-	//	// compile the body
-	//	body := c.opcLen()
-	//	c.Visit(f.Body)
-	//	c.push(f.Body.End(), bc.Jump, begin.high, begin.low)
-	//
-	//	// jump to top of loop
-	//	end := c.opcLen()
-	//	c.setJump(j0, end)
-	//
-	//	c.fixBreakContinue(begin, body, end)
+	// put Iterable expression on stack
+	c.Visit(f.Iterable)
+
+	// call NewIterator()
+	c.push(tok, bc.NewIter)
+
+	// store iterator
+	c.pushIndex(tok, bc.StoreLocal, idx)
+
+	// top of loop: load iterator and call IterNext()
+	begin := c.opcLen()
+	c.pushIndex(tok, bc.LoadLocal, idx)
+	c.push(tok, bc.IterNext)
+	j0 := c.push(tok, bc.JumpFalse, 0xFF, 0xFF)
+
+	// load iterator and call IterGet()
+	c.pushIndex(tok, bc.LoadLocal, idx)
+	c.push(tok, bc.IterGet)
+
+	if len(f.Idents) == 1 {
+		// perform StoreLocal on the current item
+		ident := f.Idents[0]
+		c.pushIndex(ident.Begin(), bc.StoreLocal, ident.Variable.Index())
+	} else {
+		// make sure the current item is really a tuple,
+		// and is of the proper length
+		c.pushIndex(tok, bc.CheckTuple, len(f.Idents))
+
+		// perform StoreLocal on each tuple element
+		for i, ident := range f.Idents {
+			c.push(tok, bc.Dup)
+			c.loadInt(tok, int64(i))
+			c.push(tok, bc.GetIndex)
+			c.pushIndex(ident.Begin(), bc.StoreLocal, ident.Variable.Index())
+		}
+
+		// pop the tuple
+		c.push(tok, bc.Pop)
+	}
+
+	// compile the body
+	body := c.opcLen()
+	c.Visit(f.Body)
+	c.push(f.Body.End(), bc.Jump, begin.high, begin.low)
+
+	// jump to top of loop
+	end := c.opcLen()
+	c.setJump(j0, end)
+
+	c.fixBreakContinue(begin, body, end)
 }
 
 func (c *compiler) fixBreakContinue(begin *instPtr, body *instPtr, end *instPtr) {
@@ -1065,13 +1063,11 @@ func (c *compiler) visitThisExpr(this *ast.ThisExpr) {
 
 func (c *compiler) visitFieldExpr(fe *ast.FieldExpr) {
 
-	panic("TODO")
-
-	//	c.Visit(fe.Operand)
-	//	c.pushIndex(
-	//		fe.Key.Position,
-	//		bc.GetField,
-	//		c.poolBuilder.constIndex(g.NewStr(fe.Key.Text)))
+	c.Visit(fe.Operand)
+	c.pushIndex(
+		fe.Key.Position,
+		bc.GetField,
+		c.poolBuilder.constIndex(g.NewStr(fe.Key.Text)))
 }
 
 func (c *compiler) visitIndexExpr(ie *ast.IndexExpr) {

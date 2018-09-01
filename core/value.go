@@ -56,10 +56,10 @@ type (
 		SliceTo(Evaluator, Value) (Value, Error)
 	}
 
-	//// Iterable is a value that can be iterated
-	//Iterable interface {
-	//	NewIterator(Evaluator) Iterator
-	//}
+	// Iterable is a value that can be iterated
+	Iterable interface {
+		NewIterator(Evaluator) Iterator
+	}
 )
 
 //---------------------------------------------------------------
@@ -134,18 +134,6 @@ type (
 // Func
 
 type (
-	// ArityKind defines the various kinds of Arity for a Func
-	ArityKind uint16
-
-	// Arity defines the arity of a function
-	Arity struct {
-		Kind           ArityKind
-		RequiredParams uint16
-		// For FixedArity and VariadicArity, this value is ignored and should be
-		// set to 0.  For MultipleArity, it must be set to a non-zero integer.
-		OptionalParams uint16
-	}
-
 	// Func is a function
 	Func interface {
 		Value
@@ -154,44 +142,6 @@ type (
 		Invoke(Evaluator, []Value) (Value, Error)
 	}
 )
-
-// The various types of arity
-const (
-	// FixedArity means a function always takes a fixed number of parameters
-	FixedArity ArityKind = iota
-
-	// VariadicArity means that any extra parameters supplied upon invocation will
-	// be collected together into a list.
-	VariadicArity
-
-	// MultipleArity means that some of the parameters can be omitted, in which case
-	// predifined optional values will be substituted.
-	MultipleArity
-)
-
-func (a Arity) String() string {
-
-	return fmt.Sprintf(
-		"Arity(%s,%d,%d)",
-		a.Kind.String(),
-		a.RequiredParams,
-		a.OptionalParams)
-}
-
-func (k ArityKind) String() string {
-
-	switch k {
-	case FixedArity:
-		return "Fixed"
-	case VariadicArity:
-		return "Variadic"
-	case MultipleArity:
-		return "Multiple"
-
-	default:
-		panic("unreachable")
-	}
-}
 
 //---------------------------------------------------------------
 // Composite
@@ -209,7 +159,7 @@ type (
 		Composite
 		IndexAssignable
 		Lenable
-		//Iterable
+		Iterable
 		Sliceable
 
 		IsEmpty() Bool
@@ -280,22 +230,22 @@ type (
 	//		Remove(Evaluator, Value) (Bool, Error)
 	//	}
 
-	// Struct is a composite collection of names values
+	// Struct is a collection of key-Field pairs
 	Struct interface {
 		Composite
 
 		SetField(string, Evaluator, Value) Error
 
-		//// Internal is for use only by the Golem Compiler
-		//Internal([]interface{})
+		// Internal is for use only by the Golem Compiler
+		Internal(...interface{})
 	}
 
-//	// Iterator iterates over a sequence of values
-//	Iterator interface {
-//		Struct
-//		IterNext() Bool
-//		IterGet() (Value, Error)
-//	}
+	// Iterator iterates over a sequence of values
+	Iterator interface {
+		Struct
+		IterNext(Evaluator) (Bool, Error)
+		IterGet(Evaluator) (Value, Error)
+	}
 )
 
 ////---------------------------------------------------------------

@@ -60,7 +60,7 @@ func (i *Interpreter) InitModules() ([]g.Value, g.Error) {
 		// invoke the "init" function
 		val, err := i.eval(initFn, mod.Refs)
 		if err != nil {
-			return nil, err
+			return nil, err.Error()
 		}
 
 		// prepend the value so that the result will be in the same order as i.modules
@@ -70,20 +70,26 @@ func (i *Interpreter) InitModules() ([]g.Value, g.Error) {
 }
 
 //-------------------------------------------------------------------------
-// Context
+// Evaluator
 
-// Eval evaluates a given BytecodeFunc.
+// Eval evaluates a Func.
 func (i *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
 
 	switch t := fn.(type) {
+
 	case bc.BytecodeFunc:
-		return i.eval(t, newLocals(t.Template().NumLocals, params))
+		val, err := i.eval(t, newLocals(t.Template().NumLocals, params))
+		if err != nil {
+			return nil, err.Error()
+		}
+		return val, nil
+
 	case g.NativeFunc:
 		return fn.Invoke(i, params)
+
 	default:
 		panic("unreachable")
 	}
-
 }
 
 //-------------------------------------------------------------------------
@@ -95,7 +101,9 @@ func (i *Interpreter) lookupModule(name string) (*bc.Module, g.Error) {
 	return nil, g.UndefinedModuleError(name)
 }
 
-func (i *Interpreter) eval(fn bc.BytecodeFunc, locals []*bc.Ref) (result g.Value, errTrace g.Error) {
+func (i *Interpreter) eval(
+	fn bc.BytecodeFunc,
+	locals []*bc.Ref) (result g.Value, errStruct g.ErrorStruct) {
 
 	lastFrame := len(i.frames)
 	i.frames = append(i.frames, &frame{fn, locals, []g.Value{}, 0})
@@ -104,89 +112,89 @@ func (i *Interpreter) eval(fn bc.BytecodeFunc, locals []*bc.Ref) (result g.Value
 	for result == nil {
 		result, err = i.advance(lastFrame)
 		if err != nil {
-			panic("TODO")
-			//result, errTrace = i.walkStack(i.makeErrorTrace(err, i.stackTrace()))
-			//if errTrace != nil {
-			//	return nil, errTrace
-			//}
+			result, errStruct = i.walkStack(g.NewErrorStruct(err, i.stackTrace()))
+			if errStruct != nil {
+				return nil, errStruct
+			}
 		}
 	}
 
 	return result, nil
 }
 
-//func (i *Interpreter) walkStack(errTrace g.Error) (g.Value, g.Error) {
-//
-//	// unwind the frames
-//	for len(i.frames) > 0 {
-//		frameIndex := len(i.frames) - 1
-//		f := i.frames[frameIndex]
-//		instPtr := f.ip
-//
-//		// visit exception handlers
-//		tpl := f.fn.Template()
-//		for _, eh := range tpl.ExceptionHandlers {
-//
-//			// found an active handler
-//			if instPtr >= eh.Begin && instPtr < eh.End {
-//
-//				if eh.Catch != -1 {
-//					f.ip = eh.Catch
-//					f.stack = append(f.stack, errTrace.Struct())
-//					cres, cerr := i.runTryClause(f, frameIndex)
-//					if cerr != nil {
-//						// save the error
-//						errTrace = i.makeErrorTrace(cerr, i.stackTrace())
-//
-//						// run finally clause
-//						if eh.Finally != -1 {
-//							f.ip = eh.Finally
-//							fres, ferr := i.runTryClause(f, frameIndex)
-//							if ferr != nil {
-//								// save the error
-//								errTrace = i.makeErrorTrace(ferr, i.stackTrace())
-//							} else if fres != nil {
-//								// stop unwinding the stack
-//								return fres, nil
-//							}
-//						}
-//
-//					} else {
-//
-//						// run finally clause
-//						if eh.Finally != -1 {
-//							f.ip = eh.Finally
-//							fres, ferr := i.runTryClause(f, frameIndex)
-//							if ferr == nil && fres != nil {
-//								// stop unwinding the stack
-//								return fres, nil
-//							}
-//						}
-//
-//						// done!
-//						return cres, nil
-//					}
-//				} else {
-//					assert(eh.Finally != -1)
-//					f.ip = eh.Finally
-//					fres, ferr := i.runTryClause(f, frameIndex)
-//					if ferr != nil {
-//						// save the error
-//						errTrace = i.makeErrorTrace(ferr, i.stackTrace())
-//					} else if fres != nil {
-//						// stop unwinding the stack
-//						return fres, nil
-//					}
-//				}
-//			}
-//		}
-//
-//		// pop the frame
-//		i.frames = i.frames[:frameIndex]
-//	}
-//
-//	return nil, errTrace
-//}
+func (i *Interpreter) walkStack(errStruct g.ErrorStruct) (g.Value, g.ErrorStruct) {
+
+	// unwind the frames
+	for len(i.frames) > 0 {
+		frameIndex := len(i.frames) - 1
+		f := i.frames[frameIndex]
+		instPtr := f.ip
+
+		// visit exception handlers
+		tpl := f.fn.Template()
+		for _, eh := range tpl.ExceptionHandlers {
+
+			// found an active handler
+			if instPtr >= eh.Begin && instPtr < eh.End {
+
+				if eh.Catch != -1 {
+					f.ip = eh.Catch
+					f.stack = append(f.stack, errStruct)
+					cres, cerr := i.runTryClause(f, frameIndex)
+					if cerr != nil {
+
+						// save the error
+						errStruct = g.NewErrorStruct(cerr, i.stackTrace())
+
+						// run finally clause
+						if eh.Finally != -1 {
+							f.ip = eh.Finally
+							fres, ferr := i.runTryClause(f, frameIndex)
+							if ferr != nil {
+								// save the error
+								errStruct = g.NewErrorStruct(ferr, i.stackTrace())
+							} else if fres != nil {
+								// stop unwinding the stack
+								return fres, nil
+							}
+						}
+
+					} else {
+
+						// run finally clause
+						if eh.Finally != -1 {
+							f.ip = eh.Finally
+							fres, ferr := i.runTryClause(f, frameIndex)
+							if ferr == nil && fres != nil {
+								// stop unwinding the stack
+								return fres, nil
+							}
+						}
+
+						// done!
+						return cres, nil
+					}
+				} else {
+					g.Assert(eh.Finally != -1)
+					f.ip = eh.Finally
+					fres, ferr := i.runTryClause(f, frameIndex)
+					if ferr != nil {
+						// save the error
+						errStruct = g.NewErrorStruct(ferr, i.stackTrace())
+					} else if fres != nil {
+						// stop unwinding the stack
+						return fres, nil
+					}
+				}
+			}
+		}
+
+		// pop the frame
+		i.frames = i.frames[:frameIndex]
+	}
+
+	return nil, errStruct
+}
 
 func (i *Interpreter) runTryClause(f *frame, frameIndex int) (g.Value, g.Error) {
 
@@ -239,31 +247,6 @@ type frame struct {
 	stack  []g.Value
 	ip     int
 }
-
-//---------------------------------------------------------------
-
-//func (i *Interpreter) makeErrorTrace(err g.Error, stackTrace []string) g.Error {
-//
-//	// make list-of-str
-//	vals := make([]g.Value, len(stackTrace))
-//	for i, s := range stackTrace {
-//		vals[i] = g.NewStr(s)
-//	}
-//	list, e := g.NewList(vals).Freeze(i)
-//	assert(e == nil)
-//
-//	stc, e := g.NewStruct([]g.Field{g.NewField("stackTrace", true, list)}, true)
-//	assert(e == nil)
-//
-//	merge := g.MergeStructs([]g.Struct{err.Struct(), stc})
-//	return g.NewErrorFromStruct(i, merge)
-//}
-
-//func assert(flag bool) {
-//	if !flag {
-//		panic("assertion failure")
-//	}
-//}
 
 ////---------------------------------------------------------------
 //

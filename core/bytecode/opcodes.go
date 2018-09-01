@@ -84,7 +84,7 @@ const (
 	SliceFrom
 	SliceTo
 
-	Iter
+	NewIter
 	IterNext
 	IterGet
 
@@ -258,8 +258,8 @@ func FmtOpcode(opcodes []byte, i int) string {
 	case SliceTo:
 		return fmt.Sprintf("%d: SliceTo\n", i)
 
-	case Iter:
-		return fmt.Sprintf("%d: Iter\n", i)
+	case NewIter:
+		return fmt.Sprintf("%d: NewIter\n", i)
 	case IterNext:
 		return fmt.Sprintf("%d: IterNext\n", i)
 	case IterGet:

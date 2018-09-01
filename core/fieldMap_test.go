@@ -21,7 +21,10 @@ func TestHashFieldMap(t *testing.T) {
 		},
 		true}
 
-	Tassert(t, reflect.DeepEqual([]string{"a", "b"}, fm.names()))
+	ab := reflect.DeepEqual([]string{"a", "b"}, fm.names())
+	ba := reflect.DeepEqual([]string{"b", "a"}, fm.names())
+	Tassert(t, ab || ba)
+
 	Tassert(t, fm.has("a"))
 	Tassert(t, fm.has("b"))
 	Tassert(t, !fm.has("c"))

@@ -115,7 +115,8 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			go (func() {
 				_, errTrace := intp.eval(fn, locals)
 				if errTrace != nil {
-					fmt.Printf("%v\n", errTrace.Error())
+					panic("TODO")
+					//fmt.Printf("%v\n", errTrace.Error())
 				}
 			})()
 
@@ -180,27 +181,16 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		fn.PushCapture(f.fn.GetCapture(idx))
 		f.ip += 3
 
-		//	case bc.DefineStruct:
-		//
-		//		defs := pool.StructDefs[index(opc, f.ip)]
-		//		stc, err := g.DefineStruct(defs)
-		//		if err != nil {
-		//			return nil, err
-		//		}
-		//
-		//		f.stack = append(f.stack, stc)
-		//		f.ip += 3
+	case bc.NewList:
 
-		//	case bc.NewList:
-		//
-		//		size := index(opc, f.ip)
-		//		vals := make([]g.Value, size)
-		//		copy(vals, f.stack[n-size+1:])
-		//
-		//		f.stack = f.stack[:n-size+1]
-		//		f.stack = append(f.stack, g.NewList(vals))
-		//		f.ip += 3
-		//
+		size := index(opc, f.ip)
+		vals := make([]g.Value, size)
+		copy(vals, f.stack[n-size+1:])
+
+		f.stack = f.stack[:n-size+1]
+		f.stack = append(f.stack, g.NewList(vals))
+		f.ip += 3
+
 		//	case bc.NewSet:
 		//
 		//		size := index(opc, f.ip)
@@ -277,20 +267,32 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//		f.stack = append(f.stack, dict)
 		//		f.ip += 3
 		//
-		//	case bc.GetField:
+
+		//	case bc.DefineStruct:
 		//
-		//		idx := index(opc, f.ip)
-		//		key, ok := pool.Constants[idx].(g.Str)
-		//		g.Assert(ok)
-		//
-		//		result, err := f.stack[n].GetField(i, key)
+		//		defs := pool.StructDefs[index(opc, f.ip)]
+		//		stc, err := g.DefineStruct(defs)
 		//		if err != nil {
 		//			return nil, err
 		//		}
 		//
-		//		f.stack[n] = result
+		//		f.stack = append(f.stack, stc)
 		//		f.ip += 3
-		//
+
+	case bc.GetField:
+
+		idx := index(opc, f.ip)
+		key, ok := pool.Constants[idx].(g.Str)
+		g.Assert(ok)
+
+		result, err := f.stack[n].GetField(key.String(), i)
+		if err != nil {
+			return nil, err
+		}
+
+		f.stack[n] = result
+		f.ip += 3
+
 		//	case bc.InitField, bc.SetField:
 		//
 		//		idx := index(opc, f.ip)
@@ -836,35 +838,40 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n] = val
 		f.ip++
 
-		//	case bc.Iter:
-		//
-		//		ibl, ok := f.stack[n].(g.Iterable)
-		//		g.Assert(ok)
-		//
-		//		f.stack[n] = ibl.NewIterator(i)
-		//		f.ip++
-		//
-		//	case bc.IterNext:
-		//
-		//		itr, ok := f.stack[n].(g.Iterator)
-		//		g.Assert(ok)
-		//
-		//		f.stack[n] = itr.IterNext()
-		//		f.ip++
-		//
-		//	case bc.IterGet:
-		//
-		//		itr, ok := f.stack[n].(g.Iterator)
-		//		g.Assert(ok)
-		//
-		//		val, err := itr.IterGet()
-		//		if err != nil {
-		//			return nil, err
-		//		}
-		//
-		//		f.stack[n] = val
-		//		f.ip++
-		//
+	case bc.NewIter:
+
+		ibl, ok := f.stack[n].(g.Iterable)
+		g.Assert(ok)
+
+		f.stack[n] = ibl.NewIterator(i)
+		f.ip++
+
+	case bc.IterNext:
+
+		itr, ok := f.stack[n].(g.Iterator)
+		g.Assert(ok)
+
+		val, err := itr.IterNext(i)
+		if err != nil {
+			return nil, err
+		}
+
+		f.stack[n] = val
+		f.ip++
+
+	case bc.IterGet:
+
+		itr, ok := f.stack[n].(g.Iterator)
+		g.Assert(ok)
+
+		val, err := itr.IterGet(i)
+		if err != nil {
+			return nil, err
+		}
+
+		f.stack[n] = val
+		f.ip++
+
 	case bc.Dup:
 		f.stack = append(f.stack, f.stack[n])
 		f.ip++

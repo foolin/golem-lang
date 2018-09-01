@@ -135,3 +135,10 @@ func (st *_struct) SetField(name string, ev Evaluator, val Value) Error {
 
 	return st.fieldMap.set(name, ev, val)
 }
+
+func (st *_struct) Internal(args ...interface{}) {
+
+	name := args[0].(string)
+	field := args[1].(Field)
+	st.fieldMap.replace(name, field)
+}

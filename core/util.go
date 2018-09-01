@@ -116,42 +116,34 @@ func valuesEq(ev Evaluator, as []Value, bs []Value) (Bool, Error) {
 	return True, nil
 }
 
-//func newIteratorStruct() Struct {
-//
-//	// create a struct with fields that have placeholder Null values
-//	stc, err := NewStruct([]Field{
-//		NewField("next", true, Null),
-//		NewField("get", true, Null)}, true)
-//	if err != nil {
-//		panic("invalid iterator")
-//	}
-//	return stc
-//}
-//
-//func initIteratorStruct(ev Evaluator, itr Iterator) Iterator {
-//
-//	// initialize the struct fields with functions that refer back to the iterator
-//	err := itr.InitField(
-//		ev, NewStr("next"),
-//		NewFixedNativeFunc(
-//			[]Type{}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				return itr.IterNext(), nil
-//			}))
-//	if err != nil {
-//		panic("invalid iterator")
-//	}
-//
-//	err = itr.InitField(
-//		ev, NewStr("get"),
-//		NewFixedNativeFunc(
-//			[]Type{}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				return itr.IterGet()
-//			}))
-//	if err != nil {
-//		panic("invalid iterator")
-//	}
-//
-//	return itr
-//}
+func iteratorStruct() Struct {
+
+	stc, err := NewFieldStruct(
+		map[string]Field{
+			"next": NewReadonlyField(Null),
+			"get":  NewReadonlyField(Null),
+		}, true)
+	if err != nil {
+		panic("unreachable")
+	}
+	return stc
+}
+
+func iteratorFields(ev Evaluator, itr Iterator) (next Field, get Field) {
+
+	next = NewReadonlyField(
+		NewFixedNativeFunc(
+			[]Type{}, false,
+			func(ev Evaluator, values []Value) (Value, Error) {
+				return itr.IterNext(ev)
+			}))
+
+	get = NewReadonlyField(
+		NewFixedNativeFunc(
+			[]Type{}, false,
+			func(ev Evaluator, values []Value) (Value, Error) {
+				return itr.IterGet(ev)
+			}))
+
+	return
+}

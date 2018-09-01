@@ -8,8 +8,10 @@ import (
 	"fmt"
 )
 
-// Error is an error
-type Error error
+type (
+	// Error is an error
+	Error error
+)
 
 func NewError(s string) Error {
 	return fmt.Errorf(s)
@@ -70,4 +72,60 @@ func InvalidStructKeyError(key string) Error {
 // UndefinedModuleError creates a UndefinedModule Error
 func UndefinedModuleError(name string) Error {
 	return fmt.Errorf("UndefinedModule: Module '%s' is not defined", name)
+}
+
+// NoSuchElementError creates a NoSuchElement Error
+func NoSuchElementError() Error {
+	return fmt.Errorf("NoSuchElement")
+}
+
+// AssertionFailedError creates a NoSuchElement Error
+func AssertionFailedError() Error {
+	return fmt.Errorf("AssertionFailed")
+}
+
+//--------------------------------------------------------------
+// ErrorStruct
+//--------------------------------------------------------------
+
+type (
+	// ErrorStruct is a Struct that describes an Error
+	ErrorStruct interface {
+		Struct
+		Error() Error
+		StackTrace() []string
+	}
+
+	errorStruct struct {
+		Struct
+		err        Error
+		stackTrace []string
+	}
+)
+
+func NewErrorStruct(err Error, stackTrace []string) ErrorStruct {
+
+	// make list-of-str
+	vals := make([]Value, len(stackTrace))
+	for i, s := range stackTrace {
+		vals[i] = NewStr(s)
+	}
+	list, e := NewList(vals).Freeze(nil)
+	Assert(e == nil)
+
+	stc, e := NewFieldStruct(
+		map[string]Field{
+			"error":      NewReadonlyField(NewStr(err.Error())),
+			"stackTrace": NewReadonlyField(list),
+		}, true)
+	Assert(e == nil)
+
+	return &errorStruct{stc, err, stackTrace}
+}
+
+func (e *errorStruct) Error() Error {
+	return e.err
+}
+func (e *errorStruct) StackTrace() []string {
+	return e.stackTrace
 }

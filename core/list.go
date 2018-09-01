@@ -281,36 +281,52 @@ func (ls *list) Clear() Error {
 	return nil
 }
 
-////---------------------------------------------------------------
-//// Iterator
-//
-//type listIterator struct {
-//	Struct
-//	ls *list
-//	n  int
-//}
-//
-//func (ls *list) NewIterator(ev Evaluator) Iterator {
-//	return initIteratorStruct(ev,
-//		&listIterator{newIteratorStruct(), ls, -1})
-//}
-//
-//func (i *listIterator) IterNext() Bool {
-//	i.n++
-//	return NewBool(i.n < len(i.ls.array))
-//}
-//
-//func (i *listIterator) IterGet() (Value, Error) {
-//	if (i.n >= 0) && (i.n < len(i.ls.array)) {
-//		return i.ls.array[i.n], nil
-//	}
-//	return nil, NoSuchElementError()
-//}
+//---------------------------------------------------------------
+// Iterator
+
+type listIterator struct {
+	Struct
+	ls *list
+	n  int
+}
+
+func (ls *list) NewIterator(ev Evaluator) Iterator {
+
+	// make an iterator with an empty struct
+	itr := &listIterator{iteratorStruct(), ls, -1}
+
+	// initialize the fields of the struct
+	next, get := iteratorFields(ev, itr)
+	itr.Internal("next", next)
+	itr.Internal("get", get)
+
+	// done
+	return itr
+}
+
+func (i *listIterator) IterNext(ev Evaluator) (Bool, Error) {
+	i.n++
+	return NewBool(i.n < len(i.ls.array)), nil
+}
+
+func (i *listIterator) IterGet(ev Evaluator) (Value, Error) {
+	if (i.n >= 0) && (i.n < len(i.ls.array)) {
+		return i.ls.array[i.n], nil
+	}
+	return nil, NoSuchElementError()
+}
 
 //--------------------------------------------------------------
 // fields
 
-var listMethods = map[string]Method{}
+var listMethods = map[string]Method{
+	"iterator": NewFixedMethod(
+		[]Type{}, false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			ls := self.(List)
+			return ls.NewIterator(ev), nil
+		}),
+}
 
 func (ls *list) FieldNames() ([]string, Error) {
 	names := make([]string, 0, len(listMethods))
