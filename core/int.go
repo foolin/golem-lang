@@ -114,7 +114,7 @@ func (i _int) Add(val Value) (Number, Error) {
 		return NewFloat(a + b), nil
 
 	default:
-		return nil, TypeMismatchError("Expected Number Type")
+		return nil, TypeMismatchError("Expected Number")
 	}
 }
 
@@ -133,7 +133,7 @@ func (i _int) Sub(val Value) (Number, Error) {
 		return NewFloat(a - b), nil
 
 	default:
-		return nil, TypeMismatchError("Expected Number Type")
+		return nil, TypeMismatchError("Expected Number")
 	}
 }
 
@@ -149,7 +149,7 @@ func (i _int) Mul(val Value) (Number, Error) {
 		return NewFloat(a * b), nil
 
 	default:
-		return nil, TypeMismatchError("Expected Number Type")
+		return nil, TypeMismatchError("Expected Number")
 	}
 }
 
@@ -171,7 +171,7 @@ func (i _int) Div(val Value) (Number, Error) {
 		return NewFloat(a / b), nil
 
 	default:
-		return nil, TypeMismatchError("Expected Number Type")
+		return nil, TypeMismatchError("Expected Number")
 	}
 }
 

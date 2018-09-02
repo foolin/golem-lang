@@ -369,7 +369,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			return nil, err
 		}
 
-		after, err := plus(itp, before, value)
+		after, err := inc(itp, before, value)
 		if err != nil {
 			return nil, err
 		}
@@ -445,7 +445,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			return nil, err
 		}
 
-		after, err := plus(itp, before, val)
+		after, err := inc(itp, before, val)
 		if err != nil {
 			return nil, err
 		}
@@ -689,6 +689,15 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
+	case bc.Inc:
+		val, err := inc(itp, f.stack[n-1], f.stack[n])
+		if err != nil {
+			return nil, err
+		}
+		f.stack = f.stack[:n]
+		f.stack[n-1] = val
+		f.ip++
+
 	case bc.Not:
 		b, ok := f.stack[n].(g.Bool)
 		if !ok {
@@ -701,7 +710,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.Sub:
 		z, ok := f.stack[n-1].(g.Number)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Number Type")
+			return nil, g.TypeMismatchError("Expected Number")
 		}
 
 		val, err := z.Sub(f.stack[n])
@@ -715,7 +724,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.Mul:
 		z, ok := f.stack[n-1].(g.Number)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Number Type")
+			return nil, g.TypeMismatchError("Expected Number")
 		}
 
 		val, err := z.Mul(f.stack[n])
@@ -729,7 +738,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.Div:
 		z, ok := f.stack[n-1].(g.Number)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Number Type")
+			return nil, g.TypeMismatchError("Expected Number")
 		}
 
 		val, err := z.Div(f.stack[n])
@@ -743,7 +752,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.Negate:
 		z, ok := f.stack[n].(g.Number)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Number Type")
+			return nil, g.TypeMismatchError("Expected Number")
 		}
 
 		val := z.Negate()
@@ -921,5 +930,15 @@ func plus(ev g.Evaluator, a g.Value, b g.Value) (g.Value, g.Error) {
 	}
 
 	// error
-	return nil, g.TypeMismatchError("Expected Number Type")
+	return nil, g.TypeMismatchError("Expected Number")
+}
+
+func inc(ev g.Evaluator, a g.Value, b g.Value) (g.Value, g.Error) {
+
+	na, ok := a.(g.Number)
+	if !ok {
+		return nil, g.TypeMismatchError("Expected Number")
+	}
+	nb := b.(g.Number)
+	return na.Add(nb)
 }

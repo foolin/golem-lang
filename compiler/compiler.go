@@ -412,7 +412,7 @@ func (c *compiler) visitPostfixExpr(pe *ast.PostfixExpr) {
 			panic("invalid postfix operator")
 		}
 
-		c.push(pe.Op.Position, bc.Plus)
+		c.push(pe.Op.Position, bc.Inc)
 		c.assignIdent(t)
 
 	case *ast.FieldExpr:

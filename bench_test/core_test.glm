@@ -33,9 +33,9 @@ fn testExpressions() {
 	assert('a' + null == 'anull')
 	assert(null + 'a' == 'nulla')
 
-	fail(|| => true + null, 'TypeMismatch: Expected Number Type')
-	fail(|| => 1 + null, 'TypeMismatch: Expected Number Type')
-	fail(|| => null + 1, 'TypeMismatch: Expected Number Type')
+	fail(|| => true + null, 'TypeMismatch: Expected Number')
+	fail(|| => 1 + null, 'TypeMismatch: Expected Number')
+	fail(|| => null + 1, 'TypeMismatch: Expected Number')
 
 	assert((true == 'a') == false)
 	assert((3 * 7 + 4 == 5 * 5) == true)
@@ -140,10 +140,22 @@ fn testAssignment() {
             let d = b--
             assert([11, 19, 10, 20] == [a, b, c, d])
 
-            // TODO fix this
-            let e = 'abc'
-            e++
-            assert('abc1' == e)
+            fail(fn() {
+                    let e = 'abc'
+                    e++
+                }, "TypeMismatch: Expected Number")
+        },
+        fn () {
+            let a = [10]
+            let b = [20]
+            let c = a[0]++
+            let d = b[0]--
+            assert([[11], [19], 10, 20] == [a, b, c, d])
+
+            fail(fn() {
+                    let e = ['abc']
+                    e[0]++
+                }, "TypeMismatch: Expected Number")
         },
         fn () {
             let a = struct { x: 10 }
@@ -152,10 +164,10 @@ fn testAssignment() {
             let d = b.y--
             assert([struct { x: 11 }, struct { y: 19 }, 10, 20] == [a, b, c, d])
 
-            // TODO fix this
-            let e = struct { x: 'abc' }
-            e.x++
-            assert(struct { x: 'abc1' } ==  e)
+            fail(fn() {
+                    let e = struct { x: 'abc' }
+                    e.x++
+                }, "TypeMismatch: Expected Number")
         }
     ]
     for f in funcs { f(); }

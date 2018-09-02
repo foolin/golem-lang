@@ -38,6 +38,7 @@ const (
 	Cmp
 
 	Plus
+	Inc
 	Sub
 	Mul
 	Div
@@ -155,6 +156,8 @@ func BytecodeString(bc byte) string {
 
 	case Plus:
 		return "Plus"
+	case Inc:
+		return "Inc"
 	case Sub:
 		return "Sub"
 	case Mul:
@@ -272,7 +275,7 @@ func BytecodeSize(bc byte) int {
 	case
 		LoadNull, LoadTrue, LoadFalse, LoadZero, LoadOne, LoadNegOne,
 		Eq, Ne, Gt, Gte, Lt, Lte, Cmp,
-		Plus, Sub, Mul, Div,
+		Plus, Inc, Sub, Mul, Div,
 		Rem, BitAnd, BitOr, BitXor, LeftShift, RightShift,
 		Negate, Not, Complement,
 		Return, Done, Throw,
