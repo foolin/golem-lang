@@ -91,6 +91,91 @@ fn testExpressions() {
 
 }
 
+fn testAssignment() {
+    let funcs = [
+        fn () {
+            let a = 1
+            const b = 2
+            a = a + b
+            assert([3, 2] == [a, b])
+        },
+        fn () {
+            let a = 1
+            a = a + 41
+            const b = a / 6
+            let c = b + 3
+            c = (c + a)/13
+            assert([42, 7, 4] == [a, b, c])
+        },
+        fn () {
+            let a = 1
+            let b = a += 3
+            let c = ~0
+            c -= -2
+            c <<= 4
+            b *= 2
+            assert([4, 8, 16] == [a, b, c])
+        },
+        fn () {
+            let a = 1
+            let b = 2
+            a = b = 11
+            b = a %= 4
+            assert([3, 3] == [a, b])
+        }
+    ]
+    for f in funcs { f(); }
+}
+
+fn testFlowControl() {
+    let funcs = [
+        fn () {
+            let a = 1; if (true) { a = 2; }
+            assert(a == 2)
+        },
+        fn () {
+            let a = 1; if (false) { a = 2; }
+            assert(a == 1)
+        },
+        fn () {
+            let a = 1; if (1 == 1) { a = 2; } else { a = 3; }; let b = 4;
+            assert(a == 2 && b == 4)
+        },
+        fn () {
+            let a = 1; if (1 == 2) { a = 2; } else { a = 3; }; const b = 4;
+            assert(a == 3 && b == 4)
+        },
+        fn () {
+            let a = 1
+            while (a < 3) {
+                a = a + 1
+            }
+            assert(a == 3)
+        },
+        fn () {
+            let a = 1
+            while (a < 11) {
+                if (a == 4) { a = a + 2; break; }
+                a = a + 1
+            }
+            assert(a == 6)
+        },
+        fn () {
+            let a = 1
+            let b = 0
+            while (a < 11) {
+                a = a + 1
+                if (a > 5) { continue; }
+                b = b + 1
+            }
+            assert(a == 11 && b == 4)
+        }
+    ]
+    for f in funcs { f(); }
+}
+
+//--------------------------------------------------------------
+//--------------------------------------------------------------
 //--------------------------------------------------------------
 
 //fn testFunc() {
@@ -888,6 +973,8 @@ fn testInvokeField() {
 fn main(args) {
 
     testExpressions()
+    testAssignment()
+    testFlowControl()
 
 //    testFunc()
 //    testCapture()

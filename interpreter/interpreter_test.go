@@ -5,7 +5,7 @@
 package interpreter
 
 import (
-	//"reflect"
+	"reflect"
 	"testing"
 
 	"github.com/mjarmy/golem-lang/compiler"
@@ -31,6 +31,19 @@ func testCompile(t *testing.T, code string) *bc.Module {
 	return mods[0]
 }
 
+func ok(t *testing.T, val interface{}, err g.Error, expect interface{}) {
+
+	if err != nil {
+		t.Error(err, " != ", nil)
+		panic("ok")
+	}
+
+	if !reflect.DeepEqual(val, expect) {
+		t.Error(val, " != ", expect)
+		panic("ok")
+	}
+}
+
 func TestModuleContents(t *testing.T) {
 
 	code := `
@@ -39,7 +52,6 @@ const b = "xyz"
 fn c() {}
 `
 	mod := testCompile(t, code)
-
 	intp := NewInterpreter(builtinMgr, []*bc.Module{mod})
 
 	result, errStruct := intp.InitModules()
@@ -49,19 +61,33 @@ fn c() {}
 
 	val, err := stc.GetField("a", nil)
 	g.Tassert(t, err == nil && val.Type() == g.IntType)
-
 	val, err = stc.GetField("b", nil)
 	g.Tassert(t, err == nil && val.Type() == g.StrType)
-
 	val, err = stc.GetField("c", nil)
 	g.Tassert(t, err == nil && val.Type() == g.FuncType)
 
 	err = stc.SetField("a", nil, g.One)
 	g.Tassert(t, err == nil)
-
 	err = stc.SetField("b", nil, g.One)
 	g.Tassert(t, err.Error() == "ReadonlyField: Field 'b' is readonly")
-
 	err = stc.SetField("c", nil, g.One)
 	g.Tassert(t, err.Error() == "ReadonlyField: Field 'c' is readonly")
+
+	code = `
+let a = 1
+return a + 2
+let b = 5
+`
+	mod = testCompile(t, code)
+	intp = NewInterpreter(builtinMgr, []*bc.Module{mod})
+
+	result, errStruct = intp.InitModules()
+	g.Tassert(t, errStruct == nil && len(result) == 1)
+	ok(t, result[0], nil, g.NewInt(3))
+
+	stc = mod.Contents
+	val, err = stc.GetField("a", nil)
+	ok(t, val, err, g.One)
+	val, err = stc.GetField("b", nil)
+	ok(t, val, err, g.Null)
 }
