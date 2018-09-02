@@ -5,6 +5,7 @@
 package core
 
 import (
+	"fmt"
 	"strings"
 	"unicode/utf8"
 )
@@ -162,6 +163,9 @@ var strMethods = map[string]Method{
 			s := self.(Str).String()
 			substr := params[0].(Str).String()
 			result := strings.Contains(s, substr)
+
+			fmt.Printf("Str.contains: %s, %s, %v\n", s, substr, result)
+
 			return NewBool(result), nil
 		}),
 
@@ -209,7 +213,6 @@ func (s str) GetField(name string, ev Evaluator) (Value, Error) {
 }
 
 func (s str) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
-
 	if method, ok := strMethods[name]; ok {
 		return method.Invoke(s, ev, params)
 	}

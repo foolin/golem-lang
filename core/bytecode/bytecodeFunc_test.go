@@ -83,7 +83,7 @@ func TestLineNumber(t *testing.T) {
 		Arity:       g.Arity{},
 		NumCaptures: 0,
 		NumLocals:   0,
-		OpCodes:     nil,
+		Bytecodes:   nil,
 		LineNumberTable: []LineNumberEntry{
 			{0, 0},
 			{1, 2},

@@ -45,12 +45,3 @@ func (m *Module) String() string {
 
 	return buf.String()
 }
-
-// Pool is a pool of the constants, function templates, and struct definitions
-// used by a given Module.  Pools are created at compile time, and
-// are immutable at run time.
-type Pool struct {
-	Constants  []g.Basic
-	Templates  []*FuncTemplate
-	StructDefs [][]string
-}

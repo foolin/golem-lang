@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	g "github.com/mjarmy/golem-lang/core"
-	bc "github.com/mjarmy/golem-lang/core/bytecode"
+	"github.com/mjarmy/golem-lang/core/bytecode"
 )
 
 //---------------------------------------------------------------
@@ -16,8 +16,8 @@ import (
 
 // Interpreter interprets Golem bytecode.
 type Interpreter struct {
-	modules    []*bc.Module
-	modMap     map[string]*bc.Module
+	modules    []*bytecode.Module
+	modMap     map[string]*bytecode.Module
 	builtInMgr g.BuiltinManager
 	frames     []*frame
 }
@@ -25,9 +25,9 @@ type Interpreter struct {
 // NewInterpreter creates a new Interpreter
 func NewInterpreter(
 	builtInMgr g.BuiltinManager,
-	modules []*bc.Module) *Interpreter {
+	modules []*bytecode.Module) *Interpreter {
 
-	modMap := make(map[string]*bc.Module)
+	modMap := make(map[string]*bytecode.Module)
 	for _, m := range modules {
 		modMap[m.Name] = m
 	}
@@ -55,7 +55,7 @@ func (i *Interpreter) InitModules() ([]g.Value, g.ErrorStruct) {
 		mod.Refs = newLocals(initTpl.NumLocals, nil)
 
 		// make init function from template
-		initFn := bc.NewBytecodeFunc(initTpl)
+		initFn := bytecode.NewBytecodeFunc(initTpl)
 
 		// invoke the "init" function
 		val, err := i.eval(initFn, mod.Refs)
@@ -77,7 +77,7 @@ func (i *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
 
 	switch t := fn.(type) {
 
-	case bc.BytecodeFunc:
+	case bytecode.BytecodeFunc:
 		val, errStruct := i.EvalBytecode(t, params)
 		if errStruct != nil {
 			return nil, errStruct.Error()
@@ -92,7 +92,7 @@ func (i *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
 	}
 }
 
-func (i *Interpreter) EvalBytecode(fn bc.BytecodeFunc, params []g.Value) (g.Value, g.ErrorStruct) {
+func (i *Interpreter) EvalBytecode(fn bytecode.BytecodeFunc, params []g.Value) (g.Value, g.ErrorStruct) {
 	val, err := i.eval(fn, newLocals(fn.Template().NumLocals, params))
 	if err != nil {
 		return nil, err
@@ -103,8 +103,8 @@ func (i *Interpreter) EvalBytecode(fn bc.BytecodeFunc, params []g.Value) (g.Valu
 //-------------------------------------------------------------------------
 
 func (i *Interpreter) eval(
-	fn bc.BytecodeFunc,
-	locals []*bc.Ref) (result g.Value, errStruct g.ErrorStruct) {
+	fn bytecode.BytecodeFunc,
+	locals []*bytecode.Ref) (result g.Value, errStruct g.ErrorStruct) {
 
 	lastFrame := len(i.frames)
 	i.frames = append(i.frames, &frame{fn, locals, []g.Value{}, 0})
@@ -199,8 +199,8 @@ func (i *Interpreter) walkStack(errStruct g.ErrorStruct) (g.Value, g.ErrorStruct
 
 func (i *Interpreter) runTryClause(f *frame, frameIndex int) (g.Value, g.Error) {
 
-	opc := f.fn.Template().OpCodes
-	for opc[f.ip] != bc.Done {
+	btc := f.fn.Template().Bytecodes
+	for btc[f.ip] != bytecode.Done {
 
 		result, err := i.advance(frameIndex)
 		if result != nil || err != nil {
@@ -226,61 +226,22 @@ func (i *Interpreter) stackTrace() []string {
 	return stack
 }
 
-func newLocals(numLocals int, params []g.Value) []*bc.Ref {
+func newLocals(numLocals int, params []g.Value) []*bytecode.Ref {
 	p := len(params)
-	locals := make([]*bc.Ref, numLocals)
+	locals := make([]*bytecode.Ref, numLocals)
 	for j := 0; j < numLocals; j++ {
 		if j < p {
-			locals[j] = &bc.Ref{Val: params[j]}
+			locals[j] = &bytecode.Ref{Val: params[j]}
 		} else {
-			locals[j] = &bc.Ref{Val: g.Null}
+			locals[j] = &bytecode.Ref{Val: g.Null}
 		}
 	}
 	return locals
 }
 
-func (i *Interpreter) lookupModule(name string) (*bc.Module, g.Error) {
+func (i *Interpreter) lookupModule(name string) (*bytecode.Module, g.Error) {
 	if mod, ok := i.modMap[name]; ok {
 		return mod, nil
 	}
 	return nil, g.UndefinedModuleError(name)
 }
-
-//---------------------------------------------------------------
-// An execution environment, a.k.a 'stack frame'.
-
-type frame struct {
-	fn     bc.BytecodeFunc
-	locals []*bc.Ref
-	stack  []g.Value
-	ip     int
-}
-
-////---------------------------------------------------------------
-//
-//func (i *Interpreter) dump() {
-//
-//	println("-----------------------------------------")
-//
-//	f := i.frames[len(i.frames)-1]
-//	opc := f.fn.Template().OpCodes
-//	print(bc.FmtOpcode(opc, f.ip))
-//
-//	for j, f := range i.frames {
-//		fmt.Printf("frame %d\n", j)
-//		i.dumpFrame(f)
-//	}
-//}
-//
-//func (i *Interpreter) dumpFrame(f *frame) {
-//	fmt.Printf("    locals:\n")
-//	for j, r := range f.locals {
-//		fmt.Printf("        %d: %s\n", j, r.Val.ToStr(i))
-//	}
-//	fmt.Printf("    stack:\n")
-//	for j, v := range f.stack {
-//		fmt.Printf("        %d: %s\n", j, v.ToStr(i))
-//	}
-//	fmt.Printf("    ip: %d\n", f.ip)
-//}
-//

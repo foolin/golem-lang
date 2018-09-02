@@ -5,6 +5,8 @@
 package bytecode
 
 import (
+	"fmt"
+
 	g "github.com/mjarmy/golem-lang/core"
 )
 
@@ -16,7 +18,7 @@ type FuncTemplate struct {
 	Arity             g.Arity
 	NumCaptures       int
 	NumLocals         int
-	OpCodes           []byte
+	Bytecodes         []byte
 	LineNumberTable   []LineNumberEntry
 	ExceptionHandlers []ExceptionHandler
 }
@@ -27,6 +29,13 @@ type LineNumberEntry struct {
 	LineNum int
 }
 
+func (ln LineNumberEntry) String() string {
+	return fmt.Sprintf(
+		"LineNumberEntry(Index: %d, LineNum: %d)",
+		ln.Index,
+		ln.LineNum)
+}
+
 // ExceptionHandler handles exceptions for a given block of opcodes,
 // by providing the instruction pointers for 'catch' and 'finally'
 type ExceptionHandler struct {
@@ -34,6 +43,15 @@ type ExceptionHandler struct {
 	End     int
 	Catch   int
 	Finally int
+}
+
+func (eh ExceptionHandler) String() string {
+	return fmt.Sprintf(
+		"ExceptionHandler(Begin: %d, End: %d, Catch: %d, Finally: %d)",
+		eh.Begin,
+		eh.End,
+		eh.Catch,
+		eh.Finally)
 }
 
 // LineNumber returns the line number for the opcode at the given instruction pointer

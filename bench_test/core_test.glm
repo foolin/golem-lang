@@ -91,6 +91,8 @@ fn testExpressions() {
 
 }
 
+//--------------------------------------------------------------
+
 //fn testFunc() {
 //
 //    let a = fn(x) { x; }
@@ -209,6 +211,8 @@ fn testExpressions() {
 //
 //fn testStr() {
 //
+//	assert(struct{a: 1} has 'a' == true)
+//	assert(struct{a: 1} has 'b' == false)
 //    assert('abc'.contains('b'))
 //    assert(!'abc'.contains('z'))
 //    assert('abc'.index('b') == 1)
@@ -301,6 +305,8 @@ fn testList() {
         }
 //        },
 //        fn () {
+//	assert(struct{a: 1} has 'a' == true)
+//	assert(struct{a: 1} has 'b' == false)
 //            let a = []
 //            a.add(1)
 //            assert(a == [1])
@@ -684,6 +690,7 @@ fn testList() {
 //    assert(fields(s) == set {'a', 'b'})
 //    assert(getval(s, 'a') == 1)
 //    assert(setval(s, 'a', 3) == 3)
+//    s.a++ // TODO fix compiler
 //
 //    failMsg(|| => fields(0),       'TypeMismatch' , 'Expected Struct')
 //    failMsg(|| => fields(0, 1),    'ArityMismatch', 'Expected 1 params, got 2')
@@ -809,9 +816,9 @@ fn testList() {
 fn testIterator() {
     
     // list
-    fail(|| => [].iterator().get(), 'NoSuchElement')
+    fail(|| => [].iter().get(), 'NoSuchElement')
     let count = 0
-    let itr = [1, 2, 3].iterator()
+    let itr = [1, 2, 3].iter()
     fail(|| => itr.get(), 'NoSuchElement')
     while itr.next() {
         count += itr.get()
@@ -820,9 +827,9 @@ fn testIterator() {
     fail(|| => itr.get(), 'NoSuchElement')
 
 //    // range
-//    fail(|| => range(0, 0).iterator().get(), 'NoSuchElement')
+//    fail(|| => range(0, 0).iter().get(), 'NoSuchElement')
 //    count = 0
-//    itr = range(1, 5).iterator()
+//    itr = range(1, 5).iter()
 //    fail(|| => itr.get(), 'NoSuchElement')
 //    while itr.next() {
 //        count += itr.get()
@@ -831,9 +838,9 @@ fn testIterator() {
 //    fail(|| => itr.get(), 'NoSuchElement')
 //
 //    // dict
-//    fail(|| => dict{}.iterator().get(), 'NoSuchElement')
+//    fail(|| => dict{}.iter().get(), 'NoSuchElement')
 //    count = 0
-//    itr = dict{'a': 1, 'b': 2}.iterator()
+//    itr = dict{'a': 1, 'b': 2}.iter()
 //    fail(|| => itr.get(), 'NoSuchElement')
 //    while itr.next() {
 //        let e = itr.get()
@@ -844,9 +851,9 @@ fn testIterator() {
 //    fail(|| => itr.get(), 'NoSuchElement')
 //
 //    // set
-//    fail(|| => set{}.iterator().get(), 'NoSuchElement')
+//    fail(|| => set{}.iter().get(), 'NoSuchElement')
 //    count = 0
-//    itr = set{3, 4, 1, 4}.iterator()
+//    itr = set{3, 4, 1, 4}.iter()
 //    fail(|| => itr.get(), 'NoSuchElement')
 //    while itr.next() {
 //        count += itr.get()
@@ -855,9 +862,9 @@ fn testIterator() {
 //    fail(|| => itr.get(), 'NoSuchElement')
 //
 //    // str
-//    fail(|| => ''.iterator().get(), 'NoSuchElement')
+//    fail(|| => ''.iter().get(), 'NoSuchElement')
 //    count = ''
-//    itr = 'abcde'.iterator()
+//    itr = 'abcde'.iter()
 //    fail(|| => itr.get(), 'NoSuchElement')
 //    while itr.next() {
 //        count = itr.get() + count
@@ -889,7 +896,8 @@ fn main(args) {
 //    testSlice()
 //    testUnicodeEscape()
 //    testStruct()
-    testIterator()
+
+//    testIterator()
 
 //
 //    assert(42 == zork.quux)

@@ -5,6 +5,7 @@
 package compiler
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -34,8 +35,8 @@ func ok(t *testing.T, pool *bc.Pool, expect *bc.Pool) {
 			t.Error(pool, " != ", expect)
 		}
 
-		if !reflect.DeepEqual(mt.OpCodes, et.OpCodes) {
-			t.Error("OpCodes: ", pool, " != ", expect)
+		if !reflect.DeepEqual(mt.Bytecodes, et.Bytecodes) {
+			t.Error("Bytecodes: ", pool, " != ", expect)
 		}
 
 		// checking LineNumberTable is optional
@@ -79,7 +80,7 @@ func TestExpression(t *testing.T) {
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadConst, 0, 0,
 					bc.LoadNegOne,
@@ -92,7 +93,7 @@ func TestExpression(t *testing.T) {
 					bc.Plus,
 					bc.LoadConst, 0, 1,
 					bc.Plus,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
@@ -110,7 +111,7 @@ func TestExpression(t *testing.T) {
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadConst, 0, 0,
 					bc.LoadConst, 0, 1,
@@ -119,7 +120,7 @@ func TestExpression(t *testing.T) {
 					bc.Mul,
 					bc.LoadConst, 0, 3,
 					bc.Div,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
@@ -137,14 +138,14 @@ func TestExpression(t *testing.T) {
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadNull,
 					bc.LoadTrue,
 					bc.Div,
 					bc.LoadFalse,
 					bc.Plus,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
@@ -164,12 +165,12 @@ func TestExpression(t *testing.T) {
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadConst, 0, 0,
 					bc.LoadConst, 0, 1,
 					bc.Mul,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
@@ -187,12 +188,12 @@ func TestExpression(t *testing.T) {
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadConst, 0, 0,
 					bc.LoadTrue,
 					bc.Eq,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
@@ -210,12 +211,12 @@ func TestExpression(t *testing.T) {
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadTrue,
 					bc.LoadFalse,
 					bc.Ne,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
@@ -233,7 +234,7 @@ func TestExpression(t *testing.T) {
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadTrue,
 					bc.LoadFalse,
@@ -241,7 +242,7 @@ func TestExpression(t *testing.T) {
 					bc.LoadTrue,
 					bc.LoadFalse,
 					bc.Gte,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
@@ -259,7 +260,7 @@ func TestExpression(t *testing.T) {
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadTrue,
 					bc.LoadFalse,
@@ -270,7 +271,7 @@ func TestExpression(t *testing.T) {
 					bc.LoadTrue,
 					bc.LoadFalse,
 					bc.Cmp,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
@@ -288,7 +289,7 @@ func TestExpression(t *testing.T) {
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   1,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadConst, 0, 0,
 					bc.JumpFalse, 0, 17,
@@ -298,7 +299,7 @@ func TestExpression(t *testing.T) {
 					bc.Jump, 0, 18,
 					bc.LoadFalse,
 					bc.StoreLocal, 0, 0,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
@@ -316,7 +317,7 @@ func TestExpression(t *testing.T) {
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   1,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadConst, 0, 0,
 					bc.JumpTrue, 0, 13,
@@ -326,7 +327,7 @@ func TestExpression(t *testing.T) {
 					bc.Jump, 0, 18,
 					bc.LoadFalse,
 					bc.StoreLocal, 0, 0,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
@@ -347,7 +348,7 @@ func TestAssignment(t *testing.T) {
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   2,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadOne,
 					bc.StoreLocal, 0, 0,
@@ -356,7 +357,7 @@ func TestAssignment(t *testing.T) {
 					bc.LoadConst, 0, 1,
 					bc.Dup,
 					bc.StoreLocal, 0, 0,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
@@ -396,7 +397,7 @@ func TestIf(t *testing.T) {
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   1,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadConst, 0, 0,
 					bc.LoadConst, 0, 1,
@@ -404,7 +405,7 @@ func TestIf(t *testing.T) {
 					bc.JumpFalse, 0, 17,
 					bc.LoadConst, 0, 2,
 					bc.StoreLocal, 0, 0,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
@@ -430,7 +431,7 @@ func TestIf(t *testing.T) {
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   4,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadOne,
 					bc.StoreLocal, 0, 0,
@@ -443,7 +444,7 @@ func TestIf(t *testing.T) {
 					bc.StoreLocal, 0, 2,
 					bc.LoadConst, 0, 2,
 					bc.StoreLocal, 0, 3,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
@@ -470,7 +471,7 @@ func TestWhile(t *testing.T) {
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   2,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadOne,
 					bc.StoreLocal, 0, 0,
@@ -481,7 +482,7 @@ func TestWhile(t *testing.T) {
 					bc.LoadConst, 0, 0,
 					bc.StoreLocal, 0, 1,
 					bc.Jump, 0, 5,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
@@ -500,7 +501,7 @@ func TestWhile(t *testing.T) {
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   3,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadConst, 0, 0,
 					bc.StoreLocal, 0, 0,
@@ -515,7 +516,7 @@ func TestWhile(t *testing.T) {
 					bc.Jump, 0, 7,
 					bc.LoadConst, 0, 2,
 					bc.StoreLocal, 0, 2,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
@@ -539,18 +540,18 @@ func TestReturn(t *testing.T) {
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   1,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadOne,
 					bc.StoreLocal, 0, 0,
 					bc.LoadLocal, 0, 0,
 					bc.LoadConst, 0, 0,
 					bc.Sub,
-					bc.ReturnStmt,
+					bc.Return,
 					bc.LoadConst, 0, 1,
 					bc.Dup,
 					bc.StoreLocal, 0, 0,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
@@ -592,13 +593,13 @@ let b = fn(x) {
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   2,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.NewFunc, 0, 1,
 					bc.StoreLocal, 0, 0,
 					bc.NewFunc, 0, 2,
 					bc.StoreLocal, 0, 1,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 2},
@@ -610,10 +611,10 @@ let b = fn(x) {
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadConst, 0, 0,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 2},
@@ -624,7 +625,7 @@ let b = fn(x) {
 				Arity:       fixedArity(1),
 				NumCaptures: 0,
 				NumLocals:   2,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.NewFunc, 0, 3,
 					bc.StoreLocal, 0, 1,
@@ -635,7 +636,7 @@ let b = fn(x) {
 					bc.LoadLocal, 0, 0,
 					bc.Invoke, 0, 1,
 					bc.Plus,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 4},
@@ -647,12 +648,12 @@ let b = fn(x) {
 				Arity:       fixedArity(1),
 				NumCaptures: 0,
 				NumLocals:   1,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadLocal, 0, 0,
 					bc.LoadConst, 0, 1,
 					bc.Mul,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 5},
@@ -685,7 +686,7 @@ c(2, 3)
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   3,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.NewFunc, 0, 1,
 					bc.StoreLocal, 0, 0,
@@ -702,7 +703,7 @@ c(2, 3)
 					bc.LoadConst, 0, 0,
 					bc.LoadConst, 0, 1,
 					bc.Invoke, 0, 2,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 2},
@@ -718,9 +719,9 @@ c(2, 3)
 				Arity:       fixedArity(0),
 				NumCaptures: 0,
 				NumLocals:   0,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0}},
 				ExceptionHandlers: nil,
@@ -729,10 +730,10 @@ c(2, 3)
 				Arity:       fixedArity(1),
 				NumCaptures: 0,
 				NumLocals:   1,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadLocal, 0, 0,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 3},
@@ -743,7 +744,7 @@ c(2, 3)
 				Arity:       fixedArity(2),
 				NumCaptures: 0,
 				NumLocals:   3,
-				OpCodes: []byte{
+				Bytecodes: []byte{
 					bc.LoadNull,
 					bc.LoadConst, 0, 2,
 					bc.StoreLocal, 0, 2,
@@ -752,7 +753,7 @@ c(2, 3)
 					bc.Mul,
 					bc.LoadLocal, 0, 2,
 					bc.Mul,
-					bc.ReturnStmt},
+					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 4},
@@ -781,11 +782,11 @@ const accumGen = fn(n) {
 			Arity:       fixedArity(0),
 			NumCaptures: 0,
 			NumLocals:   1,
-			OpCodes: []byte{
+			Bytecodes: []byte{
 				bc.LoadNull,
 				bc.NewFunc, 0, 1,
 				bc.StoreLocal, 0, 0,
-				bc.ReturnStmt},
+				bc.Return},
 			LineNumberTable: []bc.LineNumberEntry{
 				{Index: 0, LineNum: 0},
 				{Index: 1, LineNum: 2},
@@ -795,12 +796,12 @@ const accumGen = fn(n) {
 			Arity:       fixedArity(1),
 			NumCaptures: 0,
 			NumLocals:   1,
-			OpCodes: []byte{
+			Bytecodes: []byte{
 				bc.LoadNull,
 				bc.NewFunc, 0, 2,
 				bc.FuncLocal, 0, 0,
-				bc.ReturnStmt,
-				bc.ReturnStmt},
+				bc.Return,
+				bc.Return},
 			LineNumberTable: []bc.LineNumberEntry{
 				{Index: 0, LineNum: 0},
 				{Index: 1, LineNum: 3},
@@ -810,7 +811,7 @@ const accumGen = fn(n) {
 			Arity:       fixedArity(1),
 			NumCaptures: 1,
 			NumLocals:   1,
-			OpCodes: []byte{
+			Bytecodes: []byte{
 				bc.LoadNull,
 				bc.LoadCapture, 0, 0,
 				bc.LoadLocal, 0, 0,
@@ -818,8 +819,8 @@ const accumGen = fn(n) {
 				bc.Dup,
 				bc.StoreCapture, 0, 0,
 				bc.LoadCapture, 0, 0,
-				bc.ReturnStmt,
-				bc.ReturnStmt},
+				bc.Return,
+				bc.Return},
 			LineNumberTable: []bc.LineNumberEntry{
 				{Index: 0, LineNum: 0},
 				{Index: 1, LineNum: 4},
@@ -852,14 +853,14 @@ const accumGen = fn(n) {
 			Arity:       fixedArity(0),
 			NumCaptures: 0,
 			NumLocals:   2,
-			OpCodes: []byte{
+			Bytecodes: []byte{
 				bc.LoadNull,
 				bc.LoadConst, 0, 0,
 				bc.StoreLocal, 0, 0,
 				bc.NewFunc, 0, 1,
 				bc.FuncLocal, 0, 0,
 				bc.StoreLocal, 0, 1,
-				bc.ReturnStmt},
+				bc.Return},
 			LineNumberTable: []bc.LineNumberEntry{
 				{Index: 0, LineNum: 0},
 				{Index: 1, LineNum: 2},
@@ -870,13 +871,13 @@ const accumGen = fn(n) {
 			Arity:       fixedArity(1),
 			NumCaptures: 1,
 			NumLocals:   1,
-			OpCodes: []byte{
+			Bytecodes: []byte{
 				bc.LoadNull,
 				bc.NewFunc, 0, 2,
 				bc.FuncLocal, 0, 0,
 				bc.FuncCapture, 0, 0,
-				bc.ReturnStmt,
-				bc.ReturnStmt},
+				bc.Return,
+				bc.Return},
 			LineNumberTable: []bc.LineNumberEntry{
 				{Index: 0, LineNum: 0},
 				{Index: 1, LineNum: 4},
@@ -886,7 +887,7 @@ const accumGen = fn(n) {
 			Arity:       fixedArity(1),
 			NumCaptures: 2,
 			NumLocals:   1,
-			OpCodes: []byte{
+			Bytecodes: []byte{
 				bc.LoadNull,
 				bc.LoadCapture, 0, 0,
 				bc.LoadLocal, 0, 0,
@@ -896,8 +897,8 @@ const accumGen = fn(n) {
 				bc.Dup,
 				bc.StoreCapture, 0, 0,
 				bc.LoadCapture, 0, 0,
-				bc.ReturnStmt,
-				bc.ReturnStmt},
+				bc.Return,
+				bc.Return},
 			LineNumberTable: []bc.LineNumberEntry{
 				{Index: 0, LineNum: 0},
 				{Index: 1, LineNum: 5},
@@ -930,7 +931,7 @@ let d = b--
 			Arity:       fixedArity(0),
 			NumCaptures: 0,
 			NumLocals:   4,
-			OpCodes: []byte{
+			Bytecodes: []byte{
 				bc.LoadNull,
 				bc.LoadConst, 0, 0,
 				bc.StoreLocal, 0, 0,
@@ -948,7 +949,7 @@ let d = b--
 				bc.Plus,
 				bc.StoreLocal, 0, 1,
 				bc.StoreLocal, 0, 3,
-				bc.ReturnStmt},
+				bc.Return},
 			LineNumberTable: []bc.LineNumberEntry{
 				{Index: 0, LineNum: 0},
 				{Index: 1, LineNum: 2},
@@ -959,34 +960,6 @@ let d = b--
 			ExceptionHandlers: nil,
 		}},
 	})
-}
-
-func TestTry(t *testing.T) {
-
-	code := `
-let a = 1
-try {
-    a++
-}
-finally {
-    a++
-}
-`
-	mod := testCompile(t, code)
-
-	//fmt.Println("----------------------------")
-	//fmt.Println(code)
-	//fmt.Println("----------------------------")
-	//fmt.Println(mod)
-
-	g.Tassert(t, mod.Pool.Templates[0].ExceptionHandlers[0] ==
-		bc.ExceptionHandler{
-			Begin:   5,
-			End:     14,
-			Catch:   -1,
-			Finally: 14,
-		})
-
 }
 
 func TestImport(t *testing.T) {
@@ -1011,4 +984,49 @@ func TestImport(t *testing.T) {
 	g.Tassert(t, mods[1].Name == "a")
 	g.Tassert(t, mods[2].Name == "b")
 	g.Tassert(t, mods[3].Name == "c")
+}
+
+func TestTry(t *testing.T) {
+
+	code := `
+let a = 1
+try {
+    a++
+}
+finally {
+    a++
+}
+`
+	mod := testCompile(t, code)
+
+	fmt.Println("----------------------------")
+	fmt.Println(code)
+	fmt.Println("----------------------------")
+	fmt.Println(mod.Pool)
+
+	g.Tassert(t, mod.Pool.Templates[0].ExceptionHandlers[0] ==
+		bc.ExceptionHandler{
+			Begin:   5,
+			End:     14,
+			Catch:   -1,
+			Finally: 14,
+		})
+
+}
+
+func TestInvokeField(t *testing.T) {
+
+	code := `
+let s = 'abc'
+
+let c = s.contains
+let x = c('b')
+let y = s.contains('z')
+`
+	mod := testCompile(t, code)
+
+	fmt.Println("----------------------------")
+	fmt.Println(code)
+	fmt.Println("----------------------------")
+	fmt.Println(mod.Pool)
 }
