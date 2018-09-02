@@ -6,8 +6,6 @@ package bytecode
 
 import (
 	"fmt"
-
-	g "github.com/mjarmy/golem-lang/core"
 )
 
 // Define all the various bytecodes
@@ -89,7 +87,7 @@ const (
 	IterNext
 	IterGet
 
-	CheckCast
+	//CheckCast
 	CheckTuple
 
 	Pop
@@ -204,6 +202,9 @@ func BytecodeString(bc byte) string {
 
 	case NewStruct:
 		return "NewStruct"
+	case ReplaceField:
+		return "ReplaceField"
+
 	case NewDict:
 		return "NewDict"
 	case NewList:
@@ -217,8 +218,6 @@ func BytecodeString(bc byte) string {
 		return "GetField"
 	case InvokeField:
 		return "InvokeField"
-	case ReplaceField:
-		return "ReplaceField"
 	case SetField:
 		return "SetField"
 	case IncField:
@@ -245,8 +244,8 @@ func BytecodeString(bc byte) string {
 	case IterGet:
 		return "IterGet"
 
-	case CheckCast:
-		return "CheckCast"
+	//case CheckCast:
+	//	return "CheckCast"
 	case CheckTuple:
 		return "CheckTuple"
 
@@ -288,7 +287,7 @@ func BytecodeSize(bc byte) int {
 		Jump, JumpTrue, JumpFalse, Break, Continue,
 		NewFunc, FuncCapture, FuncLocal, Invoke, Go,
 		NewStruct, GetField, ReplaceField, SetField, IncField,
-		NewDict, NewList, NewSet, NewTuple, CheckCast, CheckTuple:
+		NewDict, NewList, NewSet, NewTuple /*CheckCast,*/, CheckTuple:
 
 		return 3
 
@@ -304,7 +303,9 @@ func BytecodeSize(bc byte) int {
 func EncodeParam(p int) (byte, byte) {
 
 	// TODO implicit wide indexing
-	g.Assert(p < (2 << 16))
+	if p >= (2 << 16) {
+		panic("Internal Compiler Error")
+	}
 
 	return byte((p >> 8) & 0xFF), byte(p & 0xFF)
 }

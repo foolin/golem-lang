@@ -189,93 +189,99 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = append(f.stack, g.NewList(vals))
 		f.ip += 3
 
-		//	case bc.NewSet:
-		//
-		//		size := bc.DecodeParam(btc, f.ip)
-		//		vals := make([]g.Value, size)
-		//		copy(vals, f.stack[n-size+1:])
-		//		f.stack = f.stack[:n-size+1]
-		//
-		//		set, err := g.NewSet(itp, vals)
-		//		if err != nil {
-		//			return nil, err
-		//		}
-		//
-		//		f.stack = append(f.stack, set)
-		//		f.ip += 3
-		//
-		//	case bc.NewTuple:
-		//
-		//		size := bc.DecodeParam(btc, f.ip)
-		//		vals := make([]g.Value, size)
-		//		copy(vals, f.stack[n-size+1:])
-		//
-		//		f.stack = f.stack[:n-size+1]
-		//		f.stack = append(f.stack, g.NewTuple(vals))
-		//		f.ip += 3
-		//
-		//	case bc.CheckTuple:
-		//
-		//		// make sure the top of the stack is really a tuple
-		//		tp, ok := f.stack[n].(g.Tuple)
-		//		if !ok {
-		//			return nil, g.TypeMismatchError("Expected Tuple")
-		//		}
-		//
-		//		// and make sure its of the expected length
-		//		expectedLen := bc.DecodeParam(btc, f.ip)
-		//		tpLen := tp.Len(itp)
-		//		if expectedLen != int(tpLen.IntVal()) {
-		//			return nil, g.InvalidArgumentError(
-		//				fmt.Sprintf("Expected Tuple of length %d", expectedLen))
-		//		}
-		//
-		//		// do not alter stack
-		//		f.ip += 3
+	//	case bc.NewSet:
+	//
+	//		size := bc.DecodeParam(btc, f.ip)
+	//		vals := make([]g.Value, size)
+	//		copy(vals, f.stack[n-size+1:])
+	//		f.stack = f.stack[:n-size+1]
+	//
+	//		set, err := g.NewSet(itp, vals)
+	//		if err != nil {
+	//			return nil, err
+	//		}
+	//
+	//		f.stack = append(f.stack, set)
+	//		f.ip += 3
+	//
+	//	case bc.NewTuple:
+	//
+	//		size := bc.DecodeParam(btc, f.ip)
+	//		vals := make([]g.Value, size)
+	//		copy(vals, f.stack[n-size+1:])
+	//
+	//		f.stack = f.stack[:n-size+1]
+	//		f.stack = append(f.stack, g.NewTuple(vals))
+	//		f.ip += 3
+	//
+	//	case bc.CheckTuple:
+	//
+	//		// make sure the top of the stack is really a tuple
+	//		tp, ok := f.stack[n].(g.Tuple)
+	//		if !ok {
+	//			return nil, g.TypeMismatchError("Expected Tuple")
+	//		}
+	//
+	//		// and make sure its of the expected length
+	//		expectedLen := bc.DecodeParam(btc, f.ip)
+	//		tpLen := tp.Len(itp)
+	//		if expectedLen != int(tpLen.IntVal()) {
+	//			return nil, g.InvalidArgumentError(
+	//				fmt.Sprintf("Expected Tuple of length %d", expectedLen))
+	//		}
+	//
+	//		// do not alter stack
+	//		f.ip += 3
 
-	case bc.CheckCast:
+	//case bc.CheckCast:
 
-		// make sure the top of the stack is of the given type
-		vtype := g.Type(bc.DecodeParam(btc, f.ip))
-		v := f.stack[n]
-		if v.Type() != vtype {
-			return nil, g.TypeMismatchError(fmt.Sprintf("Expected %s", vtype.String()))
+	//	// make sure the top of the stack is of the given type
+	//	vtype := g.Type(bc.DecodeParam(btc, f.ip))
+	//	v := f.stack[n]
+	//	if v.Type() != vtype {
+	//		return nil, g.TypeMismatchError(fmt.Sprintf("Expected %s", vtype.String()))
+	//	}
+
+	//	// do not alter stack
+	//	f.ip += 3
+
+	//	case bc.NewDict:
+	//
+	//		size := bc.DecodeParam(btc, f.ip)
+	//		entries := make([]*g.HEntry, 0, size)
+	//
+	//		numVals := size * 2
+	//		for j := n - numVals + 1; j <= n; j += 2 {
+	//			entries = append(entries, &g.HEntry{Key: f.stack[j], Value: f.stack[j+1]})
+	//		}
+	//
+	//		f.stack = f.stack[:n-numVals+1]
+	//
+	//		dict, err := g.NewDict(itp, entries)
+	//		if err != nil {
+	//			return nil, err
+	//		}
+	//
+	//		f.stack = append(f.stack, dict)
+	//		f.ip += 3
+	//
+
+	case bc.NewStruct:
+
+		p := bc.DecodeParam(btc, f.ip)
+		def := pool.StructDefs[p]
+		fields := make(map[string]g.Field)
+		for _, name := range def {
+			fields[name] = g.NewField(g.Null)
 		}
 
-		// do not alter stack
+		stc, err := g.NewFieldStruct(fields, false)
+		if err != nil {
+			return nil, err
+		}
+
+		f.stack = append(f.stack, stc)
 		f.ip += 3
-
-		//	case bc.NewDict:
-		//
-		//		size := bc.DecodeParam(btc, f.ip)
-		//		entries := make([]*g.HEntry, 0, size)
-		//
-		//		numVals := size * 2
-		//		for j := n - numVals + 1; j <= n; j += 2 {
-		//			entries = append(entries, &g.HEntry{Key: f.stack[j], Value: f.stack[j+1]})
-		//		}
-		//
-		//		f.stack = f.stack[:n-numVals+1]
-		//
-		//		dict, err := g.NewDict(itp, entries)
-		//		if err != nil {
-		//			return nil, err
-		//		}
-		//
-		//		f.stack = append(f.stack, dict)
-		//		f.ip += 3
-		//
-
-		//	case bc.DefineStruct:
-		//
-		//		defs := pool.StructDefs[bc.DecodeParam(btc, f.ip)]
-		//		stc, err := g.DefineStruct(defs)
-		//		if err != nil {
-		//			return nil, err
-		//		}
-		//
-		//		f.stack = append(f.stack, stc)
-		//		f.ip += 3
 
 	case bc.GetField:
 
@@ -313,25 +319,6 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-q] = result
 		f.stack = f.stack[:n-q+1]
 		f.ip += 5
-
-		//-----------------------------------------
-		//34: InvokeField  0 1 (1), 0 1 (1)
-		//frame 0
-		//    locals:
-		//        0: abc
-		//        1: nativeFunc<0xc420086760>
-		//        2: true
-		//        3: null
-		//    stack:
-		//        0: null
-		//        1: abc
-		//        2: z
-		//    ip: 34
-		//InvokeField aaa 1 1
-		//InvokeField bbb contains
-		//InvokeField ccc [z] 2 1 2
-		//Str.contains: z, z, true
-		//InvokeField ddd %!s(core._bool=true)
 
 		//	case bc.InitField, bc.SetField:
 		//

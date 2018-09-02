@@ -253,8 +253,8 @@ func (c *compiler) Visit(node ast.Node) {
 	case *ast.StructExpr:
 		c.visitStructExpr(t)
 
-	case *ast.PropNode:
-		c.visitPropNode(t)
+		//	case *ast.PropNode:
+		//		c.visitPropNode(t)
 
 	case *ast.ThisExpr:
 		c.visitThisExpr(t)
@@ -999,76 +999,80 @@ func (c *compiler) visitExprStmt(es *ast.ExprStmt) {
 }
 
 func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
-	panic("TODO")
 
-	//	// create def and entries
-	//	def := []*g.FieldDef{}
-	//	for i, k := range stc.Keys {
-	//		v := stc.Values[i]
-	//
-	//		if p, ok := v.(*ast.PropNode); ok {
-	//			def = append(def, &g.FieldDef{
-	//				Name:       k.Text,
-	//				IsReadonly: p.Setter == nil,
-	//				IsProperty: true,
-	//			})
-	//		} else {
-	//			def = append(def, &g.FieldDef{
-	//				Name:       k.Text,
-	//				IsReadonly: false,
-	//				IsProperty: false,
-	//			})
-	//		}
-	//	}
-	//	defIdx := c.poolBuilder.structDefIndex(def)
-	//
-	//	// create new struct
-	//	c.pushBytecode(stc.Begin(), bc.DefineStruct, defIdx)
-	//
-	//	// if the struct is referenced by a 'this', then store local
-	//	if this, ok := stc.Scope.GetVariable("this"); ok {
-	//		c.push(stc.Begin(), bc.Dup)
-	//		c.pushBytecode(stc.Begin(), bc.StoreLocal, this.Index())
-	//	}
-	//
-	//	// init each value
-	//	for i, k := range stc.Keys {
-	//		v := stc.Values[i]
-	//		c.push(k.Position, bc.Dup)
-	//		c.Visit(v)
-	//		c.pushBytecode(
-	//			v.Begin(),
-	//			bc.InitField,
-	//			c.poolBuilder.constIndex(g.NewStr(k.Text)))
-	//		c.push(k.Position, bc.Pop)
-	//	}
+	// add struct def to pool
+	def := make([]string, len(stc.Keys))
+	for i, k := range stc.Keys {
+		def[i] = k.Text
+	}
+	defIdx := c.poolBuilder.structDefIndex(def)
+
+	// create new struct
+	c.pushBytecode(stc.Begin(), bc.NewStruct, defIdx)
+
+	// if the struct is referenced by a 'this', then store local
+	if this, ok := stc.Scope.GetVariable("this"); ok {
+		c.push(stc.Begin(), bc.Dup)
+		c.pushBytecode(stc.Begin(), bc.StoreLocal, this.Index())
+	}
+
+	//if p, ok := v.(*ast.PropNode); ok {
+	//	def = append(def, &g.FieldDef{
+	//		Name:       k.Text,
+	//		IsReadonly: p.Setter == nil,
+	//		IsProperty: true,
+	//	})
+	//} else {
+	//	def = append(def, &g.FieldDef{
+	//		Name:       k.Text,
+	//		IsReadonly: false,
+	//		IsProperty: false,
+	//	})
+	//}
+
+	// init each value
+	for i, k := range stc.Keys {
+
+		c.push(k.Position, bc.Dup)
+
+		v := stc.Values[i]
+		if _, ok := v.(*ast.PropNode); ok {
+			panic("TODO")
+		}
+
+		c.Visit(v)
+		c.pushBytecode(
+			v.Begin(),
+			bc.ReplaceField,
+			c.poolBuilder.constIndex(g.NewStr(k.Text)))
+
+		c.push(k.Position, bc.Pop)
+	}
 }
 
-func (c *compiler) visitPropNode(pn *ast.PropNode) {
-
-	panic("TODO")
-
-	//	c.Visit(pn.Getter)
-	//
-	//	if pn.Setter == nil {
-	//		c.push(pn.Begin(), bc.LoadNull)
-	//	} else {
-	//		c.Visit(pn.Setter)
-	//	}
-	//
-	//	c.pushBytecode(pn.Begin(), bc.NewTuple, 2)
-}
+//func (c *compiler) visitPropNode(pn *ast.PropNode) {
+//
+//	panic("TODO")
+//
+//	//	c.Visit(pn.Getter)
+//	//
+//	//	if pn.Setter == nil {
+//	//		c.push(pn.Begin(), bc.LoadNull)
+//	//	} else {
+//	//		c.Visit(pn.Setter)
+//	//	}
+//	//
+//	//	c.pushBytecode(pn.Begin(), bc.NewTuple, 2)
+//}
 
 func (c *compiler) visitThisExpr(this *ast.ThisExpr) {
 
-	panic("TODO")
-
-	//	v := this.Variable
-	//	if v.IsCapture() {
-	//		c.pushBytecode(this.Begin(), bc.LoadCapture, v.Index())
-	//	} else {
-	//		c.pushBytecode(this.Begin(), bc.LoadLocal, v.Index())
-	//	}
+	v := this.Variable
+	if v.IsCapture() {
+		c.pushBytecode(this.Begin(), bc.LoadCapture, v.Index())
+	} else {
+		c.pushBytecode(this.Begin(), bc.LoadLocal, v.Index())
+	}
 }
 
 func (c *compiler) visitFieldExpr(fe *ast.FieldExpr) {

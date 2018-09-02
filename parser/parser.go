@@ -433,7 +433,7 @@ func (p *Parser) tupleIdents() []*ast.IdentExpr {
 	}
 
 	if len(idents) < 2 {
-		panic(&parserError{path: p.scn.Source.Path, kind: InvalidFor, token: lparen})
+		panic(newParserError(p.scn.Source.Path, InvalidFor, lparen))
 	}
 
 	return idents
@@ -490,7 +490,7 @@ func (p *Parser) caseStmt() *ast.CaseNode {
 			colon := p.expect(ast.Colon)
 			body := p.statementsAny(ast.Case, ast.Default, ast.Rbrace)
 			if len(body) == 0 {
-				panic(&parserError{path: p.scn.Source.Path, kind: InvalidSwitch, token: colon})
+				panic(newParserError(p.scn.Source.Path, InvalidSwitch, colon))
 			}
 			return &ast.CaseNode{
 				Token:   token,
@@ -511,7 +511,7 @@ func (p *Parser) defaultStmt() *ast.DefaultNode {
 
 	body := p.statements(ast.Rbrace)
 	if len(body) == 0 {
-		panic(&parserError{path: p.scn.Source.Path, kind: InvalidSwitch, token: colon})
+		panic(newParserError(p.scn.Source.Path, InvalidSwitch, colon))
 	}
 
 	return &ast.DefaultNode{
@@ -585,7 +585,7 @@ func (p *Parser) tryStmt() *ast.TryStmt {
 
 	// make sure we got at least one of try or catch
 	if catchToken == nil && finallyToken == nil {
-		panic(&parserError{path: p.scn.Source.Path, kind: InvalidTry, token: tryToken})
+		panic(newParserError(p.scn.Source.Path, InvalidTry, tryToken))
 	}
 
 	// done
@@ -797,7 +797,7 @@ func (p *Parser) postfixExpr() ast.Expression {
 				Op:       tok,
 			}
 		} else {
-			panic(&parserError{path: p.scn.Source.Path, kind: InvalidPostfix, token: p.cur.token})
+			panic(newParserError(p.scn.Source.Path, InvalidPostfix, p.cur.token))
 		}
 	}
 
@@ -1107,6 +1107,7 @@ func (p *Parser) structExpr() ast.Expression {
 func (p *Parser) structBody(token *ast.Token) ast.Expression {
 
 	// key-value pairs
+	names := make(map[string]bool)
 	keys := []*ast.Token{}
 	values := []ast.Node{}
 	var rbrace *ast.Token
@@ -1115,7 +1116,14 @@ func (p *Parser) structBody(token *ast.Token) ast.Expression {
 	switch p.cur.token.Kind {
 
 	case ast.Ident:
+
+		name := p.cur.token.Text
+		if _, ok := names[name]; ok {
+			panic(newParserError(p.scn.Source.Path, DuplicateKey, p.cur.token))
+		}
+		names[name] = true
 		keys = append(keys, p.cur.token)
+
 		p.consume()
 		p.expect(ast.Colon)
 
@@ -1131,7 +1139,14 @@ func (p *Parser) structBody(token *ast.Token) ast.Expression {
 
 			case ast.Comma:
 				p.consume()
+
+				name := p.cur.token.Text
+				if _, ok := names[name]; ok {
+					panic(newParserError(p.scn.Source.Path, DuplicateKey, p.cur.token))
+				}
+				names[name] = true
 				keys = append(keys, p.cur.token)
+
 				p.consume()
 				p.expect(ast.Colon)
 
@@ -1175,14 +1190,14 @@ func (p *Parser) property() *ast.PropNode {
 
 	getter := p.propertyFunc()
 	if len(getter.RequiredParams) != 0 {
-		panic(&parserError{path: p.scn.Source.Path, kind: InvalidPropertyGetter, token: getter.Token})
+		panic(newParserError(p.scn.Source.Path, InvalidPropertyGetter, getter.Token))
 	}
 
 	var setter *ast.FnExpr
 	if p.accept(ast.Comma) {
 		setter = p.propertyFunc()
 		if len(setter.RequiredParams) != 1 {
-			panic(&parserError{path: p.scn.Source.Path, kind: InvalidPropertySetter, token: setter.Token})
+			panic(newParserError(p.scn.Source.Path, InvalidPropertySetter, setter.Token))
 		}
 	}
 
@@ -1470,10 +1485,10 @@ func (p *Parser) advance() tokenInfo {
 		switch token.Kind {
 
 		case ast.UnexpectedChar:
-			panic(&parserError{path: p.scn.Source.Path, kind: UnexpectedChar, token: token})
+			panic(newParserError(p.scn.Source.Path, UnexpectedChar, token))
 
 		case ast.UnexpectedEOF:
-			panic(&parserError{path: p.scn.Source.Path, kind: UnexpectedEOF, token: token})
+			panic(newParserError(p.scn.Source.Path, UnexpectedEOF, token))
 
 		default:
 			panic("unreachable")
@@ -1488,13 +1503,13 @@ func (p *Parser) advance() tokenInfo {
 func (p *Parser) unexpected() error {
 	switch p.cur.token.Kind {
 	case ast.EOF:
-		return &parserError{path: p.scn.Source.Path, kind: UnexpectedEOF, token: p.cur.token}
+		return newParserError(p.scn.Source.Path, UnexpectedEOF, p.cur.token)
 
 	case ast.Reserved:
-		return &parserError{path: p.scn.Source.Path, kind: UnexpectedReservedWork, token: p.cur.token}
+		return newParserError(p.scn.Source.Path, UnexpectedReservedWork, p.cur.token)
 
 	default:
-		return &parserError{path: p.scn.Source.Path, kind: UnexpectedToken, token: p.cur.token}
+		return newParserError(p.scn.Source.Path, UnexpectedToken, p.cur.token)
 	}
 }
 
@@ -1618,69 +1633,5 @@ func fromAssignOp(t *ast.Token) *ast.Token {
 
 	default:
 		panic("invalid op")
-	}
-}
-
-//--------------------------------------------------------------
-// parserError
-
-type parserErrorKind int
-
-// Parser Errors
-const (
-	UnexpectedChar parserErrorKind = iota
-	UnexpectedToken
-	UnexpectedReservedWork
-	UnexpectedEOF
-	InvalidPostfix
-	InvalidFor
-	InvalidSwitch
-	InvalidTry
-	InvalidPropertyGetter
-	InvalidPropertySetter
-)
-
-type parserError struct {
-	path  string
-	kind  parserErrorKind
-	token *ast.Token
-}
-
-func (e *parserError) Error() string {
-
-	switch e.kind {
-
-	case UnexpectedChar:
-		return fmt.Sprintf("Unexpected Character '%v' at %s:%v", e.token.Text, e.path, e.token.Position)
-
-	case UnexpectedToken:
-		return fmt.Sprintf("Unexpected Token '%v' at %s:%v", e.token.Text, e.path, e.token.Position)
-
-	case UnexpectedReservedWork:
-		return fmt.Sprintf("Unexpected Reserved Word '%v' at %s:%v", e.token.Text, e.path, e.token.Position)
-
-	case UnexpectedEOF:
-		return fmt.Sprintf("Unexpected EOF at %s:%v", e.path, e.token.Position)
-
-	case InvalidPostfix:
-		return fmt.Sprintf("Invalid Postfix Expression at %s:%v", e.path, e.token.Position)
-
-	case InvalidFor:
-		return fmt.Sprintf("Invalid ForStmt Expression at %s:%v", e.path, e.token.Position)
-
-	case InvalidSwitch:
-		return fmt.Sprintf("Invalid SwitchStmt Expression at %s:%v", e.path, e.token.Position)
-
-	case InvalidTry:
-		return fmt.Sprintf("Invalid Try Expression at %s:%v", e.path, e.token.Position)
-
-	case InvalidPropertyGetter:
-		return fmt.Sprintf("Invalid Property Getter at %s:%v", e.path, e.token.Position)
-
-	case InvalidPropertySetter:
-		return fmt.Sprintf("Invalid Property Setter at %s:%v", e.path, e.token.Position)
-
-	default:
-		panic("unreachable")
 	}
 }

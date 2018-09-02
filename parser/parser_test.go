@@ -489,6 +489,12 @@ func TestStruct(t *testing.T) {
 	p = newParser("struct{a:1,b:2}")
 	okExpr(t, p, "struct { a: 1, b: 2 }")
 
+	p = newParser("struct{ a:1, a:2 }")
+	fail(t, p, "Duplicate Key at foo.glm:1:14")
+
+	p = newParser("struct{ a:1, b:2, c:3, a:1 }")
+	fail(t, p, "Duplicate Key at foo.glm:1:24")
+
 	p = newParser("struct{a:1,b:2,c:3}")
 	okExpr(t, p, "struct { a: 1, b: 2, c: 3 }")
 
@@ -900,9 +906,7 @@ let a = struct {
     x: 8,
     y: 5,
     plus:  fn() { return this.x + this.y; },
-    minus: || => this.x - this.y, 
-    plus:  fn() { return this.x + this.y 
-	}
+    minus: || => this.x - this.y 
 }
 let b = a.plus()
 let c = a.minus()
