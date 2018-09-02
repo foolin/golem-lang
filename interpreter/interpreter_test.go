@@ -10,7 +10,7 @@ import (
 
 	"github.com/mjarmy/golem-lang/compiler"
 	g "github.com/mjarmy/golem-lang/core"
-	"github.com/mjarmy/golem-lang/core/bytecode"
+	bc "github.com/mjarmy/golem-lang/core/bytecode"
 	"github.com/mjarmy/golem-lang/scanner"
 )
 
@@ -21,7 +21,7 @@ import (
 var builtins []*g.BuiltinEntry = nil
 var builtinMgr = g.NewBuiltinManager(builtins)
 
-func testCompile(t *testing.T, code string) *bytecode.Module {
+func testCompile(t *testing.T, code string) *bc.Module {
 
 	source := &scanner.Source{Name: "foo", Path: "foo.glm", Code: code}
 	mods, errs := compiler.CompileSourceFully(builtinMgr, source, nil)
@@ -40,7 +40,7 @@ fn c() {}
 `
 	mod := testCompile(t, code)
 
-	intp := NewInterpreter(builtinMgr, []*bytecode.Module{mod})
+	intp := NewInterpreter(builtinMgr, []*bc.Module{mod})
 
 	result, errStruct := intp.InitModules()
 	g.Tassert(t, errStruct == nil && len(result) == 1)

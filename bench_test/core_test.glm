@@ -873,6 +873,18 @@ fn testIterator() {
 //    fail(|| => itr.get(), 'NoSuchElement')
 }
 
+fn testInvokeField() {
+    let s = 'abc'
+    let c = s.contains
+    let x = c('b')
+    let y = s.contains('z')
+
+    let ls = [1]
+    let p = ls.iter().next()
+
+    assert([true, false, true] == [x, y, p])
+}
+
 fn main(args) {
 
     testExpressions()
@@ -898,6 +910,7 @@ fn main(args) {
 //    testStruct()
 
 //    testIterator()
+    testInvokeField()
 
 //
 //    assert(42 == zork.quux)

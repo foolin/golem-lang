@@ -8,16 +8,16 @@ import (
 	"fmt"
 
 	g "github.com/mjarmy/golem-lang/core"
-	"github.com/mjarmy/golem-lang/core/bytecode"
+	bc "github.com/mjarmy/golem-lang/core/bytecode"
 )
 
 //---------------------------------------------------------------
 // The Golem Interpreter
 
-// Interpreter interprets Golem bytecode.
+// Interpreter interprets Golem bc.
 type Interpreter struct {
-	modules    []*bytecode.Module
-	modMap     map[string]*bytecode.Module
+	modules    []*bc.Module
+	modMap     map[string]*bc.Module
 	builtInMgr g.BuiltinManager
 	frames     []*frame
 }
@@ -25,9 +25,9 @@ type Interpreter struct {
 // NewInterpreter creates a new Interpreter
 func NewInterpreter(
 	builtInMgr g.BuiltinManager,
-	modules []*bytecode.Module) *Interpreter {
+	modules []*bc.Module) *Interpreter {
 
-	modMap := make(map[string]*bytecode.Module)
+	modMap := make(map[string]*bc.Module)
 	for _, m := range modules {
 		modMap[m.Name] = m
 	}
@@ -42,11 +42,11 @@ func NewInterpreter(
 
 // InitModules initializes each of the Modules.  Note that the modules
 // are initialized in reverse order.
-func (i *Interpreter) InitModules() ([]g.Value, g.ErrorStruct) {
+func (itp *Interpreter) InitModules() ([]g.Value, g.ErrorStruct) {
 
 	result := []g.Value{}
-	for j := len(i.modules) - 1; j >= 0; j-- {
-		mod := i.modules[j]
+	for i := len(itp.modules) - 1; i >= 0; i-- {
+		mod := itp.modules[i]
 
 		// the 'init' function is always the first template in the pool
 		initTpl := mod.Pool.Templates[0]
@@ -55,15 +55,15 @@ func (i *Interpreter) InitModules() ([]g.Value, g.ErrorStruct) {
 		mod.Refs = newLocals(initTpl.NumLocals, nil)
 
 		// make init function from template
-		initFn := bytecode.NewBytecodeFunc(initTpl)
+		initFn := bc.NewBytecodeFunc(initTpl)
 
 		// invoke the "init" function
-		val, err := i.eval(initFn, mod.Refs)
+		val, err := itp.eval(initFn, mod.Refs)
 		if err != nil {
 			return nil, err
 		}
 
-		// prepend the value so that the result will be in the same order as i.modules
+		// prepend the value so that the result will be in the same order as itp.modules
 		result = append([]g.Value{val}, result...)
 	}
 	return result, nil
@@ -73,27 +73,27 @@ func (i *Interpreter) InitModules() ([]g.Value, g.ErrorStruct) {
 // Evaluator
 
 // Eval evaluates a Func.
-func (i *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
+func (itp *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
 
 	switch t := fn.(type) {
 
-	case bytecode.BytecodeFunc:
-		val, errStruct := i.EvalBytecode(t, params)
+	case bc.BytecodeFunc:
+		val, errStruct := itp.EvalBytecode(t, params)
 		if errStruct != nil {
 			return nil, errStruct.Error()
 		}
 		return val, nil
 
 	case g.NativeFunc:
-		return fn.Invoke(i, params)
+		return fn.Invoke(itp, params)
 
 	default:
 		panic("unreachable")
 	}
 }
 
-func (i *Interpreter) EvalBytecode(fn bytecode.BytecodeFunc, params []g.Value) (g.Value, g.ErrorStruct) {
-	val, err := i.eval(fn, newLocals(fn.Template().NumLocals, params))
+func (itp *Interpreter) EvalBytecode(fn bc.BytecodeFunc, params []g.Value) (g.Value, g.ErrorStruct) {
+	val, err := itp.eval(fn, newLocals(fn.Template().NumLocals, params))
 	if err != nil {
 		return nil, err
 	}
@@ -102,18 +102,18 @@ func (i *Interpreter) EvalBytecode(fn bytecode.BytecodeFunc, params []g.Value) (
 
 //-------------------------------------------------------------------------
 
-func (i *Interpreter) eval(
-	fn bytecode.BytecodeFunc,
-	locals []*bytecode.Ref) (result g.Value, errStruct g.ErrorStruct) {
+func (itp *Interpreter) eval(
+	fn bc.BytecodeFunc,
+	locals []*bc.Ref) (result g.Value, errStruct g.ErrorStruct) {
 
-	lastFrame := len(i.frames)
-	i.frames = append(i.frames, &frame{fn, locals, []g.Value{}, 0})
+	lastFrame := len(itp.frames)
+	itp.frames = append(itp.frames, &frame{fn, locals, []g.Value{}, 0})
 
 	var err g.Error
 	for result == nil {
-		result, err = i.advance(lastFrame)
+		result, err = itp.advance(lastFrame)
 		if err != nil {
-			result, errStruct = i.walkStack(g.NewErrorStruct(err, i.stackTrace()))
+			result, errStruct = itp.walkStack(g.NewErrorStruct(err, itp.stackTrace()))
 			if errStruct != nil {
 				return nil, errStruct
 			}
@@ -123,12 +123,12 @@ func (i *Interpreter) eval(
 	return result, nil
 }
 
-func (i *Interpreter) walkStack(errStruct g.ErrorStruct) (g.Value, g.ErrorStruct) {
+func (itp *Interpreter) walkStack(errStruct g.ErrorStruct) (g.Value, g.ErrorStruct) {
 
 	// unwind the frames
-	for len(i.frames) > 0 {
-		frameIndex := len(i.frames) - 1
-		f := i.frames[frameIndex]
+	for len(itp.frames) > 0 {
+		frameIndex := len(itp.frames) - 1
+		f := itp.frames[frameIndex]
 		instPtr := f.ip
 
 		// visit exception handlers
@@ -141,19 +141,19 @@ func (i *Interpreter) walkStack(errStruct g.ErrorStruct) (g.Value, g.ErrorStruct
 				if eh.Catch != -1 {
 					f.ip = eh.Catch
 					f.stack = append(f.stack, errStruct)
-					cres, cerr := i.runTryClause(f, frameIndex)
+					cres, cerr := itp.runTryClause(f, frameIndex)
 					if cerr != nil {
 
 						// save the error
-						errStruct = g.NewErrorStruct(cerr, i.stackTrace())
+						errStruct = g.NewErrorStruct(cerr, itp.stackTrace())
 
 						// run finally clause
 						if eh.Finally != -1 {
 							f.ip = eh.Finally
-							fres, ferr := i.runTryClause(f, frameIndex)
+							fres, ferr := itp.runTryClause(f, frameIndex)
 							if ferr != nil {
 								// save the error
-								errStruct = g.NewErrorStruct(ferr, i.stackTrace())
+								errStruct = g.NewErrorStruct(ferr, itp.stackTrace())
 							} else if fres != nil {
 								// stop unwinding the stack
 								return fres, nil
@@ -165,7 +165,7 @@ func (i *Interpreter) walkStack(errStruct g.ErrorStruct) (g.Value, g.ErrorStruct
 						// run finally clause
 						if eh.Finally != -1 {
 							f.ip = eh.Finally
-							fres, ferr := i.runTryClause(f, frameIndex)
+							fres, ferr := itp.runTryClause(f, frameIndex)
 							if ferr == nil && fres != nil {
 								// stop unwinding the stack
 								return fres, nil
@@ -178,10 +178,10 @@ func (i *Interpreter) walkStack(errStruct g.ErrorStruct) (g.Value, g.ErrorStruct
 				} else {
 					g.Assert(eh.Finally != -1)
 					f.ip = eh.Finally
-					fres, ferr := i.runTryClause(f, frameIndex)
+					fres, ferr := itp.runTryClause(f, frameIndex)
 					if ferr != nil {
 						// save the error
-						errStruct = g.NewErrorStruct(ferr, i.stackTrace())
+						errStruct = g.NewErrorStruct(ferr, itp.stackTrace())
 					} else if fres != nil {
 						// stop unwinding the stack
 						return fres, nil
@@ -191,18 +191,18 @@ func (i *Interpreter) walkStack(errStruct g.ErrorStruct) (g.Value, g.ErrorStruct
 		}
 
 		// pop the frame
-		i.frames = i.frames[:frameIndex]
+		itp.frames = itp.frames[:frameIndex]
 	}
 
 	return nil, errStruct
 }
 
-func (i *Interpreter) runTryClause(f *frame, frameIndex int) (g.Value, g.Error) {
+func (itp *Interpreter) runTryClause(f *frame, frameIndex int) (g.Value, g.Error) {
 
 	btc := f.fn.Template().Bytecodes
-	for btc[f.ip] != bytecode.Done {
+	for btc[f.ip] != bc.Done {
 
-		result, err := i.advance(frameIndex)
+		result, err := itp.advance(frameIndex)
 		if result != nil || err != nil {
 			return result, err
 		}
@@ -212,35 +212,35 @@ func (i *Interpreter) runTryClause(f *frame, frameIndex int) (g.Value, g.Error) 
 	return nil, nil
 }
 
-func (i *Interpreter) stackTrace() []string {
+func (itp *Interpreter) stackTrace() []string {
 
-	n := len(i.frames)
+	n := len(itp.frames)
 	stack := []string{}
 
-	for j := n - 1; j >= 0; j-- {
-		tpl := i.frames[j].fn.Template()
-		lineNum := tpl.LineNumber(i.frames[j].ip)
+	for i := n - 1; i >= 0; i-- {
+		tpl := itp.frames[i].fn.Template()
+		lineNum := tpl.LineNumber(itp.frames[i].ip)
 		stack = append(stack, fmt.Sprintf("    at %s:%d", tpl.Module.Path, lineNum))
 	}
 
 	return stack
 }
 
-func newLocals(numLocals int, params []g.Value) []*bytecode.Ref {
+func newLocals(numLocals int, params []g.Value) []*bc.Ref {
 	p := len(params)
-	locals := make([]*bytecode.Ref, numLocals)
-	for j := 0; j < numLocals; j++ {
-		if j < p {
-			locals[j] = &bytecode.Ref{Val: params[j]}
+	locals := make([]*bc.Ref, numLocals)
+	for i := 0; i < numLocals; i++ {
+		if i < p {
+			locals[i] = &bc.Ref{Val: params[i]}
 		} else {
-			locals[j] = &bytecode.Ref{Val: g.Null}
+			locals[i] = &bc.Ref{Val: g.Null}
 		}
 	}
 	return locals
 }
 
-func (i *Interpreter) lookupModule(name string) (*bytecode.Module, g.Error) {
-	if mod, ok := i.modMap[name]; ok {
+func (itp *Interpreter) lookupModule(name string) (*bc.Module, g.Error) {
+	if mod, ok := itp.modMap[name]; ok {
 		return mod, nil
 	}
 	return nil, g.UndefinedModuleError(name)

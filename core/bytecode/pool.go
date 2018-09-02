@@ -43,13 +43,32 @@ func (p *Pool) String() string {
 		buf.WriteString(fmt.Sprintf("        NumCaptures: %d\n", t.NumCaptures))
 		buf.WriteString(fmt.Sprintf("        NumLocals: %d\n", t.NumLocals))
 
-		//buf.WriteString(fmt.Sprintf("        Opcodes:\n"))
-		//i := 0
-		//for i < len(t.Opcodes) {
-		//	buf.WriteString("            ")
-		//	buf.WriteString(FmtOpcode(t.Opcodes, i))
-		//	i += OpcodeSize(t.Opcodes[i])
-		//}
+		buf.WriteString(fmt.Sprintf("        Bytecodes:\n"))
+		btc := t.Bytecodes
+		ip := 0
+		curLine := -1
+		for ip < len(btc) {
+			buf.WriteString("            ")
+			buf.WriteString(FmtBytecode(btc, ip))
+
+			bc := btc[ip]
+			switch bc {
+			case GetField, ImportModule, LoadConst: //  InitField, SetField, IncField
+				prm := DecodeParam(btc, ip)
+				buf.WriteString(fmt.Sprintf(" # '%v'", p.Constants[prm]))
+			case InvokeField:
+				prm, _ := DecodeWideParams(btc, ip)
+				buf.WriteString(fmt.Sprintf(" # '%v'", p.Constants[prm]))
+			}
+
+			if curLine != t.LineNumber(ip) {
+				curLine = t.LineNumber(ip)
+				buf.WriteString(fmt.Sprintf("  // line %d", curLine))
+			}
+
+			buf.WriteString("\n")
+			ip += BytecodeSize(btc[ip])
+		}
 
 		buf.WriteString(fmt.Sprintf("        LineNumberTable:\n"))
 		for j, ln := range t.LineNumberTable {

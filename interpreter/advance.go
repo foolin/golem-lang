@@ -6,32 +6,31 @@ package interpreter
 
 import (
 	"fmt"
-
 	g "github.com/mjarmy/golem-lang/core"
-	"github.com/mjarmy/golem-lang/core/bytecode"
+	bc "github.com/mjarmy/golem-lang/core/bytecode"
 )
 
 // Advance the interpreter forwards by one opcode.
-func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
+func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
-	frameIndex := len(i.frames) - 1
-	f := i.frames[frameIndex]
+	frameIndex := len(itp.frames) - 1
+	f := itp.frames[frameIndex]
 
 	n := len(f.stack) - 1 // top of stack
 	btc := f.fn.Template().Bytecodes
 	pool := f.fn.Template().Module.Pool
 
-	//dumpFrames(i.frames)
+	//dumpFrames(itp.frames)
 
 	switch btc[f.ip] {
 
-	case bytecode.Invoke:
+	case bc.Invoke:
 
-		p := bytecode.DecodeParam(btc, f.ip)
+		p := bc.DecodeParam(btc, f.ip)
 		params := f.stack[n-p+1:]
 
 		switch fn := f.stack[n-p].(type) {
-		case bytecode.BytecodeFunc:
+		case bc.BytecodeFunc:
 
 			// check arity
 			numParams := len(params)
@@ -52,11 +51,11 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 			// push a new frame
 			locals := newLocals(fn.Template().NumLocals, params)
-			i.frames = append(i.frames, &frame{fn, locals, []g.Value{}, 0})
+			itp.frames = append(itp.frames, &frame{fn, locals, []g.Value{}, 0})
 
 		case g.NativeFunc:
 
-			val, err := fn.Invoke(i, params)
+			val, err := fn.Invoke(itp, params)
 			if err != nil {
 				return nil, err
 			}
@@ -69,16 +68,13 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			return nil, g.TypeMismatchError("Expected Func")
 		}
 
-	case bytecode.Return:
+	case bc.Return:
 
-		// TODO once we've written a Control Flow Graph
-		// turn this sanity check on to make sure we are managing
-		// the stack properly
-
+		//// TODO once we've written a Control Flow Graph
+		//// turn this sanity check on to make sure we are managing
+		//// the stack properly
 		//if len(f.stack) < 1 || len(f.stack) > 2 {
-		//	for j, v := range f.stack {
-		//		fmt.Printf("stack %d: %s\n", j, v.ToStr())
-		//	}
+		//	dumpFrame(f)
 		//	panic("invalid stack")
 		//}
 
@@ -86,7 +82,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		result := f.stack[n]
 
 		// pop the old frame
-		i.frames = i.frames[:frameIndex]
+		itp.frames = itp.frames[:frameIndex]
 
 		// If we are on the last frame, then we are done.
 		if frameIndex == lastFrame {
@@ -94,26 +90,26 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		}
 
 		// push the result onto the new top frame
-		f = i.frames[len(i.frames)-1]
+		f = itp.frames[len(itp.frames)-1]
 		f.stack = append(f.stack, result)
 
 		// advance the instruction pointer now that we are done invoking
 		f.ip += 3
 
-	case bytecode.Done:
+	case bc.Done:
 		panic("Done cannot be executed directly")
 
-	case bytecode.Go:
+	case bc.Go:
 
-		p := bytecode.DecodeParam(btc, f.ip)
+		p := bc.DecodeParam(btc, f.ip)
 		params := f.stack[n-p+1:]
 
 		switch fn := f.stack[n-p].(type) {
-		case bytecode.BytecodeFunc:
+		case bc.BytecodeFunc:
 			f.stack = f.stack[:n-p]
 			f.ip += 3
 
-			intp := NewInterpreter(i.builtInMgr, i.modules)
+			intp := NewInterpreter(itp.builtInMgr, itp.modules)
 			go (func() {
 				_, errStruct := intp.EvalBytecode(fn, params)
 				if errStruct != nil {
@@ -127,7 +123,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			f.ip += 3
 
 			go (func() {
-				_, err := fn.Invoke(i, params)
+				_, err := fn.Invoke(itp, params)
 				if err != nil {
 					fmt.Printf("%v\n", err)
 				}
@@ -137,7 +133,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			return nil, g.TypeMismatchError("Expected Func")
 		}
 
-	case bytecode.Throw:
+	case bc.Throw:
 
 		// get str from stack
 		s, ok := f.stack[n].(g.Str)
@@ -148,44 +144,44 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// throw an error
 		return nil, g.NewError(s.String())
 
-	case bytecode.NewFunc:
+	case bc.NewFunc:
 
 		// push a function
-		p := bytecode.DecodeParam(btc, f.ip)
+		p := bc.DecodeParam(btc, f.ip)
 		tpl := pool.Templates[p]
-		nf := bytecode.NewBytecodeFunc(tpl)
+		nf := bc.NewBytecodeFunc(tpl)
 		f.stack = append(f.stack, nf)
 		f.ip += 3
 
-	case bytecode.FuncLocal:
+	case bc.FuncLocal:
 
 		// get function from stack
-		fn, ok := f.stack[n].(bytecode.BytecodeFunc)
+		fn, ok := f.stack[n].(bc.BytecodeFunc)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected BytecodeFunc")
 		}
 
 		// push a local onto the captures of the function
-		p := bytecode.DecodeParam(btc, f.ip)
+		p := bc.DecodeParam(btc, f.ip)
 		fn.PushCapture(f.locals[p])
 		f.ip += 3
 
-	case bytecode.FuncCapture:
+	case bc.FuncCapture:
 
 		// get function from stack
-		fn, ok := f.stack[n].(bytecode.BytecodeFunc)
+		fn, ok := f.stack[n].(bc.BytecodeFunc)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected BytecodeFunc")
 		}
 
 		// push a capture onto the captures of the function
-		p := bytecode.DecodeParam(btc, f.ip)
+		p := bc.DecodeParam(btc, f.ip)
 		fn.PushCapture(f.fn.GetCapture(p))
 		f.ip += 3
 
-	case bytecode.NewList:
+	case bc.NewList:
 
-		size := bytecode.DecodeParam(btc, f.ip)
+		size := bc.DecodeParam(btc, f.ip)
 		vals := make([]g.Value, size)
 		copy(vals, f.stack[n-size+1:])
 
@@ -193,14 +189,14 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = append(f.stack, g.NewList(vals))
 		f.ip += 3
 
-		//	case bytecode.NewSet:
+		//	case bc.NewSet:
 		//
-		//		size := bytecode.DecodeParam(btc, f.ip)
+		//		size := bc.DecodeParam(btc, f.ip)
 		//		vals := make([]g.Value, size)
 		//		copy(vals, f.stack[n-size+1:])
 		//		f.stack = f.stack[:n-size+1]
 		//
-		//		set, err := g.NewSet(i, vals)
+		//		set, err := g.NewSet(itp, vals)
 		//		if err != nil {
 		//			return nil, err
 		//		}
@@ -208,9 +204,9 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//		f.stack = append(f.stack, set)
 		//		f.ip += 3
 		//
-		//	case bytecode.NewTuple:
+		//	case bc.NewTuple:
 		//
-		//		size := bytecode.DecodeParam(btc, f.ip)
+		//		size := bc.DecodeParam(btc, f.ip)
 		//		vals := make([]g.Value, size)
 		//		copy(vals, f.stack[n-size+1:])
 		//
@@ -218,7 +214,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//		f.stack = append(f.stack, g.NewTuple(vals))
 		//		f.ip += 3
 		//
-		//	case bytecode.CheckTuple:
+		//	case bc.CheckTuple:
 		//
 		//		// make sure the top of the stack is really a tuple
 		//		tp, ok := f.stack[n].(g.Tuple)
@@ -227,8 +223,8 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//		}
 		//
 		//		// and make sure its of the expected length
-		//		expectedLen := bytecode.DecodeParam(btc, f.ip)
-		//		tpLen := tp.Len(i)
+		//		expectedLen := bc.DecodeParam(btc, f.ip)
+		//		tpLen := tp.Len(itp)
 		//		if expectedLen != int(tpLen.IntVal()) {
 		//			return nil, g.InvalidArgumentError(
 		//				fmt.Sprintf("Expected Tuple of length %d", expectedLen))
@@ -237,10 +233,10 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//		// do not alter stack
 		//		f.ip += 3
 
-	case bytecode.CheckCast:
+	case bc.CheckCast:
 
 		// make sure the top of the stack is of the given type
-		vtype := g.Type(bytecode.DecodeParam(btc, f.ip))
+		vtype := g.Type(bc.DecodeParam(btc, f.ip))
 		v := f.stack[n]
 		if v.Type() != vtype {
 			return nil, g.TypeMismatchError(fmt.Sprintf("Expected %s", vtype.String()))
@@ -249,9 +245,9 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// do not alter stack
 		f.ip += 3
 
-		//	case bytecode.NewDict:
+		//	case bc.NewDict:
 		//
-		//		size := bytecode.DecodeParam(btc, f.ip)
+		//		size := bc.DecodeParam(btc, f.ip)
 		//		entries := make([]*g.HEntry, 0, size)
 		//
 		//		numVals := size * 2
@@ -261,7 +257,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//
 		//		f.stack = f.stack[:n-numVals+1]
 		//
-		//		dict, err := g.NewDict(i, entries)
+		//		dict, err := g.NewDict(itp, entries)
 		//		if err != nil {
 		//			return nil, err
 		//		}
@@ -270,9 +266,9 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//		f.ip += 3
 		//
 
-		//	case bytecode.DefineStruct:
+		//	case bc.DefineStruct:
 		//
-		//		defs := pool.StructDefs[bytecode.DecodeParam(btc, f.ip)]
+		//		defs := pool.StructDefs[bc.DecodeParam(btc, f.ip)]
 		//		stc, err := g.DefineStruct(defs)
 		//		if err != nil {
 		//			return nil, err
@@ -281,13 +277,13 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//		f.stack = append(f.stack, stc)
 		//		f.ip += 3
 
-	case bytecode.GetField:
+	case bc.GetField:
 
-		p := bytecode.DecodeParam(btc, f.ip)
+		p := bc.DecodeParam(btc, f.ip)
 		key, ok := pool.Constants[p].(g.Str)
 		g.Assert(ok)
 
-		result, err := f.stack[n].GetField(key.String(), i)
+		result, err := f.stack[n].GetField(key.String(), itp)
 		if err != nil {
 			return nil, err
 		}
@@ -295,31 +291,51 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n] = result
 		f.ip += 3
 
-	case bytecode.InvokeField:
+	case bc.InvokeField:
 
-		p, q := bytecode.DecodeWideParams(btc, f.ip)
-		fmt.Printf("InvokeField aaa %d %d\n", p, q)
+		p, q := bc.DecodeWideParams(btc, f.ip)
+		//fmt.Printf("InvokeField aaa %d %d\n", p, q)
 
 		key, ok := pool.Constants[p].(g.Str)
 		g.Assert(ok)
-		fmt.Printf("InvokeField bbb %s\n", key)
+		//fmt.Printf("InvokeField bbb %s\n", key)
 
+		self := f.stack[n-q]
 		params := f.stack[n-q+1:]
-		fmt.Printf("InvokeField ccc %v %d %d %d\n", params, n, q, n-q+1)
+		//fmt.Printf("InvokeField ccc %v %d %d %d\n", params, n, q, n-q+1)
 
-		val, err := f.stack[n].InvokeField(key.String(), i, params)
+		result, err := self.InvokeField(key.String(), itp, params)
 		if err != nil {
 			return nil, err
 		}
-		fmt.Printf("InvokeField ddd %s\n", val)
+		//fmt.Printf("InvokeField ddd %s\n", result)
 
-		f.stack = f.stack[:n-q]
-		f.stack = append(f.stack, val)
+		f.stack[n-q] = result
+		f.stack = f.stack[:n-q+1]
 		f.ip += 5
 
-		//	case bytecode.InitField, bytecode.SetField:
+		//-----------------------------------------
+		//34: InvokeField  0 1 (1), 0 1 (1)
+		//frame 0
+		//    locals:
+		//        0: abc
+		//        1: nativeFunc<0xc420086760>
+		//        2: true
+		//        3: null
+		//    stack:
+		//        0: null
+		//        1: abc
+		//        2: z
+		//    ip: 34
+		//InvokeField aaa 1 1
+		//InvokeField bbb contains
+		//InvokeField ccc [z] 2 1 2
+		//Str.contains: z, z, true
+		//InvokeField ddd %!s(core._bool=true)
+
+		//	case bc.InitField, bc.SetField:
 		//
-		//		idx := bytecode.DecodeParam(btc, f.ip)
+		//		idx := bc.DecodeParam(btc, f.ip)
 		//		key, ok := pool.Constants[idx].(g.Str)
 		//		g.Assert(ok)
 		//
@@ -333,13 +349,13 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//		value := f.stack[n]
 		//
 		//		// init or set
-		//		if btc[f.ip] == bytecode.InitField {
-		//			err := stc.InitField(i, key, value)
+		//		if btc[f.ip] == bc.InitField {
+		//			err := stc.InitField(itp, key, value)
 		//			if err != nil {
 		//				return nil, err
 		//			}
 		//		} else {
-		//			err := stc.SetField(i, key, value)
+		//			err := stc.SetField(itp, key, value)
 		//			if err != nil {
 		//				return nil, err
 		//			}
@@ -349,9 +365,9 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//		f.stack = f.stack[:n]
 		//		f.ip += 3
 		//
-		//	case bytecode.IncField:
+		//	case bc.IncField:
 		//
-		//		idx := bytecode.DecodeParam(btc, f.ip)
+		//		idx := bc.DecodeParam(btc, f.ip)
 		//		key, ok := pool.Constants[idx].(g.Str)
 		//		g.Assert(ok)
 		//
@@ -364,17 +380,17 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//		// get value from stack
 		//		value := f.stack[n]
 		//
-		//		before, err := stc.GetField(i, key)
+		//		before, err := stc.GetField(itp, key)
 		//		if err != nil {
 		//			return nil, err
 		//		}
 		//
-		//		after, err := plus(i, before, value)
+		//		after, err := plus(itp, before, value)
 		//		if err != nil {
 		//			return nil, err
 		//		}
 		//
-		//		err = stc.SetField(i, key, after)
+		//		err = stc.SetField(itp, key, after)
 		//		if err != nil {
 		//			return nil, err
 		//		}
@@ -383,7 +399,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//		f.stack = f.stack[:n]
 		//		f.ip += 3
 
-	case bytecode.GetIndex:
+	case bc.GetIndex:
 
 		// get Indexable from stack
 		gtb, ok := f.stack[n-1].(g.Indexable)
@@ -394,7 +410,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get index from stack
 		idx := f.stack[n]
 
-		result, err := gtb.Get(i, idx)
+		result, err := gtb.Get(itp, idx)
 		if err != nil {
 			return nil, err
 		}
@@ -403,7 +419,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = f.stack[:n]
 		f.ip++
 
-	case bytecode.SetIndex:
+	case bc.SetIndex:
 
 		// get IndexAssignable from stack
 		ibl, ok := f.stack[n-2].(g.IndexAssignable)
@@ -417,7 +433,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get value from stack
 		val := f.stack[n]
 
-		err := ibl.Set(i, idx, val)
+		err := ibl.Set(itp, idx, val)
 		if err != nil {
 			return nil, err
 		}
@@ -426,7 +442,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = f.stack[:n-1]
 		f.ip++
 
-	case bytecode.IncIndex:
+	case bc.IncIndex:
 
 		// get IndexAssignable from stack
 		ibl, ok := f.stack[n-2].(g.IndexAssignable)
@@ -440,17 +456,17 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get value from stack
 		val := f.stack[n]
 
-		before, err := ibl.Get(i, idx)
+		before, err := ibl.Get(itp, idx)
 		if err != nil {
 			return nil, err
 		}
 
-		after, err := plus(i, before, val)
+		after, err := plus(itp, before, val)
 		if err != nil {
 			return nil, err
 		}
 
-		err = ibl.Set(i, idx, after)
+		err = ibl.Set(itp, idx, after)
 		if err != nil {
 			return nil, err
 		}
@@ -459,7 +475,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = f.stack[:n-1]
 		f.ip++
 
-	case bytecode.Slice:
+	case bc.Slice:
 
 		// get Sliceable from stack
 		slb, ok := f.stack[n-2].(g.Sliceable)
@@ -471,7 +487,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		from := f.stack[n-1]
 		to := f.stack[n]
 
-		result, err := slb.Slice(i, from, to)
+		result, err := slb.Slice(itp, from, to)
 		if err != nil {
 			return nil, err
 		}
@@ -480,7 +496,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = f.stack[:n-1]
 		f.ip++
 
-	case bytecode.SliceFrom:
+	case bc.SliceFrom:
 
 		// get Sliceable from stack
 		slb, ok := f.stack[n-1].(g.Sliceable)
@@ -491,7 +507,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get index from stack
 		from := f.stack[n]
 
-		result, err := slb.SliceFrom(i, from)
+		result, err := slb.SliceFrom(itp, from)
 		if err != nil {
 			return nil, err
 		}
@@ -500,7 +516,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = f.stack[:n]
 		f.ip++
 
-	case bytecode.SliceTo:
+	case bc.SliceTo:
 
 		// get Sliceable from stack
 		slb, ok := f.stack[n-1].(g.Sliceable)
@@ -511,7 +527,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get index from stack
 		to := f.stack[n]
 
-		result, err := slb.SliceTo(i, to)
+		result, err := slb.SliceTo(itp, to)
 		if err != nil {
 			return nil, err
 		}
@@ -520,34 +536,34 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = f.stack[:n]
 		f.ip++
 
-	case bytecode.LoadNull:
+	case bc.LoadNull:
 		f.stack = append(f.stack, g.Null)
 		f.ip++
-	case bytecode.LoadTrue:
+	case bc.LoadTrue:
 		f.stack = append(f.stack, g.True)
 		f.ip++
-	case bytecode.LoadFalse:
+	case bc.LoadFalse:
 		f.stack = append(f.stack, g.False)
 		f.ip++
-	case bytecode.LoadZero:
+	case bc.LoadZero:
 		f.stack = append(f.stack, g.Zero)
 		f.ip++
-	case bytecode.LoadOne:
+	case bc.LoadOne:
 		f.stack = append(f.stack, g.One)
 		f.ip++
-	case bytecode.LoadNegOne:
+	case bc.LoadNegOne:
 		f.stack = append(f.stack, g.NegOne)
 		f.ip++
 
-	case bytecode.ImportModule:
+	case bc.ImportModule:
 
 		// get the module name from the pool
-		p := bytecode.DecodeParam(btc, f.ip)
+		p := bc.DecodeParam(btc, f.ip)
 		name, ok := pool.Constants[p].(g.Str)
 		g.Assert(ok)
 
 		// Lookup the module.
-		mod, err := i.lookupModule(name.String())
+		mod, err := itp.lookupModule(name.String())
 		if err != nil {
 			return nil, err
 		}
@@ -556,42 +572,42 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = append(f.stack, mod.Contents)
 		f.ip += 3
 
-	case bytecode.LoadBuiltin:
-		p := bytecode.DecodeParam(btc, f.ip)
-		f.stack = append(f.stack, i.builtInMgr.Builtins()[p])
+	case bc.LoadBuiltin:
+		p := bc.DecodeParam(btc, f.ip)
+		f.stack = append(f.stack, itp.builtInMgr.Builtins()[p])
 		f.ip += 3
 
-	case bytecode.LoadConst:
-		p := bytecode.DecodeParam(btc, f.ip)
+	case bc.LoadConst:
+		p := bc.DecodeParam(btc, f.ip)
 		f.stack = append(f.stack, pool.Constants[p])
 		f.ip += 3
 
-	case bytecode.LoadLocal:
-		p := bytecode.DecodeParam(btc, f.ip)
+	case bc.LoadLocal:
+		p := bc.DecodeParam(btc, f.ip)
 		f.stack = append(f.stack, f.locals[p].Val)
 		f.ip += 3
 
-	case bytecode.LoadCapture:
-		p := bytecode.DecodeParam(btc, f.ip)
+	case bc.LoadCapture:
+		p := bc.DecodeParam(btc, f.ip)
 		f.stack = append(f.stack, f.fn.GetCapture(p).Val)
 		f.ip += 3
 
-	case bytecode.StoreLocal:
-		p := bytecode.DecodeParam(btc, f.ip)
+	case bc.StoreLocal:
+		p := bc.DecodeParam(btc, f.ip)
 		f.locals[p].Val = f.stack[n]
 		f.stack = f.stack[:n]
 		f.ip += 3
 
-	case bytecode.StoreCapture:
-		p := bytecode.DecodeParam(btc, f.ip)
+	case bc.StoreCapture:
+		p := bc.DecodeParam(btc, f.ip)
 		f.fn.GetCapture(p).Val = f.stack[n]
 		f.stack = f.stack[:n]
 		f.ip += 3
 
-	case bytecode.Jump:
-		f.ip = bytecode.DecodeParam(btc, f.ip)
+	case bc.Jump:
+		f.ip = bc.DecodeParam(btc, f.ip)
 
-	case bytecode.JumpTrue:
+	case bc.JumpTrue:
 		b, ok := f.stack[n].(g.Bool)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected Bool")
@@ -599,12 +615,12 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		f.stack = f.stack[:n]
 		if b.BoolVal() {
-			f.ip = bytecode.DecodeParam(btc, f.ip)
+			f.ip = bc.DecodeParam(btc, f.ip)
 		} else {
 			f.ip += 3
 		}
 
-	case bytecode.JumpFalse:
+	case bc.JumpFalse:
 		b, ok := f.stack[n].(g.Bool)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected Bool")
@@ -614,11 +630,11 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		if b.BoolVal() {
 			f.ip += 3
 		} else {
-			f.ip = bytecode.DecodeParam(btc, f.ip)
+			f.ip = bc.DecodeParam(btc, f.ip)
 		}
 
-	case bytecode.Eq:
-		b, err := f.stack[n-1].Eq(i, f.stack[n])
+	case bc.Eq:
+		b, err := f.stack[n-1].Eq(itp, f.stack[n])
 		if err != nil {
 			return nil, err
 		}
@@ -626,8 +642,8 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = b
 		f.ip++
 
-	case bytecode.Ne:
-		b, err := f.stack[n-1].Eq(i, f.stack[n])
+	case bc.Ne:
+		b, err := f.stack[n-1].Eq(itp, f.stack[n])
 		if err != nil {
 			return nil, err
 		}
@@ -635,8 +651,8 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = b.Not()
 		f.ip++
 
-	case bytecode.Lt:
-		val, err := f.stack[n-1].Cmp(i, f.stack[n])
+	case bc.Lt:
+		val, err := f.stack[n-1].Cmp(itp, f.stack[n])
 		if err != nil {
 			return nil, err
 		}
@@ -644,8 +660,8 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = g.NewBool(val.IntVal() < 0)
 		f.ip++
 
-	case bytecode.Lte:
-		val, err := f.stack[n-1].Cmp(i, f.stack[n])
+	case bc.Lte:
+		val, err := f.stack[n-1].Cmp(itp, f.stack[n])
 		if err != nil {
 			return nil, err
 		}
@@ -653,8 +669,8 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = g.NewBool(val.IntVal() <= 0)
 		f.ip++
 
-	case bytecode.Gt:
-		val, err := f.stack[n-1].Cmp(i, f.stack[n])
+	case bc.Gt:
+		val, err := f.stack[n-1].Cmp(itp, f.stack[n])
 		if err != nil {
 			return nil, err
 		}
@@ -662,8 +678,8 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = g.NewBool(val.IntVal() > 0)
 		f.ip++
 
-	case bytecode.Gte:
-		val, err := f.stack[n-1].Cmp(i, f.stack[n])
+	case bc.Gte:
+		val, err := f.stack[n-1].Cmp(itp, f.stack[n])
 		if err != nil {
 			return nil, err
 		}
@@ -671,8 +687,8 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = g.NewBool(val.IntVal() >= 0)
 		f.ip++
 
-	case bytecode.Cmp:
-		val, err := f.stack[n-1].Cmp(i, f.stack[n])
+	case bc.Cmp:
+		val, err := f.stack[n-1].Cmp(itp, f.stack[n])
 		if err != nil {
 			return nil, err
 		}
@@ -680,7 +696,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case bytecode.Has:
+	case bc.Has:
 
 		panic("TODO")
 
@@ -690,7 +706,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//			return nil, g.TypeMismatchError("Expected Struct")
 		//		}
 		//
-		//		val, err := stc.Has(i, f.stack[n])
+		//		val, err := stc.Has(itp, f.stack[n])
 		//		if err != nil {
 		//			return nil, err
 		//		}
@@ -698,8 +714,8 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		//		f.stack[n-1] = val
 		//		f.ip++
 
-	case bytecode.Plus:
-		val, err := plus(i, f.stack[n-1], f.stack[n])
+	case bc.Plus:
+		val, err := plus(itp, f.stack[n-1], f.stack[n])
 		if err != nil {
 			return nil, err
 		}
@@ -707,7 +723,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case bytecode.Not:
+	case bc.Not:
 		b, ok := f.stack[n].(g.Bool)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected Bool")
@@ -716,7 +732,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n] = b.Not()
 		f.ip++
 
-	case bytecode.Sub:
+	case bc.Sub:
 		z, ok := f.stack[n-1].(g.Number)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected Number Type")
@@ -730,7 +746,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case bytecode.Mul:
+	case bc.Mul:
 		z, ok := f.stack[n-1].(g.Number)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected Number Type")
@@ -744,7 +760,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case bytecode.Div:
+	case bc.Div:
 		z, ok := f.stack[n-1].(g.Number)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected Number Type")
@@ -758,7 +774,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case bytecode.Negate:
+	case bc.Negate:
 		z, ok := f.stack[n].(g.Number)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected Number Type")
@@ -768,7 +784,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n] = val
 		f.ip++
 
-	case bytecode.Rem:
+	case bc.Rem:
 		z, ok := f.stack[n-1].(g.Int)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected Int")
@@ -782,7 +798,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case bytecode.BitAnd:
+	case bc.BitAnd:
 		z, ok := f.stack[n-1].(g.Int)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected Int")
@@ -796,7 +812,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case bytecode.BitOr:
+	case bc.BitOr:
 		z, ok := f.stack[n-1].(g.Int)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected Int")
@@ -810,7 +826,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case bytecode.BitXor:
+	case bc.BitXor:
 		z, ok := f.stack[n-1].(g.Int)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected Int")
@@ -824,7 +840,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case bytecode.LeftShift:
+	case bc.LeftShift:
 		z, ok := f.stack[n-1].(g.Int)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected Int")
@@ -838,7 +854,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case bytecode.RightShift:
+	case bc.RightShift:
 		z, ok := f.stack[n-1].(g.Int)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected Int")
@@ -852,7 +868,7 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case bytecode.Complement:
+	case bc.Complement:
 		z, ok := f.stack[n].(g.Int)
 		if !ok {
 			return nil, g.TypeMismatchError("Expected Int")
@@ -862,20 +878,20 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n] = val
 		f.ip++
 
-	case bytecode.NewIter:
+	case bc.NewIter:
 
 		ibl, ok := f.stack[n].(g.Iterable)
 		g.Assert(ok)
 
-		f.stack[n] = ibl.NewIterator(i)
+		f.stack[n] = ibl.NewIterator(itp)
 		f.ip++
 
-	case bytecode.IterNext:
+	case bc.IterNext:
 
 		itr, ok := f.stack[n].(g.Iterator)
 		g.Assert(ok)
 
-		val, err := itr.IterNext(i)
+		val, err := itr.IterNext(itp)
 		if err != nil {
 			return nil, err
 		}
@@ -883,12 +899,12 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n] = val
 		f.ip++
 
-	case bytecode.IterGet:
+	case bc.IterGet:
 
 		itr, ok := f.stack[n].(g.Iterator)
 		g.Assert(ok)
 
-		val, err := itr.IterGet(i)
+		val, err := itr.IterGet(itp)
 		if err != nil {
 			return nil, err
 		}
@@ -896,11 +912,11 @@ func (i *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n] = val
 		f.ip++
 
-	case bytecode.Dup:
+	case bc.Dup:
 		f.stack = append(f.stack, f.stack[n])
 		f.ip++
 
-	case bytecode.Pop:
+	case bc.Pop:
 		f.stack = f.stack[:n]
 		f.ip++
 
@@ -941,22 +957,3 @@ func plus(ev g.Evaluator, a g.Value, b g.Value) (g.Value, g.Error) {
 	// error
 	return nil, g.TypeMismatchError("Expected Number Type")
 }
-
-//func index(opcodes []byte, ip int) int {
-//
-//	high := opcodes[ip+1]
-//	low := opcodes[ip+2]
-//
-//	return int(high)<<8 + int(low)
-//}
-//
-//func wideIndex(opcodes []byte, ip int) (int, int) {
-//
-//	high1 := opcodes[ip+1]
-//	low1 := opcodes[ip+2]
-//
-//	high2 := opcodes[ip+3]
-//	low2 := opcodes[ip+4]
-//
-//	return int(high1)<<8 + int(low1), int(high2)<<8 + int(low2)
-//}

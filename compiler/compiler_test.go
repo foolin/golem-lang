@@ -5,7 +5,7 @@
 package compiler
 
 import (
-	"fmt"
+	//"fmt"
 	"reflect"
 	"testing"
 
@@ -999,11 +999,6 @@ finally {
 `
 	mod := testCompile(t, code)
 
-	fmt.Println("----------------------------")
-	fmt.Println(code)
-	fmt.Println("----------------------------")
-	fmt.Println(mod.Pool)
-
 	g.Tassert(t, mod.Pool.Templates[0].ExceptionHandlers[0] ==
 		bc.ExceptionHandler{
 			Begin:   5,
@@ -1018,15 +1013,70 @@ func TestInvokeField(t *testing.T) {
 
 	code := `
 let s = 'abc'
-
 let c = s.contains
 let x = c('b')
 let y = s.contains('z')
+
+let ls = [1]
+let p = ls.iter().next()
 `
 	mod := testCompile(t, code)
 
-	fmt.Println("----------------------------")
-	fmt.Println(code)
-	fmt.Println("----------------------------")
-	fmt.Println(mod.Pool)
+	//fmt.Println("----------------------------")
+	//fmt.Println(code)
+	//fmt.Println("----------------------------")
+	//fmt.Println(mod.Pool)
+
+	ok(t, mod.Pool, &bc.Pool{
+		Constants: []g.Basic{
+			g.NewStr("abc"),
+			g.NewStr("contains"),
+			g.NewStr("b"),
+			g.NewStr("z"),
+			g.NewStr("iter"),
+			g.NewStr("next"),
+		},
+
+		StructDefs: [][]string{},
+		Templates: []*bc.FuncTemplate{&bc.FuncTemplate{
+			Arity:       fixedArity(0),
+			NumCaptures: 0,
+			NumLocals:   6,
+			Bytecodes: []byte{
+				bc.LoadNull,
+				bc.LoadConst, 0, 0,
+				bc.StoreLocal, 0, 0,
+				bc.LoadLocal, 0, 0,
+				bc.GetField, 0, 1,
+				bc.StoreLocal, 0, 1,
+				bc.LoadLocal, 0, 1,
+				bc.LoadConst, 0, 2,
+				bc.Invoke, 0, 1,
+				bc.StoreLocal, 0, 2,
+				bc.LoadLocal, 0, 0,
+				bc.LoadConst, 0, 3,
+				bc.InvokeField, 0, 1, 0, 1,
+				bc.StoreLocal, 0, 3,
+				bc.LoadOne,
+				bc.NewList, 0, 1,
+				bc.StoreLocal, 0, 4,
+				bc.LoadLocal, 0, 4,
+				bc.InvokeField, 0, 4, 0, 0,
+				bc.InvokeField, 0, 5, 0, 0,
+				bc.StoreLocal, 0, 5,
+				bc.Return,
+			},
+			LineNumberTable: []bc.LineNumberEntry{
+				{Index: 0, LineNum: 0},
+				{Index: 1, LineNum: 2},
+				{Index: 7, LineNum: 3},
+				{Index: 16, LineNum: 4},
+				{Index: 28, LineNum: 5},
+				{Index: 42, LineNum: 7},
+				{Index: 49, LineNum: 8},
+				{Index: 65, LineNum: 0},
+			},
+			ExceptionHandlers: nil,
+		}},
+	})
 }

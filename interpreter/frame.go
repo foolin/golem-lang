@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	g "github.com/mjarmy/golem-lang/core"
-	"github.com/mjarmy/golem-lang/core/bytecode"
+	bc "github.com/mjarmy/golem-lang/core/bytecode"
 )
 
 //---------------------------------------------------------------
@@ -16,8 +16,8 @@ import (
 //---------------------------------------------------------------
 
 type frame struct {
-	fn     bytecode.BytecodeFunc
-	locals []*bytecode.Ref
+	fn     bc.BytecodeFunc
+	locals []*bc.Ref
 	stack  []g.Value
 	ip     int
 }
@@ -32,12 +32,12 @@ func mustStr(val g.Value) g.Str {
 
 func dumpFrames(frames []*frame) {
 
-	println("-----------------------------------------")
+	fmt.Printf("-----------------------------------------\n")
 
 	f := frames[len(frames)-1]
 	opc := f.fn.Template().Bytecodes
 
-	fmt.Printf("%s\n", bytecode.FmtBytecode(opc, f.ip))
+	fmt.Printf("%s\n", bc.FmtBytecode(opc, f.ip))
 
 	for j, f := range frames {
 		fmt.Printf("frame %d\n", j)
