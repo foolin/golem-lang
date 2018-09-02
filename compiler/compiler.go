@@ -1033,8 +1033,6 @@ func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 	// init each value
 	for i, k := range stc.Keys {
 
-		c.push(k.Position, bc.Dup)
-
 		v := stc.Values[i]
 		if _, ok := v.(*ast.PropNode); ok {
 			panic("TODO")
@@ -1045,8 +1043,6 @@ func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 			v.Begin(),
 			bc.ReplaceField,
 			c.poolBuilder.constIndex(g.NewStr(k.Text)))
-
-		c.push(k.Position, bc.Pop)
 	}
 }
 

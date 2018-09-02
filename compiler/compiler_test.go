@@ -5,7 +5,7 @@
 package compiler
 
 import (
-	//"fmt"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -1079,4 +1079,19 @@ let p = ls.iter().next()
 			ExceptionHandlers: nil,
 		}},
 	})
+}
+
+func TestStruct(t *testing.T) {
+
+	code := `
+let x = struct {}
+let y = struct {a: 1}
+let z = struct {a: 1, b: 2}
+`
+	mod := testCompile(t, code)
+
+	fmt.Println("----------------------------")
+	fmt.Println(code)
+	fmt.Println("----------------------------")
+	fmt.Println(mod.Pool)
 }

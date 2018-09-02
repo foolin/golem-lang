@@ -6,6 +6,7 @@ package core
 
 import (
 	"bytes"
+	"reflect"
 
 	"github.com/mjarmy/golem-lang/scanner"
 )
@@ -101,7 +102,51 @@ func (st *_struct) HashCode(ev Evaluator) (Int, Error) {
 }
 
 func (st *_struct) Eq(ev Evaluator, val Value) (Bool, Error) {
-	panic("TODO")
+
+	// same type
+	that, ok := val.(Struct)
+	if !ok {
+		return False, nil
+	}
+
+	// same fields
+	n1, err := st.FieldNames()
+	if err != nil {
+		return nil, err
+	}
+	n2, err := that.FieldNames()
+	if err != nil {
+		return nil, err
+	}
+	if !reflect.DeepEqual(n1, n2) {
+		return False, nil
+	}
+
+	// all fields have same value
+	for _, name := range n1 {
+
+		a, err := st.GetField(name, ev)
+		if err != nil {
+			return nil, err
+		}
+
+		b, err := that.GetField(name, ev)
+		if err != nil {
+			return nil, err
+		}
+
+		eq, err := a.Eq(ev, b)
+		if err != nil {
+			return nil, err
+		}
+
+		if !eq.BoolVal() {
+			return False, nil
+		}
+	}
+
+	// done
+	return True, nil
 }
 
 func (st *_struct) Cmp(ev Evaluator, val Value) (Int, Error) {

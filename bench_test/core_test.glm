@@ -344,39 +344,6 @@ fn testFlowControl() {
 //
 //	failMsg(|| => 'abc'.bogus(), 'NoSuchField', 'Field 'bogus' not found')
 //}
-//
-//fn testMerge() {
-//
-//	failMsg(|| => merge(), 'ArityMismatch', 'Expected at least 2 params, got 0')
-//	failMsg(|| => merge(true), 'ArityMismatch', 'Expected at least 2 params, got 1')
-//	failMsg(|| => merge(struct{}, false), 'TypeMismatch', 'Expected Struct')
-//	failMsg(|| => merge(struct{}, struct{}, struct{}, false), 'TypeMismatch', 'Expected Struct')
-//
-//    let a = struct { x: 1, y: 2}
-//    let b = merge(struct { y: 3, z: 4}, a)
-//    assert(b.x == 1)
-//    assert(b.y == 3)
-//    assert(b.z == 4)
-//    a.x = 5
-//    a.y = 6
-//    assert(b.x == 5)
-//    assert(b.y == 3)
-//    assert(b.z == 4)
-//    let c = merge(struct { w: 10}, b)
-//    assert(c.w == 10)
-//    assert(c.x == 5)
-//    assert(c.y == 3)
-//    assert(c.z == 4)
-//    a.x = 7
-//    b.z = 11
-//    assert(c.w == 10)
-//    assert(c.x == 7)
-//    assert(c.y == 3)
-//    assert(c.z == 11)
-//
-//    let z = merge(struct { a: 1}, struct { b: 2}, struct { c: 3}, struct { d: 4})
-//    assert(struct { a: 1, b: 2, c: 3, d: 4} == z)
-//}
 
 fn testList() {
     let funcs = [
@@ -852,8 +819,22 @@ fn testList() {
 //    assert(s[1] == '♥')
 //    assert(s[2] == '$')
 //}
-//
-//fn testStruct() {
+
+fn testStruct() {
+
+    let funcs = [
+        fn () {
+            println("testStruct")
+            assert(struct{} == struct{})
+            assert(struct{a:1} == struct{a:1})
+            assert(struct{a:1,b:2} == struct{a:1,b:2})
+            assert(struct{a:1} != struct{a:1,b:2})
+            assert(struct{a:1,b:2} != struct{b:2})
+            assert(struct{a:1,b:2} != struct{a:3,b:2})
+        }
+    ]
+    for f in funcs { f(); }
+
 
 //	assert(struct{a: 1} has 'a' == true)
 //	assert(struct{a: 1} has 'b' == false)
@@ -867,7 +848,6 @@ fn testList() {
 //	assert(struct{a:1,b:2} != struct{b:2} == true)
 //	assert(struct{a:1,b:2} != struct{a:3,b:2} == true)
 
-//
 //    let x = 2
 //    let s = struct {
 //
@@ -896,6 +876,39 @@ fn testList() {
 //
 //    x = 4
 //    assert([s.a, s.b, x, s.c()] == [1, 4, 4, 5])
+}
+
+//fn testMerge() {
+//
+//	failMsg(|| => merge(), 'ArityMismatch', 'Expected at least 2 params, got 0')
+//	failMsg(|| => merge(true), 'ArityMismatch', 'Expected at least 2 params, got 1')
+//	failMsg(|| => merge(struct{}, false), 'TypeMismatch', 'Expected Struct')
+//	failMsg(|| => merge(struct{}, struct{}, struct{}, false), 'TypeMismatch', 'Expected Struct')
+//
+//    let a = struct { x: 1, y: 2}
+//    let b = merge(struct { y: 3, z: 4}, a)
+//    assert(b.x == 1)
+//    assert(b.y == 3)
+//    assert(b.z == 4)
+//    a.x = 5
+//    a.y = 6
+//    assert(b.x == 5)
+//    assert(b.y == 3)
+//    assert(b.z == 4)
+//    let c = merge(struct { w: 10}, b)
+//    assert(c.w == 10)
+//    assert(c.x == 5)
+//    assert(c.y == 3)
+//    assert(c.z == 4)
+//    a.x = 7
+//    b.z = 11
+//    assert(c.w == 10)
+//    assert(c.x == 7)
+//    assert(c.y == 3)
+//    assert(c.z == 11)
+//
+//    let z = merge(struct { a: 1}, struct { b: 2}, struct { c: 3}, struct { d: 4})
+//    assert(struct { a: 1, b: 2, c: 3, d: 4} == z)
 //}
 
 fn testIterator() {
@@ -981,7 +994,6 @@ fn main(args) {
 //    testNamedFunc()
 //    testLambda()
 //    testStr()
-//    testMerge()
     testList()
 //    testFreeze()
 //    testDict()
@@ -994,7 +1006,8 @@ fn main(args) {
 //    testRange()
 //    testSlice()
 //    testUnicodeEscape()
-//    testStruct()
+    testStruct()
+//    testMerge()
 
 //    testIterator()
     testInvokeField()

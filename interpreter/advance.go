@@ -320,38 +320,35 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = f.stack[:n-q+1]
 		f.ip += 5
 
-		//	case bc.InitField, bc.SetField:
-		//
-		//		idx := bc.DecodeParam(btc, f.ip)
-		//		key, ok := pool.Constants[idx].(g.Str)
-		//		g.Assert(ok)
-		//
-		//		// get struct from stack
-		//		stc, ok := f.stack[n-1].(g.Struct)
-		//		if !ok {
-		//			return nil, g.TypeMismatchError("Expected Struct")
-		//		}
-		//
-		//		// get value from stack
-		//		value := f.stack[n]
-		//
-		//		// init or set
-		//		if btc[f.ip] == bc.InitField {
-		//			err := stc.InitField(itp, key, value)
-		//			if err != nil {
-		//				return nil, err
-		//			}
-		//		} else {
-		//			err := stc.SetField(itp, key, value)
-		//			if err != nil {
-		//				return nil, err
-		//			}
-		//		}
-		//
-		//		f.stack[n-1] = value
-		//		f.stack = f.stack[:n]
-		//		f.ip += 3
-		//
+	case bc.ReplaceField, bc.SetField:
+
+		idx := bc.DecodeParam(btc, f.ip)
+		key, ok := pool.Constants[idx].(g.Str)
+		g.Assert(ok)
+
+		// get struct from stack
+		stc, ok := f.stack[n-1].(g.Struct)
+		if !ok {
+			return nil, g.TypeMismatchError("Expected Struct")
+		}
+
+		// get value from stack
+		value := f.stack[n]
+
+		// init or set
+		if btc[f.ip] == bc.SetField {
+			err := stc.SetField(key.String(), itp, value)
+			if err != nil {
+				return nil, err
+			}
+			f.stack[n-1] = value
+		} else {
+			stc.Internal(key.String(), g.NewField(value))
+		}
+
+		f.stack = f.stack[:n]
+		f.ip += 3
+
 		//	case bc.IncField:
 		//
 		//		idx := bc.DecodeParam(btc, f.ip)
