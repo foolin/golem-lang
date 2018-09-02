@@ -49,6 +49,11 @@ func mergeFieldMaps(fieldMaps []fieldMap) fieldMap {
 // hashFieldMap
 //--------------------------------------------------------------
 
+// TODO: Using a golang map is a placeholder implementation.
+// Since we know that no keys will be added or removed once the fieldMap
+// is instantiated, there are probably more efficient implementations
+// available that we can substitute in at some point.
+
 type hashFieldMap struct {
 	fields     map[string]Field
 	replacable bool
@@ -112,6 +117,11 @@ func (fm *hashFieldMap) replace(name string, field Field) {
 //--------------------------------------------------------------
 // virtualFieldMap
 //--------------------------------------------------------------
+
+// TODO: Using a golang map is a placeholder implementation.
+// Since we know that no keys will be added or removed once the fieldMap
+// is instantiated, there are probably more efficient implementations
+// available that we can substitute in at some point.
 
 type virtualFieldMap struct {
 	self    interface{}

@@ -7,6 +7,8 @@ package core
 import (
 	"bytes"
 	"reflect"
+	"sort"
+	"strings"
 
 	"github.com/mjarmy/golem-lang/scanner"
 )
@@ -118,6 +120,14 @@ func (st *_struct) Eq(ev Evaluator, val Value) (Bool, Error) {
 	if err != nil {
 		return nil, err
 	}
+	// Unfortunately we have to sort the keys, because the underlying
+	// golang map in the fieldMap iterates over its keys unpredictably.
+	sort.Slice(n1, func(i, j int) bool {
+		return strings.Compare(n1[i], n1[j]) < 0
+	})
+	sort.Slice(n2, func(i, j int) bool {
+		return strings.Compare(n2[i], n2[j]) < 0
+	})
 	if !reflect.DeepEqual(n1, n2) {
 		return False, nil
 	}

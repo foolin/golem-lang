@@ -4,12 +4,22 @@
 
 //import zork
 
-fn fail(func, error) {
+fn fail(func, err) {
     try {
         func()
         assert(false)
     } catch e {
-        assert(error == e.error)
+        assert(err == e.error)
+
+        //println("BenchTestError: " + err + " != " + e.error)
+
+        ////println('==============================================')
+        //if err != e.error {
+        //    //throw "BenchTestError: " + err + " != " + e.error
+        //    println("BenchTestError: " + err + " != " + e.error)
+        //    assert(false)
+        //    //assert(err == e.error)
+        //}
     }
 }
 
@@ -824,29 +834,51 @@ fn testStruct() {
 
     let funcs = [
         fn () {
-            println("testStruct")
             assert(struct{} == struct{})
             assert(struct{a:1} == struct{a:1})
             assert(struct{a:1,b:2} == struct{a:1,b:2})
             assert(struct{a:1} != struct{a:1,b:2})
             assert(struct{a:1,b:2} != struct{b:2})
             assert(struct{a:1,b:2} != struct{a:3,b:2})
+        },
+        fn () {
+            let w = struct {}
+            let x = struct { a: 0 }
+            let y = struct { a: 1, b: 2 }
+            let z = struct { a: 3, b: 4, c: struct { d: 5 } }
+
+            assert([0] == [x.a])
+            assert([1, 2] == [y.a, y.b])
+            assert([3, 4, 5] == [z.a, z.b, z.c.d])
+
+            for s in [w, x, y, z] {
+                fail(|| => s.bogus, "NoSuchField: Field 'bogus' not found")
+            }
+        },
+        fn () {
+            let x = struct { a: 5 }
+            let y = x.a
+            x.a = 6
+            assert([5, 6] == [y, x.a])
+        },
+        fn () {
+            let a = struct {
+                x: 8,
+                y: 5,
+                plus:  fn() { return this.x + this.y; },
+                minus: fn() { return this.x - this.y; }
+            }
+            let b = a.plus()
+            let c = a.minus()
+            assert([13, 3] == [b, c])
+        },
+        fn () {
+            let a = null
+            a = struct { x: 8 }.x = 5
+            assert(5 == a)
         }
     ]
     for f in funcs { f(); }
-
-
-//	assert(struct{a: 1} has 'a' == true)
-//	assert(struct{a: 1} has 'b' == false)
-//
-//	fail(|| => struct{a: 1, a: 2}, 'DuplicateField: Field 'a' is a duplicate')
-//
-//	assert(struct{} == struct{} == true)
-//	assert(struct{a:1} == struct{a:1} == true)
-//	assert(struct{a:1,b:2} == struct{a:1,b:2} == true)
-//	assert(struct{a:1} != struct{a:1,b:2} == true)
-//	assert(struct{a:1,b:2} != struct{b:2} == true)
-//	assert(struct{a:1,b:2} != struct{a:3,b:2} == true)
 
 //    let x = 2
 //    let s = struct {
