@@ -1507,8 +1507,7 @@ func isComparative(kind ast.TokenKind) bool {
 		ast.GtEq,
 		ast.Lt,
 		ast.LtEq,
-		ast.Cmp,
-		ast.Has:
+		ast.Cmp:
 
 		return true
 	default:

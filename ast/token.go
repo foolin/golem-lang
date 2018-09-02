@@ -122,7 +122,6 @@ const (
 
 	Struct
 	This
-	Has
 	Dict
 	Set
 
@@ -275,8 +274,6 @@ func (t TokenKind) String() string {
 		return "Struct"
 	case This:
 		return "This"
-	case Has:
-		return "Has"
 	case Dict:
 		return "Dict"
 	case Set:

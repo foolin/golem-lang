@@ -38,7 +38,6 @@ const (
 	Lt
 	Lte
 	Cmp
-	Has
 
 	Plus
 	Sub
@@ -155,8 +154,6 @@ func BytecodeString(bc byte) string {
 		return "Lte"
 	case Cmp:
 		return "Cmp"
-	case Has:
-		return "Has"
 
 	case Plus:
 		return "Plus"
@@ -275,7 +272,7 @@ func BytecodeSize(bc byte) int {
 
 	case
 		LoadNull, LoadTrue, LoadFalse, LoadZero, LoadOne, LoadNegOne,
-		Eq, Ne, Gt, Gte, Lt, Lte, Cmp, Has,
+		Eq, Ne, Gt, Gte, Lt, Lte, Cmp,
 		Plus, Sub, Mul, Div,
 		Rem, BitAnd, BitOr, BitXor, LeftShift, RightShift,
 		Negate, Not, Complement,

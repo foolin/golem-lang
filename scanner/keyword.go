@@ -24,7 +24,6 @@ var keywords = map[string]ast.TokenKind{
 	"fn":       ast.Fn,
 	"for":      ast.For,
 	"go":       ast.Go,
-	"has":      ast.Has,
 	"if":       ast.If,
 	"import":   ast.Import,
 	"in":       ast.In,

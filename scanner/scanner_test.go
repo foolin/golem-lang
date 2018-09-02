@@ -322,13 +322,12 @@ func TestIdentOrKeyword(t *testing.T) {
 	ok(t, s, ast.Import, "import", 1, 11)
 	ok(t, s, ast.EOF, "", 1, 17)
 
-	s = NewScanner(&Source{"", "", "struct this has dict set"})
+	s = NewScanner(&Source{"", "", "struct this dict set"})
 	ok(t, s, ast.Struct, "struct", 1, 1)
 	ok(t, s, ast.This, "this", 1, 8)
-	ok(t, s, ast.Has, "has", 1, 13)
-	ok(t, s, ast.Dict, "dict", 1, 17)
-	ok(t, s, ast.Set, "set", 1, 22)
-	ok(t, s, ast.EOF, "", 1, 25)
+	ok(t, s, ast.Dict, "dict", 1, 13)
+	ok(t, s, ast.Set, "set", 1, 18)
+	ok(t, s, ast.EOF, "", 1, 21)
 }
 
 func TestComments(t *testing.T) {

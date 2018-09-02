@@ -696,24 +696,6 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack[n-1] = val
 		f.ip++
 
-	case bc.Has:
-
-		panic("TODO")
-
-		//		// get struct from stack
-		//		stc, ok := f.stack[n-1].(g.Struct)
-		//		if !ok {
-		//			return nil, g.TypeMismatchError("Expected Struct")
-		//		}
-		//
-		//		val, err := stc.Has(itp, f.stack[n])
-		//		if err != nil {
-		//			return nil, err
-		//		}
-		//		f.stack = f.stack[:n]
-		//		f.stack[n-1] = val
-		//		f.ip++
-
 	case bc.Plus:
 		val, err := plus(itp, f.stack[n-1], f.stack[n])
 		if err != nil {

@@ -327,8 +327,6 @@ func TestComparitive(t *testing.T) {
 	okExpr(t, newParser("1 <=> 3"), "(1 <=> 3)")
 
 	okExpr(t, newParser("1 <=> 2 + 3 * 4"), "(1 <=> (2 + (3 * 4)))")
-
-	okExpr(t, newParser("1 has 3"), "(1 has 3)")
 }
 
 func TestAndOr(t *testing.T) {
