@@ -363,32 +363,22 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		// get value from stack
 		value := f.stack[n]
-		inc, ok := value.(g.Number)
-		g.Assert(ok)
 
-		// get field
 		before, err := stc.GetField(key.String(), itp)
 		if err != nil {
 			return nil, err
 		}
-		beforeNum, ok := before.(g.Number)
-		if !ok {
-			return nil, g.TypeMismatchError("Expected Number")
-		}
 
-		// add
-		after, err := beforeNum.Add(inc)
+		after, err := plus(itp, before, value)
 		if err != nil {
 			return nil, err
 		}
 
-		// set field
 		err = stc.SetField(key.String(), itp, after)
 		if err != nil {
 			return nil, err
 		}
 
-		// done
 		f.stack[n-1] = before
 		f.stack = f.stack[:n]
 		f.ip += 3
