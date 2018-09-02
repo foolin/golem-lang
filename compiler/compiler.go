@@ -428,11 +428,10 @@ func (c *compiler) visitPostfixExpr(pe *ast.PostfixExpr) {
 			panic("invalid postfix operator")
 		}
 
-		panic("TODO")
-		//c.pushBytecode(
-		//	t.Key.Position,
-		//	bc.IncField,
-		//	c.poolBuilder.constIndex(g.NewStr(t.Key.Text)))
+		c.pushBytecode(
+			t.Key.Position,
+			bc.IncField,
+			c.poolBuilder.constIndex(g.NewStr(t.Key.Text)))
 
 	case *ast.IndexExpr:
 

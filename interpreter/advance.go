@@ -349,39 +349,49 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = f.stack[:n]
 		f.ip += 3
 
-		//	case bc.IncField:
-		//
-		//		idx := bc.DecodeParam(btc, f.ip)
-		//		key, ok := pool.Constants[idx].(g.Str)
-		//		g.Assert(ok)
-		//
-		//		// get struct from stack
-		//		stc, ok := f.stack[n-1].(g.Struct)
-		//		if !ok {
-		//			return nil, g.TypeMismatchError("Expected Struct")
-		//		}
-		//
-		//		// get value from stack
-		//		value := f.stack[n]
-		//
-		//		before, err := stc.GetField(itp, key)
-		//		if err != nil {
-		//			return nil, err
-		//		}
-		//
-		//		after, err := plus(itp, before, value)
-		//		if err != nil {
-		//			return nil, err
-		//		}
-		//
-		//		err = stc.SetField(itp, key, after)
-		//		if err != nil {
-		//			return nil, err
-		//		}
-		//
-		//		f.stack[n-1] = before
-		//		f.stack = f.stack[:n]
-		//		f.ip += 3
+	case bc.IncField:
+
+		idx := bc.DecodeParam(btc, f.ip)
+		key, ok := pool.Constants[idx].(g.Str)
+		g.Assert(ok)
+
+		// get struct from stack
+		stc, ok := f.stack[n-1].(g.Struct)
+		if !ok {
+			return nil, g.TypeMismatchError("Expected Struct")
+		}
+
+		// get value from stack
+		value := f.stack[n]
+		inc, ok := value.(g.Number)
+		g.Assert(ok)
+
+		// get field
+		before, err := stc.GetField(key.String(), itp)
+		if err != nil {
+			return nil, err
+		}
+		beforeNum, ok := before.(g.Number)
+		if !ok {
+			return nil, g.TypeMismatchError("Expected Number")
+		}
+
+		// add
+		after, err := beforeNum.Add(inc)
+		if err != nil {
+			return nil, err
+		}
+
+		// set field
+		err = stc.SetField(key.String(), itp, after)
+		if err != nil {
+			return nil, err
+		}
+
+		// done
+		f.stack[n-1] = before
+		f.stack = f.stack[:n]
+		f.ip += 3
 
 	case bc.GetIndex:
 

@@ -9,10 +9,10 @@ fn fail(func, err) {
         func()
         assert(false)
     } catch e {
+        //println("BenchTestError: " + err + " != " + e.error)
         assert(err == e.error)
 
         //println("BenchTestError: " + err + " != " + e.error)
-
         ////println('==============================================')
         //if err != e.error {
         //    //throw "BenchTestError: " + err + " != " + e.error
@@ -132,6 +132,23 @@ fn testAssignment() {
             a = b = 11
             b = a %= 4
             assert([3, 3] == [a, b])
+        },
+        fn () {
+            let a = 10
+            let b = 20
+            let c = a++
+            let d = b--
+            assert([11, 19, 10, 20] == [a, b, c, d])
+
+            //let e = 'abc'
+            //fail(|| => e++, "foo")
+        },
+        fn () {
+            let a = struct { x: 10 }
+            let b = struct { y: 20 }
+            let c = a.x++
+            let d = b.y--
+            assert([struct { x: 11 }, struct { y: 19 }, 10, 20] == [a, b, c, d])
         }
     ]
     for f in funcs { f(); }
@@ -237,75 +254,80 @@ fn testFlowControl() {
 //
 //	fail(|| => 1/0, 'DivideByZero')
 //}
-//
-//fn testCapture() {
-//
-//    const accumGen = fn(n) {
-//        return fn(i) {
-//            n = n + i
-//            return n
-//        }
-//    }
-//    const a = accumGen(3)
-//    const x = a(2)
-//    const y = a(7)
-//    assert([5, 12] == [x, y])
-//
-//    //---------------------
-//
-//    let z = 2
-//    const acc2 = fn(n) {
-//        return fn(i) {
-//            n = n + i
-//            n = n + z
-//            return n
-//        }
-//    }
-//    const b = acc2(3)
-//    let i = b(2)
-//    z = 0
-//    let j = b(1)
-//    assert([0, 7, 8] == [z, i, j])
-//
-//    const m = 123
-//    const n = 456
-//
-//    fn foo() {
-//        assert(n == 456)
-//        assert(m == 123)
-//    }
-//    foo()
-//
-//    //---------------------
-//
-//    const cap = 1
-//    let f1 = || => cap
-//    let f2 = || => cap
-//    assert([1, 1] == [f1(), f2()])
-//}
-//
-//fn testNamedFunc() {
-//    fn a() {
-//        return b()
-//    }
-//    fn b() {
-//        return 42
-//    }
-//    assert(a() == 42)
-//}
-//
-//fn testLambda() {
-//    let z = 5
-//    let a = || => 3
-//    let b = |x| => x * x
-//    let c = |x, y| => (x + y)*z
-//    assert(a() == 3)
-//    assert(b(2) == 4)
-//    assert(c(1, 2) == 15)
-//}
-//
-//fn testStr() {
-//
+
+fn testCapture() {
+
+    const accumGen = fn(n) {
+        return fn(i) {
+            n = n + i
+            return n
+        }
+    }
+    const a = accumGen(3)
+    const x = a(2)
+    const y = a(7)
+    assert([5, 12] == [x, y])
+
+    //---------------------
+
+    let z = 2
+    const acc2 = fn(n) {
+        return fn(i) {
+            n = n + i
+            n = n + z
+            return n
+        }
+    }
+    const b = acc2(3)
+    let i = b(2)
+    z = 0
+    let j = b(1)
+    assert([0, 7, 8] == [z, i, j])
+
+    const m = 123
+    const n = 456
+
+    fn foo() {
+        assert(n == 456)
+        assert(m == 123)
+    }
+    foo()
+
+    //---------------------
+
+    const cap = 1
+    let f1 = || => cap
+    let f2 = || => cap
+    assert([1, 1] == [f1(), f2()])
+}
+
+fn testNamedFunc() {
+    fn a() {
+        return b()
+    }
+    fn b() {
+        return 42
+    }
+    assert(a() == 42)
+}
+
+fn testLambda() {
+    let z = 5
+    let a = || => 3
+    let b = |x| => x * x
+    let c = |x, y| => (x + y)*z
+    assert(a() == 3)
+    assert(b(2) == 4)
+    assert(c(1, 2) == 15)
+}
+
+fn testStr() {
+
+    let s = '\u{1f496}\u{2665}\u{24}'
+    assert(s[0] == '💖')
+    assert(s[1] == '♥')
+    assert(s[2] == '$')
+
 //	assert(struct{a: 1} has 'a' == true)
 //	assert(struct{a: 1} has 'b' == false)
 //    assert('abc'.contains('b'))
@@ -353,7 +375,7 @@ fn testFlowControl() {
 //	failMsg(|| => 'abc'.replace('a', 'b', 'c'), 'TypeMismatch', 'Expected Int')
 //
 //	failMsg(|| => 'abc'.bogus(), 'NoSuchField', 'Field 'bogus' not found')
-//}
+}
 
 fn testList() {
     let funcs = [
@@ -822,13 +844,6 @@ fn testList() {
 //    assert(s[-5:-4] == '');
 //    assert(s[3:4] == '');
 //}
-//
-//fn testUnicodeEscape() {
-//    let s = '\u{1f496}\u{2665}\u{24}'
-//    assert(s[0] == '💖')
-//    assert(s[1] == '♥')
-//    assert(s[2] == '$')
-//}
 
 fn testStruct() {
 
@@ -1022,10 +1037,10 @@ fn main(args) {
     testFlowControl()
 
 //    testFunc()
-//    testCapture()
-//    testNamedFunc()
-//    testLambda()
-//    testStr()
+    testCapture()
+    testNamedFunc()
+    testLambda()
+    testStr()
     testList()
 //    testFreeze()
 //    testDict()
@@ -1037,7 +1052,6 @@ fn main(args) {
 //    testArity()
 //    testRange()
 //    testSlice()
-//    testUnicodeEscape()
     testStruct()
 //    testMerge()
 
