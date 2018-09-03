@@ -189,21 +189,21 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = append(f.stack, g.NewList(vals))
 		f.ip += 3
 
-	//	case bc.NewSet:
-	//
-	//		size := bc.DecodeParam(btc, f.ip)
-	//		vals := make([]g.Value, size)
-	//		copy(vals, f.stack[n-size+1:])
-	//		f.stack = f.stack[:n-size+1]
-	//
-	//		set, err := g.NewSet(itp, vals)
-	//		if err != nil {
-	//			return nil, err
-	//		}
-	//
-	//		f.stack = append(f.stack, set)
-	//		f.ip += 3
-	//
+	case bc.NewSet:
+
+		size := bc.DecodeParam(btc, f.ip)
+		vals := make([]g.Value, size)
+		copy(vals, f.stack[n-size+1:])
+
+		set, err := g.NewSet(itp, vals)
+		if err != nil {
+			return nil, err
+		}
+
+		f.stack = f.stack[:n-size+1]
+		f.stack = append(f.stack, set)
+		f.ip += 3
+
 	//	case bc.NewTuple:
 	//
 	//		size := bc.DecodeParam(btc, f.ip)

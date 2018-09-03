@@ -907,8 +907,19 @@ fn testList() {
 //    ]
 //    for f in funcs { f(); }
 //}
-//
-//fn testSet() {
+
+fn testSet() {
+
+    assert(set {} == set{})
+    assert(set {'a'} == set{'a'})
+    assert(set {'a', 'b'} == set{'a', 'b'})
+    assert(set {'a', 'b', 'c'} == set{'a', 'b', 'c'})
+
+    assert(set {'a', 'b', 'c'} != set{'a', 'b', 'd'})
+    assert(set {'a', 'b', 'c'} != set{'a', 'b'})
+    assert(set {'a', 'b', 'c'} != set{'a'})
+    assert(set {'a', 'b', 'c'} != set{})
+
 //	code = `
 //try {
 //    let s = set {'a', 'b', null}
@@ -988,8 +999,8 @@ fn testList() {
 //        }
 //    ]
 //    for f in funcs { f(); }
-//}
-//
+}
+
 //fn testTuple() {
 //
 //    let a = (4,5)
@@ -1368,7 +1379,7 @@ fn main(args) {
     testList()
 //    testFreeze()
 //    testDict()
-//    testSet()
+    testSet()
 //    testTuple()
 //    testTypes()
 //    testGo()

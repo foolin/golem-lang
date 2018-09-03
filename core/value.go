@@ -214,21 +214,21 @@ type (
 	//		AddAll(Evaluator, Value) Error
 	//		Remove(Evaluator, Value) (Bool, Error)
 	//	}
-	//
-	//	// Set is a set of unique values
-	//	Set interface {
-	//		Composite
-	//		Lenable
-	//		Iterable
-	//
-	//		IsEmpty() Bool
-	//		Clear() Error
-	//
-	//		Contains(Evaluator, Value) (Bool, Error)
-	//		Add(Evaluator, Value) Error
-	//		AddAll(Evaluator, Value) Error
-	//		Remove(Evaluator, Value) (Bool, Error)
-	//	}
+
+	// Set is a set of unique values
+	Set interface {
+		Composite
+		Lenable
+		Iterable
+
+		IsEmpty() Bool
+		Clear() Error
+
+		Contains(Evaluator, Value) (Bool, Error)
+		Add(Evaluator, Value) Error
+		AddAll(Evaluator, Value) Error
+		Remove(Evaluator, Value) (Bool, Error)
+	}
 
 	// Struct is a collection of key-Field pairs
 	Struct interface {

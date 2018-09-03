@@ -63,32 +63,35 @@ func (b *builtinManager) IndexOf(s string) int {
 // StandardBuiltins containts the built-ins that are
 // pure functions.  These functions do not do any form of I/O.
 var StandardBuiltins = []*BuiltinEntry{
-	//{"arity", BuiltinArity},
 	{"assert", BuiltinAssert},
-	//{"chan", BuiltinChan},
-	//{"fields", BuiltinFields},
-	//{"freeze", BuiltinFreeze},
-	//{"frozen", BuiltinFrozen},
-	//{"getField", BuiltinGetField},
-	//{"hasField", BuiltinHasField},
+
+	{"freeze", BuiltinFreeze},
+	{"frozen", BuiltinFrozen},
 	{"iter", BuiltinIter},
 	{"len", BuiltinLen},
-	//{"merge", BuiltinMerge},
 	{"range", BuiltinRange},
+	{"str", BuiltinStr},
+	{"type", BuiltinType},
+
+	//{"fields", BuiltinFields},
+	//{"getField", BuiltinGetField},
+	//{"hasField", BuiltinHasField},
 	//{"setField", BuiltinSetField},
-	//{"str", BuiltinStr},
-	//{"type", BuiltinType},
+
+	//{"arity", BuiltinArity},
+	//{"chan", BuiltinChan},
+	//{"merge", BuiltinMerge},
 }
 
 ////-----------------------------------------------------------------
-//
-//// BuiltinStr converts a single value to a Str
-//var BuiltinStr = NewFixedNativeFunc(
-//	[]Type{AnyType},
-//	false,
-//	func(ev Evaluator, values []Value) (Value, Error) {
-//		return values[0].ToStr(ev), nil
-//	})
+
+// BuiltinStr converts a single value to a Str
+var BuiltinStr = NewFixedNativeFunc(
+	[]Type{AnyType},
+	false,
+	func(ev Evaluator, values []Value) (Value, Error) {
+		return values[0].ToStr(ev)
+	})
 
 // BuiltinLen returns the length of a single Lenable
 var BuiltinLen = NewFixedNativeFunc(
@@ -174,33 +177,33 @@ var BuiltinAssert = NewFixedNativeFunc(
 //		size := values[0].(Int)
 //		return NewBufferedChan(int(size.IntVal())), nil
 //	})
-//
-//// BuiltinType returns the Str representation of the Type of a single Value
-//var BuiltinType = NewFixedNativeFunc(
-//	[]Type{AnyType},
-//	// Subtlety: Null has a type, but for the purposes of type()
-//	// we are going to pretend that it doesn't
-//	false,
-//	func(ev Evaluator, values []Value) (Value, Error) {
-//		t := values[0].Type()
-//		return NewStr(t.String()), nil
-//	})
-//
-//// BuiltinFreeze freezes a single Value.
-//var BuiltinFreeze = NewFixedNativeFunc(
-//	[]Type{AnyType},
-//	false,
-//	func(ev Evaluator, values []Value) (Value, Error) {
-//		return values[0].Freeze(ev)
-//	})
-//
-//// BuiltinFrozen returns whether a single Value is Frozen.
-//var BuiltinFrozen = NewFixedNativeFunc(
-//	[]Type{AnyType},
-//	false,
-//	func(ev Evaluator, values []Value) (Value, Error) {
-//		return values[0].Frozen(ev)
-//	})
+
+// BuiltinType returns the Str representation of the Type of a single Value
+var BuiltinType = NewFixedNativeFunc(
+	[]Type{AnyType},
+	// Subtlety: Null has a type, but for the purposes of type()
+	// we are going to pretend that it doesn't
+	false,
+	func(ev Evaluator, values []Value) (Value, Error) {
+		t := values[0].Type()
+		return NewStr(t.String()), nil
+	})
+
+// BuiltinFreeze freezes a single Value.
+var BuiltinFreeze = NewFixedNativeFunc(
+	[]Type{AnyType},
+	false,
+	func(ev Evaluator, values []Value) (Value, Error) {
+		return values[0].Freeze(ev)
+	})
+
+// BuiltinFrozen returns whether a single Value is Frozen.
+var BuiltinFrozen = NewFixedNativeFunc(
+	[]Type{AnyType},
+	false,
+	func(ev Evaluator, values []Value) (Value, Error) {
+		return values[0].Frozen(ev)
+	})
 
 //// BuiltinFields returns the fields of a Struct
 //var BuiltinFields = NewFixedNativeFunc(
