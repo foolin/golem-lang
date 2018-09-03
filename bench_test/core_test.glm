@@ -744,6 +744,8 @@ fn testStr() {
     assert(false == ''.contains('d'))
     assert(-1 == ''.index('cd'))
     assert(-1 == ''.index('d'))
+
+    // TODO old bench test
 }
 
 fn testList() {
@@ -839,6 +841,7 @@ fn testList() {
             f(5)
             assert(b == [4, 5])
         }
+// TODO
 //        fn () {
 //            let a = []
 //            a.addAll([1,2]).addAll('bc')
@@ -918,6 +921,7 @@ fn testList() {
     for f in funcs { f(); }
 }
 
+// TODO
 //fn testDict() {
 //
 //    let funcs = [
@@ -1004,6 +1008,39 @@ fn testSet() {
     assert(set {'a', 'b', 'c'} != set{'a', 'b'})
     assert(set {'a', 'b', 'c'} != set{'a'})
     assert(set {'a', 'b', 'c'} != set{})
+
+    let x = set{}
+    let y = set{'a'}
+
+    assert(x == x)
+    assert(y == y)
+    assert(x != y)
+    assert(y != x)
+    assert(x != 'z')
+    assert('z' != y)
+
+    assert(!frozen(x))
+    assert(x == freeze(x))
+    assert(frozen(x))
+
+    assert(iter(x) != null)
+    assert(len(x) == 0)
+    assert(len(y) == 1)
+
+    assert('set { }'     == str(set{}))
+    assert('set { a }'   == str(set{'a'}))
+    assert('set { b, a }'== str(set{'a', 'b'}))
+
+    assert('Set' == type(x))
+
+    assert(set { } == fields(x))
+
+    assert(!hasField(x, 'bogus'))
+    fail(|| => getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => setField(x, 'bogus', null), "TypeMismatch: Expected Struct")
+    fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct")
+
+    //-------------------------------------------------
 
 //    code = `
 //try {
@@ -1367,6 +1404,7 @@ fn testStruct() {
     for f in funcs { f(); }
 }
 
+// TODO
 //fn testMerge() {
 //
 //    failMsg(|| => merge(), 'ArityMismatch', 'Expected at least 2 params, got 0')
@@ -1400,56 +1438,6 @@ fn testStruct() {
 //    assert(struct { a: 1, b: 2, c: 3, d: 4} == z)
 //}
 
-//fn testIterator() {
-//    
-//
-//    // range
-//    fail(|| => iter(range(0, 0)).get(), 'NoSuchElement')
-//    count = 0
-//    itr = iter(range(1, 5))
-//    fail(|| => itr.get(), 'NoSuchElement')
-//    while itr.next() {
-//        count += itr.get()
-//    }
-//    assert(10 == count)
-//    fail(|| => itr.get(), 'NoSuchElement')
-//
-////    // dict
-////    fail(|| => dict{}.iter().get(), 'NoSuchElement')
-////    count = 0
-////    itr = dict{'a': 1, 'b': 2}.iter()
-////    fail(|| => itr.get(), 'NoSuchElement')
-////    while itr.next() {
-////        let e = itr.get()
-////        // let (k, v) = itr.get() TODO this would be cool
-////        count += e[1]
-////    }
-////    assert(3 == count)
-////    fail(|| => itr.get(), 'NoSuchElement')
-////
-////    // set
-////    fail(|| => set{}.iter().get(), 'NoSuchElement')
-////    count = 0
-////    itr = set{3, 4, 1, 4}.iter()
-////    fail(|| => itr.get(), 'NoSuchElement')
-////    while itr.next() {
-////        count += itr.get()
-////    }
-////    assert(8 == count)
-////    fail(|| => itr.get(), 'NoSuchElement')
-////
-////    // str
-////    fail(|| => ''.iter().get(), 'NoSuchElement')
-////    count = ''
-////    itr = 'abcde'.iter()
-////    fail(|| => itr.get(), 'NoSuchElement')
-////    while itr.next() {
-////        count = itr.get() + count
-////    }
-////    assert('edcba' == count)
-////    fail(|| => itr.get(), 'NoSuchElement')
-//}
-
 fn testInvokeField() {
     let s = 'abc'
     let c = s.contains
@@ -1476,7 +1464,7 @@ fn main(args) {
     testExpressions() 
     testAssignment()
     testFlowControl()
-//    testTry()
+//    testTry() TODO
     testInvokeField()
     testSlice()
 
@@ -1484,7 +1472,7 @@ fn main(args) {
     testCapture()
     testNamedFunc()
     testLambda()
-//    testArity()
+//    testArity() TODO
 
     testNull()
     testBool()
@@ -1494,10 +1482,10 @@ fn main(args) {
     testList()
     testRange()
     testTuple()
-//    testDict()
-    testSet()
-    testStruct() // testMerge()
-//    testChan() //    testGo()
+//    testDict() TODO
+    testSet() // TODO
+    testStruct() // testMerge() TODO
+//    testChan() //    testGo() // TODO
 }
 
 
