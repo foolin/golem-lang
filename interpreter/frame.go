@@ -22,12 +22,12 @@ type frame struct {
 	ip     int
 }
 
-func mustStr(val g.Value) g.Str {
+func mustStr(val g.Value) string {
 	s, err := val.ToStr(nil)
 	if err != nil {
-		return g.NewStr("ToStr ERROR: " + err.Error())
+		return "ToStr ERROR: " + err.Error()
 	}
-	return s
+	return s.String()
 }
 
 func dumpFrames(frames []*frame) {

@@ -69,11 +69,12 @@ var StandardBuiltins = []*BuiltinEntry{
 	//{"fields", BuiltinFields},
 	//{"freeze", BuiltinFreeze},
 	//{"frozen", BuiltinFrozen},
-	//{"getval", BuiltinGetVal},
-	//{"len", BuiltinLen},
+	//{"getField", BuiltinGetField},
+	//{"hasField", BuiltinHasField},
+	{"len", BuiltinLen},
 	//{"merge", BuiltinMerge},
 	{"range", BuiltinRange},
-	//{"setval", BuiltinSetVal},
+	//{"setField", BuiltinSetField},
 	//{"str", BuiltinStr},
 	//{"type", BuiltinType},
 }
@@ -87,17 +88,18 @@ var StandardBuiltins = []*BuiltinEntry{
 //	func(ev Evaluator, values []Value) (Value, Error) {
 //		return values[0].ToStr(ev), nil
 //	})
-//
-//// BuiltinLen returns the length of a single Lenable
-//var BuiltinLen = NewFixedNativeFunc(
-//	[]Type{AnyType},
-//	false,
-//	func(ev Evaluator, values []Value) (Value, Error) {
-//		if ln, ok := values[0].(Lenable); ok {
-//			return ln.Len(ev), nil
-//		}
-//		return nil, TypeMismatchError("Expected Lenable Type")
-//	})
+
+// BuiltinLen returns the length of a single Lenable
+var BuiltinLen = NewFixedNativeFunc(
+	[]Type{AnyType},
+	false,
+	func(ev Evaluator, values []Value) (Value, Error) {
+		if ln, ok := values[0].(Lenable); ok {
+			return ln.Len(ev)
+		}
+		return nil, TypeMismatchError(
+			fmt.Sprintf("Type %s has no len()", values[0].Type()))
+	})
 
 // BuiltinRange creates a new Range
 var BuiltinRange = NewMultipleNativeFunc(
@@ -186,10 +188,10 @@ var BuiltinAssert = NewFixedNativeFunc(
 //	func(ev Evaluator, values []Value) (Value, Error) {
 //		return values[0].Frozen(ev)
 //	})
-//
+
 //// BuiltinFields returns the fields of a Struct
 //var BuiltinFields = NewFixedNativeFunc(
-//	[]Type{StructType},
+//	[]Type{AnyType},
 //	false,
 //	func(ev Evaluator, values []Value) (Value, Error) {
 //		st := values[0].(*_struct)
@@ -200,9 +202,9 @@ var BuiltinAssert = NewFixedNativeFunc(
 //		}
 //		return NewSet(ev, result)
 //	})
-//
-//// BuiltinGetVal gets the Value associated with a Struct's field name.
-//var BuiltinGetVal = NewFixedNativeFunc(
+
+//// BuiltinGetField gets the Value associated with a Struct's field name.
+//var BuiltinGetField = NewFixedNativeFunc(
 //	[]Type{StructType, StrType},
 //	false,
 //	func(ev Evaluator, values []Value) (Value, Error) {
@@ -212,8 +214,8 @@ var BuiltinAssert = NewFixedNativeFunc(
 //		return st.GetField(ev, field)
 //	})
 //
-//// BuiltinSetVal sets the Value associated with a Struct's field name.
-//var BuiltinSetVal = NewFixedNativeFunc(
+//// BuiltinSetField sets the Value associated with a Struct's field name.
+//var BuiltinSetField = NewFixedNativeFunc(
 //	[]Type{StructType, StrType, AnyType},
 //	false,
 //	func(ev Evaluator, values []Value) (Value, Error) {
@@ -227,7 +229,7 @@ var BuiltinAssert = NewFixedNativeFunc(
 //		}
 //		return val, nil
 //	})
-//
+
 //// BuiltinArity returns the arity of a function.
 //var BuiltinArity = NewFixedNativeFunc(
 //	[]Type{FuncType},
