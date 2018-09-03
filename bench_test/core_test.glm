@@ -101,6 +101,58 @@ fn testExpressions() {
 
 }
 
+fn testInt() {
+    assert(1 == 1)
+    assert(2 == 2)
+    assert(1 != 2)
+    assert(2 != 1)
+    assert(1 != 'z')
+    assert('z' != 2)
+
+    assert(frozen(1))
+    assert(1 == freeze(1))
+    assert(frozen(1))
+
+    fail(|| => iter(1), "TypeMismatch: Type Int has no iter()")
+    fail(|| => len(1), "TypeMismatch: Type Int has no len()")
+
+    assert('1' == str(1))
+    assert('Int' == type(1))
+
+    assert(set {} == fields(1))
+    assert(!hasField(1, 'bogus'))
+    fail(|| => 1 .bogus, "NoSuchField: Field 'bogus' not found") // Note that '1.bogus' fails to parse
+    fail(|| => getField(1, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => setField(1, 'bogus', null), "TypeMismatch: Expected Struct")
+    fail(|| => 1 .bogus = 'z', "TypeMismatch: Expected Struct")
+}
+
+fn testFloat() {
+    assert(1.1 == 1.1)
+    assert(2.2 == 2.2)
+    assert(1.1 != 2.2)
+    assert(2.2 != 1.1)
+    assert(1.1 != 'z')
+    assert('z' != 2.2)
+
+    assert(frozen(1.1))
+    assert(1.1 == freeze(1.1))
+    assert(frozen(1.1))
+
+    fail(|| => iter(1.1), "TypeMismatch: Type Float has no iter()")
+    fail(|| => len(1.1), "TypeMismatch: Type Float has no len()")
+
+    assert('1.1' == str(1.1))
+    assert('Float' == type(1.1))
+
+    assert(set {} == fields(1.1))
+    assert(!hasField(1.1, 'bogus'))
+    fail(|| => 1.1 .bogus, "NoSuchField: Field 'bogus' not found") // Note that '1.1.bogus' fails to parse
+    fail(|| => getField(1.1, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => setField(1.1, 'bogus', null), "TypeMismatch: Expected Struct")
+    fail(|| => 1.1 .bogus = 'z', "TypeMismatch: Expected Struct")
+}
+
 fn testAssignment() {
     let funcs = [
         fn () {
@@ -453,21 +505,46 @@ fn testFlowControl() {
 
 fn testFunc() {
 
+    let f = || => null
+    let g = || => null
+
+    assert(f == f)
+    assert(g == g)
+    assert(f != g)
+    assert(g != f)
+    assert(f != 'z')
+    assert('z' != g)
+
+    assert(frozen(f))
+    assert(f == freeze(f))
+    assert(frozen(f))
+
+    fail(|| => iter(f), "TypeMismatch: Type Func has no iter()")
+    fail(|| => len(f), "TypeMismatch: Type Func has no len()")
+
+    assert(str(f) != null) // TODO startsWith('func')
+    assert('Func' == type(f))
+
+    assert(set {} == fields(f))
+    assert(!hasField(f, 'bogus'))
+    fail(|| => f.bogus, "NoSuchField: Field 'bogus' not found")
+    fail(|| => getField(f, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => setField(f, 'bogus', null), "TypeMismatch: Expected Struct")
+    fail(|| => f.bogus = 'z', "TypeMismatch: Expected Struct")
+
+    //------------------------------------------
+
     let a = fn(x) { x; }
     let b = a(1)
     assert(b == 1)
-
-    //------------------------------------------
 
     a = fn() { }
     b = fn(x) { x; }
     let c = fn(x, y) { let z = 4; x * y * z; }
     let d = a()
     let e = b(1)
-    let f = c(b(2), 3)
-    assert([null, 1, 24] == [d, e, f])
-
-    //------------------------------------------
+    let h = c(b(2), 3)
+    assert([null, 1, 24] == [d, e, h])
 
     let fibonacciGenerator = fn() {
         let x = 1
@@ -486,8 +563,6 @@ fn testFunc() {
     }
     assert([1, 1, 2, 3, 5, 8, 13, 21, 34, 55] == list)
 
-    //------------------------------------------
-
     let foo = fn(n) {
         let bar = fn(x) {
             return x * (x - 1)
@@ -495,8 +570,6 @@ fn testFunc() {
         return bar(n) + bar(n-1)
     }
     assert(32 == foo(5))
-
-    //------------------------------------------
 
     fail(|| => 1/0, 'DivideByZero')
 }
@@ -587,7 +660,6 @@ fn testNull() {
     fail(|| => getField(null, 'bogus'), "NullValue")
     fail(|| => null.bogus, "NullValue")
     fail(|| => null.bogus(), "NullValue")
-
     fail(|| => setField(null, 'bogus', null), "NullValue")
     fail(|| => null.bogus = 1, "NullValue")
 }
@@ -601,8 +673,10 @@ fn testBool() {
     assert(true != 1)
     assert(1 != false)
 
-    assert(freeze(true))
-    assert(freeze(false))
+    assert(frozen(true))
+    assert(frozen(false))
+    assert(true == freeze(true))
+    assert(false == freeze(false))
     assert(frozen(true))
     assert(frozen(false))
 
@@ -650,6 +724,7 @@ fn testStr() {
     assert('a' != 1)
     assert(1 != 'b')
 
+    assert(frozen('a'))
     assert('a' == freeze('a'))
     assert(frozen('a'))
 
@@ -690,6 +765,17 @@ fn testStr() {
     }
     assert('cba們我是這' == reverse)
 
+    fail(|| => iter('').get(), 'NoSuchElement')
+    let count = 0
+    let itr = iter(s)
+    fail(|| => itr.get(), 'NoSuchElement')
+    reverse = ''  
+    while itr.next() {
+        reverse = itr.get() + reverse
+    }
+    assert('cba們我是這' == reverse)
+    fail(|| => itr.get(), 'NoSuchElement')
+
     const f = s.contains
     assert(true == f('ab'))
     assert(true == s.contains('這是我'))
@@ -710,7 +796,72 @@ fn testStr() {
 }
 
 fn testList() {
+
+    assert([] == [])
+    assert([1] == [1])
+    assert([1,2] == [1,2])
+    assert([1,2,3] == [1,2,3])
+    assert([1,2,3] != [1,2,4])
+    assert([1,2,3] != [1,2])
+    assert([1,2,3] != [1])
+    assert([1,2,3] != [])
+
+    let x = []
+    let y = [1]
+
+    assert(x == x)
+    assert(y == y)
+    assert(x != y)
+    assert(y != x)
+    assert(x != 'z')
+    assert('z' != y)
+
+    assert(!frozen(x))
+    assert(x == freeze(x))
+    assert(frozen(x))
+
+    assert(iter(x) != null)
+    assert(len(x) == 0)
+    assert(len(y) == 1)
+
+    assert("[ ]" == str([]))
+    assert("[ 1 ]" == str([1]))
+    assert("[ 1, 2 ]" == str([1,2]))
+
+    assert('List' == type(x))
+
+    assert(set { 'add' } == fields(x))
+    for f in fields(x) {
+        assert(hasField(x, f))
+    }
+    assert(x.add == getField(x, 'add'))
+
+    assert(!hasField(x, 'bogus'))
+    fail(|| => getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => setField(x, 'bogus', null), "TypeMismatch: Expected Struct")
+    fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct")
+
+    //-------------------------------------------------
+
     let funcs = [
+        fn () {
+            let count = 0
+            for n in [1, 2, 3] {
+                count += n
+            }
+            assert(6 == count)
+        },
+        fn () {
+            fail(|| => iter([]).get(), 'NoSuchElement')
+            let count = 0
+            let itr = iter([1, 2, 3])
+            fail(|| => itr.get(), 'NoSuchElement')
+            while itr.next() {
+                count += itr.get()
+            }
+            assert(6 == count)
+            fail(|| => itr.get(), 'NoSuchElement')
+        },
         fn () {
             let a = []
             let b = [true]
@@ -718,24 +869,25 @@ fn testList() {
             let d = b[0]
             b[0] = 33
             let e = c[1]++
+        },
+        fn () {
+            let a = []
+            a.add(1)
+            assert(a == [1])
+            a.add(2).add([3])
+            assert(a == [1,2,[3]])
+            let b = []
+            b.add(4)
+            assert(b == [4])
+            assert(a.add == a.add)
+            assert(b.add == b.add)
+            assert(a.add != b.add)
+            assert(b.add != a.add)
+
+            let f = b.add
+            f(5)
+            assert(b == [4, 5])
         }
-//        },
-//        fn () {
-//    assert(struct{a: 1} has 'a' == true)
-//    assert(struct{a: 1} has 'b' == false)
-//            let a = []
-//            a.add(1)
-//            assert(a == [1])
-//            a.add(2).add([3])
-//            assert(a == [1,2,[3]])
-//            let b = []
-//            b.add(4)
-//            assert(b == [4])
-//            assert(a.add == a.add)
-//            assert(b.add == b.add)
-//            assert(a.add != b.add)
-//            assert(b.add != a.add)
-//        },
 //        fn () {
 //            let a = []
 //            a.addAll([1,2]).addAll('bc')
@@ -1031,6 +1183,32 @@ fn testSet() {
 
 fn testRange() {
 
+    assert(range(0, 0) == range(0, 0))
+    assert(range(0, 0) != range(0, 1))
+
+    let x = range(0, 0)
+    let y = range(2, 3)
+
+    assert(x == x)
+    assert(y == y)
+    assert(x != y)
+    assert(y != x)
+    assert(x != 'z')
+    assert('z' != y)
+
+    assert(frozen(x))
+    assert(x == freeze(x))
+    assert(frozen(x))
+
+    assert(iter(x) != null)
+    assert(len(x) == 0)
+    assert(len(y) == 1)
+
+    assert("range<0, 0, 1>" == str(x))
+    assert("range<2, 3, 1>" == str(y))
+
+    assert('Range' == type(x))
+
     let rng = range(0, 10)
     assert(set { 'to', 'count', 'step', 'from' } == fields(rng))
     for f in fields(rng) {
@@ -1048,11 +1226,24 @@ fn testRange() {
 
     //-----------------------------------------
 
+    fail(|| => iter(range(0,0)).get(), 'NoSuchElement')
+
     fn listify(r) {
         let ls = []
         for n in r {
             ls.add(n)
         }
+        return ls
+    }
+
+    fn iterate(r) {
+        let ls = []
+        let itr = iter(r)
+        fail(|| => itr.get(), 'NoSuchElement')
+        while itr.next() {
+            ls.add(itr.get())
+        }
+        fail(|| => itr.get(), 'NoSuchElement')
         return ls
     }
 
@@ -1062,23 +1253,45 @@ fn testRange() {
     let d = range(-1, -8, -3)
     let e = range(2, 2)
     let f = range(-1, -1, -1)
+    let g = range(2, 1, 1)
+    let h = range(1, 2, -1)
+
     assert(listify(a) == [ 0, 1, 2, 3, 4 ])
     assert(listify(b) == [ 0, 2, 4 ])
     assert(listify(c) == [ 2, 5, 8, 11 ])
     assert(listify(d) == [ -1, -4, -7 ])
     assert(listify(e) == [])
     assert(listify(f) == [])
+    assert(listify(g) == [])
+    assert(listify(h) == [])
+
+    assert(iterate(a) == [ 0, 1, 2, 3, 4 ])
+    assert(iterate(b) == [ 0, 2, 4 ])
+    assert(iterate(c) == [ 2, 5, 8, 11 ])
+    assert(iterate(d) == [ -1, -4, -7 ])
+    assert(iterate(e) == [])
+    assert(iterate(f) == [])
+    assert(iterate(g) == [])
+    assert(iterate(h) == [])
+
     assert([a.from(), a.to(), a.step(), a.count()] == [0, 5, 1, 5])
     assert([b.from(), b.to(), b.step(), b.count()] == [0, 5, 2, 3])
     assert([c.from(), c.to(), c.step(), c.count()] == [2, 14, 3, 4])
     assert([d.from(), d.to(), d.step(), d.count()] == [-1, -8, -3, 3])
     assert([e.from(), e.to(), e.step(), e.count()] == [2, 2, 1, 0])
+    assert([f.from(), f.to(), f.step(), f.count()] == [-1, -1, -1, 0])
+    assert([g.from(), g.to(), g.step(), g.count()] == [2, 1, 1, 0])
+    assert([h.from(), h.to(), h.step(), h.count()] == [1, 2, -1, 0])
 
     let i = 0
-    while i < a.count() {
-        assert(a[i] == i)
+    let ls = [2, 5, 8, 11]
+    while i < c.count() {
+        assert(c[i] == ls[i])
         i++
     } 
+    assert(i == 4)
+
+    fail(|| => range(0, 0, 0), "InvalidArgument: step cannot be 0")
 }
 
 fn testSlice() {
@@ -1208,16 +1421,6 @@ fn testStruct() {
 
 //fn testIterator() {
 //    
-//    // list
-//    fail(|| => iter([]).get(), 'NoSuchElement')
-//    let count = 0
-//    let itr = iter([1, 2, 3])
-//    fail(|| => itr.get(), 'NoSuchElement')
-//    while itr.next() {
-//        count += itr.get()
-//    }
-//    assert(6 == count)
-//    fail(|| => itr.get(), 'NoSuchElement')
 //
 //    // range
 //    fail(|| => iter(range(0, 0)).get(), 'NoSuchElement')
@@ -1352,9 +1555,8 @@ fn main(args) {
     testNull()
     testBool()
     testStr()
-//    testInt()
-//    testFloat()
-//    testFunc() ^^^^^^^
+    testInt()
+    testFloat()
     testList()
     testRange()
 //    testTuple()

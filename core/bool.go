@@ -29,7 +29,7 @@ func (b _bool) basicMarker() {}
 func (b _bool) Type() Type { return BoolType }
 
 func (b _bool) Freeze(ev Evaluator) (Value, Error) {
-	return True, nil
+	return b, nil
 }
 
 func (b _bool) Frozen(ev Evaluator) (Bool, Error) {
