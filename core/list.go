@@ -58,7 +58,7 @@ func (ls *list) ToStr(ev Evaluator) (Str, Error) {
 }
 
 func (ls *list) HashCode(ev Evaluator) (Int, Error) {
-	return nil, TypeMismatchError("Expected Hashable")
+	return nil, TempMismatchError("Expected Hashable")
 }
 
 func (ls *list) Eq(ev Evaluator, v Value) (Bool, Error) {
@@ -195,7 +195,7 @@ func (ls *list) Filter(ev Evaluator, filterer func(Value) (Value, Error)) (Value
 		}
 		pred, ok := flt.(Bool)
 		if !ok {
-			return nil, TypeMismatchError("Expected Bool")
+			return nil, TypeMismatchError(BoolType)
 		}
 
 		eq, err := pred.Eq(ev, True)
@@ -252,7 +252,7 @@ func (ls *list) Add(ev Evaluator, val Value) Error {
 //		}
 //		return nil
 //	}
-//	return TypeMismatchError("Expected Iterable Type")
+//	return TempMismatchError("Expected Iterable Type")
 //}
 
 func (ls *list) Remove(ev Evaluator, index Int) Error {

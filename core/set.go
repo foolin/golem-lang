@@ -69,7 +69,7 @@ func (s *set) ToStr(ev Evaluator) (Str, Error) {
 }
 
 func (s *set) HashCode(ev Evaluator) (Int, Error) {
-	return nil, TypeMismatchError("Expected Hashable")
+	return nil, TempMismatchError("Expected Hashable")
 }
 
 func (s *set) Eq(ev Evaluator, v Value) (Bool, Error) {
@@ -126,7 +126,7 @@ func (s *set) AddAll(ev Evaluator, val Value) Error {
 	//		return nil
 	//	}
 	//
-	//		return nil, TypeMismatchError(
+	//		return nil, TempMismatchError(
 	//			fmt.Sprintf("Type %s has no iter()", values[0].Type()))
 }
 

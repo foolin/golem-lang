@@ -54,7 +54,7 @@ func (r *rng) ToStr(ev Evaluator) (Str, Error) {
 }
 
 func (r *rng) HashCode(ev Evaluator) (Int, Error) {
-	return nil, TypeMismatchError("Expected Hashable")
+	return nil, TempMismatchError("Expected Hashable")
 }
 
 func (r *rng) Eq(ev Evaluator, v Value) (Bool, Error) {

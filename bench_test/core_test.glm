@@ -34,9 +34,9 @@ fn testExpressions() {
     assert('a' + null == 'anull')
     assert(null + 'a' == 'nulla')
 
-    fail(|| => true + null, 'TypeMismatch: Expected Number')
-    fail(|| => 1 + null, 'TypeMismatch: Expected Number')
-    fail(|| => null + 1, 'TypeMismatch: Expected Number')
+    fail(|| => true + null, 'TypeMismatch: Expected Int or Float, not Bool')
+    fail(|| => 1 + null, 'TypeMismatch: Expected Int or Float, not Null')
+    fail(|| => null + 1, 'TypeMismatch: Expected Int or Float, not Null')
 
     assert((true == 'a') == false)
     assert((3 * 7 + 4 == 5 * 5) == true)
@@ -199,7 +199,7 @@ fn testAssignment() {
             fail(fn() {
                     let e = 'abc'
                     e++
-                }, "TypeMismatch: Expected Number")
+                }, "TypeMismatch: Expected Int or Float, not Str")
         },
         fn () {
             let a = [10]
@@ -211,7 +211,7 @@ fn testAssignment() {
             fail(fn() {
                     let e = ['abc']
                     e[0]++
-                }, "TypeMismatch: Expected Number")
+                }, "TypeMismatch: Expected Int or Float, not Str")
         },
         fn () {
             let a = struct { x: 10 }
@@ -223,7 +223,7 @@ fn testAssignment() {
             fail(fn() {
                     let e = struct { x: 'abc' }
                     e.x++
-                }, "TypeMismatch: Expected Number")
+                }, "TypeMismatch: Expected Int or Float, not Str")
         }
     ]
     for f in funcs { f(); }

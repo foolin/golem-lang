@@ -65,7 +65,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			f.ip += 3
 
 		default:
-			return nil, g.TypeMismatchError("Expected Func")
+			return nil, g.TypeMismatchError(g.FuncType)
 		}
 
 	case bc.Return:
@@ -130,7 +130,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			})()
 
 		default:
-			return nil, g.TypeMismatchError("Expected Func")
+			return nil, g.TypeMismatchError(g.FuncType)
 		}
 
 	case bc.Throw:
@@ -138,7 +138,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get str from stack
 		s, ok := f.stack[n].(g.Str)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Str")
+			return nil, g.TypeMismatchError(g.StrType)
 		}
 
 		// throw an error
@@ -156,10 +156,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.FuncLocal:
 
 		// get function from stack
-		fn, ok := f.stack[n].(bc.BytecodeFunc)
-		if !ok {
-			return nil, g.TypeMismatchError("Expected BytecodeFunc")
-		}
+		fn := f.stack[n].(bc.BytecodeFunc)
 
 		// push a local onto the captures of the function
 		p := bc.DecodeParam(btc, f.ip)
@@ -169,10 +166,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.FuncCapture:
 
 		// get function from stack
-		fn, ok := f.stack[n].(bc.BytecodeFunc)
-		if !ok {
-			return nil, g.TypeMismatchError("Expected BytecodeFunc")
-		}
+		fn := f.stack[n].(bc.BytecodeFunc)
 
 		// push a capture onto the captures of the function
 		p := bc.DecodeParam(btc, f.ip)
@@ -219,7 +213,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	//		// make sure the top of the stack is really a tuple
 	//		tp, ok := f.stack[n].(g.Tuple)
 	//		if !ok {
-	//			return nil, g.TypeMismatchError("Expected Tuple")
+	//			return nil, g.TypeMismatchError(g.TupleType)
 	//		}
 	//
 	//		// and make sure its of the expected length
@@ -232,18 +226,6 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	//
 	//		// do not alter stack
 	//		f.ip += 3
-
-	//case bc.CheckCast:
-
-	//	// make sure the top of the stack is of the given type
-	//	vtype := g.Type(bc.DecodeParam(btc, f.ip))
-	//	v := f.stack[n]
-	//	if v.Type() != vtype {
-	//		return nil, g.TypeMismatchError(fmt.Sprintf("Expected %s", vtype.String()))
-	//	}
-
-	//	// do not alter stack
-	//	f.ip += 3
 
 	//	case bc.NewDict:
 	//
@@ -336,7 +318,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 			stc, ok := f.stack[n-1].(g.Struct)
 			if !ok {
-				return nil, g.TypeMismatchError("Expected Struct")
+				return nil, g.TypeMismatchError(g.StructType)
 			}
 			value := f.stack[n]
 
@@ -393,7 +375,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get struct from stack
 		stc, ok := f.stack[n-1].(g.Struct)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Struct")
+			return nil, g.TypeMismatchError(g.StructType)
 		}
 
 		// get value from stack
@@ -423,7 +405,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get Indexable from stack
 		gtb, ok := f.stack[n-1].(g.Indexable)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Indexable")
+			return nil, g.TempMismatchError("Expected Indexable")
 		}
 
 		// get index from stack
@@ -443,7 +425,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get IndexAssignable from stack
 		ibl, ok := f.stack[n-2].(g.IndexAssignable)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Indexable")
+			return nil, g.TempMismatchError("Expected Indexable")
 		}
 
 		// get index from stack
@@ -466,7 +448,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get IndexAssignable from stack
 		ibl, ok := f.stack[n-2].(g.IndexAssignable)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Indexable")
+			return nil, g.TempMismatchError("Expected Indexable")
 		}
 
 		// get index from stack
@@ -499,7 +481,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get Sliceable from stack
 		slb, ok := f.stack[n-2].(g.Sliceable)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Sliceable")
+			return nil, g.TempMismatchError("Expected Sliceable")
 		}
 
 		// get indices from stack
@@ -520,7 +502,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get Sliceable from stack
 		slb, ok := f.stack[n-1].(g.Sliceable)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Sliceable")
+			return nil, g.TempMismatchError("Expected Sliceable")
 		}
 
 		// get index from stack
@@ -540,7 +522,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get Sliceable from stack
 		slb, ok := f.stack[n-1].(g.Sliceable)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Sliceable")
+			return nil, g.TempMismatchError("Expected Sliceable")
 		}
 
 		// get index from stack
@@ -629,7 +611,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.JumpTrue:
 		b, ok := f.stack[n].(g.Bool)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Bool")
+			return nil, g.TypeMismatchError(g.BoolType)
 		}
 
 		f.stack = f.stack[:n]
@@ -642,7 +624,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.JumpFalse:
 		b, ok := f.stack[n].(g.Bool)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Bool")
+			return nil, g.TypeMismatchError(g.BoolType)
 		}
 
 		f.stack = f.stack[:n]
@@ -674,11 +656,11 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		lhs, lhsOk := f.stack[n-1].(g.Comparable)
 		if !lhsOk {
-			return nil, g.TypeMismatchError("Expected Comparable")
+			return nil, g.TempMismatchError("Expected Comparable")
 		}
 		rhs, rhsOk := f.stack[n].(g.Comparable)
 		if !rhsOk {
-			return nil, g.TypeMismatchError("Expected Comparable")
+			return nil, g.TempMismatchError("Expected Comparable")
 		}
 
 		val, err := lhs.Cmp(itp, rhs)
@@ -693,11 +675,11 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		lhs, lhsOk := f.stack[n-1].(g.Comparable)
 		if !lhsOk {
-			return nil, g.TypeMismatchError("Expected Comparable")
+			return nil, g.TempMismatchError("Expected Comparable")
 		}
 		rhs, rhsOk := f.stack[n].(g.Comparable)
 		if !rhsOk {
-			return nil, g.TypeMismatchError("Expected Comparable")
+			return nil, g.TempMismatchError("Expected Comparable")
 		}
 
 		val, err := lhs.Cmp(itp, rhs)
@@ -712,11 +694,11 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		lhs, lhsOk := f.stack[n-1].(g.Comparable)
 		if !lhsOk {
-			return nil, g.TypeMismatchError("Expected Comparable")
+			return nil, g.TempMismatchError("Expected Comparable")
 		}
 		rhs, rhsOk := f.stack[n].(g.Comparable)
 		if !rhsOk {
-			return nil, g.TypeMismatchError("Expected Comparable")
+			return nil, g.TempMismatchError("Expected Comparable")
 		}
 
 		val, err := lhs.Cmp(itp, rhs)
@@ -731,11 +713,11 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		lhs, lhsOk := f.stack[n-1].(g.Comparable)
 		if !lhsOk {
-			return nil, g.TypeMismatchError("Expected Comparable")
+			return nil, g.TempMismatchError("Expected Comparable")
 		}
 		rhs, rhsOk := f.stack[n].(g.Comparable)
 		if !rhsOk {
-			return nil, g.TypeMismatchError("Expected Comparable")
+			return nil, g.TempMismatchError("Expected Comparable")
 		}
 
 		val, err := lhs.Cmp(itp, rhs)
@@ -750,11 +732,11 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		lhs, lhsOk := f.stack[n-1].(g.Comparable)
 		if !lhsOk {
-			return nil, g.TypeMismatchError("Expected Comparable")
+			return nil, g.TempMismatchError("Expected Comparable")
 		}
 		rhs, rhsOk := f.stack[n].(g.Comparable)
 		if !rhsOk {
-			return nil, g.TypeMismatchError("Expected Comparable")
+			return nil, g.TempMismatchError("Expected Comparable")
 		}
 
 		val, err := lhs.Cmp(itp, rhs)
@@ -786,16 +768,18 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.Not:
 		b, ok := f.stack[n].(g.Bool)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Bool")
+			return nil, g.TypeMismatchError(g.BoolType)
 		}
 
 		f.stack[n] = b.Not()
 		f.ip++
 
 	case bc.Sub:
-		z, ok := f.stack[n-1].(g.Number)
+
+		lhs := f.stack[n-1]
+		z, ok := lhs.(g.Number)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Number")
+			return nil, g.NumberMismatchError(lhs.Type())
 		}
 
 		val, err := z.Sub(f.stack[n])
@@ -807,9 +791,11 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.ip++
 
 	case bc.Mul:
-		z, ok := f.stack[n-1].(g.Number)
+
+		lhs := f.stack[n-1]
+		z, ok := lhs.(g.Number)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Number")
+			return nil, g.NumberMismatchError(lhs.Type())
 		}
 
 		val, err := z.Mul(f.stack[n])
@@ -821,9 +807,11 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.ip++
 
 	case bc.Div:
-		z, ok := f.stack[n-1].(g.Number)
+
+		lhs := f.stack[n-1]
+		z, ok := lhs.(g.Number)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Number")
+			return nil, g.NumberMismatchError(lhs.Type())
 		}
 
 		val, err := z.Div(f.stack[n])
@@ -835,9 +823,11 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.ip++
 
 	case bc.Negate:
-		z, ok := f.stack[n].(g.Number)
+
+		lhs := f.stack[n-1]
+		z, ok := lhs.(g.Number)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Number")
+			return nil, g.NumberMismatchError(lhs.Type())
 		}
 
 		val := z.Negate()
@@ -845,9 +835,10 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.ip++
 
 	case bc.Rem:
+
 		z, ok := f.stack[n-1].(g.Int)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Int")
+			return nil, g.TypeMismatchError(g.IntType)
 		}
 
 		val, err := z.Rem(f.stack[n])
@@ -859,9 +850,10 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.ip++
 
 	case bc.BitAnd:
+
 		z, ok := f.stack[n-1].(g.Int)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Int")
+			return nil, g.TypeMismatchError(g.IntType)
 		}
 
 		val, err := z.BitAnd(f.stack[n])
@@ -875,7 +867,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.BitOr:
 		z, ok := f.stack[n-1].(g.Int)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Int")
+			return nil, g.TypeMismatchError(g.IntType)
 		}
 
 		val, err := z.BitOr(f.stack[n])
@@ -889,7 +881,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.BitXor:
 		z, ok := f.stack[n-1].(g.Int)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Int")
+			return nil, g.TypeMismatchError(g.IntType)
 		}
 
 		val, err := z.BitXOr(f.stack[n])
@@ -903,7 +895,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.LeftShift:
 		z, ok := f.stack[n-1].(g.Int)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Int")
+			return nil, g.TypeMismatchError(g.IntType)
 		}
 
 		val, err := z.LeftShift(f.stack[n])
@@ -917,7 +909,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.RightShift:
 		z, ok := f.stack[n-1].(g.Int)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Int")
+			return nil, g.TypeMismatchError(g.IntType)
 		}
 
 		val, err := z.RightShift(f.stack[n])
@@ -931,7 +923,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.Complement:
 		z, ok := f.stack[n].(g.Int)
 		if !ok {
-			return nil, g.TypeMismatchError("Expected Int")
+			return nil, g.TypeMismatchError(g.IntType)
 		}
 
 		val := z.Complement()
@@ -1014,20 +1006,23 @@ func plus(ev g.Evaluator, a g.Value, b g.Value) (g.Value, g.Error) {
 
 	// if both are Numbers, add them together
 	na, ia := a.(g.Number)
-	nb, ib := b.(g.Number)
-	if ia && ib {
-		return na.Add(nb)
+	if !ia {
+		return nil, g.NumberMismatchError(a.Type())
 	}
 
-	// error
-	return nil, g.TypeMismatchError("Expected Number")
+	nb, ib := b.(g.Number)
+	if !ib {
+		return nil, g.NumberMismatchError(b.Type())
+	}
+
+	return na.Add(nb)
 }
 
 func inc(ev g.Evaluator, a g.Value, b g.Value) (g.Value, g.Error) {
 
 	na, ok := a.(g.Number)
 	if !ok {
-		return nil, g.TypeMismatchError("Expected Number")
+		return nil, g.NumberMismatchError(a.Type())
 	}
 	nb := b.(g.Number)
 	return na.Add(nb)

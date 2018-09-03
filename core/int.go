@@ -98,7 +98,7 @@ func (i _int) Cmp(ev Evaluator, c Comparable) (Int, Error) {
 		}
 
 	default:
-		return nil, TypeMismatchError("Expected Comparable")
+		return nil, TempMismatchError("Expected Comparable")
 	}
 }
 
@@ -114,7 +114,7 @@ func (i _int) Add(val Value) (Number, Error) {
 		return NewFloat(a + b), nil
 
 	default:
-		return nil, TypeMismatchError("Expected Number")
+		return nil, NumberMismatchError(val.Type())
 	}
 }
 
@@ -133,7 +133,7 @@ func (i _int) Sub(val Value) (Number, Error) {
 		return NewFloat(a - b), nil
 
 	default:
-		return nil, TypeMismatchError("Expected Number")
+		return nil, NumberMismatchError(val.Type())
 	}
 }
 
@@ -149,7 +149,7 @@ func (i _int) Mul(val Value) (Number, Error) {
 		return NewFloat(a * b), nil
 
 	default:
-		return nil, TypeMismatchError("Expected Number")
+		return nil, NumberMismatchError(val.Type())
 	}
 }
 
@@ -171,7 +171,7 @@ func (i _int) Div(val Value) (Number, Error) {
 		return NewFloat(a / b), nil
 
 	default:
-		return nil, TypeMismatchError("Expected Number")
+		return nil, NumberMismatchError(val.Type())
 	}
 }
 
@@ -187,7 +187,7 @@ func (i _int) Rem(val Value) (Int, Error) {
 	case _int:
 		return i % t, nil
 	default:
-		return nil, TypeMismatchError("Expected Int")
+		return nil, TypeMismatchError(IntType)
 	}
 }
 
@@ -196,7 +196,7 @@ func (i _int) BitAnd(val Value) (Int, Error) {
 	case _int:
 		return i & t, nil
 	default:
-		return nil, TypeMismatchError("Expected Int")
+		return nil, TypeMismatchError(IntType)
 	}
 }
 
@@ -205,7 +205,7 @@ func (i _int) BitOr(val Value) (Int, Error) {
 	case _int:
 		return i | t, nil
 	default:
-		return nil, TypeMismatchError("Expected Int")
+		return nil, TypeMismatchError(IntType)
 	}
 }
 
@@ -214,7 +214,7 @@ func (i _int) BitXOr(val Value) (Int, Error) {
 	case _int:
 		return i ^ t, nil
 	default:
-		return nil, TypeMismatchError("Expected Int")
+		return nil, TypeMismatchError(IntType)
 	}
 }
 
@@ -226,7 +226,7 @@ func (i _int) LeftShift(val Value) (Int, Error) {
 		}
 		return i << uint(t), nil
 	default:
-		return nil, TypeMismatchError("Expected Int")
+		return nil, TypeMismatchError(IntType)
 	}
 }
 
@@ -238,7 +238,7 @@ func (i _int) RightShift(val Value) (Int, Error) {
 		}
 		return i >> uint(t), nil
 	default:
-		return nil, TypeMismatchError("Expected Int")
+		return nil, TypeMismatchError(IntType)
 	}
 }
 

@@ -48,7 +48,7 @@ func (f *nativeFunc) Frozen(ev Evaluator) (Bool, Error) {
 }
 
 func (f *nativeFunc) HashCode(ev Evaluator) (Int, Error) {
-	return nil, TypeMismatchError("Expected Hashable")
+	return nil, TempMismatchError("Expected Hashable")
 }
 
 func (f *nativeFunc) ToStr(ev Evaluator) (Str, Error) {
@@ -359,7 +359,7 @@ func vetParam(value Value, typ Type, allowNull bool) Error {
 
 	// check type
 	if value.Type() != typ {
-		return TypeMismatchError(fmt.Sprintf("Expected %s", typ.String()))
+		return TypeMismatchError(typ)
 	}
 
 	return nil

@@ -37,7 +37,7 @@ func (f *field) Get(ev Evaluator) (Value, Error) {
 func (f *field) Invoke(ev Evaluator, params []Value) (Value, Error) {
 	fn, ok := f.value.(Func)
 	if !ok {
-		return nil, TypeMismatchError("Expected Func")
+		return nil, TypeMismatchError(FuncType)
 	}
 	return fn.Invoke(ev, params)
 }
@@ -70,7 +70,7 @@ func (f *readonlyField) Get(ev Evaluator) (Value, Error) {
 func (f *readonlyField) Invoke(ev Evaluator, params []Value) (Value, Error) {
 	fn, ok := f.value.(Func)
 	if !ok {
-		return nil, TypeMismatchError("Expected Func")
+		return nil, TypeMismatchError(FuncType)
 	}
 	return fn.Invoke(ev, params)
 }
@@ -118,7 +118,7 @@ func (p *property) Invoke(ev Evaluator, params []Value) (Value, Error) {
 
 	fn, ok := val.(Func)
 	if !ok {
-		return nil, TypeMismatchError("Expected Func")
+		return nil, TypeMismatchError(FuncType)
 	}
 	return fn.Invoke(ev, params)
 }
@@ -162,7 +162,7 @@ func (p *readonlyProperty) Invoke(ev Evaluator, params []Value) (Value, Error) {
 
 	fn, ok := val.(Func)
 	if !ok {
-		return nil, TypeMismatchError("Expected Func")
+		return nil, TypeMismatchError(FuncType)
 	}
 	return fn.Invoke(ev, params)
 }

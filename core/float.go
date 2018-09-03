@@ -97,7 +97,7 @@ func (f _float) Cmp(ev Evaluator, c Comparable) (Int, Error) {
 		}
 
 	default:
-		return nil, TypeMismatchError("Expected Comparable")
+		return nil, TempMismatchError("Expected Comparable")
 	}
 }
 
@@ -111,7 +111,7 @@ func (f _float) Add(val Value) (Number, Error) {
 		return f + t, nil
 
 	default:
-		return nil, TypeMismatchError("Expected Number")
+		return nil, NumberMismatchError(val.Type())
 	}
 }
 
@@ -125,7 +125,7 @@ func (f _float) Sub(val Value) (Number, Error) {
 		return f - t, nil
 
 	default:
-		return nil, TypeMismatchError("Expected Number")
+		return nil, NumberMismatchError(val.Type())
 	}
 }
 
@@ -139,7 +139,7 @@ func (f _float) Mul(val Value) (Number, Error) {
 		return f * t, nil
 
 	default:
-		return nil, TypeMismatchError("Expected Number")
+		return nil, NumberMismatchError(val.Type())
 	}
 }
 
@@ -159,7 +159,7 @@ func (f _float) Div(val Value) (Number, Error) {
 		return f / t, nil
 
 	default:
-		return nil, TypeMismatchError("Expected Number")
+		return nil, NumberMismatchError(val.Type())
 	}
 }
 

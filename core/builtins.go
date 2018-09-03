@@ -106,7 +106,7 @@ var BuiltinLen = NewFixedNativeFunc(
 		if ln, ok := values[0].(Lenable); ok {
 			return ln.Len(ev)
 		}
-		return nil, TypeMismatchError(
+		return nil, TempMismatchError(
 			fmt.Sprintf("Type %s has no len()", values[0].Type()))
 	})
 
@@ -123,7 +123,7 @@ var BuiltinIter = NewFixedNativeFunc(
 		if ibl, ok := values[0].(Iterable); ok {
 			return ibl.NewIterator(ev)
 		}
-		return nil, TypeMismatchError(
+		return nil, TempMismatchError(
 			fmt.Sprintf("Type %s has no iter()", values[0].Type()))
 	})
 
@@ -165,7 +165,7 @@ var BuiltinAssert = NewFixedNativeFunc(
 //			if s, ok := v.(Struct); ok {
 //				structs[i] = s
 //			} else {
-//				return nil, TypeMismatchError("Expected Struct")
+//				return nil, TypeMismatchError(StructType)
 //			}
 //		}
 //
