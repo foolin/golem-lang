@@ -120,38 +120,41 @@ func (s str) Concat(that Str) Str {
 	return str(strcpy(a) + strcpy(b))
 }
 
-////---------------------------------------------------------------
-//// Iterator
-//
-//type strIterator struct {
-//	Struct
-//	runes []rune
-//	n     int
-//}
-//
-//func (s str) NewIterator(ev Evaluator) Iterator {
-//	return initIteratorStruct(ev,
-//		&strIterator{newIteratorStruct(), []rune(string(s)), -1})
-//}
-//
-//func (i *strIterator) IterNext() Bool {
-//	i.n++
-//	return NewBool(i.n < len(i.runes))
-//}
-//
-//func (i *strIterator) IterGet() (Value, Error) {
-//
-//	if (i.n >= 0) && (i.n < len(i.runes)) {
-//		return str([]rune{i.runes[i.n]}), nil
-//	}
-//	return nil, NoSuchElementError()
-//}
+//---------------------------------------------------------------
+// Iterator
+
+type strIterator struct {
+	Struct
+	runes []rune
+	n     int
+}
+
+func (s str) NewIterator(ev Evaluator) (Iterator, Error) {
+
+	itr := &strIterator{iteratorStruct(), []rune(string(s)), -1}
+
+	next, get := iteratorFields(ev, itr)
+	itr.Internal("next", next)
+	itr.Internal("get", get)
+
+	return itr, nil
+}
+
+func (i *strIterator) IterNext(ev Evaluator) (Bool, Error) {
+	i.n++
+	return NewBool(i.n < len(i.runes)), nil
+}
+
+func (i *strIterator) IterGet(ev Evaluator) (Value, Error) {
+
+	if (i.n >= 0) && (i.n < len(i.runes)) {
+		return str([]rune{i.runes[i.n]}), nil
+	}
+	return nil, NoSuchElementError()
+}
 
 //--------------------------------------------------------------
 // fields
-
-// This is some chinese text that we are going to use for testing purposes.
-// 這是我們將用於測試目的的一些中文文本。
 
 var strMethods = map[string]Method{
 
@@ -180,13 +183,6 @@ var strMethods = map[string]Method{
 			result = utf8.RuneCountInString(s[:result])
 			return NewInt(int64(result)), nil
 		}),
-
-	//"lastIndex",
-	//"startsWith",
-	//"endsWith",
-	//"replace",
-	//"split",
-	//"iterator",
 }
 
 func (s str) FieldNames() ([]string, Error) {
@@ -292,13 +288,6 @@ func (s str) InvokeField(name string, ev Evaluator, params []Value) (Value, Erro
 //				}
 //				return NewList(result), nil
 //
-//			})}, nil
-//
-//	case "iterator":
-//		return &virtualFunc{s, sn, NewFixedNativeFunc(
-//			[]Type{}, false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//				return s.NewIterator(ev), nil
 //			})}, nil
 //
 //	default:

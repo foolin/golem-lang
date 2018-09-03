@@ -290,7 +290,7 @@ type listIterator struct {
 	n  int
 }
 
-func (ls *list) NewIterator(ev Evaluator) Iterator {
+func (ls *list) NewIterator(ev Evaluator) (Iterator, Error) {
 
 	itr := &listIterator{iteratorStruct(), ls, -1}
 
@@ -298,7 +298,7 @@ func (ls *list) NewIterator(ev Evaluator) Iterator {
 	itr.Internal("next", next)
 	itr.Internal("get", get)
 
-	return itr
+	return itr, nil
 }
 
 func (i *listIterator) IterNext(ev Evaluator) (Bool, Error) {

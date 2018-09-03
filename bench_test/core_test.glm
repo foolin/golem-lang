@@ -25,79 +25,79 @@ fn fail(func, err) {
 
 fn testExpressions() {
 
-	assert((2 + 3) * -4 / 10 == -2)
-	assert((2*2*2*2 + 2*3*(8 - 1) + 2) / (17 - 2*2*2 - -1) == 6)
+    assert((2 + 3) * -4 / 10 == -2)
+    assert((2*2*2*2 + 2*3*(8 - 1) + 2) / (17 - 2*2*2 - -1) == 6)
 
-	assert(true + 'a' == 'truea')
-	assert('a' + true == 'atrue')
-	assert('a' + null == 'anull')
-	assert(null + 'a' == 'nulla')
+    assert(true + 'a' == 'truea')
+    assert('a' + true == 'atrue')
+    assert('a' + null == 'anull')
+    assert(null + 'a' == 'nulla')
 
-	fail(|| => true + null, 'TypeMismatch: Expected Number')
-	fail(|| => 1 + null, 'TypeMismatch: Expected Number')
-	fail(|| => null + 1, 'TypeMismatch: Expected Number')
+    fail(|| => true + null, 'TypeMismatch: Expected Number')
+    fail(|| => 1 + null, 'TypeMismatch: Expected Number')
+    fail(|| => null + 1, 'TypeMismatch: Expected Number')
 
-	assert((true == 'a') == false)
-	assert((3 * 7 + 4 == 5 * 5) == true)
-	assert((1 != 1) == false)
-	assert((1 != 2) == true)
+    assert((true == 'a') == false)
+    assert((3 * 7 + 4 == 5 * 5) == true)
+    assert((1 != 1) == false)
+    assert((1 != 2) == true)
 
-	assert(!false == true)
-	assert(!true == false)
-	fail(|| => !null, 'TypeMismatch: Expected Bool')
-	fail(|| => !'a', 'TypeMismatch: Expected Bool')
-	fail(|| => !1, 'TypeMismatch: Expected Bool')
-	fail(|| => !1.0, 'TypeMismatch: Expected Bool')
+    assert(!false == true)
+    assert(!true == false)
+    fail(|| => !null, 'TypeMismatch: Expected Bool')
+    fail(|| => !'a', 'TypeMismatch: Expected Bool')
+    fail(|| => !1, 'TypeMismatch: Expected Bool')
+    fail(|| => !1.0, 'TypeMismatch: Expected Bool')
 
-	assert(1 < 2 == true)
-	assert(1 <= 2 == true)
-	assert(1 > 2 == false)
-	assert(1 >= 2 == false)
+    assert(1 < 2 == true)
+    assert(1 <= 2 == true)
+    assert(1 > 2 == false)
+    assert(1 >= 2 == false)
 
-	assert(2 < 2 == false)
-	assert(2 <= 2 == true)
-	assert(2 > 2 == false)
-	assert(2 >= 2 == true)
+    assert(2 < 2 == false)
+    assert(2 <= 2 == true)
+    assert(2 > 2 == false)
+    assert(2 >= 2 == true)
 
-	assert(1 <=> 2 == -1)
-	assert(2 <=> 2 == 0)
-	assert(2 <=> 1 == 1)
+    assert(1 <=> 2 == -1)
+    assert(2 <=> 2 == 0)
+    assert(2 <=> 1 == 1)
 
-	assert((true  && true) == true)
-	assert((true  && false) == false)
-	assert((false && true) == false)
-	assert((false && 12) == false)
-	fail(|| => 12 && false, 'TypeMismatch: Expected Bool')
+    assert((true  && true) == true)
+    assert((true  && false) == false)
+    assert((false && true) == false)
+    assert((false && 12) == false)
+    fail(|| => 12 && false, 'TypeMismatch: Expected Bool')
 
-	assert(true  || (true == true))
-	assert(true  || (false == true))
-	assert(false || (true == true))
-	assert(false || (false == false))
-	assert(true  || (12 == true))
-	fail(|| => 12  || true, 'TypeMismatch: Expected Bool')
+    assert(true  || (true == true))
+    assert(true  || (false == true))
+    assert(false || (true == true))
+    assert(false || (false == false))
+    assert(true  || (12 == true))
+    fail(|| => 12  || true, 'TypeMismatch: Expected Bool')
 
-	assert(~0 == -1)
-	assert(8 % 2 == 0)
-	assert(8 & 2 == 0)
-	assert(8 | 2 == 10)
-	assert(8 ^ 2 == 10)
-	assert(8 << 2 == 32)
-	assert(8 >> 2 == 2)
+    assert(~0 == -1)
+    assert(8 % 2 == 0)
+    assert(8 & 2 == 0)
+    assert(8 | 2 == 10)
+    assert(8 ^ 2 == 10)
+    assert(8 << 2 == 32)
+    assert(8 >> 2 == 2)
 
-	assert([true][0] == true)
-	assert('abc'[1] == 'b')
-	assert('abc'[-1] == 'c')
-	fail(|| => [true][2], 'IndexOutOfBounds: 2')
+    assert([true][0] == true)
+    assert('abc'[1] == 'b')
+    assert('abc'[-1] == 'c')
+    fail(|| => [true][2], 'IndexOutOfBounds: 2')
 
-	assert('abc'[1:] == 'bc')
-	assert('abc'[:1] == 'a')
-	assert('abcd'[1:3] == 'bc')
-	assert('abcd'[1:1] == '')
+    assert('abc'[1:] == 'bc')
+    assert('abc'[:1] == 'a')
+    assert('abcd'[1:3] == 'bc')
+    assert('abcd'[1:1] == '')
 
-	assert([6,7,8][1:] == [7,8])
-	assert([6,7,8][:1] == [6])
-	assert([6,7,8,9][1:3] == [7,8])
-	assert([6,7,8,9][1:1] == [])
+    assert([6,7,8][1:] == [7,8])
+    assert([6,7,8][:1] == [6])
+    assert([6,7,8,9][1:3] == [7,8])
+    assert([6,7,8,9][1:1] == [])
 
 }
 
@@ -173,135 +173,135 @@ fn testAssignment() {
     for f in funcs { f(); }
 }
 
-fn testTry() {
-//    println('testTry')
-//
-//    let funcs = [
-//        fn () {
-//            println('begin func 0')
-//            fail(|| => 3 / 0, "DivideByZero")
-//            fail(fn() {
-//                    try {
-//                        3 / 0
-//                    } catch e2 {
-//                        assert()
-//                    }
-//                },
-//                "ArityMismatch: Expected 1 params, got 0")
-//            println('end   func 0')
-//        },
-//        fn () {
-//            println('begin func 1')
-//            let a = 0
-//            let b = 0
-//            try {
-//                3 / 0
-//            } catch e {
-//                a = 1
-//            }
-//            try {
-//                3 / 0
-//            } catch e {
-//                b = 2
-//            }
-//            assert(a == 1)
-//            assert(b == 2)
-//            println('end   func 1')
-//        },
-//        fn () {
-//            println('begin func 2')
-//            let a = 0
-//            try {
-//                3 / 0
-//            } catch e {
-//                a = 1
-//            } finally {
-//                a = 2
-//            }
-//            assert(a == 2)
-//            println('end   func 2')
-//        },
-//        fn () {
-//            println('begin func 3')
-//            let a = 0
-//            //let f = fn() {
-//            //    try {
-//            //        3 / 0
-//            //    } catch e {
-//            //        return 1
-//            //    } finally {
-//            //        a = 2
-//            //    }
-//            //}
-//            //let b = f()
-//            //assert(b == 1)
-//            //assert(a == 2)
-//            println('end   func 3')
-//        },
-//        fn () {
-//            println('begin func 4')
-//            //let a = 0
-//            //let f = fn() {
-//            //    try {
-//            //        3 / 0
-//            //    } catch e {
-//            //        return 1
-//            //    } finally {
-//            //        a = 2
-//            //    }
-//            //}
-//            //let b = f()
-//            //assert(b == 1)
-//            //assert(a == 2)
-//            println('end   func 4')
-//        }
-//        //fn () {
-//        //    println('func 4')
-//        //    let a = 0
-//        //    let b = 0
-//        //    //try {
-//        //    //    try {
-//        //    //        3 / 0
-//        //    //    } catch e {
-//        //    //        assert(1,2,3)
-//        //    //    } finally {
-//        //    //        a = 1
-//        //    //    }
-//        //    //} catch e {
-//        //    //    b = 2
-//        //    //}
-//        //    //assert(a == 1)
-//        //    //assert(b == 2)
-//        //}
-//        ////fn () {
-//        ////    println('throw test')
-//        ////    //try {
-//        ////        //throw 'abcdef';
-//        ////        //assert(false)
-//        ////    //} catch e {
-//        ////    //    println(e)
-//        ////    //}
-//        ////}
-//    ]
-//    println('len funcs ', len(funcs))
-//
-//    //funcs[0]()
-//    //funcs[1]()
-//    //funcs[2]()
-//    funcs[3]()
-//    funcs[4]()
-//
-//    //for i in range(0, len(funcs)) {
-//    //    let f = funcs[i]
-//    //    println('testing ', i, ': ', f)
-//    //    f()
-//    //}
-//    
-//    //for f in funcs { 
-//    //    println('testing ', f)
-//    //    f() 
-//    //}
-}
+//fn testTry() {
+////    println('testTry')
+////
+////    let funcs = [
+////        fn () {
+////            println('begin func 0')
+////            fail(|| => 3 / 0, "DivideByZero")
+////            fail(fn() {
+////                    try {
+////                        3 / 0
+////                    } catch e2 {
+////                        assert()
+////                    }
+////                },
+////                "ArityMismatch: Expected 1 params, got 0")
+////            println('end   func 0')
+////        },
+////        fn () {
+////            println('begin func 1')
+////            let a = 0
+////            let b = 0
+////            try {
+////                3 / 0
+////            } catch e {
+////                a = 1
+////            }
+////            try {
+////                3 / 0
+////            } catch e {
+////                b = 2
+////            }
+////            assert(a == 1)
+////            assert(b == 2)
+////            println('end   func 1')
+////        },
+////        fn () {
+////            println('begin func 2')
+////            let a = 0
+////            try {
+////                3 / 0
+////            } catch e {
+////                a = 1
+////            } finally {
+////                a = 2
+////            }
+////            assert(a == 2)
+////            println('end   func 2')
+////        },
+////        fn () {
+////            println('begin func 3')
+////            let a = 0
+////            //let f = fn() {
+////            //    try {
+////            //        3 / 0
+////            //    } catch e {
+////            //        return 1
+////            //    } finally {
+////            //        a = 2
+////            //    }
+////            //}
+////            //let b = f()
+////            //assert(b == 1)
+////            //assert(a == 2)
+////            println('end   func 3')
+////        },
+////        fn () {
+////            println('begin func 4')
+////            //let a = 0
+////            //let f = fn() {
+////            //    try {
+////            //        3 / 0
+////            //    } catch e {
+////            //        return 1
+////            //    } finally {
+////            //        a = 2
+////            //    }
+////            //}
+////            //let b = f()
+////            //assert(b == 1)
+////            //assert(a == 2)
+////            println('end   func 4')
+////        }
+////        //fn () {
+////        //    println('func 4')
+////        //    let a = 0
+////        //    let b = 0
+////        //    //try {
+////        //    //    try {
+////        //    //        3 / 0
+////        //    //    } catch e {
+////        //    //        assert(1,2,3)
+////        //    //    } finally {
+////        //    //        a = 1
+////        //    //    }
+////        //    //} catch e {
+////        //    //    b = 2
+////        //    //}
+////        //    //assert(a == 1)
+////        //    //assert(b == 2)
+////        //}
+////        ////fn () {
+////        ////    println('throw test')
+////        ////    //try {
+////        ////        //throw 'abcdef';
+////        ////        //assert(false)
+////        ////    //} catch e {
+////        ////    //    println(e)
+////        ////    //}
+////        ////}
+////    ]
+////    println('len funcs ', len(funcs))
+////
+////    //funcs[0]()
+////    //funcs[1]()
+////    //funcs[2]()
+////    funcs[3]()
+////    funcs[4]()
+////
+////    //for i in range(0, len(funcs)) {
+////    //    let f = funcs[i]
+////    //    println('testing ', i, ': ', f)
+////    //    f()
+////    //}
+////    
+////    //for f in funcs { 
+////    //    println('testing ', f)
+////    //    f() 
+////    //}
+//}
 
 fn testFlowControl() {
     let funcs = [
@@ -401,7 +401,7 @@ fn testFlowControl() {
             assert(a == 6)
         }
 
-//	code = `
+//    code = `
 //let keys = '';
 //let values = 0;
 //for (k, v)  in dict {'a': 1, 'b': 2, 'c': 3} {
@@ -411,20 +411,20 @@ fn testFlowControl() {
 //assert(keys == 'bac');
 //assert(values == 6);
 //`
-//	mod = testCompile(t, code)
-//	interpret([]*g.Module{mod})
+//    mod = testCompile(t, code)
+//    interpret([]*g.Module{mod})
 //
-//	code = `
+//    code = `
 //let entries = '';
 //for e in dict {'a': 1, 'b': 2, 'c': 3} {
 //    entries += str(e);
 //}
 //assert(entries == '(b, 2)(a, 1)(c, 3)');
 //`
-//	mod = testCompile(t, code)
-//	interpret([]*g.Module{mod})
+//    mod = testCompile(t, code)
+//    interpret([]*g.Module{mod})
 //
-//	code = `
+//    code = `
 //let keys = '';
 //let values = 0;
 //for (k, v)  in [('a', 1), ('b', 2), ('c', 3)] {
@@ -434,18 +434,18 @@ fn testFlowControl() {
 //assert(keys == 'abc');
 //assert(values == 6);
 //`
-//	mod = testCompile(t, code)
-//	interpret([]*g.Module{mod})
+//    mod = testCompile(t, code)
+//    interpret([]*g.Module{mod})
 //
-//	code = "for (k, v)  in [1, 2, 3] {}"
-//	fail(t, code,
-//		g.TypeMismatchError("Expected Tuple"),
-//		[]string{"    at foo.glm:1"})
+//    code = "for (k, v)  in [1, 2, 3] {}"
+//    fail(t, code,
+//        g.TypeMismatchError("Expected Tuple"),
+//        []string{"    at foo.glm:1"})
 //
-//	code = "for (a, b, c)  in [('a', 1), ('b', 2), ('c', 3)] {}"
-//	fail(t, code,
-//		g.InvalidArgumentError("Expected Tuple of length 3"),
-//		[]string{"    at foo.glm:1"})
+//    code = "for (a, b, c)  in [('a', 1), ('b', 2), ('c', 3)] {}"
+//    fail(t, code,
+//        g.InvalidArgumentError("Expected Tuple of length 3"),
+//        []string{"    at foo.glm:1"})
 //        }
     ]
     for f in funcs { f(); }
@@ -498,7 +498,7 @@ fn testFunc() {
 
     //------------------------------------------
 
-	fail(|| => 1/0, 'DivideByZero')
+    fail(|| => 1/0, 'DivideByZero')
 }
 
 fn testCapture() {
@@ -578,85 +578,135 @@ fn testNull() {
     fail(|| => iter(null), "NullValue")
     fail(|| => len(null), "NullValue")
     fail(|| => range(null, null), "NullValue")
-    assert('null' == str(null))
+    assert('null' == str(null)) // this is convenient
     fail(|| => type(null), "NullValue")
 
     fail(|| => fields(null), "NullValue")
     fail(|| => hasField(null, 'bogus'), "NullValue")
-    fail(|| => getField(null, 'bogus'), "NullValue")
-    fail(|| => setField(null, 'bogus', null), "NullValue")
 
-   // try {
-   //     println('type: ', type(null))
-   // } catch e {
-   //     println(e.error)
-   // }
+    fail(|| => getField(null, 'bogus'), "NullValue")
+    fail(|| => null.bogus, "NullValue")
+    fail(|| => null.bogus(), "NullValue")
+
+    fail(|| => setField(null, 'bogus', null), "NullValue")
+    fail(|| => null.bogus = 1, "NullValue")
+}
+
+fn testBool() {
+
+    assert(true == true)
+    assert(false == false)
+    assert(true != false)
+    assert(false != true)
+    assert(true != 1)
+    assert(1 != false)
+
+    assert(freeze(true))
+    assert(freeze(false))
+    assert(frozen(true))
+    assert(frozen(false))
+
+    fail(|| => iter(true), "TypeMismatch: Type Bool has no iter()")
+    fail(|| => iter(false), "TypeMismatch: Type Bool has no iter()")
+    fail(|| => len(true), "TypeMismatch: Type Bool has no len()")
+    fail(|| => len(false), "TypeMismatch: Type Bool has no len()")
+
+    fail(|| => range(true, 1), "TypeMismatch: Expected Int")
+    fail(|| => range(false, 1), "TypeMismatch: Expected Int")
+    fail(|| => range(1, true), "TypeMismatch: Expected Int")
+    fail(|| => range(1, false), "TypeMismatch: Expected Int")
+
+    assert('true' == str(true))
+    assert('false' == str(false))
+
+    assert('Bool' == type(true))
+    assert('Bool' == type(false))
+
+    assert(set{} == fields(true))
+    assert(set{} == fields(false))
+
+    assert(false == hasField(true, 'bogus'))
+    assert(false == hasField(false, 'bogus'))
+
+    fail(|| => getField(true,  'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => getField(false, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => true.bogus, "NoSuchField: Field 'bogus' not found")
+    fail(|| => false.bogus, "NoSuchField: Field 'bogus' not found")
+    fail(|| => true.bogus(), "NoSuchField: Field 'bogus' not found")
+    fail(|| => false.bogus(), "NoSuchField: Field 'bogus' not found")
+
+    fail(|| => setField(true, 'bogus', null), "TypeMismatch: Expected Struct")
+    fail(|| => setField(false, 'bogus', null), "TypeMismatch: Expected Struct")
+    fail(|| => true.bogus = 1,  "TypeMismatch: Expected Struct")
+    fail(|| => false.bogus = 1, "TypeMismatch: Expected Struct")
 }
 
 fn testStr() {
 
-    let s = '\u{1f496}\u{2665}\u{24}'
-    assert(s[0] == '💖')
-    assert(s[1] == '♥')
-    assert(s[2] == '$')
-//
-//		"let s = `\n" +
-//			"ab\n" +
-//			"cd\n" +
-//			"efgh\n" +
-//			"`\n" +
-//			"\tassert(s[1:3] == 'ab')\n" +
-//			"\tassert(s[4:6] == 'cd')\n" +
-//			"\tassert(s[7:-1] == 'efgh')"
-//---------------------------------------------
+    assert('a' == 'a')
+    assert('b' == 'b')
+    assert('a' != 'b')
+    assert('b' != 'a')
+    assert('a' != 1)
+    assert(1 != 'b')
 
-//	assert(struct{a: 1} has 'a' == true)
-//	assert(struct{a: 1} has 'b' == false)
-//    assert('abc'.contains('b'))
-//    assert(!'abc'.contains('z'))
-//    assert('abc'.index('b') == 1)
-//    assert('abc'.index('z') == -1)
-//    assert('abc'.startsWith('a'))
-//    assert(!'abc'.startsWith('z'))
-//    assert('abc'.endsWith('c'))
-//    assert(!'abc'.endsWith('z'))
-//    assert('aaa'.replace('a', 'z') == 'zzz')
-//    assert('aaa'.replace('a', 'z', 2) == 'zza')
-//    assert('aaa'.replace('a', 'z', 0) == 'aaa')
-//    assert('aaa'.replace('a', 'z', -1) == 'zzz')
-//    assert('a,b,c'.split(',') == ['a','b','c'])
-//
-//    assert('abcabc'.lastIndex('ab') == 3)
-//    assert('abc'.lastIndex('z') == -1)
-//
-//    fn ext(s) {
-//        let n = s.lastIndex('.')
-//        return n == -1 ? '' : s[n:]
-//    }
-//    assert(ext('foo') == '')
-//    assert(ext('foo.txt') == '.txt')
-//
-//	failMsg(|| => 'abc'.contains(), 'ArityMismatch', 'Expected 1 params, got 0')
-//	failMsg(|| => 'abc'.contains(1), 'TypeMismatch', 'Expected Str')
-//
-//	failMsg(|| => 'abc'.index(), 'ArityMismatch', 'Expected 1 params, got 0')
-//	failMsg(|| => 'abc'.index(1), 'TypeMismatch', 'Expected Str')
-//	failMsg(|| => 'abc'.lastIndex(), 'ArityMismatch', 'Expected 1 params, got 0')
-//	failMsg(|| => 'abc'.lastIndex(1), 'TypeMismatch', 'Expected Str')
-//
-//	failMsg(|| => 'abc'.startsWith(), 'ArityMismatch', 'Expected 1 params, got 0')
-//	failMsg(|| => 'abc'.startsWith(1), 'TypeMismatch', 'Expected Str')
-//
-//	failMsg(|| => 'abc'.endsWith(), 'ArityMismatch', 'Expected 1 params, got 0')
-//	failMsg(|| => 'abc'.endsWith(1), 'TypeMismatch', 'Expected Str')
-//
-//	failMsg(|| => 'abc'.replace(), 'ArityMismatch', 'Expected at least 2 params, got 0')
-//	failMsg(|| => 'abc'.replace(1,2,3,4), 'ArityMismatch', 'Expected at most 3 params, got 4')
-//	failMsg(|| => 'abc'.replace(0, 'a'), 'TypeMismatch', 'Expected Str')
-//	failMsg(|| => 'abc'.replace('a', 0), 'TypeMismatch', 'Expected Str')
-//	failMsg(|| => 'abc'.replace('a', 'b', 'c'), 'TypeMismatch', 'Expected Int')
-//
-//	failMsg(|| => 'abc'.bogus(), 'NoSuchField', 'Field 'bogus' not found')
+    assert('a' == freeze('a'))
+    assert(frozen('a'))
+
+    assert(iter('a') != null)
+    assert(1 == len('a'))
+
+    fail(|| => range('a', 1), "TypeMismatch: Expected Int")
+    fail(|| => range(1, 'a'), "TypeMismatch: Expected Int")
+
+    assert('a' == str('a'))
+    assert('Str' == type('a'))
+
+    let s = 'a'
+    assert(set { 'contains', 'index' } == fields(s))
+    for f in fields(s) {
+        assert(hasField(s, f))
+    }
+    assert(s.contains == getField(s, 'contains'))
+    assert(s.index == getField(s, 'index'))
+
+    assert(!hasField(s, 'bogus'))
+    fail(|| => getField(s, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => setField(s, 'bogus', null), "TypeMismatch: Expected Struct")
+    fail(|| => s.bogus = 1, "TypeMismatch: Expected Struct")
+
+    //---------------------------------------------
+
+    s = '\u{1f496}\u{2665}\u{24}'
+    assert('💖' == s[0])
+    assert('♥'  == s[1])
+    assert('$'  == s[2])
+
+    s = "這是我們abc"
+    assert(7 == len(s))
+    let reverse = ''  
+    for c in s {
+        reverse = c + reverse
+    }
+    assert('cba們我是這' == reverse)
+
+    const f = s.contains
+    assert(true == f('ab'))
+    assert(true == s.contains('這是我'))
+    assert(true == s.contains('們ab'))
+    assert(false == s.contains('z'))
+    assert(true == 'abcde'.contains('cd'))
+    assert(true == 'abcde'.contains('d'))
+
+    assert(0 == s.index('這是我'))
+    assert(3 == s.index('們ab'))
+    assert(-1 == s.index('z'))
+    assert(2 == 'abcde'.index('cd'))
+    assert(3 == 'abcde'.index('d'))
+    assert(false == ''.contains('cd'))
+    assert(false == ''.contains('d'))
+    assert(-1 == ''.index('cd'))
+    assert(-1 == ''.index('d'))
 }
 
 fn testList() {
@@ -671,8 +721,8 @@ fn testList() {
         }
 //        },
 //        fn () {
-//	assert(struct{a: 1} has 'a' == true)
-//	assert(struct{a: 1} has 'b' == false)
+//    assert(struct{a: 1} has 'a' == true)
+//    assert(struct{a: 1} has 'b' == false)
 //            let a = []
 //            a.add(1)
 //            assert(a == [1])
@@ -765,100 +815,6 @@ fn testList() {
     for f in funcs { f(); }
 }
 
-//fn testFreeze() {
-//
-//	fail(|| => freeze(null), 'NullValue')
-//	fail(|| => frozen(null), 'NullValue')
-//
-//    assert(frozen(true))
-//    assert(frozen('a'))
-//    assert(frozen(1))
-//    assert(frozen(1.0))
-//    assert(frozen(range(1,2)))
-//    assert(frozen(chan()))
-//    assert(frozen(fn(){}))
-//    assert(frozen((1,2)))
-//
-//    freeze(true)
-//    freeze('a')
-//    freeze(1)
-//    freeze(1.0)
-//    freeze(range(1,2))
-//    freeze(chan())
-//    freeze(fn(){})
-//    freeze((1,2))
-//
-//    let ls = [1,2,3]
-//    assert(!frozen(ls))
-//
-//    ls.clear()
-//    ls.add('a')
-//    ls.addAll(['b', 'c'])
-//    ls.remove(1)
-//    ls[1] = 'z'
-//
-//    assert(ls == ['a', 'z'])
-//
-//    freeze(ls)
-//    assert(frozen(ls))
-//    assert(ls == ['a', 'z']);
-//
-//    fail(|| => ls.clear(), 'ImmutableValue')
-//    fail(|| => ls.add('a'), 'ImmutableValue')
-//    fail(|| => ls.addAll(['b', 'c']), 'ImmutableValue')
-//    fail(|| => ls.remove(1), 'ImmutableValue')
-//    fail(|| => ls[1] = 'z', 'ImmutableValue')
-//
-//    let d = dict {'x': 1, 'y': 2}
-//    assert(!frozen(d))
-//
-//    d.clear()
-//    d.addAll([('a', 1), ('b', 2), ('c', 3)])
-//    d.remove('c')
-//    d['a'] = 0
-//    assert(d == dict {'a': 0, 'b': 2})
-//
-//    freeze(d)
-//    assert(frozen(d))
-//    assert(d == dict {'a': 0, 'b': 2})
-//
-//    fail(|| => d.clear(), 'ImmutableValue')
-//    fail(|| => d.addAll([('a', 1), ('b', 2), ('c', 3)]), 'ImmutableValue')
-//    fail(|| => d.remove('c'), 'ImmutableValue')
-//    fail(|| => d['a'] = 0, 'ImmutableValue')
-//
-//    let s = set {'x', 'y'}
-//    assert(!frozen(s))
-//
-//    s.clear()
-//    s.addAll('a')
-//    s.addAll(['a', 'b', 'c'])
-//    s.remove('c')
-//    assert(s == set {'a', 'b'})
-//
-//    freeze(s)
-//    assert(frozen(s))
-//    assert(s == set {'a', 'b'})
-//
-//    fail(|| => s.clear(), 'ImmutableValue')
-//    fail(|| => s.addAll('a'), 'ImmutableValue')
-//    fail(|| => s.addAll(['a', 'b', 'c']), 'ImmutableValue')
-//    fail(|| => s.remove('c'), 'ImmutableValue')
-//
-//    let st = struct {x: 1, y: 2}
-//    st.y = 3
-//
-//    freeze(st)
-//    assert(frozen(st))
-//    assert(st == struct {x: 1, y: 3})
-//
-//    fail(|| => st.y = 3, 'ImmutableValue')
-//
-//    assert(!frozen(merge(struct {}, struct{})))
-//    assert(frozen(merge(st, struct{})))
-//    assert(frozen(merge(struct {}, st)))
-//}
-//
 //fn testDict() {
 //
 //    let funcs = [
@@ -946,7 +902,7 @@ fn testSet() {
     assert(set {'a', 'b', 'c'} != set{'a'})
     assert(set {'a', 'b', 'c'} != set{})
 
-//	code = `
+//    code = `
 //try {
 //    let s = set {'a', 'b', null}
 //    assert(false)
@@ -1039,18 +995,6 @@ fn testSet() {
 //    failMsg(|| => a[2], 'IndexOutOfBounds', '2')
 //}
 //
-//fn testTypes() {
-//    let values = [
-//        true, '', 0, 0.0, fn(){}, 
-//        [], range(0,1), (0,1), dict{}, set{}, 
-//        struct{}, chan()]
-//
-//    assert(
-//        [ 'Bool', 'Str', 'Int', 'Float', 'Func', 'List', 'Range', 
-//          'Tuple', 'Dict', 'Set', 'Struct', 'Chan'] == 
-//        values.map(type))
-//}
-//
 //fn testGo() {
 //    fn sum(a, c) {
 //        let total = 0
@@ -1074,25 +1018,6 @@ fn testSet() {
 //    ch.send(1)
 //    ch.send(2)
 //    assert([ch.recv(), ch.recv()] == [1, 2])
-//}
-//
-//fn testFields() {
-//
-//    let s = struct {a: 1, b: 2}
-//    assert(fields(s) == set {'a', 'b'})
-//    assert(getval(s, 'a') == 1)
-//    assert(setval(s, 'a', 3) == 3)
-//    s.a++ // TODO fix compiler
-//
-//    failMsg(|| => fields(0),       'TypeMismatch' , 'Expected Struct')
-//    failMsg(|| => fields(0, 1),    'ArityMismatch', 'Expected 1 params, got 2')
-//    failMsg(|| => getval(0, 1),    'TypeMismatch' , 'Expected Struct')
-//    failMsg(|| => getval(s, 1),    'TypeMismatch' , 'Expected Str')
-//    failMsg(|| => getval(0),       'ArityMismatch', 'Expected 2 params, got 1')
-//    failMsg(|| => setval(0, 1, 2), 'TypeMismatch' , 'Expected Struct')
-//    failMsg(|| => setval(s, 1, 2), 'TypeMismatch' , 'Expected Str')
-//    failMsg(|| => setval(0),       'ArityMismatch', 'Expected 3 params, got 1')
-//    failMsg(|| => setval(0, 1),    'ArityMismatch', 'Expected 3 params, got 2')
 //}
 //
 //fn testArity() {
@@ -1119,6 +1044,7 @@ fn testRange() {
     assert(!hasField(rng, 'bogus'))
     fail(|| => getField(rng, 'bogus'), "NoSuchField: Field 'bogus' not found")
     fail(|| => setField(rng, 'bogus', null), "TypeMismatch: Expected Struct")
+    fail(|| => rng.bogus = 1, "TypeMismatch: Expected Struct")
 
     //-----------------------------------------
 
@@ -1156,15 +1082,17 @@ fn testRange() {
 }
 
 fn testSlice() {
+
     let ls = [3,4,5];
     assert(ls[0:1] == [3]);
     assert(ls[1:3] == [4,5]);
     assert(ls[-2:-1] == [4]);
     assert(ls[-5:-4] == []);
     assert(ls[3:4] == []);
-    let s = '345';
+
+    let s = '34這';
     assert(s[0:1] == '3');
-    assert(s[1:3] == '45');
+    assert(s[1:3] == '4這');
     assert(s[-2:-1] == '4');
     assert(s[-5:-4] == '');
     assert(s[3:4] == '');
@@ -1247,10 +1175,10 @@ fn testStruct() {
 
 //fn testMerge() {
 //
-//	failMsg(|| => merge(), 'ArityMismatch', 'Expected at least 2 params, got 0')
-//	failMsg(|| => merge(true), 'ArityMismatch', 'Expected at least 2 params, got 1')
-//	failMsg(|| => merge(struct{}, false), 'TypeMismatch', 'Expected Struct')
-//	failMsg(|| => merge(struct{}, struct{}, struct{}, false), 'TypeMismatch', 'Expected Struct')
+//    failMsg(|| => merge(), 'ArityMismatch', 'Expected at least 2 params, got 0')
+//    failMsg(|| => merge(true), 'ArityMismatch', 'Expected at least 2 params, got 1')
+//    failMsg(|| => merge(struct{}, false), 'TypeMismatch', 'Expected Struct')
+//    failMsg(|| => merge(struct{}, struct{}, struct{}, false), 'TypeMismatch', 'Expected Struct')
 //
 //    let a = struct { x: 1, y: 2}
 //    let b = merge(struct { y: 3, z: 4}, a)
@@ -1278,65 +1206,65 @@ fn testStruct() {
 //    assert(struct { a: 1, b: 2, c: 3, d: 4} == z)
 //}
 
-fn testIterator() {
-    
-    // list
-    fail(|| => iter([]).get(), 'NoSuchElement')
-    let count = 0
-    let itr = iter([1, 2, 3])
-    fail(|| => itr.get(), 'NoSuchElement')
-    while itr.next() {
-        count += itr.get()
-    }
-    assert(6 == count)
-    fail(|| => itr.get(), 'NoSuchElement')
-
-    // range
-    fail(|| => iter(range(0, 0)).get(), 'NoSuchElement')
-    count = 0
-    itr = iter(range(1, 5))
-    fail(|| => itr.get(), 'NoSuchElement')
-    while itr.next() {
-        count += itr.get()
-    }
-    assert(10 == count)
-    fail(|| => itr.get(), 'NoSuchElement')
-
-//    // dict
-//    fail(|| => dict{}.iter().get(), 'NoSuchElement')
-//    count = 0
-//    itr = dict{'a': 1, 'b': 2}.iter()
-//    fail(|| => itr.get(), 'NoSuchElement')
-//    while itr.next() {
-//        let e = itr.get()
-//        // let (k, v) = itr.get() TODO this would be cool
-//        count += e[1]
-//    }
-//    assert(3 == count)
-//    fail(|| => itr.get(), 'NoSuchElement')
-//
-//    // set
-//    fail(|| => set{}.iter().get(), 'NoSuchElement')
-//    count = 0
-//    itr = set{3, 4, 1, 4}.iter()
+//fn testIterator() {
+//    
+//    // list
+//    fail(|| => iter([]).get(), 'NoSuchElement')
+//    let count = 0
+//    let itr = iter([1, 2, 3])
 //    fail(|| => itr.get(), 'NoSuchElement')
 //    while itr.next() {
 //        count += itr.get()
 //    }
-//    assert(8 == count)
+//    assert(6 == count)
 //    fail(|| => itr.get(), 'NoSuchElement')
 //
-//    // str
-//    fail(|| => ''.iter().get(), 'NoSuchElement')
-//    count = ''
-//    itr = 'abcde'.iter()
+//    // range
+//    fail(|| => iter(range(0, 0)).get(), 'NoSuchElement')
+//    count = 0
+//    itr = iter(range(1, 5))
 //    fail(|| => itr.get(), 'NoSuchElement')
 //    while itr.next() {
-//        count = itr.get() + count
+//        count += itr.get()
 //    }
-//    assert('edcba' == count)
+//    assert(10 == count)
 //    fail(|| => itr.get(), 'NoSuchElement')
-}
+//
+////    // dict
+////    fail(|| => dict{}.iter().get(), 'NoSuchElement')
+////    count = 0
+////    itr = dict{'a': 1, 'b': 2}.iter()
+////    fail(|| => itr.get(), 'NoSuchElement')
+////    while itr.next() {
+////        let e = itr.get()
+////        // let (k, v) = itr.get() TODO this would be cool
+////        count += e[1]
+////    }
+////    assert(3 == count)
+////    fail(|| => itr.get(), 'NoSuchElement')
+////
+////    // set
+////    fail(|| => set{}.iter().get(), 'NoSuchElement')
+////    count = 0
+////    itr = set{3, 4, 1, 4}.iter()
+////    fail(|| => itr.get(), 'NoSuchElement')
+////    while itr.next() {
+////        count += itr.get()
+////    }
+////    assert(8 == count)
+////    fail(|| => itr.get(), 'NoSuchElement')
+////
+////    // str
+////    fail(|| => ''.iter().get(), 'NoSuchElement')
+////    count = ''
+////    itr = 'abcde'.iter()
+////    fail(|| => itr.get(), 'NoSuchElement')
+////    while itr.next() {
+////        count = itr.get() + count
+////    }
+////    assert('edcba' == count)
+////    fail(|| => itr.get(), 'NoSuchElement')
+//}
 
 fn testInvokeField() {
     let s = 'abc'
@@ -1355,8 +1283,8 @@ fn main(args) {
 //---------------------------------------------
 //code := "null.bogus;"
 //fail(t, code,
-//	g.NullValueError(),
-//	[]string{"    at foo.glm:1"})
+//    g.NullValueError(),
+//    []string{"    at foo.glm:1"})
 
 //err := g.NoSuchFieldError("bogus")
 
@@ -1373,7 +1301,7 @@ fn main(args) {
 
 //failErr(t, "(fn() {}).bogus;", err)
 //---------------------------------------------
-//	code := `
+//    code := `
 //try {
 //    [].join = 456;
 //} catch e {
@@ -1382,7 +1310,7 @@ fn main(args) {
 //}
 //---------------------------------------------
 //
-//	code := `
+//    code := `
 //assert(
 //    [type(true), type(""), type(0), type(0.0)] ==
 //    ["Bool", "Str", "Int", "Float"]);
@@ -1393,8 +1321,8 @@ fn main(args) {
 //    [type(dict{}), type(set{}), type(struct{}), type(chan())] ==
 //    ["Dict", "Set", "Struct", "Chan"]);
 //`
-//	mod := testCompile(t, code)
-//	interpret([]*g.Module{mod})
+//    mod := testCompile(t, code)
+//    interpret([]*g.Module{mod})
 //}
 //---------------------------------------------
 
@@ -1410,31 +1338,30 @@ fn main(args) {
     testExpressions()
     testAssignment()
     testFlowControl()
-    testTry()
+//    testGo()
+//    testTry()
+    testInvokeField()
+    testSlice()
 
     testFunc()
     testCapture()
     testNamedFunc()
     testLambda()
+//    testArity()
 
     testNull()
+    testBool()
     testStr()
+//    testInt()
+//    testFloat()
+//    testFunc() ^^^^^^^
     testList()
-//    testFreeze()
+    testRange()
+//    testTuple()
 //    testDict()
     testSet()
-//    testTuple()
-//    testTypes()
-//    testGo()
-//    testFields()
-//    testArity()
-    testRange()
-    testStruct()
-//    testMerge()
-    testSlice()
-
-//    testIterator()
-    testInvokeField()
+    testStruct() // testMerge()
+//    testChan()
 }
 
 

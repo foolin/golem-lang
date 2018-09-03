@@ -330,6 +330,10 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		case bc.SetField:
 
+			if f.stack[n-1].Type() == g.NullType {
+				return nil, g.NullValueError()
+			}
+
 			stc, ok := f.stack[n-1].(g.Struct)
 			if !ok {
 				return nil, g.TypeMismatchError("Expected Struct")
@@ -889,7 +893,12 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		ibl, ok := f.stack[n].(g.Iterable)
 		g.Assert(ok)
 
-		f.stack[n] = ibl.NewIterator(itp)
+		itr, err := ibl.NewIterator(itp)
+		if err != nil {
+			return nil, err
+		}
+
+		f.stack[n] = itr
 		f.ip++
 
 	case bc.IterNext:

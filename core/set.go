@@ -159,7 +159,7 @@ type setIterator struct {
 	hasNext bool
 }
 
-func (s *set) NewIterator(ev Evaluator) Iterator {
+func (s *set) NewIterator(ev Evaluator) (Iterator, Error) {
 
 	itr := &setIterator{iteratorStruct(), s, s.hashMap.Iterator(), false}
 
@@ -167,7 +167,7 @@ func (s *set) NewIterator(ev Evaluator) Iterator {
 	itr.Internal("next", next)
 	itr.Internal("get", get)
 
-	return itr
+	return itr, nil
 }
 
 func (i *setIterator) IterNext(ev Evaluator) (Bool, Error) {

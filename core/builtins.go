@@ -121,7 +121,7 @@ var BuiltinIter = NewFixedNativeFunc(
 		}
 
 		if ibl, ok := values[0].(Iterable); ok {
-			return ibl.NewIterator(ev), nil
+			return ibl.NewIterator(ev)
 		}
 		return nil, TypeMismatchError(
 			fmt.Sprintf("Type %s has no iter()", values[0].Type()))

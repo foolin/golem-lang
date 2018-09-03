@@ -58,7 +58,7 @@ type (
 
 	// Iterable is a value that can be iterated
 	Iterable interface {
-		NewIterator(Evaluator) Iterator
+		NewIterator(Evaluator) (Iterator, Error)
 	}
 )
 
@@ -93,7 +93,7 @@ type (
 		Indexable
 		Lenable
 		Sliceable
-		//Iterable
+		Iterable
 
 		Concat(Str) Str
 	}

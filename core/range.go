@@ -96,7 +96,7 @@ type rangeIterator struct {
 	n int64
 }
 
-func (r *rng) NewIterator(ev Evaluator) Iterator {
+func (r *rng) NewIterator(ev Evaluator) (Iterator, Error) {
 
 	itr := &rangeIterator{iteratorStruct(), r, -1}
 
@@ -104,7 +104,7 @@ func (r *rng) NewIterator(ev Evaluator) Iterator {
 	itr.Internal("next", next)
 	itr.Internal("get", get)
 
-	return itr
+	return itr, nil
 }
 
 func (i *rangeIterator) IterNext(ev Evaluator) (Bool, Error) {
