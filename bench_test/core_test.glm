@@ -192,6 +192,11 @@ fn testFlowControl() {
             assert(a == 3 && b == 4)
         },
         fn () {
+            let a = true ? 3 : 4;
+            let b = false ? 5 : 6;
+            assert(a == 3 && b == 6)
+        },
+        fn () {
             let a = 1
             while (a < 3) {
                 a = a + 1
