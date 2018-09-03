@@ -91,7 +91,7 @@ func TestFixedMethod(t *testing.T) {
 	fail(t, val, err, "ArityMismatch: Expected 1 params, got 0")
 
 	val, err = fn.Invoke(nil, []Value{NewStr("a")})
-	fail(t, val, err, "TypeMismatch: Expected Int")
+	fail(t, val, err, "TypeMismatch: Expected Int, not Str")
 }
 
 func TestVariadicMethod(t *testing.T) {

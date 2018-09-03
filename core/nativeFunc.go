@@ -359,7 +359,7 @@ func vetParam(value Value, typ Type, allowNull bool) Error {
 
 	// check type
 	if value.Type() != typ {
-		return TypeMismatchError(typ)
+		return TypeMismatchError(typ, value.Type())
 	}
 
 	return nil

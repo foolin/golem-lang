@@ -16,7 +16,7 @@ func TestField(t *testing.T) {
 	ok(t, val, err, Zero)
 
 	val, err = field.Invoke(nil, []Value{})
-	fail(t, val, err, "TypeMismatch: Expected Func")
+	fail(t, val, err, "TypeMismatch: Expected Func, not Int")
 
 	Tassert(t, !field.IsReadonly())
 	err = field.Set(nil, One)
@@ -26,7 +26,7 @@ func TestField(t *testing.T) {
 	ok(t, val, err, One)
 
 	val, err = field.Invoke(nil, []Value{})
-	fail(t, val, err, "TypeMismatch: Expected Func")
+	fail(t, val, err, "TypeMismatch: Expected Func, not Int")
 
 	//----------------------------
 
@@ -52,7 +52,7 @@ func TestField(t *testing.T) {
 	ok(t, val, err, One)
 
 	val, err = field.Invoke(nil, []Value{})
-	fail(t, val, err, "TypeMismatch: Expected Func")
+	fail(t, val, err, "TypeMismatch: Expected Func, not Int")
 }
 
 func TestReadonlyField(t *testing.T) {
@@ -63,7 +63,7 @@ func TestReadonlyField(t *testing.T) {
 	ok(t, val, err, Zero)
 
 	val, err = field.Invoke(nil, []Value{})
-	fail(t, val, err, "TypeMismatch: Expected Func")
+	fail(t, val, err, "TypeMismatch: Expected Func, not Int")
 
 	Tassert(t, field.IsReadonly())
 	err = field.Set(nil, One)
@@ -126,7 +126,7 @@ func TestPropertyField(t *testing.T) {
 	ok(t, val, err, Zero)
 
 	val, err = field.Invoke(nil, []Value{})
-	fail(t, val, err, "TypeMismatch: Expected Func")
+	fail(t, val, err, "TypeMismatch: Expected Func, not Int")
 
 	Tassert(t, !field.IsReadonly())
 	err = field.Set(nil, One)
@@ -136,7 +136,7 @@ func TestPropertyField(t *testing.T) {
 	ok(t, val, err, One)
 
 	val, err = field.Invoke(nil, []Value{})
-	fail(t, val, err, "TypeMismatch: Expected Func")
+	fail(t, val, err, "TypeMismatch: Expected Func, not Int")
 
 	//----------------------------
 
@@ -161,7 +161,7 @@ func TestPropertyField(t *testing.T) {
 	ok(t, val, err, One)
 
 	val, err = field.Invoke(nil, []Value{})
-	fail(t, val, err, "TypeMismatch: Expected Func")
+	fail(t, val, err, "TypeMismatch: Expected Func, not Int")
 }
 
 func TestReadonlyPropertyField(t *testing.T) {
@@ -190,7 +190,7 @@ func TestReadonlyPropertyField(t *testing.T) {
 	ok(t, val, err, Zero)
 
 	val, err = field.Invoke(nil, []Value{})
-	fail(t, val, err, "TypeMismatch: Expected Func")
+	fail(t, val, err, "TypeMismatch: Expected Func, not Int")
 
 	Tassert(t, field.IsReadonly())
 	err = field.Set(nil, One)

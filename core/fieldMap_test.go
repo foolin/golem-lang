@@ -37,9 +37,9 @@ func TestHashFieldMap(t *testing.T) {
 	fail(t, val, err, "NoSuchField: Field 'c' not found")
 
 	val, err = fm.invoke("a", nil, []Value{})
-	fail(t, val, err, "TypeMismatch: Expected Func")
+	fail(t, val, err, "TypeMismatch: Expected Func, not Int")
 	val, err = fm.invoke("b", nil, []Value{})
-	fail(t, val, err, "TypeMismatch: Expected Func")
+	fail(t, val, err, "TypeMismatch: Expected Func, not Int")
 	val, err = fm.invoke("c", nil, []Value{})
 	fail(t, val, err, "NoSuchField: Field 'c' not found")
 

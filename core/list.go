@@ -195,7 +195,7 @@ func (ls *list) Filter(ev Evaluator, filterer func(Value) (Value, Error)) (Value
 		}
 		pred, ok := flt.(Bool)
 		if !ok {
-			return nil, TypeMismatchError(BoolType)
+			return nil, TypeMismatchError(BoolType, flt.Type())
 		}
 
 		eq, err := pred.Eq(ev, True)

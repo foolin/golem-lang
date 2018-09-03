@@ -5,7 +5,6 @@
 package core
 
 import (
-	"bytes"
 	"fmt"
 )
 
@@ -29,17 +28,8 @@ func TempMismatchError(msg string) Error {
 }
 
 // TypeMismatchError creates a TypeMismatch Error
-func TypeMismatchError(typ Type /*, types ...Type*/) Error {
-
-	var buf bytes.Buffer
-
-	buf.WriteString(typ.String())
-	//for _, t := range types {
-	//	buf.WriteString(" or ")
-	//	buf.WriteString(t.String())
-	//}
-
-	return fmt.Errorf("TypeMismatch: Expected %s", buf.String())
+func TypeMismatchError(typ, wrong Type) Error {
+	return fmt.Errorf("TypeMismatch: Expected %s, not %s", typ, wrong)
 }
 
 // NumberMismatchError creates a TypeMismatch Error

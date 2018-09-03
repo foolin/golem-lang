@@ -359,7 +359,7 @@ func TestInt(t *testing.T) {
 	ok(t, v1, err, NewInt(1))
 
 	v1, err = NewInt(8).RightShift(NewStr("a"))
-	fail(t, v1, err, "TypeMismatch: Expected Int")
+	fail(t, v1, err, "TypeMismatch: Expected Int, not Str")
 
 	v1, err = NewInt(8).RightShift(NewInt(-1))
 	fail(t, v1, err, "InvalidArgument: Shift count cannot be less than zero")

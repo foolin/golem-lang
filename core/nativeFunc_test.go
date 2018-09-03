@@ -47,7 +47,7 @@ func TestFixedNativeFunc(t *testing.T) {
 	fail(t, val, err, "ArityMismatch: Expected 1 params, got 0")
 
 	val, err = fn.Invoke(nil, []Value{NewStr("a")})
-	fail(t, val, err, "TypeMismatch: Expected Int")
+	fail(t, val, err, "TypeMismatch: Expected Int, not Str")
 
 	//----------------------------------------------
 
@@ -72,7 +72,7 @@ func TestFixedNativeFunc(t *testing.T) {
 	fail(t, val, err, "ArityMismatch: Expected 1 params, got 0")
 
 	val, err = fn.Invoke(nil, []Value{NewStr("a")})
-	fail(t, val, err, "TypeMismatch: Expected Int")
+	fail(t, val, err, "TypeMismatch: Expected Int, not Str")
 }
 
 func TestVariadicNativeFunc(t *testing.T) {
@@ -108,13 +108,13 @@ func TestVariadicNativeFunc(t *testing.T) {
 	fail(t, val, err, "ArityMismatch: Expected at least 1 params, got 0")
 
 	val, err = fn.Invoke(nil, []Value{NewStr("a")})
-	fail(t, val, err, "TypeMismatch: Expected Int")
+	fail(t, val, err, "TypeMismatch: Expected Int, not Str")
 
 	val, err = fn.Invoke(nil, []Value{Null})
 	fail(t, val, err, "NullValue")
 
 	val, err = fn.Invoke(nil, []Value{Zero, NewStr("a"), False})
-	fail(t, val, err, "TypeMismatch: Expected Bool")
+	fail(t, val, err, "TypeMismatch: Expected Bool, not Str")
 
 	val, err = fn.Invoke(nil, []Value{Zero, Null, False})
 	fail(t, val, err, "NullValue")
@@ -160,13 +160,13 @@ func TestMultipleNativeFunc(t *testing.T) {
 	fail(t, val, err, "ArityMismatch: Expected at most 3 params, got 4")
 
 	val, err = fn.Invoke(nil, []Value{Zero, Zero, NewStr("d")})
-	fail(t, val, err, "TypeMismatch: Expected Str")
+	fail(t, val, err, "TypeMismatch: Expected Str, not Int")
 
 	val, err = fn.Invoke(nil, []Value{Zero, NewStr("c"), Null})
 	fail(t, val, err, "NullValue")
 
 	val, err = fn.Invoke(nil, []Value{Zero, NewStr("c"), Zero})
-	fail(t, val, err, "TypeMismatch: Expected Bool")
+	fail(t, val, err, "TypeMismatch: Expected Bool, not Int")
 
 	val, err = fn.Invoke(nil, []Value{Zero, NewStr("c"), True})
 	ok(t, val, err, NewStr("0ctrue"))

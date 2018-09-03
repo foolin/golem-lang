@@ -45,10 +45,10 @@ fn testExpressions() {
 
     assert(!false == true)
     assert(!true == false)
-    fail(|| => !null, 'TypeMismatch: Expected Bool')
-    fail(|| => !'a', 'TypeMismatch: Expected Bool')
-    fail(|| => !1, 'TypeMismatch: Expected Bool')
-    fail(|| => !1.0, 'TypeMismatch: Expected Bool')
+    fail(|| => !null, 'TypeMismatch: Expected Bool, not Null')
+    fail(|| => !'a', 'TypeMismatch: Expected Bool, not Str')
+    fail(|| => !1, 'TypeMismatch: Expected Bool, not Int')
+    fail(|| => !1.0, 'TypeMismatch: Expected Bool, not Float')
 
     assert(1 < 2 == true)
     assert(1 <= 2 == true)
@@ -68,14 +68,14 @@ fn testExpressions() {
     assert((true  && false) == false)
     assert((false && true) == false)
     assert((false && 12) == false)
-    fail(|| => 12 && false, 'TypeMismatch: Expected Bool')
+    fail(|| => 12 && false, 'TypeMismatch: Expected Bool, not Int')
 
     assert(true  || (true == true))
     assert(true  || (false == true))
     assert(false || (true == true))
     assert(false || (false == false))
     assert(true  || (12 == true))
-    fail(|| => 12  || true, 'TypeMismatch: Expected Bool')
+    fail(|| => 12  || true, 'TypeMismatch: Expected Bool, not Int')
 
     assert(~0 == -1)
     assert(8 % 2 == 0)
@@ -127,8 +127,8 @@ fn testInt() {
     assert(!hasField(1, 'bogus'))
     fail(|| => 1 .bogus, "NoSuchField: Field 'bogus' not found") // Note that '1.bogus' fails to parse
     fail(|| => getField(1, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => setField(1, 'bogus', null), "TypeMismatch: Expected Struct")
-    fail(|| => 1 .bogus = 'z', "TypeMismatch: Expected Struct")
+    fail(|| => setField(1, 'bogus', null), "TypeMismatch: Expected Struct, not Int")
+    fail(|| => 1 .bogus = 'z', "TypeMismatch: Expected Struct, not Int")
 }
 
 fn testFloat() {
@@ -153,8 +153,8 @@ fn testFloat() {
     assert(!hasField(1.1, 'bogus'))
     fail(|| => 1.1 .bogus, "NoSuchField: Field 'bogus' not found") // Note that '1.1.bogus' fails to parse
     fail(|| => getField(1.1, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => setField(1.1, 'bogus', null), "TypeMismatch: Expected Struct")
-    fail(|| => 1.1 .bogus = 'z', "TypeMismatch: Expected Struct")
+    fail(|| => setField(1.1, 'bogus', null), "TypeMismatch: Expected Struct, not Float")
+    fail(|| => 1.1 .bogus = 'z', "TypeMismatch: Expected Struct, not Float")
 }
 
 fn testAssignment() {
@@ -480,8 +480,8 @@ fn testFunc() {
     assert(!hasField(f, 'bogus'))
     fail(|| => f.bogus, "NoSuchField: Field 'bogus' not found")
     fail(|| => getField(f, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => setField(f, 'bogus', null), "TypeMismatch: Expected Struct")
-    fail(|| => f.bogus = 'z', "TypeMismatch: Expected Struct")
+    fail(|| => setField(f, 'bogus', null), "TypeMismatch: Expected Struct, not Func")
+    fail(|| => f.bogus = 'z', "TypeMismatch: Expected Struct, not Func")
 
     //------------------------------------------
 
@@ -636,10 +636,10 @@ fn testBool() {
     fail(|| => len(true), "TypeMismatch: Type Bool has no len()")
     fail(|| => len(false), "TypeMismatch: Type Bool has no len()")
 
-    fail(|| => range(true, 1), "TypeMismatch: Expected Int")
-    fail(|| => range(false, 1), "TypeMismatch: Expected Int")
-    fail(|| => range(1, true), "TypeMismatch: Expected Int")
-    fail(|| => range(1, false), "TypeMismatch: Expected Int")
+    fail(|| => range(true, 1), "TypeMismatch: Expected Int, not Bool")
+    fail(|| => range(false, 1), "TypeMismatch: Expected Int, not Bool")
+    fail(|| => range(1, true), "TypeMismatch: Expected Int, not Bool")
+    fail(|| => range(1, false), "TypeMismatch: Expected Int, not Bool")
 
     assert('true' == str(true))
     assert('false' == str(false))
@@ -660,10 +660,10 @@ fn testBool() {
     fail(|| => true.bogus(), "NoSuchField: Field 'bogus' not found")
     fail(|| => false.bogus(), "NoSuchField: Field 'bogus' not found")
 
-    fail(|| => setField(true, 'bogus', null), "TypeMismatch: Expected Struct")
-    fail(|| => setField(false, 'bogus', null), "TypeMismatch: Expected Struct")
-    fail(|| => true.bogus = 1,  "TypeMismatch: Expected Struct")
-    fail(|| => false.bogus = 1, "TypeMismatch: Expected Struct")
+    fail(|| => setField(true, 'bogus', null), "TypeMismatch: Expected Struct, not Bool")
+    fail(|| => setField(false, 'bogus', null), "TypeMismatch: Expected Struct, not Bool")
+    fail(|| => true.bogus = 1,  "TypeMismatch: Expected Struct, not Bool")
+    fail(|| => false.bogus = 1, "TypeMismatch: Expected Struct, not Bool")
 }
 
 fn testStr() {
@@ -682,8 +682,8 @@ fn testStr() {
     assert(iter('a') != null)
     assert(1 == len('a'))
 
-    fail(|| => range('a', 1), "TypeMismatch: Expected Int")
-    fail(|| => range(1, 'a'), "TypeMismatch: Expected Int")
+    fail(|| => range('a', 1), "TypeMismatch: Expected Int, not Str")
+    fail(|| => range(1, 'a'), "TypeMismatch: Expected Int, not Str")
 
     assert('a' == str('a'))
     assert('Str' == type('a'))
@@ -698,8 +698,8 @@ fn testStr() {
 
     assert(!hasField(s, 'bogus'))
     fail(|| => getField(s, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => setField(s, 'bogus', null), "TypeMismatch: Expected Struct")
-    fail(|| => s.bogus = 1, "TypeMismatch: Expected Struct")
+    fail(|| => setField(s, 'bogus', null), "TypeMismatch: Expected Struct, not Str")
+    fail(|| => s.bogus = 1, "TypeMismatch: Expected Struct, not Str")
 
     //---------------------------------------------
 
@@ -791,8 +791,8 @@ fn testList() {
 
     assert(!hasField(x, 'bogus'))
     fail(|| => getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => setField(x, 'bogus', null), "TypeMismatch: Expected Struct")
-    fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct")
+    fail(|| => setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not List")
+    fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct, not List")
 
     //-------------------------------------------------
 
@@ -1037,11 +1037,12 @@ fn testSet() {
 
     assert(!hasField(x, 'bogus'))
     fail(|| => getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => setField(x, 'bogus', null), "TypeMismatch: Expected Struct")
-    fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct")
+    fail(|| => setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not Set")
+    fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct, not Set")
 
     //-------------------------------------------------
 
+// TODO
 //    code = `
 //try {
 //    let s = set {'a', 'b', null}
@@ -1157,8 +1158,8 @@ fn testTuple() {
 
     assert(!hasField(x, 'bogus'))
     fail(|| => getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => setField(x, 'bogus', null), "TypeMismatch: Expected Struct")
-    fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct")
+    fail(|| => setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not Tuple")
+    fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct, not Tuple")
 
     //-----------------------------------------------
 
@@ -1239,8 +1240,8 @@ fn testRange() {
 
     assert(!hasField(rng, 'bogus'))
     fail(|| => getField(rng, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => setField(rng, 'bogus', null), "TypeMismatch: Expected Struct")
-    fail(|| => rng.bogus = 1, "TypeMismatch: Expected Struct")
+    fail(|| => setField(rng, 'bogus', null), "TypeMismatch: Expected Struct, not Range")
+    fail(|| => rng.bogus = 1, "TypeMismatch: Expected Struct, not Range")
 
     //-----------------------------------------
 

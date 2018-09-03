@@ -21,10 +21,11 @@ func Tassert(t *testing.T, flag bool) {
 	}
 }
 
-func posIndex(val Value, length int) (int, Error) {
-	i, ok := val.(Int)
+func posIndex(v Value, length int) (int, Error) {
+
+	i, ok := v.(Int)
 	if !ok {
-		return -1, TypeMismatchError(IntType)
+		return -1, TypeMismatchError(IntType, v.Type())
 	}
 
 	n := int(i.IntVal())
@@ -34,8 +35,8 @@ func posIndex(val Value, length int) (int, Error) {
 	return n, nil
 }
 
-func boundedIndex(val Value, length int) (int, Error) {
-	n, err := posIndex(val, length)
+func boundedIndex(v Value, length int) (int, Error) {
+	n, err := posIndex(v, length)
 	if err != nil {
 		return -1, err
 	}
@@ -64,11 +65,11 @@ func sliceBounds(n int, length int) int {
 func sliceIndices(from Value, to Value, length int) (int, int, Error) {
 	f, err := posIndex(from, length)
 	if err != nil {
-		return 0, 0, TypeMismatchError(IntType)
+		return -1, -1, err
 	}
 	t, err := posIndex(to, length)
 	if err != nil {
-		return 0, 0, TypeMismatchError(IntType)
+		return -1, -1, err
 	}
 
 	return sliceBounds(f, length), sliceBounds(t, length), nil

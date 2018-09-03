@@ -187,7 +187,7 @@ func (i _int) Rem(val Value) (Int, Error) {
 	case _int:
 		return i % t, nil
 	default:
-		return nil, TypeMismatchError(IntType)
+		return nil, TypeMismatchError(IntType, val.Type())
 	}
 }
 
@@ -196,7 +196,7 @@ func (i _int) BitAnd(val Value) (Int, Error) {
 	case _int:
 		return i & t, nil
 	default:
-		return nil, TypeMismatchError(IntType)
+		return nil, TypeMismatchError(IntType, val.Type())
 	}
 }
 
@@ -205,7 +205,7 @@ func (i _int) BitOr(val Value) (Int, Error) {
 	case _int:
 		return i | t, nil
 	default:
-		return nil, TypeMismatchError(IntType)
+		return nil, TypeMismatchError(IntType, val.Type())
 	}
 }
 
@@ -214,7 +214,7 @@ func (i _int) BitXOr(val Value) (Int, Error) {
 	case _int:
 		return i ^ t, nil
 	default:
-		return nil, TypeMismatchError(IntType)
+		return nil, TypeMismatchError(IntType, val.Type())
 	}
 }
 
@@ -226,7 +226,7 @@ func (i _int) LeftShift(val Value) (Int, Error) {
 		}
 		return i << uint(t), nil
 	default:
-		return nil, TypeMismatchError(IntType)
+		return nil, TypeMismatchError(IntType, val.Type())
 	}
 }
 
@@ -238,7 +238,7 @@ func (i _int) RightShift(val Value) (Int, Error) {
 		}
 		return i >> uint(t), nil
 	default:
-		return nil, TypeMismatchError(IntType)
+		return nil, TypeMismatchError(IntType, val.Type())
 	}
 }
 
