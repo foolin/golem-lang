@@ -73,10 +73,10 @@ var StandardBuiltins = []*BuiltinEntry{
 	{"str", BuiltinStr},
 	{"type", BuiltinType},
 
-	//{"fields", BuiltinFields},
-	//{"getField", BuiltinGetField},
-	//{"hasField", BuiltinHasField},
-	//{"setField", BuiltinSetField},
+	{"fields", BuiltinFields},
+	{"getField", BuiltinGetField},
+	{"hasField", BuiltinHasField},
+	{"setField", BuiltinSetField},
 
 	//{"arity", BuiltinArity},
 	//{"chan", BuiltinChan},
@@ -205,46 +205,70 @@ var BuiltinFrozen = NewFixedNativeFunc(
 		return values[0].Frozen(ev)
 	})
 
-//// BuiltinFields returns the fields of a Struct
-//var BuiltinFields = NewFixedNativeFunc(
-//	[]Type{AnyType},
-//	false,
-//	func(ev Evaluator, values []Value) (Value, Error) {
-//		st := values[0].(*_struct)
-//		fields := st.smap.fieldNames()
-//		result := make([]Value, len(fields))
-//		for i, k := range fields {
-//			result[i] = NewStr(k)
-//		}
-//		return NewSet(ev, result)
-//	})
+// BuiltinFields returns the fields of a Struct
+var BuiltinFields = NewFixedNativeFunc(
+	[]Type{AnyType},
+	false,
+	func(ev Evaluator, values []Value) (Value, Error) {
 
-//// BuiltinGetField gets the Value associated with a Struct's field name.
-//var BuiltinGetField = NewFixedNativeFunc(
-//	[]Type{StructType, StrType},
-//	false,
-//	func(ev Evaluator, values []Value) (Value, Error) {
-//		st := values[0].(*_struct)
-//		field := values[1].(Str)
-//
-//		return st.GetField(ev, field)
-//	})
-//
-//// BuiltinSetField sets the Value associated with a Struct's field name.
-//var BuiltinSetField = NewFixedNativeFunc(
-//	[]Type{StructType, StrType, AnyType},
-//	false,
-//	func(ev Evaluator, values []Value) (Value, Error) {
-//		st := values[0].(*_struct)
-//		field := values[1].(Str)
-//		val := values[2]
-//
-//		err := st.SetField(ev, field, val)
-//		if err != nil {
-//			return nil, err
-//		}
-//		return val, nil
-//	})
+		fields, err := values[0].FieldNames()
+		if err != nil {
+			return nil, err
+		}
+
+		entries := make([]Value, len(fields))
+		for i, k := range fields {
+			entries[i] = NewStr(k)
+		}
+		return NewSet(ev, entries)
+	})
+
+// BuiltinGetField gets the Value associated with a Struct's field name.
+var BuiltinGetField = NewFixedNativeFunc(
+	[]Type{AnyType, StrType},
+	false,
+	func(ev Evaluator, values []Value) (Value, Error) {
+		field := values[1].(Str)
+
+		return values[0].GetField(field.String(), ev)
+	})
+
+// BuiltinHasField gets the Value associated with a Struct's field name.
+var BuiltinHasField = NewFixedNativeFunc(
+	[]Type{AnyType, StrType},
+	false,
+	func(ev Evaluator, values []Value) (Value, Error) {
+		field := values[1].(Str)
+
+		b, err := values[0].HasField(field.String())
+		if err != nil {
+			return nil, err
+		}
+		return NewBool(b), nil
+	})
+
+// BuiltinSetField sets the Value associated with a Struct's field name.
+var BuiltinSetField = NewFixedNativeFunc(
+	[]Type{StructType, StrType, AnyType},
+	true,
+	func(ev Evaluator, values []Value) (Value, Error) {
+
+		if values[0].Type() == NullType {
+			return nil, NullValueError()
+		}
+		if values[1].Type() == NullType {
+			return nil, NullValueError()
+		}
+
+		st := values[0].(Struct)
+		fld := values[1].(Str)
+
+		err := st.SetField(fld.String(), ev, values[2])
+		if err != nil {
+			return nil, err
+		}
+		return Null, nil
+	})
 
 //// BuiltinArity returns the arity of a function.
 //var BuiltinArity = NewFixedNativeFunc(

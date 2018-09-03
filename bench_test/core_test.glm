@@ -1080,6 +1080,22 @@ fn testSet() {
 
 fn testRange() {
 
+    let rng = range(0, 10)
+    assert(set { 'to', 'count', 'step', 'from' } == fields(rng))
+    for f in fields(rng) {
+        assert(hasField(rng, f))
+    }
+    assert(rng.to == getField(rng, 'to'))
+    assert(rng.count == getField(rng, 'count'))
+    assert(rng.step == getField(rng, 'step'))
+    assert(rng.from == getField(rng, 'from'))
+
+    assert(!hasField(rng, 'bogus'))
+    fail(|| => getField(rng, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => setField(rng, 'bogus', null), "TypeMismatch: Expected Struct")
+
+    //-----------------------------------------
+
     fn listify(r) {
         let ls = []
         for n in r {
