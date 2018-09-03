@@ -320,39 +320,70 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = f.stack[:n-q+1]
 		f.ip += 5
 
-	case bc.ReplaceField, bc.SetField:
+	case bc.SetField, bc.InitField, bc.InitProperty, bc.InitReadonlyProperty:
 
-		idx := bc.DecodeParam(btc, f.ip)
-		key, ok := pool.Constants[idx].(g.Str)
+		p := bc.DecodeParam(btc, f.ip)
+		key, ok := pool.Constants[p].(g.Str)
 		g.Assert(ok)
 
-		// get struct from stack
-		stc, ok := f.stack[n-1].(g.Struct)
-		if !ok {
-			return nil, g.TypeMismatchError("Expected Struct")
-		}
+		switch btc[f.ip] {
 
-		// get value from stack
-		value := f.stack[n]
+		case bc.SetField:
 
-		// init or set
-		if btc[f.ip] == bc.SetField {
+			stc, ok := f.stack[n-1].(g.Struct)
+			if !ok {
+				return nil, g.TypeMismatchError("Expected Struct")
+			}
+			value := f.stack[n]
+
 			err := stc.SetField(key.String(), itp, value)
 			if err != nil {
 				return nil, err
 			}
 			f.stack[n-1] = value
-		} else {
+			f.stack = f.stack[:n]
+
+		case bc.InitField:
+
+			stc := f.stack[n-1].(g.Struct)
+			value := f.stack[n]
+
 			stc.Internal(key.String(), g.NewField(value))
+			f.stack = f.stack[:n]
+
+		case bc.InitProperty:
+
+			stc := f.stack[n-2].(g.Struct)
+			get := f.stack[n-1].(g.Func)
+			set := f.stack[n].(g.Func)
+
+			prop, err := g.NewProperty(get, set)
+			g.Assert(err == nil)
+
+			stc.Internal(key.String(), prop)
+			f.stack = f.stack[:n-1]
+
+		case bc.InitReadonlyProperty:
+
+			stc := f.stack[n-1].(g.Struct)
+			get := f.stack[n].(g.Func)
+
+			prop, err := g.NewReadonlyProperty(get)
+			g.Assert(err == nil)
+
+			stc.Internal(key.String(), prop)
+			f.stack = f.stack[:n]
+
+		default:
+			panic("unreachable")
 		}
 
-		f.stack = f.stack[:n]
 		f.ip += 3
 
 	case bc.IncField:
 
-		idx := bc.DecodeParam(btc, f.ip)
-		key, ok := pool.Constants[idx].(g.Str)
+		p := bc.DecodeParam(btc, f.ip)
+		key, ok := pool.Constants[p].(g.Str)
 		g.Assert(ok)
 
 		// get struct from stack

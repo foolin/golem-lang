@@ -72,7 +72,9 @@ const (
 
 	GetField
 	InvokeField
-	ReplaceField
+	InitField
+	InitProperty
+	InitReadonlyProperty
 	SetField
 	IncField
 
@@ -205,8 +207,12 @@ func BytecodeString(bc byte) string {
 
 	case NewStruct:
 		return "NewStruct"
-	case ReplaceField:
-		return "ReplaceField"
+	case InitField:
+		return "InitField"
+	case InitProperty:
+		return "InitProperty"
+	case InitReadonlyProperty:
+		return "InitReadonlyProperty"
 
 	case NewDict:
 		return "NewDict"
@@ -289,7 +295,9 @@ func BytecodeSize(bc byte) int {
 		LoadLocal, LoadCapture, StoreLocal, StoreCapture,
 		Jump, JumpTrue, JumpFalse, Break, Continue,
 		NewFunc, FuncCapture, FuncLocal, Invoke, Go,
-		NewStruct, GetField, ReplaceField, SetField, IncField,
+		NewStruct, GetField,
+		InitField, InitProperty, InitReadonlyProperty,
+		SetField, IncField,
 		NewDict, NewList, NewSet, NewTuple /*CheckCast,*/, CheckTuple:
 
 		return 3

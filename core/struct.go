@@ -6,9 +6,6 @@ package core
 
 import (
 	"bytes"
-	"reflect"
-	"sort"
-	"strings"
 
 	"github.com/mjarmy/golem-lang/scanner"
 )
@@ -103,7 +100,7 @@ func (st *_struct) HashCode(ev Evaluator) (Int, Error) {
 	return nil, TypeMismatchError("Expected Hashable Type")
 }
 
-func (st *_struct) Eq(ev Evaluator, val Value) (Bool, Error) {
+func (this *_struct) Eq(ev Evaluator, val Value) (Bool, Error) {
 
 	// same type
 	that, ok := val.(Struct)
@@ -111,8 +108,8 @@ func (st *_struct) Eq(ev Evaluator, val Value) (Bool, Error) {
 		return False, nil
 	}
 
-	// same fields
-	n1, err := st.FieldNames()
+	// same number of fields
+	n1, err := this.FieldNames()
 	if err != nil {
 		return nil, err
 	}
@@ -120,22 +117,22 @@ func (st *_struct) Eq(ev Evaluator, val Value) (Bool, Error) {
 	if err != nil {
 		return nil, err
 	}
-	// Unfortunately we have to sort the keys, because the underlying
-	// golang map in the fieldMap iterates over its keys unpredictably.
-	sort.Slice(n1, func(i, j int) bool {
-		return strings.Compare(n1[i], n1[j]) < 0
-	})
-	sort.Slice(n2, func(i, j int) bool {
-		return strings.Compare(n2[i], n2[j]) < 0
-	})
-	if !reflect.DeepEqual(n1, n2) {
+	if len(n1) != len(n2) {
 		return False, nil
 	}
 
-	// all fields have same value
+	// same fields, with same values
 	for _, name := range n1 {
 
-		a, err := st.GetField(name, ev)
+		has, err := that.HasField(name)
+		if err != nil {
+			return nil, err
+		}
+		if !has {
+			return False, nil
+		}
+
+		a, err := this.GetField(name, ev)
 		if err != nil {
 			return nil, err
 		}
@@ -149,7 +146,6 @@ func (st *_struct) Eq(ev Evaluator, val Value) (Bool, Error) {
 		if err != nil {
 			return nil, err
 		}
-
 		if !eq.BoolVal() {
 			return False, nil
 		}

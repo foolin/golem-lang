@@ -1015,50 +1015,42 @@ func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 		c.pushBytecode(stc.Begin(), bc.StoreLocal, this.Index())
 	}
 
-	//if p, ok := v.(*ast.PropNode); ok {
-	//	def = append(def, &g.FieldDef{
-	//		Name:       k.Text,
-	//		IsReadonly: p.Setter == nil,
-	//		IsProperty: true,
-	//	})
-	//} else {
-	//	def = append(def, &g.FieldDef{
-	//		Name:       k.Text,
-	//		IsReadonly: false,
-	//		IsProperty: false,
-	//	})
-	//}
-
-	// init each value
+	// init each field
 	for i, k := range stc.Keys {
 
 		v := stc.Values[i]
-		if _, ok := v.(*ast.PropNode); ok {
-			panic("TODO")
-		}
+		if p, ok := v.(*ast.PropNode); ok {
 
-		c.Visit(v)
-		c.pushBytecode(
-			v.Begin(),
-			bc.ReplaceField,
-			c.poolBuilder.constIndex(g.NewStr(k.Text)))
+			if p.Set == nil {
+
+				// InitReadonlyProperty
+				c.Visit(p.Get)
+				c.pushBytecode(
+					v.Begin(),
+					bc.InitReadonlyProperty,
+					c.poolBuilder.constIndex(g.NewStr(k.Text)))
+
+			} else {
+
+				// InitProperty
+				c.Visit(p.Get)
+				c.Visit(p.Set)
+				c.pushBytecode(
+					v.Begin(),
+					bc.InitProperty,
+					c.poolBuilder.constIndex(g.NewStr(k.Text)))
+			}
+		} else {
+
+			// InitField
+			c.Visit(v)
+			c.pushBytecode(
+				v.Begin(),
+				bc.InitField,
+				c.poolBuilder.constIndex(g.NewStr(k.Text)))
+		}
 	}
 }
-
-//func (c *compiler) visitPropNode(pn *ast.PropNode) {
-//
-//	panic("TODO")
-//
-//	//	c.Visit(pn.Getter)
-//	//
-//	//	if pn.Setter == nil {
-//	//		c.push(pn.Begin(), bc.LoadNull)
-//	//	} else {
-//	//		c.Visit(pn.Setter)
-//	//	}
-//	//
-//	//	c.pushBytecode(pn.Begin(), bc.NewTuple, 2)
-//}
 
 func (c *compiler) visitThisExpr(this *ast.ThisExpr) {
 

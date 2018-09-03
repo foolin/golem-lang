@@ -245,10 +245,10 @@ func (stc *StructExpr) Traverse(v Visitor) {
 
 // Traverse DictExpr
 func (propNode *PropNode) Traverse(v Visitor) {
-	v.Visit(propNode.Getter)
+	v.Visit(propNode.Get)
 
-	if propNode.Setter != nil {
-		v.Visit(propNode.Setter)
+	if propNode.Set != nil {
+		v.Visit(propNode.Set)
 	}
 }
 

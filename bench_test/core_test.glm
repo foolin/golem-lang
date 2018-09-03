@@ -910,38 +910,33 @@ fn testStruct() {
             let a = null
             a = struct { x: 8 }.x = 5
             assert(5 == a)
+        },
+        fn () {
+            let s = struct { 
+                a: prop { || => 1 } 
+            }
+            assert(1 == s.a)
+            fail(|| => s.a = 2, "ReadonlyField: Field 'a' is readonly")
+        },
+        fn () {
+            let x = 2
+            let s = struct { 
+                a: prop { || => 1 } ,
+                b: prop { || => x, |v| => x = v },
+                c: || => this.a + this.b
+            }
+            fail(|| => s.a = 2, "ReadonlyField: Field 'a' is readonly")
+
+            assert([s.a, s.b, x, s.c()] == [1, 2, 2, 3])
+
+            s.b = 3
+            assert([s.a, s.b, x, s.c()] == [1, 3, 3, 4])
+
+            x = 4
+            assert([s.a, s.b, x, s.c()] == [1, 4, 4, 5])
         }
     ]
     for f in funcs { f(); }
-
-//    let x = 2
-//    let s = struct {
-//
-//        // 'a' is a readonly property with a getter function.
-//        a: prop { || => 1 },
-//
-//        // 'b' is a property with getter and setters functions.
-//        b: prop { || => x, |v| => x = v },
-//
-//        // 'a' and 'b' act like normal fields here.
-//        c: || => this.a + this.b
-//    }
-//
-//    try {
-//        s.a = 42
-//        assert(false) // we will never get here.
-//    } catch e {
-//        assert(e.kind == 'ReadonlyField')
-//        assert(e.msg == 'Field 'a' is readonly')
-//    }
-//
-//    assert([s.a, s.b, x, s.c()] == [1, 2, 2, 3])
-//
-//    s.b = 3
-//    assert([s.a, s.b, x, s.c()] == [1, 3, 3, 4])
-//
-//    x = 4
-//    assert([s.a, s.b, x, s.c()] == [1, 4, 4, 5])
 }
 
 //fn testMerge() {

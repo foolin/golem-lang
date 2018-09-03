@@ -1188,24 +1188,24 @@ func (p *Parser) property() *ast.PropNode {
 	token := p.expect(ast.Prop)
 	lbrace := p.expect(ast.Lbrace)
 
-	getter := p.propertyFunc()
-	if len(getter.RequiredParams) != 0 {
-		panic(newParserError(p.scn.Source.Path, InvalidPropertyGetter, getter.Token))
+	get := p.propertyFunc()
+	if len(get.RequiredParams) != 0 {
+		panic(newParserError(p.scn.Source.Path, InvalidPropertyGetter, get.Token))
 	}
 
-	var setter *ast.FnExpr
+	var set *ast.FnExpr
 	if p.accept(ast.Comma) {
-		setter = p.propertyFunc()
-		if len(setter.RequiredParams) != 1 {
-			panic(newParserError(p.scn.Source.Path, InvalidPropertySetter, setter.Token))
+		set = p.propertyFunc()
+		if len(set.RequiredParams) != 1 {
+			panic(newParserError(p.scn.Source.Path, InvalidPropertySetter, set.Token))
 		}
 	}
 
 	return &ast.PropNode{
 		Token:  token,
 		LBrace: lbrace,
-		Getter: getter,
-		Setter: setter,
+		Get:    get,
+		Set:    set,
 		RBrace: p.expect(ast.Rbrace),
 	}
 }

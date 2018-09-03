@@ -298,8 +298,8 @@ type (
 	PropNode struct {
 		Token  *Token
 		LBrace *Token
-		Getter *FnExpr
-		Setter *FnExpr
+		Get    *FnExpr
+		Set    *FnExpr
 		RBrace *Token
 	}
 
@@ -1052,11 +1052,11 @@ func (n *PropNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString("prop { ")
 
-	buf.WriteString(n.Getter.String())
+	buf.WriteString(n.Get.String())
 
-	if n.Setter != nil {
+	if n.Set != nil {
 		buf.WriteString(", ")
-		buf.WriteString(n.Setter.String())
+		buf.WriteString(n.Set.String())
 	}
 
 	buf.WriteString(" }")
