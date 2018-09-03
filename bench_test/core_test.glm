@@ -819,41 +819,41 @@ fn testList() {
 //
 //    failMsg(|| => arity(0), 'TypeMismatch', 'Expected Func')
 //}
-//
-//fn testRange() {
-//
-//    fn listify(r) {
-//        let ls = []
-//        for n in r {
-//            ls.add(n)
-//        }
-//        return ls
-//    }
-//    let a = range(0, 5)
-//    let b = range(0, 5, 2)
-//    let c = range(2, 14, 3)
-//    let d = range(-1, -8, -3)
-//    let e = range(2, 2)
-//    let f = range(-1, -1, -1)
-//    assert(listify(a) == [ 0, 1, 2, 3, 4 ])
-//    assert(listify(b) == [ 0, 2, 4 ])
-//    assert(listify(c) == [ 2, 5, 8, 11 ])
-//    assert(listify(d) == [ -1, -4, -7 ])
-//    assert(listify(e) == [])
-//    assert(listify(f) == [])
-//    assert([a.from(), a.to(), a.step(), a.count()] == [0, 5, 1, 5])
-//    assert([b.from(), b.to(), b.step(), b.count()] == [0, 5, 2, 3])
-//    assert([c.from(), c.to(), c.step(), c.count()] == [2, 14, 3, 4])
-//    assert([d.from(), d.to(), d.step(), d.count()] == [-1, -8, -3, 3])
-//    assert([e.from(), e.to(), e.step(), e.count()] == [2, 2, 1, 0])
-//
-//    let i = 0
-//    while i < a.count() {
-//        assert(a[i] == i)
-//        i++
-//    } 
-//}
-//
+
+fn testRange() {
+
+    fn listify(r) {
+        let ls = []
+        for n in r {
+            ls.add(n)
+        }
+        return ls
+    }
+    let a = range(0, 5)
+    let b = range(0, 5, 2)
+    let c = range(2, 14, 3)
+    let d = range(-1, -8, -3)
+    let e = range(2, 2)
+    let f = range(-1, -1, -1)
+    assert(listify(a) == [ 0, 1, 2, 3, 4 ])
+    assert(listify(b) == [ 0, 2, 4 ])
+    assert(listify(c) == [ 2, 5, 8, 11 ])
+    assert(listify(d) == [ -1, -4, -7 ])
+    assert(listify(e) == [])
+    assert(listify(f) == [])
+    assert([a.from(), a.to(), a.step(), a.count()] == [0, 5, 1, 5])
+    assert([b.from(), b.to(), b.step(), b.count()] == [0, 5, 2, 3])
+    assert([c.from(), c.to(), c.step(), c.count()] == [2, 14, 3, 4])
+    assert([d.from(), d.to(), d.step(), d.count()] == [-1, -8, -3, 3])
+    assert([e.from(), e.to(), e.step(), e.count()] == [2, 2, 1, 0])
+
+    let i = 0
+    while i < a.count() {
+        assert(a[i] == i)
+        i++
+    } 
+}
+
 //fn testSlice() {
 //    let ls = [3,4,5];
 //    assert(ls[0:1] == [3]);
@@ -1069,7 +1069,7 @@ fn main(args) {
 //    testGo()
 //    testFields()
 //    testArity()
-//    testRange()
+    testRange()
 //    testSlice()
     testStruct()
 //    testMerge()

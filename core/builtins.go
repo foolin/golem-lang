@@ -72,7 +72,7 @@ var StandardBuiltins = []*BuiltinEntry{
 	//{"getval", BuiltinGetVal},
 	//{"len", BuiltinLen},
 	//{"merge", BuiltinMerge},
-	//{"range", BuiltinRange},
+	{"range", BuiltinRange},
 	//{"setval", BuiltinSetVal},
 	//{"str", BuiltinStr},
 	//{"type", BuiltinType},
@@ -98,22 +98,22 @@ var StandardBuiltins = []*BuiltinEntry{
 //		}
 //		return nil, TypeMismatchError("Expected Lenable Type")
 //	})
-//
-//// BuiltinRange creates a new Range
-//var BuiltinRange = NewMultipleNativeFunc(
-//	[]Type{IntType, IntType},
-//	[]Type{IntType},
-//	false,
-//	func(ev Evaluator, values []Value) (Value, Error) {
-//		from := values[0].(Int)
-//		to := values[1].(Int)
-//		step := One
-//		if len(values) == 3 {
-//			step = values[2].(Int)
-//
-//		}
-//		return NewRange(from.IntVal(), to.IntVal(), step.IntVal())
-//	})
+
+// BuiltinRange creates a new Range
+var BuiltinRange = NewMultipleNativeFunc(
+	[]Type{IntType, IntType},
+	[]Type{IntType},
+	false,
+	func(ev Evaluator, values []Value) (Value, Error) {
+		from := values[0].(Int)
+		to := values[1].(Int)
+		step := One
+		if len(values) == 3 {
+			step = values[2].(Int)
+
+		}
+		return NewRange(from.IntVal(), to.IntVal(), step.IntVal())
+	})
 
 // BuiltinAssert asserts that a single Bool is True
 var BuiltinAssert = NewFixedNativeFunc(

@@ -180,19 +180,19 @@ type (
 		Filter(Evaluator, func(Value) (Value, Error)) (Value, Error)
 	}
 
-	//	// Range is an immutable, iterable representation of a  sequence of integers
-	//	Range interface {
-	//		Composite
-	//		Indexable
-	//		Lenable
-	//		Iterable
-	//
-	//		From() Int
-	//		To() Int
-	//		Step() Int
-	//		Count() Int
-	//	}
-	//
+	// Range is an immutable, iterable representation of a  sequence of integers
+	Range interface {
+		Composite
+		Indexable
+		Lenable
+		Iterable
+
+		From() Int
+		To() Int
+		Step() Int
+		Count() Int
+	}
+
 	//	// Tuple is an immutable sequence of two or more values
 	//	Tuple interface {
 	//		Composite

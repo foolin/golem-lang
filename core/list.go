@@ -292,15 +292,12 @@ type listIterator struct {
 
 func (ls *list) NewIterator(ev Evaluator) Iterator {
 
-	// make an iterator with an empty struct
 	itr := &listIterator{iteratorStruct(), ls, -1}
 
-	// initialize the fields of the struct
 	next, get := iteratorFields(ev, itr)
 	itr.Internal("next", next)
 	itr.Internal("get", get)
 
-	// done
 	return itr
 }
 
@@ -325,6 +322,16 @@ var listMethods = map[string]Method{
 		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
 			ls := self.(List)
 			return ls.NewIterator(ev), nil
+		}),
+	"add": NewFixedMethod(
+		[]Type{AnyType}, true,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			ls := self.(List)
+			err := ls.Add(ev, params[0])
+			if err != nil {
+				return nil, err
+			}
+			return ls, nil
 		}),
 }
 
@@ -365,8 +372,8 @@ func (ls *list) InvokeField(name string, ev Evaluator, params []Value) (Value, E
 //	case "add":
 //		return &virtualFunc{ls, sn, NewFixedNativeFunc(
 //			[]Type{AnyType}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				err := ls.Add(ev, values[0])
+//			func(ev Evaluator, params []Value) (Value, Error) {
+//				err := ls.Add(ev, params[0])
 //				if err != nil {
 //					return nil, err
 //				}
@@ -376,8 +383,8 @@ func (ls *list) InvokeField(name string, ev Evaluator, params []Value) (Value, E
 //	case "addAll":
 //		return &virtualFunc{ls, sn, NewFixedNativeFunc(
 //			[]Type{AnyType}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				err := ls.AddAll(ev, values[0])
+//			func(ev Evaluator, params []Value) (Value, Error) {
+//				err := ls.AddAll(ev, params[0])
 //				if err != nil {
 //					return nil, err
 //				}
@@ -387,8 +394,8 @@ func (ls *list) InvokeField(name string, ev Evaluator, params []Value) (Value, E
 //	case "remove":
 //		return &virtualFunc{ls, sn, NewFixedNativeFunc(
 //			[]Type{IntType}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				i := values[0].(Int)
+//			func(ev Evaluator, params []Value) (Value, Error) {
+//				i := params[0].(Int)
 //				err := ls.Remove(ev, i)
 //				if err != nil {
 //					return nil, err
@@ -399,7 +406,7 @@ func (ls *list) InvokeField(name string, ev Evaluator, params []Value) (Value, E
 //	case "clear":
 //		return &virtualFunc{ls, sn, NewFixedNativeFunc(
 //			[]Type{}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
+//			func(ev Evaluator, params []Value) (Value, Error) {
 //				err := ls.Clear()
 //				if err != nil {
 //					return nil, err
@@ -410,22 +417,22 @@ func (ls *list) InvokeField(name string, ev Evaluator, params []Value) (Value, E
 //	case "isEmpty":
 //		return &virtualFunc{ls, sn, NewFixedNativeFunc(
 //			[]Type{}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
+//			func(ev Evaluator, params []Value) (Value, Error) {
 //				return ls.IsEmpty(), nil
 //			})}, nil
 //
 //	case "contains":
 //		return &virtualFunc{ls, sn, NewFixedNativeFunc(
 //			[]Type{AnyType}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				return ls.Contains(ev, values[0])
+//			func(ev Evaluator, params []Value) (Value, Error) {
+//				return ls.Contains(ev, params[0])
 //			})}, nil
 //
 //	case "indexOf":
 //		return &virtualFunc{ls, sn, NewFixedNativeFunc(
 //			[]Type{AnyType}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				return ls.IndexOf(ev, values[0])
+//			func(ev Evaluator, params []Value) (Value, Error) {
+//				return ls.IndexOf(ev, params[0])
 //			})}, nil
 //
 //	case "join":
@@ -433,10 +440,10 @@ func (ls *list) InvokeField(name string, ev Evaluator, params []Value) (Value, E
 //			[]Type{},
 //			[]Type{StrType},
 //			false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
+//			func(ev Evaluator, params []Value) (Value, Error) {
 //				delim := NewStr("")
-//				if len(values) == 1 {
-//					delim = values[0].(Str)
+//				if len(params) == 1 {
+//					delim = params[0].(Str)
 //				}
 //
 //				return ls.Join(ev, delim), nil
@@ -445,9 +452,9 @@ func (ls *list) InvokeField(name string, ev Evaluator, params []Value) (Value, E
 //	case "map":
 //		return &virtualFunc{ls, sn, NewFixedNativeFunc(
 //			[]Type{FuncType}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
+//			func(ev Evaluator, params []Value) (Value, Error) {
 //
-//				fn := values[0].(Func)
+//				fn := params[0].(Func)
 //				return ls.Map(ev, func(v Value) (Value, Error) {
 //					return fn.Invoke(ev, []Value{v})
 //				})
@@ -457,14 +464,14 @@ func (ls *list) InvokeField(name string, ev Evaluator, params []Value) (Value, E
 //	case "reduce":
 //		return &virtualFunc{ls, sn, NewFixedNativeFunc(
 //			[]Type{AnyType, FuncType}, true,
-//			func(ev Evaluator, values []Value) (Value, Error) {
+//			func(ev Evaluator, params []Value) (Value, Error) {
 //
-//				if values[1] == Null {
+//				if params[1] == Null {
 //					return nil, NullValueError()
 //				}
 //
-//				initial := values[0]
-//				fn := values[1].(Func)
+//				initial := params[0]
+//				fn := params[1].(Func)
 //				return ls.Reduce(ev, initial, func(acc Value, v Value) (Value, Error) {
 //					return fn.Invoke(ev, []Value{acc, v})
 //				})
@@ -473,9 +480,9 @@ func (ls *list) InvokeField(name string, ev Evaluator, params []Value) (Value, E
 //	case "filter":
 //		return &virtualFunc{ls, sn, NewFixedNativeFunc(
 //			[]Type{FuncType}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
+//			func(ev Evaluator, params []Value) (Value, Error) {
 //
-//				fn := values[0].(Func)
+//				fn := params[0].(Func)
 //				return ls.Filter(ev, func(v Value) (Value, Error) {
 //					return fn.Invoke(ev, []Value{v})
 //				})
@@ -485,7 +492,7 @@ func (ls *list) InvokeField(name string, ev Evaluator, params []Value) (Value, E
 //	case "iterator":
 //		return &virtualFunc{ls, sn, NewFixedNativeFunc(
 //			[]Type{}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
+//			func(ev Evaluator, params []Value) (Value, Error) {
 //				return ls.NewIterator(ev), nil
 //			})}, nil
 //
