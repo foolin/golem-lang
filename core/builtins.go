@@ -98,6 +98,11 @@ var BuiltinLen = NewFixedNativeFunc(
 	[]Type{AnyType},
 	false,
 	func(ev Evaluator, values []Value) (Value, Error) {
+
+		if values[0].Type() == NullType {
+			return nil, NullValueError()
+		}
+
 		if ln, ok := values[0].(Lenable); ok {
 			return ln.Len(ev)
 		}
@@ -110,6 +115,11 @@ var BuiltinIter = NewFixedNativeFunc(
 	[]Type{AnyType},
 	false,
 	func(ev Evaluator, values []Value) (Value, Error) {
+
+		if values[0].Type() == NullType {
+			return nil, NullValueError()
+		}
+
 		if ibl, ok := values[0].(Iterable); ok {
 			return ibl.NewIterator(ev), nil
 		}
@@ -183,10 +193,14 @@ var BuiltinType = NewFixedNativeFunc(
 	[]Type{AnyType},
 	// Subtlety: Null has a type, but for the purposes of type()
 	// we are going to pretend that it doesn't
-	false,
+	true,
 	func(ev Evaluator, values []Value) (Value, Error) {
-		t := values[0].Type()
-		return NewStr(t.String()), nil
+
+		if values[0].Type() == NullType {
+			return nil, NullValueError()
+		}
+
+		return NewStr(values[0].Type().String()), nil
 	})
 
 // BuiltinFreeze freezes a single Value.

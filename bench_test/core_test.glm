@@ -567,6 +567,32 @@ fn testLambda() {
     assert(c(1, 2) == 15)
 }
 
+fn testNull() {
+
+    assert(null == null)
+    assert(null != 1)
+    assert(1 != null)
+
+    fail(|| => freeze(null), "NullValue")
+    fail(|| => frozen(null), "NullValue")
+    fail(|| => iter(null), "NullValue")
+    fail(|| => len(null), "NullValue")
+    fail(|| => range(null, null), "NullValue")
+    assert('null' == str(null))
+    fail(|| => type(null), "NullValue")
+
+    fail(|| => fields(null), "NullValue")
+    fail(|| => hasField(null, 'bogus'), "NullValue")
+    fail(|| => getField(null, 'bogus'), "NullValue")
+    fail(|| => setField(null, 'bogus', null), "NullValue")
+
+   // try {
+   //     println('type: ', type(null))
+   // } catch e {
+   //     println(e.error)
+   // }
+}
+
 fn testStr() {
 
     let s = '\u{1f496}\u{2665}\u{24}'
@@ -1391,6 +1417,7 @@ fn main(args) {
     testNamedFunc()
     testLambda()
 
+    testNull()
     testStr()
     testList()
 //    testFreeze()
