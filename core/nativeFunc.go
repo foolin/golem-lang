@@ -48,11 +48,7 @@ func (f *nativeFunc) Frozen(ev Evaluator) (Bool, Error) {
 }
 
 func (f *nativeFunc) HashCode(ev Evaluator) (Int, Error) {
-	return nil, TypeMismatchError("Expected Hashable Type")
-}
-
-func (f *nativeFunc) Cmp(ev Evaluator, val Value) (Int, Error) {
-	return nil, TypeMismatchError("Expected Comparable Type")
+	return nil, TypeMismatchError("Expected Hashable")
 }
 
 func (f *nativeFunc) ToStr(ev Evaluator) (Str, Error) {

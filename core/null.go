@@ -22,11 +22,17 @@ var Null Nil = &null{0}
 
 func (n *null) basicMarker() {}
 
-func (n *null) Type() Type { return NullType }
+func (n *null) Type() Type {
+	return NullType
+}
 
-func (n *null) ToStr(ev Evaluator) (Str, Error) { return NewStr("null"), nil }
+func (n *null) ToStr(ev Evaluator) (Str, Error) {
+	return NewStr("null"), nil
+}
 
-func (n *null) HashCode(ev Evaluator) (Int, Error) { return nil, NullValueError() }
+func (n *null) HashCode(ev Evaluator) (Int, Error) {
+	return nil, NullValueError()
+}
 
 func (n *null) Eq(ev Evaluator, val Value) (Bool, Error) {
 	switch val.(type) {
@@ -36,8 +42,6 @@ func (n *null) Eq(ev Evaluator, val Value) (Bool, Error) {
 		return False, nil
 	}
 }
-
-func (n *null) Cmp(ev Evaluator, val Value) (Int, Error) { return nil, NullValueError() }
 
 func (n *null) Freeze(ev Evaluator) (Value, Error) {
 	return nil, NullValueError()

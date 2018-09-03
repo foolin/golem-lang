@@ -62,8 +62,8 @@ func (b _bool) Eq(ev Evaluator, val Value) (Bool, Error) {
 	}
 }
 
-func (b _bool) Cmp(ev Evaluator, val Value) (Int, Error) {
-	switch t := val.(type) {
+func (b _bool) Cmp(ev Evaluator, c Comparable) (Int, Error) {
+	switch t := c.(type) {
 
 	case _bool:
 		if b == t {
@@ -75,7 +75,7 @@ func (b _bool) Cmp(ev Evaluator, val Value) (Int, Error) {
 		}
 
 	default:
-		return nil, TypeMismatchError("Expected Comparable Type")
+		return nil, TypeMismatchError("Expected Comparable")
 	}
 }
 

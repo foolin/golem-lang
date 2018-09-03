@@ -97,7 +97,7 @@ func (st *_struct) ToStr(ev Evaluator) (Str, Error) {
 }
 
 func (st *_struct) HashCode(ev Evaluator) (Int, Error) {
-	return nil, TypeMismatchError("Expected Hashable Type")
+	return nil, TypeMismatchError("Expected Hashable")
 }
 
 func (this *_struct) Eq(ev Evaluator, val Value) (Bool, Error) {
@@ -153,10 +153,6 @@ func (this *_struct) Eq(ev Evaluator, val Value) (Bool, Error) {
 
 	// done
 	return True, nil
-}
-
-func (st *_struct) Cmp(ev Evaluator, val Value) (Int, Error) {
-	return nil, TypeMismatchError("Expected Comparable Type")
 }
 
 //--------------------------------------------------------------

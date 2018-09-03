@@ -67,9 +67,6 @@ func TestNull(t *testing.T) {
 	val, err = Null.Eq(nil, True)
 	ok(t, val, err, False)
 
-	val, err = Null.Cmp(nil, True)
-	fail(t, val, err, "NullValue")
-
 	_, err = Null.FieldNames()
 	fail(t, nil, err, "NullValue")
 
@@ -119,7 +116,7 @@ func TestBool(t *testing.T) {
 	val, err = False.Cmp(nil, False)
 	ok(t, val, err, Zero)
 	val, err = True.Cmp(nil, NewInt(1))
-	fail(t, val, err, "TypeMismatch: Expected Comparable Type")
+	fail(t, val, err, "TypeMismatch: Expected Comparable")
 
 	val = True.Not()
 	ok(t, val, nil, False)
@@ -159,7 +156,7 @@ func TestStr(t *testing.T) {
 	ok(t, val, err, True)
 
 	val, err = a.Cmp(nil, NewInt(1))
-	fail(t, val, err, "TypeMismatch: Expected Comparable Type")
+	fail(t, val, err, "TypeMismatch: Expected Comparable")
 	val, err = a.Cmp(nil, a)
 	ok(t, val, err, NewInt(0))
 	val, err = a.Cmp(nil, b)
@@ -286,7 +283,7 @@ func TestInt(t *testing.T) {
 	ok(t, val, err, True)
 
 	val, err = a.Cmp(nil, True)
-	fail(t, val, err, "TypeMismatch: Expected Comparable Type")
+	fail(t, val, err, "TypeMismatch: Expected Comparable")
 	val, err = a.Cmp(nil, a)
 	ok(t, val, err, NewInt(0))
 	val, err = a.Cmp(nil, b)
@@ -413,7 +410,7 @@ func TestFloat(t *testing.T) {
 	i := NewInt(0)
 	j := NewInt(1)
 	val, err = f.Cmp(nil, NewStr("f"))
-	fail(t, val, err, "TypeMismatch: Expected Comparable Type")
+	fail(t, val, err, "TypeMismatch: Expected Comparable")
 	val, err = f.Cmp(nil, f)
 	ok(t, val, err, NewInt(0))
 	val, err = f.Cmp(nil, g)

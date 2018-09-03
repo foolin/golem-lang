@@ -21,7 +21,6 @@ type Value interface {
 	Eq(Evaluator, Value) (Bool, Error)
 	HashCode(Evaluator) (Int, Error)
 	ToStr(Evaluator) (Str, Error)
-	Cmp(Evaluator, Value) (Int, Error)
 
 	FieldNames() ([]string, Error)
 	HasField(string) (bool, Error)
@@ -33,6 +32,12 @@ type Value interface {
 // Shared Interfaces
 
 type (
+
+	// Comparable is a value that can be compared to another value of the same type.
+	Comparable interface {
+		Cmp(Evaluator, Comparable) (Int, Error)
+	}
+
 	// Indexable is a value that supports the index operator
 	Indexable interface {
 		Get(Evaluator, Value) (Value, Error)
@@ -69,6 +74,7 @@ type (
 	// Basic represents the immutable types null, bool, str, int and float
 	Basic interface {
 		Value
+
 		basicMarker()
 	}
 
@@ -80,6 +86,7 @@ type (
 	// Bool is the boolean value -- true or false
 	Bool interface {
 		Basic
+		Comparable
 
 		BoolVal() bool
 		Not() Bool
@@ -87,9 +94,10 @@ type (
 
 	// Str is a string -- defined in golem as a sequence of runes
 	Str interface {
-		Basic
 		fmt.Stringer
 
+		Basic
+		Comparable
 		Indexable
 		Lenable
 		Sliceable
@@ -101,6 +109,7 @@ type (
 	// Number is a number
 	Number interface {
 		Basic
+
 		FloatVal() float64
 		IntVal() int64
 
@@ -114,11 +123,13 @@ type (
 	// Float is a float64
 	Float interface {
 		Number
+		Comparable
 	}
 
 	// Int is an int64
 	Int interface {
 		Number
+		Comparable
 
 		Rem(Value) (Int, Error)
 		BitAnd(Value) (Int, Error)

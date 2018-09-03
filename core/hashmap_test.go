@@ -144,23 +144,3 @@ func TestHashMapIterator(t *testing.T) {
 			{NewStr("a"), NewInt(1)},
 			{NewStr("c"), NewInt(3)}})
 }
-
-//func TestBogusHashCode(t *testing.T) {
-//
-//	key := NewList([]Value{})
-//	var v Value
-//	var err Error
-//
-//	hm := newHashMap(t, nil)
-//	v, err = hm.Get(nil, key)
-//	fail(t, v, err, "TypeMismatch: Expected Hashable Type")
-//
-//	v, err = hm.ContainsKey(nil, key)
-//	fail(t, v, err, "TypeMismatch: Expected Hashable Type")
-//
-//	err = hm.Put(nil, key, Zero)
-//	fail(t, nil, err, "TypeMismatch: Expected Hashable Type")
-//
-//	_, err = NewHashMap(nil, []*HEntry{{key, NewInt(2)}})
-//	fail(t, nil, err, "TypeMismatch: Expected Hashable Type")
-//}

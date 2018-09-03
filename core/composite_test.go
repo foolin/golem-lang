@@ -134,13 +134,13 @@ func TestList(t *testing.T) {
 //
 //func TestCompositeHashCode(t *testing.T) {
 //	h, err := newDict(nil, []*HEntry{}).HashCode(nil)
-//	fail(t, h, err, "TypeMismatch: Expected Hashable Type")
+//	fail(t, h, err, "TypeMismatch: Expected Hashable")
 //
 //	h, err = NewList([]Value{}).HashCode(nil)
-//	fail(t, h, err, "TypeMismatch: Expected Hashable Type")
+//	fail(t, h, err, "TypeMismatch: Expected Hashable")
 //
 //	h, err = newStruct([]Field{}).HashCode(nil)
-//	fail(t, h, err, "TypeMismatch: Expected Hashable Type")
+//	fail(t, h, err, "TypeMismatch: Expected Hashable")
 //}
 //
 //func TestDict(t *testing.T) {
@@ -205,7 +205,7 @@ func TestList(t *testing.T) {
 //	fail(t, d, err, "NullValue")
 //
 //	d, err = NewDict(nil, []*HEntry{{NewList([]Value{}), True}})
-//	fail(t, d, err, "TypeMismatch: Expected Hashable Type")
+//	fail(t, d, err, "TypeMismatch: Expected Hashable")
 //}
 //
 //func newSet(nil Context, values []Value) Set {
@@ -267,7 +267,7 @@ func TestList(t *testing.T) {
 //	fail(t, s, err, "NullValue")
 //
 //	s, err = NewSet(nil, []Value{NewList([]Value{})})
-//	fail(t, s, err, "TypeMismatch: Expected Hashable Type")
+//	fail(t, s, err, "TypeMismatch: Expected Hashable")
 //}
 //
 //func TestTuple(t *testing.T) {

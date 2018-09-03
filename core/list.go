@@ -58,7 +58,7 @@ func (ls *list) ToStr(ev Evaluator) (Str, Error) {
 }
 
 func (ls *list) HashCode(ev Evaluator) (Int, Error) {
-	return nil, TypeMismatchError("Expected Hashable Type")
+	return nil, TypeMismatchError("Expected Hashable")
 }
 
 func (ls *list) Eq(ev Evaluator, v Value) (Bool, Error) {
@@ -68,10 +68,6 @@ func (ls *list) Eq(ev Evaluator, v Value) (Bool, Error) {
 	default:
 		return False, nil
 	}
-}
-
-func (ls *list) Cmp(ev Evaluator, v Value) (Int, Error) {
-	return nil, TypeMismatchError("Expected Comparable Type")
 }
 
 func (ls *list) Get(ev Evaluator, index Value) (Value, Error) {

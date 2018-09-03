@@ -79,10 +79,6 @@ func (tp tuple) Eq(ev Evaluator, v Value) (Bool, Error) {
 	}
 }
 
-func (tp tuple) Cmp(ev Evaluator, v Value) (Int, Error) {
-	return nil, TypeMismatchError("Expected Comparable Type")
-}
-
 func (tp tuple) Get(ev Evaluator, index Value) (Value, Error) {
 	idx, err := boundedIndex(index, len(tp))
 	if err != nil {

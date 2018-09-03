@@ -42,11 +42,7 @@ func (f *bytecodeFunc) Frozen(ev g.Evaluator) (g.Bool, g.Error) {
 }
 
 func (f *bytecodeFunc) HashCode(ev g.Evaluator) (g.Int, g.Error) {
-	return nil, g.TypeMismatchError("Expected Hashable Type")
-}
-
-func (f *bytecodeFunc) Cmp(ev g.Evaluator, val g.Value) (g.Int, g.Error) {
-	return nil, g.TypeMismatchError("Expected Comparable Type")
+	return nil, g.TypeMismatchError("Expected Hashable")
 }
 
 func (f *bytecodeFunc) ToStr(ev g.Evaluator) (g.Str, g.Error) {

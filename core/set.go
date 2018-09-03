@@ -69,7 +69,7 @@ func (s *set) ToStr(ev Evaluator) (Str, Error) {
 }
 
 func (s *set) HashCode(ev Evaluator) (Int, Error) {
-	return nil, TypeMismatchError("Expected Hashable Type")
+	return nil, TypeMismatchError("Expected Hashable")
 }
 
 func (s *set) Eq(ev Evaluator, v Value) (Bool, Error) {
@@ -79,10 +79,6 @@ func (s *set) Eq(ev Evaluator, v Value) (Bool, Error) {
 	default:
 		return False, nil
 	}
-}
-
-func (s *set) Cmp(ev Evaluator, v Value) (Int, Error) {
-	return nil, TypeMismatchError("Expected Comparable Type")
 }
 
 func (s *set) Len(ev Evaluator) (Int, Error) {
@@ -129,7 +125,9 @@ func (s *set) AddAll(ev Evaluator, val Value) Error {
 	//		}
 	//		return nil
 	//	}
-	//	return TypeMismatchError("Expected Iterable Type")
+	//
+	//		return nil, TypeMismatchError(
+	//			fmt.Sprintf("Type %s has no iter()", values[0].Type()))
 }
 
 func (s *set) Clear() Error {

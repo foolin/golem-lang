@@ -671,7 +671,17 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.ip++
 
 	case bc.Lt:
-		val, err := f.stack[n-1].Cmp(itp, f.stack[n])
+
+		lhs, lhsOk := f.stack[n-1].(g.Comparable)
+		if !lhsOk {
+			return nil, g.TypeMismatchError("Expected Comparable")
+		}
+		rhs, rhsOk := f.stack[n].(g.Comparable)
+		if !rhsOk {
+			return nil, g.TypeMismatchError("Expected Comparable")
+		}
+
+		val, err := lhs.Cmp(itp, rhs)
 		if err != nil {
 			return nil, err
 		}
@@ -680,7 +690,17 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.ip++
 
 	case bc.Lte:
-		val, err := f.stack[n-1].Cmp(itp, f.stack[n])
+
+		lhs, lhsOk := f.stack[n-1].(g.Comparable)
+		if !lhsOk {
+			return nil, g.TypeMismatchError("Expected Comparable")
+		}
+		rhs, rhsOk := f.stack[n].(g.Comparable)
+		if !rhsOk {
+			return nil, g.TypeMismatchError("Expected Comparable")
+		}
+
+		val, err := lhs.Cmp(itp, rhs)
 		if err != nil {
 			return nil, err
 		}
@@ -689,7 +709,17 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.ip++
 
 	case bc.Gt:
-		val, err := f.stack[n-1].Cmp(itp, f.stack[n])
+
+		lhs, lhsOk := f.stack[n-1].(g.Comparable)
+		if !lhsOk {
+			return nil, g.TypeMismatchError("Expected Comparable")
+		}
+		rhs, rhsOk := f.stack[n].(g.Comparable)
+		if !rhsOk {
+			return nil, g.TypeMismatchError("Expected Comparable")
+		}
+
+		val, err := lhs.Cmp(itp, rhs)
 		if err != nil {
 			return nil, err
 		}
@@ -698,7 +728,17 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.ip++
 
 	case bc.Gte:
-		val, err := f.stack[n-1].Cmp(itp, f.stack[n])
+
+		lhs, lhsOk := f.stack[n-1].(g.Comparable)
+		if !lhsOk {
+			return nil, g.TypeMismatchError("Expected Comparable")
+		}
+		rhs, rhsOk := f.stack[n].(g.Comparable)
+		if !rhsOk {
+			return nil, g.TypeMismatchError("Expected Comparable")
+		}
+
+		val, err := lhs.Cmp(itp, rhs)
 		if err != nil {
 			return nil, err
 		}
@@ -707,7 +747,17 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.ip++
 
 	case bc.Cmp:
-		val, err := f.stack[n-1].Cmp(itp, f.stack[n])
+
+		lhs, lhsOk := f.stack[n-1].(g.Comparable)
+		if !lhsOk {
+			return nil, g.TypeMismatchError("Expected Comparable")
+		}
+		rhs, rhsOk := f.stack[n].(g.Comparable)
+		if !rhsOk {
+			return nil, g.TypeMismatchError("Expected Comparable")
+		}
+
+		val, err := lhs.Cmp(itp, rhs)
 		if err != nil {
 			return nil, err
 		}

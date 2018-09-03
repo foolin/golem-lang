@@ -52,15 +52,15 @@ func (s str) Eq(ev Evaluator, v Value) (Bool, Error) {
 	}
 }
 
-func (s str) Cmp(ev Evaluator, v Value) (Int, Error) {
-	switch t := v.(type) {
+func (s str) Cmp(ev Evaluator, c Comparable) (Int, Error) {
+	switch t := c.(type) {
 
 	case str:
 		cmp := strings.Compare(string(s), string(t))
 		return NewInt(int64(cmp)), nil
 
 	default:
-		return nil, TypeMismatchError("Expected Comparable Type")
+		return nil, TypeMismatchError("Expected Comparable")
 	}
 }
 

@@ -54,7 +54,7 @@ func (r *rng) ToStr(ev Evaluator) (Str, Error) {
 }
 
 func (r *rng) HashCode(ev Evaluator) (Int, Error) {
-	return nil, TypeMismatchError("Expected Hashable Type")
+	return nil, TypeMismatchError("Expected Hashable")
 }
 
 func (r *rng) Eq(ev Evaluator, v Value) (Bool, Error) {
@@ -64,10 +64,6 @@ func (r *rng) Eq(ev Evaluator, v Value) (Bool, Error) {
 	default:
 		return False, nil
 	}
-}
-
-func (r *rng) Cmp(ev Evaluator, v Value) (Int, Error) {
-	return nil, TypeMismatchError("Expected Comparable Type")
 }
 
 func (r *rng) Get(ev Evaluator, index Value) (Value, Error) {
