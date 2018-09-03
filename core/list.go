@@ -58,7 +58,7 @@ func (ls *list) ToStr(ev Evaluator) (Str, Error) {
 }
 
 func (ls *list) HashCode(ev Evaluator) (Int, Error) {
-	return nil, TempMismatchError("Expected Hashable")
+	return nil, HashCodeMismatchError(IntType)
 }
 
 func (ls *list) Eq(ev Evaluator, v Value) (Bool, Error) {

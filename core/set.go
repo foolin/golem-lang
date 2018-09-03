@@ -69,7 +69,7 @@ func (s *set) ToStr(ev Evaluator) (Str, Error) {
 }
 
 func (s *set) HashCode(ev Evaluator) (Int, Error) {
-	return nil, TempMismatchError("Expected Hashable")
+	return nil, HashCodeMismatchError(SetType)
 }
 
 func (s *set) Eq(ev Evaluator, v Value) (Bool, Error) {

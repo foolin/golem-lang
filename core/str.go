@@ -60,7 +60,7 @@ func (s str) Cmp(ev Evaluator, c Comparable) (Int, Error) {
 		return NewInt(int64(cmp)), nil
 
 	default:
-		return nil, TempMismatchError("Expected Comparable")
+		return nil, ComparableMismatchError(StrType, c.(Value).Type())
 	}
 }
 

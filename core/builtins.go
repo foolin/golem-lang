@@ -106,8 +106,7 @@ var BuiltinLen = NewFixedNativeFunc(
 		if ln, ok := values[0].(Lenable); ok {
 			return ln.Len(ev)
 		}
-		return nil, TempMismatchError(
-			fmt.Sprintf("Type %s has no len()", values[0].Type()))
+		return nil, LenableMismatchError(values[0].Type())
 	})
 
 // BuiltinIter returns the length of a single Lenable
@@ -123,8 +122,7 @@ var BuiltinIter = NewFixedNativeFunc(
 		if ibl, ok := values[0].(Iterable); ok {
 			return ibl.NewIterator(ev)
 		}
-		return nil, TempMismatchError(
-			fmt.Sprintf("Type %s has no iter()", values[0].Type()))
+		return nil, IterableMismatchError(values[0].Type())
 	})
 
 // BuiltinRange creates a new Range

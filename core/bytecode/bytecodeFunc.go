@@ -42,7 +42,7 @@ func (f *bytecodeFunc) Frozen(ev g.Evaluator) (g.Bool, g.Error) {
 }
 
 func (f *bytecodeFunc) HashCode(ev g.Evaluator) (g.Int, g.Error) {
-	return nil, g.TempMismatchError("Expected Hashable")
+	return nil, g.HashCodeMismatchError(g.FuncType)
 }
 
 func (f *bytecodeFunc) ToStr(ev g.Evaluator) (g.Str, g.Error) {

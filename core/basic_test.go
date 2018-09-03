@@ -117,7 +117,7 @@ func TestBool(t *testing.T) {
 	val, err = False.Cmp(nil, False)
 	ok(t, val, err, Zero)
 	val, err = True.Cmp(nil, NewInt(1))
-	fail(t, val, err, "TypeMismatch: Expected Comparable")
+	fail(t, val, err, "TypeMismatch: Types Bool and Int cannot be compared")
 
 	val = True.Not()
 	ok(t, val, nil, False)
@@ -157,7 +157,7 @@ func TestStr(t *testing.T) {
 	ok(t, val, err, True)
 
 	val, err = a.Cmp(nil, NewInt(1))
-	fail(t, val, err, "TypeMismatch: Expected Comparable")
+	fail(t, val, err, "TypeMismatch: Types Str and Int cannot be compared")
 	val, err = a.Cmp(nil, a)
 	ok(t, val, err, NewInt(0))
 	val, err = a.Cmp(nil, b)
@@ -284,7 +284,7 @@ func TestInt(t *testing.T) {
 	ok(t, val, err, True)
 
 	val, err = a.Cmp(nil, True)
-	fail(t, val, err, "TypeMismatch: Expected Comparable")
+	fail(t, val, err, "TypeMismatch: Types Int and Bool cannot be compared")
 	val, err = a.Cmp(nil, a)
 	ok(t, val, err, NewInt(0))
 	val, err = a.Cmp(nil, b)
@@ -411,7 +411,7 @@ func TestFloat(t *testing.T) {
 	i := NewInt(0)
 	j := NewInt(1)
 	val, err = f.Cmp(nil, NewStr("f"))
-	fail(t, val, err, "TypeMismatch: Expected Comparable")
+	fail(t, val, err, "TypeMismatch: Types Float and Str cannot be compared")
 	val, err = f.Cmp(nil, f)
 	ok(t, val, err, NewInt(0))
 	val, err = f.Cmp(nil, g)

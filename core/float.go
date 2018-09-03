@@ -97,7 +97,7 @@ func (f _float) Cmp(ev Evaluator, c Comparable) (Int, Error) {
 		}
 
 	default:
-		return nil, TempMismatchError("Expected Comparable")
+		return nil, ComparableMismatchError(FloatType, c.(Value).Type())
 	}
 }
 

@@ -98,7 +98,7 @@ func (i _int) Cmp(ev Evaluator, c Comparable) (Int, Error) {
 		}
 
 	default:
-		return nil, TempMismatchError("Expected Comparable")
+		return nil, ComparableMismatchError(IntType, c.(Value).Type())
 	}
 }
 

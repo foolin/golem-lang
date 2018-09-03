@@ -22,11 +22,6 @@ func NullValueError() Error {
 	return fmt.Errorf("NullValue")
 }
 
-// TempMismatchError creates a TypeMismatch Error
-func TempMismatchError(msg string) Error {
-	return fmt.Errorf("TypeMismatch: %s", msg)
-}
-
 // TypeMismatchError creates a TypeMismatch Error
 func TypeMismatchError(typ, wrong Type) Error {
 	return fmt.Errorf("TypeMismatch: Expected %s, not %s", typ, wrong)
@@ -35,6 +30,36 @@ func TypeMismatchError(typ, wrong Type) Error {
 // NumberMismatchError creates a TypeMismatch Error
 func NumberMismatchError(wrong Type) Error {
 	return fmt.Errorf("TypeMismatch: Expected Int or Float, not %s", wrong)
+}
+
+// IterableMismatchError creates a TypeMismatch Error
+func IterableMismatchError(wrong Type) Error {
+	return fmt.Errorf("TypeMismatch: Type %s has no iter()", wrong)
+}
+
+// LenableMismatchError creates a TypeMismatch Error
+func LenableMismatchError(wrong Type) Error {
+	return fmt.Errorf("TypeMismatch: Type %s has no len()", wrong)
+}
+
+// IndexableMismatchError creates a TypeMismatch Error
+func IndexableMismatchError(wrong Type) Error {
+	return fmt.Errorf("TypeMismatch: Type %s cannot be indexed", wrong)
+}
+
+// SliceableMismatchError creates a TypeMismatch Error
+func SliceableMismatchError(wrong Type) Error {
+	return fmt.Errorf("TypeMismatch: Type %s cannot be sliced", wrong)
+}
+
+// ComparableMismatchError creates a TypeMismatch Error
+func ComparableMismatchError(a, b Type) Error {
+	return fmt.Errorf("TypeMismatch: Types %s and %s cannot be compared", a, b)
+}
+
+// HashCodeMismatchError creates a TypeMismatch Error
+func HashCodeMismatchError(wrong Type) Error {
+	return fmt.Errorf("TypeMismatch: Type %s cannot be hashed", wrong)
 }
 
 // DivideByZeroError creates a DivideByZero Error

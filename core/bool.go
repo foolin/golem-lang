@@ -75,7 +75,7 @@ func (b _bool) Cmp(ev Evaluator, c Comparable) (Int, Error) {
 		}
 
 	default:
-		return nil, TempMismatchError("Expected Comparable")
+		return nil, ComparableMismatchError(BoolType, c.(Value).Type())
 	}
 }
 

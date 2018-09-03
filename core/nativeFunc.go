@@ -48,7 +48,7 @@ func (f *nativeFunc) Frozen(ev Evaluator) (Bool, Error) {
 }
 
 func (f *nativeFunc) HashCode(ev Evaluator) (Int, Error) {
-	return nil, TempMismatchError("Expected Hashable")
+	return nil, HashCodeMismatchError(FuncType)
 }
 
 func (f *nativeFunc) ToStr(ev Evaluator) (Str, Error) {

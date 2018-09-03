@@ -405,7 +405,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get Indexable from stack
 		gtb, ok := f.stack[n-1].(g.Indexable)
 		if !ok {
-			return nil, g.TempMismatchError("Expected Indexable")
+			return nil, g.IndexableMismatchError(f.stack[n-1].Type())
 		}
 
 		// get index from stack
@@ -425,7 +425,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get IndexAssignable from stack
 		ibl, ok := f.stack[n-2].(g.IndexAssignable)
 		if !ok {
-			return nil, g.TempMismatchError("Expected Indexable")
+			return nil, g.IndexableMismatchError(f.stack[n-2].Type())
 		}
 
 		// get index from stack
@@ -448,7 +448,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get IndexAssignable from stack
 		ibl, ok := f.stack[n-2].(g.IndexAssignable)
 		if !ok {
-			return nil, g.TempMismatchError("Expected Indexable")
+			return nil, g.IndexableMismatchError(f.stack[n-2].Type())
 		}
 
 		// get index from stack
@@ -481,7 +481,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get Sliceable from stack
 		slb, ok := f.stack[n-2].(g.Sliceable)
 		if !ok {
-			return nil, g.TempMismatchError("Expected Sliceable")
+			return nil, g.SliceableMismatchError(f.stack[n-2].Type())
 		}
 
 		// get indices from stack
@@ -502,7 +502,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get Sliceable from stack
 		slb, ok := f.stack[n-1].(g.Sliceable)
 		if !ok {
-			return nil, g.TempMismatchError("Expected Sliceable")
+			return nil, g.SliceableMismatchError(f.stack[n-1].Type())
 		}
 
 		// get index from stack
@@ -522,7 +522,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get Sliceable from stack
 		slb, ok := f.stack[n-1].(g.Sliceable)
 		if !ok {
-			return nil, g.TempMismatchError("Expected Sliceable")
+			return nil, g.SliceableMismatchError(f.stack[n-1].Type())
 		}
 
 		// get index from stack
@@ -655,12 +655,9 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.Lt:
 
 		lhs, lhsOk := f.stack[n-1].(g.Comparable)
-		if !lhsOk {
-			return nil, g.TempMismatchError("Expected Comparable")
-		}
 		rhs, rhsOk := f.stack[n].(g.Comparable)
-		if !rhsOk {
-			return nil, g.TempMismatchError("Expected Comparable")
+		if !lhsOk || !rhsOk {
+			return nil, g.ComparableMismatchError(f.stack[n-1].Type(), f.stack[n].Type())
 		}
 
 		val, err := lhs.Cmp(itp, rhs)
@@ -674,12 +671,9 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.Lte:
 
 		lhs, lhsOk := f.stack[n-1].(g.Comparable)
-		if !lhsOk {
-			return nil, g.TempMismatchError("Expected Comparable")
-		}
 		rhs, rhsOk := f.stack[n].(g.Comparable)
-		if !rhsOk {
-			return nil, g.TempMismatchError("Expected Comparable")
+		if !lhsOk || !rhsOk {
+			return nil, g.ComparableMismatchError(f.stack[n-1].Type(), f.stack[n].Type())
 		}
 
 		val, err := lhs.Cmp(itp, rhs)
@@ -693,12 +687,9 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.Gt:
 
 		lhs, lhsOk := f.stack[n-1].(g.Comparable)
-		if !lhsOk {
-			return nil, g.TempMismatchError("Expected Comparable")
-		}
 		rhs, rhsOk := f.stack[n].(g.Comparable)
-		if !rhsOk {
-			return nil, g.TempMismatchError("Expected Comparable")
+		if !lhsOk || !rhsOk {
+			return nil, g.ComparableMismatchError(f.stack[n-1].Type(), f.stack[n].Type())
 		}
 
 		val, err := lhs.Cmp(itp, rhs)
@@ -712,12 +703,9 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.Gte:
 
 		lhs, lhsOk := f.stack[n-1].(g.Comparable)
-		if !lhsOk {
-			return nil, g.TempMismatchError("Expected Comparable")
-		}
 		rhs, rhsOk := f.stack[n].(g.Comparable)
-		if !rhsOk {
-			return nil, g.TempMismatchError("Expected Comparable")
+		if !lhsOk || !rhsOk {
+			return nil, g.ComparableMismatchError(f.stack[n-1].Type(), f.stack[n].Type())
 		}
 
 		val, err := lhs.Cmp(itp, rhs)
@@ -731,12 +719,9 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.Cmp:
 
 		lhs, lhsOk := f.stack[n-1].(g.Comparable)
-		if !lhsOk {
-			return nil, g.TempMismatchError("Expected Comparable")
-		}
 		rhs, rhsOk := f.stack[n].(g.Comparable)
-		if !rhsOk {
-			return nil, g.TempMismatchError("Expected Comparable")
+		if !lhsOk || !rhsOk {
+			return nil, g.ComparableMismatchError(f.stack[n-1].Type(), f.stack[n].Type())
 		}
 
 		val, err := lhs.Cmp(itp, rhs)
