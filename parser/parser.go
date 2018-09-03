@@ -1354,6 +1354,12 @@ func (p *Parser) tupleExpr(lparen *ast.Token, expr ast.Expression) ast.Expressio
 	for {
 		switch p.cur.token.Kind {
 		case ast.Rparen:
+
+			// tuples always have at least 2 elements
+			if len(elems) < 2 {
+				panic("unreachable")
+			}
+
 			return &ast.TupleExpr{
 				LParen: lparen,
 				Elems:  elems,

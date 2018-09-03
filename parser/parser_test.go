@@ -776,7 +776,12 @@ func TestBuiltin(t *testing.T) {
 }
 
 func TestTuple(t *testing.T) {
-	p := newParser("(a, b)")
+
+	// not a tuple!
+	p := newParser("(a)")
+	okExpr(t, p, "a")
+
+	p = newParser("(a, b)")
 	okExpr(t, p, "(a, b)")
 
 	p = newParser("(a, b, struct { z: 1 })[2]")

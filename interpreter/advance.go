@@ -204,16 +204,16 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = append(f.stack, set)
 		f.ip += 3
 
-	//	case bc.NewTuple:
-	//
-	//		size := bc.DecodeParam(btc, f.ip)
-	//		vals := make([]g.Value, size)
-	//		copy(vals, f.stack[n-size+1:])
-	//
-	//		f.stack = f.stack[:n-size+1]
-	//		f.stack = append(f.stack, g.NewTuple(vals))
-	//		f.ip += 3
-	//
+	case bc.NewTuple:
+
+		size := bc.DecodeParam(btc, f.ip)
+		vals := make([]g.Value, size)
+		copy(vals, f.stack[n-size+1:])
+
+		f.stack = f.stack[:n-size+1]
+		f.stack = append(f.stack, g.NewTuple(vals))
+		f.ip += 3
+
 	//	case bc.CheckTuple:
 	//
 	//		// make sure the top of the stack is really a tuple

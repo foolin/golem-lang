@@ -193,13 +193,13 @@ type (
 		Count() Int
 	}
 
-	//	// Tuple is an immutable sequence of two or more values
-	//	Tuple interface {
-	//		Composite
-	//		Indexable
-	//		Lenable
-	//	}
-	//
+	// Tuple is an immutable sequence of two or more values
+	Tuple interface {
+		Composite
+		Indexable
+		Lenable
+	}
+
 	//	// Dict is an associative array, a.k.a Hash Map
 	//	Dict interface {
 	//		Composite

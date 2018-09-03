@@ -9,6 +9,7 @@ fn fail(func, err) {
         func()
         assert(false)
     } catch e {
+        // TODO try-catch-finally appears to be broken
         //println("BenchTestError: " + err + " != " + e.error)
         assert(err == e.error)
 
@@ -87,7 +88,10 @@ fn testExpressions() {
     assert([true][0] == true)
     assert('abc'[1] == 'b')
     assert('abc'[-1] == 'c')
+    fail(|| => 'abc'[3], 'IndexOutOfBounds: 3')
     fail(|| => [true][2], 'IndexOutOfBounds: 2')
+    fail(|| => (1,2)[3], 'IndexOutOfBounds: 3')
+    fail(|| => range(0, 2)[2], 'IndexOutOfBounds: 2')
 
     assert('abc'[1:] == 'bc')
     assert('abc'[:1] == 'a')
@@ -225,134 +229,135 @@ fn testAssignment() {
     for f in funcs { f(); }
 }
 
+// TODO try-catch-finally appears to be broken
 //fn testTry() {
-////    println('testTry')
-////
-////    let funcs = [
-////        fn () {
-////            println('begin func 0')
-////            fail(|| => 3 / 0, "DivideByZero")
-////            fail(fn() {
-////                    try {
-////                        3 / 0
-////                    } catch e2 {
-////                        assert()
-////                    }
-////                },
-////                "ArityMismatch: Expected 1 params, got 0")
-////            println('end   func 0')
-////        },
-////        fn () {
-////            println('begin func 1')
-////            let a = 0
-////            let b = 0
-////            try {
-////                3 / 0
-////            } catch e {
-////                a = 1
-////            }
-////            try {
-////                3 / 0
-////            } catch e {
-////                b = 2
-////            }
-////            assert(a == 1)
-////            assert(b == 2)
-////            println('end   func 1')
-////        },
-////        fn () {
-////            println('begin func 2')
-////            let a = 0
-////            try {
-////                3 / 0
-////            } catch e {
-////                a = 1
-////            } finally {
-////                a = 2
-////            }
-////            assert(a == 2)
-////            println('end   func 2')
-////        },
-////        fn () {
-////            println('begin func 3')
-////            let a = 0
-////            //let f = fn() {
-////            //    try {
-////            //        3 / 0
-////            //    } catch e {
-////            //        return 1
-////            //    } finally {
-////            //        a = 2
-////            //    }
-////            //}
-////            //let b = f()
-////            //assert(b == 1)
-////            //assert(a == 2)
-////            println('end   func 3')
-////        },
-////        fn () {
-////            println('begin func 4')
-////            //let a = 0
-////            //let f = fn() {
-////            //    try {
-////            //        3 / 0
-////            //    } catch e {
-////            //        return 1
-////            //    } finally {
-////            //        a = 2
-////            //    }
-////            //}
-////            //let b = f()
-////            //assert(b == 1)
-////            //assert(a == 2)
-////            println('end   func 4')
-////        }
-////        //fn () {
-////        //    println('func 4')
-////        //    let a = 0
-////        //    let b = 0
-////        //    //try {
-////        //    //    try {
-////        //    //        3 / 0
-////        //    //    } catch e {
-////        //    //        assert(1,2,3)
-////        //    //    } finally {
-////        //    //        a = 1
-////        //    //    }
-////        //    //} catch e {
-////        //    //    b = 2
-////        //    //}
-////        //    //assert(a == 1)
-////        //    //assert(b == 2)
-////        //}
-////        ////fn () {
-////        ////    println('throw test')
-////        ////    //try {
-////        ////        //throw 'abcdef';
-////        ////        //assert(false)
-////        ////    //} catch e {
-////        ////    //    println(e)
-////        ////    //}
-////        ////}
-////    ]
-////    println('len funcs ', len(funcs))
-////
-////    //funcs[0]()
-////    //funcs[1]()
-////    //funcs[2]()
-////    funcs[3]()
-////    funcs[4]()
-////
-////    //for i in range(0, len(funcs)) {
-////    //    let f = funcs[i]
-////    //    println('testing ', i, ': ', f)
-////    //    f()
-////    //}
-////    
-////    //for f in funcs { 
-////    //    println('testing ', f)
-////    //    f() 
-////    //}
+//    println('testTry')
+//
+//    let funcs = [
+//        fn () {
+//            println('begin func 0')
+//            fail(|| => 3 / 0, "DivideByZero")
+//            fail(fn() {
+//                    try {
+//                        3 / 0
+//                    } catch e2 {
+//                        assert()
+//                    }
+//                },
+//                "ArityMismatch: Expected 1 params, got 0")
+//            println('end   func 0')
+//        },
+//        fn () {
+//            println('begin func 1')
+//            let a = 0
+//            let b = 0
+//            try {
+//                3 / 0
+//            } catch e {
+//                a = 1
+//            }
+//            try {
+//                3 / 0
+//            } catch e {
+//                b = 2
+//            }
+//            assert(a == 1)
+//            assert(b == 2)
+//            println('end   func 1')
+//        },
+//        fn () {
+//            println('begin func 2')
+//            let a = 0
+//            try {
+//                3 / 0
+//            } catch e {
+//                a = 1
+//            } finally {
+//                a = 2
+//            }
+//            assert(a == 2)
+//            println('end   func 2')
+//        },
+//        fn () {
+//            println('begin func 3')
+//            let a = 0
+//            //let f = fn() {
+//            //    try {
+//            //        3 / 0
+//            //    } catch e {
+//            //        return 1
+//            //    } finally {
+//            //        a = 2
+//            //    }
+//            //}
+//            //let b = f()
+//            //assert(b == 1)
+//            //assert(a == 2)
+//            println('end   func 3')
+//        },
+//        fn () {
+//            println('begin func 4')
+//            //let a = 0
+//            //let f = fn() {
+//            //    try {
+//            //        3 / 0
+//            //    } catch e {
+//            //        return 1
+//            //    } finally {
+//            //        a = 2
+//            //    }
+//            //}
+//            //let b = f()
+//            //assert(b == 1)
+//            //assert(a == 2)
+//            println('end   func 4')
+//        }
+//        //fn () {
+//        //    println('func 4')
+//        //    let a = 0
+//        //    let b = 0
+//        //    //try {
+//        //    //    try {
+//        //    //        3 / 0
+//        //    //    } catch e {
+//        //    //        assert(1,2,3)
+//        //    //    } finally {
+//        //    //        a = 1
+//        //    //    }
+//        //    //} catch e {
+//        //    //    b = 2
+//        //    //}
+//        //    //assert(a == 1)
+//        //    //assert(b == 2)
+//        //}
+//        ////fn () {
+//        ////    println('throw test')
+//        ////    //try {
+//        ////        //throw 'abcdef';
+//        ////        //assert(false)
+//        ////    //} catch e {
+//        ////    //    println(e)
+//        ////    //}
+//        ////}
+//    ]
+//    println('len funcs ', len(funcs))
+//
+//    //funcs[0]()
+//    //funcs[1]()
+//    //funcs[2]()
+//    funcs[3]()
+//    funcs[4]()
+//
+//    //for i in range(0, len(funcs)) {
+//    //    let f = funcs[i]
+//    //    println('testing ', i, ': ', f)
+//    //    f()
+//    //}
+//    
+//    //for f in funcs { 
+//    //    println('testing ', f)
+//    //    f() 
+//    //}
 //}
 
 fn testFlowControl() {
@@ -444,61 +449,7 @@ fn testFlowControl() {
                 }
             }
             assert(s == 'aab')
-        },
-        fn () {
-            let a = 0
-            for n in [1,2,3] {
-                a += n
-            }
-            assert(a == 6)
         }
-
-//    code = `
-//let keys = '';
-//let values = 0;
-//for (k, v)  in dict {'a': 1, 'b': 2, 'c': 3} {
-//    keys += k;
-//    values += v;
-//}
-//assert(keys == 'bac');
-//assert(values == 6);
-//`
-//    mod = testCompile(t, code)
-//    interpret([]*g.Module{mod})
-//
-//    code = `
-//let entries = '';
-//for e in dict {'a': 1, 'b': 2, 'c': 3} {
-//    entries += str(e);
-//}
-//assert(entries == '(b, 2)(a, 1)(c, 3)');
-//`
-//    mod = testCompile(t, code)
-//    interpret([]*g.Module{mod})
-//
-//    code = `
-//let keys = '';
-//let values = 0;
-//for (k, v)  in [('a', 1), ('b', 2), ('c', 3)] {
-//    keys += k;
-//    values += v;
-//}
-//assert(keys == 'abc');
-//assert(values == 6);
-//`
-//    mod = testCompile(t, code)
-//    interpret([]*g.Module{mod})
-//
-//    code = "for (k, v)  in [1, 2, 3] {}"
-//    fail(t, code,
-//        g.TypeMismatchError("Expected Tuple"),
-//        []string{"    at foo.glm:1"})
-//
-//    code = "for (a, b, c)  in [('a', 1), ('b', 2), ('c', 3)] {}"
-//    fail(t, code,
-//        g.InvalidArgumentError("Expected Tuple of length 3"),
-//        []string{"    at foo.glm:1"})
-//        }
     ]
     for f in funcs { f(); }
 }
@@ -1135,18 +1086,48 @@ fn testSet() {
 //    for f in funcs { f(); }
 }
 
-//fn testTuple() {
-//
-//    let a = (4,5)
-//    let b = a[0]
-//    let c = a[1]
-//    assert(b == 4)
-//    assert(c == 5)
-//    assert(len(a) == 2)
-//
-//    failMsg(|| => a[2], 'IndexOutOfBounds', '2')
-//}
-//
+fn testTuple() {
+
+    assert((1,2) == (1,2))
+    assert((1,2,3) == (1,2,3))
+    assert((1,2,3) != (1,2,4))
+    assert((1,2,3) != (1,2))
+
+    let x = (1, 2)
+    let y = (3, 4, 5)
+
+    assert(x == x)
+    assert(y == y)
+    assert(x != y)
+    assert(y != x)
+    assert(x != 'z')
+    assert('z' != y)
+
+    assert(frozen(x))
+    assert(x == freeze(x))
+    assert(frozen(x))
+
+    fail(|| => iter(x), "TypeMismatch: Type Tuple has no iter()")
+    assert(len(x) == 2)
+    assert(len(y) == 3)
+
+    assert('(1, 2)' == str(x))
+    assert('(3, 4, 5)' == str(y))
+
+    assert('Tuple' == type(x))
+
+    assert(set { } == fields(x))
+
+    assert(!hasField(x, 'bogus'))
+    fail(|| => getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => setField(x, 'bogus', null), "TypeMismatch: Expected Struct")
+    fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct")
+
+    //-----------------------------------------------
+
+    assert([1, 2] == [x[0], x[1]])
+}
+
 //fn testGo() {
 //    fn sum(a, c) {
 //        let total = 0
@@ -1483,52 +1464,6 @@ fn testInvokeField() {
 
 fn main(args) {
 
-//---------------------------------------------
-//code := "null.bogus;"
-//fail(t, code,
-//    g.NullValueError(),
-//    []string{"    at foo.glm:1"})
-
-//err := g.NoSuchFieldError("bogus")
-
-//failErr(t, "true.bogus;", err)
-//failErr(t, "'a'.bogus;", err)
-//failErr(t, "(0).bogus;", err)
-//failErr(t, "(0.123).bogus;", err)
-
-//failErr(t, "(1,2).bogus;", err)
-//failErr(t, "range(1,2).bogus;", err)
-//failErr(t, "[1,2].bogus;", err)
-//failErr(t, "dict {'a':1}.bogus;", err)
-//failErr(t, "struct {a:1}.bogus;", err)
-
-//failErr(t, "(fn() {}).bogus;", err)
-//---------------------------------------------
-//    code := `
-//try {
-//    [].join = 456;
-//} catch e {
-//    assert(e.kind == 'TypeMismatch');
-//    assert(e.msg == "Expected Struct");
-//}
-//---------------------------------------------
-//
-//    code := `
-//assert(
-//    [type(true), type(""), type(0), type(0.0)] ==
-//    ["Bool", "Str", "Int", "Float"]);
-//assert(
-//    [type(fn(){}), type([]), type(range(0,1)), type((0,1))] ==
-//    ["Func", "List", "Range", "Tuple"]);
-//assert(
-//    [type(dict{}), type(set{}), type(struct{}), type(chan())] ==
-//    ["Dict", "Set", "Struct", "Chan"]);
-//`
-//    mod := testCompile(t, code)
-//    interpret([]*g.Module{mod})
-//}
-//---------------------------------------------
-
     assert(42 == zork.quux)
 
     assert(assert == assert);
@@ -1538,10 +1473,9 @@ fn main(args) {
     assert(assert != println);
     assert(print != println);
 
-    testExpressions()
+    testExpressions() 
     testAssignment()
     testFlowControl()
-//    testGo()
 //    testTry()
     testInvokeField()
     testSlice()
@@ -1559,11 +1493,11 @@ fn main(args) {
     testFloat()
     testList()
     testRange()
-//    testTuple()
+    testTuple()
 //    testDict()
     testSet()
     testStruct() // testMerge()
-//    testChan()
+//    testChan() //    testGo()
 }
 
 
