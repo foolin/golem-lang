@@ -1228,9 +1228,9 @@ fn testStruct() {
 fn testIterator() {
     
     // list
-    fail(|| => [].iter().get(), 'NoSuchElement')
+    fail(|| => iter([]).get(), 'NoSuchElement')
     let count = 0
-    let itr = [1, 2, 3].iter()
+    let itr = iter([1, 2, 3])
     fail(|| => itr.get(), 'NoSuchElement')
     while itr.next() {
         count += itr.get()
@@ -1239,9 +1239,9 @@ fn testIterator() {
     fail(|| => itr.get(), 'NoSuchElement')
 
     // range
-    fail(|| => range(0, 0).iter().get(), 'NoSuchElement')
+    fail(|| => iter(range(0, 0)).get(), 'NoSuchElement')
     count = 0
-    itr = range(1, 5).iter()
+    itr = iter(range(1, 5))
     fail(|| => itr.get(), 'NoSuchElement')
     while itr.next() {
         count += itr.get()
@@ -1292,7 +1292,7 @@ fn testInvokeField() {
     let y = s.contains('z')
 
     let ls = [1]
-    let p = ls.iter().next()
+    let p = iter(ls).next()
 
     assert([true, false, true] == [x, y, p])
 }

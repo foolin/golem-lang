@@ -71,6 +71,7 @@ var StandardBuiltins = []*BuiltinEntry{
 	//{"frozen", BuiltinFrozen},
 	//{"getField", BuiltinGetField},
 	//{"hasField", BuiltinHasField},
+	{"iter", BuiltinIter},
 	{"len", BuiltinLen},
 	//{"merge", BuiltinMerge},
 	{"range", BuiltinRange},
@@ -99,6 +100,18 @@ var BuiltinLen = NewFixedNativeFunc(
 		}
 		return nil, TypeMismatchError(
 			fmt.Sprintf("Type %s has no len()", values[0].Type()))
+	})
+
+// BuiltinIter returns the length of a single Lenable
+var BuiltinIter = NewFixedNativeFunc(
+	[]Type{AnyType},
+	false,
+	func(ev Evaluator, values []Value) (Value, Error) {
+		if ibl, ok := values[0].(Iterable); ok {
+			return ibl.NewIterator(ev), nil
+		}
+		return nil, TypeMismatchError(
+			fmt.Sprintf("Type %s has no iter()", values[0].Type()))
 	})
 
 // BuiltinRange creates a new Range

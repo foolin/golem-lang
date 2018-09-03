@@ -317,12 +317,6 @@ func (i *listIterator) IterGet(ev Evaluator) (Value, Error) {
 // fields
 
 var listMethods = map[string]Method{
-	"iter": NewFixedMethod(
-		[]Type{}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
-			ls := self.(List)
-			return ls.NewIterator(ev), nil
-		}),
 	"add": NewFixedMethod(
 		[]Type{AnyType}, true,
 		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {

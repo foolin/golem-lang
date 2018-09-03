@@ -124,12 +124,6 @@ func (i *rangeIterator) IterGet(ev Evaluator) (Value, Error) {
 // fields
 
 var rangeMethods = map[string]Method{
-	"iter": NewFixedMethod(
-		[]Type{}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
-			r := self.(Range)
-			return r.NewIterator(ev), nil
-		}),
 	"from": NewFixedMethod(
 		[]Type{}, false,
 		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
