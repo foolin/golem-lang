@@ -34,7 +34,7 @@ func TestField(t *testing.T) {
 		[]Type{IntType}, false,
 		func(ev Evaluator, values []Value) (Value, Error) {
 			n := values[0].(Int)
-			return n.Add(One)
+			return n.Add(One), nil
 		})
 	field = NewField(fn)
 
@@ -75,7 +75,7 @@ func TestReadonlyField(t *testing.T) {
 		[]Type{IntType}, false,
 		func(ev Evaluator, values []Value) (Value, Error) {
 			n := values[0].(Int)
-			return n.Add(One)
+			return n.Add(One), nil
 		})
 	field = NewReadonlyField(fn)
 
@@ -144,7 +144,7 @@ func TestPropertyField(t *testing.T) {
 		[]Type{IntType}, false,
 		func(ev Evaluator, values []Value) (Value, Error) {
 			n := values[0].(Int)
-			return n.Add(One)
+			return n.Add(One), nil
 		})
 
 	val, err = field.Get(nil)
@@ -202,7 +202,7 @@ func TestReadonlyPropertyField(t *testing.T) {
 		[]Type{IntType}, false,
 		func(ev Evaluator, values []Value) (Value, Error) {
 			n := values[0].(Int)
-			return n.Add(One)
+			return n.Add(One), nil
 		})
 
 	val, err = field.Get(nil)

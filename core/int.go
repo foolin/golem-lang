@@ -102,59 +102,59 @@ func (i _int) Cmp(ev Evaluator, c Comparable) (Int, Error) {
 	}
 }
 
-func (i _int) Add(val Value) (Number, Error) {
-	switch t := val.(type) {
-
-	case _int:
-		return i + t, nil
-
-	case _float:
-		a := float64(i)
-		b := t.FloatVal()
-		return NewFloat(a + b), nil
-
-	default:
-		return nil, NumberMismatchError(val.Type())
-	}
-}
-
 //--------------------------------------------------------------
 // Number
 
-func (i _int) Sub(val Value) (Number, Error) {
-	switch t := val.(type) {
+func (i _int) Add(n Number) Number {
+	switch t := n.(type) {
 
 	case _int:
-		return i - t, nil
+		return i + t
 
 	case _float:
 		a := float64(i)
 		b := t.FloatVal()
-		return NewFloat(a - b), nil
+		return NewFloat(a + b)
 
 	default:
-		return nil, NumberMismatchError(val.Type())
+		panic("unreachable")
 	}
 }
 
-func (i _int) Mul(val Value) (Number, Error) {
-	switch t := val.(type) {
+func (i _int) Sub(n Number) Number {
+	switch t := n.(type) {
 
 	case _int:
-		return i * t, nil
+		return i - t
 
 	case _float:
 		a := float64(i)
 		b := t.FloatVal()
-		return NewFloat(a * b), nil
+		return NewFloat(a - b)
 
 	default:
-		return nil, NumberMismatchError(val.Type())
+		panic("unreachable")
 	}
 }
 
-func (i _int) Div(val Value) (Number, Error) {
-	switch t := val.(type) {
+func (i _int) Mul(n Number) Number {
+	switch t := n.(type) {
+
+	case _int:
+		return i * t
+
+	case _float:
+		a := float64(i)
+		b := t.FloatVal()
+		return NewFloat(a * b)
+
+	default:
+		panic("unreachable")
+	}
+}
+
+func (i _int) Div(n Number) (Number, Error) {
+	switch t := n.(type) {
 
 	case _int:
 		if t == 0 {
@@ -171,7 +171,7 @@ func (i _int) Div(val Value) (Number, Error) {
 		return NewFloat(a / b), nil
 
 	default:
-		return nil, NumberMismatchError(val.Type())
+		panic("unreachable")
 	}
 }
 
@@ -182,63 +182,63 @@ func (i _int) Negate() Number {
 //--------------------------------------------------------------
 // Int
 
-func (i _int) Rem(val Value) (Int, Error) {
-	switch t := val.(type) {
+func (i _int) Rem(n Int) Int {
+	switch t := n.(type) {
 	case _int:
-		return i % t, nil
+		return i % t
 	default:
-		return nil, TypeMismatchError(IntType, val.Type())
+		panic("unreachable")
 	}
 }
 
-func (i _int) BitAnd(val Value) (Int, Error) {
-	switch t := val.(type) {
+func (i _int) BitAnd(n Int) Int {
+	switch t := n.(type) {
 	case _int:
-		return i & t, nil
+		return i & t
 	default:
-		return nil, TypeMismatchError(IntType, val.Type())
+		panic("unreachable")
 	}
 }
 
-func (i _int) BitOr(val Value) (Int, Error) {
-	switch t := val.(type) {
+func (i _int) BitOr(n Int) Int {
+	switch t := n.(type) {
 	case _int:
-		return i | t, nil
+		return i | t
 	default:
-		return nil, TypeMismatchError(IntType, val.Type())
+		panic("unreachable")
 	}
 }
 
-func (i _int) BitXOr(val Value) (Int, Error) {
-	switch t := val.(type) {
+func (i _int) BitXOr(n Int) Int {
+	switch t := n.(type) {
 	case _int:
-		return i ^ t, nil
+		return i ^ t
 	default:
-		return nil, TypeMismatchError(IntType, val.Type())
+		panic("unreachable")
 	}
 }
 
-func (i _int) LeftShift(val Value) (Int, Error) {
-	switch t := val.(type) {
+func (i _int) LeftShift(n Int) (Int, Error) {
+	switch t := n.(type) {
 	case _int:
 		if t < 0 {
 			return nil, InvalidArgumentError("Shift count cannot be less than zero")
 		}
 		return i << uint(t), nil
 	default:
-		return nil, TypeMismatchError(IntType, val.Type())
+		panic("unreachable")
 	}
 }
 
-func (i _int) RightShift(val Value) (Int, Error) {
-	switch t := val.(type) {
+func (i _int) RightShift(n Int) (Int, Error) {
+	switch t := n.(type) {
 	case _int:
 		if t < 0 {
 			return nil, InvalidArgumentError("Shift count cannot be less than zero")
 		}
 		return i >> uint(t), nil
 	default:
-		return nil, TypeMismatchError(IntType, val.Type())
+		panic("unreachable")
 	}
 }
 

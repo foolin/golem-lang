@@ -104,6 +104,11 @@ fn testExpressions() {
     assert(8 << 2 == 32)
     assert(8 >> 2 == 2)
 
+    assert([-3,1,1,-1,-3,-7] == [~2, ~-2, 7 % -3, -11 % 2, -4 | -3, -17 ^ 22])
+
+    fail(|| => 1 << -1, 'InvalidArgument: Shift count cannot be less than zero')
+    fail(|| => 1 >> -1, 'InvalidArgument: Shift count cannot be less than zero')
+
     assert([true][0] == true)
     assert('abc'[1] == 'b')
     assert('abc'[-1] == 'c')
@@ -852,6 +857,12 @@ fn testList() {
     fail(|| => x.addAll(1), "ImmutableValue")
     fail(|| => x.remove(1), "ImmutableValue")
     fail(|| => x.clear(), "ImmutableValue")
+    x.isEmpty()
+    x.contains(1)
+    x.indexOf(1)
+    x.map(|e| => e)
+    x.reduce(0, |acc, e| => acc + e)
+    x.filter(|e| => e)
 
     assert(iter(x) != null)
     assert(len(x) == 0)

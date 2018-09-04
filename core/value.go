@@ -116,10 +116,10 @@ type (
 		FloatVal() float64
 		IntVal() int64
 
-		Add(Value) (Number, Error)
-		Sub(Value) (Number, Error)
-		Mul(Value) (Number, Error)
-		Div(Value) (Number, Error)
+		Add(Number) Number
+		Sub(Number) Number
+		Mul(Number) Number
+		Div(Number) (Number, Error)
 		Negate() Number
 	}
 
@@ -134,12 +134,12 @@ type (
 		Number
 		Comparable
 
-		Rem(Value) (Int, Error)
-		BitAnd(Value) (Int, Error)
-		BitOr(Value) (Int, Error)
-		BitXOr(Value) (Int, Error)
-		LeftShift(Value) (Int, Error)
-		RightShift(Value) (Int, Error)
+		Rem(Int) Int
+		BitAnd(Int) Int
+		BitOr(Int) Int
+		BitXOr(Int) Int
+		LeftShift(Int) (Int, Error)
+		RightShift(Int) (Int, Error)
 		Complement() Int
 	}
 )

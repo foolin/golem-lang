@@ -32,7 +32,7 @@ func TestFixedNativeFunc(t *testing.T) {
 		false,
 		func(ev Evaluator, params []Value) (Value, Error) {
 			n := params[0].(Int)
-			return n.Add(One)
+			return n.Add(One), nil
 		})
 
 	ok(t, fn.Arity(), nil, Arity{FixedArity, 1, 0})

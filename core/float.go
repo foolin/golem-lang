@@ -101,50 +101,53 @@ func (f _float) Cmp(ev Evaluator, c Comparable) (Int, Error) {
 	}
 }
 
-func (f _float) Add(val Value) (Number, Error) {
-	switch t := val.(type) {
+//--------------------------------------------------------------
+// Number
+
+func (f _float) Add(n Number) Number {
+	switch t := n.(type) {
 
 	case _int:
-		return f + _float(t), nil
+		return f + _float(t)
 
 	case _float:
-		return f + t, nil
+		return f + t
 
 	default:
-		return nil, NumberMismatchError(val.Type())
+		panic("unreachable")
 	}
 }
 
-func (f _float) Sub(val Value) (Number, Error) {
-	switch t := val.(type) {
+func (f _float) Sub(n Number) Number {
+	switch t := n.(type) {
 
 	case _int:
-		return f - _float(t), nil
+		return f - _float(t)
 
 	case _float:
-		return f - t, nil
+		return f - t
 
 	default:
-		return nil, NumberMismatchError(val.Type())
+		panic("unreachable")
 	}
 }
 
-func (f _float) Mul(val Value) (Number, Error) {
-	switch t := val.(type) {
+func (f _float) Mul(n Number) Number {
+	switch t := n.(type) {
 
 	case _int:
-		return f * _float(t), nil
+		return f * _float(t)
 
 	case _float:
-		return f * t, nil
+		return f * t
 
 	default:
-		return nil, NumberMismatchError(val.Type())
+		panic("unreachable")
 	}
 }
 
-func (f _float) Div(val Value) (Number, Error) {
-	switch t := val.(type) {
+func (f _float) Div(n Number) (Number, Error) {
+	switch t := n.(type) {
 
 	case _int:
 		if t == 0 {
@@ -159,7 +162,7 @@ func (f _float) Div(val Value) (Number, Error) {
 		return f / t, nil
 
 	default:
-		return nil, NumberMismatchError(val.Type())
+		panic("unreachable")
 	}
 }
 

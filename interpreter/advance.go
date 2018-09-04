@@ -761,157 +761,184 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 	case bc.Sub:
 
-		lhs := f.stack[n-1]
-		z, ok := lhs.(g.Number)
-		if !ok {
-			return nil, g.NumberMismatchError(lhs.Type())
+		lhs, lhsOk := f.stack[n-1].(g.Number)
+		rhs, rhsOk := f.stack[n].(g.Number)
+		if !lhsOk {
+			return nil, g.NumberMismatchError(f.stack[n-1].Type())
+		}
+		if !rhsOk {
+			return nil, g.NumberMismatchError(f.stack[n].Type())
 		}
 
-		val, err := z.Sub(f.stack[n])
-		if err != nil {
-			return nil, err
-		}
+		val := lhs.Sub(rhs)
+
 		f.stack = f.stack[:n]
 		f.stack[n-1] = val
 		f.ip++
 
 	case bc.Mul:
 
-		lhs := f.stack[n-1]
-		z, ok := lhs.(g.Number)
-		if !ok {
-			return nil, g.NumberMismatchError(lhs.Type())
+		lhs, lhsOk := f.stack[n-1].(g.Number)
+		rhs, rhsOk := f.stack[n].(g.Number)
+		if !lhsOk {
+			return nil, g.NumberMismatchError(f.stack[n-1].Type())
+		}
+		if !rhsOk {
+			return nil, g.NumberMismatchError(f.stack[n].Type())
 		}
 
-		val, err := z.Mul(f.stack[n])
-		if err != nil {
-			return nil, err
-		}
+		val := lhs.Mul(rhs)
+
 		f.stack = f.stack[:n]
 		f.stack[n-1] = val
 		f.ip++
 
 	case bc.Div:
 
-		lhs := f.stack[n-1]
-		z, ok := lhs.(g.Number)
-		if !ok {
-			return nil, g.NumberMismatchError(lhs.Type())
+		lhs, lhsOk := f.stack[n-1].(g.Number)
+		rhs, rhsOk := f.stack[n].(g.Number)
+		if !lhsOk {
+			return nil, g.NumberMismatchError(f.stack[n-1].Type())
+		}
+		if !rhsOk {
+			return nil, g.NumberMismatchError(f.stack[n].Type())
 		}
 
-		val, err := z.Div(f.stack[n])
+		val, err := lhs.Div(rhs)
 		if err != nil {
 			return nil, err
 		}
+
 		f.stack = f.stack[:n]
 		f.stack[n-1] = val
 		f.ip++
 
 	case bc.Negate:
 
-		lhs := f.stack[n-1]
-		z, ok := lhs.(g.Number)
-		if !ok {
-			return nil, g.NumberMismatchError(lhs.Type())
+		lhs, lhsOk := f.stack[n-1].(g.Number)
+		if !lhsOk {
+			return nil, g.NumberMismatchError(f.stack[n-1].Type())
 		}
 
-		val := z.Negate()
+		val := lhs.Negate()
 		f.stack[n] = val
 		f.ip++
 
 	case bc.Rem:
 
-		z, ok := f.stack[n-1].(g.Int)
-		if !ok {
+		lhs, lhsOk := f.stack[n-1].(g.Int)
+		rhs, rhsOk := f.stack[n].(g.Int)
+		if !lhsOk {
 			return nil, g.TypeMismatchError(g.IntType, f.stack[n-1].Type())
 		}
-
-		val, err := z.Rem(f.stack[n])
-		if err != nil {
-			return nil, err
+		if !rhsOk {
+			return nil, g.TypeMismatchError(g.IntType, f.stack[n].Type())
 		}
+
+		val := lhs.Rem(rhs)
+
 		f.stack = f.stack[:n]
 		f.stack[n-1] = val
 		f.ip++
 
 	case bc.BitAnd:
 
-		z, ok := f.stack[n-1].(g.Int)
-		if !ok {
+		lhs, lhsOk := f.stack[n-1].(g.Int)
+		rhs, rhsOk := f.stack[n].(g.Int)
+		if !lhsOk {
 			return nil, g.TypeMismatchError(g.IntType, f.stack[n-1].Type())
 		}
-
-		val, err := z.BitAnd(f.stack[n])
-		if err != nil {
-			return nil, err
+		if !rhsOk {
+			return nil, g.TypeMismatchError(g.IntType, f.stack[n].Type())
 		}
+
+		val := lhs.BitAnd(rhs)
+
 		f.stack = f.stack[:n]
 		f.stack[n-1] = val
 		f.ip++
 
 	case bc.BitOr:
-		z, ok := f.stack[n-1].(g.Int)
-		if !ok {
+
+		lhs, lhsOk := f.stack[n-1].(g.Int)
+		rhs, rhsOk := f.stack[n].(g.Int)
+		if !lhsOk {
 			return nil, g.TypeMismatchError(g.IntType, f.stack[n-1].Type())
 		}
-
-		val, err := z.BitOr(f.stack[n])
-		if err != nil {
-			return nil, err
+		if !rhsOk {
+			return nil, g.TypeMismatchError(g.IntType, f.stack[n].Type())
 		}
+
+		val := lhs.BitOr(rhs)
+
 		f.stack = f.stack[:n]
 		f.stack[n-1] = val
 		f.ip++
 
 	case bc.BitXor:
-		z, ok := f.stack[n-1].(g.Int)
-		if !ok {
+
+		lhs, lhsOk := f.stack[n-1].(g.Int)
+		rhs, rhsOk := f.stack[n].(g.Int)
+		if !lhsOk {
 			return nil, g.TypeMismatchError(g.IntType, f.stack[n-1].Type())
 		}
-
-		val, err := z.BitXOr(f.stack[n])
-		if err != nil {
-			return nil, err
+		if !rhsOk {
+			return nil, g.TypeMismatchError(g.IntType, f.stack[n].Type())
 		}
+
+		val := lhs.BitXOr(rhs)
+
 		f.stack = f.stack[:n]
 		f.stack[n-1] = val
 		f.ip++
 
 	case bc.LeftShift:
-		z, ok := f.stack[n-1].(g.Int)
-		if !ok {
+
+		lhs, lhsOk := f.stack[n-1].(g.Int)
+		rhs, rhsOk := f.stack[n].(g.Int)
+		if !lhsOk {
 			return nil, g.TypeMismatchError(g.IntType, f.stack[n-1].Type())
 		}
+		if !rhsOk {
+			return nil, g.TypeMismatchError(g.IntType, f.stack[n].Type())
+		}
 
-		val, err := z.LeftShift(f.stack[n])
+		val, err := lhs.LeftShift(rhs)
 		if err != nil {
 			return nil, err
 		}
+
 		f.stack = f.stack[:n]
 		f.stack[n-1] = val
 		f.ip++
 
 	case bc.RightShift:
-		z, ok := f.stack[n-1].(g.Int)
-		if !ok {
+
+		lhs, lhsOk := f.stack[n-1].(g.Int)
+		rhs, rhsOk := f.stack[n].(g.Int)
+		if !lhsOk {
 			return nil, g.TypeMismatchError(g.IntType, f.stack[n-1].Type())
 		}
+		if !rhsOk {
+			return nil, g.TypeMismatchError(g.IntType, f.stack[n].Type())
+		}
 
-		val, err := z.RightShift(f.stack[n])
+		val, err := lhs.RightShift(rhs)
 		if err != nil {
 			return nil, err
 		}
+
 		f.stack = f.stack[:n]
 		f.stack[n-1] = val
 		f.ip++
 
 	case bc.Complement:
-		z, ok := f.stack[n].(g.Int)
+		lhs, ok := f.stack[n].(g.Int)
 		if !ok {
 			return nil, g.TypeMismatchError(g.IntType, f.stack[n-1].Type())
 		}
 
-		val := z.Complement()
+		val := lhs.Complement()
 		f.stack[n] = val
 		f.ip++
 
@@ -991,16 +1018,15 @@ func plus(ev g.Evaluator, a g.Value, b g.Value) (g.Value, g.Error) {
 
 	// if both are Numbers, add them together
 	na, ia := a.(g.Number)
+	nb, ib := b.(g.Number)
 	if !ia {
 		return nil, g.NumberMismatchError(a.Type())
 	}
-
-	nb, ib := b.(g.Number)
 	if !ib {
 		return nil, g.NumberMismatchError(b.Type())
 	}
 
-	return na.Add(nb)
+	return na.Add(nb), nil
 }
 
 func inc(ev g.Evaluator, a g.Value, b g.Value) (g.Value, g.Error) {
@@ -1009,6 +1035,6 @@ func inc(ev g.Evaluator, a g.Value, b g.Value) (g.Value, g.Error) {
 	if !ok {
 		return nil, g.NumberMismatchError(a.Type())
 	}
-	nb := b.(g.Number)
-	return na.Add(nb)
+	nb := b.(g.Number) // cast must succeed
+	return na.Add(nb), nil
 }

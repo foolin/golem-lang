@@ -71,7 +71,7 @@ func TestFixedMethod(t *testing.T) {
 		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
 			n := self.(Int)
 			p := params[0].(Int)
-			return n.Add(p)
+			return n.Add(p), nil
 		})
 
 	val, err = m.Invoke(NewInt(2), nil, []Value{NewInt(3)})
@@ -170,7 +170,7 @@ func TestBenchmarkDirectInvoke(t *testing.T) {
 	var i2 Int = NewInt(2)
 
 	for i := 0; i < iterate; i++ {
-		val, _ := i1.Add(i2)
+		val := i1.Add(i2)
 		show(val)
 	}
 }
@@ -183,7 +183,7 @@ func TestBenchmarkFuncInvoke(t *testing.T) {
 		func(ev Evaluator, params []Value) (Value, Error) {
 			a := params[0].(Int)
 			b := params[1].(Int)
-			return a.Add(b)
+			return a.Add(b), nil
 		})
 
 	var i1 Int = NewInt(1)
@@ -203,7 +203,7 @@ func TestBenchmarkMethodInvoke(t *testing.T) {
 		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
 			n := self.(Int)
 			p := params[0].(Int)
-			return n.Add(p)
+			return n.Add(p), nil
 		})
 
 	var i1 Int = NewInt(1)
@@ -223,7 +223,7 @@ func TestBenchmarkVirtualFuncInvoke(t *testing.T) {
 		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
 			n := self.(Int)
 			p := params[0].(Int)
-			return n.Add(p)
+			return n.Add(p), nil
 		})
 
 	var i1 Int = NewInt(1)
