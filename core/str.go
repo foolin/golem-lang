@@ -76,6 +76,10 @@ func (s str) Get(ev Evaluator, index Value) (Value, Error) {
 	return str(string(runes[idx])), nil
 }
 
+func (s str) Set(ev Evaluator, index Value, val Value) Error {
+	return ImmutableValueError()
+}
+
 func (s str) Len(ev Evaluator) (Int, Error) {
 	n := utf8.RuneCountInString(string(s))
 	return NewInt(int64(n)), nil

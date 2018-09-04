@@ -87,6 +87,10 @@ func (tp tuple) Get(ev Evaluator, index Value) (Value, Error) {
 	return tp[idx], nil
 }
 
+func (tp tuple) Set(ev Evaluator, index Value, val Value) Error {
+	return ImmutableValueError()
+}
+
 func (tp tuple) Len(ev Evaluator) (Int, Error) {
 	return NewInt(int64(len(tp))), nil
 }

@@ -422,8 +422,8 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 	case bc.SetIndex:
 
-		// get IndexAssignable from stack
-		ibl, ok := f.stack[n-2].(g.IndexAssignable)
+		// get Indexable from stack
+		ibl, ok := f.stack[n-2].(g.Indexable)
 		if !ok {
 			return nil, g.IndexableMismatchError(f.stack[n-2].Type())
 		}
@@ -445,8 +445,8 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 	case bc.IncIndex:
 
-		// get IndexAssignable from stack
-		ibl, ok := f.stack[n-2].(g.IndexAssignable)
+		// get Indexable from stack
+		ibl, ok := f.stack[n-2].(g.Indexable)
 		if !ok {
 			return nil, g.IndexableMismatchError(f.stack[n-2].Type())
 		}

@@ -74,6 +74,10 @@ func (r *rng) Get(ev Evaluator, index Value) (Value, Error) {
 	return NewInt(r.from + int64(idx)*r.step), nil
 }
 
+func (r *rng) Set(ev Evaluator, index Value, val Value) Error {
+	return ImmutableValueError()
+}
+
 func (r *rng) Len(ev Evaluator) (Int, Error) {
 	return NewInt(r.count), nil
 }
@@ -173,49 +177,3 @@ func (r *rng) InvokeField(name string, ev Evaluator, params []Value) (Value, Err
 	}
 	return nil, NoSuchFieldError(name)
 }
-
-////--------------------------------------------------------------
-//// intrinsic functions
-//
-//func (r *rng) GetField(ev Evaluator, key Str) (Value, Error) {
-//	switch sn := key.String(); sn {
-//
-//	case "from":
-//		return &virtualFunc{r, sn, NewFixedNativeFunc(
-//			[]Type{}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				return NewInt(r.from), nil
-//			})}, nil
-//
-//	case "to":
-//		return &virtualFunc{r, sn, NewFixedNativeFunc(
-//			[]Type{}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				return NewInt(r.to), nil
-//			})}, nil
-//
-//	case "step":
-//		return &virtualFunc{r, sn, NewFixedNativeFunc(
-//			[]Type{}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				return NewInt(r.step), nil
-//			})}, nil
-//
-//	case "count":
-//		return &virtualFunc{r, sn, NewFixedNativeFunc(
-//			[]Type{}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				return NewInt(r.count), nil
-//			})}, nil
-//
-//	case "iterator":
-//		return &virtualFunc{r, sn, NewFixedNativeFunc(
-//			[]Type{}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				return r.NewIterator(ev), nil
-//			})}, nil
-//
-//	default:
-//		return nil, NoSuchFieldError(key.String())
-//	}
-//}

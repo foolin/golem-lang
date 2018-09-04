@@ -41,11 +41,6 @@ type (
 	// Indexable is a value that supports the index operator
 	Indexable interface {
 		Get(Evaluator, Value) (Value, Error)
-	}
-
-	// IndexAssignable is a value that supports index assignment
-	IndexAssignable interface {
-		Indexable
 		Set(Evaluator, Value, Value) Error
 	}
 
@@ -168,7 +163,7 @@ type (
 	// List is an indexable sequence of values
 	List interface {
 		Composite
-		IndexAssignable
+		Indexable
 		Lenable
 		Iterable
 		Sliceable
@@ -214,7 +209,6 @@ type (
 	//	// Dict is an associative array, a.k.a Hash Map
 	//	Dict interface {
 	//		Composite
-	//		IndexAssignable
 	//		Lenable
 	//		Iterable
 	//
