@@ -6,6 +6,7 @@ package core
 
 import (
 	"bytes"
+	"fmt"
 )
 
 //---------------------------------------------------------------
@@ -16,7 +17,7 @@ type tuple []Value
 // NewTuple creates a new Tuple
 func NewTuple(values []Value) Tuple {
 	if len(values) < 2 {
-		panic("invalid tuple size")
+		panic(fmt.Errorf("invalid tuple size: %d", len(values)))
 	}
 	return tuple(values)
 }

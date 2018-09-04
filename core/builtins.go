@@ -80,7 +80,7 @@ var StandardBuiltins = []*BuiltinEntry{
 
 	//{"arity", BuiltinArity},
 	//{"chan", BuiltinChan},
-	//{"merge", BuiltinMerge},
+	{"merge", BuiltinMerge},
 }
 
 ////-----------------------------------------------------------------
@@ -152,24 +152,19 @@ var BuiltinAssert = NewFixedNativeFunc(
 		return nil, AssertionFailedError()
 	})
 
-//// BuiltinMerge merges structs together.
-//var BuiltinMerge = NewVariadicNativeFunc(
-//	[]Type{StructType, StructType},
-//	StructType,
-//	false,
-//	func(ev Evaluator, values []Value) (Value, Error) {
-//		structs := make([]Struct, len(values))
-//		for i, v := range values {
-//			if s, ok := v.(Struct); ok {
-//				structs[i] = s
-//			} else {
-//				return nil, TypeMismatchError(StructType)
-//			}
-//		}
-//
-//		return MergeStructs(structs), nil
-//	})
-//
+// BuiltinMerge merges structs together.
+var BuiltinMerge = NewVariadicNativeFunc(
+	[]Type{StructType, StructType},
+	StructType,
+	false,
+	func(ev Evaluator, values []Value) (Value, Error) {
+		structs := make([]Struct, len(values))
+		for i, v := range values {
+			structs[i] = v.(Struct)
+		}
+		return MergeStructs(structs)
+	})
+
 //// BuiltinChan creates a new Chan.  If an Int is passed in,
 //// it is used to create a buffered Chan.
 //var BuiltinChan = NewMultipleNativeFunc(

@@ -6,6 +6,7 @@ package core
 
 import (
 	"bytes"
+	"fmt"
 
 	"github.com/mjarmy/golem-lang/scanner"
 )
@@ -49,6 +50,36 @@ func NewVirtualStruct(methods map[string]Method, frozen bool) (Struct, Error) {
 		},
 		frozen: frozen,
 	}, nil
+}
+
+type frozenness int
+
+func MergeStructs(structs []Struct) (Struct, Error) {
+
+	if len(structs) < 2 {
+		panic(fmt.Errorf("invalid struct merge size: %d", len(structs)))
+	}
+
+	frozen := structs[0].(*_struct).frozen
+	fieldMaps := make([]fieldMap, len(structs))
+	for i, st := range structs {
+		s := st.(*_struct)
+
+		if i > 0 {
+			if frozen != s.frozen {
+				return nil, InvalidArgumentError(
+					"Cannot merge structs unless they are all frozen, or all unfrozen")
+			}
+		}
+
+		fieldMaps[i] = s.fieldMap
+	}
+
+	return &_struct{
+		fieldMap: mergeFieldMaps(fieldMaps),
+		frozen:   frozen,
+	}, nil
+
 }
 
 func (st *_struct) compositeMarker() {}

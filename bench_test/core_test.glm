@@ -1499,14 +1499,47 @@ fn testSlice() {
 
 fn testStruct() {
 
+    fail(|| => len(struct{}), 'TypeMismatch: Type Struct has no len()')
+    fail(|| => iter(struct{}), 'TypeMismatch: Type Struct has no iter()')
+
+    assert("struct { }" == str(struct {}))
+    assert("struct { a: 1 }" == str(struct {a: 1}))
+
+    //-----------------------------------------
+
     let funcs = [
         fn () {
-            assert(struct{} == struct{})
-            assert(struct{a:1} == struct{a:1})
-            assert(struct{a:1,b:2} == struct{a:1,b:2})
-            assert(struct{a:1} != struct{a:1,b:2})
-            assert(struct{a:1,b:2} != struct{b:2})
-            assert(struct{a:1,b:2} != struct{a:3,b:2})
+            assert(struct {} == struct{})
+            assert(struct {a: 1} == struct{a: 1})
+            assert(struct {a: 1, b: 2} == struct{a: 1, b: 2})
+            assert(struct {a: 1, b: 2, c: 3} == struct{a: 1, b: 2, c: 3})
+
+            assert(struct {a: 1, b: 2, c: 3} != struct{a: 1, b: 2, d: 4})
+            assert(struct {a: 1, b: 2, c: 3} != struct{a: 1, b: 2})
+            assert(struct {a: 1, b: 2, c: 3} != struct{a: 1})
+            assert(struct {a: 1, b: 2, c: 3} != struct{})
+
+            let x = struct{}
+            let y = struct{a: 1}
+
+            assert(x == x)
+            assert(y == y)
+            assert(x != y)
+            assert(y != x)
+            assert(x != 'z')
+            assert('z' != y)
+
+            assert(!frozen(y))
+            assert(y == freeze(y))
+            assert(frozen(y))
+            fail(|| => y.a = 2, "ImmutableValue")
+
+            assert('Struct' == type(x))
+
+            assert(!hasField(x, 'bogus'))
+            fail(|| => getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
+            fail(|| => setField(x, 'bogus', null), "NoSuchField: Field 'bogus' not found")
+            fail(|| => x.bogus = 1, "NoSuchField: Field 'bogus' not found")
         },
         fn () {
             let w = struct {}
@@ -1572,39 +1605,51 @@ fn testStruct() {
     for f in funcs { f(); }
 }
 
-// TODO
-//fn testMerge() {
-//
-//    failMsg(|| => merge(), 'ArityMismatch', 'Expected at least 2 params, got 0')
-//    failMsg(|| => merge(true), 'ArityMismatch', 'Expected at least 2 params, got 1')
-//    failMsg(|| => merge(struct{}, false), 'TypeMismatch', 'Expected Struct')
-//    failMsg(|| => merge(struct{}, struct{}, struct{}, false), 'TypeMismatch', 'Expected Struct')
-//
-//    let a = struct { x: 1, y: 2}
-//    let b = merge(struct { y: 3, z: 4}, a)
-//    assert(b.x == 1)
-//    assert(b.y == 3)
-//    assert(b.z == 4)
-//    a.x = 5
-//    a.y = 6
-//    assert(b.x == 5)
-//    assert(b.y == 3)
-//    assert(b.z == 4)
-//    let c = merge(struct { w: 10}, b)
-//    assert(c.w == 10)
-//    assert(c.x == 5)
-//    assert(c.y == 3)
-//    assert(c.z == 4)
-//    a.x = 7
-//    b.z = 11
-//    assert(c.w == 10)
-//    assert(c.x == 7)
-//    assert(c.y == 3)
-//    assert(c.z == 11)
-//
-//    let z = merge(struct { a: 1}, struct { b: 2}, struct { c: 3}, struct { d: 4})
-//    assert(struct { a: 1, b: 2, c: 3, d: 4} == z)
-//}
+fn testMerge() {
+
+    fail(|| => merge(), 'ArityMismatch: Expected at least 2 params, got 0')
+    fail(|| => merge(true), 'ArityMismatch: Expected at least 2 params, got 1')
+    fail(|| => merge(struct{}, false), 'TypeMismatch: Expected Struct, not Bool')
+    fail(|| => merge(struct{}, struct{}, struct{}, []), 'TypeMismatch: Expected Struct, not List')
+
+    let a = struct { x: 1, y: 2}
+    let b = merge(a, struct { y: 3, z: 4})
+    assert(b.x == 1)
+    assert(b.y == 3)
+    assert(b.z == 4)
+    a.x = 5
+    a.y = 6
+    assert(b.x == 5)
+    assert(b.y == 3)
+    assert(b.z == 4)
+    let c = merge(b, struct { w: 10})
+    assert(c.x == 5)
+    assert(c.y == 3)
+    assert(c.z == 4)
+    assert(c.w == 10)
+    a.x = 7
+    b.z = 11
+    assert(c.x == 7)
+    assert(c.y == 3)
+    assert(c.z == 11)
+    assert(c.w == 10)
+
+    let z = merge(struct { a: 1}, struct { b: 2}, struct { c: 3}, struct { d: 4})
+    assert(struct { a: 1, b: 2, c: 3, d: 4} == z)
+
+    let f = freeze(struct { x: 1, y: 2})
+    let g = freeze(struct { x: 3, z: 4})
+    let h = merge(f, g)
+    assert(struct { x: 3, y: 2, z: 4} == h)
+
+    let ls = [a, b, c, f, g, h].map(frozen)
+    assert([ false, false, false, true, true, true ] == ls)
+
+    fail(|| => merge(a, b, f), 'InvalidArgument: Cannot merge structs unless they are all frozen, or all unfrozen')
+    fail(|| => merge(a, f, b), 'InvalidArgument: Cannot merge structs unless they are all frozen, or all unfrozen')
+    fail(|| => merge(f, a, b), 'InvalidArgument: Cannot merge structs unless they are all frozen, or all unfrozen')
+    fail(|| => merge(f, g, b), 'InvalidArgument: Cannot merge structs unless they are all frozen, or all unfrozen')
+}
 
 fn testInvokeField() {
     let s = 'abc'
@@ -1653,7 +1698,8 @@ fn main(args) {
     testTuple()
     testDict() 
     testSet() 
-    testStruct() // testMerge() TODO
+    testStruct() 
+    testMerge() 
 //    testChan() //    testGo() // TODO
 }
 
