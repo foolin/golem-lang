@@ -261,11 +261,14 @@ type (
 	}
 )
 
-////---------------------------------------------------------------
-//// Chan
-//
-//// Chan is a goroutine channel
-//type Chan interface {
-//	Value
-//	chanMarker()
-//}
+//---------------------------------------------------------------
+// Chan
+
+// Chan is a goroutine channel
+type Chan interface {
+	Value
+	chanMarker()
+
+	Send(Value)
+	Recv() Value
+}

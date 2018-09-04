@@ -79,7 +79,7 @@ var StandardBuiltins = []*BuiltinEntry{
 	{"setField", BuiltinSetField},
 
 	//{"arity", BuiltinArity},
-	//{"chan", BuiltinChan},
+	{"chan", BuiltinChan},
 	{"merge", BuiltinMerge},
 }
 
@@ -165,21 +165,21 @@ var BuiltinMerge = NewVariadicNativeFunc(
 		return MergeStructs(structs)
 	})
 
-//// BuiltinChan creates a new Chan.  If an Int is passed in,
-//// it is used to create a buffered Chan.
-//var BuiltinChan = NewMultipleNativeFunc(
-//	[]Type{},
-//	[]Type{IntType},
-//	true,
-//	func(ev Evaluator, values []Value) (Value, Error) {
-//
-//		if len(values) == 0 {
-//			return NewChan(), nil
-//		}
-//
-//		size := values[0].(Int)
-//		return NewBufferedChan(int(size.IntVal())), nil
-//	})
+// BuiltinChan creates a new Chan.  If an Int is passed in,
+// it is used to create a buffered Chan.
+var BuiltinChan = NewMultipleNativeFunc(
+	[]Type{},
+	[]Type{IntType},
+	false,
+	func(ev Evaluator, values []Value) (Value, Error) {
+
+		if len(values) == 0 {
+			return NewChan(), nil
+		}
+
+		size := values[0].(Int)
+		return NewBufferedChan(int(size.IntVal())), nil
+	})
 
 // BuiltinType returns the Str representation of the Type of a single Value
 var BuiltinType = NewFixedNativeFunc(

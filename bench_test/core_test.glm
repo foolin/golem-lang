@@ -261,7 +261,6 @@ fn testAssignment() {
     for f in funcs { f(); }
 }
 
-// TODO try-catch-finally appears to be broken
 //fn testTry() {
 //    println('testTry')
 //
@@ -505,7 +504,7 @@ fn testFunc() {
     fail(|| => iter(f), "TypeMismatch: Type Func has no iter()")
     fail(|| => len(f), "TypeMismatch: Type Func has no len()")
 
-    assert(str(f).hasPrefix('func'))
+    assert(str(f).hasPrefix('func<'))
     assert('Func' == type(f))
 
     assert(set {} == fields(f))
@@ -743,6 +742,13 @@ fn testStr() {
     fail(|| => s.bogus = 1, "TypeMismatch: Expected Struct, not Str")
 
     //---------------------------------------------
+
+    s = '34這';
+    assert(s[0:1] == '3');
+    assert(s[1:3] == '4這');
+    assert(s[-2:-1] == '4');
+    assert(s[-5:-4] == '');
+    assert(s[3:4] == '');
 
     s = '\u{1f496}\u{2665}\u{24}'
     assert('💖' == s[0])
@@ -1025,6 +1031,19 @@ fn testList() {
             assert(b == [1, 4, 9] && n == 6)
 
             fail(|| => [].remove('a'), 'TypeMismatch: Expected Int, not Str')
+        },
+        fn () {
+            let ls = [3,4,5];
+            assert(ls[0:1] == [3]);
+            assert(ls[1:3] == [4,5]);
+            assert(ls[-2:-1] == [4]);
+            assert(ls[-5:-4] == []);
+            assert(ls[3:4] == []);
+
+            let a = [1, 2, 3]
+            assert([false, false, false, false] == [a, a[0:1], a[0:], a[:1]].map(frozen))
+            freeze(a)
+            assert([true, true, true, true] == [a, a[0:1], a[0:], a[:1]].map(frozen))
         }
     ]
     for f in funcs { f(); }
@@ -1352,31 +1371,73 @@ fn testTuple() {
     assert([1, 2] == [x[0], x[1]])
 }
 
-//fn testGo() {
+fn testChan() {
+
+    let p = chan()
+    let q = chan(1)
+
+    assert(p == p)
+    assert(q == q)
+    assert(p != q)
+    assert(q != p)
+    assert(p != 'z')
+    assert('z' != q)
+
+    assert(frozen(p))
+    assert(p == freeze(p))
+    assert(frozen(p))
+
+    fail(|| => iter(p), "TypeMismatch: Type Chan has no iter()")
+    fail(|| => len(p), "TypeMismatch: Type Chan has no len()")
+
+    assert(str(p).hasPrefix('chan<'))
+    assert('Chan' == type(p))
+
+    assert(set { 
+        'send', 
+        'recv' 
+    } == fields(p))
+    for f in fields(p) {
+        assert(hasField(p, f))
+    }
+    assert(p.send == getField(p, 'send'))
+    assert(p.recv == getField(p, 'recv'))
+
+    //assert(!hasField(p, 'bogus'))
+    //fail(|| => getField(p, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    //fail(|| => setField(p, 'bogus', null), "TypeMismatch: Expected Struct, not Chan")
+    //fail(|| => p.bogus = 1, "TypeMismatch: Expected Struct, not Chan")
+
+//    //-------------------------------------------------
+//
 //    fn sum(a, c) {
+//        println(['sum aaa ', a])
 //        let total = 0
 //        for v in a {
 //            total += v
 //        }
+//        println(['sum bbb ', total])
 //        c.send(total)
 //    }
 //
 //    let a = [7, 2, 8, -9, 4, 0]
 //    let n = len(a) / 2
+//    println([n, a[:n], a[n:], a])
 //    let c = chan()
 //
 //    go sum(a[:n], c)
 //    go sum(a[n:], c)
 //    let x = c.recv()
 //    let y = c.recv()
-//    assert([x, y] == [-5, 17])
+//    println([x, y])
+//    //assert([x, y] == [-5, 17])
 //
-//    let ch = chan(2)
-//    ch.send(1)
-//    ch.send(2)
-//    assert([ch.recv(), ch.recv()] == [1, 2])
-//}
-//
+//    //let ch = chan(2)
+//    //ch.send(1)
+//    //ch.send(2)
+//    //assert([ch.recv(), ch.recv()] == [1, 2])
+}
+
 //fn testArity() {
 //
 ////    assert(arity(type) == struct { min: 1, max: 1 });
@@ -1478,23 +1539,6 @@ fn testRange() {
     assert(i == 4)
 
     fail(|| => range(0, 0, 0), "InvalidArgument: step cannot be 0")
-}
-
-fn testSlice() {
-
-    let ls = [3,4,5];
-    assert(ls[0:1] == [3]);
-    assert(ls[1:3] == [4,5]);
-    assert(ls[-2:-1] == [4]);
-    assert(ls[-5:-4] == []);
-    assert(ls[3:4] == []);
-
-    let s = '34這';
-    assert(s[0:1] == '3');
-    assert(s[1:3] == '4這');
-    assert(s[-2:-1] == '4');
-    assert(s[-5:-4] == '');
-    assert(s[3:4] == '');
 }
 
 fn testStruct() {
@@ -1678,9 +1722,8 @@ fn main(args) {
     testAssignment()
     testFlowControl()
     testInvokeField()
-    testSlice()
 
-//    testTry() TODO
+//    testTry() TODO try-catch-finally appears to be broken
 
     testFunc()
     testCapture()
@@ -1700,7 +1743,7 @@ fn main(args) {
     testSet() 
     testStruct() 
     testMerge() 
-//    testChan() //    testGo() // TODO
+    testChan() // TODO this appears to be broken
 }
 
 

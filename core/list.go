@@ -106,7 +106,12 @@ func (ls *list) Slice(ev Evaluator, from Value, to Value) (Value, Error) {
 	a := ls.array[f:t]
 	b := make([]Value, len(a))
 	copy(b, a)
-	return NewList(b), nil
+
+	result := NewList(b)
+	if ls.frozen {
+		result.(*list).frozen = true
+	}
+	return result, nil
 }
 
 func (ls *list) SliceFrom(ev Evaluator, from Value) (Value, Error) {
