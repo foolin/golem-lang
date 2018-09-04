@@ -91,8 +91,8 @@ func (hm *HashMap) Get(ev Evaluator, key Value) (value Value, err Error) {
 	return b[n].Value, nil
 }
 
-// ContainsKey returns whether the HashMap contains an Entry for the given key
-func (hm *HashMap) ContainsKey(ev Evaluator, key Value) (flag Bool, err Error) {
+// Contains returns whether the HashMap contains an Entry for the given key
+func (hm *HashMap) Contains(ev Evaluator, key Value) (flag Bool, err Error) {
 
 	// recover from an un-hashable value
 	defer func() {

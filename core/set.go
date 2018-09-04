@@ -92,7 +92,7 @@ func (s *set) IsEmpty() Bool {
 }
 
 func (s *set) Contains(ev Evaluator, key Value) (Bool, Error) {
-	return s.hashMap.ContainsKey(ev, key)
+	return s.hashMap.Contains(ev, key)
 }
 
 func (s *set) Add(ev Evaluator, val Value) (Set, Error) {

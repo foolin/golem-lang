@@ -92,10 +92,10 @@ func TestStrHashMap(t *testing.T) {
 	v, err := hm.Get(nil, NewStr("abc"))
 	ok(t, v, err, NewStr("xyz"))
 
-	v, err = hm.ContainsKey(nil, NewStr("abc"))
+	v, err = hm.Contains(nil, NewStr("abc"))
 	ok(t, v, err, True)
 
-	v, err = hm.ContainsKey(nil, NewStr("bogus"))
+	v, err = hm.Contains(nil, NewStr("bogus"))
 	ok(t, v, err, False)
 }
 

@@ -208,45 +208,49 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		f.stack = append(f.stack, g.NewTuple(vals))
 		f.ip += 3
 
-	//	case bc.CheckTuple:
-	//
-	//		// make sure the top of the stack is really a tuple
-	//		tp, ok := f.stack[n].(g.Tuple)
-	//		if !ok {
-	//			return nil, g.TypeMismatchError(g.TupleType)
-	//		}
-	//
-	//		// and make sure its of the expected length
-	//		expectedLen := bc.DecodeParam(btc, f.ip)
-	//		tpLen := tp.Len(itp)
-	//		if expectedLen != int(tpLen.IntVal()) {
-	//			return nil, g.InvalidArgumentError(
-	//				fmt.Sprintf("Expected Tuple of length %d", expectedLen))
-	//		}
-	//
-	//		// do not alter stack
-	//		f.ip += 3
+	case bc.CheckTuple:
 
-	//	case bc.NewDict:
-	//
-	//		size := bc.DecodeParam(btc, f.ip)
-	//		entries := make([]*g.HEntry, 0, size)
-	//
-	//		numVals := size * 2
-	//		for j := n - numVals + 1; j <= n; j += 2 {
-	//			entries = append(entries, &g.HEntry{Key: f.stack[j], Value: f.stack[j+1]})
-	//		}
-	//
-	//		f.stack = f.stack[:n-numVals+1]
-	//
-	//		dict, err := g.NewDict(itp, entries)
-	//		if err != nil {
-	//			return nil, err
-	//		}
-	//
-	//		f.stack = append(f.stack, dict)
-	//		f.ip += 3
-	//
+		// make sure the top of the stack is really a tuple
+		tp, ok := f.stack[n].(g.Tuple)
+		if !ok {
+			return nil, g.TypeMismatchError(g.TupleType, f.stack[n].Type())
+		}
+
+		// and make sure its of the expected length
+		expectedLen := bc.DecodeParam(btc, f.ip)
+		tpLen, err := tp.Len(itp)
+		if err != nil {
+			return nil, err
+		}
+		if expectedLen != int(tpLen.IntVal()) {
+			return nil, g.InvalidArgumentError(
+				fmt.Sprintf(
+					"Expected Tuple of length %d, not length %d",
+					expectedLen, int(tpLen.IntVal())))
+		}
+
+		// do not alter stack
+		f.ip += 3
+
+	case bc.NewDict:
+
+		size := bc.DecodeParam(btc, f.ip)
+		entries := make([]*g.HEntry, 0, size)
+
+		numVals := size * 2
+		for j := n - numVals + 1; j <= n; j += 2 {
+			entries = append(entries, &g.HEntry{Key: f.stack[j], Value: f.stack[j+1]})
+		}
+
+		f.stack = f.stack[:n-numVals+1]
+
+		dict, err := g.NewDict(itp, entries)
+		if err != nil {
+			return nil, err
+		}
+
+		f.stack = append(f.stack, dict)
+		f.ip += 3
 
 	case bc.NewStruct:
 

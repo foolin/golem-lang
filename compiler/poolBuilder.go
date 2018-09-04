@@ -32,7 +32,7 @@ func (p *poolBuilder) constIndex(key g.Basic) int {
 	// The key is always g.Basic, so the Evaluator will never be used.
 	var ev g.Evaluator
 
-	b, err := p.constants.ContainsKey(ev, key)
+	b, err := p.constants.Contains(ev, key)
 	g.Assert(err == nil)
 
 	if b.BoolVal() {

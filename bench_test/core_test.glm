@@ -1030,86 +1030,150 @@ fn testList() {
     for f in funcs { f(); }
 }
 
-// TODO
-//fn testDict() {
-//
-//            let b = []
-//            b.addAll(range(0,3))
-//            //b.addAll(dict { (true,false): 1, 'y': 2 })
-//            //assert(b == [ 0, 1, 2, ((true,false), 1), ('y', 2)])
-//
-//    let funcs = [
-//        fn () {
-//            let d = dict {'x': 1, 'y': 2};
-//            d['x'] = 0;
-//            assert(d == dict {'y': 2, 'x': 0});
-//        },
-//        fn () {
-//            let a = dict { 'x': 1, 'y': 2 };
-//            let b = a['x'];
-//            let c = a['z'];
-//            a['x'] = -1;
-//            let d = a['x'];
-//            assert([1, null, -1] == [b, c, d])
-//        },
-//        fn () {
-//            let a = dict {};
-//            a.addAll([(1,2)]).addAll([(3,4)]);
-//            assert(a == dict {1:2,3:4});
-//            let b = dict {};
-//            assert(a.addAll == a.addAll);
-//            assert(b.addAll == b.addAll);
-//            assert(a.addAll != b.addAll);
-//            assert(b.addAll != a.addAll);
-//            assert(a.clear != a.addAll);
-//        },
-//        fn () {
-//            let a = dict{}
-//            failMsg(|| => a.addAll(false), 'TypeMismatch', 'Expected Iterable Type')
-//            failMsg(|| => a.addAll([false]), 'TypeMismatch', 'Expected Tuple')
-//            failMsg(|| => a.addAll([(1,2,3)]), 'TupleLength', 'Expected Tuple of length 2, got 3')
-//            failMsg(|| => a[[1,2]], 'TypeMismatch', 'Expected Hashable Type')
-//            failMsg(|| => a[[1,2]] = 3, 'TypeMismatch', 'Expected Hashable Type')
-//            failMsg(|| => a.containsKey([1,2]), 'TypeMismatch', 'Expected Hashable Type')
-//        },
-//        fn () {
-//            let a = dict {};
-//            assert(a.isEmpty());
-//            a[1] = 2;
-//            assert(!a.isEmpty());
-//            a.clear();
-//            assert(a.isEmpty());
-//        },
-//        fn () {
-//            let a = dict {'z': 3};
-//            assert(a.containsKey('z'));
-//            assert(!a.containsKey('x'));
-//        },
-//        fn () {
-//            let d = dict {'a': 1, 'b': 2};
-//            assert(!d.remove('z'));
-//            assert(d.remove('a'));
-//            assert(d == dict {'b': 2});
-//            assert(d.remove('b'));
-//            assert(d == dict {});
-//            assert(len(d) == 0);
-//        },
-//        fn () {
-//            let d = dict {'a': 1, 'b': 2};
-//            assert(!d.remove('z'));
-//            assert(d.remove('a'));
-//            assert(d == dict {'b': 2});
-//            assert(d.remove('b'));
-//            assert(d == dict {});
-//            assert(len(d) == 0);
-//        },
-//        fn () {
-//            fail(|| => dict {null: 'b'}, 'NullValue')
-//            failMsg(|| => dict {[]: 'b'}, 'TypeMismatch', 'Expected Hashable Type')
-//        }
-//    ]
-//    for f in funcs { f(); }
-//}
+fn testDict() {
+
+    assert(dict {} == dict{})
+    assert(dict {'a': 1} == dict{'a': 1})
+    assert(dict {'a': 1, 'b': 2} == dict{'a': 1, 'b': 2})
+    assert(dict {'a': 1, 'b': 2, 'c': 3} == dict{'a': 1, 'b': 2, 'c': 3})
+
+    assert(dict {'a': 1, 'b': 2, 'c': 3} != dict{'a': 1, 'b': 2, 'd': 4})
+    assert(dict {'a': 1, 'b': 2, 'c': 3} != dict{'a': 1, 'b': 2})
+    assert(dict {'a': 1, 'b': 2, 'c': 3} != dict{'a': 1})
+    assert(dict {'a': 1, 'b': 2, 'c': 3} != dict{})
+
+    let x = dict{}
+    let y = dict{'a': 1}
+
+    assert(x == x)
+    assert(y == y)
+    assert(x != y)
+    assert(y != x)
+    assert(x != 'z')
+    assert('z' != y)
+
+    assert(!frozen(x))
+    assert(x == freeze(x))
+    assert(frozen(x))
+    fail(|| => x.addAll(1), "ImmutableValue")
+    fail(|| => x.remove(1), "ImmutableValue")
+    fail(|| => x.clear(), "ImmutableValue")
+    x.isEmpty()
+    x.contains(1)
+
+    assert(iter(x) != null)
+    assert(len(x) == 0)
+    assert(len(y) == 1)
+
+    assert("dict { }" == str(dict {}))
+    assert("dict { 1: a }" == str(dict {1:'a'}))
+    assert("dict { 1: a, 2: b }" == str(dict {1:'a',2:'b'}))
+
+    assert('Dict' == type(x))
+
+    assert(set { 
+        'isEmpty', 
+        'contains', 
+
+        'addAll',
+        'clear',
+        'remove' 
+    } == fields(x))
+    for f in fields(x) {
+        assert(hasField(x, f))
+    }
+    assert(x.isEmpty == getField(x, 'isEmpty'))
+    assert(x.contains == getField(x, 'contains'))
+
+    assert(x.addAll == getField(x, 'addAll'))
+    assert(x.clear == getField(x, 'clear'))
+    assert(x.remove == getField(x, 'remove'))
+
+    assert(!hasField(x, 'bogus'))
+    fail(|| => getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not Dict")
+    fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct, not Dict")
+
+    //-------------------------------------------------
+
+    let funcs = [
+        fn () {
+            let d = dict {'x': 1, 'y': 2};
+            d['x'] = 0;
+            assert(d == dict {'y': 2, 'x': 0});
+        },
+        fn () {
+            let a = dict { 'x': 1, 'y': 2 };
+            let b = a['x'];
+            let c = a['z'];
+            a['x'] = -1;
+            let d = a['x'];
+            assert([1, null, -1] == [b, c, d])
+        },
+        fn () {
+            let a = dict {};
+            a.addAll([(1,2)]).addAll([(3,4)]);
+            assert(a == dict {1:2,3:4});
+            let b = dict {};
+            assert(a.addAll == a.addAll);
+            assert(b.addAll == b.addAll);
+            assert(a.addAll != b.addAll);
+            assert(b.addAll != a.addAll);
+            assert(a.clear != a.addAll);
+        },
+        fn () {
+            let a = dict{}
+            fail(|| => a.addAll(false),      'TypeMismatch: Type Bool has no iter()')
+            fail(|| => a.addAll([false]),    'TypeMismatch: Expected Tuple, not Bool')
+            fail(|| => a.addAll([(1,2,3)]),  'InvalidArgument: Expected Tuple of length 2, not length 3')
+            fail(|| => a[[1,2]],             'TypeMismatch: Type List cannot be hashed')
+            fail(|| => a[[1,2]] = 3,         'TypeMismatch: Type List cannot be hashed')
+            fail(|| => a.contains([1,2]), 'TypeMismatch: Type List cannot be hashed')
+        },
+        fn () {
+            let a = dict {};
+            assert(a.isEmpty());
+            a[1] = 2;
+            assert(!a.isEmpty());
+            a.clear();
+            assert(a.isEmpty());
+        },
+        fn () {
+            let a = dict {'z': 3};
+            assert(a.contains('z'));
+            assert(!a.contains('x'));
+        },
+        fn () {
+            let d = dict {'a': 1, 'b': 2};
+            d.remove('z')
+            d.remove('a')
+            assert(d == dict {'b': 2});
+            d.remove('b');
+            assert(d == dict {});
+            assert(len(d) == 0);
+        },
+        fn () {
+            let d = dict {'a': 1, 'b': 2};
+            d.remove('z');
+            d.remove('a');
+            assert(d == dict {'b': 2});
+            d.remove('b');
+            assert(d == dict {});
+            assert(len(d) == 0);
+        },
+        fn () {
+            let b = []
+            b.addAll(range(0,3))
+            b.addAll(dict { (true,false): 1, 'y': 2 })
+            assert(b == [ 0, 1, 2, ((true,false), 1), ('y', 2)])
+        },
+        fn () {
+            fail(|| => dict {null: 'b'}, 'NullValue')
+            fail(|| => dict {[]: 'b'}, 'TypeMismatch: Type List cannot be hashed')
+        }
+    ]
+    for f in funcs { f(); }
+}
 
 fn testSet() {
 
@@ -1587,7 +1651,7 @@ fn main(args) {
     testList()
     testRange()
     testTuple()
-//    testDict() TODO
+    testDict() 
     testSet() 
     testStruct() // testMerge() TODO
 //    testChan() //    testGo() // TODO

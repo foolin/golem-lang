@@ -213,19 +213,20 @@ type (
 		Lenable
 	}
 
-	//	// Dict is an associative array, a.k.a Hash Map
-	//	Dict interface {
-	//		Composite
-	//		Lenable
-	//		Iterable
-	//
-	//		IsEmpty() Bool
-	//		Clear() (Dict, Error)
-	//
-	//		ContainsKey(Evaluator, Value) (Bool, Error)
-	//		AddAll(Evaluator, Value) Error
-	//		Remove(Value) (Bool, Error)
-	//	}
+	// Dict is an associative array, a.k.a Hash Map
+	Dict interface {
+		Composite
+		Lenable
+		Iterable
+		Indexable
+
+		IsEmpty() Bool
+		Contains(Evaluator, Value) (Bool, Error)
+
+		Clear() (Dict, Error)
+		AddAll(Evaluator, Value) (Dict, Error)
+		Remove(Evaluator, Value) (Dict, Error)
+	}
 
 	// Set is a set of unique values
 	Set interface {
@@ -242,7 +243,7 @@ type (
 		Remove(Evaluator, Value) (Set, Error)
 	}
 
-	// Struct is a collection of key-Field pairs
+	// Struct is a collection of key-value pairs
 	Struct interface {
 		Composite
 
