@@ -127,11 +127,14 @@ fn testExpressions() {
     assert([6,7,8,9][1:3] == [7,8])
     assert([6,7,8,9][1:1] == [])
 
-// TODO not lenable
-// TODO not indexable
-// TODO not sliceable
-// TODO not comparable
-
+    fail(|| => len(true), 'TypeMismatch: Type Bool has no len()')
+    fail(|| => true[0], 'TypeMismatch: Type Bool cannot be indexed')
+    fail(|| => true[0] = 1, 'TypeMismatch: Type Bool cannot be indexed')
+    fail(|| => true[0:1], 'TypeMismatch: Type Bool cannot be sliced')
+    fail(|| => true[:1], 'TypeMismatch: Type Bool cannot be sliced')
+    fail(|| => true[0:], 'TypeMismatch: Type Bool cannot be sliced')
+    fail(|| => set {} < 3, 'TypeMismatch: Types Set and Int cannot be compared')
+    fail(|| => 3 > set {}, 'TypeMismatch: Types Int and Set cannot be compared')
 }
 
 fn testInt() {
@@ -502,7 +505,7 @@ fn testFunc() {
     fail(|| => iter(f), "TypeMismatch: Type Func has no iter()")
     fail(|| => len(f), "TypeMismatch: Type Func has no len()")
 
-    assert(str(f) != null) // TODO startsWith('func')
+    assert(str(f).hasPrefix('func'))
     assert('Func' == type(f))
 
     assert(set {} == fields(f))
@@ -1565,9 +1568,10 @@ fn main(args) {
     testExpressions() 
     testAssignment()
     testFlowControl()
-//    testTry() TODO
     testInvokeField()
     testSlice()
+
+//    testTry() TODO
 
     testFunc()
     testCapture()
