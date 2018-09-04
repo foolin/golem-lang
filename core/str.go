@@ -118,12 +118,6 @@ func (s str) SliceTo(ev Evaluator, to Value) (Value, Error) {
 	return str(string(runes[:t])), nil
 }
 
-func (s str) Concat(that Str) Str {
-	a := string(s)
-	b := string(that.(str))
-	return str(strcpy(a) + strcpy(b))
-}
-
 //---------------------------------------------------------------
 // Iterator
 
@@ -158,6 +152,74 @@ func (i *strIterator) IterGet(ev Evaluator) (Value, Error) {
 }
 
 //--------------------------------------------------------------
+
+func (s str) Concat(that Str) Str {
+	a := string(s)
+	b := string(that.(str))
+	return str(strcpy(a) + strcpy(b))
+}
+
+func (s str) Contains(substr Str) Bool {
+	a := string(s)
+	b := string(substr.(str))
+	return NewBool(strings.Contains(a, b))
+}
+
+func (s str) Index(substr Str) Int {
+	a := string(s)
+	b := string(substr.(str))
+	result := strings.Index(a, b)
+	if result == -1 {
+		return NegOne
+	}
+	result = utf8.RuneCountInString(a[:result])
+	return NewInt(int64(result))
+}
+
+func (s str) LastIndex(substr Str) Int {
+	a := string(s)
+	b := string(substr.(str))
+	result := strings.LastIndex(a, b)
+	if result == -1 {
+		return NegOne
+	}
+	result = utf8.RuneCountInString(a[:result])
+	return NewInt(int64(result))
+}
+
+func (s str) HasPrefix(substr Str) Bool {
+	a := string(s)
+	b := string(substr.(str))
+	return NewBool(strings.HasPrefix(a, b))
+}
+
+func (s str) HasSuffix(substr Str) Bool {
+	a := string(s)
+	b := string(substr.(str))
+	return NewBool(strings.HasSuffix(a, b))
+}
+
+func (s str) Replace(old, new Str, n Int) Str {
+	a := string(s)
+	b := string(old.(str))
+	c := string(new.(str))
+	d := int(n.(_int))
+	return NewStr(strings.Replace(a, b, c, d))
+}
+
+func (s str) Split(sep Str) List {
+	a := string(s)
+	b := string(sep.(str))
+
+	tokens := strings.Split(a, b)
+	result := make([]Value, len(tokens))
+	for i, t := range tokens {
+		result[i] = NewStr(t)
+	}
+	return NewList(result)
+}
+
+//--------------------------------------------------------------
 // fields
 
 var strMethods = map[string]Method{
@@ -165,56 +227,31 @@ var strMethods = map[string]Method{
 	"contains": NewFixedMethod(
 		[]Type{StrType}, false,
 		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
-
-			s := self.(Str).String()
-			substr := params[0].(Str).String()
-			result := strings.Contains(s, substr)
-
-			return NewBool(result), nil
+			return self.(Str).Contains(params[0].(Str)), nil
 		}),
 
 	"index": NewFixedMethod(
 		[]Type{StrType}, false,
 		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
-			s := self.(Str).String()
-			substr := params[0].(Str).String()
-
-			result := strings.Index(s, substr)
-			if result == -1 {
-				return NegOne, nil
-			}
-			result = utf8.RuneCountInString(s[:result])
-			return NewInt(int64(result)), nil
+			return self.(Str).Index(params[0].(Str)), nil
 		}),
 
 	"lastIndex": NewFixedMethod(
 		[]Type{StrType}, false,
 		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
-			s := self.(Str).String()
-			substr := params[0].(Str).String()
-
-			result := strings.LastIndex(s, substr)
-			if result == -1 {
-				return NegOne, nil
-			}
-			result = utf8.RuneCountInString(s[:result])
-			return NewInt(int64(result)), nil
+			return self.(Str).LastIndex(params[0].(Str)), nil
 		}),
 
 	"hasPrefix": NewFixedMethod(
 		[]Type{StrType}, false,
 		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
-			s := self.(Str).String()
-			prefix := params[0].(Str).String()
-			return NewBool(strings.HasPrefix(s, prefix)), nil
+			return self.(Str).HasPrefix(params[0].(Str)), nil
 		}),
 
 	"hasSuffix": NewFixedMethod(
 		[]Type{StrType}, false,
 		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
-			s := self.(Str).String()
-			prefix := params[0].(Str).String()
-			return NewBool(strings.HasPrefix(s, prefix)), nil
+			return self.(Str).HasSuffix(params[0].(Str)), nil
 		}),
 
 	"replace": NewMultipleMethod(
@@ -222,33 +259,19 @@ var strMethods = map[string]Method{
 		[]Type{IntType},
 		false,
 		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
-			s := self.(Str).String()
-			old := params[0].(Str).String()
-			new := params[1].(Str).String()
-			var n int = -1
+			old := params[0].(Str)
+			new := params[1].(Str)
+			n := NegOne
 			if len(params) == 3 {
-				n = int(params[2].(Int).IntVal())
+				n = params[2].(Int)
 			}
-
-			return NewStr(strings.Replace(
-				s,
-				old,
-				new,
-				n)), nil
+			return self.(Str).Replace(old, new, n), nil
 		}),
 
 	"split": NewFixedMethod(
 		[]Type{StrType}, false,
 		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
-			s := self.(Str).String()
-			sep := params[0].(Str).String()
-
-			tokens := strings.Split(s, sep)
-			result := make([]Value, len(tokens))
-			for i, t := range tokens {
-				result[i] = NewStr(t)
-			}
-			return NewList(result), nil
+			return self.(Str).Split(params[0].(Str)), nil
 		}),
 }
 

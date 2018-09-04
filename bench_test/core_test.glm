@@ -807,8 +807,8 @@ fn testStr() {
 	fail(|| => s.lastIndex(), 'ArityMismatch: Expected 1 params, got 0')
 	fail(|| => s.lastIndex(1), 'TypeMismatch: Expected Str, not Int')
 
-    assert(s.hasSuffix('這是我'))
-    assert(!s.hasSuffix('bc'))
+    assert(!s.hasSuffix('這是我'))
+    assert(s.hasSuffix('bc'))
     assert(!''.hasSuffix('這是我'))
     assert(!''.hasSuffix('bc'))
 	fail(|| => s.lastIndex(), 'ArityMismatch: Expected 1 params, got 0')

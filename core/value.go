@@ -99,6 +99,14 @@ type (
 		Iterable
 
 		Concat(Str) Str
+
+		Contains(Str) Bool
+		Index(Str) Int
+		LastIndex(Str) Int
+		HasPrefix(Str) Bool
+		HasSuffix(Str) Bool
+		Replace(Str, Str, Int) Str
+		Split(Str) List
 	}
 
 	// Number is a number
