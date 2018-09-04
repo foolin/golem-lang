@@ -176,16 +176,79 @@ var strMethods = map[string]Method{
 	"index": NewFixedMethod(
 		[]Type{StrType}, false,
 		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
-
-			// TODO implement this more efficiently
 			s := self.(Str).String()
 			substr := params[0].(Str).String()
+
 			result := strings.Index(s, substr)
 			if result == -1 {
 				return NegOne, nil
 			}
 			result = utf8.RuneCountInString(s[:result])
 			return NewInt(int64(result)), nil
+		}),
+
+	"lastIndex": NewFixedMethod(
+		[]Type{StrType}, false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			s := self.(Str).String()
+			substr := params[0].(Str).String()
+
+			result := strings.LastIndex(s, substr)
+			if result == -1 {
+				return NegOne, nil
+			}
+			result = utf8.RuneCountInString(s[:result])
+			return NewInt(int64(result)), nil
+		}),
+
+	"hasPrefix": NewFixedMethod(
+		[]Type{StrType}, false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			s := self.(Str).String()
+			prefix := params[0].(Str).String()
+			return NewBool(strings.HasPrefix(s, prefix)), nil
+		}),
+
+	"hasSuffix": NewFixedMethod(
+		[]Type{StrType}, false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			s := self.(Str).String()
+			prefix := params[0].(Str).String()
+			return NewBool(strings.HasPrefix(s, prefix)), nil
+		}),
+
+	"replace": NewMultipleMethod(
+		[]Type{StrType, StrType},
+		[]Type{IntType},
+		false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			s := self.(Str).String()
+			old := params[0].(Str).String()
+			new := params[1].(Str).String()
+			var n int = -1
+			if len(params) == 3 {
+				n = int(params[2].(Int).IntVal())
+			}
+
+			return NewStr(strings.Replace(
+				s,
+				old,
+				new,
+				n)), nil
+		}),
+
+	"split": NewFixedMethod(
+		[]Type{StrType}, false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			s := self.(Str).String()
+			sep := params[0].(Str).String()
+
+			tokens := strings.Split(s, sep)
+			result := make([]Value, len(tokens))
+			for i, t := range tokens {
+				result[i] = NewStr(t)
+			}
+			return NewList(result), nil
 		}),
 }
 
@@ -215,86 +278,3 @@ func (s str) InvokeField(name string, ev Evaluator, params []Value) (Value, Erro
 	}
 	return nil, NoSuchFieldError(name)
 }
-
-//--------------------------------------------------------------
-
-//func (s str) GetField(ev Evaluator, key Str) (Value, Error) {
-//	switch sn := key.String(); sn {
-//
-//	case "contains":
-//		return &virtualFunc{s, sn, NewFixedNativeFunc(
-//			[]Type{StrType}, false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//				z := params[0].(Str)
-//				return NewBool(strings.Contains(string(s), z.String())), nil
-//			})}, nil
-//
-//	case "index":
-//		return &virtualFunc{s, sn, NewFixedNativeFunc(
-//			[]Type{StrType}, false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//				z := params[0].(Str)
-//				return NewInt(int64(strings.Index(string(s), z.String()))), nil
-//			})}, nil
-//
-//	case "lastIndex":
-//		return &virtualFunc{s, sn, NewFixedNativeFunc(
-//			[]Type{StrType}, false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//				z := params[0].(Str)
-//				return NewInt(int64(strings.LastIndex(string(s), z.String()))), nil
-//			})}, nil
-//
-//	case "startsWith":
-//		return &virtualFunc{s, sn, NewFixedNativeFunc(
-//			[]Type{StrType}, false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//				z := params[0].(Str)
-//				return NewBool(strings.HasPrefix(string(s), z.String())), nil
-//			})}, nil
-//
-//	case "endsWith":
-//		return &virtualFunc{s, sn, NewFixedNativeFunc(
-//			[]Type{StrType}, false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//				z := params[0].(Str)
-//				return NewBool(strings.HasSuffix(string(s), z.String())), nil
-//			})}, nil
-//
-//	case "replace":
-//		return &virtualFunc{s, sn, NewMultipleNativeFunc(
-//			[]Type{StrType, StrType},
-//			[]Type{IntType},
-//			false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//				a := params[0].(Str)
-//				b := params[1].(Str)
-//				n := NegOne
-//				if len(params) == 3 {
-//					n = params[2].(Int)
-//				}
-//				return NewStr(strings.Replace(
-//					string(s),
-//					a.String(),
-//					b.String(),
-//					int(n.IntVal()))), nil
-//			})}, nil
-//
-//	case "split":
-//		return &virtualFunc{s, sn, NewFixedNativeFunc(
-//			[]Type{StrType}, false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//				z := params[0].(Str)
-//				tokens := strings.Split(string(s), z.String())
-//				result := make([]Value, len(tokens))
-//				for i, t := range tokens {
-//					result[i] = NewStr(t)
-//				}
-//				return NewList(result), nil
-//
-//			})}, nil
-//
-//	default:
-//		return nil, NoSuchFieldError(key.String())
-//	}
-//}

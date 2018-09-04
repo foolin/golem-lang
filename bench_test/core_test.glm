@@ -24,6 +24,25 @@ fn fail(func, err) {
     }
 }
 
+fn listify(ibl) {
+    let ls = []
+    for n in ibl {
+        ls.add(n)
+    }
+    return ls
+}
+
+fn iterate(ibl) {
+    let ls = []
+    let itr = iter(ibl)
+    fail(|| => itr.get(), 'NoSuchElement')
+    while itr.next() {
+        ls.add(itr.get())
+    }
+    fail(|| => itr.get(), 'NoSuchElement')
+    return ls
+}
+
 fn testExpressions() {
 
     assert((2 + 3) * -4 / 10 == -2)
@@ -694,12 +713,21 @@ fn testStr() {
     assert('Str' == type('a'))
 
     let s = 'a'
-    assert(set { 'contains', 'index' } == fields(s))
+    assert(set { 
+        'contains', 'index', 'lastIndex', 
+        'hasPrefix', 'hasSuffix',
+        'replace', 'split'
+    } == fields(s))
     for f in fields(s) {
         assert(hasField(s, f))
     }
     assert(s.contains == getField(s, 'contains'))
     assert(s.index == getField(s, 'index'))
+    assert(s.lastIndex == getField(s, 'lastIndex'))
+    assert(s.hasPrefix == getField(s, 'hasPrefix'))
+    assert(s.hasSuffix == getField(s, 'hasSuffix'))
+    assert(s.replace == getField(s, 'replace'))
+    assert(s.split == getField(s, 'split'))
 
     assert(!hasField(s, 'bogus'))
     fail(|| => getField(s, 'bogus'), "NoSuchField: Field 'bogus' not found")
@@ -712,6 +740,13 @@ fn testStr() {
     assert('💖' == s[0])
     assert('♥'  == s[1])
     assert('$'  == s[2])
+
+    assert(listify(s) == ['💖', '♥', '$'])
+    assert(iterate(s) == ['💖', '♥', '$'])
+    assert(listify('abc') == ['a', 'b', 'c'])
+    assert(iterate('abc') == ['a', 'b', 'c'])
+    assert(listify('') == [])
+    assert(iterate('') == [])
 
     s = "這是我們abc"
     assert(7 == len(s))
@@ -739,18 +774,54 @@ fn testStr() {
     assert(false == s.contains('z'))
     assert(true == 'abcde'.contains('cd'))
     assert(true == 'abcde'.contains('d'))
+    assert(false == ''.contains('cd'))
+    assert(false == ''.contains('d'))
+	fail(|| => s.contains(), 'ArityMismatch: Expected 1 params, got 0')
+	fail(|| => s.contains(1), 'TypeMismatch: Expected Str, not Int')
 
     assert(0 == s.index('這是我'))
     assert(3 == s.index('們ab'))
     assert(-1 == s.index('z'))
     assert(2 == 'abcde'.index('cd'))
     assert(3 == 'abcde'.index('d'))
-    assert(false == ''.contains('cd'))
-    assert(false == ''.contains('d'))
     assert(-1 == ''.index('cd'))
     assert(-1 == ''.index('d'))
+	fail(|| => s.index(), 'ArityMismatch: Expected 1 params, got 0')
+	fail(|| => s.index(1), 'TypeMismatch: Expected Str, not Int')
 
-    // TODO bring back old bench test
+    s = "這是我們a們abc"
+    assert(0 == s.lastIndex('這是我'))
+    assert(5 == s.lastIndex('們a'))
+    assert(-1 == s.lastIndex('z'))
+    assert(2 == 'abcde'.lastIndex('cd'))
+    assert(5 == 'abcdcde'.lastIndex('d'))
+    assert(-1 == ''.lastIndex('cd'))
+    assert(-1 == ''.lastIndex('d'))
+	fail(|| => s.lastIndex(), 'ArityMismatch: Expected 1 params, got 0')
+	fail(|| => s.lastIndex(1), 'TypeMismatch: Expected Str, not Int')
+
+    assert(s.hasPrefix('這是我'))
+    assert(!s.hasPrefix('bc'))
+    assert(!''.hasPrefix('這是我'))
+    assert(!''.hasPrefix('bc'))
+	fail(|| => s.lastIndex(), 'ArityMismatch: Expected 1 params, got 0')
+	fail(|| => s.lastIndex(1), 'TypeMismatch: Expected Str, not Int')
+
+    assert(s.hasSuffix('這是我'))
+    assert(!s.hasSuffix('bc'))
+    assert(!''.hasSuffix('這是我'))
+    assert(!''.hasSuffix('bc'))
+	fail(|| => s.lastIndex(), 'ArityMismatch: Expected 1 params, got 0')
+
+    assert("這是我zzbc" == s.replace('們a', 'z'))
+    assert("這是我z們abc" == s.replace('們a', 'z', 1))
+    assert('abc' == 'abc'.replace('x', 'y'))
+	fail(|| => s.replace(), 'ArityMismatch: Expected at least 2 params, got 0')
+
+    assert(['a', 'b', 'c'] == 'a,b,c'.split(','))
+    assert(['abc'] == 'abc'.split(','))
+    assert([''] == ''.split(','))
+	fail(|| => s.split(), 'ArityMismatch: Expected 1 params, got 0')
 }
 
 fn testList() {
@@ -788,11 +859,12 @@ fn testList() {
 
     assert('List' == type(x))
 
-    assert(set { 'add' } == fields(x))
+    assert(set { 'add', 'addAll' } == fields(x))
     for f in fields(x) {
         assert(hasField(x, f))
     }
     assert(x.add == getField(x, 'add'))
+    assert(x.addAll == getField(x, 'addAll'))
 
     assert(!hasField(x, 'bogus'))
     fail(|| => getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
@@ -827,6 +899,7 @@ fn testList() {
             let d = b[0]
             b[0] = 33
             let e = c[1]++
+            assert([[], [ 33 ], [ false, 23 ], true, 22] == [a, b, c, d, e])
         },
         fn () {
             let a = []
@@ -845,22 +918,12 @@ fn testList() {
             let f = b.add
             f(5)
             assert(b == [4, 5])
+        },
+        fn () {
+            let a = []
+            a.addAll([1,2]).addAll('bc').addAll([])
+            assert(a == [1,2,'b','c'])
         }
-// TODO
-//        fn () {
-//            let a = []
-//            a.addAll([1,2]).addAll('bc')
-//            assert(a == [1,2,'b','c'])
-//            let b = []
-//            b.addAll(range(0,3))
-//            b.addAll(dict { (true,false): 1, 'y': 2 })
-//            assert(b == [ 0, 1, 2, ((true,false), 1), ('y', 2)])
-//            assert(a.addAll == a.addAll)
-//            assert(b.addAll == b.addAll)
-//            assert(a.addAll != b.addAll)
-//            assert(b.addAll != a.addAll)
-//            assert(a.add != a.addAll)
-//        },
 //        fn () {
 //            let a = []
 //            assert(a.isEmpty())
@@ -928,6 +991,11 @@ fn testList() {
 
 // TODO
 //fn testDict() {
+//
+//            let b = []
+//            b.addAll(range(0,3))
+//            //b.addAll(dict { (true,false): 1, 'y': 2 })
+//            //assert(b == [ 0, 1, 2, ((true,false), 1), ('y', 2)])
 //
 //    let funcs = [
 //        fn () {
@@ -1251,25 +1319,6 @@ fn testRange() {
     //-----------------------------------------
 
     fail(|| => iter(range(0,0)).get(), 'NoSuchElement')
-
-    fn listify(r) {
-        let ls = []
-        for n in r {
-            ls.add(n)
-        }
-        return ls
-    }
-
-    fn iterate(r) {
-        let ls = []
-        let itr = iter(r)
-        fail(|| => itr.get(), 'NoSuchElement')
-        while itr.next() {
-            ls.add(itr.get())
-        }
-        fail(|| => itr.get(), 'NoSuchElement')
-        return ls
-    }
 
     let a = range(0, 5)
     let b = range(0, 5, 2)

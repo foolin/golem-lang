@@ -269,42 +269,42 @@ func TestList(t *testing.T) {
 //	s, err = NewSet(nil, []Value{NewList([]Value{})})
 //	fail(t, s, err, "TypeMismatch: Expected Hashable")
 //}
-//
-//func TestTuple(t *testing.T) {
-//	var v Value
-//	var err Error
-//
-//	tp := NewTuple([]Value{One, Zero})
-//	okType(t, tp, TupleType)
-//
-//	v, err = tp.Eq(nil, NewTuple([]Value{Zero, Zero}))
-//	ok(t, v, err, False)
-//
-//	v, err = tp.Eq(nil, NewTuple([]Value{One, Zero}))
-//	ok(t, v, err, True)
-//
-//	v, err = tp.Eq(nil, Null)
-//	ok(t, v, err, False)
-//
-//	v, err = tp.Get(nil, Zero)
-//	ok(t, v, err, One)
-//
-//	v, err = tp.Get(nil, One)
-//	ok(t, v, err, Zero)
-//
-//	v, err = tp.Get(nil, NegOne)
-//	ok(t, v, err, Zero)
-//
-//	v, err = tp.Get(nil, NewInt(2))
-//	fail(t, v, err, "IndexOutOfBounds: 2")
-//
-//	v = tp.ToStr(nil)
-//	ok(t, v, nil, NewStr("(1, 0)"))
-//
-//	v = tp.Len(nil)
-//	ok(t, v, nil, NewInt(2))
-//}
-//
+
+func TestTuple(t *testing.T) {
+	var v Value
+	var err Error
+
+	tp := NewTuple([]Value{One, Zero})
+	okType(t, tp, TupleType)
+
+	v, err = tp.Eq(nil, NewTuple([]Value{Zero, Zero}))
+	ok(t, v, err, False)
+
+	v, err = tp.Eq(nil, NewTuple([]Value{One, Zero}))
+	ok(t, v, err, True)
+
+	v, err = tp.Eq(nil, Null)
+	ok(t, v, err, False)
+
+	v, err = tp.Get(nil, Zero)
+	ok(t, v, err, One)
+
+	v, err = tp.Get(nil, One)
+	ok(t, v, err, Zero)
+
+	v, err = tp.Get(nil, NegOne)
+	ok(t, v, err, Zero)
+
+	v, err = tp.Get(nil, NewInt(2))
+	fail(t, v, err, "IndexOutOfBounds: 2")
+
+	v, err = tp.ToStr(nil)
+	ok(t, v, err, NewStr("(1, 0)"))
+
+	v, err = tp.Len(nil)
+	ok(t, v, err, NewInt(2))
+}
+
 //func newRange(from int64, to int64, step int64) Range {
 //	r, err := NewRange(from, to, step)
 //	if err != nil {

@@ -168,6 +168,8 @@ type (
 		Iterable
 		Sliceable
 
+		Values() []Value
+
 		IsEmpty() Bool
 		Clear() Error
 
@@ -176,10 +178,8 @@ type (
 		Join(Evaluator, Str) (Str, Error)
 
 		Add(Evaluator, Value) Error
-		//AddAll(Evaluator, Value) Error
+		AddAll(Evaluator, Value) Error
 		Remove(Evaluator, Int) Error
-
-		Values() []Value
 
 		Map(Evaluator, func(Value) (Value, Error)) (Value, Error)
 		Reduce(Evaluator, Value, func(Value, Value) (Value, Error)) (Value, Error)

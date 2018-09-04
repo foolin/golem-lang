@@ -236,24 +236,39 @@ func (ls *list) Add(ev Evaluator, val Value) Error {
 	return nil
 }
 
-//func (ls *list) AddAll(ev Evaluator, val Value) Error {
-//	if ls.frozen {
-//		return ImmutableValueError()
-//	}
-//
-//	if ibl, ok := val.(Iterable); ok {
-//		itr := ibl.NewIterator(ev)
-//		for itr.IterNext().BoolVal() {
-//			v, err := itr.IterGet()
-//			if err != nil {
-//				return err
-//			}
-//			ls.array = append(ls.array, v)
-//		}
-//		return nil
-//	}
-//	return TempMismatchError("Expected Iterable Type")
-//}
+func (ls *list) AddAll(ev Evaluator, val Value) Error {
+	if ls.frozen {
+		return ImmutableValueError()
+	}
+
+	ibl, ok := val.(Iterable)
+	if !ok {
+		return IterableMismatchError(val.Type())
+	}
+
+	itr, err := ibl.NewIterator(ev)
+	if err != nil {
+		return err
+	}
+
+	b, err := itr.IterNext(ev)
+	if err != nil {
+		return err
+	}
+	for b.BoolVal() {
+		v, err := itr.IterGet(ev)
+		if err != nil {
+			return err
+		}
+		ls.array = append(ls.array, v)
+
+		b, err = itr.IterNext(ev)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 func (ls *list) Remove(ev Evaluator, index Int) Error {
 	if ls.frozen {
@@ -323,6 +338,17 @@ var listMethods = map[string]Method{
 			}
 			return ls, nil
 		}),
+
+	"addAll": NewFixedMethod(
+		[]Type{AnyType}, true,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			ls := self.(List)
+			err := ls.AddAll(ev, params[0])
+			if err != nil {
+				return nil, err
+			}
+			return ls, nil
+		}),
 }
 
 func (ls *list) FieldNames() ([]string, Error) {
@@ -353,34 +379,6 @@ func (ls *list) InvokeField(name string, ev Evaluator, params []Value) (Value, E
 	return nil, NoSuchFieldError(name)
 }
 
-////--------------------------------------------------------------
-//// intrinsic functions
-//
-//func (ls *list) GetField(ev Evaluator, key Str) (Value, Error) {
-//	switch sn := key.String(); sn {
-//
-//	case "add":
-//		return &virtualFunc{ls, sn, NewFixedNativeFunc(
-//			[]Type{AnyType}, false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//				err := ls.Add(ev, params[0])
-//				if err != nil {
-//					return nil, err
-//				}
-//				return ls, nil
-//			})}, nil
-//
-//	case "addAll":
-//		return &virtualFunc{ls, sn, NewFixedNativeFunc(
-//			[]Type{AnyType}, false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//				err := ls.AddAll(ev, params[0])
-//				if err != nil {
-//					return nil, err
-//				}
-//				return ls, nil
-//			})}, nil
-//
 //	case "remove":
 //		return &virtualFunc{ls, sn, NewFixedNativeFunc(
 //			[]Type{IntType}, false,

@@ -193,68 +193,6 @@ func TestStr(t *testing.T) {
 
 	val, err = a.Get(nil, NewInt(2))
 	ok(t, val, err, NewStr("語"))
-
-	//////////////////////////////
-
-	names, err := a.FieldNames()
-	okNames(t, names, err, []string{
-		"contains",
-		"index",
-		//"lastIndex",
-		//"startsWith",
-		//"endsWith",
-		//"replace",
-		//"split",
-	})
-
-	var bv bool
-	bv, err = a.HasField("a")
-	ok(t, bv, err, false)
-
-	bv, err = a.HasField("contains")
-	ok(t, bv, err, true)
-
-	bv, err = a.HasField("index")
-	ok(t, bv, err, true)
-
-	val, err = a.GetField("a", nil)
-	fail(t, val, err, "NoSuchField: Field 'a' not found")
-
-	//////////////////////////////
-
-	val, err = a.InvokeField("contains", nil, []Value{NewStr("語")})
-	ok(t, val, err, True)
-
-	val, err = a.InvokeField("contains", nil, []Value{NewStr("a")})
-	ok(t, val, err, False)
-
-	val, err = a.GetField("contains", nil)
-	Tassert(t, err == nil)
-	fn := val.(Func)
-
-	val, err = fn.Invoke(nil, []Value{NewStr("語")})
-	ok(t, val, err, True)
-
-	val, err = fn.Invoke(nil, []Value{NewStr("a")})
-	ok(t, val, err, False)
-
-	//////////////////////////////
-
-	val, err = a.InvokeField("index", nil, []Value{NewStr("本語")})
-	ok(t, val, err, NewInt(1))
-
-	val, err = a.InvokeField("index", nil, []Value{NewStr("a")})
-	ok(t, val, err, NewInt(-1))
-
-	val, err = a.GetField("index", nil)
-	Tassert(t, err == nil)
-	fn = val.(Func)
-
-	val, err = fn.Invoke(nil, []Value{NewStr("本語")})
-	ok(t, val, err, NewInt(1))
-
-	val, err = fn.Invoke(nil, []Value{NewStr("a")})
-	ok(t, val, err, NewInt(-1))
 }
 
 func TestInt(t *testing.T) {
