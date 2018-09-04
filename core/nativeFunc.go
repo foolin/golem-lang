@@ -13,8 +13,80 @@ type (
 	NativeFunc interface {
 		Func
 	}
-	Invoke func(Eval, []Value) (Value, Error)
+	Invoke        func(Eval, []Value) (Value, Error)
+	NullaryInvoke func(Eval) (Value, Error)
 )
+
+//--------------------------------------------------------------
+// nullaryFunc
+//--------------------------------------------------------------
+
+type nullaryFunc struct {
+	invoke NullaryInvoke
+}
+
+// NewNullaryNativeFunc creates a new nullary NativeFunc.
+func NewNullaryNativeFunc(invoke NullaryInvoke) NativeFunc {
+	return &nullaryFunc{invoke}
+}
+
+func (f *nullaryFunc) funcMarker() {}
+
+func (f *nullaryFunc) Type() Type { return FuncType }
+
+func (f *nullaryFunc) Eq(ev Eval, val Value) (Bool, Error) {
+	switch t := val.(type) {
+	case *nullaryFunc:
+		// equality is based on identity
+		return NewBool(f == t), nil
+	default:
+		return False, nil
+	}
+}
+
+func (f *nullaryFunc) Freeze(ev Eval) (Value, Error) {
+	return f, nil
+}
+
+func (f *nullaryFunc) Frozen(ev Eval) (Bool, Error) {
+	return True, nil
+}
+
+func (f *nullaryFunc) HashCode(ev Eval) (Int, Error) {
+	return nil, HashCodeMismatchError(FuncType)
+}
+
+func (f *nullaryFunc) ToStr(ev Eval) (Str, Error) {
+	return NewStr(fmt.Sprintf("nullaryFunc<%p>", f)), nil
+}
+
+func (f *nullaryFunc) Arity() Arity {
+	return Arity{FixedArity, 0, 0}
+}
+
+func (f *nullaryFunc) Invoke(ev Eval, params []Value) (Value, Error) {
+	Assert(len(params) == 0)
+	return f.invoke(ev)
+}
+
+//--------------------------------
+// fields
+
+func (f *nullaryFunc) FieldNames() ([]string, Error) {
+	return []string{}, nil
+}
+
+func (f *nullaryFunc) HasField(name string) (bool, Error) {
+	return false, nil
+}
+
+func (f *nullaryFunc) GetField(name string, ev Eval) (Value, Error) {
+	return nil, NoSuchFieldError(name)
+}
+
+func (f *nullaryFunc) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
+	return nil, NoSuchFieldError(name)
+}
 
 //--------------------------------------------------------------
 // nativeFunc

@@ -32,14 +32,14 @@ func NewField(val Value) Field {
 
 func (f *field) Get(ev Eval) (Value, Error) {
 
-	fmt.Printf("Field Get\n")
+	//fmt.Printf("Field Get\n")
 
 	return f.value, nil
 }
 
 func (f *field) Invoke(ev Eval, params []Value) (Value, Error) {
 
-	fmt.Printf("Field Get\n")
+	//fmt.Printf("Field Get\n")
 
 	fn, ok := f.value.(Func)
 	if !ok {

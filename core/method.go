@@ -5,7 +5,7 @@
 package core
 
 import (
-	"fmt"
+//"fmt"
 )
 
 type (
@@ -37,7 +37,7 @@ func NewWrapperMethod(wrapper WrapperMethodInvoke) Method {
 
 func (m *wrapperMethod) Invoke(self interface{}, ev Eval, params []Value) (Value, Error) {
 
-	fmt.Printf("Wrapper Method Invoke\n")
+	//fmt.Printf("Wrapper Method Invoke\n")
 
 	Assert(len(params) == 0)
 	return m.invoke(self), nil
@@ -45,7 +45,7 @@ func (m *wrapperMethod) Invoke(self interface{}, ev Eval, params []Value) (Value
 
 func (m *wrapperMethod) ToFunc(self interface{}, methodName string) NativeFunc {
 
-	fmt.Printf("Wrapper Method ToFunc\n")
+	//fmt.Printf("Wrapper Method ToFunc\n")
 
 	nf := NewFixedNativeFunc(
 		[]Type{}, false,
@@ -74,7 +74,7 @@ func NewNullaryMethod(nullary NullaryMethodInvoke) Method {
 
 func (m *nullaryMethod) Invoke(self interface{}, ev Eval, params []Value) (Value, Error) {
 
-	fmt.Printf("Nullary Method Invoke\n")
+	//fmt.Printf("Nullary Method Invoke\n")
 
 	Assert(len(params) == 0)
 	return m.invoke(self, ev)
@@ -82,7 +82,7 @@ func (m *nullaryMethod) Invoke(self interface{}, ev Eval, params []Value) (Value
 
 func (m *nullaryMethod) ToFunc(self interface{}, methodName string) NativeFunc {
 
-	fmt.Printf("Nullary Method ToFunc\n")
+	//fmt.Printf("Nullary Method ToFunc\n")
 
 	nf := NewFixedNativeFunc(
 		[]Type{}, false,
@@ -135,7 +135,7 @@ func NewFixedMethod(
 
 func (m *fixedMethod) Invoke(self interface{}, ev Eval, params []Value) (Value, Error) {
 
-	fmt.Printf("Method Invoke\n")
+	//fmt.Printf("Method Invoke\n")
 
 	err := vetFixedParams(params, m.requiredTypes, m.allowNull)
 	if err != nil {
@@ -146,7 +146,7 @@ func (m *fixedMethod) Invoke(self interface{}, ev Eval, params []Value) (Value, 
 
 func (m *fixedMethod) ToFunc(self interface{}, methodName string) NativeFunc {
 
-	fmt.Printf("Method ToFunc\n")
+	//fmt.Printf("Method ToFunc\n")
 
 	nf := NewFixedNativeFunc(
 		m.requiredTypes,

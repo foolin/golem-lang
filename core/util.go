@@ -133,16 +133,14 @@ func iteratorStruct() Struct {
 func iteratorFields(ev Eval, itr Iterator) (next Field, get Field) {
 
 	next = NewReadonlyField(
-		NewFixedNativeFunc(
-			[]Type{}, false,
-			func(ev Eval, values []Value) (Value, Error) {
+		NewNullaryNativeFunc(
+			func(ev Eval) (Value, Error) {
 				return itr.IterNext(ev)
 			}))
 
 	get = NewReadonlyField(
-		NewFixedNativeFunc(
-			[]Type{}, false,
-			func(ev Eval, values []Value) (Value, Error) {
+		NewNullaryNativeFunc(
+			func(ev Eval) (Value, Error) {
 				return itr.IterGet(ev)
 			}))
 
