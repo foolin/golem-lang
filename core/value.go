@@ -233,13 +233,13 @@ type (
 		Lenable
 		Iterable
 
-		//IsEmpty() Bool
-		//Clear() (Set, Error)
+		IsEmpty() Bool
+		Contains(Evaluator, Value) (Bool, Error)
 
-		//Contains(Evaluator, Value) (Bool, Error)
-		//Add(Evaluator, Value) Error
-		//AddAll(Evaluator, Value) Error
-		//Remove(Value) (Bool, Error)
+		Clear() (Set, Error)
+		Add(Evaluator, Value) (Set, Error)
+		AddAll(Evaluator, Value) (Set, Error)
+		Remove(Evaluator, Value) (Set, Error)
 	}
 
 	// Struct is a collection of key-Field pairs

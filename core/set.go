@@ -85,6 +85,8 @@ func (s *set) Len(ev Evaluator) (Int, Error) {
 	return s.hashMap.Len(), nil
 }
 
+//---------------------------------------------------------------
+
 func (s *set) IsEmpty() Bool {
 	return NewBool(s.hashMap.Len().IntVal() == 0)
 }
@@ -93,58 +95,75 @@ func (s *set) Contains(ev Evaluator, key Value) (Bool, Error) {
 	return s.hashMap.ContainsKey(ev, key)
 }
 
-//---------------------------------------------------------------
-// Mutation
-
-func (s *set) Add(ev Evaluator, val Value) Error {
-	if s.frozen {
-		return ImmutableValueError()
-	}
-
-	return s.hashMap.Put(ev, val, True)
-}
-
-func (s *set) AddAll(ev Evaluator, val Value) Error {
-	if s.frozen {
-		return ImmutableValueError()
-	}
-
-	panic("TODO")
-
-	//	if ibl, ok := val.(Iterable); ok {
-	//		itr := ibl.NewIterator(ev)
-	//		for itr.IterNext(ev).BoolVal() {
-	//			v, err := itr.IterGet()
-	//			if err != nil {
-	//				return err
-	//			}
-	//			err = s.hashMap.Put(ev, v, True)
-	//			if err != nil {
-	//				return err
-	//			}
-	//		}
-	//		return nil
-	//	}
-	//
-	//		return nil, TempMismatchError(
-	//			fmt.Sprintf("Type %s has no iter()", values[0].Type()))
-}
-
-func (s *set) Clear() Error {
-	if s.frozen {
-		return ImmutableValueError()
-	}
-
-	s.hashMap = EmptyHashMap()
-	return nil
-}
-
-func (s *set) Remove(ev Evaluator, key Value) (Bool, Error) {
+func (s *set) Add(ev Evaluator, val Value) (Set, Error) {
 	if s.frozen {
 		return nil, ImmutableValueError()
 	}
 
-	return s.hashMap.Remove(ev, key)
+	err := s.hashMap.Put(ev, val, True)
+	if err != nil {
+		return nil, err
+	}
+	return s, nil
+}
+
+func (s *set) AddAll(ev Evaluator, val Value) (Set, Error) {
+	if s.frozen {
+		return nil, ImmutableValueError()
+	}
+
+	ibl, ok := val.(Iterable)
+	if !ok {
+		return nil, IterableMismatchError(val.Type())
+	}
+
+	itr, err := ibl.NewIterator(ev)
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := itr.IterNext(ev)
+	if err != nil {
+		return nil, err
+	}
+	for b.BoolVal() {
+		v, err := itr.IterGet(ev)
+		if err != nil {
+			return nil, err
+		}
+
+		err = s.hashMap.Put(ev, v, True)
+		if err != nil {
+			return nil, err
+		}
+
+		b, err = itr.IterNext(ev)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return s, nil
+}
+
+func (s *set) Clear() (Set, Error) {
+	if s.frozen {
+		return nil, ImmutableValueError()
+	}
+
+	s.hashMap = EmptyHashMap()
+	return s, nil
+}
+
+func (s *set) Remove(ev Evaluator, key Value) (Set, Error) {
+	if s.frozen {
+		return nil, ImmutableValueError()
+	}
+
+	_, err := s.hashMap.Remove(ev, key)
+	if err != nil {
+		return nil, err
+	}
+	return s, nil
 }
 
 //---------------------------------------------------------------
@@ -185,7 +204,50 @@ func (i *setIterator) IterGet(ev Evaluator) (Value, Error) {
 //--------------------------------------------------------------
 // fields
 
-var setMethods = map[string]Method{}
+var setMethods = map[string]Method{
+
+	"isEmpty": NewFixedMethod(
+		[]Type{}, false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			s := self.(Set)
+			return s.IsEmpty(), nil
+		}),
+
+	"contains": NewFixedMethod(
+		[]Type{AnyType}, true,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			s := self.(Set)
+			return s.Contains(ev, params[0])
+		}),
+
+	"add": NewFixedMethod(
+		[]Type{AnyType}, true,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			s := self.(Set)
+			return s.Add(ev, params[0])
+		}),
+
+	"addAll": NewFixedMethod(
+		[]Type{AnyType}, false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			s := self.(Set)
+			return s.AddAll(ev, params[0])
+		}),
+
+	"clear": NewFixedMethod(
+		[]Type{}, false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			s := self.(Set)
+			return s.Clear()
+		}),
+
+	"remove": NewFixedMethod(
+		[]Type{AnyType}, false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			s := self.(Set)
+			return s.Remove(ev, params[0])
+		}),
+}
 
 func (s *set) FieldNames() ([]string, Error) {
 	names := make([]string, 0, len(setMethods))
@@ -214,75 +276,3 @@ func (s *set) InvokeField(name string, ev Evaluator, params []Value) (Value, Err
 	}
 	return nil, NoSuchFieldError(name)
 }
-
-////--------------------------------------------------------------
-//// intrinsic functions
-//
-//func (s *set) GetField(ev Evaluator, key Str) (Value, Error) {
-//	switch sn := key.String(); sn {
-//
-//	case "add":
-//		return &virtualFunc{s, sn, NewFixedNativeFunc(
-//			[]Type{AnyType}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				err := s.Add(ev, values[0])
-//				if err != nil {
-//					return nil, err
-//				}
-//				return s, nil
-//			})}, nil
-//
-//	case "addAll":
-//		return &virtualFunc{s, sn, NewFixedNativeFunc(
-//			[]Type{AnyType}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				err := s.AddAll(ev, values[0])
-//				if err != nil {
-//					return nil, err
-//				}
-//				return s, nil
-//			})}, nil
-//
-//	case "clear":
-//		return &virtualFunc{s, sn, NewFixedNativeFunc(
-//			[]Type{}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				err := s.Clear()
-//				if err != nil {
-//					return nil, err
-//				}
-//				return s, nil
-//			})}, nil
-//
-//	case "isEmpty":
-//		return &virtualFunc{s, sn, NewFixedNativeFunc(
-//			[]Type{}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				return s.IsEmpty(), nil
-//			})}, nil
-//
-//	case "contains":
-//		return &virtualFunc{s, sn, NewFixedNativeFunc(
-//			[]Type{AnyType}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				return s.Contains(ev, values[0])
-//			})}, nil
-//
-//	case "remove":
-//		return &virtualFunc{s, sn, NewFixedNativeFunc(
-//			[]Type{AnyType}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				return s.Remove(ev, values[0])
-//			})}, nil
-//
-//	case "iterator":
-//		return &virtualFunc{s, sn, NewFixedNativeFunc(
-//			[]Type{}, false,
-//			func(ev Evaluator, values []Value) (Value, Error) {
-//				return s.NewIterator(ev), nil
-//			})}, nil
-//
-//	default:
-//		return nil, NoSuchFieldError(key.String())
-//	}
-//}

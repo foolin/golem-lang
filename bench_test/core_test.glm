@@ -1110,129 +1110,137 @@ fn testList() {
 
 fn testSet() {
 
-//    assert(set {} == set{})
-//    assert(set {'a'} == set{'a'})
-//    assert(set {'a', 'b'} == set{'a', 'b'})
-//    assert(set {'a', 'b', 'c'} == set{'a', 'b', 'c'})
-//
-//    assert(set {'a', 'b', 'c'} != set{'a', 'b', 'd'})
-//    assert(set {'a', 'b', 'c'} != set{'a', 'b'})
-//    assert(set {'a', 'b', 'c'} != set{'a'})
-//    assert(set {'a', 'b', 'c'} != set{})
-//
-//    let x = set{}
-//    let y = set{'a'}
-//
-//    assert(x == x)
-//    assert(y == y)
-//    assert(x != y)
-//    assert(y != x)
-//    assert(x != 'z')
-//    assert('z' != y)
-//
-//    assert(!frozen(x))
-//    assert(x == freeze(x))
-//    assert(frozen(x))
-//
-//    assert(iter(x) != null)
-//    assert(len(x) == 0)
-//    assert(len(y) == 1)
-//
-//    assert('set { }'     == str(set{}))
-//    assert('set { a }'   == str(set{'a'}))
-//    assert('set { b, a }'== str(set{'a', 'b'}))
-//
-//    assert('Set' == type(x))
-//
-//    assert(set { } == fields(x))
-//
-//    assert(!hasField(x, 'bogus'))
-//    fail(|| => getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
-//    fail(|| => setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not Set")
-//    fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct, not Set")
+    assert(set {} == set{})
+    assert(set {'a'} == set{'a'})
+    assert(set {'a', 'b'} == set{'a', 'b'})
+    assert(set {'a', 'b', 'c'} == set{'a', 'b', 'c'})
+
+    assert(set {'a', 'b', 'c'} != set{'a', 'b', 'd'})
+    assert(set {'a', 'b', 'c'} != set{'a', 'b'})
+    assert(set {'a', 'b', 'c'} != set{'a'})
+    assert(set {'a', 'b', 'c'} != set{})
+
+    let x = set{}
+    let y = set{'a'}
+
+    assert(x == x)
+    assert(y == y)
+    assert(x != y)
+    assert(y != x)
+    assert(x != 'z')
+    assert('z' != y)
+
+    assert(!frozen(x))
+    assert(x == freeze(x))
+    assert(frozen(x))
+    fail(|| => x.add(1), "ImmutableValue")
+    fail(|| => x.addAll(1), "ImmutableValue")
+    fail(|| => x.remove(1), "ImmutableValue")
+    fail(|| => x.clear(), "ImmutableValue")
+    x.isEmpty()
+    x.contains(1)
+
+    assert(iter(x) != null)
+    assert(len(x) == 0)
+    assert(len(y) == 1)
+
+    assert("set { }" == str(set {}))
+    assert("set { 1 }" == str(set {1}))
+    assert("set { 1, 2 }" == str(set {1,2}))
+
+    assert('Set' == type(x))
+
+    assert(set { 
+        'isEmpty', 
+        'contains', 
+
+        'add', 
+        'addAll',
+        'clear',
+        'remove' 
+    } == fields(x))
+    for f in fields(x) {
+        assert(hasField(x, f))
+    }
+    assert(x.isEmpty == getField(x, 'isEmpty'))
+    assert(x.contains == getField(x, 'contains'))
+
+    assert(x.add == getField(x, 'add'))
+    assert(x.addAll == getField(x, 'addAll'))
+    assert(x.clear == getField(x, 'clear'))
+    assert(x.remove == getField(x, 'remove'))
+
+    assert(!hasField(x, 'bogus'))
+    fail(|| => getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not Set")
+    fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct, not Set")
 
     //-------------------------------------------------
 
-// TODO
-//    code = `
-//try {
-//    let s = set {'a', 'b', null}
-//    assert(false)
-//} catch e {
-//    assert(e.kind == "NullValue")
-//}
-//
-//try {
-//    let s = set {'a', 'b', []}
-//    assert(false)
-//} catch e {
-//    assert(e.kind == "TypeMismatch")
-//    assert(e.msg == "Expected Hashable Type")
-//}
-//
-//    let funcs = [
-//        fn () {
-//            let a = set {};
-//            a.add(1);
-//            assert(a == set {1});
-//            a.add(2).add(3).add(2);
-//            assert(a == set {1,2,3});
-//            assert(set {3,1,2} == set {1,2,3});
-//            assert(set {1,2} != set {1,2,3});
-//            let b = set { 4 };
-//            b.add(4);
-//            assert(b == set { 4 });
-//            assert(a.add == a.add);
-//            assert(b.add == b.add);
-//            assert(a.add != b.add);
-//            assert(b.add != a.add);
-//        },
-//        fn () {
-//            let a = set {};
-//            a.addAll([1,2]).addAll('bc');
-//            assert(a == set {1,2,'b','c'});
-//            let b = set {};
-//            b.addAll(range(0,3));
-//            assert(b == set { 0, 1, 2 });
-//            assert(a.addAll == a.addAll);
-//            assert(b.addAll == b.addAll);
-//            assert(a.addAll != b.addAll);
-//            assert(b.addAll != a.addAll);
-//            assert(a.add != a.addAll);
-//        },
-//        fn () {
-//            failMsg(fn() { let a = set{}; a.addAll(false); },   'TypeMismatch', 'Expected Iterable Type')
-//            failMsg(fn() { let a = set{}; a.add(3,4); },        'ArityMismatch', 'Expected 1 params, got 2')
-//            failMsg(fn() { let a = set{}; a.add([1,2]); },      'TypeMismatch', 'Expected Hashable Type')
-//            failMsg(fn() { let a = set{}; a.contains([1,2]); }, 'TypeMismatch', 'Expected Hashable Type')
-//        },
-//        fn () {
-//            let a = set{};
-//            assert(a.isEmpty());
-//            a.add(1);
-//            assert(!a.isEmpty());
-//            a.clear();
-//            assert(a.isEmpty());
-//        },
-//        fn () {
-//            let a = set{};
-//            assert(!a.contains('x'));
-//            a = set {'z', 'x'};
-//        },
-//        fn () {
-//            let s = set {'a', 'b', 'c'};
-//            assert(!s.remove('z'));
-//            assert(s.remove('a'));
-//            assert(s == set {'c', 'b'});
-//            assert(s.remove('b'));
-//            assert(s == set {'c'});
-//            assert(len(s) == 1);
-//            assert(s.remove('c'));
-//            assert(s == set {});
-//            assert(len(s) == 0);
-//        }
-//    ]
-//    for f in funcs { f(); }
+    let funcs = [
+        fn () {
+            let a = set {};
+            a.add(1);
+            assert(a == set {1});
+            a.add(2).add(3).add(2);
+            assert(a == set {1,2,3});
+            assert(set {3,1,2} == set {1,2,3});
+            assert(set {1,2} != set {1,2,3});
+            let b = set { 4 };
+            b.add(4);
+            assert(b == set { 4 });
+            assert(a.add == a.add);
+            assert(b.add == b.add);
+            assert(a.add != b.add);
+            assert(b.add != a.add);
+        },
+        fn () {
+            let a = set {};
+            a.addAll([1,2]).addAll('bc');
+            assert(a == set {1,2,'b','c'});
+            let b = set {};
+            b.addAll(range(0,3));
+            assert(b == set { 0, 1, 2 });
+            assert(a.addAll == a.addAll);
+            assert(b.addAll == b.addAll);
+            assert(a.addAll != b.addAll);
+            assert(b.addAll != a.addAll);
+            assert(a.add != a.addAll);
+        },
+        fn () {
+            fail(|| => set{}.addAll(false),   'TypeMismatch: Type Bool has no iter()')
+            fail(|| => set{}.add(3,4),        'ArityMismatch: Expected 1 params, got 2')
+            fail(|| => set{}.add([1,2]),      'TypeMismatch: Type List cannot be hashed')
+            fail(|| => set{}.contains([1,2]), 'TypeMismatch: Type List cannot be hashed')
+            fail(|| => set {'a', 'b', null},  'NullValue')
+            fail(|| => set {'a', 'b', []},    'TypeMismatch: Type List cannot be hashed')
+        },
+        fn () {
+            let a = set{};
+            assert(a.isEmpty());
+            a.add(1);
+            assert(!a.isEmpty());
+            a.clear();
+            assert(a.isEmpty());
+        },
+        fn () {
+            let a = set{};
+            assert(!a.contains('x'));
+            a = set {'z', 'x'};
+        },
+        fn () {
+            let s = set {'a', 'b', 'c'};
+            s.remove('z').remove('a')
+            assert(s == set {'c', 'b'});
+            s.remove('b');
+            assert(s == set {'c'});
+            assert(len(s) == 1);
+            s.remove('c');
+            assert(s == set {});
+            assert(len(s) == 0);
+        }
+    ]
+    for f in funcs { f(); }
 }
 
 fn testTuple() {
@@ -1576,7 +1584,7 @@ fn main(args) {
     testRange()
     testTuple()
 //    testDict() TODO
-    testSet() // TODO
+    testSet() 
     testStruct() // testMerge() TODO
 //    testChan() //    testGo() // TODO
 }
