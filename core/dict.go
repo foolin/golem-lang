@@ -216,9 +216,8 @@ func (i *dictIterator) IterGet(ev Eval) (Value, Error) {
 
 var dictMethods = map[string]Method{
 
-	"isEmpty": NewFixedMethod(
-		[]Type{}, false,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+	"isEmpty": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
 			d := self.(Dict)
 			return d.IsEmpty(), nil
 		}),
@@ -237,9 +236,8 @@ var dictMethods = map[string]Method{
 			return d.AddAll(ev, params[0])
 		}),
 
-	"clear": NewFixedMethod(
-		[]Type{}, false,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+	"clear": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
 			d := self.(Dict)
 			return d.Clear()
 		}),

@@ -69,16 +69,13 @@ var chanMethods = map[string]Method{
 		[]Type{AnyType}, true,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			ch := self.(Chan)
-
 			ch.Send(params[0])
 			return Null, nil
 		}),
 
-	"recv": NewFixedMethod(
-		[]Type{}, false,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+	"recv": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
 			ch := self.(Chan)
-
 			val := ch.Recv()
 			return val, nil
 		}),

@@ -124,27 +124,24 @@ func (i *rangeIterator) IterGet(ev Eval) (Value, Error) {
 // fields
 
 var rangeMethods = map[string]Method{
-	"from": NewFixedMethod(
-		[]Type{}, false,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+
+	"from": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
 			r := self.(Range)
 			return r.From(), nil
 		}),
-	"to": NewFixedMethod(
-		[]Type{}, false,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+	"to": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
 			r := self.(Range)
 			return r.To(), nil
 		}),
-	"step": NewFixedMethod(
-		[]Type{}, false,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+	"step": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
 			r := self.(Range)
 			return r.Step(), nil
 		}),
-	"count": NewFixedMethod(
-		[]Type{}, false,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+	"count": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
 			r := self.(Range)
 			return r.Count(), nil
 		}),

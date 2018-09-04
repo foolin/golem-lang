@@ -348,16 +348,14 @@ var listMethods = map[string]Method{
 			return ls.AddAll(ev, params[0])
 		}),
 
-	"clear": NewFixedMethod(
-		[]Type{}, false,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+	"clear": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
 			ls := self.(List)
 			return ls.Clear()
 		}),
 
-	"isEmpty": NewFixedMethod(
-		[]Type{}, false,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+	"isEmpty": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
 			ls := self.(List)
 			return ls.IsEmpty(), nil
 		}),
