@@ -16,7 +16,7 @@ import (
 	g "github.com/mjarmy/golem-lang/core"
 	bc "github.com/mjarmy/golem-lang/core/bytecode"
 	"github.com/mjarmy/golem-lang/interpreter"
-	//"github.com/mjarmy/golem-lang/lib"
+	"github.com/mjarmy/golem-lang/lib"
 	"github.com/mjarmy/golem-lang/scanner"
 )
 
@@ -133,9 +133,9 @@ func main() {
 	var builtins []*g.BuiltinEntry = append(
 		g.StandardBuiltins,
 		g.UnsandboxedBuiltins...)
-	//	builtins = append(
-	//		builtins,
-	//		&g.BuiltinEntry{Name: "_lib", Value: lib.BuiltinLib})
+	builtins = append(
+		builtins,
+		&g.BuiltinEntry{Name: "_lib", Value: lib.BuiltinLib})
 	builtinMgr := g.NewBuiltinManager(builtins)
 
 	// read source

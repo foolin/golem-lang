@@ -52,8 +52,6 @@ func NewVirtualStruct(methods map[string]Method, frozen bool) (Struct, Error) {
 	}, nil
 }
 
-type frozenness int
-
 func MergeStructs(structs []Struct) (Struct, Error) {
 
 	if len(structs) < 2 {
