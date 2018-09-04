@@ -26,15 +26,15 @@ func (tp tuple) compositeMarker() {}
 
 func (tp tuple) Type() Type { return TupleType }
 
-func (tp tuple) Freeze(ev Evaluator) (Value, Error) {
+func (tp tuple) Freeze(ev Eval) (Value, Error) {
 	return tp, nil
 }
 
-func (tp tuple) Frozen(ev Evaluator) (Bool, Error) {
+func (tp tuple) Frozen(ev Eval) (Bool, Error) {
 	return True, nil
 }
 
-func (tp tuple) ToStr(ev Evaluator) (Str, Error) {
+func (tp tuple) ToStr(ev Eval) (Str, Error) {
 
 	var buf bytes.Buffer
 	buf.WriteString("(")
@@ -52,7 +52,7 @@ func (tp tuple) ToStr(ev Evaluator) (Str, Error) {
 	return NewStr(buf.String()), nil
 }
 
-func (tp tuple) HashCode(ev Evaluator) (Int, Error) {
+func (tp tuple) HashCode(ev Eval) (Int, Error) {
 
 	// https://en.wikipedia.org/wiki/Jenkins_hash_function
 	var hash int64
@@ -71,7 +71,7 @@ func (tp tuple) HashCode(ev Evaluator) (Int, Error) {
 	return NewInt(hash), nil
 }
 
-func (tp tuple) Eq(ev Evaluator, v Value) (Bool, Error) {
+func (tp tuple) Eq(ev Eval, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case tuple:
 		return valuesEq(ev, tp, t)
@@ -80,7 +80,7 @@ func (tp tuple) Eq(ev Evaluator, v Value) (Bool, Error) {
 	}
 }
 
-func (tp tuple) Get(ev Evaluator, index Value) (Value, Error) {
+func (tp tuple) Get(ev Eval, index Value) (Value, Error) {
 	idx, err := boundedIndex(index, len(tp))
 	if err != nil {
 		return nil, err
@@ -88,11 +88,11 @@ func (tp tuple) Get(ev Evaluator, index Value) (Value, Error) {
 	return tp[idx], nil
 }
 
-func (tp tuple) Set(ev Evaluator, index Value, val Value) Error {
+func (tp tuple) Set(ev Eval, index Value, val Value) Error {
 	return ImmutableValueError()
 }
 
-func (tp tuple) Len(ev Evaluator) (Int, Error) {
+func (tp tuple) Len(ev Eval) (Int, Error) {
 	return NewInt(int64(len(tp))), nil
 }
 
@@ -107,10 +107,10 @@ func (tp tuple) HasField(name string) (bool, Error) {
 	return false, nil
 }
 
-func (tp tuple) GetField(name string, ev Evaluator) (Value, Error) {
+func (tp tuple) GetField(name string, ev Eval) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
 
-func (tp tuple) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
+func (tp tuple) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }

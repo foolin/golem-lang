@@ -28,9 +28,9 @@ func newPoolBuilder() *poolBuilder {
 
 func (p *poolBuilder) constIndex(key g.Basic) int {
 
-	// Its OK for the Evaluator to be nil here.
-	// The key is always g.Basic, so the Evaluator will never be used.
-	var ev g.Evaluator
+	// Its OK for the Eval to be nil here.
+	// The key is always g.Basic, so the Eval will never be used.
+	var ev g.Eval
 
 	b, err := p.constants.Contains(ev, key)
 	g.Assert(err == nil)

@@ -28,29 +28,29 @@ func (b _bool) basicMarker() {}
 
 func (b _bool) Type() Type { return BoolType }
 
-func (b _bool) Freeze(ev Evaluator) (Value, Error) {
+func (b _bool) Freeze(ev Eval) (Value, Error) {
 	return b, nil
 }
 
-func (b _bool) Frozen(ev Evaluator) (Bool, Error) {
+func (b _bool) Frozen(ev Eval) (Bool, Error) {
 	return True, nil
 }
 
-func (b _bool) ToStr(ev Evaluator) (Str, Error) {
+func (b _bool) ToStr(ev Eval) (Str, Error) {
 	if b {
 		return NewStr("true"), nil
 	}
 	return NewStr("false"), nil
 }
 
-func (b _bool) HashCode(ev Evaluator) (Int, Error) {
+func (b _bool) HashCode(ev Eval) (Int, Error) {
 	if b {
 		return NewInt(1009), nil
 	}
 	return NewInt(1013), nil
 }
 
-func (b _bool) Eq(ev Evaluator, val Value) (Bool, Error) {
+func (b _bool) Eq(ev Eval, val Value) (Bool, Error) {
 	switch t := val.(type) {
 	case _bool:
 		if b == t {
@@ -62,7 +62,7 @@ func (b _bool) Eq(ev Evaluator, val Value) (Bool, Error) {
 	}
 }
 
-func (b _bool) Cmp(ev Evaluator, c Comparable) (Int, Error) {
+func (b _bool) Cmp(ev Eval, c Comparable) (Int, Error) {
 	switch t := c.(type) {
 
 	case _bool:
@@ -94,10 +94,10 @@ func (b _bool) HasField(name string) (bool, Error) {
 	return false, nil
 }
 
-func (b _bool) GetField(name string, ev Evaluator) (Value, Error) {
+func (b _bool) GetField(name string, ev Eval) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
 
-func (b _bool) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
+func (b _bool) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }

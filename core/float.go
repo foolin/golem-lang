@@ -29,19 +29,19 @@ func (f _float) basicMarker() {}
 
 func (f _float) Type() Type { return FloatType }
 
-func (f _float) Freeze(ev Evaluator) (Value, Error) {
+func (f _float) Freeze(ev Eval) (Value, Error) {
 	return f, nil
 }
 
-func (f _float) Frozen(ev Evaluator) (Bool, Error) {
+func (f _float) Frozen(ev Eval) (Bool, Error) {
 	return True, nil
 }
 
-func (f _float) ToStr(ev Evaluator) (Str, Error) {
+func (f _float) ToStr(ev Eval) (Str, Error) {
 	return NewStr(fmt.Sprintf("%g", f)), nil
 }
 
-func (f _float) HashCode(ev Evaluator) (Int, Error) {
+func (f _float) HashCode(ev Eval) (Int, Error) {
 
 	writer := new(bytes.Buffer)
 	err := binary.Write(writer, binary.LittleEndian, f.FloatVal())
@@ -60,7 +60,7 @@ func (f _float) HashCode(ev Evaluator) (Int, Error) {
 	return NewInt(hashCode), nil
 }
 
-func (f _float) Eq(ev Evaluator, val Value) (Bool, Error) {
+func (f _float) Eq(ev Eval, val Value) (Bool, Error) {
 	switch t := val.(type) {
 
 	case _float:
@@ -74,7 +74,7 @@ func (f _float) Eq(ev Evaluator, val Value) (Bool, Error) {
 	}
 }
 
-func (f _float) Cmp(ev Evaluator, c Comparable) (Int, Error) {
+func (f _float) Cmp(ev Eval, c Comparable) (Int, Error) {
 	switch t := c.(type) {
 
 	case _float:
@@ -181,10 +181,10 @@ func (f _float) HasField(name string) (bool, Error) {
 	return false, nil
 }
 
-func (f _float) GetField(name string, ev Evaluator) (Value, Error) {
+func (f _float) GetField(name string, ev Eval) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
 
-func (f _float) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
+func (f _float) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }

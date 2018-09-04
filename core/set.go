@@ -14,7 +14,7 @@ type set struct {
 }
 
 // NewSet creates a new Set
-func NewSet(ev Evaluator, values []Value) (Set, Error) {
+func NewSet(ev Eval, values []Value) (Set, Error) {
 
 	hashMap := EmptyHashMap()
 	for _, v := range values {
@@ -31,16 +31,16 @@ func (s *set) compositeMarker() {}
 
 func (s *set) Type() Type { return SetType }
 
-func (s *set) Freeze(ev Evaluator) (Value, Error) {
+func (s *set) Freeze(ev Eval) (Value, Error) {
 	s.frozen = true
 	return s, nil
 }
 
-func (s *set) Frozen(ev Evaluator) (Bool, Error) {
+func (s *set) Frozen(ev Eval) (Bool, Error) {
 	return NewBool(s.frozen), nil
 }
 
-func (s *set) ToStr(ev Evaluator) (Str, Error) {
+func (s *set) ToStr(ev Eval) (Str, Error) {
 
 	var buf bytes.Buffer
 	buf.WriteString("set {")
@@ -68,11 +68,11 @@ func (s *set) ToStr(ev Evaluator) (Str, Error) {
 	return NewStr(buf.String()), nil
 }
 
-func (s *set) HashCode(ev Evaluator) (Int, Error) {
+func (s *set) HashCode(ev Eval) (Int, Error) {
 	return nil, HashCodeMismatchError(SetType)
 }
 
-func (s *set) Eq(ev Evaluator, v Value) (Bool, Error) {
+func (s *set) Eq(ev Eval, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *set:
 		return s.hashMap.Eq(ev, t.hashMap)
@@ -81,7 +81,7 @@ func (s *set) Eq(ev Evaluator, v Value) (Bool, Error) {
 	}
 }
 
-func (s *set) Len(ev Evaluator) (Int, Error) {
+func (s *set) Len(ev Eval) (Int, Error) {
 	return s.hashMap.Len(), nil
 }
 
@@ -91,11 +91,11 @@ func (s *set) IsEmpty() Bool {
 	return NewBool(s.hashMap.Len().IntVal() == 0)
 }
 
-func (s *set) Contains(ev Evaluator, key Value) (Bool, Error) {
+func (s *set) Contains(ev Eval, key Value) (Bool, Error) {
 	return s.hashMap.Contains(ev, key)
 }
 
-func (s *set) Add(ev Evaluator, val Value) (Set, Error) {
+func (s *set) Add(ev Eval, val Value) (Set, Error) {
 	if s.frozen {
 		return nil, ImmutableValueError()
 	}
@@ -107,7 +107,7 @@ func (s *set) Add(ev Evaluator, val Value) (Set, Error) {
 	return s, nil
 }
 
-func (s *set) AddAll(ev Evaluator, val Value) (Set, Error) {
+func (s *set) AddAll(ev Eval, val Value) (Set, Error) {
 	if s.frozen {
 		return nil, ImmutableValueError()
 	}
@@ -154,7 +154,7 @@ func (s *set) Clear() (Set, Error) {
 	return s, nil
 }
 
-func (s *set) Remove(ev Evaluator, key Value) (Set, Error) {
+func (s *set) Remove(ev Eval, key Value) (Set, Error) {
 	if s.frozen {
 		return nil, ImmutableValueError()
 	}
@@ -176,7 +176,7 @@ type setIterator struct {
 	hasNext bool
 }
 
-func (s *set) NewIterator(ev Evaluator) (Iterator, Error) {
+func (s *set) NewIterator(ev Eval) (Iterator, Error) {
 
 	itr := &setIterator{iteratorStruct(), s, s.hashMap.Iterator(), false}
 
@@ -187,12 +187,12 @@ func (s *set) NewIterator(ev Evaluator) (Iterator, Error) {
 	return itr, nil
 }
 
-func (i *setIterator) IterNext(ev Evaluator) (Bool, Error) {
+func (i *setIterator) IterNext(ev Eval) (Bool, Error) {
 	i.hasNext = i.itr.Next()
 	return NewBool(i.hasNext), nil
 }
 
-func (i *setIterator) IterGet(ev Evaluator) (Value, Error) {
+func (i *setIterator) IterGet(ev Eval) (Value, Error) {
 
 	if i.hasNext {
 		entry := i.itr.Get()
@@ -208,42 +208,42 @@ var setMethods = map[string]Method{
 
 	"isEmpty": NewFixedMethod(
 		[]Type{}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			s := self.(Set)
 			return s.IsEmpty(), nil
 		}),
 
 	"contains": NewFixedMethod(
 		[]Type{AnyType}, true,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			s := self.(Set)
 			return s.Contains(ev, params[0])
 		}),
 
 	"add": NewFixedMethod(
 		[]Type{AnyType}, true,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			s := self.(Set)
 			return s.Add(ev, params[0])
 		}),
 
 	"addAll": NewFixedMethod(
 		[]Type{AnyType}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			s := self.(Set)
 			return s.AddAll(ev, params[0])
 		}),
 
 	"clear": NewFixedMethod(
 		[]Type{}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			s := self.(Set)
 			return s.Clear()
 		}),
 
 	"remove": NewFixedMethod(
 		[]Type{AnyType}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			s := self.(Set)
 			return s.Remove(ev, params[0])
 		}),
@@ -262,14 +262,14 @@ func (s *set) HasField(name string) (bool, Error) {
 	return ok, nil
 }
 
-func (s *set) GetField(name string, ev Evaluator) (Value, Error) {
+func (s *set) GetField(name string, ev Eval) (Value, Error) {
 	if method, ok := setMethods[name]; ok {
 		return method.ToFunc(s, name), nil
 	}
 	return nil, NoSuchFieldError(name)
 }
 
-func (s *set) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
+func (s *set) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
 
 	if method, ok := setMethods[name]; ok {
 		return method.Invoke(s, ev, params)

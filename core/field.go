@@ -11,10 +11,10 @@ import (
 
 type (
 	Field interface {
-		Get(Evaluator) (Value, Error)
-		Invoke(Evaluator, []Value) (Value, Error)
+		Get(Eval) (Value, Error)
+		Invoke(Eval, []Value) (Value, Error)
 		IsReadonly() bool
-		Set(Evaluator, Value) Error
+		Set(Eval, Value) Error
 	}
 )
 
@@ -30,11 +30,11 @@ func NewField(val Value) Field {
 	return &field{val}
 }
 
-func (f *field) Get(ev Evaluator) (Value, Error) {
+func (f *field) Get(ev Eval) (Value, Error) {
 	return f.value, nil
 }
 
-func (f *field) Invoke(ev Evaluator, params []Value) (Value, Error) {
+func (f *field) Invoke(ev Eval, params []Value) (Value, Error) {
 	fn, ok := f.value.(Func)
 	if !ok {
 		return nil, TypeMismatchError(FuncType, f.value.Type())
@@ -46,7 +46,7 @@ func (f *field) IsReadonly() bool {
 	return false
 }
 
-func (f *field) Set(ev Evaluator, val Value) Error {
+func (f *field) Set(ev Eval, val Value) Error {
 	f.value = val
 	return nil
 }
@@ -63,11 +63,11 @@ func NewReadonlyField(val Value) Field {
 	return &readonlyField{val}
 }
 
-func (f *readonlyField) Get(ev Evaluator) (Value, Error) {
+func (f *readonlyField) Get(ev Eval) (Value, Error) {
 	return f.value, nil
 }
 
-func (f *readonlyField) Invoke(ev Evaluator, params []Value) (Value, Error) {
+func (f *readonlyField) Invoke(ev Eval, params []Value) (Value, Error) {
 	fn, ok := f.value.(Func)
 	if !ok {
 		return nil, TypeMismatchError(FuncType, f.value.Type())
@@ -79,7 +79,7 @@ func (f *readonlyField) IsReadonly() bool {
 	return true
 }
 
-func (f *readonlyField) Set(ev Evaluator, val Value) Error {
+func (f *readonlyField) Set(ev Eval, val Value) Error {
 	return fmt.Errorf("ReadonlyField")
 }
 
@@ -105,11 +105,11 @@ func NewProperty(get Func, set Func) (Field, Error) {
 	return &property{get, set}, nil
 }
 
-func (p *property) Get(ev Evaluator) (Value, Error) {
+func (p *property) Get(ev Eval) (Value, Error) {
 	return p.get.Invoke(ev, []Value{})
 }
 
-func (p *property) Invoke(ev Evaluator, params []Value) (Value, Error) {
+func (p *property) Invoke(ev Eval, params []Value) (Value, Error) {
 
 	val, err := p.get.Invoke(ev, []Value{})
 	if err != nil {
@@ -127,7 +127,7 @@ func (p *property) IsReadonly() bool {
 	return false
 }
 
-func (p *property) Set(ev Evaluator, val Value) Error {
+func (p *property) Set(ev Eval, val Value) Error {
 	_, err := p.set.Invoke(ev, []Value{val})
 	return err
 }
@@ -149,11 +149,11 @@ func NewReadonlyProperty(get Func) (Field, Error) {
 	return &readonlyProperty{get}, nil
 }
 
-func (p *readonlyProperty) Get(ev Evaluator) (Value, Error) {
+func (p *readonlyProperty) Get(ev Eval) (Value, Error) {
 	return p.get.Invoke(ev, []Value{})
 }
 
-func (p *readonlyProperty) Invoke(ev Evaluator, params []Value) (Value, Error) {
+func (p *readonlyProperty) Invoke(ev Eval, params []Value) (Value, Error) {
 
 	val, err := p.get.Invoke(ev, []Value{})
 	if err != nil {
@@ -171,6 +171,6 @@ func (p *readonlyProperty) IsReadonly() bool {
 	return true
 }
 
-func (p *readonlyProperty) Set(ev Evaluator, val Value) Error {
+func (p *readonlyProperty) Set(ev Eval, val Value) Error {
 	return fmt.Errorf("ReadonlyField")
 }

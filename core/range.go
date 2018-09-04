@@ -41,23 +41,23 @@ func (r *rng) compositeMarker() {}
 
 func (r *rng) Type() Type { return RangeType }
 
-func (r *rng) Freeze(ev Evaluator) (Value, Error) {
+func (r *rng) Freeze(ev Eval) (Value, Error) {
 	return r, nil
 }
 
-func (r *rng) Frozen(ev Evaluator) (Bool, Error) {
+func (r *rng) Frozen(ev Eval) (Bool, Error) {
 	return True, nil
 }
 
-func (r *rng) ToStr(ev Evaluator) (Str, Error) {
+func (r *rng) ToStr(ev Eval) (Str, Error) {
 	return NewStr(fmt.Sprintf("range<%d, %d, %d>", r.from, r.to, r.step)), nil
 }
 
-func (r *rng) HashCode(ev Evaluator) (Int, Error) {
+func (r *rng) HashCode(ev Eval) (Int, Error) {
 	return nil, HashCodeMismatchError(RangeType)
 }
 
-func (r *rng) Eq(ev Evaluator, v Value) (Bool, Error) {
+func (r *rng) Eq(ev Eval, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *rng:
 		return NewBool(reflect.DeepEqual(r, t)), nil
@@ -66,7 +66,7 @@ func (r *rng) Eq(ev Evaluator, v Value) (Bool, Error) {
 	}
 }
 
-func (r *rng) Get(ev Evaluator, index Value) (Value, Error) {
+func (r *rng) Get(ev Eval, index Value) (Value, Error) {
 	idx, err := boundedIndex(index, int(r.count))
 	if err != nil {
 		return nil, err
@@ -74,11 +74,11 @@ func (r *rng) Get(ev Evaluator, index Value) (Value, Error) {
 	return NewInt(r.from + int64(idx)*r.step), nil
 }
 
-func (r *rng) Set(ev Evaluator, index Value, val Value) Error {
+func (r *rng) Set(ev Eval, index Value, val Value) Error {
 	return ImmutableValueError()
 }
 
-func (r *rng) Len(ev Evaluator) (Int, Error) {
+func (r *rng) Len(ev Eval) (Int, Error) {
 	return NewInt(r.count), nil
 }
 
@@ -96,7 +96,7 @@ type rangeIterator struct {
 	n int64
 }
 
-func (r *rng) NewIterator(ev Evaluator) (Iterator, Error) {
+func (r *rng) NewIterator(ev Eval) (Iterator, Error) {
 
 	itr := &rangeIterator{iteratorStruct(), r, -1}
 
@@ -107,12 +107,12 @@ func (r *rng) NewIterator(ev Evaluator) (Iterator, Error) {
 	return itr, nil
 }
 
-func (i *rangeIterator) IterNext(ev Evaluator) (Bool, Error) {
+func (i *rangeIterator) IterNext(ev Eval) (Bool, Error) {
 	i.n++
 	return NewBool(i.n < i.r.count), nil
 }
 
-func (i *rangeIterator) IterGet(ev Evaluator) (Value, Error) {
+func (i *rangeIterator) IterGet(ev Eval) (Value, Error) {
 
 	if (i.n >= 0) && (i.n < i.r.count) {
 		return NewInt(i.r.from + i.n*i.r.step), nil
@@ -126,25 +126,25 @@ func (i *rangeIterator) IterGet(ev Evaluator) (Value, Error) {
 var rangeMethods = map[string]Method{
 	"from": NewFixedMethod(
 		[]Type{}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			r := self.(Range)
 			return r.From(), nil
 		}),
 	"to": NewFixedMethod(
 		[]Type{}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			r := self.(Range)
 			return r.To(), nil
 		}),
 	"step": NewFixedMethod(
 		[]Type{}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			r := self.(Range)
 			return r.Step(), nil
 		}),
 	"count": NewFixedMethod(
 		[]Type{}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			r := self.(Range)
 			return r.Count(), nil
 		}),
@@ -163,14 +163,14 @@ func (r *rng) HasField(name string) (bool, Error) {
 	return ok, nil
 }
 
-func (r *rng) GetField(name string, ev Evaluator) (Value, Error) {
+func (r *rng) GetField(name string, ev Eval) (Value, Error) {
 	if method, ok := rangeMethods[name]; ok {
 		return method.ToFunc(r, name), nil
 	}
 	return nil, NoSuchFieldError(name)
 }
 
-func (r *rng) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
+func (r *rng) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
 
 	if method, ok := rangeMethods[name]; ok {
 		return method.Invoke(r, ev, params)

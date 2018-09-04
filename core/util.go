@@ -98,7 +98,7 @@ func strcpy(s string) string {
 	return string(c)
 }
 
-func valuesEq(ev Evaluator, as []Value, bs []Value) (Bool, Error) {
+func valuesEq(ev Eval, as []Value, bs []Value) (Bool, Error) {
 
 	if len(as) != len(bs) {
 		return False, nil
@@ -130,19 +130,19 @@ func iteratorStruct() Struct {
 	return stc
 }
 
-func iteratorFields(ev Evaluator, itr Iterator) (next Field, get Field) {
+func iteratorFields(ev Eval, itr Iterator) (next Field, get Field) {
 
 	next = NewReadonlyField(
 		NewFixedNativeFunc(
 			[]Type{}, false,
-			func(ev Evaluator, values []Value) (Value, Error) {
+			func(ev Eval, values []Value) (Value, Error) {
 				return itr.IterNext(ev)
 			}))
 
 	get = NewReadonlyField(
 		NewFixedNativeFunc(
 			[]Type{}, false,
-			func(ev Evaluator, values []Value) (Value, Error) {
+			func(ev Eval, values []Value) (Value, Error) {
 				return itr.IterGet(ev)
 			}))
 

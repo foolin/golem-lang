@@ -13,7 +13,7 @@ func TestFixedNativeFunc(t *testing.T) {
 	fn := NewFixedNativeFunc(
 		[]Type{},
 		false,
-		func(ev Evaluator, params []Value) (Value, Error) {
+		func(ev Eval, params []Value) (Value, Error) {
 			return Zero, nil
 		})
 
@@ -30,7 +30,7 @@ func TestFixedNativeFunc(t *testing.T) {
 	fn = NewFixedNativeFunc(
 		[]Type{IntType},
 		false,
-		func(ev Evaluator, params []Value) (Value, Error) {
+		func(ev Eval, params []Value) (Value, Error) {
 			n := params[0].(Int)
 			return n.Add(One), nil
 		})
@@ -54,7 +54,7 @@ func TestFixedNativeFunc(t *testing.T) {
 	fn = NewFixedNativeFunc(
 		[]Type{IntType},
 		true,
-		func(ev Evaluator, params []Value) (Value, Error) {
+		func(ev Eval, params []Value) (Value, Error) {
 			if params[0] == Null {
 				return True, nil
 			}
@@ -81,7 +81,7 @@ func TestVariadicNativeFunc(t *testing.T) {
 		[]Type{},
 		AnyType,
 		true,
-		func(ev Evaluator, params []Value) (Value, Error) {
+		func(ev Eval, params []Value) (Value, Error) {
 			return NewInt(int64(len(params))), nil
 		})
 
@@ -99,7 +99,7 @@ func TestVariadicNativeFunc(t *testing.T) {
 		[]Type{IntType},
 		BoolType,
 		false,
-		func(ev Evaluator, params []Value) (Value, Error) {
+		func(ev Eval, params []Value) (Value, Error) {
 			return NewInt(int64(len(params))), nil
 		})
 	ok(t, fn.Arity(), nil, Arity{VariadicArity, 1, 0})
@@ -129,7 +129,7 @@ func TestMultipleNativeFunc(t *testing.T) {
 		[]Type{IntType},
 		[]Type{StrType, BoolType},
 		false,
-		func(ev Evaluator, params []Value) (Value, Error) {
+		func(ev Eval, params []Value) (Value, Error) {
 
 			if len(params) == 1 {
 				params = append(params, NewStr("a"))

@@ -32,7 +32,7 @@ func TestField(t *testing.T) {
 
 	fn := NewFixedNativeFunc(
 		[]Type{IntType}, false,
-		func(ev Evaluator, values []Value) (Value, Error) {
+		func(ev Eval, values []Value) (Value, Error) {
 			n := values[0].(Int)
 			return n.Add(One), nil
 		})
@@ -73,7 +73,7 @@ func TestReadonlyField(t *testing.T) {
 
 	fn := NewFixedNativeFunc(
 		[]Type{IntType}, false,
-		func(ev Evaluator, values []Value) (Value, Error) {
+		func(ev Eval, values []Value) (Value, Error) {
 			n := values[0].(Int)
 			return n.Add(One), nil
 		})
@@ -96,20 +96,20 @@ func TestPropertyField(t *testing.T) {
 
 	get := NewFixedNativeFunc(
 		[]Type{}, false,
-		func(ev Evaluator, values []Value) (Value, Error) {
+		func(ev Eval, values []Value) (Value, Error) {
 			return propVal, nil
 		})
 
 	set := NewFixedNativeFunc(
 		[]Type{IntType}, false,
-		func(ev Evaluator, values []Value) (Value, Error) {
+		func(ev Eval, values []Value) (Value, Error) {
 			propVal = values[0]
 			return Null, nil
 		})
 
 	bogus := NewFixedNativeFunc(
 		[]Type{AnyType, AnyType}, false,
-		func(ev Evaluator, values []Value) (Value, Error) {
+		func(ev Eval, values []Value) (Value, Error) {
 			panic("unreachable")
 		})
 
@@ -142,7 +142,7 @@ func TestPropertyField(t *testing.T) {
 
 	propVal = NewFixedNativeFunc(
 		[]Type{IntType}, false,
-		func(ev Evaluator, values []Value) (Value, Error) {
+		func(ev Eval, values []Value) (Value, Error) {
 			n := values[0].(Int)
 			return n.Add(One), nil
 		})
@@ -170,13 +170,13 @@ func TestReadonlyPropertyField(t *testing.T) {
 
 	get := NewFixedNativeFunc(
 		[]Type{}, false,
-		func(ev Evaluator, values []Value) (Value, Error) {
+		func(ev Eval, values []Value) (Value, Error) {
 			return propVal, nil
 		})
 
 	bogus := NewFixedNativeFunc(
 		[]Type{AnyType, AnyType}, false,
-		func(ev Evaluator, values []Value) (Value, Error) {
+		func(ev Eval, values []Value) (Value, Error) {
 			panic("unreachable")
 		})
 
@@ -200,7 +200,7 @@ func TestReadonlyPropertyField(t *testing.T) {
 
 	propVal = NewFixedNativeFunc(
 		[]Type{IntType}, false,
-		func(ev Evaluator, values []Value) (Value, Error) {
+		func(ev Eval, values []Value) (Value, Error) {
 			n := values[0].(Int)
 			return n.Add(One), nil
 		})

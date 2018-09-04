@@ -13,7 +13,7 @@ type (
 	NativeFunc interface {
 		Func
 	}
-	Invoke func(Evaluator, []Value) (Value, Error)
+	Invoke func(Eval, []Value) (Value, Error)
 )
 
 //--------------------------------------------------------------
@@ -29,7 +29,7 @@ func (f *nativeFunc) funcMarker() {}
 
 func (f *nativeFunc) Type() Type { return FuncType }
 
-func (f *nativeFunc) Eq(ev Evaluator, val Value) (Bool, Error) {
+func (f *nativeFunc) Eq(ev Eval, val Value) (Bool, Error) {
 	switch t := val.(type) {
 	case *nativeFunc:
 		// equality is based on identity
@@ -39,19 +39,19 @@ func (f *nativeFunc) Eq(ev Evaluator, val Value) (Bool, Error) {
 	}
 }
 
-func (f *nativeFunc) Freeze(ev Evaluator) (Value, Error) {
+func (f *nativeFunc) Freeze(ev Eval) (Value, Error) {
 	return f, nil
 }
 
-func (f *nativeFunc) Frozen(ev Evaluator) (Bool, Error) {
+func (f *nativeFunc) Frozen(ev Eval) (Bool, Error) {
 	return True, nil
 }
 
-func (f *nativeFunc) HashCode(ev Evaluator) (Int, Error) {
+func (f *nativeFunc) HashCode(ev Eval) (Int, Error) {
 	return nil, HashCodeMismatchError(FuncType)
 }
 
-func (f *nativeFunc) ToStr(ev Evaluator) (Str, Error) {
+func (f *nativeFunc) ToStr(ev Eval) (Str, Error) {
 	return NewStr(fmt.Sprintf("nativeFunc<%p>", f)), nil
 }
 
@@ -68,11 +68,11 @@ func (f *nativeFunc) HasField(name string) (bool, Error) {
 	return false, nil
 }
 
-func (f *nativeFunc) GetField(name string, ev Evaluator) (Value, Error) {
+func (f *nativeFunc) GetField(name string, ev Eval) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
 
-func (f *nativeFunc) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
+func (f *nativeFunc) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
 
@@ -104,11 +104,11 @@ func NewFixedNativeFunc(
 	}
 }
 
-func (f *nativeFixedFunc) Freeze(ev Evaluator) (Value, Error) {
+func (f *nativeFixedFunc) Freeze(ev Eval) (Value, Error) {
 	return f, nil
 }
 
-func (f *nativeFixedFunc) Eq(ev Evaluator, val Value) (Bool, Error) {
+func (f *nativeFixedFunc) Eq(ev Eval, val Value) (Bool, Error) {
 	switch t := val.(type) {
 	case *nativeFixedFunc:
 		// equality is based on identity
@@ -118,7 +118,7 @@ func (f *nativeFixedFunc) Eq(ev Evaluator, val Value) (Bool, Error) {
 	}
 }
 
-func (f *nativeFixedFunc) Invoke(ev Evaluator, params []Value) (Value, Error) {
+func (f *nativeFixedFunc) Invoke(ev Eval, params []Value) (Value, Error) {
 
 	err := vetFixedParams(params, f.requiredTypes, f.allowNull)
 	if err != nil {
@@ -158,11 +158,11 @@ func NewVariadicNativeFunc(
 	}
 }
 
-func (f *nativeVariadicFunc) Freeze(ev Evaluator) (Value, Error) {
+func (f *nativeVariadicFunc) Freeze(ev Eval) (Value, Error) {
 	return f, nil
 }
 
-func (f *nativeVariadicFunc) Eq(ev Evaluator, val Value) (Bool, Error) {
+func (f *nativeVariadicFunc) Eq(ev Eval, val Value) (Bool, Error) {
 	switch t := val.(type) {
 	case *nativeVariadicFunc:
 		// equality is based on identity
@@ -172,7 +172,7 @@ func (f *nativeVariadicFunc) Eq(ev Evaluator, val Value) (Bool, Error) {
 	}
 }
 
-func (f *nativeVariadicFunc) Invoke(ev Evaluator, params []Value) (Value, Error) {
+func (f *nativeVariadicFunc) Invoke(ev Eval, params []Value) (Value, Error) {
 
 	err := vetVariadicParams(params, f.requiredTypes, f.variadicType, f.allowNull)
 	if err != nil {
@@ -212,11 +212,11 @@ func NewMultipleNativeFunc(
 	}
 }
 
-func (f *nativeMultipleFunc) Freeze(ev Evaluator) (Value, Error) {
+func (f *nativeMultipleFunc) Freeze(ev Eval) (Value, Error) {
 	return f, nil
 }
 
-func (f *nativeMultipleFunc) Eq(ev Evaluator, val Value) (Bool, Error) {
+func (f *nativeMultipleFunc) Eq(ev Eval, val Value) (Bool, Error) {
 	switch t := val.(type) {
 	case *nativeMultipleFunc:
 		// equality is based on identity
@@ -226,7 +226,7 @@ func (f *nativeMultipleFunc) Eq(ev Evaluator, val Value) (Bool, Error) {
 	}
 }
 
-func (f *nativeMultipleFunc) Invoke(ev Evaluator, params []Value) (Value, Error) {
+func (f *nativeMultipleFunc) Invoke(ev Eval, params []Value) (Value, Error) {
 
 	err := vetMultipleParams(params, f.requiredTypes, f.optionalTypes, f.allowNull)
 	if err != nil {

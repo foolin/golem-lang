@@ -86,16 +86,16 @@ func (st *_struct) compositeMarker() {}
 
 func (st *_struct) Type() Type { return StructType }
 
-func (st *_struct) Freeze(ev Evaluator) (Value, Error) {
+func (st *_struct) Freeze(ev Eval) (Value, Error) {
 	st.frozen = true
 	return st, nil
 }
 
-func (st *_struct) Frozen(ev Evaluator) (Bool, Error) {
+func (st *_struct) Frozen(ev Eval) (Bool, Error) {
 	return NewBool(st.frozen), nil
 }
 
-func (st *_struct) ToStr(ev Evaluator) (Str, Error) {
+func (st *_struct) ToStr(ev Eval) (Str, Error) {
 
 	var buf bytes.Buffer
 	buf.WriteString("struct {")
@@ -127,11 +127,11 @@ func (st *_struct) ToStr(ev Evaluator) (Str, Error) {
 	return NewStr(buf.String()), nil
 }
 
-func (st *_struct) HashCode(ev Evaluator) (Int, Error) {
+func (st *_struct) HashCode(ev Eval) (Int, Error) {
 	return nil, HashCodeMismatchError(StructType)
 }
 
-func (this *_struct) Eq(ev Evaluator, val Value) (Bool, Error) {
+func (this *_struct) Eq(ev Eval, val Value) (Bool, Error) {
 
 	// same type
 	that, ok := val.(Struct)
@@ -197,15 +197,15 @@ func (st *_struct) HasField(name string) (bool, Error) {
 	return st.fieldMap.has(name), nil
 }
 
-func (st *_struct) GetField(name string, ev Evaluator) (Value, Error) {
+func (st *_struct) GetField(name string, ev Eval) (Value, Error) {
 	return st.fieldMap.get(name, ev)
 }
 
-func (st *_struct) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
+func (st *_struct) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
 	return st.fieldMap.invoke(name, ev, params)
 }
 
-func (st *_struct) SetField(name string, ev Evaluator, val Value) Error {
+func (st *_struct) SetField(name string, ev Eval, val Value) Error {
 
 	if st.frozen {
 		return ImmutableValueError()

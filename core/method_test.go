@@ -44,7 +44,7 @@ func TestFixedMethod(t *testing.T) {
 	m := NewFixedMethod(
 		[]Type{},
 		false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			n := self.(int)
 			return NewInt(int64(n * n)), nil
 		})
@@ -68,7 +68,7 @@ func TestFixedMethod(t *testing.T) {
 	m = NewFixedMethod(
 		[]Type{IntType},
 		false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			n := self.(Int)
 			p := params[0].(Int)
 			return n.Add(p), nil
@@ -100,7 +100,7 @@ func TestVariadicMethod(t *testing.T) {
 		[]Type{},
 		IntType,
 		false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			n := self.(int)
 			for _, p := range params {
 				n += int(p.(Int).IntVal())
@@ -126,7 +126,7 @@ func TestMultipleMethod(t *testing.T) {
 		[]Type{IntType},
 		[]Type{IntType},
 		false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			n := self.(int)
 			n += int(params[0].(Int).IntVal())
 			if len(params) == 2 {
@@ -180,7 +180,7 @@ func TestBenchmarkFuncInvoke(t *testing.T) {
 	fn := NewFixedNativeFunc(
 		[]Type{IntType, IntType},
 		false,
-		func(ev Evaluator, params []Value) (Value, Error) {
+		func(ev Eval, params []Value) (Value, Error) {
 			a := params[0].(Int)
 			b := params[1].(Int)
 			return a.Add(b), nil
@@ -200,7 +200,7 @@ func TestBenchmarkMethodInvoke(t *testing.T) {
 	m := NewFixedMethod(
 		[]Type{IntType},
 		false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			n := self.(Int)
 			p := params[0].(Int)
 			return n.Add(p), nil
@@ -220,7 +220,7 @@ func TestBenchmarkVirtualFuncInvoke(t *testing.T) {
 	m := NewFixedMethod(
 		[]Type{IntType},
 		false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			n := self.(Int)
 			p := params[0].(Int)
 			return n.Add(p), nil

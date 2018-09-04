@@ -89,7 +89,7 @@ var StandardBuiltins = []*BuiltinEntry{
 var BuiltinStr = NewFixedNativeFunc(
 	[]Type{AnyType},
 	false,
-	func(ev Evaluator, values []Value) (Value, Error) {
+	func(ev Eval, values []Value) (Value, Error) {
 		return values[0].ToStr(ev)
 	})
 
@@ -97,7 +97,7 @@ var BuiltinStr = NewFixedNativeFunc(
 var BuiltinLen = NewFixedNativeFunc(
 	[]Type{AnyType},
 	false,
-	func(ev Evaluator, values []Value) (Value, Error) {
+	func(ev Eval, values []Value) (Value, Error) {
 
 		if values[0].Type() == NullType {
 			return nil, NullValueError()
@@ -113,7 +113,7 @@ var BuiltinLen = NewFixedNativeFunc(
 var BuiltinIter = NewFixedNativeFunc(
 	[]Type{AnyType},
 	false,
-	func(ev Evaluator, values []Value) (Value, Error) {
+	func(ev Eval, values []Value) (Value, Error) {
 
 		if values[0].Type() == NullType {
 			return nil, NullValueError()
@@ -130,7 +130,7 @@ var BuiltinRange = NewMultipleNativeFunc(
 	[]Type{IntType, IntType},
 	[]Type{IntType},
 	false,
-	func(ev Evaluator, values []Value) (Value, Error) {
+	func(ev Eval, values []Value) (Value, Error) {
 		from := values[0].(Int)
 		to := values[1].(Int)
 		step := One
@@ -144,7 +144,7 @@ var BuiltinRange = NewMultipleNativeFunc(
 // BuiltinAssert asserts that a single Bool is True
 var BuiltinAssert = NewFixedNativeFunc(
 	[]Type{BoolType}, false,
-	func(ev Evaluator, values []Value) (Value, Error) {
+	func(ev Eval, values []Value) (Value, Error) {
 		b := values[0].(Bool)
 		if b.BoolVal() {
 			return True, nil
@@ -157,7 +157,7 @@ var BuiltinMerge = NewVariadicNativeFunc(
 	[]Type{StructType, StructType},
 	StructType,
 	false,
-	func(ev Evaluator, values []Value) (Value, Error) {
+	func(ev Eval, values []Value) (Value, Error) {
 		structs := make([]Struct, len(values))
 		for i, v := range values {
 			structs[i] = v.(Struct)
@@ -171,7 +171,7 @@ var BuiltinChan = NewMultipleNativeFunc(
 	[]Type{},
 	[]Type{IntType},
 	false,
-	func(ev Evaluator, values []Value) (Value, Error) {
+	func(ev Eval, values []Value) (Value, Error) {
 
 		if len(values) == 0 {
 			return NewChan(), nil
@@ -187,7 +187,7 @@ var BuiltinType = NewFixedNativeFunc(
 	// Subtlety: Null has a type, but for the purposes of type()
 	// we are going to pretend that it doesn't
 	true,
-	func(ev Evaluator, values []Value) (Value, Error) {
+	func(ev Eval, values []Value) (Value, Error) {
 
 		if values[0].Type() == NullType {
 			return nil, NullValueError()
@@ -200,7 +200,7 @@ var BuiltinType = NewFixedNativeFunc(
 var BuiltinFreeze = NewFixedNativeFunc(
 	[]Type{AnyType},
 	false,
-	func(ev Evaluator, values []Value) (Value, Error) {
+	func(ev Eval, values []Value) (Value, Error) {
 		return values[0].Freeze(ev)
 	})
 
@@ -208,7 +208,7 @@ var BuiltinFreeze = NewFixedNativeFunc(
 var BuiltinFrozen = NewFixedNativeFunc(
 	[]Type{AnyType},
 	false,
-	func(ev Evaluator, values []Value) (Value, Error) {
+	func(ev Eval, values []Value) (Value, Error) {
 		return values[0].Frozen(ev)
 	})
 
@@ -216,7 +216,7 @@ var BuiltinFrozen = NewFixedNativeFunc(
 var BuiltinFields = NewFixedNativeFunc(
 	[]Type{AnyType},
 	false,
-	func(ev Evaluator, values []Value) (Value, Error) {
+	func(ev Eval, values []Value) (Value, Error) {
 
 		fields, err := values[0].FieldNames()
 		if err != nil {
@@ -234,7 +234,7 @@ var BuiltinFields = NewFixedNativeFunc(
 var BuiltinGetField = NewFixedNativeFunc(
 	[]Type{AnyType, StrType},
 	false,
-	func(ev Evaluator, values []Value) (Value, Error) {
+	func(ev Eval, values []Value) (Value, Error) {
 		field := values[1].(Str)
 
 		return values[0].GetField(field.String(), ev)
@@ -244,7 +244,7 @@ var BuiltinGetField = NewFixedNativeFunc(
 var BuiltinHasField = NewFixedNativeFunc(
 	[]Type{AnyType, StrType},
 	false,
-	func(ev Evaluator, values []Value) (Value, Error) {
+	func(ev Eval, values []Value) (Value, Error) {
 		field := values[1].(Str)
 
 		b, err := values[0].HasField(field.String())
@@ -258,7 +258,7 @@ var BuiltinHasField = NewFixedNativeFunc(
 var BuiltinSetField = NewFixedNativeFunc(
 	[]Type{StructType, StrType, AnyType},
 	true,
-	func(ev Evaluator, values []Value) (Value, Error) {
+	func(ev Eval, values []Value) (Value, Error) {
 
 		if values[0].Type() == NullType {
 			return nil, NullValueError()
@@ -281,7 +281,7 @@ var BuiltinSetField = NewFixedNativeFunc(
 //var BuiltinArity = NewFixedNativeFunc(
 //	[]Type{FuncType},
 //	false,
-//	func(ev Evaluator, values []Value) (Value, Error) {
+//	func(ev Eval, values []Value) (Value, Error) {
 //		//		st, err := NewStruct([]Field{
 //		//			NewField("min", true, NewInt(int64(f.MinArity()))),
 //		//			NewField("max", true, NewInt(int64(f.MaxArity())))}, true)
@@ -303,7 +303,7 @@ var UnsandboxedBuiltins = []*BuiltinEntry{
 // BuiltinPrint prints to stdout.
 var BuiltinPrint = NewVariadicNativeFunc(
 	[]Type{}, AnyType, true,
-	func(ev Evaluator, values []Value) (Value, Error) {
+	func(ev Eval, values []Value) (Value, Error) {
 		for _, v := range values {
 			s, err := v.ToStr(ev)
 			if err != nil {
@@ -318,7 +318,7 @@ var BuiltinPrint = NewVariadicNativeFunc(
 // BuiltinPrintln prints to stdout.
 var BuiltinPrintln = NewVariadicNativeFunc(
 	[]Type{}, AnyType, true,
-	func(ev Evaluator, values []Value) (Value, Error) {
+	func(ev Eval, values []Value) (Value, Error) {
 		for _, v := range values {
 			s, err := v.ToStr(ev)
 			if err != nil {

@@ -26,15 +26,15 @@ func (ch *channel) chanMarker() {}
 
 func (ch *channel) Type() Type { return ChanType }
 
-func (ch *channel) Freeze(ev Evaluator) (Value, Error) {
+func (ch *channel) Freeze(ev Eval) (Value, Error) {
 	return ch, nil
 }
 
-func (ch *channel) Frozen(ev Evaluator) (Bool, Error) {
+func (ch *channel) Frozen(ev Eval) (Bool, Error) {
 	return True, nil
 }
 
-func (ch *channel) Eq(ev Evaluator, v Value) (Bool, Error) {
+func (ch *channel) Eq(ev Eval, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *channel:
 		// equality is based on identity
@@ -44,11 +44,11 @@ func (ch *channel) Eq(ev Evaluator, v Value) (Bool, Error) {
 	}
 }
 
-func (ch *channel) HashCode(ev Evaluator) (Int, Error) {
+func (ch *channel) HashCode(ev Eval) (Int, Error) {
 	return nil, HashCodeMismatchError(ChanType)
 }
 
-func (ch *channel) ToStr(ev Evaluator) (Str, Error) {
+func (ch *channel) ToStr(ev Eval) (Str, Error) {
 	return NewStr(fmt.Sprintf("chan<%p>", ch)), nil
 }
 
@@ -67,7 +67,7 @@ var chanMethods = map[string]Method{
 
 	"send": NewFixedMethod(
 		[]Type{AnyType}, true,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			ch := self.(Chan)
 
 			ch.Send(params[0])
@@ -76,7 +76,7 @@ var chanMethods = map[string]Method{
 
 	"recv": NewFixedMethod(
 		[]Type{}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			ch := self.(Chan)
 
 			val := ch.Recv()
@@ -97,14 +97,14 @@ func (ch *channel) HasField(name string) (bool, Error) {
 	return ok, nil
 }
 
-func (ch *channel) GetField(name string, ev Evaluator) (Value, Error) {
+func (ch *channel) GetField(name string, ev Eval) (Value, Error) {
 	if method, ok := chanMethods[name]; ok {
 		return method.ToFunc(ch, name), nil
 	}
 	return nil, NoSuchFieldError(name)
 }
 
-func (ch *channel) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
+func (ch *channel) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
 
 	if method, ok := chanMethods[name]; ok {
 		return method.Invoke(ch, ev, params)

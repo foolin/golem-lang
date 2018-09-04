@@ -42,23 +42,23 @@ func (i _int) basicMarker() {}
 
 func (i _int) Type() Type { return IntType }
 
-func (i _int) Freeze(ev Evaluator) (Value, Error) {
+func (i _int) Freeze(ev Eval) (Value, Error) {
 	return i, nil
 }
 
-func (i _int) Frozen(ev Evaluator) (Bool, Error) {
+func (i _int) Frozen(ev Eval) (Bool, Error) {
 	return True, nil
 }
 
-func (i _int) ToStr(ev Evaluator) (Str, Error) {
+func (i _int) ToStr(ev Eval) (Str, Error) {
 	return NewStr(fmt.Sprintf("%d", i)), nil
 }
 
-func (i _int) HashCode(ev Evaluator) (Int, Error) {
+func (i _int) HashCode(ev Eval) (Int, Error) {
 	return i, nil
 }
 
-func (i _int) Eq(ev Evaluator, val Value) (Bool, Error) {
+func (i _int) Eq(ev Eval, val Value) (Bool, Error) {
 	switch t := val.(type) {
 
 	case _int:
@@ -74,7 +74,7 @@ func (i _int) Eq(ev Evaluator, val Value) (Bool, Error) {
 	}
 }
 
-func (i _int) Cmp(ev Evaluator, c Comparable) (Int, Error) {
+func (i _int) Cmp(ev Eval, c Comparable) (Int, Error) {
 	switch t := c.(type) {
 
 	case _int:
@@ -257,10 +257,10 @@ func (i _int) HasField(name string) (bool, Error) {
 	return false, nil
 }
 
-func (i _int) GetField(name string, ev Evaluator) (Value, Error) {
+func (i _int) GetField(name string, ev Eval) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
 
-func (i _int) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
+func (i _int) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }

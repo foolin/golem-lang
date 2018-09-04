@@ -33,7 +33,7 @@ func TestStruct(t *testing.T) {
 	method := NewFixedMethod(
 		[]Type{},
 		false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			return Null, nil
 		})
 

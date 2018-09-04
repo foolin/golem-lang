@@ -14,11 +14,11 @@ type (
 	// of a given 'self' parameter, without having to actually create
 	// a NativeFunc to do the invocation.
 	Method interface {
-		Invoke(interface{}, Evaluator, []Value) (Value, Error)
+		Invoke(interface{}, Eval, []Value) (Value, Error)
 		ToFunc(interface{}, string) NativeFunc
 	}
 
-	MethodInvoke func(interface{}, Evaluator, []Value) (Value, Error)
+	MethodInvoke func(interface{}, Eval, []Value) (Value, Error)
 
 	method struct {
 		arity  Arity
@@ -54,7 +54,7 @@ func NewFixedMethod(
 	}
 }
 
-func (m *fixedMethod) Invoke(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+func (m *fixedMethod) Invoke(self interface{}, ev Eval, params []Value) (Value, Error) {
 
 	err := vetFixedParams(params, m.requiredTypes, m.allowNull)
 	if err != nil {
@@ -68,7 +68,7 @@ func (m *fixedMethod) ToFunc(self interface{}, methodName string) NativeFunc {
 	nf := NewFixedNativeFunc(
 		m.requiredTypes,
 		m.allowNull,
-		func(ev Evaluator, params []Value) (Value, Error) {
+		func(ev Eval, params []Value) (Value, Error) {
 			return m.invoke(self, ev, params)
 		})
 
@@ -108,7 +108,7 @@ func NewVariadicMethod(
 	}
 }
 
-func (m *variadicMethod) Invoke(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+func (m *variadicMethod) Invoke(self interface{}, ev Eval, params []Value) (Value, Error) {
 
 	err := vetVariadicParams(params, m.requiredTypes, m.variadicType, m.allowNull)
 	if err != nil {
@@ -123,7 +123,7 @@ func (m *variadicMethod) ToFunc(self interface{}, methodName string) NativeFunc 
 		m.requiredTypes,
 		m.variadicType,
 		m.allowNull,
-		func(ev Evaluator, params []Value) (Value, Error) {
+		func(ev Eval, params []Value) (Value, Error) {
 			return m.invoke(self, ev, params)
 		})
 
@@ -163,7 +163,7 @@ func NewMultipleMethod(
 	}
 }
 
-func (m *multipleMethod) Invoke(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+func (m *multipleMethod) Invoke(self interface{}, ev Eval, params []Value) (Value, Error) {
 
 	err := vetMultipleParams(params, m.requiredTypes, m.optionalTypes, m.allowNull)
 	if err != nil {
@@ -178,7 +178,7 @@ func (m *multipleMethod) ToFunc(self interface{}, methodName string) NativeFunc 
 		m.requiredTypes,
 		m.optionalTypes,
 		m.allowNull,
-		func(ev Evaluator, params []Value) (Value, Error) {
+		func(ev Eval, params []Value) (Value, Error) {
 			return m.invoke(self, ev, params)
 		})
 
@@ -198,7 +198,7 @@ func (m *multipleMethod) ToFunc(self interface{}, methodName string) NativeFunc 
 
 // For self parameters that are Values, equality is based on Eq(),
 // otherwise its based on '=='
-func selfEq(ev Evaluator, this, that interface{}) (Bool, Error) {
+func selfEq(ev Eval, this, that interface{}) (Bool, Error) {
 
 	valThis, okThis := this.(Value)
 	valThat, okThat := that.(Value)
@@ -224,7 +224,7 @@ type fixedVirtualFunc struct {
 	*nativeFixedFunc
 }
 
-func (f *fixedVirtualFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
+func (f *fixedVirtualFunc) Eq(ev Eval, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *fixedVirtualFunc:
 		// Equality is based on whether the two funcs have the same self,
@@ -248,7 +248,7 @@ type variadicVirtualFunc struct {
 	*nativeVariadicFunc
 }
 
-func (f *variadicVirtualFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
+func (f *variadicVirtualFunc) Eq(ev Eval, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *variadicVirtualFunc:
 		// Equality is based on whether the two funcs have the same self,
@@ -272,7 +272,7 @@ type multipleVirtualFunc struct {
 	*nativeMultipleFunc
 }
 
-func (f *multipleVirtualFunc) Eq(ev Evaluator, v Value) (Bool, Error) {
+func (f *multipleVirtualFunc) Eq(ev Eval, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *multipleVirtualFunc:
 		// Equality is based on whether the two funcs have the same self,

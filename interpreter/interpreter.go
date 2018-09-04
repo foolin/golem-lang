@@ -70,7 +70,7 @@ func (itp *Interpreter) InitModules() ([]g.Value, g.ErrorStruct) {
 }
 
 //-------------------------------------------------------------------------
-// Evaluator
+// Eval
 
 // Eval evaluates a Func.
 func (itp *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {

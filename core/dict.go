@@ -15,7 +15,7 @@ type dict struct {
 }
 
 // NewDict creates a new Dict
-func NewDict(ev Evaluator, entries []*HEntry) (Dict, Error) {
+func NewDict(ev Eval, entries []*HEntry) (Dict, Error) {
 	h, err := NewHashMap(ev, entries)
 	if err != nil {
 		return nil, err
@@ -27,16 +27,16 @@ func (d *dict) compositeMarker() {}
 
 func (d *dict) Type() Type { return DictType }
 
-func (d *dict) Freeze(ev Evaluator) (Value, Error) {
+func (d *dict) Freeze(ev Eval) (Value, Error) {
 	d.frozen = true
 	return d, nil
 }
 
-func (d *dict) Frozen(ev Evaluator) (Bool, Error) {
+func (d *dict) Frozen(ev Eval) (Bool, Error) {
 	return NewBool(d.frozen), nil
 }
 
-func (d *dict) ToStr(ev Evaluator) (Str, Error) {
+func (d *dict) ToStr(ev Eval) (Str, Error) {
 
 	var buf bytes.Buffer
 	buf.WriteString("dict {")
@@ -69,11 +69,11 @@ func (d *dict) ToStr(ev Evaluator) (Str, Error) {
 	return NewStr(buf.String()), nil
 }
 
-func (d *dict) HashCode(ev Evaluator) (Int, Error) {
+func (d *dict) HashCode(ev Eval) (Int, Error) {
 	return nil, HashCodeMismatchError(DictType)
 }
 
-func (d *dict) Eq(ev Evaluator, v Value) (Bool, Error) {
+func (d *dict) Eq(ev Eval, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *dict:
 		return d.hashMap.Eq(ev, t.hashMap)
@@ -82,11 +82,11 @@ func (d *dict) Eq(ev Evaluator, v Value) (Bool, Error) {
 	}
 }
 
-func (d *dict) Get(ev Evaluator, key Value) (Value, Error) {
+func (d *dict) Get(ev Eval, key Value) (Value, Error) {
 	return d.hashMap.Get(ev, key)
 }
 
-func (d *dict) Set(ev Evaluator, key Value, val Value) Error {
+func (d *dict) Set(ev Eval, key Value, val Value) Error {
 	if d.frozen {
 		return ImmutableValueError()
 	}
@@ -94,7 +94,7 @@ func (d *dict) Set(ev Evaluator, key Value, val Value) Error {
 	return d.hashMap.Put(ev, key, val)
 }
 
-func (d *dict) Len(ev Evaluator) (Int, Error) {
+func (d *dict) Len(ev Eval) (Int, Error) {
 	return d.hashMap.Len(), nil
 }
 
@@ -104,7 +104,7 @@ func (d *dict) IsEmpty() Bool {
 	return NewBool(d.hashMap.Len().IntVal() == 0)
 }
 
-func (d *dict) Contains(ev Evaluator, key Value) (Bool, Error) {
+func (d *dict) Contains(ev Eval, key Value) (Bool, Error) {
 	return d.hashMap.Contains(ev, key)
 }
 
@@ -117,7 +117,7 @@ func (d *dict) Clear() (Dict, Error) {
 	return d, nil
 }
 
-func (d *dict) Remove(ev Evaluator, key Value) (Dict, Error) {
+func (d *dict) Remove(ev Eval, key Value) (Dict, Error) {
 	if d.frozen {
 		return nil, ImmutableValueError()
 	}
@@ -129,7 +129,7 @@ func (d *dict) Remove(ev Evaluator, key Value) (Dict, Error) {
 	return d, nil
 }
 
-func (d *dict) AddAll(ev Evaluator, val Value) (Dict, Error) {
+func (d *dict) AddAll(ev Eval, val Value) (Dict, Error) {
 	if d.frozen {
 		return nil, ImmutableValueError()
 	}
@@ -187,7 +187,7 @@ type dictIterator struct {
 	hasNext bool
 }
 
-func (d *dict) NewIterator(ev Evaluator) (Iterator, Error) {
+func (d *dict) NewIterator(ev Eval) (Iterator, Error) {
 
 	itr := &dictIterator{iteratorStruct(), d, d.hashMap.Iterator(), false}
 
@@ -198,12 +198,12 @@ func (d *dict) NewIterator(ev Evaluator) (Iterator, Error) {
 	return itr, nil
 }
 
-func (i *dictIterator) IterNext(ev Evaluator) (Bool, Error) {
+func (i *dictIterator) IterNext(ev Eval) (Bool, Error) {
 	i.hasNext = i.itr.Next()
 	return NewBool(i.hasNext), nil
 }
 
-func (i *dictIterator) IterGet(ev Evaluator) (Value, Error) {
+func (i *dictIterator) IterGet(ev Eval) (Value, Error) {
 
 	if i.hasNext {
 		entry := i.itr.Get()
@@ -218,35 +218,35 @@ var dictMethods = map[string]Method{
 
 	"isEmpty": NewFixedMethod(
 		[]Type{}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			d := self.(Dict)
 			return d.IsEmpty(), nil
 		}),
 
 	"contains": NewFixedMethod(
 		[]Type{AnyType}, true,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			d := self.(Dict)
 			return d.Contains(ev, params[0])
 		}),
 
 	"addAll": NewFixedMethod(
 		[]Type{AnyType}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			d := self.(Dict)
 			return d.AddAll(ev, params[0])
 		}),
 
 	"clear": NewFixedMethod(
 		[]Type{}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			d := self.(Dict)
 			return d.Clear()
 		}),
 
 	"remove": NewFixedMethod(
 		[]Type{AnyType}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			d := self.(Dict)
 			return d.Remove(ev, params[0])
 		}),
@@ -265,14 +265,14 @@ func (d *dict) HasField(name string) (bool, Error) {
 	return ok, nil
 }
 
-func (d *dict) GetField(name string, ev Evaluator) (Value, Error) {
+func (d *dict) GetField(name string, ev Eval) (Value, Error) {
 	if method, ok := dictMethods[name]; ok {
 		return method.ToFunc(d, name), nil
 	}
 	return nil, NoSuchFieldError(name)
 }
 
-func (d *dict) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
+func (d *dict) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
 
 	if method, ok := dictMethods[name]; ok {
 		return method.Invoke(d, ev, params)

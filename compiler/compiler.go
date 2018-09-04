@@ -109,7 +109,7 @@ func (c *compiler) makeModuleProperty(index int, isConst bool) g.Field {
 
 	get := g.NewFixedNativeFunc(
 		[]g.Type{}, false,
-		func(ev g.Evaluator, values []g.Value) (g.Value, g.Error) {
+		func(ev g.Eval, values []g.Value) (g.Value, g.Error) {
 			return c.mod.Refs[index].Val, nil
 		})
 
@@ -123,7 +123,7 @@ func (c *compiler) makeModuleProperty(index int, isConst bool) g.Field {
 
 	set := g.NewFixedNativeFunc(
 		[]g.Type{g.AnyType}, false,
-		func(ev g.Evaluator, values []g.Value) (g.Value, g.Error) {
+		func(ev g.Eval, values []g.Value) (g.Value, g.Error) {
 			c.mod.Refs[index].Val = values[0]
 			return g.Null, nil
 		})

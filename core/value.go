@@ -15,17 +15,17 @@ import (
 type Value interface {
 	Type() Type
 
-	Freeze(Evaluator) (Value, Error)
-	Frozen(Evaluator) (Bool, Error)
+	Freeze(Eval) (Value, Error)
+	Frozen(Eval) (Bool, Error)
 
-	Eq(Evaluator, Value) (Bool, Error)
-	HashCode(Evaluator) (Int, Error)
-	ToStr(Evaluator) (Str, Error)
+	Eq(Eval, Value) (Bool, Error)
+	HashCode(Eval) (Int, Error)
+	ToStr(Eval) (Str, Error)
 
 	FieldNames() ([]string, Error)
 	HasField(string) (bool, Error)
-	GetField(string, Evaluator) (Value, Error)
-	InvokeField(string, Evaluator, []Value) (Value, Error)
+	GetField(string, Eval) (Value, Error)
+	InvokeField(string, Eval, []Value) (Value, Error)
 }
 
 //---------------------------------------------------------------
@@ -35,30 +35,30 @@ type (
 
 	// Comparable is a value that can be compared to another value of the same type.
 	Comparable interface {
-		Cmp(Evaluator, Comparable) (Int, Error)
+		Cmp(Eval, Comparable) (Int, Error)
 	}
 
 	// Indexable is a value that supports the index operator
 	Indexable interface {
-		Get(Evaluator, Value) (Value, Error)
-		Set(Evaluator, Value, Value) Error
+		Get(Eval, Value) (Value, Error)
+		Set(Eval, Value, Value) Error
 	}
 
 	// Lenable is a value that has a length
 	Lenable interface {
-		Len(Evaluator) (Int, Error)
+		Len(Eval) (Int, Error)
 	}
 
 	// Sliceable is a value that can be sliced
 	Sliceable interface {
-		Slice(Evaluator, Value, Value) (Value, Error)
-		SliceFrom(Evaluator, Value) (Value, Error)
-		SliceTo(Evaluator, Value) (Value, Error)
+		Slice(Eval, Value, Value) (Value, Error)
+		SliceFrom(Eval, Value) (Value, Error)
+		SliceTo(Eval, Value) (Value, Error)
 	}
 
 	// Iterable is a value that can be iterated
 	Iterable interface {
-		NewIterator(Evaluator) (Iterator, Error)
+		NewIterator(Eval) (Iterator, Error)
 	}
 )
 
@@ -153,7 +153,7 @@ type (
 		Value
 
 		Arity() Arity
-		Invoke(Evaluator, []Value) (Value, Error)
+		Invoke(Eval, []Value) (Value, Error)
 	}
 )
 
@@ -179,18 +179,18 @@ type (
 		Values() []Value
 
 		IsEmpty() Bool
-		Contains(Evaluator, Value) (Bool, Error)
-		IndexOf(Evaluator, Value) (Int, Error)
-		Join(Evaluator, Str) (Str, Error)
+		Contains(Eval, Value) (Bool, Error)
+		IndexOf(Eval, Value) (Int, Error)
+		Join(Eval, Str) (Str, Error)
 
 		Clear() (List, Error)
-		Add(Evaluator, Value) (List, Error)
-		AddAll(Evaluator, Value) (List, Error)
+		Add(Eval, Value) (List, Error)
+		AddAll(Eval, Value) (List, Error)
 		Remove(Int) (List, Error)
 
-		Map(Evaluator, func(Value) (Value, Error)) (List, Error)
-		Reduce(Evaluator, Value, func(Value, Value) (Value, Error)) (Value, Error)
-		Filter(Evaluator, func(Value) (Value, Error)) (List, Error)
+		Map(Eval, func(Value) (Value, Error)) (List, Error)
+		Reduce(Eval, Value, func(Value, Value) (Value, Error)) (Value, Error)
+		Filter(Eval, func(Value) (Value, Error)) (List, Error)
 	}
 
 	// Range is an immutable, iterable representation of a  sequence of integers
@@ -221,11 +221,11 @@ type (
 		Indexable
 
 		IsEmpty() Bool
-		Contains(Evaluator, Value) (Bool, Error)
+		Contains(Eval, Value) (Bool, Error)
 
 		Clear() (Dict, Error)
-		AddAll(Evaluator, Value) (Dict, Error)
-		Remove(Evaluator, Value) (Dict, Error)
+		AddAll(Eval, Value) (Dict, Error)
+		Remove(Eval, Value) (Dict, Error)
 	}
 
 	// Set is a set of unique values
@@ -235,19 +235,19 @@ type (
 		Iterable
 
 		IsEmpty() Bool
-		Contains(Evaluator, Value) (Bool, Error)
+		Contains(Eval, Value) (Bool, Error)
 
 		Clear() (Set, Error)
-		Add(Evaluator, Value) (Set, Error)
-		AddAll(Evaluator, Value) (Set, Error)
-		Remove(Evaluator, Value) (Set, Error)
+		Add(Eval, Value) (Set, Error)
+		AddAll(Eval, Value) (Set, Error)
+		Remove(Eval, Value) (Set, Error)
 	}
 
 	// Struct is a collection of key-value pairs
 	Struct interface {
 		Composite
 
-		SetField(string, Evaluator, Value) Error
+		SetField(string, Eval, Value) Error
 
 		// Internal is for use only by the Golem Compiler
 		Internal(...interface{})
@@ -256,8 +256,8 @@ type (
 	// Iterator iterates over a sequence of values
 	Iterator interface {
 		Struct
-		IterNext(Evaluator) (Bool, Error)
-		IterGet(Evaluator) (Value, Error)
+		IterNext(Eval) (Bool, Error)
+		IterGet(Eval) (Value, Error)
 	}
 )
 

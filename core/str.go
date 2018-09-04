@@ -24,24 +24,24 @@ func (s str) basicMarker() {}
 
 func (s str) Type() Type { return StrType }
 
-func (s str) Freeze(ev Evaluator) (Value, Error) {
+func (s str) Freeze(ev Eval) (Value, Error) {
 	return s, nil
 }
 
-func (s str) Frozen(ev Evaluator) (Bool, Error) {
+func (s str) Frozen(ev Eval) (Bool, Error) {
 	return True, nil
 }
 
-func (s str) ToStr(ev Evaluator) (Str, Error) {
+func (s str) ToStr(ev Eval) (Str, Error) {
 	return s, nil
 }
 
-func (s str) HashCode(ev Evaluator) (Int, Error) {
+func (s str) HashCode(ev Eval) (Int, Error) {
 	h := strHash(string(s))
 	return NewInt(int64(h)), nil
 }
 
-func (s str) Eq(ev Evaluator, v Value) (Bool, Error) {
+func (s str) Eq(ev Eval, v Value) (Bool, Error) {
 	switch t := v.(type) {
 
 	case str:
@@ -52,7 +52,7 @@ func (s str) Eq(ev Evaluator, v Value) (Bool, Error) {
 	}
 }
 
-func (s str) Cmp(ev Evaluator, c Comparable) (Int, Error) {
+func (s str) Cmp(ev Eval, c Comparable) (Int, Error) {
 	switch t := c.(type) {
 
 	case str:
@@ -64,7 +64,7 @@ func (s str) Cmp(ev Evaluator, c Comparable) (Int, Error) {
 	}
 }
 
-func (s str) Get(ev Evaluator, index Value) (Value, Error) {
+func (s str) Get(ev Eval, index Value) (Value, Error) {
 	// TODO implement this more efficiently
 	runes := []rune(string(s))
 
@@ -76,16 +76,16 @@ func (s str) Get(ev Evaluator, index Value) (Value, Error) {
 	return str(string(runes[idx])), nil
 }
 
-func (s str) Set(ev Evaluator, index Value, val Value) Error {
+func (s str) Set(ev Eval, index Value, val Value) Error {
 	return ImmutableValueError()
 }
 
-func (s str) Len(ev Evaluator) (Int, Error) {
+func (s str) Len(ev Eval) (Int, Error) {
 	n := utf8.RuneCountInString(string(s))
 	return NewInt(int64(n)), nil
 }
 
-func (s str) Slice(ev Evaluator, from Value, to Value) (Value, Error) {
+func (s str) Slice(ev Eval, from Value, to Value) (Value, Error) {
 	runes := []rune(string(s))
 
 	f, t, err := sliceIndices(from, to, len(runes))
@@ -96,7 +96,7 @@ func (s str) Slice(ev Evaluator, from Value, to Value) (Value, Error) {
 	return str(string(runes[f:t])), nil
 }
 
-func (s str) SliceFrom(ev Evaluator, from Value) (Value, Error) {
+func (s str) SliceFrom(ev Eval, from Value) (Value, Error) {
 	runes := []rune(string(s))
 
 	f, _, err := sliceIndices(from, NegOne, len(runes))
@@ -107,7 +107,7 @@ func (s str) SliceFrom(ev Evaluator, from Value) (Value, Error) {
 	return str(string(runes[f:])), nil
 }
 
-func (s str) SliceTo(ev Evaluator, to Value) (Value, Error) {
+func (s str) SliceTo(ev Eval, to Value) (Value, Error) {
 	runes := []rune(string(s))
 
 	_, t, err := sliceIndices(Zero, to, len(runes))
@@ -127,7 +127,7 @@ type strIterator struct {
 	n     int
 }
 
-func (s str) NewIterator(ev Evaluator) (Iterator, Error) {
+func (s str) NewIterator(ev Eval) (Iterator, Error) {
 
 	itr := &strIterator{iteratorStruct(), []rune(string(s)), -1}
 
@@ -138,12 +138,12 @@ func (s str) NewIterator(ev Evaluator) (Iterator, Error) {
 	return itr, nil
 }
 
-func (i *strIterator) IterNext(ev Evaluator) (Bool, Error) {
+func (i *strIterator) IterNext(ev Eval) (Bool, Error) {
 	i.n++
 	return NewBool(i.n < len(i.runes)), nil
 }
 
-func (i *strIterator) IterGet(ev Evaluator) (Value, Error) {
+func (i *strIterator) IterGet(ev Eval) (Value, Error) {
 
 	if (i.n >= 0) && (i.n < len(i.runes)) {
 		return str([]rune{i.runes[i.n]}), nil
@@ -226,31 +226,31 @@ var strMethods = map[string]Method{
 
 	"contains": NewFixedMethod(
 		[]Type{StrType}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			return self.(Str).Contains(params[0].(Str)), nil
 		}),
 
 	"index": NewFixedMethod(
 		[]Type{StrType}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			return self.(Str).Index(params[0].(Str)), nil
 		}),
 
 	"lastIndex": NewFixedMethod(
 		[]Type{StrType}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			return self.(Str).LastIndex(params[0].(Str)), nil
 		}),
 
 	"hasPrefix": NewFixedMethod(
 		[]Type{StrType}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			return self.(Str).HasPrefix(params[0].(Str)), nil
 		}),
 
 	"hasSuffix": NewFixedMethod(
 		[]Type{StrType}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			return self.(Str).HasSuffix(params[0].(Str)), nil
 		}),
 
@@ -258,7 +258,7 @@ var strMethods = map[string]Method{
 		[]Type{StrType, StrType},
 		[]Type{IntType},
 		false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			old := params[0].(Str)
 			new := params[1].(Str)
 			n := NegOne
@@ -270,7 +270,7 @@ var strMethods = map[string]Method{
 
 	"split": NewFixedMethod(
 		[]Type{StrType}, false,
-		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			return self.(Str).Split(params[0].(Str)), nil
 		}),
 }
@@ -288,14 +288,14 @@ func (s str) HasField(name string) (bool, Error) {
 	return ok, nil
 }
 
-func (s str) GetField(name string, ev Evaluator) (Value, Error) {
+func (s str) GetField(name string, ev Eval) (Value, Error) {
 	if method, ok := strMethods[name]; ok {
 		return method.ToFunc(s, name), nil
 	}
 	return nil, NoSuchFieldError(name)
 }
 
-func (s str) InvokeField(name string, ev Evaluator, params []Value) (Value, Error) {
+func (s str) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
 	if method, ok := strMethods[name]; ok {
 		return method.Invoke(s, ev, params)
 	}

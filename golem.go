@@ -34,7 +34,7 @@ func exitErrors(errors []error) {
 	os.Exit(-1)
 }
 
-func dumpError(ev g.Evaluator, err g.ErrorStruct) {
+func dumpError(ev g.Eval, err g.ErrorStruct) {
 	fmt.Printf("Error: %s\n", err.Error())
 	for _, s := range err.StackTrace() {
 		fmt.Printf("%s\n", s)

@@ -33,23 +33,23 @@ func NewBytecodeFunc(template *FuncTemplate) BytecodeFunc {
 
 func (f *bytecodeFunc) Type() g.Type { return g.FuncType }
 
-func (f *bytecodeFunc) Freeze(ev g.Evaluator) (g.Value, g.Error) {
+func (f *bytecodeFunc) Freeze(ev g.Eval) (g.Value, g.Error) {
 	return f, nil
 }
 
-func (f *bytecodeFunc) Frozen(ev g.Evaluator) (g.Bool, g.Error) {
+func (f *bytecodeFunc) Frozen(ev g.Eval) (g.Bool, g.Error) {
 	return g.True, nil
 }
 
-func (f *bytecodeFunc) HashCode(ev g.Evaluator) (g.Int, g.Error) {
+func (f *bytecodeFunc) HashCode(ev g.Eval) (g.Int, g.Error) {
 	return nil, g.HashCodeMismatchError(g.FuncType)
 }
 
-func (f *bytecodeFunc) ToStr(ev g.Evaluator) (g.Str, g.Error) {
+func (f *bytecodeFunc) ToStr(ev g.Eval) (g.Str, g.Error) {
 	return g.NewStr(fmt.Sprintf("func<%p>", f)), nil
 }
 
-func (f *bytecodeFunc) Eq(ev g.Evaluator, val g.Value) (g.Bool, g.Error) {
+func (f *bytecodeFunc) Eq(ev g.Eval, val g.Value) (g.Bool, g.Error) {
 	switch t := val.(type) {
 	case BytecodeFunc:
 		// equality is based on identity
@@ -70,11 +70,11 @@ func (f *bytecodeFunc) HasField(name string) (bool, g.Error) {
 	return false, nil
 }
 
-func (f *bytecodeFunc) GetField(name string, ev g.Evaluator) (g.Value, g.Error) {
+func (f *bytecodeFunc) GetField(name string, ev g.Eval) (g.Value, g.Error) {
 	return nil, g.NoSuchFieldError(name)
 }
 
-func (f *bytecodeFunc) InvokeField(name string, ev g.Evaluator, params []g.Value) (g.Value, g.Error) {
+func (f *bytecodeFunc) InvokeField(name string, ev g.Eval, params []g.Value) (g.Value, g.Error) {
 	return nil, g.NoSuchFieldError(name)
 }
 
@@ -83,7 +83,7 @@ func (f *bytecodeFunc) InvokeField(name string, ev g.Evaluator, params []g.Value
 
 func (f *bytecodeFunc) Arity() g.Arity { return f.template.Arity }
 
-func (f *bytecodeFunc) Invoke(ev g.Evaluator, params []g.Value) (g.Value, g.Error) {
+func (f *bytecodeFunc) Invoke(ev g.Eval, params []g.Value) (g.Value, g.Error) {
 	return ev.Eval(f, params)
 }
 

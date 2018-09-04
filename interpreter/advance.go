@@ -1000,7 +1000,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func plus(ev g.Evaluator, a g.Value, b g.Value) (g.Value, g.Error) {
+func plus(ev g.Eval, a g.Value, b g.Value) (g.Value, g.Error) {
 
 	// if either is a Str, return concatenated strings
 	_, ia := a.(g.Str)
@@ -1033,7 +1033,7 @@ func plus(ev g.Evaluator, a g.Value, b g.Value) (g.Value, g.Error) {
 	return na.Add(nb), nil
 }
 
-func inc(ev g.Evaluator, a g.Value, b g.Value) (g.Value, g.Error) {
+func inc(ev g.Eval, a g.Value, b g.Value) (g.Value, g.Error) {
 
 	na, ok := a.(g.Number)
 	if !ok {

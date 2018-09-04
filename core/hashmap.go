@@ -25,7 +25,7 @@ func EmptyHashMap() *HashMap {
 }
 
 // NewHashMap creates an empty HashMap
-func NewHashMap(ev Evaluator, entries []*HEntry) (*HashMap, Error) {
+func NewHashMap(ev Eval, entries []*HEntry) (*HashMap, Error) {
 	capacity := 5
 	buckets := make([][]*HEntry, capacity)
 	hm := &HashMap{buckets, 0}
@@ -40,7 +40,7 @@ func NewHashMap(ev Evaluator, entries []*HEntry) (*HashMap, Error) {
 }
 
 // Eq tests whether two HashMaps are equal
-func (hm *HashMap) Eq(ev Evaluator, that *HashMap) (Bool, Error) {
+func (hm *HashMap) Eq(ev Eval, that *HashMap) (Bool, Error) {
 
 	if hm.size != that.size {
 		return False, nil
@@ -69,7 +69,7 @@ func (hm *HashMap) Eq(ev Evaluator, that *HashMap) (Bool, Error) {
 }
 
 // Get retrieves a value, or returns Null if the value is not present
-func (hm *HashMap) Get(ev Evaluator, key Value) (value Value, err Error) {
+func (hm *HashMap) Get(ev Eval, key Value) (value Value, err Error) {
 
 	// recover from an un-hashable value
 	defer func() {
@@ -92,7 +92,7 @@ func (hm *HashMap) Get(ev Evaluator, key Value) (value Value, err Error) {
 }
 
 // Contains returns whether the HashMap contains an Entry for the given key
-func (hm *HashMap) Contains(ev Evaluator, key Value) (flag Bool, err Error) {
+func (hm *HashMap) Contains(ev Eval, key Value) (flag Bool, err Error) {
 
 	// recover from an un-hashable value
 	defer func() {
@@ -116,7 +116,7 @@ func (hm *HashMap) Contains(ev Evaluator, key Value) (flag Bool, err Error) {
 
 // Remove removes the value associated with the given key, if the key
 // is present.  Remove returns whether or not the key was present.
-func (hm *HashMap) Remove(ev Evaluator, key Value) (flag Bool, err Error) {
+func (hm *HashMap) Remove(ev Eval, key Value) (flag Bool, err Error) {
 
 	// recover from an un-hashable value
 	defer func() {
@@ -142,7 +142,7 @@ func (hm *HashMap) Remove(ev Evaluator, key Value) (flag Bool, err Error) {
 }
 
 // Put adds a new key-value pair to the HashMap
-func (hm *HashMap) Put(ev Evaluator, key Value, value Value) (err Error) {
+func (hm *HashMap) Put(ev Eval, key Value, value Value) (err Error) {
 
 	// recover from an un-hashable value
 	defer func() {
@@ -180,7 +180,7 @@ func (hm *HashMap) Len() Int {
 //--------------------------------------------------------------
 // these are internal methods -- don't call them directly
 
-func (hm *HashMap) _indexOf(ev Evaluator, b []*HEntry, key Value) int {
+func (hm *HashMap) _indexOf(ev Eval, b []*HEntry, key Value) int {
 	for i, e := range b {
 
 		eq, err := e.Key.Eq(ev, key)
@@ -200,7 +200,7 @@ func (hm *HashMap) _tooFull() bool {
 	return headroom > len(hm.buckets)
 }
 
-func (hm *HashMap) _rehash(ev Evaluator) {
+func (hm *HashMap) _rehash(ev Eval) {
 	oldBuckets := hm.buckets
 
 	capacity := len(hm.buckets)<<1 + 1
@@ -213,7 +213,7 @@ func (hm *HashMap) _rehash(ev Evaluator) {
 	}
 }
 
-func (hm *HashMap) _lookupBucket(ev Evaluator, key Value) int {
+func (hm *HashMap) _lookupBucket(ev Eval, key Value) int {
 
 	// panic on an un-hashable value
 	hc, err := key.HashCode(ev)
