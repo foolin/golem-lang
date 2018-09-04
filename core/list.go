@@ -78,6 +78,51 @@ func (ls *list) Get(ev Evaluator, index Value) (Value, Error) {
 	return ls.array[idx], nil
 }
 
+func (ls *list) Set(ev Evaluator, index Value, val Value) Error {
+	if ls.frozen {
+		return ImmutableValueError()
+	}
+
+	idx, err := boundedIndex(index, len(ls.array))
+	if err != nil {
+		return err
+	}
+
+	ls.array[idx] = val
+	return nil
+}
+
+func (ls *list) Len(ev Evaluator) (Int, Error) {
+	return NewInt(int64(len(ls.array))), nil
+}
+
+func (ls *list) Slice(ev Evaluator, from Value, to Value) (Value, Error) {
+
+	f, t, err := sliceIndices(from, to, len(ls.array))
+	if err != nil {
+		return nil, err
+	}
+
+	a := ls.array[f:t]
+	b := make([]Value, len(a))
+	copy(b, a)
+	return NewList(b), nil
+}
+
+func (ls *list) SliceFrom(ev Evaluator, from Value) (Value, Error) {
+	return ls.Slice(ev, from, NewInt(int64(len(ls.array))))
+}
+
+func (ls *list) SliceTo(ev Evaluator, to Value) (Value, Error) {
+	return ls.Slice(ev, Zero, to)
+}
+
+func (ls *list) Values() []Value {
+	return ls.array
+}
+
+//------------------------------------------------------
+
 func (ls *list) Contains(ev Evaluator, val Value) (Bool, Error) {
 
 	idx, err := ls.IndexOf(ev, val)
@@ -110,35 +155,6 @@ func (ls *list) IsEmpty() Bool {
 	return NewBool(len(ls.array) == 0)
 }
 
-func (ls *list) Len(ev Evaluator) (Int, Error) {
-	return NewInt(int64(len(ls.array))), nil
-}
-
-func (ls *list) Slice(ev Evaluator, from Value, to Value) (Value, Error) {
-
-	f, t, err := sliceIndices(from, to, len(ls.array))
-	if err != nil {
-		return nil, err
-	}
-
-	a := ls.array[f:t]
-	b := make([]Value, len(a))
-	copy(b, a)
-	return NewList(b), nil
-}
-
-func (ls *list) SliceFrom(ev Evaluator, from Value) (Value, Error) {
-	return ls.Slice(ev, from, NewInt(int64(len(ls.array))))
-}
-
-func (ls *list) SliceTo(ev Evaluator, to Value) (Value, Error) {
-	return ls.Slice(ev, Zero, to)
-}
-
-func (ls *list) Values() []Value {
-	return ls.array
-}
-
 func (ls *list) Join(ev Evaluator, delim Str) (Str, Error) {
 
 	result := make([]string, len(ls.array))
@@ -154,7 +170,7 @@ func (ls *list) Join(ev Evaluator, delim Str) (Str, Error) {
 	return NewStr(strings.Join(result, delim.String())), nil
 }
 
-func (ls *list) Map(ev Evaluator, mapper func(Value) (Value, Error)) (Value, Error) {
+func (ls *list) Map(ev Evaluator, mapper func(Value) (Value, Error)) (List, Error) {
 
 	vals := make([]Value, len(ls.array))
 
@@ -169,7 +185,8 @@ func (ls *list) Map(ev Evaluator, mapper func(Value) (Value, Error)) (Value, Err
 	return NewList(vals), nil
 }
 
-func (ls *list) Reduce(ev Evaluator, initial Value, reducer func(Value, Value) (Value, Error)) (Value, Error) {
+func (ls *list) Reduce(
+	ev Evaluator, initial Value, reducer func(Value, Value) (Value, Error)) (Value, Error) {
 
 	acc := initial
 	var err Error
@@ -184,7 +201,7 @@ func (ls *list) Reduce(ev Evaluator, initial Value, reducer func(Value, Value) (
 	return acc, nil
 }
 
-func (ls *list) Filter(ev Evaluator, filterer func(Value) (Value, Error)) (Value, Error) {
+func (ls *list) Filter(ev Evaluator, filterer func(Value) (Value, Error)) (List, Error) {
 
 	vals := []Value{}
 
@@ -210,86 +227,69 @@ func (ls *list) Filter(ev Evaluator, filterer func(Value) (Value, Error)) (Value
 	return NewList(vals), nil
 }
 
-//---------------------------------------------------------------
-// Mutation
-
-func (ls *list) Set(ev Evaluator, index Value, val Value) Error {
+func (ls *list) Add(ev Evaluator, val Value) (List, Error) {
 	if ls.frozen {
-		return ImmutableValueError()
-	}
-
-	idx, err := boundedIndex(index, len(ls.array))
-	if err != nil {
-		return err
-	}
-
-	ls.array[idx] = val
-	return nil
-}
-
-func (ls *list) Add(ev Evaluator, val Value) Error {
-	if ls.frozen {
-		return ImmutableValueError()
+		return nil, ImmutableValueError()
 	}
 
 	ls.array = append(ls.array, val)
-	return nil
+	return ls, nil
 }
 
-func (ls *list) AddAll(ev Evaluator, val Value) Error {
+func (ls *list) AddAll(ev Evaluator, val Value) (List, Error) {
 	if ls.frozen {
-		return ImmutableValueError()
+		return nil, ImmutableValueError()
 	}
 
 	ibl, ok := val.(Iterable)
 	if !ok {
-		return IterableMismatchError(val.Type())
+		return nil, IterableMismatchError(val.Type())
 	}
 
 	itr, err := ibl.NewIterator(ev)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	b, err := itr.IterNext(ev)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	for b.BoolVal() {
 		v, err := itr.IterGet(ev)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		ls.array = append(ls.array, v)
 
 		b, err = itr.IterNext(ev)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
-	return nil
+	return ls, nil
 }
 
-func (ls *list) Remove(ev Evaluator, index Int) Error {
+func (ls *list) Remove(index Int) (List, Error) {
 	if ls.frozen {
-		return ImmutableValueError()
+		return nil, ImmutableValueError()
 	}
 
 	n := int(index.IntVal())
 	if n < 0 || n >= len(ls.array) {
-		return IndexOutOfBoundsError(n)
+		return nil, IndexOutOfBoundsError(n)
 	}
 	ls.array = append(ls.array[:n], ls.array[n+1:]...)
-	return nil
+	return ls, nil
 }
 
-func (ls *list) Clear() Error {
+func (ls *list) Clear() (List, Error) {
 	if ls.frozen {
-		return ImmutableValueError()
+		return nil, ImmutableValueError()
 	}
 
 	ls.array = []Value{}
-	return nil
+	return ls, nil
 }
 
 //---------------------------------------------------------------
@@ -328,26 +328,106 @@ func (i *listIterator) IterGet(ev Evaluator) (Value, Error) {
 // fields
 
 var listMethods = map[string]Method{
+
 	"add": NewFixedMethod(
 		[]Type{AnyType}, true,
 		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
 			ls := self.(List)
-			err := ls.Add(ev, params[0])
-			if err != nil {
-				return nil, err
-			}
-			return ls, nil
+			return ls.Add(ev, params[0])
 		}),
 
 	"addAll": NewFixedMethod(
+		[]Type{AnyType}, false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			ls := self.(List)
+			return ls.AddAll(ev, params[0])
+		}),
+
+	"clear": NewFixedMethod(
+		[]Type{}, false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			ls := self.(List)
+			return ls.Clear()
+		}),
+
+	"isEmpty": NewFixedMethod(
+		[]Type{}, false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			ls := self.(List)
+			return ls.IsEmpty(), nil
+		}),
+
+	"contains": NewFixedMethod(
 		[]Type{AnyType}, true,
 		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
 			ls := self.(List)
-			err := ls.AddAll(ev, params[0])
-			if err != nil {
-				return nil, err
+			return ls.Contains(ev, params[0])
+		}),
+
+	"indexOf": NewFixedMethod(
+		[]Type{AnyType}, true,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			ls := self.(List)
+			return ls.IndexOf(ev, params[0])
+		}),
+
+	"remove": NewFixedMethod(
+		[]Type{IntType}, true,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			ls := self.(List)
+			return ls.Remove(params[0].(Int))
+		}),
+
+	"join": NewMultipleMethod(
+		[]Type{},
+		[]Type{StrType},
+		false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			ls := self.(List)
+			delim := NewStr("")
+			if len(params) == 1 {
+				delim = params[0].(Str)
 			}
-			return ls, nil
+
+			return ls.Join(ev, delim)
+		}),
+
+	"map": NewFixedMethod(
+		[]Type{FuncType}, false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			ls := self.(List)
+
+			fn := params[0].(Func)
+			return ls.Map(ev, func(v Value) (Value, Error) {
+				return fn.Invoke(ev, []Value{v})
+			})
+		}),
+
+	"reduce": NewFixedMethod(
+		[]Type{AnyType, FuncType}, true,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			ls := self.(List)
+
+			if params[1] == Null {
+				return nil, NullValueError()
+			}
+
+			initial := params[0]
+			fn := params[1].(Func)
+			return ls.Reduce(ev, initial, func(acc Value, v Value) (Value, Error) {
+				return fn.Invoke(ev, []Value{acc, v})
+			})
+		}),
+
+	"filter": NewFixedMethod(
+		[]Type{FuncType}, false,
+		func(self interface{}, ev Evaluator, params []Value) (Value, Error) {
+			ls := self.(List)
+
+			fn := params[0].(Func)
+			return ls.Filter(ev, func(v Value) (Value, Error) {
+				return fn.Invoke(ev, []Value{v})
+			})
 		}),
 }
 
@@ -378,113 +458,3 @@ func (ls *list) InvokeField(name string, ev Evaluator, params []Value) (Value, E
 	}
 	return nil, NoSuchFieldError(name)
 }
-
-//	case "remove":
-//		return &virtualFunc{ls, sn, NewFixedNativeFunc(
-//			[]Type{IntType}, false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//				i := params[0].(Int)
-//				err := ls.Remove(ev, i)
-//				if err != nil {
-//					return nil, err
-//				}
-//				return ls, nil
-//			})}, nil
-//
-//	case "clear":
-//		return &virtualFunc{ls, sn, NewFixedNativeFunc(
-//			[]Type{}, false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//				err := ls.Clear()
-//				if err != nil {
-//					return nil, err
-//				}
-//				return ls, nil
-//			})}, nil
-//
-//	case "isEmpty":
-//		return &virtualFunc{ls, sn, NewFixedNativeFunc(
-//			[]Type{}, false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//				return ls.IsEmpty(), nil
-//			})}, nil
-//
-//	case "contains":
-//		return &virtualFunc{ls, sn, NewFixedNativeFunc(
-//			[]Type{AnyType}, false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//				return ls.Contains(ev, params[0])
-//			})}, nil
-//
-//	case "indexOf":
-//		return &virtualFunc{ls, sn, NewFixedNativeFunc(
-//			[]Type{AnyType}, false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//				return ls.IndexOf(ev, params[0])
-//			})}, nil
-//
-//	case "join":
-//		return &virtualFunc{ls, sn, NewMultipleNativeFunc(
-//			[]Type{},
-//			[]Type{StrType},
-//			false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//				delim := NewStr("")
-//				if len(params) == 1 {
-//					delim = params[0].(Str)
-//				}
-//
-//				return ls.Join(ev, delim), nil
-//			})}, nil
-//
-//	case "map":
-//		return &virtualFunc{ls, sn, NewFixedNativeFunc(
-//			[]Type{FuncType}, false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//
-//				fn := params[0].(Func)
-//				return ls.Map(ev, func(v Value) (Value, Error) {
-//					return fn.Invoke(ev, []Value{v})
-//				})
-//
-//			})}, nil
-//
-//	case "reduce":
-//		return &virtualFunc{ls, sn, NewFixedNativeFunc(
-//			[]Type{AnyType, FuncType}, true,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//
-//				if params[1] == Null {
-//					return nil, NullValueError()
-//				}
-//
-//				initial := params[0]
-//				fn := params[1].(Func)
-//				return ls.Reduce(ev, initial, func(acc Value, v Value) (Value, Error) {
-//					return fn.Invoke(ev, []Value{acc, v})
-//				})
-//			})}, nil
-//
-//	case "filter":
-//		return &virtualFunc{ls, sn, NewFixedNativeFunc(
-//			[]Type{FuncType}, false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//
-//				fn := params[0].(Func)
-//				return ls.Filter(ev, func(v Value) (Value, Error) {
-//					return fn.Invoke(ev, []Value{v})
-//				})
-//
-//			})}, nil
-//
-//	case "iterator":
-//		return &virtualFunc{ls, sn, NewFixedNativeFunc(
-//			[]Type{}, false,
-//			func(ev Evaluator, params []Value) (Value, Error) {
-//				return ls.NewIterator(ev), nil
-//			})}, nil
-//
-//	default:
-//		return nil, NoSuchFieldError(key.String())
-//	}
-//}

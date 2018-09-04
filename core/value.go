@@ -179,19 +179,18 @@ type (
 		Values() []Value
 
 		IsEmpty() Bool
-		Clear() Error
-
 		Contains(Evaluator, Value) (Bool, Error)
 		IndexOf(Evaluator, Value) (Int, Error)
 		Join(Evaluator, Str) (Str, Error)
 
-		Add(Evaluator, Value) Error
-		AddAll(Evaluator, Value) Error
-		Remove(Evaluator, Int) Error
+		Clear() (List, Error)
+		Add(Evaluator, Value) (List, Error)
+		AddAll(Evaluator, Value) (List, Error)
+		Remove(Int) (List, Error)
 
-		Map(Evaluator, func(Value) (Value, Error)) (Value, Error)
+		Map(Evaluator, func(Value) (Value, Error)) (List, Error)
 		Reduce(Evaluator, Value, func(Value, Value) (Value, Error)) (Value, Error)
-		Filter(Evaluator, func(Value) (Value, Error)) (Value, Error)
+		Filter(Evaluator, func(Value) (Value, Error)) (List, Error)
 	}
 
 	// Range is an immutable, iterable representation of a  sequence of integers
@@ -221,11 +220,11 @@ type (
 	//		Iterable
 	//
 	//		IsEmpty() Bool
-	//		Clear() Error
+	//		Clear() (Dict, Error)
 	//
 	//		ContainsKey(Evaluator, Value) (Bool, Error)
 	//		AddAll(Evaluator, Value) Error
-	//		Remove(Evaluator, Value) (Bool, Error)
+	//		Remove(Value) (Bool, Error)
 	//	}
 
 	// Set is a set of unique values
@@ -234,13 +233,13 @@ type (
 		Lenable
 		Iterable
 
-		IsEmpty() Bool
-		Clear() Error
+		//IsEmpty() Bool
+		//Clear() (Set, Error)
 
-		Contains(Evaluator, Value) (Bool, Error)
-		Add(Evaluator, Value) Error
-		AddAll(Evaluator, Value) Error
-		Remove(Evaluator, Value) (Bool, Error)
+		//Contains(Evaluator, Value) (Bool, Error)
+		//Add(Evaluator, Value) Error
+		//AddAll(Evaluator, Value) Error
+		//Remove(Value) (Bool, Error)
 	}
 
 	// Struct is a collection of key-Field pairs
