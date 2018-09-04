@@ -4,53 +4,54 @@
 
 package regexp
 
-//import (
-//	"regexp"
-//
-//	g "github.com/mjarmy/golem-lang/core"
-//)
-//
-//// Regexp is the "regexp" module in the standard library
-//var Regexp g.Struct
-//
-//func init() {
-//	var err error
-//	Regexp, err = g.NewStruct([]g.Field{
-//		g.NewField("compile", true, compile),
-//	}, true)
-//	if err != nil {
-//		panic("unreachable")
-//	}
-//}
-//
-//// compile compiles a regex expression
-//var compile g.Value = g.NewFixedNativeFunc(
-//	[]g.Type{g.StrType}, false,
-//	func(cx g.Context, values []g.Value) (g.Value, g.Error) {
-//		s := values[0].(g.Str)
-//
-//		rgx, err := regexp.Compile(s.String())
-//		if err != nil {
-//			return nil, g.NewError("RegexpError", err.Error())
-//		}
-//
-//		return makeRegexp(rgx), nil
-//	})
-//
-//func makeRegexp(rgx *regexp.Regexp) g.Struct {
-//
-//	matchString := g.NewFixedNativeFunc(
-//		[]g.Type{g.StrType}, false,
-//		func(cx g.Context, values []g.Value) (g.Value, g.Error) {
-//			s := values[0].(g.Str)
-//			return g.NewBool(rgx.MatchString(s.String())), nil
-//		})
-//
-//	stc, err := g.NewStruct(
-//		[]g.Field{g.NewField("matchString", true, matchString)},
-//		true)
-//	if err != nil {
-//		panic("unreachable")
-//	}
-//	return stc
-//}
+import (
+	"regexp"
+
+	g "github.com/mjarmy/golem-lang/core"
+)
+
+// Regexp is the "regexp" module in the standard library
+var Regexp g.Struct
+
+func init() {
+	var err error
+	Regexp, err = g.NewFieldStruct(
+		map[string]g.Field{
+			"compile": g.NewField(compile),
+		}, true)
+	g.Assert(err == nil)
+}
+
+// compile compiles a regex expression
+var compile g.Value = g.NewFixedNativeFunc(
+	[]g.Type{g.StrType}, false,
+	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
+		s := params[0].(g.Str)
+
+		r, err := regexp.Compile(s.String())
+		if err != nil {
+			return nil, g.NewError("RegexpError: " + err.Error())
+		}
+
+		return makeRegexp(r), nil
+	})
+
+func makeRegexp(r *regexp.Regexp) g.Struct {
+	stc, err := g.NewMethodStruct(r, regexpMethods)
+	g.Assert(err == nil)
+	return stc
+}
+
+var regexpMethods = map[string]g.Method{
+
+	"matchString": g.NewFixedMethod(
+		[]g.Type{g.StrType}, false,
+		func(self interface{}, ev g.Eval, params []g.Value) (g.Value, g.Error) {
+			r := self.(*regexp.Regexp)
+			return matchString(r, params[0].(g.Str)), nil
+		}),
+}
+
+func matchString(r *regexp.Regexp, s g.Str) g.Bool {
+	return g.NewBool(r.MatchString(s.String()))
+}

@@ -29,8 +29,8 @@ func init() {
 // exit exits the program
 var exit g.Value = g.NewFixedNativeFunc(
 	[]g.Type{g.IntType}, false,
-	func(ev g.Eval, values []g.Value) (g.Value, g.Error) {
-		n := values[0].(g.Int)
+	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
+		n := params[0].(g.Int)
 
 		os.Exit(int(n.IntVal()))
 
@@ -41,8 +41,8 @@ var exit g.Value = g.NewFixedNativeFunc(
 // open opens a file
 var open g.Value = g.NewFixedNativeFunc(
 	[]g.Type{g.StrType}, false,
-	func(ev g.Eval, values []g.Value) (g.Value, g.Error) {
-		s := values[0].(g.Str)
+	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
+		s := params[0].(g.Str)
 
 		f, err := os.Open(s.String())
 		if err != nil {
@@ -54,16 +54,16 @@ var open g.Value = g.NewFixedNativeFunc(
 // stat stats a file
 var stat g.Value = g.NewFixedNativeFunc(
 	[]g.Type{g.StrType}, false,
-	func(ev g.Eval, values []g.Value) (g.Value, g.Error) {
-		s := values[0].(g.Str)
+	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
+		s := params[0].(g.Str)
 
 		// TODO os.Lstat
 		// TODO followSymLink == false, same as os.Lstat
 		//
 		//followSymLink := g.True
-		//if len(values) == 2 {
+		//if len(params) == 2 {
 		//	var ok bool
-		//	followSymLink, ok = values[1].(g.Bool)
+		//	followSymLink, ok = params[1].(g.Bool)
 		//	if !ok {
 		//		return nil, g.TypeMismatchError("Expected Bool")
 		//	}

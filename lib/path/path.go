@@ -28,18 +28,18 @@ func init() {
 // ext returns a file extension
 var ext g.Value = g.NewFixedNativeFunc(
 	[]g.Type{g.StrType}, false,
-	func(ev g.Eval, values []g.Value) (g.Value, g.Error) {
-		s := values[0].(g.Str)
+	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
+		s := params[0].(g.Str)
 		return g.NewStr(filepath.Ext(s.String())), nil
 	})
 
 // walk walks a directory path
 var walk g.Value = g.NewFixedNativeFunc(
 	[]g.Type{g.StrType, g.FuncType}, false,
-	func(ev g.Eval, values []g.Value) (g.Value, g.Error) {
+	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
 
-		dir := values[0].(g.Str)
-		callback := values[1].(g.Func)
+		dir := params[0].(g.Str)
+		callback := params[1].(g.Func)
 
 		arity := callback.Arity()
 		if arity.Kind != g.FixedArity || arity.RequiredParams != 2 {

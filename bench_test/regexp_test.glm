@@ -4,6 +4,16 @@
 
 import regexp
 
+fn fail(func, err) {
+    try {
+        func()
+        assert(false)
+    } catch e {
+        //println("BenchTestError: " + err + " != " + e.error)
+        assert(err == e.error)
+    }
+}
+
 fn testCompile() {
     let rgx = regexp.compile('abc')
     assert(
@@ -15,13 +25,8 @@ fn testCompile() {
         [rgx.matchString('foo[123]'), rgx.matchString('456')] == 
         [true, false])
 
-    try {
-        rgx = regexp.compile('\\')
-        assert(false)
-    } catch e {
-        assert(e.kind == 'RegexpError')
-        assert(e.msg == 'error parsing regexp: trailing backslash at end of expression: ``')
-    }
+    fail(|| => regexp.compile('\\'), 
+        'RegexpError: error parsing regexp: trailing backslash at end of expression: ``')
 }
 
 fn main(args) {

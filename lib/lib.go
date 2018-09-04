@@ -8,9 +8,9 @@ import (
 	"fmt"
 
 	g "github.com/mjarmy/golem-lang/core"
-	os "github.com/mjarmy/golem-lang/lib/os"
-	path "github.com/mjarmy/golem-lang/lib/path"
-	//regexp "github.com/mjarmy/golem-lang/lib/regexp"
+	"github.com/mjarmy/golem-lang/lib/os"
+	"github.com/mjarmy/golem-lang/lib/path"
+	"github.com/mjarmy/golem-lang/lib/regexp"
 )
 
 // BuiltinLib looks up modules in the standard library
@@ -25,8 +25,8 @@ var BuiltinLib = g.NewFixedNativeFunc(
 			return os.Os, nil
 		case "path":
 			return path.Path, nil
-			//		case "regexp":
-			//			return regexp.Regexp, nil
+		case "regexp":
+			return regexp.Regexp, nil
 		default:
 			return nil, g.NewError(
 				fmt.Sprintf("LibraryNotFound: Library '%s' not found", name.String()))
