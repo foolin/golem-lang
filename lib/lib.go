@@ -9,7 +9,7 @@ import (
 
 	g "github.com/mjarmy/golem-lang/core"
 	os "github.com/mjarmy/golem-lang/lib/os"
-	//path "github.com/mjarmy/golem-lang/lib/path"
+	path "github.com/mjarmy/golem-lang/lib/path"
 	//regexp "github.com/mjarmy/golem-lang/lib/regexp"
 )
 
@@ -23,8 +23,8 @@ var BuiltinLib = g.NewFixedNativeFunc(
 		switch name.String() {
 		case "os":
 			return os.Os, nil
-			//		case "path":
-			//			return path.Path, nil
+		case "path":
+			return path.Path, nil
 			//		case "regexp":
 			//			return regexp.Regexp, nil
 		default:

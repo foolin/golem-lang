@@ -14,7 +14,7 @@ fn testWalk() {
 
     let list = []
     path.filepath.walk('data', fn(name, info) {
-        list.add((name, info.isDir, path.filepath.ext(name)))
+        list.add((name, info.isDir(), path.filepath.ext(name)))
     })
 
     assert([ 
