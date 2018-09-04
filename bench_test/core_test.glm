@@ -762,6 +762,9 @@ fn testStr() {
     assert(listify('') == [])
     assert(iterate('') == [])
 
+    // This is some chinese text that we are going to use for testing purposes.
+    // 這是我們將用於測試目的的一些中文文本。
+
     s = "這是我們abc"
     assert(7 == len(s))
     let reverse = ''  
@@ -1044,6 +1047,18 @@ fn testList() {
             assert([false, false, false, false] == [a, a[0:1], a[0:], a[:1]].map(frozen))
             freeze(a)
             assert([true, true, true, true] == [a, a[0:1], a[0:], a[:1]].map(frozen))
+        },
+        fn () {
+            let a = set {11, 2, 31, 4, 5}
+            let b = [].addAll(a)
+            let c = set{}.addAll(b)
+            assert(a == c)
+
+            let d = dict {'x': 1, 2: 'y'}
+            let e = set{}.addAll(d)
+            let f = [].addAll(e)
+            let g = dict{}.addAll(f)
+            assert(d == g)
         }
     ]
     for f in funcs { f(); }
@@ -1644,6 +1659,34 @@ fn testStruct() {
 
             x = 4
             assert([s.a, s.b, x, s.c()] == [1, 4, 4, 5])
+        },
+        fn () {
+            fn newRectangle(w, h) {
+                return struct {
+                    width:  prop { || => w, |val| => w = val },
+                    height: prop { || => h, |val| => h = val },
+                    area:   || => w * h
+                }
+            }
+
+            fn newBox(rect, d) {
+                return merge(
+                    rect, 
+                    struct {
+                        depth:  prop { || => d, |val| => d = val },
+                        volume: || => rect.area() * d
+                    })
+            }
+
+            let r = newRectangle(2, 3)
+            let b = newBox(r, 4)
+
+            assert(fields(r) == set { 'width', 'height', 'area' })
+            assert(fields(b) == set { 'width', 'depth', 'height', 'volume', 'area' })
+
+            assert([b.width, b.height, b.depth, b.area(), b.volume()] == [2, 3, 4, 6, 24])
+            r.width = 5
+            assert([b.width, b.height, b.depth, b.area(), b.volume()] == [5, 3, 4, 15, 60])
         }
     ]
     for f in funcs { f(); }

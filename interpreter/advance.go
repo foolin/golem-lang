@@ -113,7 +113,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			go (func() {
 				_, errStruct := intp.EvalBytecode(fn, params)
 				if errStruct != nil {
-					panic("TODO")
+					panic("TODO how to handle exceptions in goroutines")
 					//fmt.Printf("%v\n", errStruct.Error())
 				}
 			})()
