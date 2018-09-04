@@ -286,21 +286,17 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.InvokeField:
 
 		p, q := bc.DecodeWideParams(btc, f.ip)
-		//fmt.Printf("InvokeField aaa %d %d\n", p, q)
 
 		key, ok := pool.Constants[p].(g.Str)
 		g.Assert(ok)
-		//fmt.Printf("InvokeField bbb %s\n", key)
 
 		self := f.stack[n-q]
 		params := f.stack[n-q+1:]
-		//fmt.Printf("InvokeField ccc %v %d %d %d\n", params, n, q, n-q+1)
 
 		result, err := self.InvokeField(key.String(), itp, params)
 		if err != nil {
 			return nil, err
 		}
-		//fmt.Printf("InvokeField ddd %s\n", result)
 
 		f.stack[n-q] = result
 		f.stack = f.stack[:n-q+1]

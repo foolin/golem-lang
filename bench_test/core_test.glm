@@ -1059,6 +1059,23 @@ fn testList() {
             let f = [].addAll(e)
             let g = dict{}.addAll(f)
             assert(d == g)
+        },
+        fn () {
+            let a = set{1, 2, 3, 4, 5}
+            let b = [].addAll(a).map(|e| => ((e, e*e), (e*e*e)))
+            let c = dict{}.addAll(b)
+            let d = [].addAll(c)
+
+            let e = set{}
+            for t in d {
+                e.add(t[0][0])
+                e.add(t[0][1])
+                e.add(t[1])
+            }
+
+            assert(b == [ ((1, 1), 1), ((2, 4), 8), ((3, 9), 27), ((4, 16), 64), ((5, 25), 125) ])
+            assert(c == dict{ (1, 1): 1, (2, 4): 8, (3, 9): 27, (4, 16): 64, (5, 25): 125 })
+            assert(e == set { 1, 2, 3, 4, 5, 8, 9, 16, 64, 25, 27, 125 })
         }
     ]
     for f in funcs { f(); }
