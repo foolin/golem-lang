@@ -4,10 +4,6 @@
 
 package core
 
-import (
-//"fmt"
-)
-
 type (
 	fieldMap interface {
 		names() []string
@@ -31,7 +27,7 @@ func mergeFieldMaps(fieldMaps []fieldMap) fieldMap {
 			for k, v := range t.fields {
 				fields[k] = v
 			}
-		case *virtualFieldMap:
+		case *methodFieldMap:
 			for k, v := range t.methods {
 				fn := v.ToFunc(t.self, k)
 				fields[k] = NewReadonlyField(fn)
@@ -115,7 +111,7 @@ func (fm *hashFieldMap) replace(name string, field Field) {
 }
 
 //--------------------------------------------------------------
-// virtualFieldMap
+// methodFieldMap
 //--------------------------------------------------------------
 
 // TODO: Using a golang map is a placeholder implementation.
@@ -123,12 +119,12 @@ func (fm *hashFieldMap) replace(name string, field Field) {
 // is instantiated, there are probably more efficient implementations
 // available that we can substitute in at some point.
 
-type virtualFieldMap struct {
+type methodFieldMap struct {
 	self    interface{}
 	methods map[string]Method
 }
 
-func (fm *virtualFieldMap) names() []string {
+func (fm *methodFieldMap) names() []string {
 
 	names := make([]string, 0, len(fm.methods))
 	for name, _ := range fm.methods {
@@ -137,13 +133,13 @@ func (fm *virtualFieldMap) names() []string {
 	return names
 }
 
-func (fm *virtualFieldMap) has(name string) bool {
+func (fm *methodFieldMap) has(name string) bool {
 
 	_, ok := fm.methods[name]
 	return ok
 }
 
-func (fm *virtualFieldMap) get(name string, ev Eval) (Value, Error) {
+func (fm *methodFieldMap) get(name string, ev Eval) (Value, Error) {
 
 	if m, ok := fm.methods[name]; ok {
 		return m.ToFunc(fm.self, name), nil
@@ -151,7 +147,7 @@ func (fm *virtualFieldMap) get(name string, ev Eval) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
 
-func (fm *virtualFieldMap) invoke(name string, ev Eval, params []Value) (Value, Error) {
+func (fm *methodFieldMap) invoke(name string, ev Eval, params []Value) (Value, Error) {
 
 	if m, ok := fm.methods[name]; ok {
 		return m.Invoke(fm.self, ev, params)
@@ -159,7 +155,7 @@ func (fm *virtualFieldMap) invoke(name string, ev Eval, params []Value) (Value, 
 	return nil, NoSuchFieldError(name)
 }
 
-func (fm *virtualFieldMap) set(name string, ev Eval, val Value) Error {
+func (fm *methodFieldMap) set(name string, ev Eval, val Value) Error {
 
 	if _, ok := fm.methods[name]; ok {
 		return ReadonlyFieldError(name)
@@ -167,6 +163,6 @@ func (fm *virtualFieldMap) set(name string, ev Eval, val Value) Error {
 	return NoSuchFieldError(name)
 }
 
-func (fm *virtualFieldMap) replace(name string, field Field) {
+func (fm *methodFieldMap) replace(name string, field Field) {
 	panic("Internal Error")
 }

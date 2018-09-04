@@ -12,7 +12,8 @@ import (
 )
 
 //--------------------------------------------------------------
-// Struct
+// Field Struct
+//--------------------------------------------------------------
 
 type _struct struct {
 	fieldMap fieldMap
@@ -36,7 +37,7 @@ func NewFieldStruct(fields map[string]Field, frozen bool) (Struct, Error) {
 	}, nil
 }
 
-func NewVirtualStruct(methods map[string]Method, frozen bool) (Struct, Error) {
+func NewMethodStruct(self interface{}, methods map[string]Method) (Struct, Error) {
 
 	for key, _ := range methods {
 		if !scanner.IsIdentifier(key) {
@@ -45,10 +46,11 @@ func NewVirtualStruct(methods map[string]Method, frozen bool) (Struct, Error) {
 	}
 
 	return &_struct{
-		fieldMap: &virtualFieldMap{
+		fieldMap: &methodFieldMap{
+			self:    self,
 			methods: methods,
 		},
-		frozen: frozen,
+		frozen: true,
 	}, nil
 }
 

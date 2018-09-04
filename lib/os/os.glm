@@ -5,5 +5,5 @@
 const _os = _lib("os")
 
 const exit = _os.exit
-//const open = _os.open
-//const stat = _os.stat
+const open = _os.open
+const stat = _os.stat

@@ -215,7 +215,7 @@ func TestBenchmarkMethodInvoke(t *testing.T) {
 	}
 }
 
-func TestBenchmarkVirtualFuncInvoke(t *testing.T) {
+func TestBenchmarkMethodFuncInvoke(t *testing.T) {
 
 	m := NewFixedMethod(
 		[]Type{IntType},

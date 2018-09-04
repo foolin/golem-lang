@@ -5,8 +5,8 @@
 package os
 
 import (
-	//	"bufio"
-	//	"io"
+	"bufio"
+	"io"
 	"os"
 
 	g "github.com/mjarmy/golem-lang/core"
@@ -20,8 +20,8 @@ func init() {
 	Os, err = g.NewFieldStruct(
 		map[string]g.Field{
 			"exit": g.NewField(exit),
-			//"open": g.NewField(open),
-			//"stat": g.NewField(stat),
+			"open": g.NewField(open),
+			"stat": g.NewField(stat),
 		}, true)
 	g.Assert(err == nil)
 }
@@ -38,119 +38,132 @@ var exit g.Value = g.NewFixedNativeFunc(
 		return g.Null, nil
 	})
 
-//// open opens a file
-//var open g.Value = g.NewFixedNativeFunc(
-//	[]g.Type{g.StrType}, false,
-//	func(ev g.Eval, values []g.Value) (g.Value, g.Error) {
-//		s := values[0].(g.Str)
-//
-//		f, err := os.Open(s.String())
-//		if err != nil {
-//			return nil, g.NewError("OsError: " + err.Error())
-//		}
-//		return newFile(f), nil
-//	})
+// open opens a file
+var open g.Value = g.NewFixedNativeFunc(
+	[]g.Type{g.StrType}, false,
+	func(ev g.Eval, values []g.Value) (g.Value, g.Error) {
+		s := values[0].(g.Str)
 
-//// stat stats a file
-//var stat g.Value = g.NewFixedNativeFunc(
-//	[]g.Type{g.StrType}, false,
-//	func(ev g.Eval, values []g.Value) (g.Value, g.Error) {
-//		s := values[0].(g.Str)
-//
-//		// TODO os.Lstat
-//		// TODO followSymLink == false, same as os.Lstat
-//		//
-//		//followSymLink := g.True
-//		//if len(values) == 2 {
-//		//	var ok bool
-//		//	followSymLink, ok = values[1].(g.Bool)
-//		//	if !ok {
-//		//		return nil, g.TypeMismatchError("Expected Bool")
-//		//	}
-//		//}
-//		//var fn = os.Stat
-//		//if !followSymLink.BoolVal() {
-//		//	fn = os.Lstat
-//		//}
-//
-//		info, err := os.Stat(s.String())
-//		if err != nil {
-//			return nil, g.NewError("OsError", err.Error())
-//		}
-//		return NewFileInfo(info), nil
-//	})
-//
-////-------------------------------------------------------------------------
-//
-//// NewFileInfo creates a struct for 'os.FileInfo'
-//func NewFileInfo(info os.FileInfo) g.Struct {
-//
-//	stc, err := g.NewStruct([]g.Field{
-//		g.NewField("name", true, g.NewStr(info.Name())),
-//		g.NewField("size", true, g.NewInt(info.Size())),
-//		g.NewField("mode", true, g.NewInt(int64(info.Mode()))),
-//		//g.NewField("modTime", true, ModTime() time.Time TODO
-//		g.NewField("isDir", true, g.NewBool(info.IsDir())),
-//	}, true)
-//	if err != nil {
-//		panic("unreachable")
-//	}
-//
-//	return stc
-//}
-//
+		f, err := os.Open(s.String())
+		if err != nil {
+			return nil, g.NewError("OsError: " + err.Error())
+		}
+		return newFile(f), nil
+	})
+
+// stat stats a file
+var stat g.Value = g.NewFixedNativeFunc(
+	[]g.Type{g.StrType}, false,
+	func(ev g.Eval, values []g.Value) (g.Value, g.Error) {
+		s := values[0].(g.Str)
+
+		// TODO os.Lstat
+		// TODO followSymLink == false, same as os.Lstat
+		//
+		//followSymLink := g.True
+		//if len(values) == 2 {
+		//	var ok bool
+		//	followSymLink, ok = values[1].(g.Bool)
+		//	if !ok {
+		//		return nil, g.TypeMismatchError("Expected Bool")
+		//	}
+		//}
+		//var fn = os.Stat
+		//if !followSymLink.BoolVal() {
+		//	fn = os.Lstat
+		//}
+
+		info, err := os.Stat(s.String())
+		if err != nil {
+			return nil, g.NewError("OsError: " + err.Error())
+		}
+		return NewFileInfo(info), nil
+	})
+
 //-------------------------------------------------------------------------
 
-//var fileMethods = map[string]Method{
-//
-//	"readLines": NewFixedMethod(
-//		[]Type{AnyType}, true,
-//		func(self interface{}, ev Eval, params []Value) (Value, Error) {
-//			ls := self.(List)
-//			return ls.Add(ev, params[0])
-//		}),
-//
-//func newFile(f *os.File) g.Struct {
-//
-//	stc, err := g.NewStruct([]g.Field{
-//		g.NewField("readLines", true, readLines(f)),
-//		g.NewField("close", true, close(f)),
-//	}, true)
-//	if err != nil {
-//		panic("unreachable")
-//	}
-//
-//	return stc
-//}
+// NewFileInfo creates a struct for 'os.FileInfo'
+func NewFileInfo(info os.FileInfo) g.Struct {
+	stc, err := g.NewMethodStruct(info, fileInfoMethods)
+	g.Assert(err == nil)
+	return stc
+}
 
-//func readLines(f io.Reader) g.NativeFunc {
-//	return g.NewFixedNativeFunc(
-//		[]g.Type{}, false,
-//		func(ev g.Eval, values []g.Value) (g.Value, g.Error) {
-//
-//			lines := []g.Value{}
-//			scanner := bufio.NewScanner(f)
-//			for scanner.Scan() {
-//				lines = append(lines, g.NewStr(scanner.Text()))
-//			}
-//
-//			if err := scanner.Err(); err != nil {
-//				return nil, g.NewError("OsError", err.Error())
-//			}
-//
-//			return g.NewList(lines), nil
-//		})
-//}
-//
-//func close(f io.Closer) g.NativeFunc {
-//	return g.NewFixedNativeFunc(
-//		[]g.Type{}, false,
-//		func(ev g.Eval, values []g.Value) (g.Value, g.Error) {
-//
-//			err := f.Close()
-//			if err != nil {
-//				return nil, g.NewError("OsError", err.Error())
-//			}
-//			return g.Null, nil
-//		})
-//}
+var fileInfoMethods = map[string]g.Method{
+
+	"name": g.NewWrapperMethod(
+		func(self interface{}) g.Value {
+			info := self.(os.FileInfo)
+			return g.NewStr(info.Name())
+		}),
+
+	"size": g.NewWrapperMethod(
+		func(self interface{}) g.Value {
+			info := self.(os.FileInfo)
+			return g.NewInt(info.Size())
+		}),
+
+	"mode": g.NewWrapperMethod(
+		func(self interface{}) g.Value {
+			info := self.(os.FileInfo)
+			return g.NewInt(int64(info.Mode()))
+		}),
+
+	//		//g.NewField("modTime", true, ModTime() time.Time TODO
+
+	"isDir": g.NewWrapperMethod(
+		func(self interface{}) g.Value {
+			info := self.(os.FileInfo)
+			return g.NewBool(info.IsDir())
+		}),
+}
+
+//-------------------------------------------------------------------------
+
+func newFile(f *os.File) g.Struct {
+	stc, err := g.NewMethodStruct(f, fileMethods)
+	g.Assert(err == nil)
+	return stc
+}
+
+var fileMethods = map[string]g.Method{
+
+	"readLines": g.NewNullaryMethod(
+		func(self interface{}, ev g.Eval) (g.Value, g.Error) {
+			f := self.(*os.File)
+			return readLines(f)
+		}),
+
+	"close": g.NewNullaryMethod(
+		func(self interface{}, ev g.Eval) (g.Value, g.Error) {
+			f := self.(*os.File)
+			err := close(f)
+			if err != nil {
+				return nil, err
+			}
+			return g.Null, nil
+		}),
+}
+
+func readLines(f io.Reader) (g.List, g.Error) {
+
+	lines := []g.Value{}
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		lines = append(lines, g.NewStr(scanner.Text()))
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, g.NewError("OsError: " + err.Error())
+	}
+
+	return g.NewList(lines), nil
+}
+
+func close(f io.Closer) g.Error {
+	err := f.Close()
+	if err != nil {
+		return g.NewError("OsError: " + err.Error())
+	}
+	return nil
+}

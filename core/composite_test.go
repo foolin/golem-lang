@@ -10,25 +10,11 @@ import (
 
 func TestStruct(t *testing.T) {
 
-	var val Value
-	var err Error
-
 	fs, err := NewFieldStruct(
 		map[string]Field{
 			"goto": NewField(NewInt(0)),
 		}, true)
 	fail(t, fs, err, "InvalidStructKey: 'goto' is not a valid struct key.")
-
-	fs, err = NewFieldStruct(
-		map[string]Field{
-			"a": NewField(NewInt(0)),
-			"b": NewField(NewInt(1)),
-		}, true)
-	Tassert(t, err == nil)
-
-	val, err = fs.ToStr(nil)
-	Tassert(t, err == nil)
-	println(val.(Str).String())
 
 	method := NewFixedMethod(
 		[]Type{},
@@ -37,21 +23,12 @@ func TestStruct(t *testing.T) {
 			return Null, nil
 		})
 
-	vs, err := NewVirtualStruct(
+	vs, err := NewMethodStruct(
+		nil,
 		map[string]Method{
 			" ": method,
-		}, true)
+		})
 	fail(t, vs, err, "InvalidStructKey: ' ' is not a valid struct key.")
-
-	vs, err = NewVirtualStruct(
-		map[string]Method{
-			"a": method,
-		}, true)
-	Tassert(t, err == nil)
-
-	val, err = vs.ToStr(nil)
-	Tassert(t, err == nil)
-	println(val.(Str).String())
 }
 
 func TestList(t *testing.T) {

@@ -5,8 +5,7 @@
 package core
 
 import (
-//	"fmt"
-//	"reflect"
+	"fmt"
 )
 
 type (
@@ -18,13 +17,93 @@ type (
 		ToFunc(interface{}, string) NativeFunc
 	}
 
-	MethodInvoke func(interface{}, Eval, []Value) (Value, Error)
-
-	method struct {
-		arity  Arity
-		invoke MethodInvoke
-	}
+	MethodInvoke        func(interface{}, Eval, []Value) (Value, Error)
+	NullaryMethodInvoke func(interface{}, Eval) (Value, Error)
+	WrapperMethodInvoke func(interface{}) Value
 )
+
+//--------------------------------------------------------------
+// WrapperMethod
+//--------------------------------------------------------------
+
+type wrapperMethod struct {
+	invoke WrapperMethodInvoke
+}
+
+// NewWrapperMethod creates a new wrapper Method.
+func NewWrapperMethod(wrapper WrapperMethodInvoke) Method {
+	return &wrapperMethod{wrapper}
+}
+
+func (m *wrapperMethod) Invoke(self interface{}, ev Eval, params []Value) (Value, Error) {
+
+	fmt.Printf("Wrapper Method Invoke\n")
+
+	Assert(len(params) == 0)
+	return m.invoke(self), nil
+}
+
+func (m *wrapperMethod) ToFunc(self interface{}, methodName string) NativeFunc {
+
+	fmt.Printf("Wrapper Method ToFunc\n")
+
+	nf := NewFixedNativeFunc(
+		[]Type{}, false,
+		func(ev Eval, params []Value) (Value, Error) {
+			return m.invoke(self), nil
+		})
+
+	return &fixedMethodFunc{
+		self,
+		methodName,
+		nf.(*nativeFixedFunc)}
+}
+
+//--------------------------------------------------------------
+// NullaryMethod
+//--------------------------------------------------------------
+
+type nullaryMethod struct {
+	invoke NullaryMethodInvoke
+}
+
+// NewNullaryMethod creates a new nullary Method.
+func NewNullaryMethod(nullary NullaryMethodInvoke) Method {
+	return &nullaryMethod{nullary}
+}
+
+func (m *nullaryMethod) Invoke(self interface{}, ev Eval, params []Value) (Value, Error) {
+
+	fmt.Printf("Nullary Method Invoke\n")
+
+	Assert(len(params) == 0)
+	return m.invoke(self, ev)
+}
+
+func (m *nullaryMethod) ToFunc(self interface{}, methodName string) NativeFunc {
+
+	fmt.Printf("Nullary Method ToFunc\n")
+
+	nf := NewFixedNativeFunc(
+		[]Type{}, false,
+		func(ev Eval, params []Value) (Value, Error) {
+			return m.invoke(self, ev)
+		})
+
+	return &fixedMethodFunc{
+		self,
+		methodName,
+		nf.(*nativeFixedFunc)}
+}
+
+//--------------------------------------------------------------
+// embeddable struct for various method implementations
+//--------------------------------------------------------------
+
+type method struct {
+	arity  Arity
+	invoke MethodInvoke
+}
 
 //--------------------------------------------------------------
 // FixedMethod
@@ -56,6 +135,8 @@ func NewFixedMethod(
 
 func (m *fixedMethod) Invoke(self interface{}, ev Eval, params []Value) (Value, Error) {
 
+	fmt.Printf("Method Invoke\n")
+
 	err := vetFixedParams(params, m.requiredTypes, m.allowNull)
 	if err != nil {
 		return nil, err
@@ -65,6 +146,8 @@ func (m *fixedMethod) Invoke(self interface{}, ev Eval, params []Value) (Value, 
 
 func (m *fixedMethod) ToFunc(self interface{}, methodName string) NativeFunc {
 
+	fmt.Printf("Method ToFunc\n")
+
 	nf := NewFixedNativeFunc(
 		m.requiredTypes,
 		m.allowNull,
@@ -72,7 +155,7 @@ func (m *fixedMethod) ToFunc(self interface{}, methodName string) NativeFunc {
 			return m.invoke(self, ev, params)
 		})
 
-	return &fixedVirtualFunc{
+	return &fixedMethodFunc{
 		self,
 		methodName,
 		nf.(*nativeFixedFunc)}
@@ -127,7 +210,7 @@ func (m *variadicMethod) ToFunc(self interface{}, methodName string) NativeFunc 
 			return m.invoke(self, ev, params)
 		})
 
-	return &variadicVirtualFunc{
+	return &variadicMethodFunc{
 		self,
 		methodName,
 		nf.(*nativeVariadicFunc)}
@@ -182,18 +265,18 @@ func (m *multipleMethod) ToFunc(self interface{}, methodName string) NativeFunc 
 			return m.invoke(self, ev, params)
 		})
 
-	return &multipleVirtualFunc{
+	return &multipleMethodFunc{
 		self,
 		methodName,
 		nf.(*nativeMultipleFunc)}
 }
 
 //--------------------------------------------------------------
-// virtualFunc
+// methodFunc
 //--------------------------------------------------------------
 
-// A virtualFunc is a function that is created only
-// when we really need to have it. The 'same' virtualFunc can end up
+// A methodFunc is a function that is created only
+// when we really need to have it. The 'same' methodFunc can end up
 // being created more than once, so equality has special semantics.
 
 // For self parameters that are Values, equality is based on Eq(),
@@ -218,15 +301,15 @@ func selfEq(ev Eval, this, that interface{}) (Bool, Error) {
 //---------------------------------------------
 // fixed
 
-type fixedVirtualFunc struct {
+type fixedMethodFunc struct {
 	self interface{}
 	name string
 	*nativeFixedFunc
 }
 
-func (f *fixedVirtualFunc) Eq(ev Eval, v Value) (Bool, Error) {
+func (f *fixedMethodFunc) Eq(ev Eval, v Value) (Bool, Error) {
 	switch t := v.(type) {
-	case *fixedVirtualFunc:
+	case *fixedMethodFunc:
 		// Equality is based on whether the two funcs have the same self,
 		// and the same name.
 		eq, err := selfEq(ev, f.self, t.self)
@@ -242,15 +325,15 @@ func (f *fixedVirtualFunc) Eq(ev Eval, v Value) (Bool, Error) {
 //---------------------------------------------
 // variadic
 
-type variadicVirtualFunc struct {
+type variadicMethodFunc struct {
 	self interface{}
 	name string
 	*nativeVariadicFunc
 }
 
-func (f *variadicVirtualFunc) Eq(ev Eval, v Value) (Bool, Error) {
+func (f *variadicMethodFunc) Eq(ev Eval, v Value) (Bool, Error) {
 	switch t := v.(type) {
-	case *variadicVirtualFunc:
+	case *variadicMethodFunc:
 		// Equality is based on whether the two funcs have the same self,
 		// and the same name.
 		eq, err := selfEq(ev, f.self, t.self)
@@ -266,15 +349,15 @@ func (f *variadicVirtualFunc) Eq(ev Eval, v Value) (Bool, Error) {
 //---------------------------------------------
 // multiple
 
-type multipleVirtualFunc struct {
+type multipleMethodFunc struct {
 	self interface{}
 	name string
 	*nativeMultipleFunc
 }
 
-func (f *multipleVirtualFunc) Eq(ev Eval, v Value) (Bool, Error) {
+func (f *multipleMethodFunc) Eq(ev Eval, v Value) (Bool, Error) {
 	switch t := v.(type) {
-	case *multipleVirtualFunc:
+	case *multipleMethodFunc:
 		// Equality is based on whether the two funcs have the same self,
 		// and the same name.
 		eq, err := selfEq(ev, f.self, t.self)

@@ -57,7 +57,7 @@ func TestHashFieldMap(t *testing.T) {
 	ok(t, val, err, NewStr("abc"))
 }
 
-func TestVirtualFieldMap(t *testing.T) {
+func TestMethodFieldMap(t *testing.T) {
 
 	method := NewFixedMethod(
 		[]Type{},
@@ -67,7 +67,7 @@ func TestVirtualFieldMap(t *testing.T) {
 			return NewInt(int64(n * n)), nil
 		})
 
-	var fm fieldMap = &virtualFieldMap{
+	var fm fieldMap = &methodFieldMap{
 		NewInt(7),
 		map[string]Method{
 			"a": method,
@@ -135,7 +135,7 @@ func TestMergeFieldMaps(t *testing.T) {
 		true}
 	Tassert(t, x.(*hashFieldMap).replacable)
 
-	var y fieldMap = &virtualFieldMap{
+	var y fieldMap = &methodFieldMap{
 		next(),
 		map[string]Method{
 			"b": NewFixedMethod(
