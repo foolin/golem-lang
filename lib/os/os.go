@@ -17,12 +17,12 @@ var Os g.Struct
 
 func init() {
 	var err error
-	Os, err = g.NewFieldStruct(
+	Os, err = g.NewFrozenFieldStruct(
 		map[string]g.Field{
 			"exit": g.NewField(exit),
 			"open": g.NewField(open),
 			"stat": g.NewField(stat),
-		}, true)
+		})
 	g.Assert(err == nil)
 }
 

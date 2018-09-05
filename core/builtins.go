@@ -298,7 +298,7 @@ var BuiltinArity = NewFixedNativeFunc(
 			fields["optional"] = NewReadonlyField(o)
 		}
 
-		return NewFieldStruct(fields, true)
+		return NewFrozenFieldStruct(fields)
 	})
 
 //-----------------------------------------------------------------

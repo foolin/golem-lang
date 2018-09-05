@@ -13,7 +13,7 @@ func TestStruct(t *testing.T) {
 	fs, err := NewFieldStruct(
 		map[string]Field{
 			"goto": NewField(NewInt(0)),
-		}, true)
+		})
 	fail(t, fs, err, "InvalidStructKey: 'goto' is not a valid struct key")
 
 	method := NewFixedMethod(
@@ -97,11 +97,11 @@ func TestList(t *testing.T) {
 }
 
 func newDict(entries []*HEntry) Dict {
-	dict, err := NewDict(nil, entries)
+	h, err := NewHashMap(nil, entries)
 	if err != nil {
 		panic(err)
 	}
-	return dict
+	return NewDict(h)
 }
 
 func TestDict(t *testing.T) {
@@ -162,11 +162,11 @@ func TestDict(t *testing.T) {
 	v, err = d.Get(nil, tp)
 	ok(t, v, err, True)
 
-	d, err = NewDict(nil, []*HEntry{{Null, True}})
-	fail(t, d, err, "NullValue")
+	_, err = NewHashMap(nil, []*HEntry{{Null, True}})
+	fail(t, nil, err, "NullValue")
 
-	d, err = NewDict(nil, []*HEntry{{NewList([]Value{}), True}})
-	fail(t, d, err, "TypeMismatch: Type List cannot be hashed")
+	_, err = NewHashMap(nil, []*HEntry{{NewList([]Value{}), True}})
+	fail(t, nil, err, "TypeMismatch: Type List cannot be hashed")
 }
 
 func newSet(values []Value) Set {

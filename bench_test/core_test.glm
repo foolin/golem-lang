@@ -53,6 +53,10 @@ fn testExpressions() {
     assert('a' + null == 'anull')
     assert(null + 'a' == 'nulla')
 
+    assert("\n\"abc\"\ndef" == `
+"abc"
+def`)
+
     fail(|| => true + null, 'TypeMismatch: Expected Int or Float, not Bool')
     fail(|| => 1 + null, 'TypeMismatch: Expected Int or Float, not Null')
     fail(|| => null + 1, 'TypeMismatch: Expected Int or Float, not Null')

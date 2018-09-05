@@ -17,11 +17,11 @@ var Path g.Struct
 
 func init() {
 	var err error
-	Path, err = g.NewFieldStruct(
+	Path, err = g.NewFrozenFieldStruct(
 		map[string]g.Field{
 			"ext":  g.NewField(ext),
 			"walk": g.NewField(walk),
-		}, true)
+		})
 	g.Assert(err == nil)
 }
 

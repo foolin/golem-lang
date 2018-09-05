@@ -100,7 +100,7 @@ func (c *compiler) makeModuleContents() g.Struct {
 		}
 	}
 
-	stc, err := g.NewFieldStruct(fields, false)
+	stc, err := g.NewFieldStruct(fields)
 	g.Assert(err == nil)
 	return stc
 }

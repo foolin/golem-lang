@@ -283,12 +283,12 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 		f.stack = f.stack[:n-numVals+1]
 
-		dict, err := g.NewDict(itp, entries)
+		hashmap, err := g.NewHashMap(itp, entries)
 		if err != nil {
 			return nil, err
 		}
 
-		f.stack = append(f.stack, dict)
+		f.stack = append(f.stack, g.NewDict(hashmap))
 		f.ip += 3
 
 	case bc.NewStruct:
@@ -300,7 +300,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			fields[name] = g.NewField(g.Null)
 		}
 
-		stc, err := g.NewFieldStruct(fields, false)
+		stc, err := g.NewFieldStruct(fields)
 		if err != nil {
 			return nil, err
 		}

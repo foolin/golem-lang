@@ -109,11 +109,11 @@ func valuesEq(ev Eval, as []Value, bs []Value) (Bool, Error) {
 
 func iteratorStruct() Struct {
 
-	stc, err := NewFieldStruct(
+	stc, err := NewFrozenFieldStruct(
 		map[string]Field{
 			"next": NewReadonlyField(Null),
 			"get":  NewReadonlyField(Null),
-		}, true)
+		})
 	if err != nil {
 		panic("unreachable")
 	}

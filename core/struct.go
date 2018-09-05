@@ -21,7 +21,7 @@ type _struct struct {
 }
 
 // NewFieldStruct create a new Struct backed by Fields
-func NewFieldStruct(fields map[string]Field, frozen bool) (Struct, Error) {
+func NewFieldStruct(fields map[string]Field) (Struct, Error) {
 
 	for key := range fields {
 		if !scanner.IsIdentifier(key) {
@@ -34,11 +34,29 @@ func NewFieldStruct(fields map[string]Field, frozen bool) (Struct, Error) {
 			fields:     fields,
 			replacable: true,
 		},
-		frozen: frozen,
+		frozen: false,
 	}, nil
 }
 
-// NewMethodStruct create a new Struct backed by Methods
+// NewFrozenFieldStruct create a new frozen Struct backed by Fields
+func NewFrozenFieldStruct(fields map[string]Field) (Struct, Error) {
+
+	for key := range fields {
+		if !scanner.IsIdentifier(key) {
+			return nil, InvalidStructKeyError(key)
+		}
+	}
+
+	return &_struct{
+		fieldMap: &hashFieldMap{
+			fields:     fields,
+			replacable: true,
+		},
+		frozen: true,
+	}, nil
+}
+
+// NewMethodStruct create a new Struct backed by Methods.
 func NewMethodStruct(self interface{}, methods map[string]Method) (Struct, Error) {
 
 	for key := range methods {

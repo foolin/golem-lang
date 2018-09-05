@@ -164,11 +164,11 @@ func NewErrorStruct(err Error, stackTrace []string) ErrorStruct {
 	list, e := NewList(vals).Freeze(nil)
 	Assert(e == nil)
 
-	stc, e := NewFieldStruct(
+	stc, e := NewFrozenFieldStruct(
 		map[string]Field{
 			"error":      NewReadonlyField(NewStr(err.Error())),
 			"stackTrace": NewReadonlyField(list),
-		}, true)
+		})
 	Assert(e == nil)
 
 	return &errorStruct{stc, err, stackTrace}

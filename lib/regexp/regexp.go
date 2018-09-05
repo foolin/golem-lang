@@ -15,10 +15,10 @@ var Regexp g.Struct
 
 func init() {
 	var err error
-	Regexp, err = g.NewFieldStruct(
+	Regexp, err = g.NewFrozenFieldStruct(
 		map[string]g.Field{
 			"compile": g.NewField(compile),
-		}, true)
+		})
 	g.Assert(err == nil)
 }
 
