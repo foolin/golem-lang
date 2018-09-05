@@ -78,7 +78,7 @@ var StandardBuiltins = []*BuiltinEntry{
 	{"hasField", BuiltinHasField},
 	{"setField", BuiltinSetField},
 
-	//{"arity", BuiltinArity},
+	{"arity", BuiltinArity},
 	{"chan", BuiltinChan},
 	{"merge", BuiltinMerge},
 }
@@ -277,20 +277,23 @@ var BuiltinSetField = NewFixedNativeFunc(
 		return Null, nil
 	})
 
-//// BuiltinArity returns the arity of a function.
-//var BuiltinArity = NewFixedNativeFunc(
-//	[]Type{FuncType},
-//	false,
-//	func(ev Eval, values []Value) (Value, Error) {
-//		//		st, err := NewStruct([]Field{
-//		//			NewField("min", true, NewInt(int64(f.MinArity()))),
-//		//			NewField("max", true, NewInt(int64(f.MaxArity())))}, true)
-//		//		if err != nil {
-//		//			panic("invalid struct")
-//		//		}
-//		//		return st, nil
-//		panic("TODO")
-//	})
+// BuiltinArity returns the arity of a function.
+var BuiltinArity = NewFixedNativeFunc(
+	[]Type{FuncType},
+	false,
+	func(ev Eval, values []Value) (Value, Error) {
+		fn := values[0].(Func)
+		a := fn.Arity()
+		k := NewStr(a.Kind.String())
+		r := NewInt(int64(a.RequiredParams))
+		o := NewInt(int64(a.OptionalParams))
+
+		return NewFieldStruct(map[string]Field{
+			"kind":           NewReadonlyField(k),
+			"requiredParams": NewReadonlyField(r),
+			"optionalParams": NewReadonlyField(o),
+		}, true)
+	})
 
 //-----------------------------------------------------------------
 

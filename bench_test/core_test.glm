@@ -1477,14 +1477,32 @@ fn testChan() {
 //    //assert([ch.recv(), ch.recv()] == [1, 2])
 }
 
-//fn testArity() {
-//
-////    assert(arity(type) == struct { min: 1, max: 1 });
-////    assert(arity(print) == struct { min: 0, max: -1 })
-////    assert(arity(|x,y| => x + y) == struct { min: 2, max: 2 })
-//
-//    failMsg(|| => arity(0), 'TypeMismatch', 'Expected Func')
-//}
+fn testArity() {
+
+    fail(|| => arity(0), 'TypeMismatch: Expected Func, not Int')
+
+    assert(arity(println) == struct { kind: "Variadic", requiredParams: 0, optionalParams: 0 })
+    assert(arity(len)     == struct { kind: "Fixed",    requiredParams: 1, optionalParams: 0 })
+    assert(arity(range)   == struct { kind: "Multiple", requiredParams: 2, optionalParams: 1 })
+
+    let a = []
+    let f = dict{}.addAll([].addAll(fields(a)).map(|name| => (name, arity(getField(a, name)))))
+
+    assert(f ==
+        dict { 
+            "add":      struct { kind: "Fixed",    requiredParams: 1, optionalParams: 0 }, 
+            "addAll":   struct { kind: "Fixed",    requiredParams: 1, optionalParams: 0 }, 
+            "clear":    struct { kind: "Fixed",    requiredParams: 0, optionalParams: 0 }, 
+            "contains": struct { kind: "Fixed",    requiredParams: 1, optionalParams: 0 }, 
+            "filter":   struct { kind: "Fixed",    requiredParams: 1, optionalParams: 0 }, 
+            "indexOf":  struct { kind: "Fixed",    requiredParams: 1, optionalParams: 0 }, 
+            "isEmpty":  struct { kind: "Fixed",    requiredParams: 0, optionalParams: 0 }, 
+            "join":     struct { kind: "Multiple", requiredParams: 0, optionalParams: 1 }, 
+            "map":      struct { kind: "Fixed",    requiredParams: 1, optionalParams: 0 }, 
+            "reduce":   struct { kind: "Fixed",    requiredParams: 2, optionalParams: 0 }, 
+            "remove":   struct { kind: "Fixed",    requiredParams: 1, optionalParams: 0 } 
+        })
+}
 
 fn testRange() {
 
@@ -1796,7 +1814,7 @@ fn main(args) {
     testCapture()
     testNamedFunc()
     testLambda()
-//    testArity() TODO
+    testArity() 
 
     testNull()
     testBool()
