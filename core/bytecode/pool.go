@@ -28,7 +28,7 @@ func (p *Pool) String() string {
 	for i, b := range p.Constants {
 		s, err := b.ToStr(nil)
 		g.Assert(err == nil)
-		buf.WriteString(fmt.Sprintf("    %d: %v\n", i, s))
+		buf.WriteString(fmt.Sprintf("    %d: %s '%v'\n", i, b.Type(), s))
 	}
 
 	buf.WriteString("StructDefs:\n")
@@ -54,11 +54,13 @@ func (p *Pool) String() string {
 			bc := btc[ip]
 			switch bc {
 			case GetField, ImportModule, LoadConst: //  InitField, SetField, IncField
-				prm := DecodeParam(btc, ip)
-				buf.WriteString(fmt.Sprintf(" # '%v'", p.Constants[prm]))
+				q := DecodeParam(btc, ip)
+				c := p.Constants[q]
+				buf.WriteString(fmt.Sprintf(" # %s '%v'", c.Type(), c))
 			case InvokeField:
-				prm, _ := DecodeWideParams(btc, ip)
-				buf.WriteString(fmt.Sprintf(" # '%v'", p.Constants[prm]))
+				q, _ := DecodeWideParams(btc, ip)
+				c := p.Constants[q]
+				buf.WriteString(fmt.Sprintf(" # %s '%v'", c.Type(), c))
 			}
 
 			if curLine != t.LineNumber(ip) {

@@ -161,8 +161,7 @@ type (
 // Composite
 
 type (
-	// Composite is a Value that is composed of other values -- List, Range, Tuple,
-	// Dict, Set, Struct
+	// Composite is a Value that is composed of other values
 	Composite interface {
 		Value
 		compositeMarker()
@@ -193,7 +192,7 @@ type (
 		Filter(Eval, func(Value) (Value, Error)) (List, Error)
 	}
 
-	// Range is an immutable, iterable representation of a  sequence of integers
+	// Range is an immutable, iterable representation of a sequence of integers
 	Range interface {
 		Composite
 		Indexable
@@ -206,14 +205,14 @@ type (
 		Count() Int
 	}
 
-	// Tuple is an immutable sequence of two or more values
+	// Tuple is an immutable tuple of two or more values
 	Tuple interface {
 		Composite
 		Indexable
 		Lenable
 	}
 
-	// Dict is an associative array, a.k.a Hash Map
+	// Dict is an associative array
 	Dict interface {
 		Composite
 		Lenable

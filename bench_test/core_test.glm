@@ -187,6 +187,13 @@ fn testFloat() {
     fail(|| => getField(1.1, 'bogus'), "NoSuchField: Field 'bogus' not found")
     fail(|| => setField(1.1, 'bogus', null), "TypeMismatch: Expected Struct, not Float")
     fail(|| => 1.1 .bogus = 'z', "TypeMismatch: Expected Struct, not Float")
+
+    println('===================================================')
+    assert(1.0 + 2.0 == 3.0)
+    assert(1.0 - 2.0 == -1.0)
+    assert(3.0 * 2.0 == 6.0)
+    assert(3.0 / 2.0 == 1.5)
+    fail(|| => 3.0 / 0.0, 'DivideByZero')
 }
 
 fn testAssignment() {

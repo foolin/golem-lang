@@ -48,13 +48,16 @@ func ok(t *testing.T, pool *bc.Pool, expect *bc.Pool) {
 	}
 }
 
-var builtins []*g.BuiltinEntry = nil
+var builtins = []*g.BuiltinEntry{
+	{"println", g.BuiltinPrintln},
+}
 var builtinMgr = g.NewBuiltinManager(builtins)
 
 func testCompile(t *testing.T, code string) *bc.Module {
 
 	source := &scanner.Source{Name: "foo", Path: "foo.glm", Code: code}
 	mods, errs := CompileSourceFully(builtinMgr, source, nil)
+	fmt.Printf("%v\n", errs)
 	g.Tassert(t, errs == nil)
 	g.Tassert(t, len(mods) == 1)
 
@@ -1080,12 +1083,10 @@ let p = ls.iter().next()
 	})
 }
 
-func TestStruct(t *testing.T) {
+func TestFoo(t *testing.T) {
 
 	code := `
-let x = struct {}
-let y = struct {a: 1}
-let z = struct {a: 1, b: 2}
+println(-1.0)
 `
 	mod := testCompile(t, code)
 

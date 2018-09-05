@@ -61,109 +61,57 @@ func (f _float) HashCode(ev Eval) (Int, Error) {
 }
 
 func (f _float) Eq(ev Eval, val Value) (Bool, Error) {
-	switch t := val.(type) {
-
-	case _float:
-		return NewBool(f == t), nil
-
-	case _int:
-		return NewBool(f.FloatVal() == t.FloatVal()), nil
-
-	default:
-		return False, nil
+	if n, ok := val.(Number); ok {
+		fv := f.FloatVal()
+		nv := n.FloatVal()
+		return NewBool(fv == nv), nil
 	}
+	return False, nil
 }
 
 func (f _float) Cmp(ev Eval, c Comparable) (Int, Error) {
-	switch t := c.(type) {
-
-	case _float:
-		if f < t {
+	if n, ok := c.(Number); ok {
+		fv := f.FloatVal()
+		nv := n.FloatVal()
+		if fv < nv {
 			return NegOne, nil
-		} else if f > t {
+		} else if fv > nv {
 			return One, nil
 		} else {
 			return Zero, nil
 		}
-
-	case _int:
-		g := _float(t)
-		if f < g {
-			return NegOne, nil
-		} else if f > g {
-			return One, nil
-		} else {
-			return Zero, nil
-		}
-
-	default:
-		return nil, ComparableMismatchError(FloatType, c.(Value).Type())
 	}
+	return nil, ComparableMismatchError(FloatType, c.(Value).Type())
 }
 
 //--------------------------------------------------------------
 // Number
 
 func (f _float) Add(n Number) Number {
-	switch t := n.(type) {
-
-	case _int:
-		return f + _float(t)
-
-	case _float:
-		return f + t
-
-	default:
-		panic("unreachable")
-	}
+	fv := f.FloatVal()
+	nv := n.FloatVal()
+	return NewFloat(fv + nv)
 }
 
 func (f _float) Sub(n Number) Number {
-	switch t := n.(type) {
-
-	case _int:
-		return f - _float(t)
-
-	case _float:
-		return f - t
-
-	default:
-		panic("unreachable")
-	}
+	fv := f.FloatVal()
+	nv := n.FloatVal()
+	return NewFloat(fv - nv)
 }
 
 func (f _float) Mul(n Number) Number {
-	switch t := n.(type) {
-
-	case _int:
-		return f * _float(t)
-
-	case _float:
-		return f * t
-
-	default:
-		panic("unreachable")
-	}
+	fv := f.FloatVal()
+	nv := n.FloatVal()
+	return NewFloat(fv * nv)
 }
 
 func (f _float) Div(n Number) (Number, Error) {
-	switch t := n.(type) {
-
-	case _int:
-		if t == 0 {
-			return nil, DivideByZeroError()
-		}
-		return f / _float(t), nil
-
-	case _float:
-		if t == 0.0 {
-			return nil, DivideByZeroError()
-		}
-		return f / t, nil
-
-	default:
-		panic("unreachable")
+	if n.FloatVal() == 0.0 {
+		return nil, DivideByZeroError()
 	}
+	fv := f.FloatVal()
+	nv := n.FloatVal()
+	return NewFloat(fv / nv), nil
 }
 
 func (f _float) Negate() Number {

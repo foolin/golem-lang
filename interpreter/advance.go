@@ -815,9 +815,9 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 	case bc.Negate:
 
-		lhs, lhsOk := f.stack[n-1].(g.Number)
+		lhs, lhsOk := f.stack[n].(g.Number)
 		if !lhsOk {
-			return nil, g.NumberMismatchError(f.stack[n-1].Type())
+			return nil, g.NumberMismatchError(f.stack[n].Type())
 		}
 
 		val := lhs.Negate()
