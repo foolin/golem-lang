@@ -18,9 +18,9 @@ func TestField(t *testing.T) {
 	val, err = field.Invoke(nil, []Value{})
 	fail(t, val, err, "TypeMismatch: Expected Func, not Int")
 
-	Tassert(t, !field.IsReadonly())
+	tassert(t, !field.IsReadonly())
 	err = field.Set(nil, One)
-	Tassert(t, err == nil)
+	tassert(t, err == nil)
 
 	val, err = field.Get(nil)
 	ok(t, val, err, One)
@@ -39,14 +39,14 @@ func TestField(t *testing.T) {
 	field = NewField(fn)
 
 	val, err = field.Get(nil)
-	Tassert(t, err == nil && val == fn)
+	tassert(t, err == nil && val == fn)
 
 	val, err = field.Invoke(nil, []Value{Zero})
 	ok(t, val, err, One)
 
-	Tassert(t, !field.IsReadonly())
+	tassert(t, !field.IsReadonly())
 	err = field.Set(nil, One)
-	Tassert(t, err == nil)
+	tassert(t, err == nil)
 
 	val, err = field.Get(nil)
 	ok(t, val, err, One)
@@ -65,7 +65,7 @@ func TestReadonlyField(t *testing.T) {
 	val, err = field.Invoke(nil, []Value{})
 	fail(t, val, err, "TypeMismatch: Expected Func, not Int")
 
-	Tassert(t, field.IsReadonly())
+	tassert(t, field.IsReadonly())
 	err = field.Set(nil, One)
 	fail(t, nil, err, "ReadonlyField")
 
@@ -80,12 +80,12 @@ func TestReadonlyField(t *testing.T) {
 	field = NewReadonlyField(fn)
 
 	val, err = field.Get(nil)
-	Tassert(t, err == nil && val == fn)
+	tassert(t, err == nil && val == fn)
 
 	val, err = field.Invoke(nil, []Value{Zero})
 	ok(t, val, err, One)
 
-	Tassert(t, field.IsReadonly())
+	tassert(t, field.IsReadonly())
 	err = field.Set(nil, One)
 	fail(t, nil, err, "ReadonlyField")
 }
@@ -120,7 +120,7 @@ func TestPropertyField(t *testing.T) {
 	fail(t, nil, err, "InvalidSetterArity: Arity(Fixed,2,0)")
 
 	field, err := NewProperty(get, set)
-	Tassert(t, err == nil)
+	tassert(t, err == nil)
 
 	val, err := field.Get(nil)
 	ok(t, val, err, Zero)
@@ -128,9 +128,9 @@ func TestPropertyField(t *testing.T) {
 	val, err = field.Invoke(nil, []Value{})
 	fail(t, val, err, "TypeMismatch: Expected Func, not Int")
 
-	Tassert(t, !field.IsReadonly())
+	tassert(t, !field.IsReadonly())
 	err = field.Set(nil, One)
-	Tassert(t, err == nil)
+	tassert(t, err == nil)
 
 	val, err = field.Get(nil)
 	ok(t, val, err, One)
@@ -148,14 +148,14 @@ func TestPropertyField(t *testing.T) {
 		})
 
 	val, err = field.Get(nil)
-	Tassert(t, err == nil && val == propVal)
+	tassert(t, err == nil && val == propVal)
 
 	val, err = field.Invoke(nil, []Value{Zero})
 	ok(t, val, err, One)
 
-	Tassert(t, !field.IsReadonly())
+	tassert(t, !field.IsReadonly())
 	err = field.Set(nil, One)
-	Tassert(t, err == nil)
+	tassert(t, err == nil)
 
 	val, err = field.Get(nil)
 	ok(t, val, err, One)
@@ -184,7 +184,7 @@ func TestReadonlyPropertyField(t *testing.T) {
 	fail(t, nil, err, "InvalidGetterArity: Arity(Fixed,2,0)")
 
 	field, err := NewReadonlyProperty(get)
-	Tassert(t, err == nil)
+	tassert(t, err == nil)
 
 	val, err := field.Get(nil)
 	ok(t, val, err, Zero)
@@ -192,7 +192,7 @@ func TestReadonlyPropertyField(t *testing.T) {
 	val, err = field.Invoke(nil, []Value{})
 	fail(t, val, err, "TypeMismatch: Expected Func, not Int")
 
-	Tassert(t, field.IsReadonly())
+	tassert(t, field.IsReadonly())
 	err = field.Set(nil, One)
 	fail(t, nil, err, "ReadonlyField")
 
@@ -206,12 +206,12 @@ func TestReadonlyPropertyField(t *testing.T) {
 		})
 
 	val, err = field.Get(nil)
-	Tassert(t, err == nil && val == propVal)
+	tassert(t, err == nil && val == propVal)
 
 	val, err = field.Invoke(nil, []Value{Zero})
 	ok(t, val, err, One)
 
-	Tassert(t, field.IsReadonly())
+	tassert(t, field.IsReadonly())
 	err = field.Set(nil, One)
 	fail(t, nil, err, "ReadonlyField")
 }

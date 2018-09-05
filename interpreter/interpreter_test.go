@@ -18,6 +18,13 @@ import (
 // 'bench_test/core_test.glm'. Testing is done there by running the Golem CLI
 // application against Golem code.
 
+func tassert(t *testing.T, flag bool) {
+	if !flag {
+		t.Error("assertion failure")
+		panic("tassert")
+	}
+}
+
 var builtins []*g.BuiltinEntry = []*g.BuiltinEntry{
 	{Name: "assert", Value: g.BuiltinAssert},
 }
@@ -28,8 +35,8 @@ func testCompile(t *testing.T, code string) *bc.Module {
 
 	source := &scanner.Source{Name: "foo", Path: "foo.glm", Code: code}
 	mods, errs := compiler.CompileSourceFully(builtinMgr, source, nil)
-	g.Tassert(t, errs == nil)
-	g.Tassert(t, len(mods) == 1)
+	tassert(t, errs == nil)
+	tassert(t, len(mods) == 1)
 
 	return mods[0]
 }
@@ -67,10 +74,10 @@ func fail(t *testing.T, code string, expect g.ErrorStruct) {
 	}
 
 	eq, e := expect.Eq(nil, err)
-	g.Tassert(t, e == nil)
+	tassert(t, e == nil)
 
 	if !eq.(g.Bool).BoolVal() {
-		t.Error(mustStr(err), " != ", mustStr(expect))
+		t.Error(err, " != ", expect)
 		panic("fail")
 	}
 }
@@ -86,23 +93,23 @@ fn c() {}
 	itp := NewInterpreter(builtinMgr, []*bc.Module{mod})
 
 	result, errStruct := itp.InitModules()
-	g.Tassert(t, errStruct == nil && len(result) == 1)
+	tassert(t, errStruct == nil && len(result) == 1)
 
 	stc := mod.Contents
 
 	val, err := stc.GetField("a", nil)
-	g.Tassert(t, err == nil && val.Type() == g.IntType)
+	tassert(t, err == nil && val.Type() == g.IntType)
 	val, err = stc.GetField("b", nil)
-	g.Tassert(t, err == nil && val.Type() == g.StrType)
+	tassert(t, err == nil && val.Type() == g.StrType)
 	val, err = stc.GetField("c", nil)
-	g.Tassert(t, err == nil && val.Type() == g.FuncType)
+	tassert(t, err == nil && val.Type() == g.FuncType)
 
 	err = stc.SetField("a", nil, g.One)
-	g.Tassert(t, err == nil)
+	tassert(t, err == nil)
 	err = stc.SetField("b", nil, g.One)
-	g.Tassert(t, err.Error() == "ReadonlyField: Field 'b' is readonly")
+	tassert(t, err.Error() == "ReadonlyField: Field 'b' is readonly")
 	err = stc.SetField("c", nil, g.One)
-	g.Tassert(t, err.Error() == "ReadonlyField: Field 'c' is readonly")
+	tassert(t, err.Error() == "ReadonlyField: Field 'c' is readonly")
 
 	code = `
 let a = 1
@@ -113,7 +120,7 @@ let b = 5
 	itp = NewInterpreter(builtinMgr, []*bc.Module{mod})
 
 	result, errStruct = itp.InitModules()
-	g.Tassert(t, errStruct == nil && len(result) == 1)
+	tassert(t, errStruct == nil && len(result) == 1)
 	ok(t, result[0], nil, g.NewInt(3))
 
 	stc = mod.Contents
@@ -142,13 +149,13 @@ assert([1, 2, 3] == [a.x, b.y, c.z])
 	}
 
 	mods, errs := compiler.CompileSourceFully(builtinMgr, srcMain, resolver)
-	g.Tassert(t, errs == nil)
-	g.Tassert(t, len(mods) == 4)
+	tassert(t, errs == nil)
+	tassert(t, len(mods) == 4)
 
 	itp := NewInterpreter(builtinMgr, mods)
 	result, errStruct := itp.InitModules()
-	g.Tassert(t, errStruct == nil)
-	g.Tassert(t, len(result) == 4)
+	tassert(t, errStruct == nil)
+	tassert(t, len(result) == 4)
 }
 
 func TestFinally(t *testing.T) {

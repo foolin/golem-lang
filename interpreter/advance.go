@@ -30,7 +30,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		params := f.stack[n-p+1:]
 
 		switch fn := f.stack[n-p].(type) {
-		case bc.BytecodeFunc:
+		case bc.Func:
 
 			// check arity, and modify params if necessary
 			arity := fn.Template().Arity
@@ -144,7 +144,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		params := f.stack[n-p+1:]
 
 		switch fn := f.stack[n-p].(type) {
-		case bc.BytecodeFunc:
+		case bc.Func:
 			f.stack = f.stack[:n-p]
 			f.ip += 3
 
@@ -195,7 +195,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.FuncLocal:
 
 		// get function from stack
-		fn := f.stack[n].(bc.BytecodeFunc)
+		fn := f.stack[n].(bc.Func)
 
 		// push a local onto the captures of the function
 		p := bc.DecodeParam(btc, f.ip)
@@ -205,7 +205,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.FuncCapture:
 
 		// get function from stack
-		fn := f.stack[n].(bc.BytecodeFunc)
+		fn := f.stack[n].(bc.Func)
 
 		// push a capture onto the captures of the function
 		p := bc.DecodeParam(btc, f.ip)

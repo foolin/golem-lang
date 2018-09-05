@@ -12,13 +12,6 @@ import (
 	g "github.com/mjarmy/golem-lang/core"
 )
 
-func Tassert(t *testing.T, flag bool) {
-	if !flag {
-		t.Error("assertion failure")
-		panic("Tassert")
-	}
-}
-
 func ok(t *testing.T, val interface{}, err g.Error, expect interface{}) {
 
 	if err != nil {
@@ -46,7 +39,7 @@ func okNames(t *testing.T, val []string, err g.Error, expect []string) {
 }
 
 func okType(t *testing.T, val g.Value, expected g.Type) {
-	Tassert(t, val.Type() == expected)
+	tassert(t, val.Type() == expected)
 }
 
 func TestBytecodeFunc(t *testing.T) {
@@ -93,12 +86,12 @@ func TestLineNumber(t *testing.T) {
 		ExceptionHandlers: nil,
 	}
 
-	Tassert(t, tp.LineNumber(0) == 0)
-	Tassert(t, tp.LineNumber(1) == 2)
-	Tassert(t, tp.LineNumber(10) == 2)
-	Tassert(t, tp.LineNumber(11) == 3)
-	Tassert(t, tp.LineNumber(19) == 3)
-	Tassert(t, tp.LineNumber(20) == 4)
-	Tassert(t, tp.LineNumber(28) == 4)
-	Tassert(t, tp.LineNumber(29) == 0)
+	tassert(t, tp.LineNumber(0) == 0)
+	tassert(t, tp.LineNumber(1) == 2)
+	tassert(t, tp.LineNumber(10) == 2)
+	tassert(t, tp.LineNumber(11) == 3)
+	tassert(t, tp.LineNumber(19) == 3)
+	tassert(t, tp.LineNumber(20) == 4)
+	tassert(t, tp.LineNumber(28) == 4)
+	tassert(t, tp.LineNumber(29) == 0)
 }

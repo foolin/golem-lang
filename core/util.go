@@ -4,23 +4,14 @@
 
 package core
 
-import (
-	"testing"
-)
-
+// Assert asserts that something is true
 func Assert(flag bool) {
 	if !flag {
 		panic("assertion failure")
 	}
 }
 
-func Tassert(t *testing.T, flag bool) {
-	if !flag {
-		t.Error("assertion failure")
-		panic("Tassert")
-	}
-}
-
+// CopyValues makes a copy of a slice of Values
 func CopyValues(v []Value) []Value {
 	c := make([]Value, len(v))
 	copy(c, v)

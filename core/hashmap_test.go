@@ -11,7 +11,7 @@ import (
 
 func newHashMap(t *testing.T, entries []*HEntry) *HashMap {
 	h, err := NewHashMap(nil, entries)
-	Tassert(t, err == nil)
+	tassert(t, err == nil)
 	return h
 }
 

@@ -162,7 +162,7 @@ func main() {
 	// run main, if it exists
 	mainVal, mainErr := mods[0].Contents.GetField("main", intp)
 	if mainErr == nil {
-		mainFn, ok := mainVal.(bc.BytecodeFunc)
+		mainFn, ok := mainVal.(bc.Func)
 		if !ok {
 			exitError(fmt.Errorf("'main' is not a function"))
 		}

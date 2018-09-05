@@ -6,9 +6,14 @@ package bytecode
 
 import (
 	"testing"
-
-	g "github.com/mjarmy/golem-lang/core"
 )
+
+func tassert(t *testing.T, flag bool) {
+	if !flag {
+		t.Error("assertion failure")
+		panic("tassert")
+	}
+}
 
 func push(btc []byte, bytes ...byte) []byte {
 	return append(btc, bytes...)
@@ -29,22 +34,22 @@ func TestBytecodes(t *testing.T) {
 	a, b, c, d := EncodeWideParams(3, 1234)
 	btc = push(btc, InvokeField, a, b, c, d)
 
-	g.Tassert(t, 12 == len(btc))
+	tassert(t, 12 == len(btc))
 
-	g.Tassert(t, LoadNull == btc[0])
+	tassert(t, LoadNull == btc[0])
 
-	g.Tassert(t, LoadConst == btc[1])
-	g.Tassert(t, 0 == DecodeParam(btc, 1))
+	tassert(t, LoadConst == btc[1])
+	tassert(t, 0 == DecodeParam(btc, 1))
 
-	g.Tassert(t, LoadLocal == btc[4])
-	g.Tassert(t, 100 == DecodeParam(btc, 4))
+	tassert(t, LoadLocal == btc[4])
+	tassert(t, 100 == DecodeParam(btc, 4))
 
-	g.Tassert(t, InvokeField == btc[7])
+	tassert(t, InvokeField == btc[7])
 	p, q := DecodeWideParams(btc, 7)
-	g.Tassert(t, 3 == p && 1234 == q)
+	tassert(t, 3 == p && 1234 == q)
 
-	g.Tassert(t, FmtBytecode(btc, 0) == "0: LoadNull")
-	g.Tassert(t, FmtBytecode(btc, 1) == "1: LoadConst    0 0 (0)")
-	g.Tassert(t, FmtBytecode(btc, 4) == "4: LoadLocal    0 100 (100)")
-	g.Tassert(t, FmtBytecode(btc, 7) == "7: InvokeField  0 3 (3), 4 210 (1234)")
+	tassert(t, FmtBytecode(btc, 0) == "0: LoadNull")
+	tassert(t, FmtBytecode(btc, 1) == "1: LoadConst    0 0 (0)")
+	tassert(t, FmtBytecode(btc, 4) == "4: LoadLocal    0 100 (100)")
+	tassert(t, FmtBytecode(btc, 7) == "7: InvokeField  0 3 (3), 4 210 (1234)")
 }

@@ -249,7 +249,7 @@ var setMethods = map[string]Method{
 
 func (s *set) FieldNames() ([]string, Error) {
 	names := make([]string, 0, len(setMethods))
-	for name, _ := range setMethods {
+	for name := range setMethods {
 		names = append(names, name)
 	}
 	return names, nil

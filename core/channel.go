@@ -83,7 +83,7 @@ var chanMethods = map[string]Method{
 
 func (ch *channel) FieldNames() ([]string, Error) {
 	names := make([]string, 0, len(chanMethods))
-	for name, _ := range chanMethods {
+	for name := range chanMethods {
 		names = append(names, name)
 	}
 	return names, nil

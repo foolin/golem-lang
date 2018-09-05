@@ -77,7 +77,7 @@ func (itp *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
 
 	switch t := fn.(type) {
 
-	case bc.BytecodeFunc:
+	case bc.Func:
 		val, errStruct := itp.EvalBytecode(t, params)
 		if errStruct != nil {
 			return nil, errStruct.Error()
@@ -92,7 +92,8 @@ func (itp *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
 	}
 }
 
-func (itp *Interpreter) EvalBytecode(fn bc.BytecodeFunc, params []g.Value) (g.Value, g.ErrorStruct) {
+// EvalBytecode evaluates a bytecode.Func
+func (itp *Interpreter) EvalBytecode(fn bc.Func, params []g.Value) (g.Value, g.ErrorStruct) {
 	val, err := itp.eval(fn, newLocals(fn.Template().NumLocals, params))
 	if err != nil {
 		return nil, err
@@ -103,7 +104,7 @@ func (itp *Interpreter) EvalBytecode(fn bc.BytecodeFunc, params []g.Value) (g.Va
 //-------------------------------------------------------------------------
 
 func (itp *Interpreter) eval(
-	fn bc.BytecodeFunc,
+	fn bc.Func,
 	locals []*bc.Ref) (result g.Value, errStruct g.ErrorStruct) {
 
 	lastFrame := len(itp.frames)

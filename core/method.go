@@ -17,8 +17,13 @@ type (
 		ToFunc(interface{}, string) NativeFunc
 	}
 
-	MethodInvoke        func(interface{}, Eval, []Value) (Value, Error)
+	// MethodInvoke defines a func signature used for invoking a Method
+	MethodInvoke func(interface{}, Eval, []Value) (Value, Error)
+
+	// NullaryMethodInvoke defines a func signature used for invoking a nullary Method
 	NullaryMethodInvoke func(interface{}, Eval) (Value, Error)
+
+	// WrapperMethodInvoke defines a func signature used for invoking a wrapper Method
 	WrapperMethodInvoke func(interface{}) Value
 )
 

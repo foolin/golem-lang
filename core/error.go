@@ -13,6 +13,7 @@ type (
 	Error error
 )
 
+// NewError creates a new Error
 func NewError(s string) Error {
 	return fmt.Errorf(s)
 }
@@ -115,7 +116,7 @@ func ImmutableValueError() Error {
 
 // InvalidStructKeyError creates a ReadonlyField Error
 func InvalidStructKeyError(key string) Error {
-	return fmt.Errorf("InvalidStructKey: '%s' is not a valid struct key.", key)
+	return fmt.Errorf("InvalidStructKey: '%s' is not a valid struct key", key)
 }
 
 // UndefinedModuleError creates a UndefinedModule Error
@@ -152,6 +153,7 @@ type (
 	}
 )
 
+// NewErrorStruct creates a Struct that contains an error and a stack trace.
 func NewErrorStruct(err Error, stackTrace []string) ErrorStruct {
 
 	// make list-of-str

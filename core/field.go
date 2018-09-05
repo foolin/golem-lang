@@ -10,6 +10,7 @@ import (
 )
 
 type (
+	// Field is a field on a Value
 	Field interface {
 		Get(Eval) (Value, Error)
 		Invoke(Eval, []Value) (Value, Error)
@@ -26,6 +27,7 @@ type field struct {
 	value Value
 }
 
+// NewField creates a Field that contains a Value
 func NewField(val Value) Field {
 	return &field{val}
 }
@@ -65,6 +67,7 @@ type readonlyField struct {
 	value Value
 }
 
+// NewReadonlyField creates a readonly Field that contains a Value
 func NewReadonlyField(val Value) Field {
 	return &readonlyField{val}
 }
@@ -98,6 +101,7 @@ type property struct {
 	set Func
 }
 
+// NewProperty creates a Field that is defined by a 'getter' and a 'setter'.
 func NewProperty(get Func, set Func) (Field, Error) {
 
 	if !reflect.DeepEqual(Arity{FixedArity, 0, 0}, get.Arity()) {
@@ -146,6 +150,7 @@ type readonlyProperty struct {
 	get Func
 }
 
+// NewReadonlyProperty creates a readonly Field that is defined by a 'getter'.
 func NewReadonlyProperty(get Func) (Field, Error) {
 
 	if !reflect.DeepEqual(Arity{FixedArity, 0, 0}, get.Arity()) {

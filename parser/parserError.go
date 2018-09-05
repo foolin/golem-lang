@@ -13,17 +13,17 @@ import (
 type parserErrorKind int
 
 const (
-	UnexpectedChar parserErrorKind = iota
-	UnexpectedToken
-	UnexpectedReservedWork
-	UnexpectedEOF
-	InvalidPostfix
-	InvalidFor
-	InvalidSwitch
-	InvalidTry
-	InvalidPropertyGetter
-	InvalidPropertySetter
-	DuplicateKey
+	unexpectedChar parserErrorKind = iota
+	unexpectedToken
+	unexpectedReservedWork
+	unexpectedEOF
+	invalidPostfix
+	invalidFor
+	invalidSwitch
+	invalidTry
+	invalidPropertyGetter
+	invalidPropertySetter
+	duplicateKey
 )
 
 type parserError struct {
@@ -40,37 +40,37 @@ func (e *parserError) Error() string {
 
 	switch e.kind {
 
-	case UnexpectedChar:
+	case unexpectedChar:
 		return fmt.Sprintf("Unexpected Character '%v' at %s:%v", e.token.Text, e.path, e.token.Position)
 
-	case UnexpectedToken:
+	case unexpectedToken:
 		return fmt.Sprintf("Unexpected Token '%v' at %s:%v", e.token.Text, e.path, e.token.Position)
 
-	case UnexpectedReservedWork:
+	case unexpectedReservedWork:
 		return fmt.Sprintf("Unexpected Reserved Word '%v' at %s:%v", e.token.Text, e.path, e.token.Position)
 
-	case UnexpectedEOF:
+	case unexpectedEOF:
 		return fmt.Sprintf("Unexpected EOF at %s:%v", e.path, e.token.Position)
 
-	case InvalidPostfix:
+	case invalidPostfix:
 		return fmt.Sprintf("Invalid Postfix Expression at %s:%v", e.path, e.token.Position)
 
-	case InvalidFor:
+	case invalidFor:
 		return fmt.Sprintf("Invalid ForStmt Expression at %s:%v", e.path, e.token.Position)
 
-	case InvalidSwitch:
+	case invalidSwitch:
 		return fmt.Sprintf("Invalid SwitchStmt Expression at %s:%v", e.path, e.token.Position)
 
-	case InvalidTry:
+	case invalidTry:
 		return fmt.Sprintf("Invalid Try Expression at %s:%v", e.path, e.token.Position)
 
-	case InvalidPropertyGetter:
+	case invalidPropertyGetter:
 		return fmt.Sprintf("Invalid Property Getter at %s:%v", e.path, e.token.Position)
 
-	case InvalidPropertySetter:
+	case invalidPropertySetter:
 		return fmt.Sprintf("Invalid Property Setter at %s:%v", e.path, e.token.Position)
 
-	case DuplicateKey:
+	case duplicateKey:
 		return fmt.Sprintf("Duplicate Key at %s:%v", e.path, e.token.Position)
 
 	default:

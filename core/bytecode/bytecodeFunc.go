@@ -10,8 +10,8 @@ import (
 	g "github.com/mjarmy/golem-lang/core"
 )
 
-// BytecodeFunc is a Func that is implemented in Golem
-type BytecodeFunc interface {
+// Func is a Func that is implemented in Golem
+type Func interface {
 	g.Func
 
 	Template() *FuncTemplate
@@ -24,9 +24,9 @@ type bytecodeFunc struct {
 	captures []*Ref
 }
 
-// NewBytecodeFunc creates a new BytecodeFunc.  NewBytecodeFunc is
+// NewBytecodeFunc creates a new Func.  NewBytecodeFunc is
 // called via NewFunc opcode at runtime.
-func NewBytecodeFunc(template *FuncTemplate) BytecodeFunc {
+func NewBytecodeFunc(template *FuncTemplate) Func {
 	captures := make([]*Ref, 0, template.NumCaptures)
 	return &bytecodeFunc{template, captures}
 }
@@ -51,7 +51,7 @@ func (f *bytecodeFunc) ToStr(ev g.Eval) (g.Str, g.Error) {
 
 func (f *bytecodeFunc) Eq(ev g.Eval, val g.Value) (g.Bool, g.Error) {
 	switch t := val.(type) {
-	case BytecodeFunc:
+	case Func:
 		// equality is based on identity
 		return g.NewBool(f == t), nil
 	default:

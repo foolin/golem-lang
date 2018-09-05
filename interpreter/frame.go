@@ -5,7 +5,7 @@
 package interpreter
 
 import (
-	"fmt"
+	//"fmt"
 
 	g "github.com/mjarmy/golem-lang/core"
 	bc "github.com/mjarmy/golem-lang/core/bytecode"
@@ -16,46 +16,46 @@ import (
 //---------------------------------------------------------------
 
 type frame struct {
-	fn     bc.BytecodeFunc
+	fn     bc.Func
 	locals []*bc.Ref
 	stack  []g.Value
 	ip     int
 }
 
-func mustStr(val g.Value) string {
-	s, err := val.ToStr(nil)
-	if err != nil {
-		return "ToStr ERROR: " + err.Error()
-	}
-	return s.String()
-}
-
-func dumpFrames(frames []*frame) {
-
-	fmt.Printf("-----------------------------------------\n")
-
-	f := frames[len(frames)-1]
-	opc := f.fn.Template().Bytecodes
-
-	fmt.Printf("%s\n", bc.FmtBytecode(opc, f.ip))
-
-	for j, f := range frames {
-		fmt.Printf("frame %d\n", j)
-		dumpFrame(f)
-	}
-}
-
-func dumpFrame(f *frame) {
-
-	fmt.Printf("    locals:\n")
-	for j, r := range f.locals {
-		fmt.Printf("        %d: %s\n", j, mustStr(r.Val))
-	}
-
-	fmt.Printf("    stack:\n")
-	for j, v := range f.stack {
-		fmt.Printf("        %d: %s\n", j, mustStr(v))
-	}
-
-	fmt.Printf("    ip: %d\n", f.ip)
-}
+//func dumpStr(val g.Value) string {
+//	s, err := val.ToStr(nil)
+//	if err != nil {
+//		return "ToStr ERROR: " + err.Error()
+//	}
+//	return s.String()
+//}
+//
+//func dumpFrames(frames []*frame) {
+//
+//	fmt.Printf("-----------------------------------------\n")
+//
+//	f := frames[len(frames)-1]
+//	opc := f.fn.Template().Bytecodes
+//
+//	fmt.Printf("%s\n", bc.FmtBytecode(opc, f.ip))
+//
+//	for j, f := range frames {
+//		fmt.Printf("frame %d\n", j)
+//		dumpFrame(f)
+//	}
+//}
+//
+//func dumpFrame(f *frame) {
+//
+//	fmt.Printf("    locals:\n")
+//	for j, r := range f.locals {
+//		fmt.Printf("        %d: %s\n", j, dumpStr(r.Val))
+//	}
+//
+//	fmt.Printf("    stack:\n")
+//	for j, v := range f.stack {
+//		fmt.Printf("        %d: %s\n", j, dumpStr(v))
+//	}
+//
+//	fmt.Printf("    ip: %d\n", f.ip)
+//}

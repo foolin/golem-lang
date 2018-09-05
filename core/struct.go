@@ -20,9 +20,10 @@ type _struct struct {
 	frozen   bool
 }
 
+// NewFieldStruct create a new Struct backed by Fields
 func NewFieldStruct(fields map[string]Field, frozen bool) (Struct, Error) {
 
-	for key, _ := range fields {
+	for key := range fields {
 		if !scanner.IsIdentifier(key) {
 			return nil, InvalidStructKeyError(key)
 		}
@@ -37,9 +38,10 @@ func NewFieldStruct(fields map[string]Field, frozen bool) (Struct, Error) {
 	}, nil
 }
 
+// NewMethodStruct create a new Struct backed by Methods
 func NewMethodStruct(self interface{}, methods map[string]Method) (Struct, Error) {
 
-	for key, _ := range methods {
+	for key := range methods {
 		if !scanner.IsIdentifier(key) {
 			return nil, InvalidStructKeyError(key)
 		}
@@ -54,6 +56,7 @@ func NewMethodStruct(self interface{}, methods map[string]Method) (Struct, Error
 	}, nil
 }
 
+// MergeStructs creates a new Struct by merging together some existing structs.
 func MergeStructs(structs []Struct) (Struct, Error) {
 
 	if len(structs) < 2 {
@@ -105,7 +108,6 @@ func (st *_struct) ToStr(ev Eval) (Str, Error) {
 		if i > 0 {
 			buf.WriteString(",")
 		}
-		i++
 		buf.WriteString(" ")
 		buf.WriteString(name)
 		buf.WriteString(": ")
@@ -131,7 +133,7 @@ func (st *_struct) HashCode(ev Eval) (Int, Error) {
 	return nil, HashCodeMismatchError(StructType)
 }
 
-func (this *_struct) Eq(ev Eval, val Value) (Bool, Error) {
+func (st *_struct) Eq(ev Eval, val Value) (Bool, Error) {
 
 	// same type
 	that, ok := val.(Struct)
@@ -140,7 +142,7 @@ func (this *_struct) Eq(ev Eval, val Value) (Bool, Error) {
 	}
 
 	// same number of fields
-	n1, err := this.FieldNames()
+	n1, err := st.FieldNames()
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +165,7 @@ func (this *_struct) Eq(ev Eval, val Value) (Bool, Error) {
 			return False, nil
 		}
 
-		a, err := this.GetField(name, ev)
+		a, err := st.GetField(name, ev)
 		if err != nil {
 			return nil, err
 		}

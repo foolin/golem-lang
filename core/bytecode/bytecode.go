@@ -102,7 +102,8 @@ const (
 	Continue = 0xFF
 )
 
-func BytecodeString(bc byte) string {
+// String returns the string representation of a bytecode
+func String(bc byte) string {
 
 	switch bc {
 
@@ -273,8 +274,8 @@ func BytecodeString(bc byte) string {
 	}
 }
 
-// BytecodeSize returns how 'wide' a bytecode is.  Bytecodes are always either 1, 3, or 5 bytes long.
-func BytecodeSize(bc byte) int {
+// Size returns how 'wide' a bytecode is.  Bytecodes are always either 1, 3, or 5 bytes long.
+func Size(bc byte) int {
 
 	switch bc {
 
@@ -311,6 +312,7 @@ func BytecodeSize(bc byte) int {
 	}
 }
 
+// EncodeParam encodes a bytecode parameter into 2 bytes.
 func EncodeParam(p int) (byte, byte) {
 
 	// TODO implicit wide indexing
@@ -321,6 +323,7 @@ func EncodeParam(p int) (byte, byte) {
 	return byte((p >> 8) & 0xFF), byte(p & 0xFF)
 }
 
+// EncodeWideParams encodes two bytecode parameters into 4 bytes.
 func EncodeWideParams(p, q int) (byte, byte, byte, byte) {
 
 	a, b := EncodeParam(p)
@@ -328,6 +331,7 @@ func EncodeWideParams(p, q int) (byte, byte, byte, byte) {
 	return a, b, c, d
 }
 
+// DecodeParam decodes the paramter associated with a bytecode
 func DecodeParam(btc []byte, ip int) int {
 
 	high := btc[ip+1]
@@ -336,16 +340,18 @@ func DecodeParam(btc []byte, ip int) int {
 	return int(high)<<8 + int(low)
 }
 
+// DecodeWideParams decodes two paramters associated with a bytecode
 func DecodeWideParams(btc []byte, ip int) (int, int) {
 
 	return DecodeParam(btc, ip), DecodeParam(btc, ip+2)
 }
 
+// FmtBytecode formats a bytecode
 func FmtBytecode(btc []byte, ip int) string {
 
-	str := BytecodeString(btc[ip])
+	str := String(btc[ip])
 
-	switch BytecodeSize(btc[ip]) {
+	switch Size(btc[ip]) {
 
 	case 1:
 		return fmt.Sprintf("%d: %s", ip, str)

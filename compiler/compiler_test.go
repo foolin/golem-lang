@@ -14,6 +14,13 @@ import (
 	"github.com/mjarmy/golem-lang/scanner"
 )
 
+func tassert(t *testing.T, flag bool) {
+	if !flag {
+		t.Error("assertion failure")
+		panic("tassert")
+	}
+}
+
 func ok(t *testing.T, pool *bc.Pool, expect *bc.Pool) {
 
 	if !reflect.DeepEqual(pool.Constants, expect.Constants) {
@@ -57,8 +64,8 @@ func testCompile(t *testing.T, code string) *bc.Module {
 
 	source := &scanner.Source{Name: "foo", Path: "foo.glm", Code: code}
 	mods, errs := CompileSourceFully(builtinMgr, source, nil)
-	g.Tassert(t, errs == nil)
-	g.Tassert(t, len(mods) == 1)
+	tassert(t, errs == nil)
+	tassert(t, len(mods) == 1)
 
 	return mods[0]
 }
@@ -979,12 +986,12 @@ func TestImport(t *testing.T) {
 	}
 
 	mods, errs := CompileSourceFully(builtinMgr, srcMain, resolver)
-	g.Tassert(t, errs == nil)
-	g.Tassert(t, len(mods) == 4)
-	g.Tassert(t, mods[0].Name == "foo")
-	g.Tassert(t, mods[1].Name == "a")
-	g.Tassert(t, mods[2].Name == "b")
-	g.Tassert(t, mods[3].Name == "c")
+	tassert(t, errs == nil)
+	tassert(t, len(mods) == 4)
+	tassert(t, mods[0].Name == "foo")
+	tassert(t, mods[1].Name == "a")
+	tassert(t, mods[2].Name == "b")
+	tassert(t, mods[3].Name == "c")
 }
 
 func TestTry(t *testing.T) {
@@ -1000,7 +1007,7 @@ finally {
 `
 	mod := testCompile(t, code)
 
-	g.Tassert(t, mod.Pool.Templates[0].ExceptionHandlers[0] ==
+	tassert(t, mod.Pool.Templates[0].ExceptionHandlers[0] ==
 		bc.ExceptionHandler{
 			Begin:   5,
 			End:     14,

@@ -11,6 +11,13 @@ import (
 	"testing"
 )
 
+func tassert(t *testing.T, flag bool) {
+	if !flag {
+		t.Error("assertion failure")
+		panic("tassert")
+	}
+}
+
 func ok(t *testing.T, val interface{}, err Error, expect interface{}) {
 
 	if err != nil {
@@ -51,7 +58,7 @@ func fail(t *testing.T, val interface{}, err Error, expect string) {
 }
 
 func okType(t *testing.T, val Value, expected Type) {
-	Tassert(t, val.Type() == expected)
+	tassert(t, val.Type() == expected)
 }
 
 func TestNull(t *testing.T) {
@@ -94,8 +101,8 @@ func TestBool(t *testing.T) {
 	okType(t, True, BoolType)
 	okType(t, False, BoolType)
 
-	Tassert(t, True.BoolVal())
-	Tassert(t, !False.BoolVal())
+	tassert(t, True.BoolVal())
+	tassert(t, !False.BoolVal())
 
 	val, err = True.Eq(nil, True)
 	ok(t, val, err, True)
@@ -336,7 +343,6 @@ func TestFloat(t *testing.T) {
 	val = a.Negate()
 	ok(t, val, nil, NewFloat(-0.1))
 
-	val = nil
 	val = NewFloat(3.3).Sub(NewInt(2))
 	ok(t, val, err, NewFloat(float64(3.3)-float64(int64(2))))
 	val = NewFloat(3.3).Sub(NewFloat(2.0))

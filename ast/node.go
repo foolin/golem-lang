@@ -1005,7 +1005,6 @@ func stringParams(
 		if n > 0 {
 			buf.WriteString(", ")
 		}
-		n++
 		if variadic.IsConst {
 			buf.WriteString("const ")
 		}

@@ -13,7 +13,11 @@ type (
 	NativeFunc interface {
 		Func
 	}
-	Invoke        func(Eval, []Value) (Value, Error)
+
+	// Invoke defines a func signature used for invoking a Func
+	Invoke func(Eval, []Value) (Value, Error)
+
+	// NullaryInvoke defines a func signature used for invoking a nullary Func
 	NullaryInvoke func(Eval) (Value, Error)
 )
 
@@ -29,8 +33,6 @@ type nullaryFunc struct {
 func NewNullaryNativeFunc(invoke NullaryInvoke) NativeFunc {
 	return &nullaryFunc{invoke}
 }
-
-func (f *nullaryFunc) funcMarker() {}
 
 func (f *nullaryFunc) Type() Type { return FuncType }
 
@@ -96,8 +98,6 @@ type nativeFunc struct {
 	arity  Arity
 	invoke Invoke
 }
-
-func (f *nativeFunc) funcMarker() {}
 
 func (f *nativeFunc) Type() Type { return FuncType }
 

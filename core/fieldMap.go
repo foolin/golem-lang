@@ -58,7 +58,7 @@ type hashFieldMap struct {
 func (fm *hashFieldMap) names() []string {
 
 	names := make([]string, 0, len(fm.fields))
-	for name, _ := range fm.fields {
+	for name := range fm.fields {
 		names = append(names, name)
 	}
 	return names
@@ -127,7 +127,7 @@ type methodFieldMap struct {
 func (fm *methodFieldMap) names() []string {
 
 	names := make([]string, 0, len(fm.methods))
-	for name, _ := range fm.methods {
+	for name := range fm.methods {
 		names = append(names, name)
 	}
 	return names

@@ -602,7 +602,7 @@ func (c *compiler) fixBreakContinue(begin instPtr, body instPtr, end instPtr) {
 			c.btc[i+1] = begin.high
 			c.btc[i+2] = begin.low
 		}
-		i += bc.BytecodeSize(c.btc[i])
+		i += bc.Size(c.btc[i])
 	}
 }
 

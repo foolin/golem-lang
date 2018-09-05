@@ -166,8 +166,8 @@ const iterate = 2 * 1000 * 1000
 
 func TestBenchmarkDirectInvoke(t *testing.T) {
 
-	var i1 Int = NewInt(1)
-	var i2 Int = NewInt(2)
+	var i1 = NewInt(1)
+	var i2 = NewInt(2)
 
 	for i := 0; i < iterate; i++ {
 		val := i1.Add(i2)
@@ -186,8 +186,8 @@ func TestBenchmarkFuncInvoke(t *testing.T) {
 			return a.Add(b), nil
 		})
 
-	var i1 Int = NewInt(1)
-	var i2 Int = NewInt(2)
+	var i1 = NewInt(1)
+	var i2 = NewInt(2)
 
 	for i := 0; i < iterate; i++ {
 		val, _ := fn.Invoke(nil, []Value{i1, i2})
@@ -206,8 +206,8 @@ func TestBenchmarkMethodInvoke(t *testing.T) {
 			return n.Add(p), nil
 		})
 
-	var i1 Int = NewInt(1)
-	var i2 Int = NewInt(2)
+	var i1 = NewInt(1)
+	var i2 = NewInt(2)
 
 	for i := 0; i < iterate; i++ {
 		val, _ := m.Invoke(i1, nil, []Value{i2})
@@ -226,8 +226,8 @@ func TestBenchmarkMethodFuncInvoke(t *testing.T) {
 			return n.Add(p), nil
 		})
 
-	var i1 Int = NewInt(1)
-	var i2 Int = NewInt(2)
+	var i1 = NewInt(1)
+	var i2 = NewInt(2)
 
 	for i := 0; i < iterate; i++ {
 		fn := m.ToFunc(i1, "foo")

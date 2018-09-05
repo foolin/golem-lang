@@ -70,7 +70,7 @@ func (p *Pool) String() string {
 			}
 
 			buf.WriteString("\n")
-			ip += BytecodeSize(btc[ip])
+			ip += Size(btc[ip])
 		}
 
 		buf.WriteString(fmt.Sprintf("        LineNumberTable:\n"))

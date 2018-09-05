@@ -14,7 +14,7 @@ func TestStruct(t *testing.T) {
 		map[string]Field{
 			"goto": NewField(NewInt(0)),
 		}, true)
-	fail(t, fs, err, "InvalidStructKey: 'goto' is not a valid struct key.")
+	fail(t, fs, err, "InvalidStructKey: 'goto' is not a valid struct key")
 
 	method := NewFixedMethod(
 		[]Type{},
@@ -28,7 +28,7 @@ func TestStruct(t *testing.T) {
 		map[string]Method{
 			" ": method,
 		})
-	fail(t, vs, err, "InvalidStructKey: ' ' is not a valid struct key.")
+	fail(t, vs, err, "InvalidStructKey: ' ' is not a valid struct key")
 }
 
 func TestList(t *testing.T) {
@@ -54,7 +54,7 @@ func TestList(t *testing.T) {
 	ok(t, v, err, Zero)
 
 	_, err = ls.Add(nil, NewStr("a"))
-	Tassert(t, err == nil)
+	tassert(t, err == nil)
 
 	v, err = ls.Eq(nil, NewList([]Value{}))
 	ok(t, v, err, False)
@@ -69,7 +69,7 @@ func TestList(t *testing.T) {
 	ok(t, v, err, NewStr("a"))
 
 	err = ls.Set(nil, Zero, NewStr("b"))
-	Tassert(t, err == nil)
+	tassert(t, err == nil)
 
 	v, err = ls.Get(nil, Zero)
 	ok(t, v, err, NewStr("b"))
@@ -81,7 +81,7 @@ func TestList(t *testing.T) {
 	fail(t, v, err, "IndexOutOfBounds: 1")
 
 	err = ls.Set(nil, NegOne, True)
-	Tassert(t, err == nil)
+	tassert(t, err == nil)
 
 	err = ls.Set(nil, One, True)
 	fail(t, nil, err, "IndexOutOfBounds: 1")
@@ -90,7 +90,7 @@ func TestList(t *testing.T) {
 	ok(t, v, err, NewStr("[ true ]"))
 
 	_, err = ls.Add(nil, NewStr("z"))
-	Tassert(t, err == nil)
+	tassert(t, err == nil)
 
 	v, err = ls.ToStr(nil)
 	ok(t, v, err, NewStr("[ true, z ]"))
@@ -127,7 +127,7 @@ func TestDict(t *testing.T) {
 	ok(t, v, err, Null)
 
 	err = d.Set(nil, NewStr("a"), One)
-	Tassert(t, err == nil)
+	tassert(t, err == nil)
 
 	v, err = d.Get(nil, NewStr("a"))
 	ok(t, v, err, One)
@@ -145,7 +145,7 @@ func TestDict(t *testing.T) {
 	ok(t, v, err, NewStr("dict { a: 1 }"))
 
 	err = d.Set(nil, NewStr("b"), NewInt(2))
-	Tassert(t, err == nil)
+	tassert(t, err == nil)
 
 	v, err = d.Get(nil, NewStr("b"))
 	ok(t, v, err, NewInt(2))

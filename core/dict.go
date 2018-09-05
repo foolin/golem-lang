@@ -252,7 +252,7 @@ var dictMethods = map[string]Method{
 
 func (d *dict) FieldNames() ([]string, Error) {
 	names := make([]string, 0, len(dictMethods))
-	for name, _ := range dictMethods {
+	for name := range dictMethods {
 		names = append(names, name)
 	}
 	return names, nil

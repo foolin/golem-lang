@@ -66,6 +66,7 @@ var reservedWords = map[string]bool{
 	"yield":     true,
 }
 
+// IsKeyword returns whether a string is a keyword
 func IsKeyword(text string) bool {
 	_, ok := keywords[text]
 	if ok {
@@ -75,6 +76,7 @@ func IsKeyword(text string) bool {
 	return ok
 }
 
+// IsIdentifier returns whether a string is an identifier
 func IsIdentifier(text string) bool {
 
 	if IsKeyword(text) {
@@ -96,10 +98,12 @@ func IsIdentifier(text string) bool {
 	return true
 }
 
+// IsIdentStart returns whether a rune can be the start of an identifier
 func IsIdentStart(r rune) bool {
 	return unicode.IsLetter(r) || r == '_'
 }
 
+// IsIdentContinue returns whether a rune can be in the middle of an identifier
 func IsIdentContinue(r rune) bool {
 	return unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_'
 }

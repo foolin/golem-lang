@@ -433,7 +433,7 @@ func (p *Parser) tupleIdents() []*ast.IdentExpr {
 	}
 
 	if len(idents) < 2 {
-		panic(newParserError(p.scn.Source.Path, InvalidFor, lparen))
+		panic(newParserError(p.scn.Source.Path, invalidFor, lparen))
 	}
 
 	return idents
@@ -490,7 +490,7 @@ func (p *Parser) caseStmt() *ast.CaseNode {
 			colon := p.expect(ast.Colon)
 			body := p.statementsAny(ast.Case, ast.Default, ast.Rbrace)
 			if len(body) == 0 {
-				panic(newParserError(p.scn.Source.Path, InvalidSwitch, colon))
+				panic(newParserError(p.scn.Source.Path, invalidSwitch, colon))
 			}
 			return &ast.CaseNode{
 				Token:   token,
@@ -511,7 +511,7 @@ func (p *Parser) defaultStmt() *ast.DefaultNode {
 
 	body := p.statements(ast.Rbrace)
 	if len(body) == 0 {
-		panic(newParserError(p.scn.Source.Path, InvalidSwitch, colon))
+		panic(newParserError(p.scn.Source.Path, invalidSwitch, colon))
 	}
 
 	return &ast.DefaultNode{
@@ -585,7 +585,7 @@ func (p *Parser) tryStmt() *ast.TryStmt {
 
 	// make sure we got at least one of try or catch
 	if catchToken == nil && finallyToken == nil {
-		panic(newParserError(p.scn.Source.Path, InvalidTry, tryToken))
+		panic(newParserError(p.scn.Source.Path, invalidTry, tryToken))
 	}
 
 	// done
@@ -797,7 +797,7 @@ func (p *Parser) postfixExpr() ast.Expression {
 				Op:       tok,
 			}
 		} else {
-			panic(newParserError(p.scn.Source.Path, InvalidPostfix, p.cur.token))
+			panic(newParserError(p.scn.Source.Path, invalidPostfix, p.cur.token))
 		}
 	}
 
@@ -1171,7 +1171,7 @@ func (p *Parser) structBody(token *ast.Token) ast.Expression {
 
 		name := p.cur.token.Text
 		if _, ok := names[name]; ok {
-			panic(newParserError(p.scn.Source.Path, DuplicateKey, p.cur.token))
+			panic(newParserError(p.scn.Source.Path, duplicateKey, p.cur.token))
 		}
 		names[name] = true
 		keys = append(keys, p.cur.token)
@@ -1194,7 +1194,7 @@ func (p *Parser) structBody(token *ast.Token) ast.Expression {
 
 				name := p.cur.token.Text
 				if _, ok := names[name]; ok {
-					panic(newParserError(p.scn.Source.Path, DuplicateKey, p.cur.token))
+					panic(newParserError(p.scn.Source.Path, duplicateKey, p.cur.token))
 				}
 				names[name] = true
 				keys = append(keys, p.cur.token)
@@ -1242,14 +1242,14 @@ func (p *Parser) property() *ast.PropNode {
 
 	get := p.propertyFunc()
 	if len(get.Required) != 0 {
-		panic(newParserError(p.scn.Source.Path, InvalidPropertyGetter, get.Token))
+		panic(newParserError(p.scn.Source.Path, invalidPropertyGetter, get.Token))
 	}
 
 	var set *ast.FnExpr
 	if p.accept(ast.Comma) {
 		set = p.propertyFunc()
 		if len(set.Required) != 1 {
-			panic(newParserError(p.scn.Source.Path, InvalidPropertySetter, set.Token))
+			panic(newParserError(p.scn.Source.Path, invalidPropertySetter, set.Token))
 		}
 	}
 
@@ -1543,10 +1543,10 @@ func (p *Parser) advance() tokenInfo {
 		switch token.Kind {
 
 		case ast.UnexpectedChar:
-			panic(newParserError(p.scn.Source.Path, UnexpectedChar, token))
+			panic(newParserError(p.scn.Source.Path, unexpectedChar, token))
 
 		case ast.UnexpectedEOF:
-			panic(newParserError(p.scn.Source.Path, UnexpectedEOF, token))
+			panic(newParserError(p.scn.Source.Path, unexpectedEOF, token))
 
 		default:
 			panic("unreachable")
@@ -1561,13 +1561,13 @@ func (p *Parser) advance() tokenInfo {
 func (p *Parser) unexpected() error {
 	switch p.cur.token.Kind {
 	case ast.EOF:
-		return newParserError(p.scn.Source.Path, UnexpectedEOF, p.cur.token)
+		return newParserError(p.scn.Source.Path, unexpectedEOF, p.cur.token)
 
 	case ast.Reserved:
-		return newParserError(p.scn.Source.Path, UnexpectedReservedWork, p.cur.token)
+		return newParserError(p.scn.Source.Path, unexpectedReservedWork, p.cur.token)
 
 	default:
-		return newParserError(p.scn.Source.Path, UnexpectedToken, p.cur.token)
+		return newParserError(p.scn.Source.Path, unexpectedToken, p.cur.token)
 	}
 }
 
