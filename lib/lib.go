@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	g "github.com/mjarmy/golem-lang/core"
+	"github.com/mjarmy/golem-lang/lib/encoding"
 	"github.com/mjarmy/golem-lang/lib/os"
 	"github.com/mjarmy/golem-lang/lib/path"
 	"github.com/mjarmy/golem-lang/lib/regexp"
@@ -27,8 +28,10 @@ var BuiltinLib = g.NewFixedNativeFunc(
 			return path.Path, nil
 		case "regexp":
 			return regexp.Regexp, nil
+		case "encoding":
+			return encoding.Encoding, nil
 		default:
-			return nil, g.NewError(
-				fmt.Sprintf("LibraryNotFound: Library '%s' not found", name.String()))
+			return nil, g.Error(fmt.Errorf(
+				"LibraryNotFound: Library '%s' not found", name.String()))
 		}
 	})

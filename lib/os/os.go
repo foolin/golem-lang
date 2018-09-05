@@ -6,6 +6,7 @@ package os
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"os"
 
@@ -46,7 +47,7 @@ var open g.Value = g.NewFixedNativeFunc(
 
 		f, err := os.Open(s.String())
 		if err != nil {
-			return nil, g.NewError("OsError: " + err.Error())
+			return nil, g.Error(fmt.Errorf("OsError: %s", err.Error()))
 		}
 		return newFile(f), nil
 	})
@@ -75,7 +76,7 @@ var stat g.Value = g.NewFixedNativeFunc(
 
 		info, err := os.Stat(s.String())
 		if err != nil {
-			return nil, g.NewError("OsError: " + err.Error())
+			return nil, g.Error(fmt.Errorf("OsError: %s", err.Error()))
 		}
 		return NewFileInfo(info), nil
 	})
@@ -154,7 +155,7 @@ func readLines(f io.Reader) (g.List, g.Error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return nil, g.NewError("OsError: " + err.Error())
+		return nil, g.Error(fmt.Errorf("OsError: %s", err.Error()))
 	}
 
 	return g.NewList(lines), nil
@@ -163,7 +164,7 @@ func readLines(f io.Reader) (g.List, g.Error) {
 func close(f io.Closer) g.Error {
 	err := f.Close()
 	if err != nil {
-		return g.NewError("OsError: " + err.Error())
+		return g.Error(fmt.Errorf("OsError: %s", err.Error()))
 	}
 	return nil
 }

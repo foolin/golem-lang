@@ -181,7 +181,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		}
 
 		// throw an error
-		return nil, g.NewError(s.String())
+		return nil, g.Error(fmt.Errorf("%s", s.String()))
 
 	case bc.NewFunc:
 

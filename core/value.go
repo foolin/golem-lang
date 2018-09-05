@@ -219,6 +219,8 @@ type (
 		Iterable
 		Indexable
 
+		HashMap() *HashMap
+
 		IsEmpty() Bool
 		Contains(Eval, Value) (Bool, Error)
 

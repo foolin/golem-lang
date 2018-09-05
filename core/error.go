@@ -8,15 +8,8 @@ import (
 	"fmt"
 )
 
-type (
-	// Error is an error
-	Error error
-)
-
-// NewError creates a new Error
-func NewError(s string) Error {
-	return fmt.Errorf(s)
-}
+// Error is an error
+type Error error
 
 // NullValueError creates a NullValue Error
 func NullValueError() Error {

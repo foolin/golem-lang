@@ -5,6 +5,7 @@
 package path
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -16,11 +17,17 @@ import (
 var Path g.Struct
 
 func init() {
-	var err error
-	Path, err = g.NewFrozenFieldStruct(
+
+	filepath, err := g.NewFrozenFieldStruct(
 		map[string]g.Field{
 			"ext":  g.NewField(ext),
 			"walk": g.NewField(walk),
+		})
+	g.Assert(err == nil)
+
+	Path, err = g.NewFrozenFieldStruct(
+		map[string]g.Field{
+			"filepath": g.NewField(filepath),
 		})
 	g.Assert(err == nil)
 }
@@ -61,7 +68,7 @@ var walk g.Value = g.NewFixedNativeFunc(
 			if gerr, ok := err.(g.Error); ok {
 				return nil, gerr
 			}
-			return nil, g.NewError("PathError: " + err.Error())
+			return nil, g.Error(fmt.Errorf("PathError: %s", err.Error()))
 		}
 		return g.Null, nil
 	})

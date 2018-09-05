@@ -94,6 +94,10 @@ func (d *dict) Len(ev Eval) (Int, Error) {
 	return d.hashMap.Len(), nil
 }
 
+func (d *dict) HashMap() *HashMap {
+	return d.hashMap
+}
+
 //---------------------------------------------------------------
 
 func (d *dict) IsEmpty() Bool {

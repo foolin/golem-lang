@@ -5,6 +5,7 @@
 package regexp
 
 import (
+	"fmt"
 	"regexp"
 
 	g "github.com/mjarmy/golem-lang/core"
@@ -30,7 +31,7 @@ var compile g.Value = g.NewFixedNativeFunc(
 
 		r, err := regexp.Compile(s.String())
 		if err != nil {
-			return nil, g.NewError("RegexpError: " + err.Error())
+			return nil, g.Error(fmt.Errorf("RegexpError: %s", err.Error()))
 		}
 
 		return makeRegexp(r), nil

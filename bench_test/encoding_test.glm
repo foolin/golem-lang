@@ -1,0 +1,49 @@
+// Copyright 2018 The Golem Language Authors. All rights reserved.
+// Use of this source code is governed by a MIT-style
+// license that can be found in the LICENSE file.
+
+import encoding
+
+const json = encoding.json
+
+fn fail(func, err) {
+    try {
+        func()
+        assert(false)
+    } catch e {
+        //println(e.error)
+        assert(err == e.error)
+    }
+}
+
+fn roundTrip(from) {
+    const s = json.marshal(from)
+    //println(s)
+    const to = json.unmarshal(s)
+    assert(from == to)
+}
+
+fn testJson() {
+
+    roundTrip(null)
+    roundTrip(true)
+    roundTrip(false)
+    roundTrip(1)
+    roundTrip(1.1)
+    roundTrip('abc')
+    roundTrip('abc\ndef')
+    roundTrip([1, 2, 3])
+    roundTrip([])
+    roundTrip([[1, false], null, [2,3,[]]])
+    roundTrip(dict{})
+    roundTrip(dict{'a': 1})
+    roundTrip(dict{'a': 1, 'b': [2, dict {'c': 2.34e-5}]})
+
+    fail(|| => json.unmarshal('@'), "JsonError: invalid character '@' looking for beginning of value")
+    fail(|| => json.marshal(dict{1: 2}), "JsonError: Int is not a valid object key")
+    fail(|| => json.marshal(dict{'a': struct{}}), "JsonError: Struct cannot be marshalled")
+}
+
+fn main(args) {
+    testJson()
+}
