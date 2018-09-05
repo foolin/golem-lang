@@ -25,7 +25,7 @@ fn fail(func, err) {
 }
 
 fn listify(ibl) {
-    let ls = []
+    const ls = []
     for n in ibl {
         ls.add(n)
     }
@@ -33,8 +33,8 @@ fn listify(ibl) {
 }
 
 fn iterate(ibl) {
-    let ls = []
-    let itr = iter(ibl)
+    const ls = []
+    const itr = iter(ibl)
     fail(|| => itr.get(), 'NoSuchElement')
     while itr.next() {
         ls.add(itr.get())
@@ -200,7 +200,7 @@ fn testFloat() {
 }
 
 fn testAssignment() {
-    let funcs = [
+    const funcs = [
         fn () {
             let a = 1
             const b = 2
@@ -234,8 +234,8 @@ fn testAssignment() {
         fn () {
             let a = 10
             let b = 20
-            let c = a++
-            let d = b--
+            const c = a++
+            const d = b--
             assert([11, 19, 10, 20] == [a, b, c, d])
 
             fail(fn() {
@@ -244,26 +244,26 @@ fn testAssignment() {
                 }, "TypeMismatch: Expected Int or Float, not Str")
         },
         fn () {
-            let a = [10]
-            let b = [20]
-            let c = a[0]++
-            let d = b[0]--
+            const a = [10]
+            const b = [20]
+            const c = a[0]++
+            const d = b[0]--
             assert([[11], [19], 10, 20] == [a, b, c, d])
 
             fail(fn() {
-                    let e = ['abc']
+                    const e = ['abc']
                     e[0]++
                 }, "TypeMismatch: Expected Int or Float, not Str")
         },
         fn () {
-            let a = struct { x: 10 }
-            let b = struct { y: 20 }
-            let c = a.x++
-            let d = b.y--
+            const a = struct { x: 10 }
+            const b = struct { y: 20 }
+            const c = a.x++
+            const d = b.y--
             assert([struct { x: 11 }, struct { y: 19 }, 10, 20] == [a, b, c, d])
 
             fail(fn() {
-                    let e = struct { x: 'abc' }
+                    const e = struct { x: 'abc' }
                     e.x++
                 }, "TypeMismatch: Expected Int or Float, not Str")
         }
@@ -274,7 +274,7 @@ fn testAssignment() {
 //fn testTry() {
 //    println('testTry')
 //
-//    let funcs = [
+//    const funcs = [
 //        fn () {
 //            println('begin func 0')
 //            fail(|| => 3 / 0, "DivideByZero")
@@ -290,8 +290,8 @@ fn testAssignment() {
 //        },
 //        fn () {
 //            println('begin func 1')
-//            let a = 0
-//            let b = 0
+//            const a = 0
+//            const b = 0
 //            try {
 //                3 / 0
 //            } catch e {
@@ -308,7 +308,7 @@ fn testAssignment() {
 //        },
 //        fn () {
 //            println('begin func 2')
-//            let a = 0
+//            const a = 0
 //            try {
 //                3 / 0
 //            } catch e {
@@ -321,8 +321,8 @@ fn testAssignment() {
 //        },
 //        fn () {
 //            println('begin func 3')
-//            let a = 0
-//            //let f = fn() {
+//            const a = 0
+//            //const f = fn() {
 //            //    try {
 //            //        3 / 0
 //            //    } catch e {
@@ -331,15 +331,15 @@ fn testAssignment() {
 //            //        a = 2
 //            //    }
 //            //}
-//            //let b = f()
+//            //const b = f()
 //            //assert(b == 1)
 //            //assert(a == 2)
 //            println('end   func 3')
 //        },
 //        fn () {
 //            println('begin func 4')
-//            //let a = 0
-//            //let f = fn() {
+//            //const a = 0
+//            //const f = fn() {
 //            //    try {
 //            //        3 / 0
 //            //    } catch e {
@@ -348,15 +348,15 @@ fn testAssignment() {
 //            //        a = 2
 //            //    }
 //            //}
-//            //let b = f()
+//            //const b = f()
 //            //assert(b == 1)
 //            //assert(a == 2)
 //            println('end   func 4')
 //        }
 //        //fn () {
 //        //    println('func 4')
-//        //    let a = 0
-//        //    let b = 0
+//        //    const a = 0
+//        //    const b = 0
 //        //    //try {
 //        //    //    try {
 //        //    //        3 / 0
@@ -390,7 +390,7 @@ fn testAssignment() {
 //    funcs[4]()
 //
 //    //for i in range(0, len(funcs)) {
-//    //    let f = funcs[i]
+//    //    const f = funcs[i]
 //    //    println('testing ', i, ': ', f)
 //    //    f()
 //    //}
@@ -402,7 +402,7 @@ fn testAssignment() {
 //}
 
 fn testFlowControl() {
-    let funcs = [
+    const funcs = [
         fn () {
             let a = 1; if (true) { a = 2; }
             assert(a == 2)
@@ -412,7 +412,7 @@ fn testFlowControl() {
             assert(a == 1)
         },
         fn () {
-            let a = 1; if (1 == 1) { a = 2; } else { a = 3; }; let b = 4;
+            let a = 1; if (1 == 1) { a = 2; } else { a = 3; }; const b = 4;
             assert(a == 2 && b == 4)
         },
         fn () {
@@ -420,8 +420,8 @@ fn testFlowControl() {
             assert(a == 3 && b == 4)
         },
         fn () {
-            let a = true ? 3 : 4;
-            let b = false ? 5 : 6;
+            const a = true ? 3 : 4;
+            const b = false ? 5 : 6;
             assert(a == 3 && b == 6)
         },
         fn () {
@@ -497,8 +497,8 @@ fn testFlowControl() {
 
 fn testFunc() {
 
-    let f = || => null
-    let g = || => null
+    const f = || => null
+    const g = || => null
 
     assert(f == f)
     assert(g == g)
@@ -532,31 +532,31 @@ fn testFunc() {
 
     a = fn() { }
     b = fn(x) { x; }
-    let c = fn(x, y) { let z = 4; x * y * z; }
-    let d = a()
-    let e = b(1)
-    let h = c(b(2), 3)
+    const c = fn(x, y) { const z = 4; x * y * z; }
+    const d = a()
+    const e = b(1)
+    const h = c(b(2), 3)
     assert([null, 1, 24] == [d, e, h])
 
-    let fibonacciGenerator = fn() {
+    const fibonacciGenerator = fn() {
         let x = 1
         let y = 1
         return fn() {
-            let z = x
+            const z = x
             x = y
             y = x + z
             return z
         }
     }
-    let fg = fibonacciGenerator()
-    let list = []
+    const fg = fibonacciGenerator()
+    const list = []
     for i in range(0, 10) {
         list.add(fg())
     }
     assert([1, 1, 2, 3, 5, 8, 13, 21, 34, 55] == list)
 
-    let foo = fn(n) {
-        let bar = fn(x) {
+    const foo = fn(n) {
+        const bar = fn(x) {
             return x * (x - 1)
         }
         return bar(n) + bar(n-1)
@@ -591,9 +591,9 @@ fn testCapture() {
         }
     }
     const b = acc2(3)
-    let i = b(2)
+    const i = b(2)
     z = 0
-    let j = b(1)
+    const j = b(1)
     assert([0, 7, 8] == [z, i, j])
 
     const m = 123
@@ -608,8 +608,8 @@ fn testCapture() {
     //---------------------
 
     const cap = 1
-    let f1 = || => cap
-    let f2 = || => cap
+    const f1 = || => cap
+    const f2 = || => cap
     assert([1, 1] == [f1(), f2()])
 }
 
@@ -624,10 +624,10 @@ fn testNamedFunc() {
 }
 
 fn testLambda() {
-    let z = 5
-    let a = || => 3
-    let b = |x| => x * x
-    let c = |x, y| => (x + y)*z
+    const z = 5
+    const a = || => 3
+    const b = |x| => x * x
+    const c = |x, y| => (x + y)*z
     assert(a() == 3)
     assert(b(2) == 4)
     assert(c(1, 2) == 15)
@@ -785,8 +785,8 @@ fn testStr() {
     assert('cba們我是這' == reverse)
 
     fail(|| => iter('').get(), 'NoSuchElement')
-    let count = 0
-    let itr = iter(s)
+    const count = 0
+    const itr = iter(s)
     fail(|| => itr.get(), 'NoSuchElement')
     reverse = ''  
     while itr.next() {
@@ -863,8 +863,8 @@ fn testList() {
     assert([1,2,3] != [1])
     assert([1,2,3] != [])
 
-    let x = []
-    let y = [1]
+    const x = []
+    const y = [1]
 
     assert(x == x)
     assert(y == y)
@@ -934,7 +934,7 @@ fn testList() {
 
     //-------------------------------------------------
 
-    let funcs = [
+    const funcs = [
         fn () {
             let count = 0
             for n in [1, 2, 3] {
@@ -945,7 +945,7 @@ fn testList() {
         fn () {
             fail(|| => iter([]).get(), 'NoSuchElement')
             let count = 0
-            let itr = iter([1, 2, 3])
+            const itr = iter([1, 2, 3])
             fail(|| => itr.get(), 'NoSuchElement')
             while itr.next() {
                 count += itr.get()
@@ -954,21 +954,21 @@ fn testList() {
             fail(|| => itr.get(), 'NoSuchElement')
         },
         fn () {
-            let a = []
-            let b = [true]
-            let c = [false,22]
-            let d = b[0]
+            const a = []
+            const b = [true]
+            const c = [false,22]
+            const d = b[0]
             b[0] = 33
-            let e = c[1]++
+            const e = c[1]++
             assert([[], [ 33 ], [ false, 23 ], true, 22] == [a, b, c, d, e])
         },
         fn () {
-            let a = []
+            const a = []
             a.add(1)
             assert(a == [1])
             a.add(2).add([3])
             assert(a == [1,2,[3]])
-            let b = []
+            const b = []
             b.add(null)
             assert(b == [null])
             assert(a.add == a.add)
@@ -976,19 +976,19 @@ fn testList() {
             assert(a.add != b.add)
             assert(b.add != a.add)
 
-            let f = b.add
+            const f = b.add
             f(5)
             assert(b == [null, 5])
 
             assert(b.remove(1) == [null])
         },
         fn () {
-            let a = []
+            const a = []
             a.addAll([1,null]).addAll('bc').addAll([])
             assert(a == [1,null,'b','c'])
         },
         fn () {
-            let a = []
+            const a = []
             assert(a.isEmpty())
             a.add(1)
             assert(!a.isEmpty())
@@ -1004,10 +1004,10 @@ fn testList() {
             assert(a.indexOf('x') == 1)
         },
         fn () {
-            let a = [1, 2, 3]
+            const a = [1, 2, 3]
         },
         fn () {
-            let a = []
+            const a = []
             assert(a.join() == '')
             assert(a.join(',') == '')
             a.add(1)
@@ -1021,10 +1021,10 @@ fn testList() {
             assert(a.join(',') == '1,2,abc')
         },
         fn () {
-            let ls = [1, 2, 3, 4, 5]
-            let squares = ls.map(|x| => x * x)
-            let addedUp = ls.reduce(0, |acc, x| => acc + x)
-            let even = ls.filter(|x| => (x % 2 == 0))
+            const ls = [1, 2, 3, 4, 5]
+            const squares = ls.map(|x| => x * x)
+            const addedUp = ls.reduce(0, |acc, x| => acc + x)
+            const even = ls.filter(|x| => (x % 2 == 0))
 
             assert(squares == [1, 4, 9, 16, 25])
             assert(addedUp == 15)
@@ -1034,50 +1034,50 @@ fn testList() {
             assert(ls == [1, 2, 4, 5])
         },
         fn () {
-            let ls = [3, 4, 5]
+            const ls = [3, 4, 5]
             assert(ls[0] == 3)
             assert(ls[2] == 5)
             assert(ls[0:3] == [3, 4, 5])
             assert(ls[2:3] == [5])
-            let a = [1, 2, 3]
+            const a = [1, 2, 3]
             let n = 0
-            let b = a.map(fn(x) { n += x; x*x; })
+            const b = a.map(fn(x) { n += x; x*x; })
             assert(b == [1, 4, 9] && n == 6)
 
             fail(|| => [].remove('a'), 'TypeMismatch: Expected Int, not Str')
         },
         fn () {
-            let ls = [3,4,5];
+            const ls = [3,4,5];
             assert(ls[0:1] == [3]);
             assert(ls[1:3] == [4,5]);
             assert(ls[-2:-1] == [4]);
             assert(ls[-5:-4] == []);
             assert(ls[3:4] == []);
 
-            let a = [1, 2, 3]
+            const a = [1, 2, 3]
             assert([false, false, false, false] == [a, a[0:1], a[0:], a[:1]].map(frozen))
             freeze(a)
             assert([true, true, true, true] == [a, a[0:1], a[0:], a[:1]].map(frozen))
         },
         fn () {
-            let a = set {11, 2, 31, 4, 5}
-            let b = [].addAll(a)
-            let c = set{}.addAll(b)
+            const a = set {11, 2, 31, 4, 5}
+            const b = [].addAll(a)
+            const c = set{}.addAll(b)
             assert(a == c)
 
-            let d = dict {'x': 1, 2: 'y'}
-            let e = set{}.addAll(d)
-            let f = [].addAll(e)
-            let g = dict{}.addAll(f)
+            const d = dict {'x': 1, 2: 'y'}
+            const e = set{}.addAll(d)
+            const f = [].addAll(e)
+            const g = dict{}.addAll(f)
             assert(d == g)
         },
         fn () {
-            let a = set{1, 2, 3, 4, 5}
-            let b = [].addAll(a).map(|e| => ((e, e*e), (e*e*e)))
-            let c = dict{}.addAll(b)
-            let d = [].addAll(c)
+            const a = set{1, 2, 3, 4, 5}
+            const b = [].addAll(a).map(|e| => ((e, e*e), (e*e*e)))
+            const c = dict{}.addAll(b)
+            const d = [].addAll(c)
 
-            let e = set{}
+            const e = set{}
             for t in d {
                 e.add(t[0][0])
                 e.add(t[0][1])
@@ -1104,8 +1104,8 @@ fn testDict() {
     assert(dict {'a': 1, 'b': 2, 'c': 3} != dict{'a': 1})
     assert(dict {'a': 1, 'b': 2, 'c': 3} != dict{})
 
-    let x = dict{}
-    let y = dict{'a': 1}
+    const x = dict{}
+    const y = dict{'a': 1}
 
     assert(x == x)
     assert(y == y)
@@ -1158,25 +1158,25 @@ fn testDict() {
 
     //-------------------------------------------------
 
-    let funcs = [
+    const funcs = [
         fn () {
-            let d = dict {'x': 1, 'y': 2};
+            const d = dict {'x': 1, 'y': 2};
             d['x'] = 0;
             assert(d == dict {'y': 2, 'x': 0});
         },
         fn () {
-            let a = dict { 'x': 1, 'y': 2 };
-            let b = a['x'];
-            let c = a['z'];
+            const a = dict { 'x': 1, 'y': 2 };
+            const b = a['x'];
+            const c = a['z'];
             a['x'] = -1;
-            let d = a['x'];
+            const d = a['x'];
             assert([1, null, -1] == [b, c, d])
         },
         fn () {
-            let a = dict {};
+            const a = dict {};
             a.addAll([(1,2)]).addAll([(3,4)]);
             assert(a == dict {1:2,3:4});
-            let b = dict {};
+            const b = dict {};
             assert(a.addAll == a.addAll);
             assert(b.addAll == b.addAll);
             assert(a.addAll != b.addAll);
@@ -1184,7 +1184,7 @@ fn testDict() {
             assert(a.clear != a.addAll);
         },
         fn () {
-            let a = dict{}
+            const a = dict{}
             fail(|| => a.addAll(false),      'TypeMismatch: Type Bool has no iter()')
             fail(|| => a.addAll([false]),    'TypeMismatch: Expected Tuple, not Bool')
             fail(|| => a.addAll([(1,2,3)]),  'InvalidArgument: Expected Tuple of length 2, not length 3')
@@ -1193,7 +1193,7 @@ fn testDict() {
             fail(|| => a.contains([1,2]), 'TypeMismatch: Type List cannot be hashed')
         },
         fn () {
-            let a = dict {};
+            const a = dict {};
             assert(a.isEmpty());
             a[1] = 2;
             assert(!a.isEmpty());
@@ -1201,12 +1201,12 @@ fn testDict() {
             assert(a.isEmpty());
         },
         fn () {
-            let a = dict {'z': 3};
+            const a = dict {'z': 3};
             assert(a.contains('z'));
             assert(!a.contains('x'));
         },
         fn () {
-            let d = dict {'a': 1, 'b': 2};
+            const d = dict {'a': 1, 'b': 2};
             d.remove('z')
             d.remove('a')
             assert(d == dict {'b': 2});
@@ -1215,7 +1215,7 @@ fn testDict() {
             assert(len(d) == 0);
         },
         fn () {
-            let d = dict {'a': 1, 'b': 2};
+            const d = dict {'a': 1, 'b': 2};
             d.remove('z');
             d.remove('a');
             assert(d == dict {'b': 2});
@@ -1224,7 +1224,7 @@ fn testDict() {
             assert(len(d) == 0);
         },
         fn () {
-            let b = []
+            const b = []
             b.addAll(range(0,3))
             b.addAll(dict { (true,false): 1, 'y': 2 })
             assert(b == [ 0, 1, 2, ((true,false), 1), ('y', 2)])
@@ -1249,8 +1249,8 @@ fn testSet() {
     assert(set {'a', 'b', 'c'} != set{'a'})
     assert(set {'a', 'b', 'c'} != set{})
 
-    let x = set{}
-    let y = set{'a'}
+    const x = set{}
+    const y = set{'a'}
 
     assert(x == x)
     assert(y == y)
@@ -1306,16 +1306,16 @@ fn testSet() {
 
     //-------------------------------------------------
 
-    let funcs = [
+    const funcs = [
         fn () {
-            let a = set {};
+            const a = set {};
             a.add(1);
             assert(a == set {1});
             a.add(2).add(3).add(2);
             assert(a == set {1,2,3});
             assert(set {3,1,2} == set {1,2,3});
             assert(set {1,2} != set {1,2,3});
-            let b = set { 4 };
+            const b = set { 4 };
             b.add(4);
             assert(b == set { 4 });
             assert(a.add == a.add);
@@ -1324,10 +1324,10 @@ fn testSet() {
             assert(b.add != a.add);
         },
         fn () {
-            let a = set {};
+            const a = set {};
             a.addAll([1,2]).addAll('bc');
             assert(a == set {1,2,'b','c'});
-            let b = set {};
+            const b = set {};
             b.addAll(range(0,3));
             assert(b == set { 0, 1, 2 });
             assert(a.addAll == a.addAll);
@@ -1345,7 +1345,7 @@ fn testSet() {
             fail(|| => set {'a', 'b', []},    'TypeMismatch: Type List cannot be hashed')
         },
         fn () {
-            let a = set{};
+            const a = set{};
             assert(a.isEmpty());
             a.add(1);
             assert(!a.isEmpty());
@@ -1358,7 +1358,7 @@ fn testSet() {
             a = set {'z', 'x'};
         },
         fn () {
-            let s = set {'a', 'b', 'c'};
+            const s = set {'a', 'b', 'c'};
             s.remove('z').remove('a')
             assert(s == set {'c', 'b'});
             s.remove('b');
@@ -1379,8 +1379,8 @@ fn testTuple() {
     assert((1,2,3) != (1,2,4))
     assert((1,2,3) != (1,2))
 
-    let x = (1, 2)
-    let y = (3, 4, 5)
+    const x = (1, 2)
+    const y = (3, 4, 5)
 
     assert(x == x)
     assert(y == y)
@@ -1416,8 +1416,8 @@ fn testTuple() {
 
 fn testChan() {
 
-    let p = chan()
-    let q = chan(1)
+    const p = chan()
+    const q = chan(1)
 
     assert(p == p)
     assert(q == q)
@@ -1455,7 +1455,7 @@ fn testChan() {
 //
 //    fn sum(a, c) {
 //        println(['sum aaa ', a])
-//        let total = 0
+//        const total = 0
 //        for v in a {
 //            total += v
 //        }
@@ -1463,19 +1463,19 @@ fn testChan() {
 //        c.send(total)
 //    }
 //
-//    let a = [7, 2, 8, -9, 4, 0]
-//    let n = len(a) / 2
+//    const a = [7, 2, 8, -9, 4, 0]
+//    const n = len(a) / 2
 //    println([n, a[:n], a[n:], a])
-//    let c = chan()
+//    const c = chan()
 //
 //    go sum(a[:n], c)
 //    go sum(a[n:], c)
-//    let x = c.recv()
-//    let y = c.recv()
+//    const x = c.recv()
+//    const y = c.recv()
 //    println([x, y])
 //    //assert([x, y] == [-5, 17])
 //
-//    //let ch = chan(2)
+//    //const ch = chan(2)
 //    //ch.send(1)
 //    //ch.send(2)
 //    //assert([ch.recv(), ch.recv()] == [1, 2])
@@ -1489,19 +1489,19 @@ fn testArity() {
     assert(arity(len)     == struct { kind: "Fixed",    required: 1 })
     assert(arity(range)   == struct { kind: "Multiple", required: 2, optional: 1 })
 
-    let v = []
-    let d = 
+    const v = []
+    const d = 
         dict{}.addAll(
             [].addAll(fields(v))
                 .map(|n| => (n, arity(getField(v, n)))))
 
     //// TODO
-    //let v = []
-    //let s = stream(fields(v))
+    //const v = []
+    //const s = stream(fields(v))
     //    .map(|n| => struct { name: n, field: getField(v, n) })
     //    .map(|s| => (s.name, arity(s.field)))
-    //let d = dict{}.addAll(s.toIter())  // option 1
-    //let e = s.toDict()                 // option 2
+    //const d = dict{}.addAll(s.toIter())  // option 1
+    //const e = s.toDict()                 // option 2
 
     assert(d ==
         dict { 
@@ -1521,15 +1521,15 @@ fn testArity() {
 
 fn testVariadic() {
 
-    let f = fn(v...) {
+    const f = fn(v...) {
         return v
     }
 
-    let g = fn(a, v...) {
+    const g = fn(a, v...) {
         return (a, v)
     }
 
-    let h = fn(a, b, v...) {
+    const h = fn(a, b, v...) {
         return (a, b, v)
     }
 
@@ -1559,15 +1559,15 @@ fn testVariadic() {
 
 fn testMultiple() {
 
-    let f = fn(a = 1, b = 2, c = 3) {
+    const f = fn(a = 1, b = 2, c = 3) {
         return (a, b, c)
     }
 
-    let g = fn(a, b = 2, c = 3) {
+    const g = fn(a, b = 2, c = 3) {
         return (a, b, c)
     }
 
-    let h = fn(a, b, c = 3) {
+    const h = fn(a, b, c = 3) {
         return (a, b, c)
     }
 
@@ -1595,8 +1595,8 @@ fn testRange() {
     assert(range(0, 0) == range(0, 0))
     assert(range(0, 0) != range(0, 1))
 
-    let x = range(0, 0)
-    let y = range(2, 3)
+    const x = range(0, 0)
+    const y = range(2, 3)
 
     assert(x == x)
     assert(y == y)
@@ -1618,7 +1618,7 @@ fn testRange() {
 
     assert('Range' == type(x))
 
-    let rng = range(0, 10)
+    const rng = range(0, 10)
     assert(set { 'to', 'count', 'step', 'from' } == fields(rng))
     for f in fields(rng) {
         assert(hasField(rng, f))
@@ -1637,14 +1637,14 @@ fn testRange() {
 
     fail(|| => iter(range(0,0)).get(), 'NoSuchElement')
 
-    let a = range(0, 5)
-    let b = range(0, 5, 2)
-    let c = range(2, 14, 3)
-    let d = range(-1, -8, -3)
-    let e = range(2, 2)
-    let f = range(-1, -1, -1)
-    let g = range(2, 1, 1)
-    let h = range(1, 2, -1)
+    const a = range(0, 5)
+    const b = range(0, 5, 2)
+    const c = range(2, 14, 3)
+    const d = range(-1, -8, -3)
+    const e = range(2, 2)
+    const f = range(-1, -1, -1)
+    const g = range(2, 1, 1)
+    const h = range(1, 2, -1)
 
     assert(listify(a) == [ 0, 1, 2, 3, 4 ])
     assert(listify(b) == [ 0, 2, 4 ])
@@ -1674,7 +1674,7 @@ fn testRange() {
     assert([h.from(), h.to(), h.step(), h.count()] == [1, 2, -1, 0])
 
     let i = 0
-    let ls = [2, 5, 8, 11]
+    const ls = [2, 5, 8, 11]
     while i < c.count() {
         assert(c[i] == ls[i])
         i++
@@ -1694,7 +1694,7 @@ fn testStruct() {
 
     //-----------------------------------------
 
-    let funcs = [
+    const funcs = [
         fn () {
             assert(struct {} == struct{})
             assert(struct {a: 1} == struct{a: 1})
@@ -1706,8 +1706,8 @@ fn testStruct() {
             assert(struct {a: 1, b: 2, c: 3} != struct{a: 1})
             assert(struct {a: 1, b: 2, c: 3} != struct{})
 
-            let x = struct{}
-            let y = struct{a: 1}
+            const x = struct{}
+            const y = struct{a: 1}
 
             assert(x == x)
             assert(y == y)
@@ -1729,10 +1729,10 @@ fn testStruct() {
             fail(|| => x.bogus = 1, "NoSuchField: Field 'bogus' not found")
         },
         fn () {
-            let w = struct {}
-            let x = struct { a: 0 }
-            let y = struct { a: 1, b: 2 }
-            let z = struct { a: 3, b: 4, c: struct { d: 5 } }
+            const w = struct {}
+            const x = struct { a: 0 }
+            const y = struct { a: 1, b: 2 }
+            const z = struct { a: 3, b: 4, c: struct { d: 5 } }
 
             assert([0] == [x.a])
             assert([1, 2] == [y.a, y.b])
@@ -1743,20 +1743,20 @@ fn testStruct() {
             }
         },
         fn () {
-            let x = struct { a: 5 }
-            let y = x.a
+            const x = struct { a: 5 }
+            const y = x.a
             x.a = 6
             assert([5, 6] == [y, x.a])
         },
         fn () {
-            let a = struct {
+            const a = struct {
                 x: 8,
                 y: 5,
                 plus:  fn() { return this.x + this.y; },
                 minus: fn() { return this.x - this.y; }
             }
-            let b = a.plus()
-            let c = a.minus()
+            const b = a.plus()
+            const c = a.minus()
             assert([13, 3] == [b, c])
         },
         fn () {
@@ -1765,7 +1765,7 @@ fn testStruct() {
             assert(5 == a)
         },
         fn () {
-            let s = struct { 
+            const s = struct { 
                 a: prop { || => 1 } 
             }
             assert(1 == s.a)
@@ -1773,7 +1773,7 @@ fn testStruct() {
         },
         fn () {
             let x = 2
-            let s = struct { 
+            const s = struct { 
                 a: prop { || => 1 } ,
                 b: prop { || => x, |v| => x = v },
                 c: || => this.a + this.b
@@ -1806,8 +1806,8 @@ fn testStruct() {
                     })
             }
 
-            let r = newRectangle(2, 3)
-            let b = newBox(r, 4)
+            const r = newRectangle(2, 3)
+            const b = newBox(r, 4)
 
             assert(fields(r) == set { 'width', 'height', 'area' })
             assert(fields(b) == set { 'width', 'depth', 'height', 'volume', 'area' })
@@ -1827,8 +1827,8 @@ fn testMerge() {
     fail(|| => merge(struct{}, false), 'TypeMismatch: Expected Struct, not Bool')
     fail(|| => merge(struct{}, struct{}, struct{}, []), 'TypeMismatch: Expected Struct, not List')
 
-    let a = struct { x: 1, y: 2}
-    let b = merge(a, struct { y: 3, z: 4})
+    const a = struct { x: 1, y: 2}
+    const b = merge(a, struct { y: 3, z: 4})
     assert(b.x == 1)
     assert(b.y == 3)
     assert(b.z == 4)
@@ -1837,7 +1837,7 @@ fn testMerge() {
     assert(b.x == 5)
     assert(b.y == 3)
     assert(b.z == 4)
-    let c = merge(b, struct { w: 10})
+    const c = merge(b, struct { w: 10})
     assert(c.x == 5)
     assert(c.y == 3)
     assert(c.z == 4)
@@ -1849,15 +1849,15 @@ fn testMerge() {
     assert(c.z == 11)
     assert(c.w == 10)
 
-    let z = merge(struct { a: 1}, struct { b: 2}, struct { c: 3}, struct { d: 4})
+    const z = merge(struct { a: 1}, struct { b: 2}, struct { c: 3}, struct { d: 4})
     assert(struct { a: 1, b: 2, c: 3, d: 4} == z)
 
-    let f = freeze(struct { x: 1, y: 2})
-    let g = freeze(struct { x: 3, z: 4})
-    let h = merge(f, g)
+    const f = freeze(struct { x: 1, y: 2})
+    const g = freeze(struct { x: 3, z: 4})
+    const h = merge(f, g)
     assert(struct { x: 3, y: 2, z: 4} == h)
 
-    let ls = [a, b, c, f, g, h].map(frozen)
+    const ls = [a, b, c, f, g, h].map(frozen)
     assert([ false, false, false, true, true, true ] == ls)
 
     fail(|| => merge(a, b, f), 'InvalidArgument: Cannot merge structs unless they are all frozen, or all unfrozen')
@@ -1867,13 +1867,13 @@ fn testMerge() {
 }
 
 fn testInvokeField() {
-    let s = 'abc'
-    let c = s.contains
-    let x = c('b')
-    let y = s.contains('z')
+    const s = 'abc'
+    const c = s.contains
+    const x = c('b')
+    const y = s.contains('z')
 
-    let ls = [1]
-    let p = iter(ls).next()
+    const ls = [1]
+    const p = iter(ls).next()
 
     assert([true, false, true] == [x, y, p])
 }

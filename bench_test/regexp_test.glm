@@ -14,6 +14,7 @@ fn fail(func, err) {
 }
 
 fn testCompile() {
+
     let rgx = regexp.compile('abc')
     assert(
         [rgx.matchString('xyzabcdef'), rgx.matchString('123')] == 
