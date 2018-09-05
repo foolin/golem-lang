@@ -173,7 +173,7 @@ func main() {
 		arity := mainFn.Template().Arity
 		if arity.Kind != g.FixedArity {
 			exitError(fmt.Errorf("'main' arity must be fixed"))
-		} else if arity.RequiredParams != 1 {
+		} else if arity.Required != 1 {
 			exitError(fmt.Errorf("'main' must have exactly one argument"))
 		} else {
 			osArgs := os.Args[2:]

@@ -35,24 +35,44 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			// check arity, and modify params if necessary
 			arity := fn.Template().Arity
 			numParams := len(params)
-			numReq := int(arity.RequiredParams)
+			numReq := int(arity.Required)
 
 			switch arity.Kind {
 
 			case g.FixedArity:
+
 				if numParams != numReq {
 					return nil, g.ArityError(numReq, numParams)
 				}
 
 			case g.VariadicArity:
+
 				if numParams < numReq {
-					err := g.ArityAtLeastError(numReq, numParams)
-					return nil, err
+					return nil, g.ArityAtLeastError(numReq, numParams)
 				}
 
-				r := params[:numReq]
-				v := params[numReq:]
-				params = append(r, g.NewList(g.CopyValues(v)))
+				// turn any extra params into a list
+				req := params[:numReq]
+				vrd := params[numReq:]
+				params = append(req, g.NewList(g.CopyValues(vrd)))
+
+			case g.MultipleArity:
+
+				if numParams < numReq {
+					return nil, g.ArityAtLeastError(numReq, numParams)
+				}
+
+				numOpt := int(arity.Optional)
+				if numParams > (numReq + numOpt) {
+					return nil, g.ArityAtMostError(numReq+numOpt, numParams)
+				}
+
+				// add any missing optional params
+				if numParams < (numReq + numOpt) {
+					opt := fn.Template().OptionalParams
+					missing := g.CopyValues(opt[numParams-numReq:])
+					params = append(params, missing...)
+				}
 
 			default:
 				panic("unreachable")

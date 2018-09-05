@@ -1009,6 +1009,27 @@ func TestArity(t *testing.T) {
 	p = newParser("fn(a, b, c  ... ) {}")
 	okExpr(t, p, "fn(a, b, c...) {  }")
 
+	p = newParser("fn(const a, b, const c  ... ) {}")
+	okExpr(t, p, "fn(const a, b, const c...) {  }")
+
 	p = newParser("fn(a..., b) {}")
 	fail(t, p, "Unexpected Token ',' at foo.glm:1:8")
+
+	p = newParser("fn(a..., b = 1) {}")
+	fail(t, p, "Unexpected Token ',' at foo.glm:1:8")
+
+	p = newParser("fn(a, b = 1, c...) {}")
+	fail(t, p, "Unexpected Token '...' at foo.glm:1:15")
+
+	p = newParser("fn(a, b, c = 1) {}")
+	okExpr(t, p, "fn(a, b, c = 1) {  }")
+
+	p = newParser("fn(const c = 1) {}")
+	okExpr(t, p, "fn(const c = 1) {  }")
+
+	p = newParser("fn(a, b = 1, c, d) {}")
+	fail(t, p, "Unexpected Token ',' at foo.glm:1:15")
+
+	p = newParser("fn(a = 1, b) {}")
+	fail(t, p, "Unexpected Token ')' at foo.glm:1:12")
 }

@@ -1482,26 +1482,37 @@ fn testArity() {
 
     fail(|| => arity(0), 'TypeMismatch: Expected Func, not Int')
 
-    assert(arity(println) == struct { kind: "Variadic", requiredParams: 0 })
-    assert(arity(len)     == struct { kind: "Fixed",    requiredParams: 1 })
-    assert(arity(range)   == struct { kind: "Multiple", requiredParams: 2, optionalParams: 1 })
+    assert(arity(println) == struct { kind: "Variadic", required: 0 })
+    assert(arity(len)     == struct { kind: "Fixed",    required: 1 })
+    assert(arity(range)   == struct { kind: "Multiple", required: 2, optional: 1 })
 
-    let a = []
-    let f = dict{}.addAll([].addAll(fields(a)).map(|name| => (name, arity(getField(a, name)))))
+    let v = []
+    let d = 
+        dict{}.addAll(
+            [].addAll(fields(v))
+                .map(|n| => (n, arity(getField(v, n)))))
 
-    assert(f ==
+    //// TODO
+    //let v = []
+    //let s = stream(fields(v))
+    //    .map(|n| => struct { name: n, field: getField(v, n) })
+    //    .map(|s| => (s.name, arity(s.field)))
+    //let d = dict{}.addAll(s.toIter())  // option 1
+    //let e = s.toDict()                 // option 2
+
+    assert(d ==
         dict { 
-            "add":      struct { kind: "Fixed", requiredParams: 1 }, 
-            "addAll":   struct { kind: "Fixed", requiredParams: 1 }, 
-            "clear":    struct { kind: "Fixed", requiredParams: 0 }, 
-            "contains": struct { kind: "Fixed", requiredParams: 1 }, 
-            "filter":   struct { kind: "Fixed", requiredParams: 1 }, 
-            "indexOf":  struct { kind: "Fixed", requiredParams: 1 }, 
-            "isEmpty":  struct { kind: "Fixed", requiredParams: 0 }, 
-            "map":      struct { kind: "Fixed", requiredParams: 1 }, 
-            "reduce":   struct { kind: "Fixed", requiredParams: 2 }, 
-            "remove":   struct { kind: "Fixed", requiredParams: 1 },
-            "join":     struct { kind: "Multiple", requiredParams: 0, optionalParams: 1 } 
+            "add":      struct { kind: "Fixed", required: 1 }, 
+            "addAll":   struct { kind: "Fixed", required: 1 }, 
+            "clear":    struct { kind: "Fixed", required: 0 }, 
+            "contains": struct { kind: "Fixed", required: 1 }, 
+            "filter":   struct { kind: "Fixed", required: 1 }, 
+            "indexOf":  struct { kind: "Fixed", required: 1 }, 
+            "isEmpty":  struct { kind: "Fixed", required: 0 }, 
+            "map":      struct { kind: "Fixed", required: 1 }, 
+            "reduce":   struct { kind: "Fixed", required: 2 }, 
+            "remove":   struct { kind: "Fixed", required: 1 },
+            "join":     struct { kind: "Multiple", required: 0, optional: 1 } 
         })
 }
 
@@ -1538,9 +1549,42 @@ fn testVariadic() {
     assert(h(0, 1, 2, 3) == (0, 1, [ 2, 3 ]))
 
     assert([f, g, h].map(arity) ==
-        [ struct { kind: "Variadic", requiredParams: 0 }, 
-          struct { kind: "Variadic", requiredParams: 1 }, 
-          struct { kind: "Variadic", requiredParams: 2 } ])
+        [ struct { kind: "Variadic", required: 0 }, 
+          struct { kind: "Variadic", required: 1 }, 
+          struct { kind: "Variadic", required: 2 } ])
+}
+
+fn testMultiple() {
+
+    let f = fn(a = 1, b = 2, c = 3) {
+        return (a, b, c)
+    }
+
+    let g = fn(a, b = 2, c = 3) {
+        return (a, b, c)
+    }
+
+    let h = fn(a, b, c = 3) {
+        return (a, b, c)
+    }
+
+    assert(f()              == (1, 2, 3))
+    assert(f('x')           == ('x', 2, 3))
+    assert(f('x', 'y')      == ('x', 'y', 3))
+    assert(f('x', 'y', 'z') == ('x', 'y', 'z'))
+    fail(|| => f('x', 'y', 'z', 0), 'ArityMismatch: Expected at most 3 params, got 4')
+
+    fail(|| => g(), 'ArityMismatch: Expected at least 1 params, got 0')
+    assert(g('x')           == ('x', 2, 3))
+    assert(g('x', 'y')      == ('x', 'y', 3))
+    assert(g('x', 'y', 'z') == ('x', 'y', 'z'))
+    fail(|| => g('x', 'y', 'z', 0), 'ArityMismatch: Expected at most 3 params, got 4')
+
+    fail(|| => h(),    'ArityMismatch: Expected at least 2 params, got 0')
+    fail(|| => h('x'), 'ArityMismatch: Expected at least 2 params, got 1')
+    assert(h('x', 'y')      ==  ('x', 'y', 3))
+    assert(h('x', 'y', 'z') ==  ('x', 'y', 'z'))
+    fail(|| => h('x', 'y', 'z', 0), 'ArityMismatch: Expected at most 3 params, got 4')
 }
 
 fn testRange() {
@@ -1846,7 +1890,6 @@ fn main(args) {
     testAssignment()
     testFlowControl()
     testInvokeField()
-
 //    testTry() TODO try-catch-finally appears to be broken
 
     testFunc()
@@ -1855,6 +1898,7 @@ fn main(args) {
     testLambda()
     testArity() 
     testVariadic() 
+    testMultiple() 
 
     testNull()
     testBool()

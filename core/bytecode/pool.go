@@ -40,6 +40,7 @@ func (p *Pool) String() string {
 	for i, t := range p.Templates {
 		buf.WriteString(fmt.Sprintf("    %d: Template\n", i))
 		buf.WriteString(fmt.Sprintf("        Arity: %s\n", t.Arity))
+		buf.WriteString(fmt.Sprintf("        OptionalParams: %v\n", t.OptionalParams))
 		buf.WriteString(fmt.Sprintf("        NumCaptures: %d\n", t.NumCaptures))
 		buf.WriteString(fmt.Sprintf("        NumLocals: %d\n", t.NumLocals))
 

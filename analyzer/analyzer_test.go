@@ -408,6 +408,12 @@ func TestFormalParams(t *testing.T) {
 
 	errors := NewAnalyzer(newModule("fn(const a, b) { a = 1; };")).Analyze()
 	fail(t, errors, "[Symbol 'a' is constant, at foo.glm:1:18]")
+
+	errors = NewAnalyzer(newModule("fn(a, const b) { b = 1; };")).Analyze()
+	fail(t, errors, "[Symbol 'b' is constant, at foo.glm:1:18]")
+
+	errors = NewAnalyzer(newModule("fn(a, const b...) { b = 1; };")).Analyze()
+	fail(t, errors, "[Symbol 'b' is constant, at foo.glm:1:21]")
 }
 
 func TestPureFunction(t *testing.T) {

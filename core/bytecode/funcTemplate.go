@@ -16,6 +16,7 @@ import (
 type FuncTemplate struct {
 	Module            *Module
 	Arity             g.Arity
+	OptionalParams    []g.Value
 	NumCaptures       int
 	NumLocals         int
 	Bytecodes         []byte

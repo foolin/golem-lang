@@ -198,11 +198,14 @@ func (ident *BuiltinExpr) Traverse(v Visitor) {
 
 // Traverse FnExpr
 func (fn *FnExpr) Traverse(v Visitor) {
-	for _, n := range fn.RequiredParams {
+	for _, n := range fn.Required {
 		v.Visit(n.Ident)
 	}
-	if fn.VariadicParam != nil {
-		v.Visit(fn.VariadicParam.Ident)
+	for _, n := range fn.Optional {
+		v.Visit(n.Ident)
+	}
+	if fn.Variadic != nil {
+		v.Visit(fn.Variadic.Ident)
 	}
 	v.Visit(fn.Body)
 }

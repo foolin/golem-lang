@@ -14,11 +14,11 @@ type (
 
 	// Arity defines the arity of a function
 	Arity struct {
-		Kind           ArityKind
-		RequiredParams uint16
+		Kind     ArityKind
+		Required uint16
 		// For FixedArity and VariadicArity, this value is ignored and should be
 		// set to 0.  For MultipleArity, it must be set to a non-zero integer.
-		OptionalParams uint16
+		Optional uint16
 	}
 )
 
@@ -41,8 +41,8 @@ func (a Arity) String() string {
 	return fmt.Sprintf(
 		"Arity(%s,%d,%d)",
 		a.Kind.String(),
-		a.RequiredParams,
-		a.OptionalParams)
+		a.Required,
+		a.Optional)
 }
 
 func (k ArityKind) String() string {

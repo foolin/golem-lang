@@ -165,9 +165,9 @@ func NewFixedNativeFunc(
 	invoke Invoke) NativeFunc {
 
 	arity := Arity{
-		Kind:           FixedArity,
-		RequiredParams: uint16(len(requiredTypes)),
-		OptionalParams: 0,
+		Kind:     FixedArity,
+		Required: uint16(len(requiredTypes)),
+		Optional: 0,
 	}
 
 	return &nativeFixedFunc{
@@ -219,9 +219,9 @@ func NewVariadicNativeFunc(
 	invoke Invoke) NativeFunc {
 
 	arity := Arity{
-		Kind:           VariadicArity,
-		RequiredParams: uint16(len(requiredTypes)),
-		OptionalParams: 0,
+		Kind:     VariadicArity,
+		Required: uint16(len(requiredTypes)),
+		Optional: 0,
 	}
 
 	return &nativeVariadicFunc{
@@ -273,9 +273,9 @@ func NewMultipleNativeFunc(
 	invoke Invoke) NativeFunc {
 
 	arity := Arity{
-		Kind:           MultipleArity,
-		RequiredParams: uint16(len(requiredTypes)),
-		OptionalParams: uint16(len(optionalTypes)),
+		Kind:     MultipleArity,
+		Required: uint16(len(requiredTypes)),
+		Optional: uint16(len(optionalTypes)),
 	}
 
 	return &nativeMultipleFunc{
@@ -317,16 +317,16 @@ func vetFixedParams(
 	requiredTypes []Type,
 	allowNull bool) Error {
 
-	numValues := len(params)
-	numReqs := len(requiredTypes)
+	numParams := len(params)
+	numReq := len(requiredTypes)
 
 	// arity mismatch
-	if numValues != numReqs {
-		return ArityError(numReqs, numValues)
+	if numParams != numReq {
+		return ArityError(numReq, numParams)
 	}
 
 	// check types on required params
-	for i := 0; i < numReqs; i++ {
+	for i := 0; i < numReq; i++ {
 		err := vetParam(params[i], requiredTypes[i], allowNull)
 		if err != nil {
 			return err
@@ -342,16 +342,16 @@ func vetVariadicParams(
 	variadicType Type,
 	allowNull bool) Error {
 
-	numValues := len(params)
-	numReqs := len(requiredTypes)
+	numParams := len(params)
+	numReq := len(requiredTypes)
 
 	// arity mismatch
-	if numValues < numReqs {
-		return ArityAtLeastError(numReqs, numValues)
+	if numParams < numReq {
+		return ArityAtLeastError(numReq, numParams)
 	}
 
 	// check types on required params
-	for i := 0; i < numReqs; i++ {
+	for i := 0; i < numReq; i++ {
 		err := vetParam(params[i], requiredTypes[i], allowNull)
 		if err != nil {
 			return err
@@ -359,7 +359,7 @@ func vetVariadicParams(
 	}
 
 	// check types on variadic params
-	for i := numReqs; i < numValues; i++ {
+	for i := numReq; i < numParams; i++ {
 		err := vetParam(params[i], variadicType, allowNull)
 		if err != nil {
 			return err
@@ -375,20 +375,20 @@ func vetMultipleParams(
 	optionalTypes []Type,
 	allowNull bool) Error {
 
-	numValues := len(params)
-	numReqs := len(requiredTypes)
-	numOpts := len(optionalTypes)
+	numParams := len(params)
+	numReq := len(requiredTypes)
+	numOpt := len(optionalTypes)
 
 	// arity mismatch
-	if numValues < numReqs {
-		return ArityAtLeastError(numReqs, numValues)
+	if numParams < numReq {
+		return ArityAtLeastError(numReq, numParams)
 	}
-	if numValues > (numReqs + numOpts) {
-		return ArityAtMostError(numReqs+numOpts, numValues)
+	if numParams > (numReq + numOpt) {
+		return ArityAtMostError(numReq+numOpt, numParams)
 	}
 
 	// check types on required params
-	for i := 0; i < numReqs; i++ {
+	for i := 0; i < numReq; i++ {
 		err := vetParam(params[i], requiredTypes[i], allowNull)
 		if err != nil {
 			return err
@@ -396,8 +396,8 @@ func vetMultipleParams(
 	}
 
 	// check types on optional params
-	for i := numReqs; i < numValues; i++ {
-		err := vetParam(params[i], optionalTypes[i-numReqs], allowNull)
+	for i := numReq; i < numParams; i++ {
+		err := vetParam(params[i], optionalTypes[i-numReq], allowNull)
 		if err != nil {
 			return err
 		}

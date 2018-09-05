@@ -134,29 +134,45 @@ func (c *compiler) makeModuleProperty(index int, isConst bool) g.Field {
 	return prop
 }
 
-func makeArity(fe *ast.FnExpr) g.Arity {
+func makeArity(fe *ast.FnExpr) (g.Arity, []g.Value) {
 
-	if fe.VariadicParam == nil {
+	if fe.Variadic != nil {
 		return g.Arity{
-			Kind:           g.FixedArity,
-			RequiredParams: uint16(len(fe.RequiredParams)),
-			OptionalParams: 0,
+			Kind:     g.VariadicArity,
+			Required: uint16(len(fe.Required)),
+			Optional: 0,
+		}, nil
+	}
+
+	if fe.Optional != nil {
+
+		opt := make([]g.Value, len(fe.Optional))
+		for i, o := range fe.Optional {
+			opt[i] = toBasicValue(o.Value)
 		}
+
+		return g.Arity{
+			Kind:     g.MultipleArity,
+			Required: uint16(len(fe.Required)),
+			Optional: uint16(len(fe.Optional)),
+		}, opt
 	}
 
 	return g.Arity{
-		Kind:           g.VariadicArity,
-		RequiredParams: uint16(len(fe.RequiredParams)),
-		OptionalParams: 0,
-	}
-
+		Kind:     g.FixedArity,
+		Required: uint16(len(fe.Required)),
+		Optional: 0,
+	}, nil
 }
 
 func (c *compiler) compileFunc(fe *ast.FnExpr) *bc.FuncTemplate {
 
+	arity, optional := makeArity(fe)
+
 	tpl := &bc.FuncTemplate{
 		Module:            c.mod,
-		Arity:             makeArity(fe),
+		Arity:             arity,
+		OptionalParams:    optional,
 		NumCaptures:       fe.Scope.NumCaptures(),
 		NumLocals:         fe.Scope.NumLocals(),
 		Bytecodes:         nil,
@@ -266,9 +282,6 @@ func (c *compiler) Visit(node ast.Node) {
 
 	case *ast.StructExpr:
 		c.visitStructExpr(t)
-
-		//	case *ast.PropNode:
-		//		c.visitPropNode(t)
 
 	case *ast.ThisExpr:
 		c.visitThisExpr(t)
@@ -554,7 +567,7 @@ func (c *compiler) visitFor(f *ast.ForStmt) {
 		// perform StoreLocal on each tuple element
 		for i, ident := range f.Idents {
 			c.push(tok, bc.Dup)
-			c.loadInt(tok, int64(i))
+			c.pushInt(tok, int64(i))
 			c.push(tok, bc.GetIndex)
 			c.pushBytecode(ident.Begin(), bc.StoreLocal, ident.Variable.Index())
 		}
@@ -921,7 +934,7 @@ func (c *compiler) visitBasicExpr(basic *ast.BasicExpr) {
 			c.poolBuilder.constIndex(g.NewStr(basic.Token.Text)))
 
 	case ast.Int:
-		c.loadInt(
+		c.pushInt(
 			basic.Token.Position,
 			parseInt(basic.Token.Text))
 
@@ -935,7 +948,33 @@ func (c *compiler) visitBasicExpr(basic *ast.BasicExpr) {
 	default:
 		panic("unreachable")
 	}
+}
 
+func toBasicValue(basic *ast.BasicExpr) g.Value {
+
+	switch basic.Token.Kind {
+
+	case ast.Null:
+		return g.Null
+
+	case ast.True:
+		return g.True
+
+	case ast.False:
+		return g.False
+
+	case ast.Str:
+		return g.NewStr(basic.Token.Text)
+
+	case ast.Int:
+		return g.NewInt(parseInt(basic.Token.Text))
+
+	case ast.Float:
+		return g.NewFloat(parseFloat(basic.Token.Text))
+
+	default:
+		panic("unreachable")
+	}
 }
 
 func (c *compiler) visitIdentExpr(ident *ast.IdentExpr) {
@@ -1146,7 +1185,7 @@ func (c *compiler) visitDictExpr(d *ast.DictExpr) {
 	c.pushBytecode(d.Begin(), bc.NewDict, len(d.Entries))
 }
 
-func (c *compiler) loadInt(pos ast.Pos, i int64) {
+func (c *compiler) pushInt(pos ast.Pos, i int64) {
 	switch i {
 	case 0:
 		c.push(pos, bc.LoadZero)

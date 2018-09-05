@@ -5,7 +5,7 @@
 package compiler
 
 import (
-	//"fmt"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -65,9 +65,9 @@ func testCompile(t *testing.T, code string) *bc.Module {
 
 func fixedArity(numParams int) g.Arity {
 	return g.Arity{
-		Kind:           g.FixedArity,
-		RequiredParams: uint16(numParams),
-		OptionalParams: 0,
+		Kind:     g.FixedArity,
+		Required: uint16(numParams),
+		Optional: 0,
 	}
 }
 
@@ -1082,14 +1082,17 @@ let p = ls.iter().next()
 	})
 }
 
-func TestFoo(t *testing.T) {
-	//	code := `
-	//println(-1.0)
-	//`
-	//	mod := testCompile(t, code)
-	//
-	//	fmt.Println("----------------------------")
-	//	fmt.Println(code)
-	//	fmt.Println("----------------------------")
-	//	fmt.Println(mod.Pool)
+func TestScratch(t *testing.T) {
+
+	code := `
+fn(a...) {}
+fn(a = 1) {}
+fn(a, b = 1, c = 2) {}
+`
+	mod := testCompile(t, code)
+
+	fmt.Println("----------------------------")
+	fmt.Println(code)
+	fmt.Println("----------------------------")
+	fmt.Println(mod.Pool)
 }

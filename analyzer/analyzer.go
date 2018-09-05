@@ -197,13 +197,16 @@ func (a *analyzer) visitFunc(fn *ast.FnExpr) {
 
 	a.pushScope(fn.Scope)
 
-	// visit child nodes
-	for _, f := range fn.RequiredParams {
+	for _, f := range fn.Required {
 		f.Ident.Variable = a.putVariable(f.Ident.Symbol.Text, f.IsConst)
 	}
 
-	if fn.VariadicParam != nil {
-		f := fn.VariadicParam
+	for _, f := range fn.Optional {
+		f.Ident.Variable = a.putVariable(f.Ident.Symbol.Text, f.IsConst)
+	}
+
+	if fn.Variadic != nil {
+		f := fn.Variadic
 		f.Ident.Variable = a.putVariable(f.Ident.Symbol.Text, f.IsConst)
 	}
 

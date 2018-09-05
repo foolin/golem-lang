@@ -122,9 +122,9 @@ func NewFixedMethod(
 	invoke MethodInvoke) Method {
 
 	arity := Arity{
-		Kind:           FixedArity,
-		RequiredParams: uint16(len(requiredTypes)),
-		OptionalParams: 0,
+		Kind:     FixedArity,
+		Required: uint16(len(requiredTypes)),
+		Optional: 0,
 	}
 
 	return &fixedMethod{
@@ -180,9 +180,9 @@ func NewVariadicMethod(
 	invoke MethodInvoke) Method {
 
 	arity := Arity{
-		Kind:           VariadicArity,
-		RequiredParams: uint16(len(requiredTypes)),
-		OptionalParams: 0,
+		Kind:     VariadicArity,
+		Required: uint16(len(requiredTypes)),
+		Optional: 0,
 	}
 
 	return &variadicMethod{
@@ -235,9 +235,9 @@ func NewMultipleMethod(
 	invoke MethodInvoke) Method {
 
 	arity := Arity{
-		Kind:           MultipleArity,
-		RequiredParams: uint16(len(requiredTypes)),
-		OptionalParams: uint16(len(optionalTypes)),
+		Kind:     MultipleArity,
+		Required: uint16(len(requiredTypes)),
+		Optional: uint16(len(optionalTypes)),
 	}
 
 	return &multipleMethod{

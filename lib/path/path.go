@@ -42,8 +42,8 @@ var walk g.Value = g.NewFixedNativeFunc(
 		callback := params[1].(g.Func)
 
 		arity := callback.Arity()
-		if arity.Kind != g.FixedArity || arity.RequiredParams != 2 {
-			return nil, g.ArityError(2, int(arity.RequiredParams))
+		if arity.Kind != g.FixedArity || arity.Required != 2 {
+			return nil, g.ArityError(2, int(arity.Required))
 		}
 
 		err := filepath.Walk(

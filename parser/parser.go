@@ -62,8 +62,8 @@ func (p *Parser) ParseModule() (mod *ast.Module, err error) {
 
 	// create initialization function
 	initFunc := &ast.FnExpr{
-		Token:          nil,
-		RequiredParams: []*ast.FormalParam{},
+		Token:    nil,
+		Required: []*ast.Param{},
 		Body: &ast.BlockNode{
 			LBrace:     nil,
 			Statements: stmts,
@@ -963,28 +963,61 @@ func (p *Parser) fnExpr(token *ast.Token) *ast.FnExpr {
 	p.expect(ast.Lparen)
 	if p.accept(ast.Rparen) {
 		return &ast.FnExpr{
-			Token:          token,
-			RequiredParams: nil,
-			Body:           p.block(),
-			Scope:          ast.NewFuncScope(),
+			Token:    token,
+			Required: nil,
+			Body:     p.block(),
+			Scope:    ast.NewFuncScope(),
 		}
 	}
-	params := []*ast.FormalParam{}
+
+	params := []*ast.Param{}
+	optional := []*ast.OptionalParam{}
 
 	for {
 
 		switch p.cur.token.Kind {
+
 		case ast.Const:
 			p.consume()
-			params = append(params, &ast.FormalParam{
-				Ident:   p.identExpr(),
-				IsConst: true,
-			})
+
+			ident := p.identExpr()
+			if p.accept(ast.Eq) {
+				optional = append(optional, &ast.OptionalParam{
+					Ident:   ident,
+					IsConst: true,
+					Value:   p.basicExpr(),
+				})
+			} else {
+				if len(optional) > 0 {
+					panic(p.unexpected())
+				}
+
+				params = append(params, &ast.Param{
+					Ident:   ident,
+					IsConst: true,
+				})
+			}
+
 		case ast.Ident:
-			params = append(params, &ast.FormalParam{
-				Ident:   p.identExpr(),
-				IsConst: false,
-			})
+
+			ident := p.identExpr()
+			if p.accept(ast.Eq) {
+				optional = append(optional, &ast.OptionalParam{
+					Ident:   ident,
+					IsConst: false,
+					Value:   p.basicExpr(),
+				})
+			} else {
+				if len(optional) > 0 {
+					panic(p.unexpected())
+				}
+
+				params = append(params, &ast.Param{
+					Ident:   ident,
+					IsConst: false,
+				})
+			}
+
 		default:
 			panic(p.unexpected())
 		}
@@ -994,28 +1027,47 @@ func (p *Parser) fnExpr(token *ast.Token) *ast.FnExpr {
 		case ast.Comma:
 			p.consume()
 
-		// Variadic
+		// Variadic Arity
 		case ast.TripleDot:
+
+			if len(optional) > 0 {
+				panic(p.unexpected())
+			}
+
 			p.consume()
 			p.expect(ast.Rparen)
 
 			n := len(params) - 1
 			return &ast.FnExpr{
-				Token:          token,
-				RequiredParams: params[:n],
-				VariadicParam:  params[n],
-				Body:           p.block(),
-				Scope:          ast.NewFuncScope(),
+				Token:    token,
+				Required: params[:n],
+				Variadic: params[n],
+				Body:     p.block(),
+				Scope:    ast.NewFuncScope(),
 			}
 
 		case ast.Rparen:
 			p.consume()
-			return &ast.FnExpr{
-				Token:          token,
-				RequiredParams: params,
-				Body:           p.block(),
-				Scope:          ast.NewFuncScope(),
+
+			// Fixed or Multiple Arity
+			if len(optional) == 0 {
+				return &ast.FnExpr{
+					Token:    token,
+					Required: params,
+					Body:     p.block(),
+					Scope:    ast.NewFuncScope(),
+				}
 			}
+
+			// Multiple Arity
+			return &ast.FnExpr{
+				Token:    token,
+				Required: params,
+				Optional: optional,
+				Body:     p.block(),
+				Scope:    ast.NewFuncScope(),
+			}
+
 		default:
 			panic(p.unexpected())
 		}
@@ -1028,7 +1080,7 @@ func (p *Parser) lambdaZero() *ast.FnExpr {
 	token := p.expect(ast.DoublePipe)
 
 	p.expect(ast.EqGt)
-	params := []*ast.FormalParam{}
+	params := []*ast.Param{}
 	expr := &ast.ExprStmt{Expr: p.expression()}
 	block := &ast.BlockNode{
 		LBrace:     nil,
@@ -1037,10 +1089,10 @@ func (p *Parser) lambdaZero() *ast.FnExpr {
 		Scope:      ast.NewScope(),
 	}
 	return &ast.FnExpr{
-		Token:          token,
-		RequiredParams: params,
-		Body:           block,
-		Scope:          ast.NewFuncScope(),
+		Token:    token,
+		Required: params,
+		Body:     block,
+		Scope:    ast.NewFuncScope(),
 	}
 }
 
@@ -1048,11 +1100,11 @@ func (p *Parser) lambda() *ast.FnExpr {
 
 	token := p.expect(ast.Pipe)
 
-	params := []*ast.FormalParam{}
+	params := []*ast.Param{}
 	switch p.cur.token.Kind {
 
 	case ast.Ident:
-		params = append(params, &ast.FormalParam{
+		params = append(params, &ast.Param{
 			Ident:   p.identExpr(),
 			IsConst: false,
 		})
@@ -1062,7 +1114,7 @@ func (p *Parser) lambda() *ast.FnExpr {
 
 			case ast.Comma:
 				p.consume()
-				params = append(params, &ast.FormalParam{
+				params = append(params, &ast.Param{
 					Ident:   p.identExpr(),
 					IsConst: false,
 				})
@@ -1093,10 +1145,10 @@ func (p *Parser) lambda() *ast.FnExpr {
 		Scope:      ast.NewScope(),
 	}
 	return &ast.FnExpr{
-		Token:          token,
-		RequiredParams: params,
-		Body:           block,
-		Scope:          ast.NewFuncScope(),
+		Token:    token,
+		Required: params,
+		Body:     block,
+		Scope:    ast.NewFuncScope(),
 	}
 }
 
@@ -1189,14 +1241,14 @@ func (p *Parser) property() *ast.PropNode {
 	lbrace := p.expect(ast.Lbrace)
 
 	get := p.propertyFunc()
-	if len(get.RequiredParams) != 0 {
+	if len(get.Required) != 0 {
 		panic(newParserError(p.scn.Source.Path, InvalidPropertyGetter, get.Token))
 	}
 
 	var set *ast.FnExpr
 	if p.accept(ast.Comma) {
 		set = p.propertyFunc()
-		if len(set.RequiredParams) != 1 {
+		if len(set.Required) != 1 {
 			panic(newParserError(p.scn.Source.Path, InvalidPropertySetter, set.Token))
 		}
 	}
@@ -1374,7 +1426,7 @@ func (p *Parser) tupleExpr(lparen *ast.Token, expr ast.Expression) ast.Expressio
 	}
 }
 
-func (p *Parser) basicExpr() ast.Expression {
+func (p *Parser) basicExpr() *ast.BasicExpr {
 
 	tok := p.cur.token
 

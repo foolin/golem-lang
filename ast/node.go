@@ -237,18 +237,28 @@ type (
 
 	// FnExpr is a function expression
 	FnExpr struct {
-		Token          *Token
-		RequiredParams []*FormalParam
-		VariadicParam  *FormalParam
-		Body           *BlockNode
+		Token *Token
+
+		Required []*Param
+		Optional []*OptionalParam
+		Variadic *Param
+
+		Body *BlockNode
 
 		Scope FuncScope
 	}
 
-	// FormalParam is a formal parameter in a function expression
-	FormalParam struct {
+	// Param is a formal parameter in a function expression
+	Param struct {
 		Ident   *IdentExpr
 		IsConst bool
+	}
+
+	// OptionalParam is an optional formal parameter in a function expression
+	OptionalParam struct {
+		Ident   *IdentExpr
+		IsConst bool
+		Value   *BasicExpr
 	}
 
 	// InvokeExpr is an invocation expression
@@ -751,7 +761,10 @@ func (n *NamedFnStmt) String() string {
 	buf.WriteString("fn ")
 	buf.WriteString(n.Ident.String())
 	buf.WriteString("(")
-	buf.WriteString(stringFormalParams(n.Func.RequiredParams, n.Func.VariadicParam))
+	buf.WriteString(stringParams(
+		n.Func.Required,
+		n.Func.Optional,
+		n.Func.Variadic))
 	buf.WriteString(") ")
 	buf.WriteString(n.Func.Body.String())
 	buf.WriteString(";")
@@ -946,32 +959,57 @@ func (n *FnExpr) String() string {
 
 	buf.WriteString("fn")
 	buf.WriteString("(")
-	buf.WriteString(stringFormalParams(n.RequiredParams, n.VariadicParam))
+	buf.WriteString(stringParams(
+		n.Required,
+		n.Optional,
+		n.Variadic))
 	buf.WriteString(") ")
 	buf.WriteString(n.Body.String())
 
 	return buf.String()
 }
 
-func stringFormalParams(required []*FormalParam, variadic *FormalParam) string {
+func stringParams(
+	required []*Param,
+	optional []*OptionalParam,
+	variadic *Param) string {
+
 	var buf bytes.Buffer
 
-	params := required
-	if variadic != nil {
-		params = append(params, variadic)
-	}
-
-	for idx, p := range params {
-		if idx > 0 {
+	n := 0
+	for _, p := range required {
+		if n > 0 {
 			buf.WriteString(", ")
 		}
+		n++
 		if p.IsConst {
 			buf.WriteString("const ")
 		}
 		buf.WriteString(p.Ident.String())
 	}
 
+	for _, p := range optional {
+		if n > 0 {
+			buf.WriteString(", ")
+		}
+		n++
+		if p.IsConst {
+			buf.WriteString("const ")
+		}
+		buf.WriteString(p.Ident.String())
+		buf.WriteString(" = ")
+		buf.WriteString(p.Value.String())
+	}
+
 	if variadic != nil {
+		if n > 0 {
+			buf.WriteString(", ")
+		}
+		n++
+		if variadic.IsConst {
+			buf.WriteString("const ")
+		}
+		buf.WriteString(variadic.Ident.String())
 		buf.WriteString("...")
 	}
 
