@@ -281,7 +281,7 @@ try {
 `
 	fail(t, code,
 		g.NewErrorStruct(
-			g.ArityMismatchError("1", 3),
+			g.ArityError(1, 3),
 			[]string{
 				"    at foo.glm:3"}))
 

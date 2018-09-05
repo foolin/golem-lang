@@ -77,10 +77,24 @@ func IndexOutOfBoundsError(val int) Error {
 	return fmt.Errorf("IndexOutOfBounds: %d", val)
 }
 
-// ArityMismatchError creates an ArityMismatch Error
-func ArityMismatchError(expected string, actual int) Error {
+// ArityError creates an ArityMismatch Error
+func ArityError(expected int, actual int) Error {
 	return fmt.Errorf(
-		"ArityMismatch: Expected %s params, got %d",
+		"ArityMismatch: Expected %d params, got %d",
+		expected, actual)
+}
+
+// ArityAtLeastError creates an ArityMismatch Error
+func ArityAtLeastError(expected int, actual int) Error {
+	return fmt.Errorf(
+		"ArityMismatch: Expected at least %d params, got %d",
+		expected, actual)
+}
+
+// ArityAtMostError creates an ArityMismatch Error
+func ArityAtMostError(expected int, actual int) Error {
+	return fmt.Errorf(
+		"ArityMismatch: Expected at most %d params, got %d",
 		expected, actual)
 }
 

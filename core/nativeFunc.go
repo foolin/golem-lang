@@ -322,9 +322,7 @@ func vetFixedParams(
 
 	// arity mismatch
 	if numValues != numReqs {
-		return ArityMismatchError(
-			fmt.Sprintf("%d", numReqs),
-			numValues)
+		return ArityError(numReqs, numValues)
 	}
 
 	// check types on required params
@@ -349,9 +347,7 @@ func vetVariadicParams(
 
 	// arity mismatch
 	if numValues < numReqs {
-		return ArityMismatchError(
-			fmt.Sprintf("at least %d", numReqs),
-			numValues)
+		return ArityAtLeastError(numReqs, numValues)
 	}
 
 	// check types on required params
@@ -385,14 +381,10 @@ func vetMultipleParams(
 
 	// arity mismatch
 	if numValues < numReqs {
-		return ArityMismatchError(
-			fmt.Sprintf("at least %d", numReqs),
-			numValues)
+		return ArityAtLeastError(numReqs, numValues)
 	}
 	if numValues > (numReqs + numOpts) {
-		return ArityMismatchError(
-			fmt.Sprintf("at most %d", numReqs+numOpts),
-			numValues)
+		return ArityAtMostError(numReqs+numOpts, numValues)
 	}
 
 	// check types on required params

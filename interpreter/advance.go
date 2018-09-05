@@ -38,8 +38,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			switch arity.Kind {
 			case g.FixedArity:
 				if uint16(numParams) != arity.RequiredParams {
-					err := g.ArityMismatchError(
-						fmt.Sprintf("%d", arity.RequiredParams), numParams)
+					err := g.ArityError(int(arity.RequiredParams), numParams)
 					return nil, err
 				}
 			default:
