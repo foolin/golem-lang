@@ -9,18 +9,8 @@ fn fail(func, err) {
         func()
         assert(false)
     } catch e {
-        // TODO try-catch-finally appears to be broken
-        //println("BenchTestError: " + err + " != " + e.error)
+        //println(e.error)
         assert(err == e.error)
-
-        //println("BenchTestError: " + err + " != " + e.error)
-        ////println('==============================================')
-        //if err != e.error {
-        //    //throw "BenchTestError: " + err + " != " + e.error
-        //    println("BenchTestError: " + err + " != " + e.error)
-        //    assert(false)
-        //    //assert(err == e.error)
-        //}
     }
 }
 

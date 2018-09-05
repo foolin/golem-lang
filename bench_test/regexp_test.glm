@@ -9,6 +9,7 @@ fn fail(func, err) {
         func()
         assert(false)
     } catch e {
+        //println(e.error)
         assert(err == e.error)
     }
 }

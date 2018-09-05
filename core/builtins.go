@@ -83,46 +83,46 @@ var StandardBuiltins = []*BuiltinEntry{
 	{"merge", BuiltinMerge},
 }
 
-////-----------------------------------------------------------------
+//-----------------------------------------------------------------
 
 // BuiltinStr converts a single value to a Str
 var BuiltinStr = NewFixedNativeFunc(
 	[]Type{AnyType},
 	false,
-	func(ev Eval, values []Value) (Value, Error) {
-		return values[0].ToStr(ev)
+	func(ev Eval, params []Value) (Value, Error) {
+		return params[0].ToStr(ev)
 	})
 
 // BuiltinLen returns the length of a single Lenable
 var BuiltinLen = NewFixedNativeFunc(
 	[]Type{AnyType},
 	false,
-	func(ev Eval, values []Value) (Value, Error) {
+	func(ev Eval, params []Value) (Value, Error) {
 
-		if values[0].Type() == NullType {
+		if params[0].Type() == NullType {
 			return nil, NullValueError()
 		}
 
-		if ln, ok := values[0].(Lenable); ok {
+		if ln, ok := params[0].(Lenable); ok {
 			return ln.Len(ev)
 		}
-		return nil, LenableMismatchError(values[0].Type())
+		return nil, LenableMismatchError(params[0].Type())
 	})
 
 // BuiltinIter returns the length of a single Lenable
 var BuiltinIter = NewFixedNativeFunc(
 	[]Type{AnyType},
 	false,
-	func(ev Eval, values []Value) (Value, Error) {
+	func(ev Eval, params []Value) (Value, Error) {
 
-		if values[0].Type() == NullType {
+		if params[0].Type() == NullType {
 			return nil, NullValueError()
 		}
 
-		if ibl, ok := values[0].(Iterable); ok {
+		if ibl, ok := params[0].(Iterable); ok {
 			return ibl.NewIterator(ev)
 		}
-		return nil, IterableMismatchError(values[0].Type())
+		return nil, IterableMismatchError(params[0].Type())
 	})
 
 // BuiltinRange creates a new Range
@@ -130,12 +130,12 @@ var BuiltinRange = NewMultipleNativeFunc(
 	[]Type{IntType, IntType},
 	[]Type{IntType},
 	false,
-	func(ev Eval, values []Value) (Value, Error) {
-		from := values[0].(Int)
-		to := values[1].(Int)
+	func(ev Eval, params []Value) (Value, Error) {
+		from := params[0].(Int)
+		to := params[1].(Int)
 		step := One
-		if len(values) == 3 {
-			step = values[2].(Int)
+		if len(params) == 3 {
+			step = params[2].(Int)
 
 		}
 		return NewRange(from.IntVal(), to.IntVal(), step.IntVal())
@@ -144,8 +144,8 @@ var BuiltinRange = NewMultipleNativeFunc(
 // BuiltinAssert asserts that a single Bool is True
 var BuiltinAssert = NewFixedNativeFunc(
 	[]Type{BoolType}, false,
-	func(ev Eval, values []Value) (Value, Error) {
-		b := values[0].(Bool)
+	func(ev Eval, params []Value) (Value, Error) {
+		b := params[0].(Bool)
 		if b.BoolVal() {
 			return True, nil
 		}
@@ -157,9 +157,9 @@ var BuiltinMerge = NewVariadicNativeFunc(
 	[]Type{StructType, StructType},
 	StructType,
 	false,
-	func(ev Eval, values []Value) (Value, Error) {
-		structs := make([]Struct, len(values))
-		for i, v := range values {
+	func(ev Eval, params []Value) (Value, Error) {
+		structs := make([]Struct, len(params))
+		for i, v := range params {
 			structs[i] = v.(Struct)
 		}
 		return MergeStructs(structs)
@@ -171,13 +171,13 @@ var BuiltinChan = NewMultipleNativeFunc(
 	[]Type{},
 	[]Type{IntType},
 	false,
-	func(ev Eval, values []Value) (Value, Error) {
+	func(ev Eval, params []Value) (Value, Error) {
 
-		if len(values) == 0 {
+		if len(params) == 0 {
 			return NewChan(), nil
 		}
 
-		size := values[0].(Int)
+		size := params[0].(Int)
 		return NewBufferedChan(int(size.IntVal())), nil
 	})
 
@@ -187,38 +187,38 @@ var BuiltinType = NewFixedNativeFunc(
 	// Subtlety: Null has a type, but for the purposes of type()
 	// we are going to pretend that it doesn't
 	true,
-	func(ev Eval, values []Value) (Value, Error) {
+	func(ev Eval, params []Value) (Value, Error) {
 
-		if values[0].Type() == NullType {
+		if params[0].Type() == NullType {
 			return nil, NullValueError()
 		}
 
-		return NewStr(values[0].Type().String()), nil
+		return NewStr(params[0].Type().String()), nil
 	})
 
 // BuiltinFreeze freezes a single Value.
 var BuiltinFreeze = NewFixedNativeFunc(
 	[]Type{AnyType},
 	false,
-	func(ev Eval, values []Value) (Value, Error) {
-		return values[0].Freeze(ev)
+	func(ev Eval, params []Value) (Value, Error) {
+		return params[0].Freeze(ev)
 	})
 
 // BuiltinFrozen returns whether a single Value is Frozen.
 var BuiltinFrozen = NewFixedNativeFunc(
 	[]Type{AnyType},
 	false,
-	func(ev Eval, values []Value) (Value, Error) {
-		return values[0].Frozen(ev)
+	func(ev Eval, params []Value) (Value, Error) {
+		return params[0].Frozen(ev)
 	})
 
 // BuiltinFields returns the fields of a Struct
 var BuiltinFields = NewFixedNativeFunc(
 	[]Type{AnyType},
 	false,
-	func(ev Eval, values []Value) (Value, Error) {
+	func(ev Eval, params []Value) (Value, Error) {
 
-		fields, err := values[0].FieldNames()
+		fields, err := params[0].FieldNames()
 		if err != nil {
 			return nil, err
 		}
@@ -234,20 +234,20 @@ var BuiltinFields = NewFixedNativeFunc(
 var BuiltinGetField = NewFixedNativeFunc(
 	[]Type{AnyType, StrType},
 	false,
-	func(ev Eval, values []Value) (Value, Error) {
-		field := values[1].(Str)
+	func(ev Eval, params []Value) (Value, Error) {
+		field := params[1].(Str)
 
-		return values[0].GetField(field.String(), ev)
+		return params[0].GetField(field.String(), ev)
 	})
 
 // BuiltinHasField gets the Value associated with a Struct's field name.
 var BuiltinHasField = NewFixedNativeFunc(
 	[]Type{AnyType, StrType},
 	false,
-	func(ev Eval, values []Value) (Value, Error) {
-		field := values[1].(Str)
+	func(ev Eval, params []Value) (Value, Error) {
+		field := params[1].(Str)
 
-		b, err := values[0].HasField(field.String())
+		b, err := params[0].HasField(field.String())
 		if err != nil {
 			return nil, err
 		}
@@ -258,19 +258,19 @@ var BuiltinHasField = NewFixedNativeFunc(
 var BuiltinSetField = NewFixedNativeFunc(
 	[]Type{StructType, StrType, AnyType},
 	true,
-	func(ev Eval, values []Value) (Value, Error) {
+	func(ev Eval, params []Value) (Value, Error) {
 
-		if values[0].Type() == NullType {
+		if params[0].Type() == NullType {
 			return nil, NullValueError()
 		}
-		if values[1].Type() == NullType {
+		if params[1].Type() == NullType {
 			return nil, NullValueError()
 		}
 
-		st := values[0].(Struct)
-		fld := values[1].(Str)
+		st := params[0].(Struct)
+		fld := params[1].(Str)
 
-		err := st.SetField(fld.String(), ev, values[2])
+		err := st.SetField(fld.String(), ev, params[2])
 		if err != nil {
 			return nil, err
 		}
@@ -281,9 +281,9 @@ var BuiltinSetField = NewFixedNativeFunc(
 var BuiltinArity = NewFixedNativeFunc(
 	[]Type{FuncType},
 	false,
-	func(ev Eval, values []Value) (Value, Error) {
+	func(ev Eval, params []Value) (Value, Error) {
 
-		fn := values[0].(Func)
+		fn := params[0].(Func)
 		a := fn.Arity()
 		k := NewStr(a.Kind.String())
 		r := NewInt(int64(a.Required))
@@ -312,8 +312,8 @@ var UnsandboxedBuiltins = []*BuiltinEntry{
 // BuiltinPrint prints to stdout.
 var BuiltinPrint = NewVariadicNativeFunc(
 	[]Type{}, AnyType, true,
-	func(ev Eval, values []Value) (Value, Error) {
-		for _, v := range values {
+	func(ev Eval, params []Value) (Value, Error) {
+		for _, v := range params {
 			s, err := v.ToStr(ev)
 			if err != nil {
 				return nil, err
@@ -327,8 +327,8 @@ var BuiltinPrint = NewVariadicNativeFunc(
 // BuiltinPrintln prints to stdout.
 var BuiltinPrintln = NewVariadicNativeFunc(
 	[]Type{}, AnyType, true,
-	func(ev Eval, values []Value) (Value, Error) {
-		for _, v := range values {
+	func(ev Eval, params []Value) (Value, Error) {
+		for _, v := range params {
 			s, err := v.ToStr(ev)
 			if err != nil {
 				return nil, err

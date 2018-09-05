@@ -15,13 +15,81 @@ import (
 // Marshal
 //---------------------------------------------------
 
+// Marshal marshals a Value into a JSON string
 var Marshal g.Value = g.NewFixedNativeFunc(
 	[]g.Type{g.AnyType}, true,
 	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
-		return marshal(params[0])
+		return marshal(ev, params[0])
 	})
 
-func fromValue(val g.Value) (interface{}, g.Error) {
+func fromList(ev g.Eval, list g.List) (interface{}, g.Error) {
+
+	vals := list.Values()
+	ifc := make([]interface{}, len(vals))
+
+	for i, iv := range vals {
+		fv, err := fromValue(ev, iv)
+		if err != nil {
+			return nil, err
+		}
+		ifc[i] = fv
+	}
+
+	return ifc, nil
+}
+
+func fromDict(ev g.Eval, dict g.Dict) (interface{}, g.Error) {
+
+	ifc := make(map[string]interface{})
+
+	itr := dict.HashMap().Iterator()
+	for itr.Next() {
+		entry := itr.Get()
+
+		s, ok := entry.Key.(g.Str)
+		if !ok {
+			return nil, g.Error(fmt.Errorf(
+				"JsonError: %s is not a valid object key", entry.Key.Type()))
+		}
+
+		fv, err := fromValue(ev, entry.Value)
+		if err != nil {
+			return nil, err
+		}
+		ifc[s.String()] = fv
+	}
+
+	return ifc, nil
+}
+
+func fromStruct(ev g.Eval, st g.Struct) (interface{}, g.Error) {
+
+	ifc := make(map[string]interface{})
+
+	names, err := st.FieldNames()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, k := range names {
+
+		val, err := st.GetField(k, ev)
+		if err != nil {
+			return nil, err
+		}
+
+		fv, err := fromValue(ev, val)
+		if err != nil {
+			return nil, err
+		}
+
+		ifc[k] = fv
+	}
+
+	return ifc, nil
+}
+
+func fromValue(ev g.Eval, val g.Value) (interface{}, g.Error) {
 
 	switch val.Type() {
 
@@ -41,41 +109,13 @@ func fromValue(val g.Value) (interface{}, g.Error) {
 		return val.(g.Str).String(), nil
 
 	case g.ListType:
-
-		vals := val.(g.List).Values()
-		ifc := make([]interface{}, len(vals))
-
-		for i, iv := range vals {
-			fv, err := fromValue(iv)
-			if err != nil {
-				return nil, err
-			}
-			ifc[i] = fv
-		}
-
-		return ifc, nil
+		return fromList(ev, val.(g.List))
 
 	case g.DictType:
+		return fromDict(ev, val.(g.Dict))
 
-		ifc := make(map[string]interface{})
-
-		itr := val.(g.Dict).HashMap().Iterator()
-		for itr.Next() {
-			entry := itr.Get()
-
-			s, ok := entry.Key.(g.Str)
-			if !ok {
-				return nil, g.Error(fmt.Errorf(
-					"JsonError: %s is not a valid object key", entry.Key.Type()))
-			}
-			fv, err := fromValue(entry.Value)
-			if err != nil {
-				return nil, err
-			}
-			ifc[s.String()] = fv
-		}
-
-		return ifc, nil
+	case g.StructType:
+		return fromStruct(ev, val.(g.Struct))
 
 	default:
 		return nil, g.Error(fmt.Errorf(
@@ -83,14 +123,14 @@ func fromValue(val g.Value) (interface{}, g.Error) {
 	}
 }
 
-func marshal(val g.Value) (g.Str, g.Error) {
+func marshal(ev g.Eval, val g.Value) (g.Str, g.Error) {
 
-	i, err := fromValue(val)
+	ifc, err := fromValue(ev, val)
 	if err != nil {
 		return nil, err
 	}
 
-	b, err := json.Marshal(i)
+	b, err := json.Marshal(ifc)
 	if err != nil {
 		return nil, g.Error(fmt.Errorf("JsonError: %s", err.Error()))
 	}
@@ -101,82 +141,112 @@ func marshal(val g.Value) (g.Str, g.Error) {
 // Unmarshal
 //---------------------------------------------------
 
-var Unmarshal g.Value = g.NewFixedNativeFunc(
-	[]g.Type{g.StrType}, false,
+// Unmarshal unmarshals a JSON string into a Value
+var Unmarshal g.Value = g.NewMultipleNativeFunc(
+	[]g.Type{g.StrType},
+	[]g.Type{g.BoolType},
+	false,
 	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
-		return unmarshal(ev, params[0].(g.Str))
+		s := params[0].(g.Str)
+		useStructs := false
+		if len(params) == 2 {
+			useStructs = params[1].(g.Bool).BoolVal()
+		}
+
+		return unmarshal(ev, s, useStructs)
 	})
 
-func toValue(ev g.Eval, i interface{}) (g.Value, g.Error) {
+func toList(ev g.Eval, ifc []interface{}, useStructs bool) (g.Value, g.Error) {
 
-	if i == nil {
+	vals := make([]g.Value, len(ifc))
+	for i, v := range ifc {
+		val, err := toValue(ev, v, useStructs)
+		if err != nil {
+			return nil, err
+		}
+		vals[i] = val
+	}
+	return g.NewList(vals), nil
+}
+
+func toStruct(ev g.Eval, ifc map[string]interface{}) (g.Value, g.Error) {
+
+	fields := make(map[string]g.Field)
+	for k, v := range ifc {
+
+		val, err := toValue(ev, v, true)
+		if err != nil {
+			return nil, err
+		}
+
+		fields[k] = g.NewField(val)
+	}
+	return g.NewFieldStruct(fields)
+}
+
+func toDict(ev g.Eval, ifc map[string]interface{}) (g.Value, g.Error) {
+
+	entries := []*g.HEntry{}
+	for k, v := range ifc {
+
+		val, err := toValue(ev, v, false)
+		if err != nil {
+			return nil, err
+		}
+
+		entries = append(entries,
+			&g.HEntry{Key: g.NewStr(k), Value: val})
+	}
+	h, err := g.NewHashMap(ev, entries)
+	if err != nil {
+		return nil, err
+	}
+	return g.NewDict(h), nil
+}
+
+func toValue(ev g.Eval, ifc interface{}, useStructs bool) (g.Value, g.Error) {
+
+	if ifc == nil {
 		return g.Null, nil
 	}
 
-	switch t := i.(type) {
+	switch t := ifc.(type) {
 
 	case bool:
 		return g.NewBool(t), nil
 
 	case float64:
-
 		n := int64(t)
 		if t == float64(n) {
 			return g.NewInt(n), nil
 		}
-
 		return g.NewFloat(t), nil
 
 	case string:
 		return g.NewStr(t), nil
 
 	case []interface{}:
-
-		vals := make([]g.Value, len(t))
-		for i, v := range t {
-			val, err := toValue(ev, v)
-			if err != nil {
-				return nil, err
-			}
-			vals[i] = val
-		}
-		return g.NewList(vals), nil
+		return toList(ev, t, useStructs)
 
 	case map[string]interface{}:
-
-		entries := []*g.HEntry{}
-		for k, v := range t {
-
-			val, err := toValue(ev, v)
-			if err != nil {
-				return nil, err
-			}
-
-			entries = append(entries,
-				&g.HEntry{
-					Key:   g.NewStr(k),
-					Value: val,
-				})
+		if useStructs {
+			return toStruct(ev, t)
 		}
-		h, err := g.NewHashMap(ev, entries)
-		if err != nil {
-			return nil, err
-		}
-		return g.NewDict(h), nil
+		return toDict(ev, t)
 
 	default:
 		panic("unreachable")
 	}
 }
 
-func unmarshal(ev g.Eval, s g.Str) (g.Value, g.Error) {
+func unmarshal(ev g.Eval, s g.Str, useStructs bool) (g.Value, g.Error) {
 
-	var i interface{}
+	var ifc interface{}
 
-	err := json.Unmarshal([]byte(s.String()), &i)
+	err := json.Unmarshal([]byte(s.String()), &ifc)
 	if err != nil {
 		return nil, g.Error(fmt.Errorf("JsonError: %s", err.Error()))
 	}
 
-	return toValue(ev, i)
+	return toValue(ev, ifc, useStructs)
 }

@@ -16,10 +16,10 @@ fn fail(func, err) {
     }
 }
 
-fn roundTrip(from) {
+fn roundTrip(from, useStructs := false) {
     const s = json.marshal(from)
     //println(s)
-    const to = json.unmarshal(s)
+    const to = json.unmarshal(s, useStructs)
     assert(from == to)
 }
 
@@ -39,9 +39,22 @@ fn testJson() {
     roundTrip(dict{'a': 1})
     roundTrip(dict{'a': 1, 'b': [2, dict {'c': 2.34e-5}]})
 
+    roundTrip(struct{ a: 1}, true)
+    roundTrip(struct{ a: 1, b: [2, struct {c: 2.34e-5}]}, true)
+
+    const from = dict{'a b': 1, 'c': 2.34}
+    assert(type(from['a b']) == 'Int')
+    assert(type(from['c']) == 'Float')
+
+    const to = json.unmarshal(json.marshal(from))
+    assert(from == to)
+    assert(type(to['a b']) == 'Int')
+    assert(type(to['c']) == 'Float')
+
+    fail(|| => json.unmarshal(json.marshal(from), true), "InvalidStructKey: 'a b' is not a valid struct key")
     fail(|| => json.unmarshal('@'), "JsonError: invalid character '@' looking for beginning of value")
-    fail(|| => json.marshal(dict{1: 2}), "JsonError: Int is not a valid object key")
-    fail(|| => json.marshal(dict{'a': struct{}}), "JsonError: Struct cannot be marshalled")
+    fail(|| => json.marshal(dict{1: 2}), 'JsonError: Int is not a valid object key')
+    fail(|| => json.marshal(dict{'a': set{}}), 'JsonError: Set cannot be marshalled')
 }
 
 fn main(args) {
