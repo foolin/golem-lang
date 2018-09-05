@@ -981,7 +981,7 @@ func (p *Parser) fnExpr(token *ast.Token) *ast.FnExpr {
 			p.consume()
 
 			ident := p.identExpr()
-			if p.accept(ast.Eq) {
+			if p.accept(ast.ColonEq) {
 				optional = append(optional, &ast.OptionalParam{
 					Ident:   ident,
 					IsConst: true,
@@ -1001,7 +1001,7 @@ func (p *Parser) fnExpr(token *ast.Token) *ast.FnExpr {
 		case ast.Ident:
 
 			ident := p.identExpr()
-			if p.accept(ast.Eq) {
+			if p.accept(ast.ColonEq) {
 				optional = append(optional, &ast.OptionalParam{
 					Ident:   ident,
 					IsConst: false,

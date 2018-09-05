@@ -53,6 +53,7 @@ const (
 	Rbracket
 	Semicolon
 	Colon
+	ColonEq
 	Comma
 	Dot
 	//DoubleDot
@@ -184,6 +185,8 @@ func (t TokenKind) String() string {
 		return "Semicolon"
 	case Colon:
 		return "Colon"
+	case ColonEq:
+		return "ColonEq"
 	case Comma:
 		return "Comma"
 	case Dot:

@@ -1093,8 +1093,8 @@ func TestScratch(t *testing.T) {
 
 	code := `
 fn(a...) {}
-fn(a = 1) {}
-fn(a, b = 1, c = 2) {}
+fn(a := 1) {}
+fn(a, b := 1, c := 2) {}
 `
 	mod := testCompile(t, code)
 

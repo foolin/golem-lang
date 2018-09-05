@@ -188,9 +188,16 @@ func (s *Scanner) Next() *ast.Token {
 		case r == ';':
 			s.consume()
 			return &ast.Token{Kind: ast.Semicolon, Text: ";", Position: pos}
+
 		case r == ':':
 			s.consume()
+			r = s.cur.r
+			if r == '=' {
+				s.consume()
+				return &ast.Token{Kind: ast.ColonEq, Text: ":=", Position: pos}
+			}
 			return &ast.Token{Kind: ast.Colon, Text: ":", Position: pos}
+
 		case r == ',':
 			s.consume()
 			return &ast.Token{Kind: ast.Comma, Text: ",", Position: pos}
