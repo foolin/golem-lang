@@ -103,11 +103,7 @@ func (ls *list) Slice(ev Eval, from Value, to Value) (Value, Error) {
 		return nil, err
 	}
 
-	a := ls.array[f:t]
-	b := make([]Value, len(a))
-	copy(b, a)
-
-	result := NewList(b)
+	result := NewList(CopyValues(ls.array[f:t]))
 	if ls.frozen {
 		result.(*list).frozen = true
 	}

@@ -134,17 +134,29 @@ func (c *compiler) makeModuleProperty(index int, isConst bool) g.Field {
 	return prop
 }
 
-func (c *compiler) compileFunc(fe *ast.FnExpr) *bc.FuncTemplate {
+func makeArity(fe *ast.FnExpr) g.Arity {
 
-	arity := g.Arity{
-		Kind:           g.FixedArity,
+	if fe.VariadicParam == nil {
+		return g.Arity{
+			Kind:           g.FixedArity,
+			RequiredParams: uint16(len(fe.RequiredParams)),
+			OptionalParams: 0,
+		}
+	}
+
+	return g.Arity{
+		Kind:           g.VariadicArity,
 		RequiredParams: uint16(len(fe.RequiredParams)),
 		OptionalParams: 0,
 	}
 
+}
+
+func (c *compiler) compileFunc(fe *ast.FnExpr) *bc.FuncTemplate {
+
 	tpl := &bc.FuncTemplate{
 		Module:            c.mod,
-		Arity:             arity,
+		Arity:             makeArity(fe),
 		NumCaptures:       fe.Scope.NumCaptures(),
 		NumLocals:         fe.Scope.NumLocals(),
 		Bytecodes:         nil,
@@ -152,6 +164,7 @@ func (c *compiler) compileFunc(fe *ast.FnExpr) *bc.FuncTemplate {
 		ExceptionHandlers: nil,
 	}
 
+	// reset template info for current func
 	c.btc = []byte{}
 	c.lnum = []bc.LineNumberEntry{}
 	c.handlers = []bc.ExceptionHandler{}
@@ -162,6 +175,7 @@ func (c *compiler) compileFunc(fe *ast.FnExpr) *bc.FuncTemplate {
 	c.Visit(fe.Body)
 	c.push(ast.Pos{}, bc.Return)
 
+	// save template info
 	tpl.Bytecodes = c.btc
 	tpl.LineNumberTable = c.lnum
 	tpl.ExceptionHandlers = c.handlers

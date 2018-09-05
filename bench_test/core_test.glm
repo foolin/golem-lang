@@ -561,6 +561,7 @@ fn testFunc() {
     assert(32 == foo(5))
 
     fail(|| => 1/0, 'DivideByZero')
+    fail(|| => true(), 'TypeMismatch: Expected Func, not Bool')
 }
 
 fn testCapture() {
@@ -1504,6 +1505,39 @@ fn testArity() {
         })
 }
 
+fn testVariadic() {
+
+    let f = fn(v...) {
+        return v
+    }
+
+    let g = fn(a, v...) {
+        return (a, v)
+    }
+
+    let h = fn(a, b, v...) {
+        return (a, b, v)
+    }
+
+    assert(f()           == [ ])
+    assert(f(0)          == [ 0 ])
+    assert(f(0, 1)       == [ 0, 1 ])
+    assert(f(0, 1, 2)    == [ 0, 1, 2 ])
+    assert(f(0, 1, 2, 3) == [ 0, 1, 2, 3 ])
+
+    fail(|| => g(), 'ArityMismatch: Expected at least 1 params, got 0')
+    assert(g(0)          == (0, [ ]))
+    assert(g(0, 1)       == (0, [ 1 ]))
+    assert(g(0, 1, 2)    == (0, [ 1, 2 ]))
+    assert(g(0, 1, 2, 3) == (0, [ 1, 2, 3 ]))
+
+    fail(|| => h(),  'ArityMismatch: Expected at least 2 params, got 0')
+    fail(|| => h(0), 'ArityMismatch: Expected at least 2 params, got 1')
+    assert(h(0, 1)       == (0, 1, [ ]))
+    assert(h(0, 1, 2)    == (0, 1, [ 2 ]))
+    assert(h(0, 1, 2, 3) == (0, 1, [ 2, 3 ]))
+}
+
 fn testRange() {
 
     assert(range(0, 0) == range(0, 0))
@@ -1815,6 +1849,7 @@ fn main(args) {
     testNamedFunc()
     testLambda()
     testArity() 
+    testVariadic() 
 
     testNull()
     testBool()

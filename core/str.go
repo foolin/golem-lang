@@ -159,6 +159,12 @@ func (s str) Concat(that Str) Str {
 	return str(strcpy(a) + strcpy(b))
 }
 
+func strcpy(s string) string {
+	c := make([]byte, len(s))
+	copy(c, s)
+	return string(c)
+}
+
 func (s str) Contains(substr Str) Bool {
 	a := string(s)
 	b := string(substr.(str))

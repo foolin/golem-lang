@@ -5,7 +5,7 @@
 package compiler
 
 import (
-	"fmt"
+	//"fmt"
 	"reflect"
 	"testing"
 
@@ -57,7 +57,6 @@ func testCompile(t *testing.T, code string) *bc.Module {
 
 	source := &scanner.Source{Name: "foo", Path: "foo.glm", Code: code}
 	mods, errs := CompileSourceFully(builtinMgr, source, nil)
-	fmt.Printf("%v\n", errs)
 	g.Tassert(t, errs == nil)
 	g.Tassert(t, len(mods) == 1)
 
@@ -1084,14 +1083,13 @@ let p = ls.iter().next()
 }
 
 func TestFoo(t *testing.T) {
-
-	code := `
-println(-1.0)
-`
-	mod := testCompile(t, code)
-
-	fmt.Println("----------------------------")
-	fmt.Println(code)
-	fmt.Println("----------------------------")
-	fmt.Println(mod.Pool)
+	//	code := `
+	//println(-1.0)
+	//`
+	//	mod := testCompile(t, code)
+	//
+	//	fmt.Println("----------------------------")
+	//	fmt.Println(code)
+	//	fmt.Println("----------------------------")
+	//	fmt.Println(mod.Pool)
 }

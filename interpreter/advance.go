@@ -32,20 +32,36 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		switch fn := f.stack[n-p].(type) {
 		case bc.BytecodeFunc:
 
-			// check arity
-			numParams := len(params)
+			// check arity, and modify params if necessary
 			arity := fn.Template().Arity
+			numParams := len(params)
+			numReq := int(arity.RequiredParams)
+
 			switch arity.Kind {
+
 			case g.FixedArity:
-				if uint16(numParams) != arity.RequiredParams {
-					err := g.ArityError(int(arity.RequiredParams), numParams)
+				if numParams != numReq {
+					return nil, g.ArityError(numReq, numParams)
+				}
+
+			case g.VariadicArity:
+				if numParams < numReq {
+					err := g.ArityAtLeastError(numReq, numParams)
 					return nil, err
 				}
+
+				r := params[:numReq]
+				v := params[numReq:]
+				params = append(r, g.NewList(g.CopyValues(v)))
+
 			default:
 				panic("unreachable")
 			}
 
-			// pop from stack
+			// Pop from stack. Note this is the only opcode that pops
+			// the stack before doing the actual operation.  Also note that
+			// we do not actually advance the instruction pointer here.
+			// That is done in bc.Return.
 			f.stack = f.stack[:n-p]
 
 			// push a new frame
@@ -59,8 +75,12 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 				return nil, err
 			}
 
+			// pop from stack
 			f.stack = f.stack[:n-p]
+
+			// push result
 			f.stack = append(f.stack, val)
+
 			f.ip += 3
 
 		default:
@@ -175,35 +195,35 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 	case bc.NewList:
 
 		size := bc.DecodeParam(btc, f.ip)
-		vals := make([]g.Value, size)
-		copy(vals, f.stack[n-size+1:])
+		ns := n - size + 1
+		vals := g.CopyValues(f.stack[ns:])
 
-		f.stack = f.stack[:n-size+1]
+		f.stack = f.stack[:ns]
 		f.stack = append(f.stack, g.NewList(vals))
 		f.ip += 3
 
 	case bc.NewSet:
 
 		size := bc.DecodeParam(btc, f.ip)
-		vals := make([]g.Value, size)
-		copy(vals, f.stack[n-size+1:])
+		ns := n - size + 1
+		vals := g.CopyValues(f.stack[ns:])
 
 		set, err := g.NewSet(itp, vals)
 		if err != nil {
 			return nil, err
 		}
 
-		f.stack = f.stack[:n-size+1]
+		f.stack = f.stack[:ns]
 		f.stack = append(f.stack, set)
 		f.ip += 3
 
 	case bc.NewTuple:
 
 		size := bc.DecodeParam(btc, f.ip)
-		vals := make([]g.Value, size)
-		copy(vals, f.stack[n-size+1:])
+		ns := n - size + 1
+		vals := g.CopyValues(f.stack[ns:])
 
-		f.stack = f.stack[:n-size+1]
+		f.stack = f.stack[:ns]
 		f.stack = append(f.stack, g.NewTuple(vals))
 		f.ip += 3
 

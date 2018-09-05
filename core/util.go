@@ -21,6 +21,12 @@ func Tassert(t *testing.T, flag bool) {
 	}
 }
 
+func CopyValues(v []Value) []Value {
+	c := make([]Value, len(v))
+	copy(c, v)
+	return c
+}
+
 func posIndex(v Value, length int) (int, Error) {
 
 	i, ok := v.(Int)
@@ -89,13 +95,6 @@ func strHash(s string) int {
 	hash ^= hash >> 11
 	hash += hash << 15
 	return hash
-}
-
-// copy to avoid memory leaks
-func strcpy(s string) string {
-	c := make([]byte, len(s))
-	copy(c, s)
-	return string(c)
 }
 
 func valuesEq(ev Eval, as []Value, bs []Value) (Bool, Error) {
