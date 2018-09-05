@@ -282,17 +282,23 @@ var BuiltinArity = NewFixedNativeFunc(
 	[]Type{FuncType},
 	false,
 	func(ev Eval, values []Value) (Value, Error) {
+
 		fn := values[0].(Func)
 		a := fn.Arity()
 		k := NewStr(a.Kind.String())
 		r := NewInt(int64(a.RequiredParams))
-		o := NewInt(int64(a.OptionalParams))
 
-		return NewFieldStruct(map[string]Field{
+		fields := map[string]Field{
 			"kind":           NewReadonlyField(k),
 			"requiredParams": NewReadonlyField(r),
-			"optionalParams": NewReadonlyField(o),
-		}, true)
+		}
+
+		if a.Kind == MultipleArity {
+			o := NewInt(int64(a.OptionalParams))
+			fields["optionalParams"] = NewReadonlyField(o)
+		}
+
+		return NewFieldStruct(fields, true)
 	})
 
 //-----------------------------------------------------------------

@@ -1482,8 +1482,8 @@ fn testArity() {
 
     fail(|| => arity(0), 'TypeMismatch: Expected Func, not Int')
 
-    assert(arity(println) == struct { kind: "Variadic", requiredParams: 0, optionalParams: 0 })
-    assert(arity(len)     == struct { kind: "Fixed",    requiredParams: 1, optionalParams: 0 })
+    assert(arity(println) == struct { kind: "Variadic", requiredParams: 0 })
+    assert(arity(len)     == struct { kind: "Fixed",    requiredParams: 1 })
     assert(arity(range)   == struct { kind: "Multiple", requiredParams: 2, optionalParams: 1 })
 
     let a = []
@@ -1491,17 +1491,17 @@ fn testArity() {
 
     assert(f ==
         dict { 
-            "add":      struct { kind: "Fixed",    requiredParams: 1, optionalParams: 0 }, 
-            "addAll":   struct { kind: "Fixed",    requiredParams: 1, optionalParams: 0 }, 
-            "clear":    struct { kind: "Fixed",    requiredParams: 0, optionalParams: 0 }, 
-            "contains": struct { kind: "Fixed",    requiredParams: 1, optionalParams: 0 }, 
-            "filter":   struct { kind: "Fixed",    requiredParams: 1, optionalParams: 0 }, 
-            "indexOf":  struct { kind: "Fixed",    requiredParams: 1, optionalParams: 0 }, 
-            "isEmpty":  struct { kind: "Fixed",    requiredParams: 0, optionalParams: 0 }, 
-            "join":     struct { kind: "Multiple", requiredParams: 0, optionalParams: 1 }, 
-            "map":      struct { kind: "Fixed",    requiredParams: 1, optionalParams: 0 }, 
-            "reduce":   struct { kind: "Fixed",    requiredParams: 2, optionalParams: 0 }, 
-            "remove":   struct { kind: "Fixed",    requiredParams: 1, optionalParams: 0 } 
+            "add":      struct { kind: "Fixed", requiredParams: 1 }, 
+            "addAll":   struct { kind: "Fixed", requiredParams: 1 }, 
+            "clear":    struct { kind: "Fixed", requiredParams: 0 }, 
+            "contains": struct { kind: "Fixed", requiredParams: 1 }, 
+            "filter":   struct { kind: "Fixed", requiredParams: 1 }, 
+            "indexOf":  struct { kind: "Fixed", requiredParams: 1 }, 
+            "isEmpty":  struct { kind: "Fixed", requiredParams: 0 }, 
+            "map":      struct { kind: "Fixed", requiredParams: 1 }, 
+            "reduce":   struct { kind: "Fixed", requiredParams: 2 }, 
+            "remove":   struct { kind: "Fixed", requiredParams: 1 },
+            "join":     struct { kind: "Multiple", requiredParams: 0, optionalParams: 1 } 
         })
 }
 
@@ -1536,6 +1536,11 @@ fn testVariadic() {
     assert(h(0, 1)       == (0, 1, [ ]))
     assert(h(0, 1, 2)    == (0, 1, [ 2 ]))
     assert(h(0, 1, 2, 3) == (0, 1, [ 2, 3 ]))
+
+    assert([f, g, h].map(arity) ==
+        [ struct { kind: "Variadic", requiredParams: 0 }, 
+          struct { kind: "Variadic", requiredParams: 1 }, 
+          struct { kind: "Variadic", requiredParams: 2 } ])
 }
 
 fn testRange() {
