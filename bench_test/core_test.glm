@@ -724,7 +724,7 @@ fn testStr() {
     assert(set { 
         'contains', 'index', 'lastIndex', 
         'hasPrefix', 'hasSuffix',
-        'replace', 'split'
+        'replace', 'split', 'toChars', 'map'
     } == fields(s))
     for f in fields(s) {
         assert(hasField(s, f))
@@ -736,6 +736,8 @@ fn testStr() {
     assert(s.hasSuffix == getField(s, 'hasSuffix'))
     assert(s.replace == getField(s, 'replace'))
     assert(s.split == getField(s, 'split'))
+    assert(s.toChars == getField(s, 'toChars'))
+    assert(s.map == getField(s, 'map'))
 
     assert(!hasField(s, 'bogus'))
     fail(|| => getField(s, 'bogus'), "NoSuchField: Field 'bogus' not found")
@@ -840,6 +842,20 @@ fn testStr() {
     assert(['abc'] == 'abc'.split(','))
     assert([''] == ''.split(','))
 	fail(|| => s.split(), 'ArityMismatch: Expected 1 parameter, got 0')
+
+    let delims = set{}.addAll('()[]'.toChars())
+    s = 'a]b)cdef(g[h]'.map(|r| => delims.contains(r) ? ' ' : r)
+
+    assert(['a', 'b', 'c'] == 'abc'.toChars())
+    assert(set{'[', ']', '(', ')'} == delims)
+    assert('a b cdef g h ' == s)
+
+    fail(|| => s.map(|r| => 0), 'TypeMismatch: map function must return Str, not Int')
+
+    fail(|| => s.map(|| => null),      "ArityMismatch: map function must have 1 parameter")
+    fail(|| => s.map(|a,b| => null),   "ArityMismatch: map function must have 1 parameter")
+    fail(|| => s.map(fn(a...) {}),     "ArityMismatch: map function must have 1 parameter")
+    fail(|| => s.map(fn(a, b = 2) {}), "ArityMismatch: map function must have 1 parameter")
 }
 
 fn testList() {

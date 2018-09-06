@@ -107,7 +107,12 @@ type (
 		HasSuffix(Str) Bool
 		Replace(Str, Str, Int) Str
 		Split(Str) List
+		ToChars() List
+		Map(Eval, StrMapper) (Str, Error)
 	}
+
+	// StrMapper transform one string into another
+	StrMapper func(Eval, Str) (Str, Error)
 
 	// A Number is either an Int or a Float
 	Number interface {

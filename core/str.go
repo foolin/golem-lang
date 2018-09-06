@@ -5,6 +5,7 @@
 package core
 
 import (
+	"fmt"
 	"strings"
 	"unicode/utf8"
 )
@@ -14,6 +15,11 @@ type str string
 // NewStr creates a new String, or returns an error if the string
 // does not consist entirely of valid UTF-8-encoded runes.
 func NewStr(s string) (Str, Error) {
+
+	// Golang's builtin 'string' type is really just a slice of bytes.
+	// We are trying to define Golem strings as being a sequence of runes,
+	// so we check for that here.  We may have to relax this restriction in the future
+	// to allow for other valid string encodings that are not utf8.
 	if !utf8.ValidString(s) {
 		return nil, InvalidUtf8String()
 	}
@@ -69,7 +75,7 @@ func (s str) Cmp(ev Eval, c Comparable) (Int, Error) {
 }
 
 func (s str) Get(ev Eval, index Value) (Value, Error) {
-	// TODO implement this more efficiently
+
 	runes := []rune(string(s))
 
 	idx, err := boundedIndex(index, len(runes))
@@ -150,7 +156,7 @@ func (i *strIterator) IterNext(ev Eval) (Bool, Error) {
 func (i *strIterator) IterGet(ev Eval) (Value, Error) {
 
 	if (i.n >= 0) && (i.n < len(i.runes)) {
-		return str([]rune{i.runes[i.n]}), nil
+		return str(i.runes[i.n : i.n+1]), nil
 	}
 	return nil, NoSuchElement()
 }
@@ -229,6 +235,33 @@ func (s str) Split(sep Str) List {
 	return NewList(result)
 }
 
+func (s str) ToChars() List {
+
+	runes := []rune(string(s))
+
+	result := make([]Value, len(runes))
+	for i, r := range runes {
+		result[i] = str(r)
+	}
+	return NewList(result)
+}
+
+func (s str) Map(ev Eval, mapper StrMapper) (Str, Error) {
+
+	runes := []rune(string(s))
+
+	result := make([]string, len(runes))
+	for i, r := range runes {
+		m, err := mapper(ev, str(r))
+		if err != nil {
+			return nil, err
+		}
+		result[i] = m.String()
+	}
+
+	return NewStr(strings.Join(result, ""))
+}
+
 //--------------------------------------------------------------
 // fields
 
@@ -282,6 +315,41 @@ var strMethods = map[string]Method{
 		[]Type{StrType}, false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			return self.(Str).Split(params[0].(Str)), nil
+		}),
+
+	"toChars": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
+			s := self.(Str)
+			return s.ToChars(), nil
+		}),
+
+	"map": NewFixedMethod(
+		[]Type{FuncType}, false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			s := self.(Str)
+
+			// check arity
+			fn := params[0].(Func)
+			expected := Arity{FixedArity, 1, 0}
+			if fn.Arity() != expected {
+				return nil, fmt.Errorf(
+					"ArityMismatch: map function must have 1 parameter")
+			}
+
+			// invoke
+			return s.Map(ev, func(ev Eval, s Str) (Str, Error) {
+				val, err := fn.Invoke(ev, []Value{s})
+				if err != nil {
+					return nil, err
+				}
+
+				result, ok := val.(Str)
+				if !ok {
+					return nil, fmt.Errorf(
+						"TypeMismatch: map function must return Str, not %s", val.Type())
+				}
+				return result, nil
+			})
 		}),
 }
 
