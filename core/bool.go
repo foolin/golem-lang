@@ -38,9 +38,9 @@ func (b _bool) Frozen(ev Eval) (Bool, Error) {
 
 func (b _bool) ToStr(ev Eval) (Str, Error) {
 	if b {
-		return NewStr("true"), nil
+		return NewStr("true")
 	}
-	return NewStr("false"), nil
+	return NewStr("false")
 }
 
 func (b _bool) HashCode(ev Eval) (Int, Error) {

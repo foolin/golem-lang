@@ -51,7 +51,7 @@ func (i _int) Frozen(ev Eval) (Bool, Error) {
 }
 
 func (i _int) ToStr(ev Eval) (Str, Error) {
-	return NewStr(fmt.Sprintf("%d", i)), nil
+	return NewStr(fmt.Sprintf("%d", i))
 }
 
 func (i _int) HashCode(ev Eval) (Int, Error) {

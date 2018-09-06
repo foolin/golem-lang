@@ -34,7 +34,7 @@ func exitErrors(errors []error) {
 	os.Exit(-1)
 }
 
-func dumpError(ev g.Eval, err g.ErrorStruct) {
+func dumpError(ev g.Eval, err interpreter.ErrorStruct) {
 	fmt.Printf("Error: %s\n", err.Error())
 	for _, s := range err.StackTrace() {
 		fmt.Printf("%s\n", s)
@@ -165,6 +165,7 @@ func main() {
 		mainFn, ok := mainVal.(bc.Func)
 		if !ok {
 			exitError(fmt.Errorf("'main' is not a function"))
+			return
 		}
 
 		// gather up the command line arguments into a single list
@@ -179,7 +180,12 @@ func main() {
 			osArgs := os.Args[2:]
 			args := make([]g.Value, len(osArgs))
 			for i, a := range osArgs {
-				args[i] = g.NewStr(a)
+				ai, ei := g.NewStr(a)
+				if ei != nil {
+					exitError(ei)
+					return
+				}
+				args[i] = ai
 			}
 			params = append(params, g.NewList(args))
 		}

@@ -62,7 +62,7 @@ func (d *dict) ToStr(ev Eval) (Str, Error) {
 	}
 
 	buf.WriteString(" }")
-	return NewStr(buf.String()), nil
+	return NewStr(buf.String())
 }
 
 func (d *dict) HashCode(ev Eval) (Int, Error) {

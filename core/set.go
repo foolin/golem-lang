@@ -65,7 +65,7 @@ func (s *set) ToStr(ev Eval) (Str, Error) {
 	}
 
 	buf.WriteString(" }")
-	return NewStr(buf.String()), nil
+	return NewStr(buf.String())
 }
 
 func (s *set) HashCode(ev Eval) (Int, Error) {

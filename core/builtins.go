@@ -193,7 +193,7 @@ var BuiltinType = NewFixedNativeFunc(
 			return nil, NullValueError()
 		}
 
-		return NewStr(params[0].Type().String()), nil
+		return NewStr(params[0].Type().String())
 	})
 
 // BuiltinFreeze freezes a single Value.
@@ -225,7 +225,11 @@ var BuiltinFields = NewFixedNativeFunc(
 
 		entries := make([]Value, len(fields))
 		for i, k := range fields {
-			entries[i] = NewStr(k)
+			entry, err := NewStr(k)
+			if err != nil {
+				return nil, err
+			}
+			entries[i] = entry
 		}
 		return NewSet(ev, entries)
 	})
@@ -285,7 +289,10 @@ var BuiltinArity = NewFixedNativeFunc(
 
 		fn := params[0].(Func)
 		a := fn.Arity()
-		k := NewStr(a.Kind.String())
+		k, err := NewStr(a.Kind.String())
+		if err != nil {
+			return nil, err
+		}
 		r := NewInt(int64(a.Required))
 
 		fields := map[string]Field{

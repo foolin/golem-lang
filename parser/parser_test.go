@@ -19,6 +19,14 @@ func tassert(t *testing.T, flag bool) {
 	}
 }
 
+func mustScanner(source *scanner.Source) *scanner.Scanner {
+	scn, err := scanner.NewScanner(source)
+	if err != nil {
+		panic(err)
+	}
+	return scn
+}
+
 func ok(t *testing.T, p *Parser, expect string) *ast.Module {
 
 	mod, err := p.ParseModule()
@@ -90,7 +98,7 @@ func newParser(code string) *Parser {
 	}
 
 	return NewParser(
-		scanner.NewScanner(
+		mustScanner(
 			&scanner.Source{
 				Name: "foo",
 				Path: "foo.glm",

@@ -59,7 +59,7 @@ func (f *nullaryFunc) HashCode(ev Eval) (Int, Error) {
 }
 
 func (f *nullaryFunc) ToStr(ev Eval) (Str, Error) {
-	return NewStr(fmt.Sprintf("nullaryFunc<%p>", f)), nil
+	return NewStr(fmt.Sprintf("nullaryFunc<%p>", f))
 }
 
 func (f *nullaryFunc) Arity() Arity {
@@ -124,7 +124,7 @@ func (f *nativeFunc) HashCode(ev Eval) (Int, Error) {
 }
 
 func (f *nativeFunc) ToStr(ev Eval) (Str, Error) {
-	return NewStr(fmt.Sprintf("nativeFunc<%p>", f)), nil
+	return NewStr(fmt.Sprintf("nativeFunc<%p>", f))
 }
 
 func (f *nativeFunc) Arity() Arity { return f.arity }

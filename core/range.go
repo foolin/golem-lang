@@ -50,7 +50,7 @@ func (r *rng) Frozen(ev Eval) (Bool, Error) {
 }
 
 func (r *rng) ToStr(ev Eval) (Str, Error) {
-	return NewStr(fmt.Sprintf("range<%d, %d, %d>", r.from, r.to, r.step)), nil
+	return NewStr(fmt.Sprintf("range<%d, %d, %d>", r.from, r.to, r.step))
 }
 
 func (r *rng) HashCode(ev Eval) (Int, Error) {

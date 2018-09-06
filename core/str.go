@@ -11,13 +11,17 @@ import (
 
 type str string
 
-func (s str) String() string {
-	return string(s)
+// NewStr creates a new String, or returns an error if the string
+// does not consist entirely of valid UTF-8-encoded runes.
+func NewStr(s string) (Str, Error) {
+	if !utf8.ValidString(s) {
+		return nil, InvalidUtf8String()
+	}
+	return str(s), nil
 }
 
-// NewStr creates a new String
-func NewStr(s string) Str {
-	return str(s)
+func (s str) String() string {
+	return string(s)
 }
 
 func (s str) basicMarker() {}

@@ -37,7 +37,10 @@ var ext g.Value = g.NewFixedNativeFunc(
 	[]g.Type{g.StrType}, false,
 	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
 		s := params[0].(g.Str)
-		return g.NewStr(filepath.Ext(s.String())), nil
+
+		// TODO: this means that the the path must be
+		// valid UTF-8.  Is that what we really want?
+		return g.NewStr(filepath.Ext(s.String()))
 	})
 
 // walk walks a directory path
@@ -55,13 +58,21 @@ var walk g.Value = g.NewFixedNativeFunc(
 
 		err := filepath.Walk(
 			dir.String(),
-			func(path string, info os.FileInfo, err error) error {
+			func(path string, info os.FileInfo, e error) error {
+				if e != nil {
+					return e
+				}
+
+				// TODO: this means that the the path must be
+				// valid UTF-8.  Is that what we really want?
+				s, err := g.NewStr(path)
 				if err != nil {
 					return err
 				}
-				_, gerr := callback.Invoke(ev,
-					[]g.Value{g.NewStr(path), libOs.NewFileInfo(info)})
-				return gerr
+
+				_, err = callback.Invoke(ev,
+					[]g.Value{s, libOs.NewFileInfo(info)})
+				return err
 			})
 
 		if err != nil {

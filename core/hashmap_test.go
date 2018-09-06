@@ -66,17 +66,17 @@ func TestHashMap(t *testing.T) {
 func TestRemove(t *testing.T) {
 
 	d := newHashMap(t, []*HEntry{
-		{NewStr("a"), NewInt(1)},
-		{NewStr("b"), NewInt(2)}})
+		{mustStr("a"), NewInt(1)},
+		{mustStr("b"), NewInt(2)}})
 
-	v, err := d.Remove(nil, NewStr("z"))
+	v, err := d.Remove(nil, mustStr("z"))
 	ok(t, v, err, False)
 
-	v, err = d.Remove(nil, NewStr("a"))
+	v, err = d.Remove(nil, mustStr("a"))
 	ok(t, v, err, True)
 
 	e := newHashMap(t, []*HEntry{
-		{NewStr("b"), NewInt(2)}})
+		{mustStr("b"), NewInt(2)}})
 
 	v, err = d.Eq(nil, e)
 	ok(t, v, err, True)
@@ -86,16 +86,16 @@ func TestStrHashMap(t *testing.T) {
 
 	hm := newHashMap(t, nil)
 
-	err := hm.Put(nil, NewStr("abc"), NewStr("xyz"))
+	err := hm.Put(nil, mustStr("abc"), mustStr("xyz"))
 	ok(t, nil, err, nil)
 
-	v, err := hm.Get(nil, NewStr("abc"))
-	ok(t, v, err, NewStr("xyz"))
+	v, err := hm.Get(nil, mustStr("abc"))
+	ok(t, v, err, mustStr("xyz"))
 
-	v, err = hm.Contains(nil, NewStr("abc"))
+	v, err = hm.Contains(nil, mustStr("abc"))
 	ok(t, v, err, True)
 
-	v, err = hm.Contains(nil, NewStr("bogus"))
+	v, err = hm.Contains(nil, mustStr("bogus"))
 	ok(t, v, err, False)
 }
 
@@ -122,25 +122,25 @@ func TestHashMapIterator(t *testing.T) {
 
 	testIteratorEntries(t,
 		[]*HEntry{
-			{NewStr("a"), NewInt(1)}},
+			{mustStr("a"), NewInt(1)}},
 		[]*HEntry{
-			{NewStr("a"), NewInt(1)}})
+			{mustStr("a"), NewInt(1)}})
 
 	testIteratorEntries(t,
 		[]*HEntry{
-			{NewStr("a"), NewInt(1)},
-			{NewStr("b"), NewInt(2)}},
+			{mustStr("a"), NewInt(1)},
+			{mustStr("b"), NewInt(2)}},
 		[]*HEntry{
-			{NewStr("b"), NewInt(2)},
-			{NewStr("a"), NewInt(1)}})
+			{mustStr("b"), NewInt(2)},
+			{mustStr("a"), NewInt(1)}})
 
 	testIteratorEntries(t,
 		[]*HEntry{
-			{NewStr("a"), NewInt(1)},
-			{NewStr("b"), NewInt(2)},
-			{NewStr("c"), NewInt(3)}},
+			{mustStr("a"), NewInt(1)},
+			{mustStr("b"), NewInt(2)},
+			{mustStr("c"), NewInt(3)}},
 		[]*HEntry{
-			{NewStr("b"), NewInt(2)},
-			{NewStr("a"), NewInt(1)},
-			{NewStr("c"), NewInt(3)}})
+			{mustStr("b"), NewInt(2)},
+			{mustStr("a"), NewInt(1)},
+			{mustStr("c"), NewInt(3)}})
 }

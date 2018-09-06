@@ -21,7 +21,7 @@ func (n *null) Type() Type {
 }
 
 func (n *null) ToStr(ev Eval) (Str, Error) {
-	return NewStr("null"), nil
+	return NewStr("null")
 }
 
 func (n *null) HashCode(ev Eval) (Int, Error) {

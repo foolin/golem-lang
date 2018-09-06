@@ -38,7 +38,7 @@ func (f _float) Frozen(ev Eval) (Bool, Error) {
 }
 
 func (f _float) ToStr(ev Eval) (Str, Error) {
-	return NewStr(fmt.Sprintf("%g", f)), nil
+	return NewStr(fmt.Sprintf("%g", f))
 }
 
 func (f _float) HashCode(ev Eval) (Int, Error) {

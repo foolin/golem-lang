@@ -66,7 +66,7 @@ type (
 // Basic
 
 type (
-	// Basic represents the immutable types null, bool, str, int and float
+	// Basic represents the immutable types Null, Bool, Str, Int and Float
 	Basic interface {
 		Value
 

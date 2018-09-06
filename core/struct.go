@@ -144,7 +144,7 @@ func (st *_struct) ToStr(ev Eval) (Str, Error) {
 	}
 
 	buf.WriteString(" }")
-	return NewStr(buf.String()), nil
+	return NewStr(buf.String())
 }
 
 func (st *_struct) HashCode(ev Eval) (Int, Error) {

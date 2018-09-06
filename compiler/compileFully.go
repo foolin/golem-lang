@@ -62,7 +62,10 @@ func CompileSource(
 	source *scanner.Source) (*ast.Module, *bc.Module, []error) {
 
 	// scan
-	scanner := scanner.NewScanner(source)
+	scanner, e := scanner.NewScanner(source)
+	if e != nil {
+		return nil, nil, []error{e}
+	}
 
 	// parse
 	parser := parser.NewParser(scanner, builtinMgr.Contains)

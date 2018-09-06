@@ -42,7 +42,7 @@ func NewInterpreter(
 
 // InitModules initializes each of the Modules.  Note that the modules
 // are initialized in reverse order.
-func (itp *Interpreter) InitModules() ([]g.Value, g.ErrorStruct) {
+func (itp *Interpreter) InitModules() ([]g.Value, ErrorStruct) {
 
 	result := []g.Value{}
 	for i := len(itp.modules) - 1; i >= 0; i-- {
@@ -93,7 +93,7 @@ func (itp *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
 }
 
 // EvalBytecode evaluates a bytecode.Func
-func (itp *Interpreter) EvalBytecode(fn bc.Func, params []g.Value) (g.Value, g.ErrorStruct) {
+func (itp *Interpreter) EvalBytecode(fn bc.Func, params []g.Value) (g.Value, ErrorStruct) {
 	val, err := itp.eval(fn, newLocals(fn.Template().NumLocals, params))
 	if err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ func (itp *Interpreter) EvalBytecode(fn bc.Func, params []g.Value) (g.Value, g.E
 
 func (itp *Interpreter) eval(
 	fn bc.Func,
-	locals []*bc.Ref) (result g.Value, errStruct g.ErrorStruct) {
+	locals []*bc.Ref) (result g.Value, errStruct ErrorStruct) {
 
 	lastFrame := len(itp.frames)
 	itp.frames = append(itp.frames, &frame{fn, locals, []g.Value{}, 0})
@@ -114,7 +114,7 @@ func (itp *Interpreter) eval(
 	for result == nil {
 		result, err = itp.advance(lastFrame)
 		if err != nil {
-			result, errStruct = itp.walkStack(g.NewErrorStruct(err, itp.stackTrace()))
+			result, errStruct = itp.walkStack(newErrorStruct(err, itp.stackTrace()))
 			if errStruct != nil {
 				return nil, errStruct
 			}
@@ -124,7 +124,7 @@ func (itp *Interpreter) eval(
 	return result, nil
 }
 
-func (itp *Interpreter) walkStack(errStruct g.ErrorStruct) (g.Value, g.ErrorStruct) {
+func (itp *Interpreter) walkStack(errStruct ErrorStruct) (g.Value, ErrorStruct) {
 
 	// unwind the frames
 	for len(itp.frames) > 0 {
@@ -146,7 +146,7 @@ func (itp *Interpreter) walkStack(errStruct g.ErrorStruct) (g.Value, g.ErrorStru
 					if cerr != nil {
 
 						// save the error
-						errStruct = g.NewErrorStruct(cerr, itp.stackTrace())
+						errStruct = newErrorStruct(cerr, itp.stackTrace())
 
 						// run finally clause
 						if eh.Finally != -1 {
@@ -154,7 +154,7 @@ func (itp *Interpreter) walkStack(errStruct g.ErrorStruct) (g.Value, g.ErrorStru
 							fres, ferr := itp.runTryClause(f, frameIndex)
 							if ferr != nil {
 								// save the error
-								errStruct = g.NewErrorStruct(ferr, itp.stackTrace())
+								errStruct = newErrorStruct(ferr, itp.stackTrace())
 							} else if fres != nil {
 								// stop unwinding the stack
 								return fres, nil
@@ -182,7 +182,7 @@ func (itp *Interpreter) walkStack(errStruct g.ErrorStruct) (g.Value, g.ErrorStru
 					fres, ferr := itp.runTryClause(f, frameIndex)
 					if ferr != nil {
 						// save the error
-						errStruct = g.NewErrorStruct(ferr, itp.stackTrace())
+						errStruct = newErrorStruct(ferr, itp.stackTrace())
 					} else if fres != nil {
 						// stop unwinding the stack
 						return fres, nil
@@ -245,4 +245,60 @@ func (itp *Interpreter) lookupModule(name string) (*bc.Module, g.Error) {
 		return mod, nil
 	}
 	return nil, g.UndefinedModule(name)
+}
+
+//--------------------------------------------------------------
+// ErrorStruct
+//--------------------------------------------------------------
+
+type (
+	// ErrorStruct is a Struct that describes an Error
+	ErrorStruct interface {
+		g.Struct
+		Error() g.Error
+		StackTrace() []string
+	}
+
+	errorStruct struct {
+		g.Struct
+		err        g.Error
+		stackTrace []string
+	}
+)
+
+func newErrorStruct(err g.Error, stackTrace []string) ErrorStruct {
+
+	// make List-of-Str
+	vals := make([]g.Value, len(stackTrace))
+	for i, s := range stackTrace {
+		vals[i] = mustStr(s)
+	}
+	list, e := g.NewList(vals).Freeze(nil)
+	g.Assert(e == nil)
+
+	stc, e := g.NewFrozenFieldStruct(
+		map[string]g.Field{
+			"error":      g.NewReadonlyField(mustStr(err.Error())),
+			"stackTrace": g.NewReadonlyField(list),
+		})
+	g.Assert(e == nil)
+
+	return &errorStruct{stc, err, stackTrace}
+}
+
+func (e *errorStruct) Error() g.Error {
+	return e.err
+}
+
+func (e *errorStruct) StackTrace() []string {
+	return e.stackTrace
+}
+
+// This *should* be impossible...
+func mustStr(s string) g.Str {
+	sv, err := g.NewStr(s)
+	if err != nil {
+		panic("internal interpreter error")
+	}
+	return sv
 }

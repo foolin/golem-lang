@@ -16,9 +16,9 @@ func TestPool(t *testing.T) {
 	pb := newPoolBuilder()
 
 	tassert(t, pb.constIndex(g.NewInt(4)) == 0)
-	tassert(t, pb.constIndex(g.NewStr("a")) == 1)
+	tassert(t, pb.constIndex(mustStr("a")) == 1)
 	tassert(t, pb.constIndex(g.NewFloat(1.0)) == 2)
-	tassert(t, pb.constIndex(g.NewStr("a")) == 1)
+	tassert(t, pb.constIndex(mustStr("a")) == 1)
 	tassert(t, pb.constIndex(g.NewInt(4)) == 0)
 
 	constants := pb.makeConstants()
@@ -26,6 +26,6 @@ func TestPool(t *testing.T) {
 		constants,
 		[]g.Basic{
 			g.NewInt(4),
-			g.NewStr("a"),
+			mustStr("a"),
 			g.NewFloat(1.0)}))
 }

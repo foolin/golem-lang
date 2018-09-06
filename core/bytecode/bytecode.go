@@ -345,19 +345,19 @@ func DecodeWideParams(btc []byte, ip int) (int, int) {
 // FmtBytecode formats a bytecode
 func FmtBytecode(btc []byte, ip int) string {
 
-	str := String(btc[ip])
+	s := String(btc[ip])
 
 	switch Size(btc[ip]) {
 
 	case 1:
-		return fmt.Sprintf("%d: %s", ip, str)
+		return fmt.Sprintf("%d: %s", ip, s)
 
 	case 3:
 
 		p := DecodeParam(btc, ip)
 		return fmt.Sprintf(
 			"%d: %s %d %d (%d)",
-			ip, padRight(str, 12, " "),
+			ip, padRight(s, 12, " "),
 			btc[ip+1], btc[ip+2], p)
 
 	case 5:
@@ -365,7 +365,7 @@ func FmtBytecode(btc []byte, ip int) string {
 		p, q := DecodeWideParams(btc, ip)
 		return fmt.Sprintf(
 			"%d: %s %d %d (%d), %d %d (%d)",
-			ip, padRight(str, 12, " "),
+			ip, padRight(s, 12, " "),
 			btc[ip+1], btc[ip+2], p,
 			btc[ip+3], btc[ip+4], q)
 
@@ -374,9 +374,9 @@ func FmtBytecode(btc []byte, ip int) string {
 	}
 }
 
-func padRight(str string, length int, pad string) string {
-	for len(str) < length {
-		str = str + pad
+func padRight(s string, length int, pad string) string {
+	for len(s) < length {
+		s = s + pad
 	}
-	return str
+	return s
 }

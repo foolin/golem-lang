@@ -49,11 +49,19 @@ var isBuiltIn = func(s string) bool {
 	return ok
 }
 
+func mustScanner(source *scanner.Source) *scanner.Scanner {
+	scn, err := scanner.NewScanner(source)
+	if err != nil {
+		panic(err)
+	}
+	return scn
+}
+
 func newModule(code string) *ast.Module {
 
 	ast.InternalResetDebugging()
 
-	scanner := scanner.NewScanner(
+	scanner := mustScanner(
 		&scanner.Source{
 			Name: "foo",
 			Path: "foo.glm",

@@ -49,7 +49,7 @@ func (tp tuple) ToStr(ev Eval) (Str, Error) {
 		buf.WriteString(s.String())
 	}
 	buf.WriteString(")")
-	return NewStr(buf.String()), nil
+	return NewStr(buf.String())
 }
 
 func (tp tuple) HashCode(ev Eval) (Int, Error) {

@@ -49,7 +49,7 @@ func (ch *channel) HashCode(ev Eval) (Int, Error) {
 }
 
 func (ch *channel) ToStr(ev Eval) (Str, Error) {
-	return NewStr(fmt.Sprintf("chan<%p>", ch)), nil
+	return NewStr(fmt.Sprintf("chan<%p>", ch))
 }
 
 func (ch *channel) Send(val Value) {

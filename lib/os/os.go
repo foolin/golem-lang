@@ -92,9 +92,12 @@ func NewFileInfo(info os.FileInfo) g.Struct {
 
 var fileInfoMethods = map[string]g.Method{
 
-	"name": g.NewWrapperMethod(
-		func(self interface{}) g.Value {
+	"name": g.NewNullaryMethod(
+		func(self interface{}, ev g.Eval) (g.Value, g.Error) {
 			info := self.(os.FileInfo)
+
+			// TODO: this means that the the file name
+			// must be valid UTF-8.  Is that what we really want?
 			return g.NewStr(info.Name())
 		}),
 
@@ -151,7 +154,15 @@ func readLines(f io.Reader) (g.List, g.Error) {
 	lines := []g.Value{}
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
-		lines = append(lines, g.NewStr(scanner.Text()))
+
+		// TODO: this means that the the file being read must consist entirely of
+		// valid UTF-8.  Is that what we really want?
+		s, e := g.NewStr(scanner.Text())
+		if e != nil {
+			return nil, e
+		}
+
+		lines = append(lines, s)
 	}
 
 	if err := scanner.Err(); err != nil {

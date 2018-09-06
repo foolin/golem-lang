@@ -46,7 +46,7 @@ func (f *bytecodeFunc) HashCode(ev g.Eval) (g.Int, g.Error) {
 }
 
 func (f *bytecodeFunc) ToStr(ev g.Eval) (g.Str, g.Error) {
-	return g.NewStr(fmt.Sprintf("func<%p>", f)), nil
+	return g.NewStr(fmt.Sprintf("func<%p>", f))
 }
 
 func (f *bytecodeFunc) Eq(ev g.Eval, val g.Value) (g.Bool, g.Error) {

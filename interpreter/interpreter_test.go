@@ -63,7 +63,7 @@ func ok(t *testing.T, val interface{}, err g.Error, expect interface{}) {
 	}
 }
 
-func fail(t *testing.T, code string, expect g.ErrorStruct) {
+func fail(t *testing.T, code string, expect ErrorStruct) {
 
 	mod := testCompile(t, code)
 	intp := NewInterpreter(builtinMgr, []*bc.Module{mod})
@@ -174,7 +174,7 @@ try {
 }
 `
 	fail(t, code,
-		g.NewErrorStruct(
+		newErrorStruct(
 			g.DivideByZero(),
 			[]string{
 				"    at foo.glm:4"}))
@@ -192,7 +192,7 @@ try {
 }
 `
 	fail(t, code,
-		g.NewErrorStruct(
+		newErrorStruct(
 			g.DivideByZero(),
 			[]string{
 				"    at foo.glm:5"}))
@@ -212,7 +212,7 @@ try {
 }
 `
 	fail(t, code,
-		g.NewErrorStruct(
+		newErrorStruct(
 			g.DivideByZero(),
 			[]string{
 				"    at foo.glm:6"}))
@@ -242,7 +242,7 @@ try {
 	//fmt.Println(mod)
 
 	fail(t, code,
-		g.NewErrorStruct(
+		newErrorStruct(
 			g.DivideByZero(),
 			[]string{
 				"    at foo.glm:6",
@@ -287,7 +287,7 @@ try {
 }
 `
 	fail(t, code,
-		g.NewErrorStruct(
+		newErrorStruct(
 			g.ArityMismatch(1, 3),
 			[]string{
 				"    at foo.glm:3"}))
@@ -300,7 +300,7 @@ try {
 }
 `
 	fail(t, code,
-		g.NewErrorStruct(
+		newErrorStruct(
 			g.DivideByZero(),
 			[]string{
 				"    at foo.glm:5"}))

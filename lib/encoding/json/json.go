@@ -134,7 +134,7 @@ func marshal(ev g.Eval, val g.Value) (g.Str, g.Error) {
 	if err != nil {
 		return nil, g.Error(fmt.Errorf("JsonError: %s", err.Error()))
 	}
-	return g.NewStr(string(b)), nil
+	return g.NewStr(string(b))
 }
 
 //---------------------------------------------------
@@ -194,8 +194,13 @@ func toDict(ev g.Eval, ifc map[string]interface{}) (g.Value, g.Error) {
 			return nil, err
 		}
 
+		ks, err := g.NewStr(k)
+		if err != nil {
+			return nil, err
+		}
+
 		entries = append(entries,
-			&g.HEntry{Key: g.NewStr(k), Value: val})
+			&g.HEntry{Key: ks, Value: val})
 	}
 	h, err := g.NewHashMap(ev, entries)
 	if err != nil {
@@ -223,7 +228,7 @@ func toValue(ev g.Eval, ifc interface{}, useStructs bool) (g.Value, g.Error) {
 		return g.NewFloat(t), nil
 
 	case string:
-		return g.NewStr(t), nil
+		return g.NewStr(t)
 
 	case []interface{}:
 		return toList(ev, t, useStructs)

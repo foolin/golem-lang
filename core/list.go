@@ -56,7 +56,7 @@ func (ls *list) ToStr(ev Eval) (Str, Error) {
 	}
 	buf.WriteString(" ]")
 
-	return NewStr(buf.String()), nil
+	return NewStr(buf.String())
 }
 
 func (ls *list) HashCode(ev Eval) (Int, Error) {
@@ -170,7 +170,7 @@ func (ls *list) Join(ev Eval, delim Str) (Str, Error) {
 		result[i] = s.String()
 	}
 
-	return NewStr(strings.Join(result, delim.String())), nil
+	return NewStr(strings.Join(result, delim.String()))
 }
 
 func (ls *list) Map(ev Eval, mapper Mapper) (List, Error) {
@@ -441,7 +441,12 @@ var listMethods = map[string]Method{
 		false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			ls := self.(List)
-			delim := NewStr("")
+
+			delim, err := NewStr("")
+			if err != nil {
+				return nil, err
+			}
+
 			if len(params) == 1 {
 				delim = params[0].(Str)
 			}

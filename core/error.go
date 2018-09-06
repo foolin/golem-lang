@@ -25,6 +25,11 @@ func AssertionFailed() Error {
 	return fmt.Errorf("AssertionFailed")
 }
 
+// InvalidUtf8String creates an Error
+func InvalidUtf8String() Error {
+	return fmt.Errorf("InvalidUtf8String")
+}
+
 // NoSuchElement creates an Error
 func NoSuchElement() Error {
 	return fmt.Errorf("NoSuchElement")
@@ -137,51 +142,4 @@ func ArityMismatchAtMost(expected int, actual int) Error {
 	return fmt.Errorf(
 		"ArityMismatch: Expected at most %d params, got %d",
 		expected, actual)
-}
-
-//--------------------------------------------------------------
-// ErrorStruct
-//--------------------------------------------------------------
-
-type (
-	// ErrorStruct is a Struct that describes an Error
-	ErrorStruct interface {
-		Struct
-		Error() Error
-		StackTrace() []string
-	}
-
-	errorStruct struct {
-		Struct
-		err        Error
-		stackTrace []string
-	}
-)
-
-// NewErrorStruct creates a Struct that contains an error and a stack trace.
-func NewErrorStruct(err Error, stackTrace []string) ErrorStruct {
-
-	// make list-of-str
-	vals := make([]Value, len(stackTrace))
-	for i, s := range stackTrace {
-		vals[i] = NewStr(s)
-	}
-	list, e := NewList(vals).Freeze(nil)
-	Assert(e == nil)
-
-	stc, e := NewFrozenFieldStruct(
-		map[string]Field{
-			"error":      NewReadonlyField(NewStr(err.Error())),
-			"stackTrace": NewReadonlyField(list),
-		})
-	Assert(e == nil)
-
-	return &errorStruct{stc, err, stackTrace}
-}
-
-func (e *errorStruct) Error() Error {
-	return e.err
-}
-func (e *errorStruct) StackTrace() []string {
-	return e.stackTrace
 }

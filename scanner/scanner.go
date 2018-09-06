@@ -6,10 +6,12 @@ package scanner
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/mjarmy/golem-lang/ast"
 	"io"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 const eof rune = -1
@@ -41,7 +43,11 @@ type (
 )
 
 // NewScanner creates a new Scanner
-func NewScanner(source *Source) *Scanner {
+func NewScanner(source *Source) (*Scanner, error) {
+
+	if !utf8.ValidString(source.Code) {
+		return nil, fmt.Errorf("Source code is not a valid UTF-8-encoded string")
+	}
 
 	s := &Scanner{
 		Source:    source,
@@ -53,7 +59,7 @@ func NewScanner(source *Source) *Scanner {
 	}
 
 	s.consume()
-	return s
+	return s, nil
 }
 
 // Next produces the next token in the stream.  By convention, if the stream is
