@@ -16,8 +16,9 @@ func init() {
 
 	json, err := g.NewFrozenFieldStruct(
 		map[string]g.Field{
-			"marshal":   g.NewField(json.Marshal),
-			"unmarshal": g.NewField(json.Unmarshal),
+			"marshal":       g.NewField(json.Marshal),
+			"marshalIndent": g.NewField(json.MarshalIndent),
+			"unmarshal":     g.NewField(json.Unmarshal),
 		})
 	g.Assert(err == nil)
 

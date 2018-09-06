@@ -22,6 +22,14 @@ var Marshal g.Value = g.NewFixedNativeFunc(
 		return marshal(ev, params[0])
 	})
 
+// Marshal marshals a Value into a JSON string
+var MarshalIndent g.Value = g.NewFixedNativeFunc(
+	[]g.Type{g.AnyType, g.StrType, g.StrType}, true,
+	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
+		return marshalIndent(
+			ev, params[0], params[1].(g.Str), params[2].(g.Str))
+	})
+
 func fromList(ev g.Eval, list g.List) (interface{}, g.Error) {
 
 	vals := list.Values()
@@ -131,6 +139,20 @@ func marshal(ev g.Eval, val g.Value) (g.Str, g.Error) {
 	}
 
 	b, err := json.Marshal(ifc)
+	if err != nil {
+		return nil, g.Error(fmt.Errorf("JsonError: %s", err.Error()))
+	}
+	return g.NewStr(string(b))
+}
+
+func marshalIndent(ev g.Eval, val g.Value, prefix, indent g.Str) (g.Str, g.Error) {
+
+	ifc, err := fromValue(ev, val)
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := json.MarshalIndent(ifc, prefix.String(), indent.String())
 	if err != nil {
 		return nil, g.Error(fmt.Errorf("JsonError: %s", err.Error()))
 	}

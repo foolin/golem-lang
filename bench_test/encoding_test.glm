@@ -51,6 +51,12 @@ fn testJson() {
     assert(type(to['a b']) == 'Int')
     assert(type(to['c']) == 'Float')
 
+    assert(json.marshalIndent(from, '', '  ') == 
+`{
+  "a b": 1,
+  "c": 2.34
+}`)
+
     fail(|| => json.unmarshal(json.marshal(from), true), "InvalidStructKey: 'a b' is not a valid struct key")
     fail(|| => json.unmarshal('@'), "JsonError: invalid character '@' looking for beginning of value")
     fail(|| => json.marshal(dict{1: 2}), 'JsonError: Int is not a valid object key')

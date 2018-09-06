@@ -19,7 +19,7 @@ func NewStr(s string) (Str, Error) {
 	// Golang's builtin 'string' type is really just a slice of bytes.
 	// We are trying to define Golem strings as being a sequence of runes,
 	// so we check for that here.  We may have to relax this restriction in the future
-	// to allow for other valid string encodings that are not utf8.
+	// to allow for other valid character encodings that are not utf8.
 	if !utf8.ValidString(s) {
 		return nil, InvalidUtf8String()
 	}
