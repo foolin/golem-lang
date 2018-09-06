@@ -66,7 +66,7 @@ func TestDelimiter(t *testing.T) {
 	ok(t, s, ast.Lparen, "(", 1, 6)
 	ok(t, s, ast.EOF, "", 1, 7)
 
-	s = NewScanner(&Source{"", "", "}{==;=+ =,:.?[]=>...:="})
+	s = NewScanner(&Source{"", "", "}{==;=+ =,:.?[]=>..."})
 	ok(t, s, ast.Rbrace, "}", 1, 1)
 	ok(t, s, ast.Lbrace, "{", 1, 2)
 	ok(t, s, ast.DoubleEq, "==", 1, 3)
@@ -82,8 +82,7 @@ func TestDelimiter(t *testing.T) {
 	ok(t, s, ast.Rbracket, "]", 1, 15)
 	ok(t, s, ast.EqGt, "=>", 1, 16)
 	ok(t, s, ast.TripleDot, "...", 1, 18)
-	ok(t, s, ast.ColonEq, ":=", 1, 21)
-	ok(t, s, ast.EOF, "", 1, 23)
+	ok(t, s, ast.EOF, "", 1, 21)
 
 	s = NewScanner(&Source{"", "", "! !="})
 	ok(t, s, ast.Not, "!", 1, 1)

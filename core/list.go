@@ -179,7 +179,7 @@ func (ls *list) Map(ev Eval, mapper Mapper) (List, Error) {
 
 	var err Error
 	for i, v := range ls.values {
-		vals[i], err = mapper(v)
+		vals[i], err = mapper(ev, v)
 		if err != nil {
 			return nil, err
 		}
@@ -194,7 +194,7 @@ func (ls *list) Reduce(ev Eval, initial Value, reducer Reducer) (Value, Error) {
 	var err Error
 
 	for _, v := range ls.values {
-		acc, err = reducer(acc, v)
+		acc, err = reducer(ev, acc, v)
 		if err != nil {
 			return nil, err
 		}
@@ -208,7 +208,7 @@ func (ls *list) Filter(ev Eval, filterer Filterer) (List, Error) {
 	vals := []Value{}
 
 	for _, v := range ls.values {
-		flt, err := filterer(v)
+		flt, err := filterer(ev, v)
 		if err != nil {
 			return nil, err
 		}
@@ -302,30 +302,37 @@ func sortValues(vals []Value, cmp func(i, j int) bool) (err Error) {
 	return
 }
 
-func (ls *list) Sort(ev Eval /*fn Func*/) (List, Error) {
+var DefaultLesser = func(ev Eval, a Value, b Value) (Bool, Error) {
+
+	ca, ok := a.(Comparable)
+	if !ok {
+		return nil, Error(fmt.Errorf("TypeMismatch: Type %s cannot be sorted", a.Type()))
+	}
+
+	cb, ok := b.(Comparable)
+	if !ok {
+		return nil, Error(fmt.Errorf("TypeMismatch: Type %s cannot be sorted", b.Type()))
+	}
+
+	n, err := ca.Cmp(ev, cb)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewBool(n.IntVal() < 0), nil
+}
+
+func (ls *list) Sort(ev Eval, lesser Lesser) (List, Error) {
 	if ls.frozen {
 		return nil, ImmutableValueError()
 	}
 
 	err := sortValues(ls.values, func(i, j int) bool {
-
-		a := ls.values[i]
-		ca, ok := a.(Comparable)
-		if !ok {
-			panic(fmt.Errorf("TypeMismatch: Type %s cannot be sorted", a.Type()))
-		}
-
-		b := ls.values[j]
-		cb, ok := b.(Comparable)
-		if !ok {
-			panic(fmt.Errorf("TypeMismatch: Type %s cannot be sorted", b.Type()))
-		}
-
-		n, err := ca.Cmp(ev, cb)
+		b, err := lesser(ev, ls.values[i], ls.values[j])
 		if err != nil {
 			panic(err)
 		}
-		return n.IntVal() < 0
+		return b.BoolVal()
 	})
 	if err != nil {
 		return nil, err
@@ -426,13 +433,6 @@ var listMethods = map[string]Method{
 			return ls.Remove(ev, params[0].(Int))
 		}),
 
-	"sort": NewFixedMethod(
-		[]Type{}, false,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
-			ls := self.(List)
-			return ls.Sort(ev)
-		}),
-
 	"join": NewMultipleMethod(
 		[]Type{},
 		[]Type{StrType},
@@ -445,6 +445,18 @@ var listMethods = map[string]Method{
 			}
 
 			return ls.Join(ev, delim)
+		}),
+
+	"sort": NewFixedMethod(
+		[]Type{}, false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			ls := self.(List)
+
+			// TODO check for proper arity
+			// TODO check for proper arity
+			// TODO check for proper arity
+
+			return ls.Sort(ev, DefaultLesser)
 		}),
 
 	"map": NewFixedMethod(
@@ -462,7 +474,7 @@ var listMethods = map[string]Method{
 			//	return nil, ArityError(1, int(a.Required))
 			//}
 
-			return ls.Map(ev, func(v Value) (Value, Error) {
+			return ls.Map(ev, func(ev Eval, v Value) (Value, Error) {
 				return fn.Invoke(ev, []Value{v})
 			})
 		}),
@@ -487,7 +499,7 @@ var listMethods = map[string]Method{
 			//	return nil, ArityError(2, int(a.Required))
 			//}
 
-			return ls.Reduce(ev, initial, func(acc Value, v Value) (Value, Error) {
+			return ls.Reduce(ev, initial, func(ev Eval, acc Value, v Value) (Value, Error) {
 				return fn.Invoke(ev, []Value{acc, v})
 			})
 		}),
@@ -499,8 +511,10 @@ var listMethods = map[string]Method{
 
 			fn := params[0].(Func)
 			// TODO check for proper arity
+			// TODO check for proper arity
+			// TODO check for proper arity
 
-			return ls.Filter(ev, func(v Value) (Bool, Error) {
+			return ls.Filter(ev, func(ev Eval, v Value) (Bool, Error) {
 				val, err := fn.Invoke(ev, []Value{v})
 				if err != nil {
 					return nil, err

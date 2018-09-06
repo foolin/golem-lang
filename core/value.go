@@ -186,16 +186,24 @@ type (
 		Add(Eval, Value) (List, Error)
 		AddAll(Eval, Value) (List, Error)
 		Remove(Eval, Int) (List, Error)
-		Sort(Eval /*Func*/) (List, Error)
 
+		// modifies list
+		Sort(Eval, Lesser) (List, Error)
+
+		// does not modify list, creates new
 		Map(Eval, Mapper) (List, Error)
+
+		// does not modify list, creates new
 		Reduce(Eval, Value, Reducer) (Value, Error)
+
+		// does not modify list, creates new
 		Filter(Eval, Filterer) (List, Error)
 	}
 
-	Mapper   func(Value) (Value, Error)
-	Reducer  func(Value, Value) (Value, Error)
-	Filterer func(Value) (Bool, Error)
+	Lesser   func(Eval, Value, Value) (Bool, Error)
+	Mapper   func(Eval, Value) (Value, Error)
+	Reducer  func(Eval, Value, Value) (Value, Error)
+	Filterer func(Eval, Value) (Bool, Error)
 
 	// Range is an immutable, iterable representation of a sequence of integers
 	Range interface {

@@ -16,7 +16,7 @@ fn fail(func, err) {
     }
 }
 
-fn roundTrip(from, useStructs := false) {
+fn roundTrip(from, useStructs = false) {
     const s = json.marshal(from)
     //println(s)
     const to = json.unmarshal(s, useStructs)

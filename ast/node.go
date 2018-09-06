@@ -997,7 +997,7 @@ func stringParams(
 			buf.WriteString("const ")
 		}
 		buf.WriteString(p.Ident.String())
-		buf.WriteString(" := ")
+		buf.WriteString(" = ")
 		buf.WriteString(p.Value.String())
 	}
 

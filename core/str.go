@@ -210,7 +210,7 @@ func (s str) Replace(old, new Str, n Int) Str {
 	b := string(old.(str))
 	c := string(new.(str))
 	d := int(n.(_int))
-	return NewStr(strings.Replace(a, b, c, d))
+	return str(strings.Replace(a, b, c, d))
 }
 
 func (s str) Split(sep Str) List {
@@ -220,7 +220,7 @@ func (s str) Split(sep Str) List {
 	tokens := strings.Split(a, b)
 	result := make([]Value, len(tokens))
 	for i, t := range tokens {
-		result[i] = NewStr(t)
+		result[i] = str(t)
 	}
 	return NewList(result)
 }
