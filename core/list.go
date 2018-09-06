@@ -302,6 +302,8 @@ func sortValues(vals []Value, cmp func(i, j int) bool) (err Error) {
 	return
 }
 
+// DefaultLesser returns whether the first param is less than the second param
+// by casting both parameters to Comparable, and callingCmp().
 var DefaultLesser = func(ev Eval, a Value, b Value) (Bool, Error) {
 
 	ca, ok := a.(Comparable)
@@ -447,16 +449,40 @@ var listMethods = map[string]Method{
 			return ls.Join(ev, delim)
 		}),
 
-	"sort": NewFixedMethod(
-		[]Type{}, false,
+	"sort": NewMultipleMethod(
+		[]Type{},
+		[]Type{FuncType},
+		false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			ls := self.(List)
 
-			// TODO check for proper arity
-			// TODO check for proper arity
-			// TODO check for proper arity
+			// if no function was provided, just use the default Lesser
+			if len(params) == 0 {
+				return ls.Sort(ev, DefaultLesser)
+			}
 
-			return ls.Sort(ev, DefaultLesser)
+			// check arity
+			fn := params[0].(Func)
+			expected := Arity{FixedArity, 2, 0}
+			if fn.Arity() != expected {
+				return nil, fmt.Errorf(
+					"ArityMismatch: sort function must have 2 params")
+			}
+
+			// invoke
+			return ls.Sort(ev, func(ev Eval, a Value, b Value) (Bool, Error) {
+				val, err := fn.Invoke(ev, []Value{a, b})
+				if err != nil {
+					return nil, err
+				}
+
+				result, ok := val.(Bool)
+				if !ok {
+					return nil, fmt.Errorf(
+						"TypeMismatch: sort function must return Bool, not %s", val.Type())
+				}
+				return result, nil
+			})
 		}),
 
 	"map": NewFixedMethod(
@@ -464,16 +490,15 @@ var listMethods = map[string]Method{
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			ls := self.(List)
 
+			// check arity
 			fn := params[0].(Func)
-			// TODO check for proper arity
-			//a := fn.Arity()
-			//if a.Kind != FixedArity {
-			//	return nil, fmt.Errorf("ArityMismatch: Expected 1 param")
-			//}
-			//if a.Required != 1 {
-			//	return nil, ArityError(1, int(a.Required))
-			//}
+			expected := Arity{FixedArity, 1, 0}
+			if fn.Arity() != expected {
+				return nil, fmt.Errorf(
+					"ArityMismatch: map function must have 1 params")
+			}
 
+			// invoke
 			return ls.Map(ev, func(ev Eval, v Value) (Value, Error) {
 				return fn.Invoke(ev, []Value{v})
 			})
@@ -489,16 +514,16 @@ var listMethods = map[string]Method{
 			if params[1] == Null {
 				return nil, NullValueError()
 			}
-			fn := params[1].(Func)
-			// TODO check for proper arity
-			//a := fn.Arity()
-			//if a.Kind != FixedArity {
-			//	return nil, fmt.Errorf("ArityMismatch: Expected 2 params")
-			//}
-			//if a.Required != 2 {
-			//	return nil, ArityError(2, int(a.Required))
-			//}
 
+			// check arity
+			fn := params[1].(Func)
+			expected := Arity{FixedArity, 2, 0}
+			if fn.Arity() != expected {
+				return nil, fmt.Errorf(
+					"ArityMismatch: reduce function must have 2 params")
+			}
+
+			// invoke
 			return ls.Reduce(ev, initial, func(ev Eval, acc Value, v Value) (Value, Error) {
 				return fn.Invoke(ev, []Value{acc, v})
 			})
@@ -509,22 +534,27 @@ var listMethods = map[string]Method{
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			ls := self.(List)
 
+			// check arity
 			fn := params[0].(Func)
-			// TODO check for proper arity
-			// TODO check for proper arity
-			// TODO check for proper arity
+			expected := Arity{FixedArity, 1, 0}
+			if fn.Arity() != expected {
+				return nil, fmt.Errorf(
+					"ArityMismatch: filter function must have 1 params")
+			}
 
+			// invoke
 			return ls.Filter(ev, func(ev Eval, v Value) (Bool, Error) {
 				val, err := fn.Invoke(ev, []Value{v})
 				if err != nil {
 					return nil, err
 				}
 
-				b, ok := val.(Bool)
+				result, ok := val.(Bool)
 				if !ok {
-					return nil, TypeMismatchError(BoolType, val.Type())
+					return nil, fmt.Errorf(
+						"TypeMismatch: filter function must return Bool, not %s", val.Type())
 				}
-				return b, nil
+				return result, nil
 			})
 		}),
 }

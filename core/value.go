@@ -187,22 +187,29 @@ type (
 		AddAll(Eval, Value) (List, Error)
 		Remove(Eval, Int) (List, Error)
 
-		// modifies list
+		// Sort sorts the list
 		Sort(Eval, Lesser) (List, Error)
 
-		// does not modify list, creates new
+		// Map creates a new list, leaving the current list unaltered
 		Map(Eval, Mapper) (List, Error)
 
-		// does not modify list, creates new
+		// Reduce creates a new list, leaving the current list unaltered
 		Reduce(Eval, Value, Reducer) (Value, Error)
 
-		// does not modify list, creates new
+		// Filter creates a new list, leaving the current list unaltered
 		Filter(Eval, Filterer) (List, Error)
 	}
 
-	Lesser   func(Eval, Value, Value) (Bool, Error)
-	Mapper   func(Eval, Value) (Value, Error)
-	Reducer  func(Eval, Value, Value) (Value, Error)
+	// Lesser returns whether the first param is less than the second param
+	Lesser func(Eval, Value, Value) (Bool, Error)
+
+	// Mapper transform one value into another
+	Mapper func(Eval, Value) (Value, Error)
+
+	// Reducer combines two values into one
+	Reducer func(Eval, Value, Value) (Value, Error)
+
+	// Filterer filters a value
 	Filterer func(Eval, Value) (Bool, Error)
 
 	// Range is an immutable, iterable representation of a sequence of integers

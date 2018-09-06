@@ -1027,16 +1027,41 @@ fn testList() {
             assert('null1245' == ls.reduce(null, |acc, x| => str(acc) + x))
 
             fail(|| => ls.reduce(0, null), 'NullValue')
-            fail(|| => ls.filter(|x| => 0), 'TypeMismatch: Expected Bool, not Int')
+        },
+        fn () {
+            let ls = freeze([2, 1, 3])
 
-            //fail(|| => ls.map(|a,b| => null), 'ArityMismatch: Expected 1 params, got 2')
-            //fail(|| => ls.map(|| => null), 'ArityMismatch: Expected 1 params, got 0')
-            //fail(|| => ls.map(fn(a...) {}), 'ArityMismatch: Expected 1 param')
+            assert([ 4, 1, 9 ] == ls.map(|a| => a*a) && [2, 1, 3] == ls)
+            fail(|| => ls.map(|| => null),      "ArityMismatch: map function must have 1 params")
+            fail(|| => ls.map(|a,b| => null),   "ArityMismatch: map function must have 1 params")
+            fail(|| => ls.map(fn(a...) {}),     "ArityMismatch: map function must have 1 params")
+            fail(|| => ls.map(fn(a, b = 2) {}), "ArityMismatch: map function must have 1 params")
 
-            //fail(|| => ls.reduce(|a| => null), 'ArityMismatch: Expected 2 params, got 1')
-            ////fail(|| => ls.reduce(|| => null), 'ArityMismatch: Expected 2 params, got 0')
-            ////fail(|| => ls.reduce(fn(a...) {}), 'ArityMismatch: Expected 2 params')
-            //ls.reduce(fn(a...) {})
+            assert(6 == ls.reduce(0, |acc, a| => acc + a) && [2, 1, 3] == ls)
+            fail(|| => ls.reduce(0, || => null),      "ArityMismatch: reduce function must have 2 params")
+            fail(|| => ls.reduce(0, |a| => null),     "ArityMismatch: reduce function must have 2 params")
+            fail(|| => ls.reduce(0, fn(a...) {}),     "ArityMismatch: reduce function must have 2 params")
+            fail(|| => ls.reduce(0, fn(a, b = 2) {}), "ArityMismatch: reduce function must have 2 params")
+
+            assert([2, 1] == ls.filter(|a| => a < 3) && [2, 1, 3] == ls)
+            fail(|| => ls.filter(|a| => 0), 'TypeMismatch: filter function must return Bool, not Int')
+
+            fail(|| => ls.filter(|| => null),      "ArityMismatch: filter function must have 1 params")
+            fail(|| => ls.filter(|a,b| => null),   "ArityMismatch: filter function must have 1 params")
+            fail(|| => ls.filter(fn(a...) {}),     "ArityMismatch: filter function must have 1 params")
+            fail(|| => ls.filter(fn(a, b = 2) {}), "ArityMismatch: filter function must have 1 params")
+
+            fail(|| => ls.sort(|a,b| => 0), 'ImmutableValue')
+
+            ls = [2, 1, 3]
+            assert([1, 2, 3] == ls.sort() && [1, 2, 3] == ls)
+            assert([3, 2, 1] == ls.sort(|a,b| => b < a) &&  [3, 2, 1] == ls)
+            fail(|| => ls.sort(|a,b| => 0), 'TypeMismatch: sort function must return Bool, not Int')
+
+            fail(|| => ls.sort(|| => null),      "ArityMismatch: sort function must have 2 params")
+            fail(|| => ls.sort(|a| => null),     "ArityMismatch: sort function must have 2 params")
+            fail(|| => ls.sort(fn(a...) {}),     "ArityMismatch: sort function must have 2 params")
+            fail(|| => ls.sort(fn(a, b = 2) {}), "ArityMismatch: sort function must have 2 params")
         },
         fn () {
             const ls = [3, 4, 5]
@@ -1523,7 +1548,7 @@ fn testArity() {
             "map":      struct { kind: "Fixed", required: 1 }, 
             "reduce":   struct { kind: "Fixed", required: 2 }, 
             "remove":   struct { kind: "Fixed", required: 1 },
-            "sort":     struct { kind: "Fixed", required: 0 },
+            "sort":     struct { kind: "Multiple", required: 0, optional: 1 },
             "join":     struct { kind: "Multiple", required: 0, optional: 1 } 
         })
 }
