@@ -97,7 +97,7 @@ func (s *set) Contains(ev Eval, key Value) (Bool, Error) {
 
 func (s *set) Add(ev Eval, val Value) (Set, Error) {
 	if s.frozen {
-		return nil, ImmutableValue
+		return nil, ImmutableValue()
 	}
 
 	err := s.hashMap.Put(ev, val, True)
@@ -109,7 +109,7 @@ func (s *set) Add(ev Eval, val Value) (Set, Error) {
 
 func (s *set) AddAll(ev Eval, val Value) (Set, Error) {
 	if s.frozen {
-		return nil, ImmutableValue
+		return nil, ImmutableValue()
 	}
 
 	ibl, ok := val.(Iterable)
@@ -147,7 +147,7 @@ func (s *set) AddAll(ev Eval, val Value) (Set, Error) {
 
 func (s *set) Clear() (Set, Error) {
 	if s.frozen {
-		return nil, ImmutableValue
+		return nil, ImmutableValue()
 	}
 
 	s.hashMap = EmptyHashMap()
@@ -156,7 +156,7 @@ func (s *set) Clear() (Set, Error) {
 
 func (s *set) Remove(ev Eval, key Value) (Set, Error) {
 	if s.frozen {
-		return nil, ImmutableValue
+		return nil, ImmutableValue()
 	}
 
 	_, err := s.hashMap.Remove(ev, key)
@@ -198,7 +198,7 @@ func (i *setIterator) IterGet(ev Eval) (Value, Error) {
 		entry := i.itr.Get()
 		return entry.Key, nil
 	}
-	return nil, NoSuchElement
+	return nil, NoSuchElement()
 }
 
 //--------------------------------------------------------------

@@ -158,7 +158,7 @@ func (i _int) Div(n Number) (Number, Error) {
 
 	case _int:
 		if t == 0 {
-			return nil, DivideByZero
+			return nil, DivideByZero()
 		}
 		return i / t, nil
 
@@ -166,7 +166,7 @@ func (i _int) Div(n Number) (Number, Error) {
 		a := float64(i)
 		b := t.FloatVal()
 		if b == 0.0 {
-			return nil, DivideByZero
+			return nil, DivideByZero()
 		}
 		return NewFloat(a / b), nil
 

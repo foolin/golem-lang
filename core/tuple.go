@@ -89,7 +89,7 @@ func (tp tuple) Get(ev Eval, index Value) (Value, Error) {
 }
 
 func (tp tuple) Set(ev Eval, index Value, val Value) Error {
-	return ImmutableValue
+	return ImmutableValue()
 }
 
 func (tp tuple) Len(ev Eval) (Int, Error) {

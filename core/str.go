@@ -77,7 +77,7 @@ func (s str) Get(ev Eval, index Value) (Value, Error) {
 }
 
 func (s str) Set(ev Eval, index Value, val Value) Error {
-	return ImmutableValue
+	return ImmutableValue()
 }
 
 func (s str) Len(ev Eval) (Int, Error) {
@@ -148,7 +148,7 @@ func (i *strIterator) IterGet(ev Eval) (Value, Error) {
 	if (i.n >= 0) && (i.n < len(i.runes)) {
 		return str([]rune{i.runes[i.n]}), nil
 	}
-	return nil, NoSuchElement
+	return nil, NoSuchElement()
 }
 
 //--------------------------------------------------------------

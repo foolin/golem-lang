@@ -84,7 +84,7 @@ func (d *dict) Get(ev Eval, key Value) (Value, Error) {
 
 func (d *dict) Set(ev Eval, key Value, val Value) Error {
 	if d.frozen {
-		return ImmutableValue
+		return ImmutableValue()
 	}
 
 	return d.hashMap.Put(ev, key, val)
@@ -110,7 +110,7 @@ func (d *dict) Contains(ev Eval, key Value) (Bool, Error) {
 
 func (d *dict) Clear() (Dict, Error) {
 	if d.frozen {
-		return nil, ImmutableValue
+		return nil, ImmutableValue()
 	}
 
 	d.hashMap = EmptyHashMap()
@@ -119,7 +119,7 @@ func (d *dict) Clear() (Dict, Error) {
 
 func (d *dict) Remove(ev Eval, key Value) (Dict, Error) {
 	if d.frozen {
-		return nil, ImmutableValue
+		return nil, ImmutableValue()
 	}
 
 	_, err := d.hashMap.Remove(ev, key)
@@ -131,7 +131,7 @@ func (d *dict) Remove(ev Eval, key Value) (Dict, Error) {
 
 func (d *dict) AddAll(ev Eval, val Value) (Dict, Error) {
 	if d.frozen {
-		return nil, ImmutableValue
+		return nil, ImmutableValue()
 	}
 
 	ibl, ok := val.(Iterable)
@@ -209,7 +209,7 @@ func (i *dictIterator) IterGet(ev Eval) (Value, Error) {
 		entry := i.itr.Get()
 		return NewTuple([]Value{entry.Key, entry.Value}), nil
 	}
-	return nil, NoSuchElement
+	return nil, NoSuchElement()
 }
 
 //--------------------------------------------------------------

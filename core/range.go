@@ -75,7 +75,7 @@ func (r *rng) Get(ev Eval, index Value) (Value, Error) {
 }
 
 func (r *rng) Set(ev Eval, index Value, val Value) Error {
-	return ImmutableValue
+	return ImmutableValue()
 }
 
 func (r *rng) Len(ev Eval) (Int, Error) {
@@ -117,7 +117,7 @@ func (i *rangeIterator) IterGet(ev Eval) (Value, Error) {
 	if (i.n >= 0) && (i.n < i.r.count) {
 		return NewInt(i.r.from + i.n*i.r.step), nil
 	}
-	return nil, NoSuchElement
+	return nil, NoSuchElement()
 }
 
 //--------------------------------------------------------------

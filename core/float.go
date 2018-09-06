@@ -107,7 +107,7 @@ func (f _float) Mul(n Number) Number {
 
 func (f _float) Div(n Number) (Number, Error) {
 	if n.FloatVal() == 0.0 {
-		return nil, DivideByZero
+		return nil, DivideByZero()
 	}
 	fv := f.FloatVal()
 	nv := n.FloatVal()

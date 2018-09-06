@@ -228,7 +228,7 @@ func (st *_struct) InvokeField(ev Eval, name string, params []Value) (Value, Err
 func (st *_struct) SetField(ev Eval, name string, val Value) Error {
 
 	if st.frozen {
-		return ImmutableValue
+		return ImmutableValue()
 	}
 
 	return st.fieldMap.set(ev, name, val)

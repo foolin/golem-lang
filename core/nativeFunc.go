@@ -418,7 +418,7 @@ func vetParam(value Value, typ Type, allowNull bool) Error {
 		if allowNull {
 			return nil
 		}
-		return NullValueError
+		return NullValueError()
 	}
 
 	// check type

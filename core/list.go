@@ -82,7 +82,7 @@ func (ls *list) Get(ev Eval, index Value) (Value, Error) {
 
 func (ls *list) Set(ev Eval, index Value, val Value) Error {
 	if ls.frozen {
-		return ImmutableValue
+		return ImmutableValue()
 	}
 
 	idx, err := boundedIndex(index, len(ls.values))
@@ -231,7 +231,7 @@ func (ls *list) Filter(ev Eval, filterer Filterer) (List, Error) {
 
 func (ls *list) Add(ev Eval, val Value) (List, Error) {
 	if ls.frozen {
-		return nil, ImmutableValue
+		return nil, ImmutableValue()
 	}
 
 	ls.values = append(ls.values, val)
@@ -240,7 +240,7 @@ func (ls *list) Add(ev Eval, val Value) (List, Error) {
 
 func (ls *list) AddAll(ev Eval, val Value) (List, Error) {
 	if ls.frozen {
-		return nil, ImmutableValue
+		return nil, ImmutableValue()
 	}
 
 	ibl, ok := val.(Iterable)
@@ -274,7 +274,7 @@ func (ls *list) AddAll(ev Eval, val Value) (List, Error) {
 
 func (ls *list) Remove(ev Eval, index Int) (List, Error) {
 	if ls.frozen {
-		return nil, ImmutableValue
+		return nil, ImmutableValue()
 	}
 
 	n := int(index.IntVal())
@@ -326,7 +326,7 @@ var DefaultLesser = func(ev Eval, a Value, b Value) (Bool, Error) {
 
 func (ls *list) Sort(ev Eval, lesser Lesser) (List, Error) {
 	if ls.frozen {
-		return nil, ImmutableValue
+		return nil, ImmutableValue()
 	}
 
 	err := sortValues(ls.values, func(i, j int) bool {
@@ -344,7 +344,7 @@ func (ls *list) Sort(ev Eval, lesser Lesser) (List, Error) {
 
 func (ls *list) Clear() (List, Error) {
 	if ls.frozen {
-		return nil, ImmutableValue
+		return nil, ImmutableValue()
 	}
 
 	ls.values = []Value{}
@@ -380,7 +380,7 @@ func (i *listIterator) IterGet(ev Eval) (Value, Error) {
 	if (i.n >= 0) && (i.n < len(i.ls.values)) {
 		return i.ls.values[i.n], nil
 	}
-	return nil, NoSuchElement
+	return nil, NoSuchElement()
 }
 
 //--------------------------------------------------------------
@@ -512,7 +512,7 @@ var listMethods = map[string]Method{
 			initial := params[0]
 
 			if params[1] == Null {
-				return nil, NullValueError
+				return nil, NullValueError()
 			}
 
 			// check arity

@@ -352,7 +352,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		case bc.SetField:
 
 			if f.stack[n-1].Type() == g.NullType {
-				return nil, g.NullValueError
+				return nil, g.NullValueError()
 			}
 
 			stc, ok := f.stack[n-1].(g.Struct)

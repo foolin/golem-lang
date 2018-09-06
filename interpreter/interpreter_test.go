@@ -175,7 +175,7 @@ try {
 `
 	fail(t, code,
 		g.NewErrorStruct(
-			g.DivideByZero,
+			g.DivideByZero(),
 			[]string{
 				"    at foo.glm:4"}))
 
@@ -193,7 +193,7 @@ try {
 `
 	fail(t, code,
 		g.NewErrorStruct(
-			g.DivideByZero,
+			g.DivideByZero(),
 			[]string{
 				"    at foo.glm:5"}))
 
@@ -213,7 +213,7 @@ try {
 `
 	fail(t, code,
 		g.NewErrorStruct(
-			g.DivideByZero,
+			g.DivideByZero(),
 			[]string{
 				"    at foo.glm:6"}))
 
@@ -243,7 +243,7 @@ try {
 
 	fail(t, code,
 		g.NewErrorStruct(
-			g.DivideByZero,
+			g.DivideByZero(),
 			[]string{
 				"    at foo.glm:6",
 				"    at foo.glm:15"}))
@@ -301,7 +301,7 @@ try {
 `
 	fail(t, code,
 		g.NewErrorStruct(
-			g.DivideByZero,
+			g.DivideByZero(),
 			[]string{
 				"    at foo.glm:5"}))
 }
