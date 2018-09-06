@@ -23,7 +23,7 @@ func TestFixedNativeFunc(t *testing.T) {
 	ok(t, val, err, Zero)
 
 	val, err = fn.Invoke(nil, []Value{One})
-	fail(t, val, err, "ArityMismatch: Expected 0 params, got 1")
+	fail(t, val, err, "ArityMismatch: Expected 0 parameters, got 1")
 
 	//----------------------------------------------
 
@@ -44,7 +44,7 @@ func TestFixedNativeFunc(t *testing.T) {
 	fail(t, val, err, "NullValue")
 
 	val, err = fn.Invoke(nil, []Value{})
-	fail(t, val, err, "ArityMismatch: Expected 1 params, got 0")
+	fail(t, val, err, "ArityMismatch: Expected 1 parameter, got 0")
 
 	val, err = fn.Invoke(nil, []Value{mustStr("a")})
 	fail(t, val, err, "TypeMismatch: Expected Int, not Str")
@@ -69,7 +69,7 @@ func TestFixedNativeFunc(t *testing.T) {
 	ok(t, val, err, True)
 
 	val, err = fn.Invoke(nil, []Value{})
-	fail(t, val, err, "ArityMismatch: Expected 1 params, got 0")
+	fail(t, val, err, "ArityMismatch: Expected 1 parameter, got 0")
 
 	val, err = fn.Invoke(nil, []Value{mustStr("a")})
 	fail(t, val, err, "TypeMismatch: Expected Int, not Str")
@@ -105,7 +105,7 @@ func TestVariadicNativeFunc(t *testing.T) {
 	ok(t, fn.Arity(), nil, Arity{VariadicArity, 1, 0})
 
 	val, err = fn.Invoke(nil, []Value{})
-	fail(t, val, err, "ArityMismatch: Expected at least 1 params, got 0")
+	fail(t, val, err, "ArityMismatch: Expected at least 1 parameter, got 0")
 
 	val, err = fn.Invoke(nil, []Value{mustStr("a")})
 	fail(t, val, err, "TypeMismatch: Expected Int, not Str")
@@ -154,10 +154,10 @@ func TestMultipleNativeFunc(t *testing.T) {
 	ok(t, fn.Arity(), nil, Arity{MultipleArity, 1, 2})
 
 	val, err := fn.Invoke(nil, []Value{})
-	fail(t, val, err, "ArityMismatch: Expected at least 1 params, got 0")
+	fail(t, val, err, "ArityMismatch: Expected at least 1 parameter, got 0")
 
 	val, err = fn.Invoke(nil, []Value{Zero, Zero, Zero, Zero})
-	fail(t, val, err, "ArityMismatch: Expected at most 3 params, got 4")
+	fail(t, val, err, "ArityMismatch: Expected at most 3 parameters, got 4")
 
 	val, err = fn.Invoke(nil, []Value{Zero, Zero, mustStr("d")})
 	fail(t, val, err, "TypeMismatch: Expected Str, not Int")

@@ -471,7 +471,7 @@ var listMethods = map[string]Method{
 			expected := Arity{FixedArity, 2, 0}
 			if fn.Arity() != expected {
 				return nil, fmt.Errorf(
-					"ArityMismatch: sort function must have 2 params")
+					"ArityMismatch: sort function must have 2 parameters")
 			}
 
 			// invoke
@@ -500,7 +500,7 @@ var listMethods = map[string]Method{
 			expected := Arity{FixedArity, 1, 0}
 			if fn.Arity() != expected {
 				return nil, fmt.Errorf(
-					"ArityMismatch: map function must have 1 params")
+					"ArityMismatch: map function must have 1 parameter")
 			}
 
 			// invoke
@@ -525,7 +525,7 @@ var listMethods = map[string]Method{
 			expected := Arity{FixedArity, 2, 0}
 			if fn.Arity() != expected {
 				return nil, fmt.Errorf(
-					"ArityMismatch: reduce function must have 2 params")
+					"ArityMismatch: reduce function must have 2 parameters")
 			}
 
 			// invoke
@@ -544,7 +544,7 @@ var listMethods = map[string]Method{
 			expected := Arity{FixedArity, 1, 0}
 			if fn.Arity() != expected {
 				return nil, fmt.Errorf(
-					"ArityMismatch: filter function must have 1 params")
+					"ArityMismatch: filter function must have 1 parameter")
 			}
 
 			// invoke

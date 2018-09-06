@@ -61,7 +61,7 @@ func TestFixedMethod(t *testing.T) {
 	ok(t, val, err, NewInt(100))
 
 	val, err = fn.Invoke(nil, []Value{One})
-	fail(t, val, err, "ArityMismatch: Expected 0 params, got 1")
+	fail(t, val, err, "ArityMismatch: Expected 0 parameters, got 1")
 
 	//----------------------------------------------
 
@@ -88,7 +88,7 @@ func TestFixedMethod(t *testing.T) {
 	fail(t, val, err, "NullValue")
 
 	val, err = fn.Invoke(nil, []Value{})
-	fail(t, val, err, "ArityMismatch: Expected 1 params, got 0")
+	fail(t, val, err, "ArityMismatch: Expected 1 parameter, got 0")
 
 	val, err = fn.Invoke(nil, []Value{mustStr("a")})
 	fail(t, val, err, "TypeMismatch: Expected Int, not Str")

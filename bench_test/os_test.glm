@@ -16,7 +16,7 @@ fn fail(func, err) {
 
 fn testExit() {
     fail(|| => os.exit('foo'), 'TypeMismatch: Expected Int, not Str')
-    fail(|| => os.exit(1, 2), 'ArityMismatch: Expected 1 params, got 2')
+    fail(|| => os.exit(1, 2), 'ArityMismatch: Expected 1 parameter, got 2')
 }
 
 fn testReadLines() {

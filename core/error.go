@@ -125,21 +125,33 @@ func HashCodeMismatch(wrong Type) Error {
 
 // ArityMismatch creates an Error
 func ArityMismatch(expected int, actual int) Error {
+
+	if expected == 1 {
+		return fmt.Errorf(
+			"ArityMismatch: Expected 1 parameter, got %d", actual)
+	}
 	return fmt.Errorf(
-		"ArityMismatch: Expected %d params, got %d",
-		expected, actual)
+		"ArityMismatch: Expected %d parameters, got %d", expected, actual)
 }
 
 // ArityMismatchAtLeast creates an Error
 func ArityMismatchAtLeast(expected int, actual int) Error {
+
+	if expected == 1 {
+		return fmt.Errorf(
+			"ArityMismatch: Expected at least 1 parameter, got %d", actual)
+	}
 	return fmt.Errorf(
-		"ArityMismatch: Expected at least %d params, got %d",
-		expected, actual)
+		"ArityMismatch: Expected at least %d parameters, got %d", expected, actual)
 }
 
 // ArityMismatchAtMost creates an Error
 func ArityMismatchAtMost(expected int, actual int) Error {
+
+	if expected == 1 {
+		return fmt.Errorf(
+			"ArityMismatch: Expected at most 1 parameter, got %d", actual)
+	}
 	return fmt.Errorf(
-		"ArityMismatch: Expected at most %d params, got %d",
-		expected, actual)
+		"ArityMismatch: Expected at most %d parameters, got %d", expected, actual)
 }
