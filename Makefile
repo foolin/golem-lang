@@ -13,7 +13,7 @@ test:
 	go test ./...
 
 compile: 
-	go build -o build/golem golem.go
+	go build -o build/golem cli/golem.go
 	mkdir -p build/lib/encoding
 	mkdir -p build/lib/os
 	mkdir -p build/lib/path

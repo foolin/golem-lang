@@ -34,11 +34,12 @@ func exitErrors(errors []error) {
 	os.Exit(-1)
 }
 
-func dumpError(ev g.Eval, err interpreter.ErrorStruct) {
-	fmt.Printf("Error: %s\n", err.Error())
-	for _, s := range err.StackTrace() {
+func exitInterpreter(es interpreter.ErrorStruct) {
+	fmt.Printf("Error: %s\n", es.Error())
+	for _, s := range es.StackTrace() {
 		fmt.Printf("%s\n", s)
 	}
+	os.Exit(-1)
 }
 
 // homeDir looks up the path of the golem executable
@@ -116,6 +117,22 @@ func makeModuleResolver(homeDir, localDir string) compiler.ModuleResolver {
 	}
 }
 
+func commandLineArguments() g.List {
+
+	osArgs := os.Args[2:]
+	args := make([]g.Value, len(osArgs))
+	for i, o := range osArgs {
+		a, e := g.NewStr(o)
+		if e != nil {
+			exitError(e)
+			return nil // can't get here
+		}
+		args[i] = a
+	}
+
+	return g.NewList(args)
+}
+
 func main() {
 
 	if len(os.Args) == 1 {
@@ -123,20 +140,32 @@ func main() {
 		os.Exit(0)
 	}
 
+	//-------------------------------------------------------------
+	// setup
+	//-------------------------------------------------------------
+
+	// save home directory of golem executable, and local directory
 	homeDir := homeDir()
 	localDir, e := os.Getwd()
 	if e != nil {
 		exitError(e)
 	}
 
-	// command line builtins
+	// use command line builtins
 	var builtins []*g.BuiltinEntry = append(
 		g.StandardBuiltins,
 		g.UnsandboxedBuiltins...)
+
+	// add a builtin for the standard library
 	builtins = append(
 		builtins,
 		&g.BuiltinEntry{Name: "_lib", Value: lib.BuiltinLib})
+
 	builtinMgr := g.NewBuiltinManager(builtins)
+
+	//-------------------------------------------------------------
+	// parse, compile, interpret
+	//-------------------------------------------------------------
 
 	// read source
 	src, e := readSourceFromFile(os.Args[1])
@@ -153,48 +182,43 @@ func main() {
 
 	// interpret
 	itp := interpreter.NewInterpreter(builtinMgr, mods)
-	_, err := itp.InitModules()
-	if err != nil {
-		dumpError(itp, err)
-		os.Exit(-1)
+	_, es := itp.InitModules()
+	if es != nil {
+		exitInterpreter(es)
 	}
 
-	// run main, if it exists
-	mainVal, mainErr := mods[0].Contents.GetField(itp, "main")
-	if mainErr == nil {
-		mainFn, ok := mainVal.(bc.Func)
-		if !ok {
-			exitError(fmt.Errorf("'main' is not a function"))
+	//-------------------------------------------------------------
+	// run main() if it exists
+	//-------------------------------------------------------------
+
+	// find main
+	main, err := mods[0].Contents.GetField(itp, "main")
+	if err != nil {
+		// its ok for there to be no 'main'
+		if err.Error() == "NoSuchField: Field 'main' not found" {
 			return
 		}
+		exitError(err)
+	}
 
-		// gather up the command line arguments into a single list
-		// that will be passed into the main function
-		params := []g.Value{}
-		arity := mainFn.Template().Arity
-		if arity.Kind != g.FixedArity {
-			exitError(fmt.Errorf("'main' arity must be fixed"))
-		} else if arity.Required != 1 {
-			exitError(fmt.Errorf("'main' must have exactly one argument"))
-		} else {
-			osArgs := os.Args[2:]
-			args := make([]g.Value, len(osArgs))
-			for i, a := range osArgs {
-				ai, ei := g.NewStr(a)
-				if ei != nil {
-					exitError(ei)
-					return
-				}
-				args[i] = ai
-			}
-			params = append(params, g.NewList(args))
-		}
+	// make sure that main is a function
+	mainFn, ok := main.(bc.Func)
+	if !ok {
+		exitError(fmt.Errorf("'main' is not a function"))
+	}
 
-		// evaluate the main function
-		_, errStruct := itp.EvalBytecode(mainFn, params)
-		if errStruct != nil {
-			dumpError(itp, errStruct)
-			os.Exit(-1)
-		}
+	// make sure that the main function takes exactly one parameter
+	expected := g.Arity{Kind: g.FixedArity, Required: 1, Optional: 0}
+	if mainFn.Arity() != expected {
+		exitError(fmt.Errorf("ArityMismatch: main function must have 1 parameter"))
+	}
+
+	// turn the command-line arguments into a List-of-Str
+	argList := commandLineArguments()
+
+	// interpret the main function
+	_, es = itp.EvalBytecode(mainFn, []g.Value{argList})
+	if es != nil {
+		exitInterpreter(es)
 	}
 }
