@@ -75,7 +75,7 @@ func (fm *hashFieldMap) get(ev Eval, name string) (Value, Error) {
 	if f, ok := fm.fields[name]; ok {
 		return f.Get(ev)
 	}
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }
 
 func (fm *hashFieldMap) invoke(ev Eval, name string, params []Value) (Value, Error) {
@@ -83,17 +83,17 @@ func (fm *hashFieldMap) invoke(ev Eval, name string, params []Value) (Value, Err
 	if f, ok := fm.fields[name]; ok {
 		return f.Invoke(ev, params)
 	}
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }
 
 func (fm *hashFieldMap) set(ev Eval, name string, val Value) Error {
 	if f, ok := fm.fields[name]; ok {
 		if f.IsReadonly() {
-			return ReadonlyFieldError(name)
+			return ReadonlyField(name)
 		}
 		return f.Set(ev, val)
 	}
-	return NoSuchFieldError(name)
+	return NoSuchField(name)
 }
 
 func (fm *hashFieldMap) replace(name string, field Field) {
@@ -144,7 +144,7 @@ func (fm *methodFieldMap) get(ev Eval, name string) (Value, Error) {
 	if m, ok := fm.methods[name]; ok {
 		return m.ToFunc(fm.self, name), nil
 	}
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }
 
 func (fm *methodFieldMap) invoke(ev Eval, name string, params []Value) (Value, Error) {
@@ -152,15 +152,15 @@ func (fm *methodFieldMap) invoke(ev Eval, name string, params []Value) (Value, E
 	if m, ok := fm.methods[name]; ok {
 		return m.Invoke(fm.self, ev, params)
 	}
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }
 
 func (fm *methodFieldMap) set(ev Eval, name string, val Value) Error {
 
 	if _, ok := fm.methods[name]; ok {
-		return ReadonlyFieldError(name)
+		return ReadonlyField(name)
 	}
-	return NoSuchFieldError(name)
+	return NoSuchField(name)
 }
 
 func (fm *methodFieldMap) replace(name string, field Field) {

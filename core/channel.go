@@ -45,7 +45,7 @@ func (ch *channel) Eq(ev Eval, v Value) (Bool, Error) {
 }
 
 func (ch *channel) HashCode(ev Eval) (Int, Error) {
-	return nil, HashCodeMismatchError(ChanType)
+	return nil, HashCodeMismatch(ChanType)
 }
 
 func (ch *channel) ToStr(ev Eval) (Str, Error) {
@@ -98,7 +98,7 @@ func (ch *channel) GetField(ev Eval, name string) (Value, Error) {
 	if method, ok := chanMethods[name]; ok {
 		return method.ToFunc(ch, name), nil
 	}
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }
 
 func (ch *channel) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
@@ -106,5 +106,5 @@ func (ch *channel) InvokeField(ev Eval, name string, params []Value) (Value, Err
 	if method, ok := chanMethods[name]; ok {
 		return method.Invoke(ch, ev, params)
 	}
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }

@@ -89,7 +89,7 @@ func (tp tuple) Get(ev Eval, index Value) (Value, Error) {
 }
 
 func (tp tuple) Set(ev Eval, index Value, val Value) Error {
-	return ImmutableValueError()
+	return ImmutableValue
 }
 
 func (tp tuple) Len(ev Eval) (Int, Error) {
@@ -108,9 +108,9 @@ func (tp tuple) HasField(name string) (bool, Error) {
 }
 
 func (tp tuple) GetField(ev Eval, name string) (Value, Error) {
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }
 
 func (tp tuple) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }

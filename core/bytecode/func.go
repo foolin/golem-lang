@@ -42,7 +42,7 @@ func (f *bytecodeFunc) Frozen(ev g.Eval) (g.Bool, g.Error) {
 }
 
 func (f *bytecodeFunc) HashCode(ev g.Eval) (g.Int, g.Error) {
-	return nil, g.HashCodeMismatchError(g.FuncType)
+	return nil, g.HashCodeMismatch(g.FuncType)
 }
 
 func (f *bytecodeFunc) ToStr(ev g.Eval) (g.Str, g.Error) {
@@ -71,11 +71,11 @@ func (f *bytecodeFunc) HasField(name string) (bool, g.Error) {
 }
 
 func (f *bytecodeFunc) GetField(ev g.Eval, name string) (g.Value, g.Error) {
-	return nil, g.NoSuchFieldError(name)
+	return nil, g.NoSuchField(name)
 }
 
 func (f *bytecodeFunc) InvokeField(ev g.Eval, name string, params []g.Value) (g.Value, g.Error) {
-	return nil, g.NoSuchFieldError(name)
+	return nil, g.NoSuchField(name)
 }
 
 //--------------------------------------------------------------

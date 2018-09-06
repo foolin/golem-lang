@@ -66,7 +66,7 @@ func (d *dict) ToStr(ev Eval) (Str, Error) {
 }
 
 func (d *dict) HashCode(ev Eval) (Int, Error) {
-	return nil, HashCodeMismatchError(DictType)
+	return nil, HashCodeMismatch(DictType)
 }
 
 func (d *dict) Eq(ev Eval, v Value) (Bool, Error) {
@@ -84,7 +84,7 @@ func (d *dict) Get(ev Eval, key Value) (Value, Error) {
 
 func (d *dict) Set(ev Eval, key Value, val Value) Error {
 	if d.frozen {
-		return ImmutableValueError()
+		return ImmutableValue
 	}
 
 	return d.hashMap.Put(ev, key, val)
@@ -110,7 +110,7 @@ func (d *dict) Contains(ev Eval, key Value) (Bool, Error) {
 
 func (d *dict) Clear() (Dict, Error) {
 	if d.frozen {
-		return nil, ImmutableValueError()
+		return nil, ImmutableValue
 	}
 
 	d.hashMap = EmptyHashMap()
@@ -119,7 +119,7 @@ func (d *dict) Clear() (Dict, Error) {
 
 func (d *dict) Remove(ev Eval, key Value) (Dict, Error) {
 	if d.frozen {
-		return nil, ImmutableValueError()
+		return nil, ImmutableValue
 	}
 
 	_, err := d.hashMap.Remove(ev, key)
@@ -131,12 +131,12 @@ func (d *dict) Remove(ev Eval, key Value) (Dict, Error) {
 
 func (d *dict) AddAll(ev Eval, val Value) (Dict, Error) {
 	if d.frozen {
-		return nil, ImmutableValueError()
+		return nil, ImmutableValue
 	}
 
 	ibl, ok := val.(Iterable)
 	if !ok {
-		return nil, IterableMismatchError(val.Type())
+		return nil, IterableMismatch(val.Type())
 	}
 
 	itr, err := ibl.NewIterator(ev)
@@ -161,12 +161,12 @@ func (d *dict) AddAll(ev Eval, val Value) (Dict, Error) {
 					return nil, err
 				}
 			} else {
-				return nil, InvalidArgumentError(
+				return nil, InvalidArgument(
 					fmt.Sprintf("Expected Tuple of length %d, not length %d",
 						2, len(tp)))
 			}
 		} else {
-			return nil, TypeMismatchError(TupleType, v.Type())
+			return nil, TypeMismatch(TupleType, v.Type())
 		}
 
 		b, err = itr.IterNext(ev)
@@ -209,7 +209,7 @@ func (i *dictIterator) IterGet(ev Eval) (Value, Error) {
 		entry := i.itr.Get()
 		return NewTuple([]Value{entry.Key, entry.Value}), nil
 	}
-	return nil, NoSuchElementError()
+	return nil, NoSuchElement
 }
 
 //--------------------------------------------------------------
@@ -267,7 +267,7 @@ func (d *dict) GetField(ev Eval, name string) (Value, Error) {
 	if method, ok := dictMethods[name]; ok {
 		return method.ToFunc(d, name), nil
 	}
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }
 
 func (d *dict) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
@@ -275,5 +275,5 @@ func (d *dict) InvokeField(ev Eval, name string, params []Value) (Value, Error) 
 	if method, ok := dictMethods[name]; ok {
 		return method.Invoke(d, ev, params)
 	}
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }

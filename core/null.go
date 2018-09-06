@@ -25,7 +25,7 @@ func (n *null) ToStr(ev Eval) (Str, Error) {
 }
 
 func (n *null) HashCode(ev Eval) (Int, Error) {
-	return nil, NullValueError()
+	return nil, NullValueError
 }
 
 func (n *null) Eq(ev Eval, val Value) (Bool, Error) {
@@ -38,28 +38,28 @@ func (n *null) Eq(ev Eval, val Value) (Bool, Error) {
 }
 
 func (n *null) Freeze(ev Eval) (Value, Error) {
-	return nil, NullValueError()
+	return nil, NullValueError
 }
 
 func (n *null) Frozen(ev Eval) (Bool, Error) {
-	return nil, NullValueError()
+	return nil, NullValueError
 }
 
 //--------------------------------------------------------------
 // fields
 
 func (n *null) FieldNames() ([]string, Error) {
-	return nil, NullValueError()
+	return nil, NullValueError
 }
 
 func (n *null) HasField(name string) (bool, Error) {
-	return false, NullValueError()
+	return false, NullValueError
 }
 
 func (n *null) GetField(ev Eval, name string) (Value, Error) {
-	return nil, NullValueError()
+	return nil, NullValueError
 }
 
 func (n *null) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
-	return nil, NullValueError()
+	return nil, NullValueError
 }

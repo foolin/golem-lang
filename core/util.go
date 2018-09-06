@@ -22,7 +22,7 @@ func posIndex(v Value, length int) (int, Error) {
 
 	i, ok := v.(Int)
 	if !ok {
-		return -1, TypeMismatchError(IntType, v.Type())
+		return -1, TypeMismatch(IntType, v.Type())
 	}
 
 	n := int(i.IntVal())
@@ -40,9 +40,9 @@ func boundedIndex(v Value, length int) (int, Error) {
 
 	switch {
 	case n < 0:
-		return -1, IndexOutOfBoundsError(n)
+		return -1, IndexOutOfBounds(n)
 	case n >= length:
-		return -1, IndexOutOfBoundsError(n)
+		return -1, IndexOutOfBounds(n)
 	default:
 		return n, nil
 	}

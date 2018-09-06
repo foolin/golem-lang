@@ -75,7 +75,7 @@ func (b _bool) Cmp(ev Eval, c Comparable) (Int, Error) {
 		}
 
 	default:
-		return nil, ComparableMismatchError(BoolType, c.(Value).Type())
+		return nil, ComparableMismatch(BoolType, c.(Value).Type())
 	}
 }
 
@@ -95,9 +95,9 @@ func (b _bool) HasField(name string) (bool, Error) {
 }
 
 func (b _bool) GetField(ev Eval, name string) (Value, Error) {
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }
 
 func (b _bool) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }

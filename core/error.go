@@ -11,120 +11,115 @@ import (
 // Error is an error
 type Error error
 
-// NullValueError creates a NullValue Error
-func NullValueError() Error {
-	return fmt.Errorf("NullValue")
-}
+var (
+	NullValueError  = fmt.Errorf("NullValue")
+	NoSuchElement   = fmt.Errorf("NoSuchElement")
+	AssertionFailed = fmt.Errorf("AssertionFailed")
+	ImmutableValue  = fmt.Errorf("ImmutableValue")
+	DivideByZero    = fmt.Errorf("DivideByZero")
+)
 
-// TypeMismatchError creates a TypeMismatch Error
-func TypeMismatchError(typ, wrong Type) Error {
-	return fmt.Errorf("TypeMismatch: Expected %s, not %s", typ, wrong)
-}
+//-----------------------------------------------------------
+// miscellaneous
+//-----------------------------------------------------------
 
-// NumberMismatchError creates a TypeMismatch Error
-func NumberMismatchError(wrong Type) Error {
-	return fmt.Errorf("TypeMismatch: Expected Int or Float, not %s", wrong)
-}
-
-// IterableMismatchError creates a TypeMismatch Error
-func IterableMismatchError(wrong Type) Error {
-	return fmt.Errorf("TypeMismatch: Type %s has no iter()", wrong)
-}
-
-// LenableMismatchError creates a TypeMismatch Error
-func LenableMismatchError(wrong Type) Error {
-	return fmt.Errorf("TypeMismatch: Type %s has no len()", wrong)
-}
-
-// IndexableMismatchError creates a TypeMismatch Error
-func IndexableMismatchError(wrong Type) Error {
-	return fmt.Errorf("TypeMismatch: Type %s cannot be indexed", wrong)
-}
-
-// SliceableMismatchError creates a TypeMismatch Error
-func SliceableMismatchError(wrong Type) Error {
-	return fmt.Errorf("TypeMismatch: Type %s cannot be sliced", wrong)
-}
-
-// ComparableMismatchError creates a TypeMismatch Error
-func ComparableMismatchError(a, b Type) Error {
-	return fmt.Errorf("TypeMismatch: Types %s and %s cannot be compared", a, b)
-}
-
-// HashCodeMismatchError creates a TypeMismatch Error
-func HashCodeMismatchError(wrong Type) Error {
-	return fmt.Errorf("TypeMismatch: Type %s cannot be hashed", wrong)
-}
-
-// DivideByZeroError creates a DivideByZero Error
-func DivideByZeroError() Error {
-	return fmt.Errorf("DivideByZero")
-}
-
-// InvalidArgumentError creates an InvalidArgument Error
-func InvalidArgumentError(msg string) Error {
+// InvalidArgument creates an InvalidArgument Error
+func InvalidArgument(msg string) Error {
 	return fmt.Errorf("InvalidArgument: %s", msg)
 }
 
-// IndexOutOfBoundsError creates an IndexOutOfBounds Error
-func IndexOutOfBoundsError(val int) Error {
+// IndexOutOfBounds creates an IndexOutOfBounds Error
+func IndexOutOfBounds(val int) Error {
 	return fmt.Errorf("IndexOutOfBounds: %d", val)
 }
 
-// ArityError creates an ArityMismatch Error
-func ArityError(expected int, actual int) Error {
+// ReadonlyField creates a ReadonlyField Error
+func ReadonlyField(name string) Error {
+	return fmt.Errorf("ReadonlyField: Field '%s' is readonly", name)
+}
+
+// NoSuchField creates a NoSuchField Error
+func NoSuchField(name string) Error {
+	return fmt.Errorf("NoSuchField: Field '%s' not found", name)
+}
+
+// InvalidStructKey creates a InvalidStructKey Error
+func InvalidStructKey(key string) Error {
+	return fmt.Errorf("InvalidStructKey: '%s' is not a valid struct key", key)
+}
+
+// UndefinedModule creates a UndefinedModule Error
+func UndefinedModule(name string) Error {
+	return fmt.Errorf("UndefinedModule: Module '%s' is not defined", name)
+}
+
+//--------------------------------------------------------------
+// type mismatch
+//--------------------------------------------------------------
+
+// TypeMismatch creates a TypeMismatch Error
+func TypeMismatch(typ, wrong Type) Error {
+	return fmt.Errorf("TypeMismatch: Expected %s, not %s", typ, wrong)
+}
+
+// NumberMismatch creates a TypeMismatch Error
+func NumberMismatch(wrong Type) Error {
+	return fmt.Errorf("TypeMismatch: Expected Int or Float, not %s", wrong)
+}
+
+// IterableMismatch creates a TypeMismatch Error
+func IterableMismatch(wrong Type) Error {
+	return fmt.Errorf("TypeMismatch: Type %s has no iter()", wrong)
+}
+
+// LenableMismatch creates a TypeMismatch Error
+func LenableMismatch(wrong Type) Error {
+	return fmt.Errorf("TypeMismatch: Type %s has no len()", wrong)
+}
+
+// IndexableMismatch creates a TypeMismatch Error
+func IndexableMismatch(wrong Type) Error {
+	return fmt.Errorf("TypeMismatch: Type %s cannot be indexed", wrong)
+}
+
+// SliceableMismatch creates a TypeMismatch Error
+func SliceableMismatch(wrong Type) Error {
+	return fmt.Errorf("TypeMismatch: Type %s cannot be sliced", wrong)
+}
+
+// ComparableMismatch creates a TypeMismatch Error
+func ComparableMismatch(a, b Type) Error {
+	return fmt.Errorf("TypeMismatch: Types %s and %s cannot be compared", a, b)
+}
+
+// HashCodeMismatch creates a TypeMismatch Error
+func HashCodeMismatch(wrong Type) Error {
+	return fmt.Errorf("TypeMismatch: Type %s cannot be hashed", wrong)
+}
+
+//--------------------------------------------------------------
+// arity mismatch
+//--------------------------------------------------------------
+
+// ArityMismatch creates an ArityMismatch Error
+func ArityMismatch(expected int, actual int) Error {
 	return fmt.Errorf(
 		"ArityMismatch: Expected %d params, got %d",
 		expected, actual)
 }
 
-// ArityAtLeastError creates an ArityMismatch Error
-func ArityAtLeastError(expected int, actual int) Error {
+// ArityMismatchAtLeast creates an ArityMismatch Error
+func ArityMismatchAtLeast(expected int, actual int) Error {
 	return fmt.Errorf(
 		"ArityMismatch: Expected at least %d params, got %d",
 		expected, actual)
 }
 
-// ArityAtMostError creates an ArityMismatch Error
-func ArityAtMostError(expected int, actual int) Error {
+// ArityMismatchAtMost creates an ArityMismatch Error
+func ArityMismatchAtMost(expected int, actual int) Error {
 	return fmt.Errorf(
 		"ArityMismatch: Expected at most %d params, got %d",
 		expected, actual)
-}
-
-// ReadonlyFieldError creates a ReadonlyField Error
-func ReadonlyFieldError(name string) Error {
-	return fmt.Errorf("ReadonlyField: Field '%s' is readonly", name)
-}
-
-// NoSuchFieldError creates a NoSuchField Error
-func NoSuchFieldError(name string) Error {
-	return fmt.Errorf("NoSuchField: Field '%s' not found", name)
-}
-
-// ImmutableValueError creates an ImmutableValue Error
-func ImmutableValueError() Error {
-	return fmt.Errorf("ImmutableValue")
-}
-
-// InvalidStructKeyError creates a InvalidStructKey Error
-func InvalidStructKeyError(key string) Error {
-	return fmt.Errorf("InvalidStructKey: '%s' is not a valid struct key", key)
-}
-
-// UndefinedModuleError creates a UndefinedModule Error
-func UndefinedModuleError(name string) Error {
-	return fmt.Errorf("UndefinedModule: Module '%s' is not defined", name)
-}
-
-// NoSuchElementError creates a NoSuchElement Error
-func NoSuchElementError() Error {
-	return fmt.Errorf("NoSuchElement")
-}
-
-// AssertionFailedError creates a NoSuchElement Error
-func AssertionFailedError() Error {
-	return fmt.Errorf("AssertionFailed")
 }
 
 //--------------------------------------------------------------

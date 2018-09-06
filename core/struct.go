@@ -25,7 +25,7 @@ func NewFieldStruct(fields map[string]Field) (Struct, Error) {
 
 	for key := range fields {
 		if !scanner.IsIdentifier(key) {
-			return nil, InvalidStructKeyError(key)
+			return nil, InvalidStructKey(key)
 		}
 	}
 
@@ -43,7 +43,7 @@ func NewFrozenFieldStruct(fields map[string]Field) (Struct, Error) {
 
 	for key := range fields {
 		if !scanner.IsIdentifier(key) {
-			return nil, InvalidStructKeyError(key)
+			return nil, InvalidStructKey(key)
 		}
 	}
 
@@ -61,7 +61,7 @@ func NewMethodStruct(self interface{}, methods map[string]Method) (Struct, Error
 
 	for key := range methods {
 		if !scanner.IsIdentifier(key) {
-			return nil, InvalidStructKeyError(key)
+			return nil, InvalidStructKey(key)
 		}
 	}
 
@@ -88,7 +88,7 @@ func MergeStructs(structs []Struct) (Struct, Error) {
 
 		if i > 0 {
 			if frozen != s.frozen {
-				return nil, InvalidArgumentError(
+				return nil, InvalidArgument(
 					"Cannot merge structs unless they are all frozen, or all unfrozen")
 			}
 		}
@@ -148,7 +148,7 @@ func (st *_struct) ToStr(ev Eval) (Str, Error) {
 }
 
 func (st *_struct) HashCode(ev Eval) (Int, Error) {
-	return nil, HashCodeMismatchError(StructType)
+	return nil, HashCodeMismatch(StructType)
 }
 
 func (st *_struct) Eq(ev Eval, val Value) (Bool, Error) {
@@ -228,7 +228,7 @@ func (st *_struct) InvokeField(ev Eval, name string, params []Value) (Value, Err
 func (st *_struct) SetField(ev Eval, name string, val Value) Error {
 
 	if st.frozen {
-		return ImmutableValueError()
+		return ImmutableValue
 	}
 
 	return st.fieldMap.set(ev, name, val)

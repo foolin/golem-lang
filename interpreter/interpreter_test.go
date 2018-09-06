@@ -145,7 +145,7 @@ assert([1, 2, 3] == [a.x, b.y, c.z])
 		if src, ok := sourceMap[moduleName]; ok {
 			return src, nil
 		}
-		return nil, g.UndefinedModuleError(moduleName)
+		return nil, g.UndefinedModule(moduleName)
 	}
 
 	mods, errs := compiler.CompileSourceFully(builtinMgr, srcMain, resolver)
@@ -175,7 +175,7 @@ try {
 `
 	fail(t, code,
 		g.NewErrorStruct(
-			g.DivideByZeroError(),
+			g.DivideByZero,
 			[]string{
 				"    at foo.glm:4"}))
 
@@ -193,7 +193,7 @@ try {
 `
 	fail(t, code,
 		g.NewErrorStruct(
-			g.DivideByZeroError(),
+			g.DivideByZero,
 			[]string{
 				"    at foo.glm:5"}))
 
@@ -213,7 +213,7 @@ try {
 `
 	fail(t, code,
 		g.NewErrorStruct(
-			g.DivideByZeroError(),
+			g.DivideByZero,
 			[]string{
 				"    at foo.glm:6"}))
 
@@ -243,7 +243,7 @@ try {
 
 	fail(t, code,
 		g.NewErrorStruct(
-			g.DivideByZeroError(),
+			g.DivideByZero,
 			[]string{
 				"    at foo.glm:6",
 				"    at foo.glm:15"}))
@@ -288,7 +288,7 @@ try {
 `
 	fail(t, code,
 		g.NewErrorStruct(
-			g.ArityError(1, 3),
+			g.ArityMismatch(1, 3),
 			[]string{
 				"    at foo.glm:3"}))
 
@@ -301,7 +301,7 @@ try {
 `
 	fail(t, code,
 		g.NewErrorStruct(
-			g.DivideByZeroError(),
+			g.DivideByZero,
 			[]string{
 				"    at foo.glm:5"}))
 }

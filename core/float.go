@@ -81,7 +81,7 @@ func (f _float) Cmp(ev Eval, c Comparable) (Int, Error) {
 			return Zero, nil
 		}
 	}
-	return nil, ComparableMismatchError(FloatType, c.(Value).Type())
+	return nil, ComparableMismatch(FloatType, c.(Value).Type())
 }
 
 //--------------------------------------------------------------
@@ -107,7 +107,7 @@ func (f _float) Mul(n Number) Number {
 
 func (f _float) Div(n Number) (Number, Error) {
 	if n.FloatVal() == 0.0 {
-		return nil, DivideByZeroError()
+		return nil, DivideByZero
 	}
 	fv := f.FloatVal()
 	nv := n.FloatVal()
@@ -130,9 +130,9 @@ func (f _float) HasField(name string) (bool, Error) {
 }
 
 func (f _float) GetField(ev Eval, name string) (Value, Error) {
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }
 
 func (f _float) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }

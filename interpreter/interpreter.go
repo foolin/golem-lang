@@ -244,5 +244,5 @@ func (itp *Interpreter) lookupModule(name string) (*bc.Module, g.Error) {
 	if mod, ok := itp.modMap[name]; ok {
 		return mod, nil
 	}
-	return nil, g.UndefinedModuleError(name)
+	return nil, g.UndefinedModule(name)
 }

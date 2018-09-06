@@ -100,13 +100,13 @@ var BuiltinLen = NewFixedNativeFunc(
 	func(ev Eval, params []Value) (Value, Error) {
 
 		if params[0].Type() == NullType {
-			return nil, NullValueError()
+			return nil, NullValueError
 		}
 
 		if ln, ok := params[0].(Lenable); ok {
 			return ln.Len(ev)
 		}
-		return nil, LenableMismatchError(params[0].Type())
+		return nil, LenableMismatch(params[0].Type())
 	})
 
 // BuiltinIter returns the length of a single Lenable
@@ -116,13 +116,13 @@ var BuiltinIter = NewFixedNativeFunc(
 	func(ev Eval, params []Value) (Value, Error) {
 
 		if params[0].Type() == NullType {
-			return nil, NullValueError()
+			return nil, NullValueError
 		}
 
 		if ibl, ok := params[0].(Iterable); ok {
 			return ibl.NewIterator(ev)
 		}
-		return nil, IterableMismatchError(params[0].Type())
+		return nil, IterableMismatch(params[0].Type())
 	})
 
 // BuiltinRange creates a new Range
@@ -149,7 +149,7 @@ var BuiltinAssert = NewFixedNativeFunc(
 		if b.BoolVal() {
 			return True, nil
 		}
-		return nil, AssertionFailedError()
+		return nil, AssertionFailed
 	})
 
 // BuiltinMerge merges structs together.
@@ -190,7 +190,7 @@ var BuiltinType = NewFixedNativeFunc(
 	func(ev Eval, params []Value) (Value, Error) {
 
 		if params[0].Type() == NullType {
-			return nil, NullValueError()
+			return nil, NullValueError
 		}
 
 		return NewStr(params[0].Type().String()), nil
@@ -261,10 +261,10 @@ var BuiltinSetField = NewFixedNativeFunc(
 	func(ev Eval, params []Value) (Value, Error) {
 
 		if params[0].Type() == NullType {
-			return nil, NullValueError()
+			return nil, NullValueError
 		}
 		if params[1].Type() == NullType {
-			return nil, NullValueError()
+			return nil, NullValueError
 		}
 
 		st := params[0].(Struct)

@@ -60,7 +60,7 @@ func (s str) Cmp(ev Eval, c Comparable) (Int, Error) {
 		return NewInt(int64(cmp)), nil
 
 	default:
-		return nil, ComparableMismatchError(StrType, c.(Value).Type())
+		return nil, ComparableMismatch(StrType, c.(Value).Type())
 	}
 }
 
@@ -77,7 +77,7 @@ func (s str) Get(ev Eval, index Value) (Value, Error) {
 }
 
 func (s str) Set(ev Eval, index Value, val Value) Error {
-	return ImmutableValueError()
+	return ImmutableValue
 }
 
 func (s str) Len(ev Eval) (Int, Error) {
@@ -148,7 +148,7 @@ func (i *strIterator) IterGet(ev Eval) (Value, Error) {
 	if (i.n >= 0) && (i.n < len(i.runes)) {
 		return str([]rune{i.runes[i.n]}), nil
 	}
-	return nil, NoSuchElementError()
+	return nil, NoSuchElement
 }
 
 //--------------------------------------------------------------
@@ -298,12 +298,12 @@ func (s str) GetField(ev Eval, name string) (Value, Error) {
 	if method, ok := strMethods[name]; ok {
 		return method.ToFunc(s, name), nil
 	}
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }
 
 func (s str) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
 	if method, ok := strMethods[name]; ok {
 		return method.Invoke(s, ev, params)
 	}
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }

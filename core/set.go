@@ -69,7 +69,7 @@ func (s *set) ToStr(ev Eval) (Str, Error) {
 }
 
 func (s *set) HashCode(ev Eval) (Int, Error) {
-	return nil, HashCodeMismatchError(SetType)
+	return nil, HashCodeMismatch(SetType)
 }
 
 func (s *set) Eq(ev Eval, v Value) (Bool, Error) {
@@ -97,7 +97,7 @@ func (s *set) Contains(ev Eval, key Value) (Bool, Error) {
 
 func (s *set) Add(ev Eval, val Value) (Set, Error) {
 	if s.frozen {
-		return nil, ImmutableValueError()
+		return nil, ImmutableValue
 	}
 
 	err := s.hashMap.Put(ev, val, True)
@@ -109,12 +109,12 @@ func (s *set) Add(ev Eval, val Value) (Set, Error) {
 
 func (s *set) AddAll(ev Eval, val Value) (Set, Error) {
 	if s.frozen {
-		return nil, ImmutableValueError()
+		return nil, ImmutableValue
 	}
 
 	ibl, ok := val.(Iterable)
 	if !ok {
-		return nil, IterableMismatchError(val.Type())
+		return nil, IterableMismatch(val.Type())
 	}
 
 	itr, err := ibl.NewIterator(ev)
@@ -147,7 +147,7 @@ func (s *set) AddAll(ev Eval, val Value) (Set, Error) {
 
 func (s *set) Clear() (Set, Error) {
 	if s.frozen {
-		return nil, ImmutableValueError()
+		return nil, ImmutableValue
 	}
 
 	s.hashMap = EmptyHashMap()
@@ -156,7 +156,7 @@ func (s *set) Clear() (Set, Error) {
 
 func (s *set) Remove(ev Eval, key Value) (Set, Error) {
 	if s.frozen {
-		return nil, ImmutableValueError()
+		return nil, ImmutableValue
 	}
 
 	_, err := s.hashMap.Remove(ev, key)
@@ -198,7 +198,7 @@ func (i *setIterator) IterGet(ev Eval) (Value, Error) {
 		entry := i.itr.Get()
 		return entry.Key, nil
 	}
-	return nil, NoSuchElementError()
+	return nil, NoSuchElement
 }
 
 //--------------------------------------------------------------
@@ -264,7 +264,7 @@ func (s *set) GetField(ev Eval, name string) (Value, Error) {
 	if method, ok := setMethods[name]; ok {
 		return method.ToFunc(s, name), nil
 	}
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }
 
 func (s *set) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
@@ -272,5 +272,5 @@ func (s *set) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
 	if method, ok := setMethods[name]; ok {
 		return method.Invoke(s, ev, params)
 	}
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }

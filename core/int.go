@@ -98,7 +98,7 @@ func (i _int) Cmp(ev Eval, c Comparable) (Int, Error) {
 		}
 
 	default:
-		return nil, ComparableMismatchError(IntType, c.(Value).Type())
+		return nil, ComparableMismatch(IntType, c.(Value).Type())
 	}
 }
 
@@ -158,7 +158,7 @@ func (i _int) Div(n Number) (Number, Error) {
 
 	case _int:
 		if t == 0 {
-			return nil, DivideByZeroError()
+			return nil, DivideByZero
 		}
 		return i / t, nil
 
@@ -166,7 +166,7 @@ func (i _int) Div(n Number) (Number, Error) {
 		a := float64(i)
 		b := t.FloatVal()
 		if b == 0.0 {
-			return nil, DivideByZeroError()
+			return nil, DivideByZero
 		}
 		return NewFloat(a / b), nil
 
@@ -222,7 +222,7 @@ func (i _int) LeftShift(n Int) (Int, Error) {
 	switch t := n.(type) {
 	case _int:
 		if t < 0 {
-			return nil, InvalidArgumentError("Shift count cannot be less than zero")
+			return nil, InvalidArgument("Shift count cannot be less than zero")
 		}
 		return i << uint(t), nil
 	default:
@@ -234,7 +234,7 @@ func (i _int) RightShift(n Int) (Int, Error) {
 	switch t := n.(type) {
 	case _int:
 		if t < 0 {
-			return nil, InvalidArgumentError("Shift count cannot be less than zero")
+			return nil, InvalidArgument("Shift count cannot be less than zero")
 		}
 		return i >> uint(t), nil
 	default:
@@ -258,9 +258,9 @@ func (i _int) HasField(name string) (bool, Error) {
 }
 
 func (i _int) GetField(ev Eval, name string) (Value, Error) {
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }
 
 func (i _int) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }

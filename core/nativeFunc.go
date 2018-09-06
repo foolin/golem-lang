@@ -55,7 +55,7 @@ func (f *nullaryFunc) Frozen(ev Eval) (Bool, Error) {
 }
 
 func (f *nullaryFunc) HashCode(ev Eval) (Int, Error) {
-	return nil, HashCodeMismatchError(FuncType)
+	return nil, HashCodeMismatch(FuncType)
 }
 
 func (f *nullaryFunc) ToStr(ev Eval) (Str, Error) {
@@ -83,11 +83,11 @@ func (f *nullaryFunc) HasField(name string) (bool, Error) {
 }
 
 func (f *nullaryFunc) GetField(ev Eval, name string) (Value, Error) {
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }
 
 func (f *nullaryFunc) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }
 
 //--------------------------------------------------------------
@@ -120,7 +120,7 @@ func (f *nativeFunc) Frozen(ev Eval) (Bool, Error) {
 }
 
 func (f *nativeFunc) HashCode(ev Eval) (Int, Error) {
-	return nil, HashCodeMismatchError(FuncType)
+	return nil, HashCodeMismatch(FuncType)
 }
 
 func (f *nativeFunc) ToStr(ev Eval) (Str, Error) {
@@ -141,11 +141,11 @@ func (f *nativeFunc) HasField(name string) (bool, Error) {
 }
 
 func (f *nativeFunc) GetField(ev Eval, name string) (Value, Error) {
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }
 
 func (f *nativeFunc) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }
 
 //--------------------------------------------------------------
@@ -322,7 +322,7 @@ func vetFixedParams(
 
 	// arity mismatch
 	if numParams != numReq {
-		return ArityError(numReq, numParams)
+		return ArityMismatch(numReq, numParams)
 	}
 
 	// check types on required params
@@ -347,7 +347,7 @@ func vetVariadicParams(
 
 	// arity mismatch
 	if numParams < numReq {
-		return ArityAtLeastError(numReq, numParams)
+		return ArityMismatchAtLeast(numReq, numParams)
 	}
 
 	// check types on required params
@@ -381,10 +381,10 @@ func vetMultipleParams(
 
 	// arity mismatch
 	if numParams < numReq {
-		return ArityAtLeastError(numReq, numParams)
+		return ArityMismatchAtLeast(numReq, numParams)
 	}
 	if numParams > (numReq + numOpt) {
-		return ArityAtMostError(numReq+numOpt, numParams)
+		return ArityMismatchAtMost(numReq+numOpt, numParams)
 	}
 
 	// check types on required params
@@ -418,12 +418,12 @@ func vetParam(value Value, typ Type, allowNull bool) Error {
 		if allowNull {
 			return nil
 		}
-		return NullValueError()
+		return NullValueError
 	}
 
 	// check type
 	if value.Type() != typ {
-		return TypeMismatchError(typ, value.Type())
+		return TypeMismatch(typ, value.Type())
 	}
 
 	return nil

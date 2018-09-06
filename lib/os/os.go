@@ -66,7 +66,7 @@ var stat g.Value = g.NewFixedNativeFunc(
 		//	var ok bool
 		//	followSymLink, ok = params[1].(g.Bool)
 		//	if !ok {
-		//		return nil, g.TypeMismatchError("Expected Bool")
+		//		return nil, g.TypeMismatch("Expected Bool")
 		//	}
 		//}
 		//var fn = os.Stat

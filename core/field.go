@@ -45,7 +45,7 @@ func (f *field) Invoke(ev Eval, params []Value) (Value, Error) {
 
 	fn, ok := f.value.(Func)
 	if !ok {
-		return nil, TypeMismatchError(FuncType, f.value.Type())
+		return nil, TypeMismatch(FuncType, f.value.Type())
 	}
 	return fn.Invoke(ev, params)
 }
@@ -79,7 +79,7 @@ func (f *readonlyField) Get(ev Eval) (Value, Error) {
 func (f *readonlyField) Invoke(ev Eval, params []Value) (Value, Error) {
 	fn, ok := f.value.(Func)
 	if !ok {
-		return nil, TypeMismatchError(FuncType, f.value.Type())
+		return nil, TypeMismatch(FuncType, f.value.Type())
 	}
 	return fn.Invoke(ev, params)
 }
@@ -128,7 +128,7 @@ func (p *property) Invoke(ev Eval, params []Value) (Value, Error) {
 
 	fn, ok := val.(Func)
 	if !ok {
-		return nil, TypeMismatchError(FuncType, val.Type())
+		return nil, TypeMismatch(FuncType, val.Type())
 	}
 	return fn.Invoke(ev, params)
 }
@@ -173,7 +173,7 @@ func (p *readonlyProperty) Invoke(ev Eval, params []Value) (Value, Error) {
 
 	fn, ok := val.(Func)
 	if !ok {
-		return nil, TypeMismatchError(FuncType, val.Type())
+		return nil, TypeMismatch(FuncType, val.Type())
 	}
 	return fn.Invoke(ev, params)
 }

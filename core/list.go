@@ -60,7 +60,7 @@ func (ls *list) ToStr(ev Eval) (Str, Error) {
 }
 
 func (ls *list) HashCode(ev Eval) (Int, Error) {
-	return nil, HashCodeMismatchError(ListType)
+	return nil, HashCodeMismatch(ListType)
 }
 
 func (ls *list) Eq(ev Eval, v Value) (Bool, Error) {
@@ -82,7 +82,7 @@ func (ls *list) Get(ev Eval, index Value) (Value, Error) {
 
 func (ls *list) Set(ev Eval, index Value, val Value) Error {
 	if ls.frozen {
-		return ImmutableValueError()
+		return ImmutableValue
 	}
 
 	idx, err := boundedIndex(index, len(ls.values))
@@ -214,7 +214,7 @@ func (ls *list) Filter(ev Eval, filterer Filterer) (List, Error) {
 		}
 		pred, ok := flt.(Bool)
 		if !ok {
-			return nil, TypeMismatchError(BoolType, flt.Type())
+			return nil, TypeMismatch(BoolType, flt.Type())
 		}
 
 		eq, err := pred.Eq(ev, True)
@@ -231,7 +231,7 @@ func (ls *list) Filter(ev Eval, filterer Filterer) (List, Error) {
 
 func (ls *list) Add(ev Eval, val Value) (List, Error) {
 	if ls.frozen {
-		return nil, ImmutableValueError()
+		return nil, ImmutableValue
 	}
 
 	ls.values = append(ls.values, val)
@@ -240,12 +240,12 @@ func (ls *list) Add(ev Eval, val Value) (List, Error) {
 
 func (ls *list) AddAll(ev Eval, val Value) (List, Error) {
 	if ls.frozen {
-		return nil, ImmutableValueError()
+		return nil, ImmutableValue
 	}
 
 	ibl, ok := val.(Iterable)
 	if !ok {
-		return nil, IterableMismatchError(val.Type())
+		return nil, IterableMismatch(val.Type())
 	}
 
 	itr, err := ibl.NewIterator(ev)
@@ -274,12 +274,12 @@ func (ls *list) AddAll(ev Eval, val Value) (List, Error) {
 
 func (ls *list) Remove(ev Eval, index Int) (List, Error) {
 	if ls.frozen {
-		return nil, ImmutableValueError()
+		return nil, ImmutableValue
 	}
 
 	n := int(index.IntVal())
 	if n < 0 || n >= len(ls.values) {
-		return nil, IndexOutOfBoundsError(n)
+		return nil, IndexOutOfBounds(n)
 	}
 	ls.values = append(ls.values[:n], ls.values[n+1:]...)
 	return ls, nil
@@ -326,7 +326,7 @@ var DefaultLesser = func(ev Eval, a Value, b Value) (Bool, Error) {
 
 func (ls *list) Sort(ev Eval, lesser Lesser) (List, Error) {
 	if ls.frozen {
-		return nil, ImmutableValueError()
+		return nil, ImmutableValue
 	}
 
 	err := sortValues(ls.values, func(i, j int) bool {
@@ -344,7 +344,7 @@ func (ls *list) Sort(ev Eval, lesser Lesser) (List, Error) {
 
 func (ls *list) Clear() (List, Error) {
 	if ls.frozen {
-		return nil, ImmutableValueError()
+		return nil, ImmutableValue
 	}
 
 	ls.values = []Value{}
@@ -380,7 +380,7 @@ func (i *listIterator) IterGet(ev Eval) (Value, Error) {
 	if (i.n >= 0) && (i.n < len(i.ls.values)) {
 		return i.ls.values[i.n], nil
 	}
-	return nil, NoSuchElementError()
+	return nil, NoSuchElement
 }
 
 //--------------------------------------------------------------
@@ -512,7 +512,7 @@ var listMethods = map[string]Method{
 			initial := params[0]
 
 			if params[1] == Null {
-				return nil, NullValueError()
+				return nil, NullValueError
 			}
 
 			// check arity
@@ -576,7 +576,7 @@ func (ls *list) GetField(ev Eval, name string) (Value, Error) {
 	if method, ok := listMethods[name]; ok {
 		return method.ToFunc(ls, name), nil
 	}
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }
 
 func (ls *list) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
@@ -584,5 +584,5 @@ func (ls *list) InvokeField(ev Eval, name string, params []Value) (Value, Error)
 	if method, ok := listMethods[name]; ok {
 		return method.Invoke(ls, ev, params)
 	}
-	return nil, NoSuchFieldError(name)
+	return nil, NoSuchField(name)
 }
