@@ -13,7 +13,11 @@ type (
 	// of a given 'self' parameter, without having to actually create
 	// a NativeFunc to do the invocation.
 	Method interface {
+
+		// Invoke the Method
 		Invoke(interface{}, Eval, []Value) (Value, Error)
+
+		// Create a NativeFunc that can invoke the Method
 		ToFunc(interface{}, string) NativeFunc
 	}
 

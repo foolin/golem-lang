@@ -6,6 +6,8 @@ package core
 
 import (
 	"bytes"
+	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -13,7 +15,7 @@ import (
 // list
 
 type list struct {
-	array  []Value
+	values []Value
 	frozen bool
 }
 
@@ -39,7 +41,7 @@ func (ls *list) ToStr(ev Eval) (Str, Error) {
 
 	var buf bytes.Buffer
 	buf.WriteString("[")
-	for idx, v := range ls.array {
+	for idx, v := range ls.values {
 		if idx > 0 {
 			buf.WriteString(",")
 		}
@@ -64,18 +66,18 @@ func (ls *list) HashCode(ev Eval) (Int, Error) {
 func (ls *list) Eq(ev Eval, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *list:
-		return valuesEq(ev, ls.array, t.array)
+		return valuesEq(ev, ls.values, t.values)
 	default:
 		return False, nil
 	}
 }
 
 func (ls *list) Get(ev Eval, index Value) (Value, Error) {
-	idx, err := boundedIndex(index, len(ls.array))
+	idx, err := boundedIndex(index, len(ls.values))
 	if err != nil {
 		return nil, err
 	}
-	return ls.array[idx], nil
+	return ls.values[idx], nil
 }
 
 func (ls *list) Set(ev Eval, index Value, val Value) Error {
@@ -83,27 +85,27 @@ func (ls *list) Set(ev Eval, index Value, val Value) Error {
 		return ImmutableValueError()
 	}
 
-	idx, err := boundedIndex(index, len(ls.array))
+	idx, err := boundedIndex(index, len(ls.values))
 	if err != nil {
 		return err
 	}
 
-	ls.array[idx] = val
+	ls.values[idx] = val
 	return nil
 }
 
 func (ls *list) Len(ev Eval) (Int, Error) {
-	return NewInt(int64(len(ls.array))), nil
+	return NewInt(int64(len(ls.values))), nil
 }
 
 func (ls *list) Slice(ev Eval, from Value, to Value) (Value, Error) {
 
-	f, t, err := sliceIndices(from, to, len(ls.array))
+	f, t, err := sliceIndices(from, to, len(ls.values))
 	if err != nil {
 		return nil, err
 	}
 
-	result := NewList(CopyValues(ls.array[f:t]))
+	result := NewList(CopyValues(ls.values[f:t]))
 	if ls.frozen {
 		result.(*list).frozen = true
 	}
@@ -111,7 +113,7 @@ func (ls *list) Slice(ev Eval, from Value, to Value) (Value, Error) {
 }
 
 func (ls *list) SliceFrom(ev Eval, from Value) (Value, Error) {
-	return ls.Slice(ev, from, NewInt(int64(len(ls.array))))
+	return ls.Slice(ev, from, NewInt(int64(len(ls.values))))
 }
 
 func (ls *list) SliceTo(ev Eval, to Value) (Value, Error) {
@@ -119,7 +121,7 @@ func (ls *list) SliceTo(ev Eval, to Value) (Value, Error) {
 }
 
 func (ls *list) Values() []Value {
-	return ls.array
+	return ls.values
 }
 
 //------------------------------------------------------
@@ -140,7 +142,7 @@ func (ls *list) Contains(ev Eval, val Value) (Bool, Error) {
 }
 
 func (ls *list) IndexOf(ev Eval, val Value) (Int, Error) {
-	for i, v := range ls.array {
+	for i, v := range ls.values {
 		eq, err := val.Eq(ev, v)
 		if err != nil {
 			return nil, err
@@ -153,13 +155,13 @@ func (ls *list) IndexOf(ev Eval, val Value) (Int, Error) {
 }
 
 func (ls *list) IsEmpty() Bool {
-	return NewBool(len(ls.array) == 0)
+	return NewBool(len(ls.values) == 0)
 }
 
 func (ls *list) Join(ev Eval, delim Str) (Str, Error) {
 
-	result := make([]string, len(ls.array))
-	for i, v := range ls.array {
+	result := make([]string, len(ls.values))
+	for i, v := range ls.values {
 
 		s, err := v.ToStr(ev)
 		if err != nil {
@@ -171,12 +173,12 @@ func (ls *list) Join(ev Eval, delim Str) (Str, Error) {
 	return NewStr(strings.Join(result, delim.String())), nil
 }
 
-func (ls *list) Map(ev Eval, mapper func(Value) (Value, Error)) (List, Error) {
+func (ls *list) Map(ev Eval, mapper Mapper) (List, Error) {
 
-	vals := make([]Value, len(ls.array))
+	vals := make([]Value, len(ls.values))
 
 	var err Error
-	for i, v := range ls.array {
+	for i, v := range ls.values {
 		vals[i], err = mapper(v)
 		if err != nil {
 			return nil, err
@@ -186,13 +188,12 @@ func (ls *list) Map(ev Eval, mapper func(Value) (Value, Error)) (List, Error) {
 	return NewList(vals), nil
 }
 
-func (ls *list) Reduce(
-	ev Eval, initial Value, reducer func(Value, Value) (Value, Error)) (Value, Error) {
+func (ls *list) Reduce(ev Eval, initial Value, reducer Reducer) (Value, Error) {
 
 	acc := initial
 	var err Error
 
-	for _, v := range ls.array {
+	for _, v := range ls.values {
 		acc, err = reducer(acc, v)
 		if err != nil {
 			return nil, err
@@ -202,11 +203,11 @@ func (ls *list) Reduce(
 	return acc, nil
 }
 
-func (ls *list) Filter(ev Eval, filterer func(Value) (Value, Error)) (List, Error) {
+func (ls *list) Filter(ev Eval, filterer Filterer) (List, Error) {
 
 	vals := []Value{}
 
-	for _, v := range ls.array {
+	for _, v := range ls.values {
 		flt, err := filterer(v)
 		if err != nil {
 			return nil, err
@@ -233,7 +234,7 @@ func (ls *list) Add(ev Eval, val Value) (List, Error) {
 		return nil, ImmutableValueError()
 	}
 
-	ls.array = append(ls.array, val)
+	ls.values = append(ls.values, val)
 	return ls, nil
 }
 
@@ -261,7 +262,7 @@ func (ls *list) AddAll(ev Eval, val Value) (List, Error) {
 		if err != nil {
 			return nil, err
 		}
-		ls.array = append(ls.array, v)
+		ls.values = append(ls.values, v)
 
 		b, err = itr.IterNext(ev)
 		if err != nil {
@@ -271,16 +272,64 @@ func (ls *list) AddAll(ev Eval, val Value) (List, Error) {
 	return ls, nil
 }
 
-func (ls *list) Remove(index Int) (List, Error) {
+func (ls *list) Remove(ev Eval, index Int) (List, Error) {
 	if ls.frozen {
 		return nil, ImmutableValueError()
 	}
 
 	n := int(index.IntVal())
-	if n < 0 || n >= len(ls.array) {
+	if n < 0 || n >= len(ls.values) {
 		return nil, IndexOutOfBoundsError(n)
 	}
-	ls.array = append(ls.array[:n], ls.array[n+1:]...)
+	ls.values = append(ls.values[:n], ls.values[n+1:]...)
+	return ls, nil
+}
+
+func sortValues(vals []Value, cmp func(i, j int) bool) (err Error) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			if e, ok := r.(Error); ok {
+				err = e
+			} else {
+				panic(r)
+			}
+		}
+	}()
+
+	sort.Slice(vals, cmp)
+
+	return
+}
+
+func (ls *list) Sort(ev Eval /*fn Func*/) (List, Error) {
+	if ls.frozen {
+		return nil, ImmutableValueError()
+	}
+
+	err := sortValues(ls.values, func(i, j int) bool {
+
+		a := ls.values[i]
+		ca, ok := a.(Comparable)
+		if !ok {
+			panic(fmt.Errorf("TypeMismatch: Type %s cannot be sorted", a.Type()))
+		}
+
+		b := ls.values[j]
+		cb, ok := b.(Comparable)
+		if !ok {
+			panic(fmt.Errorf("TypeMismatch: Type %s cannot be sorted", b.Type()))
+		}
+
+		n, err := ca.Cmp(ev, cb)
+		if err != nil {
+			panic(err)
+		}
+		return n.IntVal() < 0
+	})
+	if err != nil {
+		return nil, err
+	}
 	return ls, nil
 }
 
@@ -289,7 +338,7 @@ func (ls *list) Clear() (List, Error) {
 		return nil, ImmutableValueError()
 	}
 
-	ls.array = []Value{}
+	ls.values = []Value{}
 	return ls, nil
 }
 
@@ -315,12 +364,12 @@ func (ls *list) NewIterator(ev Eval) (Iterator, Error) {
 
 func (i *listIterator) IterNext(ev Eval) (Bool, Error) {
 	i.n++
-	return NewBool(i.n < len(i.ls.array)), nil
+	return NewBool(i.n < len(i.ls.values)), nil
 }
 
 func (i *listIterator) IterGet(ev Eval) (Value, Error) {
-	if (i.n >= 0) && (i.n < len(i.ls.array)) {
-		return i.ls.array[i.n], nil
+	if (i.n >= 0) && (i.n < len(i.ls.values)) {
+		return i.ls.values[i.n], nil
 	}
 	return nil, NoSuchElementError()
 }
@@ -374,7 +423,14 @@ var listMethods = map[string]Method{
 		[]Type{IntType}, true,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			ls := self.(List)
-			return ls.Remove(params[0].(Int))
+			return ls.Remove(ev, params[0].(Int))
+		}),
+
+	"sort": NewFixedMethod(
+		[]Type{}, false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			ls := self.(List)
+			return ls.Sort(ev)
 		}),
 
 	"join": NewMultipleMethod(
@@ -397,6 +453,15 @@ var listMethods = map[string]Method{
 			ls := self.(List)
 
 			fn := params[0].(Func)
+			// TODO check for proper arity
+			//a := fn.Arity()
+			//if a.Kind != FixedArity {
+			//	return nil, fmt.Errorf("ArityMismatch: Expected 1 param")
+			//}
+			//if a.Required != 1 {
+			//	return nil, ArityError(1, int(a.Required))
+			//}
+
 			return ls.Map(ev, func(v Value) (Value, Error) {
 				return fn.Invoke(ev, []Value{v})
 			})
@@ -407,12 +472,21 @@ var listMethods = map[string]Method{
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			ls := self.(List)
 
+			initial := params[0]
+
 			if params[1] == Null {
 				return nil, NullValueError()
 			}
-
-			initial := params[0]
 			fn := params[1].(Func)
+			// TODO check for proper arity
+			//a := fn.Arity()
+			//if a.Kind != FixedArity {
+			//	return nil, fmt.Errorf("ArityMismatch: Expected 2 params")
+			//}
+			//if a.Required != 2 {
+			//	return nil, ArityError(2, int(a.Required))
+			//}
+
 			return ls.Reduce(ev, initial, func(acc Value, v Value) (Value, Error) {
 				return fn.Invoke(ev, []Value{acc, v})
 			})
@@ -424,8 +498,19 @@ var listMethods = map[string]Method{
 			ls := self.(List)
 
 			fn := params[0].(Func)
-			return ls.Filter(ev, func(v Value) (Value, Error) {
-				return fn.Invoke(ev, []Value{v})
+			// TODO check for proper arity
+
+			return ls.Filter(ev, func(v Value) (Bool, Error) {
+				val, err := fn.Invoke(ev, []Value{v})
+				if err != nil {
+					return nil, err
+				}
+
+				b, ok := val.(Bool)
+				if !ok {
+					return nil, TypeMismatchError(BoolType, val.Type())
+				}
+				return b, nil
 			})
 		}),
 }
@@ -443,14 +528,14 @@ func (ls *list) HasField(name string) (bool, Error) {
 	return ok, nil
 }
 
-func (ls *list) GetField(name string, ev Eval) (Value, Error) {
+func (ls *list) GetField(ev Eval, name string) (Value, Error) {
 	if method, ok := listMethods[name]; ok {
 		return method.ToFunc(ls, name), nil
 	}
 	return nil, NoSuchFieldError(name)
 }
 
-func (ls *list) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
+func (ls *list) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
 
 	if method, ok := listMethods[name]; ok {
 		return method.Invoke(ls, ev, params)

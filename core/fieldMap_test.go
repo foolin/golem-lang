@@ -29,31 +29,31 @@ func TestHashFieldMap(t *testing.T) {
 	tassert(t, fm.has("b"))
 	tassert(t, !fm.has("c"))
 
-	val, err := fm.get("a", nil)
+	val, err := fm.get(nil, "a")
 	ok(t, val, err, Zero)
-	val, err = fm.get("b", nil)
+	val, err = fm.get(nil, "b")
 	ok(t, val, err, One)
-	val, err = fm.get("c", nil)
+	val, err = fm.get(nil, "c")
 	fail(t, val, err, "NoSuchField: Field 'c' not found")
 
-	val, err = fm.invoke("a", nil, []Value{})
+	val, err = fm.invoke(nil, "a", []Value{})
 	fail(t, val, err, "TypeMismatch: Expected Func, not Int")
-	val, err = fm.invoke("b", nil, []Value{})
+	val, err = fm.invoke(nil, "b", []Value{})
 	fail(t, val, err, "TypeMismatch: Expected Func, not Int")
-	val, err = fm.invoke("c", nil, []Value{})
+	val, err = fm.invoke(nil, "c", []Value{})
 	fail(t, val, err, "NoSuchField: Field 'c' not found")
 
-	err = fm.set("a", nil, One)
+	err = fm.set(nil, "a", One)
 	tassert(t, err == nil)
-	val, err = fm.get("a", nil)
+	val, err = fm.get(nil, "a")
 	ok(t, val, err, One)
-	err = fm.set("b", nil, One)
+	err = fm.set(nil, "b", One)
 	fail(t, nil, err, "ReadonlyField: Field 'b' is readonly")
-	err = fm.set("c", nil, One)
+	err = fm.set(nil, "c", One)
 	fail(t, nil, err, "NoSuchField: Field 'c' not found")
 
 	fm.replace("a", NewField(NewStr("abc")))
-	val, err = fm.get("a", nil)
+	val, err = fm.get(nil, "a")
 	ok(t, val, err, NewStr("abc"))
 }
 
@@ -77,22 +77,22 @@ func TestMethodFieldMap(t *testing.T) {
 	tassert(t, fm.has("a"))
 	tassert(t, !fm.has("b"))
 
-	val, err := fm.get("a", nil)
+	val, err := fm.get(nil, "a")
 	tassert(t, err == nil)
 	fn := val.(Func)
 	val, err = fn.Invoke(nil, []Value{})
 	ok(t, val, err, NewInt(49))
-	val, err = fm.get("b", nil)
+	val, err = fm.get(nil, "b")
 	fail(t, val, err, "NoSuchField: Field 'b' not found")
 
-	val, err = fm.invoke("a", nil, []Value{})
+	val, err = fm.invoke(nil, "a", []Value{})
 	ok(t, val, err, NewInt(49))
-	val, err = fm.invoke("b", nil, []Value{})
+	val, err = fm.invoke(nil, "b", []Value{})
 	fail(t, val, err, "NoSuchField: Field 'b' not found")
 
-	err = fm.set("a", nil, One)
+	err = fm.set(nil, "a", One)
 	fail(t, val, err, "ReadonlyField: Field 'a' is readonly")
-	err = fm.set("b", nil, One)
+	err = fm.set(nil, "b", One)
 	fail(t, val, err, "NoSuchField: Field 'b' not found")
 }
 
@@ -109,7 +109,7 @@ func getMap(t *testing.T, fm fieldMap) map[string]Value {
 	result := make(map[string]Value)
 	names := fm.names()
 	for _, n := range names {
-		val, err := fm.get(n, nil)
+		val, err := fm.get(nil, n)
 		tassert(t, err == nil)
 
 		if fn, ok := val.(Func); ok {
@@ -226,7 +226,7 @@ func TestMergeFieldMaps(t *testing.T) {
 	//------------------------------------------------
 	// a
 
-	err := x.set("a", nil, next())
+	err := x.set(nil, "a", next())
 	tassert(t, err == nil)
 
 	//fmt.Printf("%v\n", getMap(t, x))
@@ -252,7 +252,7 @@ func TestMergeFieldMaps(t *testing.T) {
 	//------------------------------------------------
 	// b
 
-	err = x.set("b", nil, next())
+	err = x.set(nil, "b", next())
 	tassert(t, err == nil)
 
 	//fmt.Printf("%v\n", getMap(t, x))
@@ -278,7 +278,7 @@ func TestMergeFieldMaps(t *testing.T) {
 	//------------------------------------------------
 	// c
 
-	err = z.set("c", nil, next())
+	err = z.set(nil, "c", next())
 	tassert(t, err == nil)
 
 	//fmt.Printf("%v\n", getMap(t, z))
@@ -304,7 +304,7 @@ func TestMergeFieldMaps(t *testing.T) {
 	//------------------------------------------------
 	// d
 
-	err = z.set("d", nil, next())
+	err = z.set(nil, "d", next())
 	tassert(t, err == nil)
 
 	//fmt.Printf("%v\n", getMap(t, z))
@@ -330,7 +330,7 @@ func TestMergeFieldMaps(t *testing.T) {
 	//------------------------------------------------
 	// e
 
-	err = x.set("e", nil, next())
+	err = x.set(nil, "e", next())
 	tassert(t, err == nil)
 
 	//fmt.Printf("%v\n", getMap(t, x))
@@ -353,7 +353,7 @@ func TestMergeFieldMaps(t *testing.T) {
 			"f": NewInt(8),
 		}))
 
-	err = z.set("e", nil, next())
+	err = z.set(nil, "e", next())
 	tassert(t, err == nil)
 
 	//fmt.Printf("%v\n", getMap(t, x))
@@ -388,7 +388,7 @@ func TestMergeFieldMaps(t *testing.T) {
 	//------------------------------------------------
 	// f
 
-	err = x.set("f", nil, next())
+	err = x.set(nil, "f", next())
 	tassert(t, err == nil)
 
 	//fmt.Printf("%v\n", getMap(t, x))
@@ -411,7 +411,7 @@ func TestMergeFieldMaps(t *testing.T) {
 			"f": NewInt(8),
 		}))
 
-	err = z.set("f", nil, next())
+	err = z.set(nil, "f", next())
 	tassert(t, err == nil)
 
 	//fmt.Printf("%v\n", getMap(t, x))
@@ -446,7 +446,7 @@ func TestMergeFieldMaps(t *testing.T) {
 	//------------------------------------------------
 	// bidrectional
 
-	err = x.set("a", nil, next())
+	err = x.set(nil, "a", next())
 	tassert(t, err == nil)
 
 	//fmt.Printf("%v\n", getMap(t, x))
@@ -469,7 +469,7 @@ func TestMergeFieldMaps(t *testing.T) {
 			"f": NewInt(16),
 		}))
 
-	err = w.set("a", nil, next())
+	err = w.set(nil, "a", next())
 	tassert(t, err == nil)
 
 	//fmt.Printf("%v\n", getMap(t, x))

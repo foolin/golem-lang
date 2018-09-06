@@ -294,14 +294,14 @@ func (s str) HasField(name string) (bool, Error) {
 	return ok, nil
 }
 
-func (s str) GetField(name string, ev Eval) (Value, Error) {
+func (s str) GetField(ev Eval, name string) (Value, Error) {
 	if method, ok := strMethods[name]; ok {
 		return method.ToFunc(s, name), nil
 	}
 	return nil, NoSuchFieldError(name)
 }
 
-func (s str) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
+func (s str) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
 	if method, ok := strMethods[name]; ok {
 		return method.Invoke(s, ev, params)
 	}

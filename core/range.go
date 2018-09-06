@@ -160,14 +160,14 @@ func (r *rng) HasField(name string) (bool, Error) {
 	return ok, nil
 }
 
-func (r *rng) GetField(name string, ev Eval) (Value, Error) {
+func (r *rng) GetField(ev Eval, name string) (Value, Error) {
 	if method, ok := rangeMethods[name]; ok {
 		return method.ToFunc(r, name), nil
 	}
 	return nil, NoSuchFieldError(name)
 }
 
-func (r *rng) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
+func (r *rng) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
 
 	if method, ok := rangeMethods[name]; ok {
 		return method.Invoke(r, ev, params)

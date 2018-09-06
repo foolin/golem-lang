@@ -107,7 +107,7 @@ func ImmutableValueError() Error {
 	return fmt.Errorf("ImmutableValue")
 }
 
-// InvalidStructKeyError creates a ReadonlyField Error
+// InvalidStructKeyError creates a InvalidStructKey Error
 func InvalidStructKeyError(key string) Error {
 	return fmt.Errorf("InvalidStructKey: '%s' is not a valid struct key", key)
 }

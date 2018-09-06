@@ -152,15 +152,15 @@ func main() {
 	}
 
 	// interpret
-	intp := interpreter.NewInterpreter(builtinMgr, mods)
-	_, err := intp.InitModules()
+	itp := interpreter.NewInterpreter(builtinMgr, mods)
+	_, err := itp.InitModules()
 	if err != nil {
-		dumpError(intp, err)
+		dumpError(itp, err)
 		os.Exit(-1)
 	}
 
 	// run main, if it exists
-	mainVal, mainErr := mods[0].Contents.GetField("main", intp)
+	mainVal, mainErr := mods[0].Contents.GetField(itp, "main")
 	if mainErr == nil {
 		mainFn, ok := mainVal.(bc.Func)
 		if !ok {
@@ -185,9 +185,9 @@ func main() {
 		}
 
 		// evaluate the main function
-		_, errStruct := intp.EvalBytecode(mainFn, params)
+		_, errStruct := itp.EvalBytecode(mainFn, params)
 		if errStruct != nil {
-			dumpError(intp, errStruct)
+			dumpError(itp, errStruct)
 			os.Exit(-1)
 		}
 	}

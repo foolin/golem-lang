@@ -260,14 +260,14 @@ func (s *set) HasField(name string) (bool, Error) {
 	return ok, nil
 }
 
-func (s *set) GetField(name string, ev Eval) (Value, Error) {
+func (s *set) GetField(ev Eval, name string) (Value, Error) {
 	if method, ok := setMethods[name]; ok {
 		return method.ToFunc(s, name), nil
 	}
 	return nil, NoSuchFieldError(name)
 }
 
-func (s *set) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
+func (s *set) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
 
 	if method, ok := setMethods[name]; ok {
 		return method.Invoke(s, ev, params)

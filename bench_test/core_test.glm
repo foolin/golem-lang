@@ -899,7 +899,8 @@ fn testList() {
         'add', 
         'addAll',
         'clear',
-        'remove' 
+        'remove', 
+        'sort' 
     } == fields(x))
     for f in fields(x) {
         assert(hasField(x, f))
@@ -916,6 +917,7 @@ fn testList() {
     assert(x.addAll == getField(x, 'addAll'))
     assert(x.clear == getField(x, 'clear'))
     assert(x.remove == getField(x, 'remove'))
+    assert(x.sort == getField(x, 'sort'))
 
     assert(!hasField(x, 'bogus'))
     fail(|| => getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
@@ -1022,6 +1024,19 @@ fn testList() {
 
             ls.remove(2)
             assert(ls == [1, 2, 4, 5])
+            assert('null1245' == ls.reduce(null, |acc, x| => str(acc) + x))
+
+            fail(|| => ls.reduce(0, null), 'NullValue')
+            fail(|| => ls.filter(|x| => 0), 'TypeMismatch: Expected Bool, not Int')
+
+            //fail(|| => ls.map(|a,b| => null), 'ArityMismatch: Expected 1 params, got 2')
+            //fail(|| => ls.map(|| => null), 'ArityMismatch: Expected 1 params, got 0')
+            //fail(|| => ls.map(fn(a...) {}), 'ArityMismatch: Expected 1 param')
+
+            //fail(|| => ls.reduce(|a| => null), 'ArityMismatch: Expected 2 params, got 1')
+            ////fail(|| => ls.reduce(|| => null), 'ArityMismatch: Expected 2 params, got 0')
+            ////fail(|| => ls.reduce(fn(a...) {}), 'ArityMismatch: Expected 2 params')
+            //ls.reduce(fn(a...) {})
         },
         fn () {
             const ls = [3, 4, 5]
@@ -1077,6 +1092,9 @@ fn testList() {
             assert(b == [ ((1, 1), 1), ((2, 4), 8), ((3, 9), 27), ((4, 16), 64), ((5, 25), 125) ])
             assert(c == dict{ (1, 1): 1, (2, 4): 8, (3, 9): 27, (4, 16): 64, (5, 25): 125 })
             assert(e == set { 1, 2, 3, 4, 5, 8, 9, 16, 64, 25, 27, 125 })
+        },
+        fn () {
+            assert([1,2,3,4] == [2,1,4,3].sort())
         }
     ]
     for f in funcs { f(); }
@@ -1505,6 +1523,7 @@ fn testArity() {
             "map":      struct { kind: "Fixed", required: 1 }, 
             "reduce":   struct { kind: "Fixed", required: 2 }, 
             "remove":   struct { kind: "Fixed", required: 1 },
+            "sort":     struct { kind: "Fixed", required: 0 },
             "join":     struct { kind: "Multiple", required: 0, optional: 1 } 
         })
 }

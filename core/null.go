@@ -4,21 +4,15 @@
 
 package core
 
-// NOTE: the type 'null' cannot be an empty struct, because empty structs have
-// unusual semantics in GoStmt, insofar as they all point to the same address.
-//
-// https://golang.org/ref/spec#Size_and_alignment_guarantees
-//
-// To work around that, we place an arbitrary value inside the struct, so
-// that it wont be empty.  This gives the singleton instance of null
-// its own address
-//
+// Null represents the null value
+var Null NullValue = &null{1019}
+
 type null struct {
+	// https://golang.org/ref/spec#Size_and_alignment_guarantees
+	// Zero-size variables share the same address, so we use a placeholder
+	// to give Null a size.
 	placeholder int
 }
-
-// Null represents the null value
-var Null Nil = &null{0}
 
 func (n *null) basicMarker() {}
 
@@ -62,10 +56,10 @@ func (n *null) HasField(name string) (bool, Error) {
 	return false, NullValueError()
 }
 
-func (n *null) GetField(name string, ev Eval) (Value, Error) {
+func (n *null) GetField(ev Eval, name string) (Value, Error) {
 	return nil, NullValueError()
 }
 
-func (n *null) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
+func (n *null) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
 	return nil, NullValueError()
 }

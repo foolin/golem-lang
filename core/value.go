@@ -24,8 +24,8 @@ type Value interface {
 
 	FieldNames() ([]string, Error)
 	HasField(string) (bool, Error)
-	GetField(string, Eval) (Value, Error)
-	InvokeField(string, Eval, []Value) (Value, Error)
+	GetField(Eval, string) (Value, Error)
+	InvokeField(Eval, string, []Value) (Value, Error)
 }
 
 //---------------------------------------------------------------
@@ -73,12 +73,12 @@ type (
 		basicMarker()
 	}
 
-	// Nil is the null value.
-	Nil interface {
+	// NullValue is the null value. The only instance of NullValue is Null.
+	NullValue interface {
 		Basic
 	}
 
-	// Bool is the boolean value -- true or false
+	// Bool is a boolean value.  The only instances of Bool are True and False.
 	Bool interface {
 		Basic
 		Comparable
@@ -87,7 +87,7 @@ type (
 		Not() Bool
 	}
 
-	// Str is a string -- defined in golem as a sequence of runes
+	// Str is an indexable sequence of runes.
 	Str interface {
 		fmt.Stringer
 
@@ -109,7 +109,7 @@ type (
 		Split(Str) List
 	}
 
-	// Number is a number
+	// A Number is either an Int or a Float
 	Number interface {
 		Basic
 
@@ -123,13 +123,13 @@ type (
 		Negate() Number
 	}
 
-	// Float is a float64
+	// A Float is a float64
 	Float interface {
 		Number
 		Comparable
 	}
 
-	// Int is an int64
+	// An Int is an int64
 	Int interface {
 		Number
 		Comparable
@@ -185,12 +185,17 @@ type (
 		Clear() (List, Error)
 		Add(Eval, Value) (List, Error)
 		AddAll(Eval, Value) (List, Error)
-		Remove(Int) (List, Error)
+		Remove(Eval, Int) (List, Error)
+		Sort(Eval /*Func*/) (List, Error)
 
-		Map(Eval, func(Value) (Value, Error)) (List, Error)
-		Reduce(Eval, Value, func(Value, Value) (Value, Error)) (Value, Error)
-		Filter(Eval, func(Value) (Value, Error)) (List, Error)
+		Map(Eval, Mapper) (List, Error)
+		Reduce(Eval, Value, Reducer) (Value, Error)
+		Filter(Eval, Filterer) (List, Error)
 	}
+
+	Mapper   func(Value) (Value, Error)
+	Reducer  func(Value, Value) (Value, Error)
+	Filterer func(Value) (Bool, Error)
 
 	// Range is an immutable, iterable representation of a sequence of integers
 	Range interface {
@@ -244,11 +249,11 @@ type (
 		Remove(Eval, Value) (Set, Error)
 	}
 
-	// Struct is a collection of key-value pairs
+	// Struct is a collection of key-value pairs.
 	Struct interface {
 		Composite
 
-		SetField(string, Eval, Value) Error
+		SetField(Eval, string, Value) Error
 
 		// Internal is for use only by the Golem Compiler
 		Internal(...interface{})

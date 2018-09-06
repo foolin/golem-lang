@@ -8,9 +8,9 @@ type (
 	fieldMap interface {
 		names() []string
 		has(string) bool
-		get(string, Eval) (Value, Error)
-		invoke(string, Eval, []Value) (Value, Error)
-		set(string, Eval, Value) Error
+		get(Eval, string) (Value, Error)
+		invoke(Eval, string, []Value) (Value, Error)
+		set(Eval, string, Value) Error
 
 		replace(string, Field)
 	}
@@ -70,7 +70,7 @@ func (fm *hashFieldMap) has(name string) bool {
 	return ok
 }
 
-func (fm *hashFieldMap) get(name string, ev Eval) (Value, Error) {
+func (fm *hashFieldMap) get(ev Eval, name string) (Value, Error) {
 
 	if f, ok := fm.fields[name]; ok {
 		return f.Get(ev)
@@ -78,7 +78,7 @@ func (fm *hashFieldMap) get(name string, ev Eval) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
 
-func (fm *hashFieldMap) invoke(name string, ev Eval, params []Value) (Value, Error) {
+func (fm *hashFieldMap) invoke(ev Eval, name string, params []Value) (Value, Error) {
 
 	if f, ok := fm.fields[name]; ok {
 		return f.Invoke(ev, params)
@@ -86,7 +86,7 @@ func (fm *hashFieldMap) invoke(name string, ev Eval, params []Value) (Value, Err
 	return nil, NoSuchFieldError(name)
 }
 
-func (fm *hashFieldMap) set(name string, ev Eval, val Value) Error {
+func (fm *hashFieldMap) set(ev Eval, name string, val Value) Error {
 	if f, ok := fm.fields[name]; ok {
 		if f.IsReadonly() {
 			return ReadonlyFieldError(name)
@@ -139,7 +139,7 @@ func (fm *methodFieldMap) has(name string) bool {
 	return ok
 }
 
-func (fm *methodFieldMap) get(name string, ev Eval) (Value, Error) {
+func (fm *methodFieldMap) get(ev Eval, name string) (Value, Error) {
 
 	if m, ok := fm.methods[name]; ok {
 		return m.ToFunc(fm.self, name), nil
@@ -147,7 +147,7 @@ func (fm *methodFieldMap) get(name string, ev Eval) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
 
-func (fm *methodFieldMap) invoke(name string, ev Eval, params []Value) (Value, Error) {
+func (fm *methodFieldMap) invoke(ev Eval, name string, params []Value) (Value, Error) {
 
 	if m, ok := fm.methods[name]; ok {
 		return m.Invoke(fm.self, ev, params)
@@ -155,7 +155,7 @@ func (fm *methodFieldMap) invoke(name string, ev Eval, params []Value) (Value, E
 	return nil, NoSuchFieldError(name)
 }
 
-func (fm *methodFieldMap) set(name string, ev Eval, val Value) Error {
+func (fm *methodFieldMap) set(ev Eval, name string, val Value) Error {
 
 	if _, ok := fm.methods[name]; ok {
 		return ReadonlyFieldError(name)

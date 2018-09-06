@@ -263,14 +263,14 @@ func (d *dict) HasField(name string) (bool, Error) {
 	return ok, nil
 }
 
-func (d *dict) GetField(name string, ev Eval) (Value, Error) {
+func (d *dict) GetField(ev Eval, name string) (Value, Error) {
 	if method, ok := dictMethods[name]; ok {
 		return method.ToFunc(d, name), nil
 	}
 	return nil, NoSuchFieldError(name)
 }
 
-func (d *dict) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
+func (d *dict) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
 
 	if method, ok := dictMethods[name]; ok {
 		return method.Invoke(d, ev, params)

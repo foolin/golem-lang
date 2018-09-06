@@ -314,7 +314,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		key, ok := pool.Constants[p].(g.Str)
 		g.Assert(ok)
 
-		result, err := f.stack[n].GetField(key.String(), itp)
+		result, err := f.stack[n].GetField(itp, key.String())
 		if err != nil {
 			return nil, err
 		}
@@ -332,7 +332,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		self := f.stack[n-q]
 		params := f.stack[n-q+1:]
 
-		result, err := self.InvokeField(key.String(), itp, params)
+		result, err := self.InvokeField(itp, key.String(), params)
 		if err != nil {
 			return nil, err
 		}
@@ -361,7 +361,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			}
 			value := f.stack[n]
 
-			err := stc.SetField(key.String(), itp, value)
+			err := stc.SetField(itp, key.String(), value)
 			if err != nil {
 				return nil, err
 			}
@@ -420,7 +420,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		// get value from stack
 		value := f.stack[n]
 
-		before, err := stc.GetField(key.String(), itp)
+		before, err := stc.GetField(itp, key.String())
 		if err != nil {
 			return nil, err
 		}
@@ -430,7 +430,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 			return nil, err
 		}
 
-		err = stc.SetField(key.String(), itp, after)
+		err = stc.SetField(itp, key.String(), after)
 		if err != nil {
 			return nil, err
 		}

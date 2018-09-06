@@ -97,18 +97,18 @@ fn c() {}
 
 	stc := mod.Contents
 
-	val, err := stc.GetField("a", nil)
+	val, err := stc.GetField(nil, "a")
 	tassert(t, err == nil && val.Type() == g.IntType)
-	val, err = stc.GetField("b", nil)
+	val, err = stc.GetField(nil, "b")
 	tassert(t, err == nil && val.Type() == g.StrType)
-	val, err = stc.GetField("c", nil)
+	val, err = stc.GetField(nil, "c")
 	tassert(t, err == nil && val.Type() == g.FuncType)
 
-	err = stc.SetField("a", nil, g.One)
+	err = stc.SetField(nil, "a", g.One)
 	tassert(t, err == nil)
-	err = stc.SetField("b", nil, g.One)
+	err = stc.SetField(nil, "b", g.One)
 	tassert(t, err.Error() == "ReadonlyField: Field 'b' is readonly")
-	err = stc.SetField("c", nil, g.One)
+	err = stc.SetField(nil, "c", g.One)
 	tassert(t, err.Error() == "ReadonlyField: Field 'c' is readonly")
 
 	code = `
@@ -124,9 +124,9 @@ let b = 5
 	ok(t, result[0], nil, g.NewInt(3))
 
 	stc = mod.Contents
-	val, err = stc.GetField("a", nil)
+	val, err = stc.GetField(nil, "a")
 	ok(t, val, err, g.One)
-	val, err = stc.GetField("b", nil)
+	val, err = stc.GetField(nil, "b")
 	ok(t, val, err, g.Null)
 }
 

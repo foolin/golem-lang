@@ -10,7 +10,7 @@ import (
 	g "github.com/mjarmy/golem-lang/core"
 )
 
-// Func is a Func that is implemented in Golem
+// Func is a core.Func that is implemented in Golem
 type Func interface {
 	g.Func
 
@@ -70,11 +70,11 @@ func (f *bytecodeFunc) HasField(name string) (bool, g.Error) {
 	return false, nil
 }
 
-func (f *bytecodeFunc) GetField(name string, ev g.Eval) (g.Value, g.Error) {
+func (f *bytecodeFunc) GetField(ev g.Eval, name string) (g.Value, g.Error) {
 	return nil, g.NoSuchFieldError(name)
 }
 
-func (f *bytecodeFunc) InvokeField(name string, ev g.Eval, params []g.Value) (g.Value, g.Error) {
+func (f *bytecodeFunc) InvokeField(ev g.Eval, name string, params []g.Value) (g.Value, g.Error) {
 	return nil, g.NoSuchFieldError(name)
 }
 

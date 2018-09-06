@@ -5,7 +5,6 @@
 package core
 
 import (
-	//"fmt"
 	"reflect"
 	"sort"
 	"testing"
@@ -81,10 +80,10 @@ func TestNull(t *testing.T) {
 	_, err = Null.HasField("a")
 	fail(t, nil, err, "NullValue")
 
-	val, err = Null.GetField("a", nil)
+	val, err = Null.GetField(nil, "a")
 	fail(t, val, err, "NullValue")
 
-	val, err = Null.InvokeField("a", nil, []Value{})
+	val, err = Null.InvokeField(nil, "a", []Value{})
 	fail(t, val, err, "NullValue")
 }
 
@@ -134,10 +133,10 @@ func TestBool(t *testing.T) {
 	names, err := True.FieldNames()
 	okNames(t, names, err, []string{})
 
-	val, err = True.GetField("a", nil)
+	val, err = True.GetField(nil, "a")
 	fail(t, val, err, "NoSuchField: Field 'a' not found")
 
-	val, err = True.InvokeField("a", nil, []Value{})
+	val, err = True.InvokeField(nil, "a", []Value{})
 	fail(t, val, err, "NoSuchField: Field 'a' not found")
 }
 
@@ -287,10 +286,10 @@ func TestInt(t *testing.T) {
 	bv, err = One.HasField("a")
 	ok(t, bv, err, false)
 
-	val, err = One.GetField("a", nil)
+	val, err = One.GetField(nil, "a")
 	fail(t, val, err, "NoSuchField: Field 'a' not found")
 
-	val, err = One.InvokeField("a", nil, []Value{})
+	val, err = One.InvokeField(nil, "a", []Value{})
 	fail(t, val, err, "NoSuchField: Field 'a' not found")
 }
 
@@ -369,10 +368,10 @@ func TestFloat(t *testing.T) {
 	bv, err = a.HasField("a")
 	ok(t, bv, err, false)
 
-	val, err = a.GetField("a", nil)
+	val, err = a.GetField(nil, "a")
 	fail(t, val, err, "NoSuchField: Field 'a' not found")
 
-	val, err = a.InvokeField("a", nil, []Value{})
+	val, err = a.InvokeField(nil, "a", []Value{})
 	fail(t, val, err, "NoSuchField: Field 'a' not found")
 }
 
@@ -383,6 +382,7 @@ func TestBasic(t *testing.T) {
 	entries[Zero] = True
 	entries[NewFloat(0.123)] = True
 	entries[False] = True
+	entries[NewStr("abc")] = True
 }
 
 func TestBasicHashCode(t *testing.T) {
@@ -413,3 +413,30 @@ func TestBasicHashCode(t *testing.T) {
 	h, err = NewStr("abcdef").HashCode(nil)
 	ok(t, h, err, NewInt(1928994870288439732))
 }
+
+//func TestScratch(t *testing.T) {
+//
+//	vals := []Value{Zero, One, True}
+//
+//	err := sortValues(vals, func(i, j int) bool {
+//
+//		a, ok := vals[i].(Comparable)
+//		if !ok {
+//			return fmt.Errorf("TypeMismatch: Types %s cannot be sorted", vals[i].Type())
+//		}
+//
+//		b, ok := vals[j].(Comparable)
+//		if !ok {
+//			return fmt.Errorf("TypeMismatch: Types %s cannot be sorted", vals[j].Type())
+//		}
+//
+//		n, err := a.Cmp(nil, b)
+//		if err != nil {
+//			panic(err)
+//		}
+//		return n.IntVal() < 0
+//	})
+//
+//	fmt.Printf("%v\n", vals)
+//	fmt.Printf("%v\n", err)
+//}

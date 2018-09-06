@@ -73,7 +73,7 @@ func fromStruct(ev g.Eval, st g.Struct) (interface{}, g.Error) {
 
 	for _, k := range names {
 
-		val, err := st.GetField(k, ev)
+		val, err := st.GetField(ev, k)
 		if err != nil {
 			return nil, err
 		}

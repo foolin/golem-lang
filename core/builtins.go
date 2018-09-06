@@ -237,7 +237,7 @@ var BuiltinGetField = NewFixedNativeFunc(
 	func(ev Eval, params []Value) (Value, Error) {
 		field := params[1].(Str)
 
-		return params[0].GetField(field.String(), ev)
+		return params[0].GetField(ev, field.String())
 	})
 
 // BuiltinHasField gets the Value associated with a Struct's field name.
@@ -270,7 +270,7 @@ var BuiltinSetField = NewFixedNativeFunc(
 		st := params[0].(Struct)
 		fld := params[1].(Str)
 
-		err := st.SetField(fld.String(), ev, params[2])
+		err := st.SetField(ev, fld.String(), params[2])
 		if err != nil {
 			return nil, err
 		}

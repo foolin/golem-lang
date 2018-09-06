@@ -257,10 +257,10 @@ func (i _int) HasField(name string) (bool, Error) {
 	return false, nil
 }
 
-func (i _int) GetField(name string, ev Eval) (Value, Error) {
+func (i _int) GetField(ev Eval, name string) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
 
-func (i _int) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
+func (i _int) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }

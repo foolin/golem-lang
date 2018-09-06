@@ -129,10 +129,10 @@ func (f _float) HasField(name string) (bool, Error) {
 	return false, nil
 }
 
-func (f _float) GetField(name string, ev Eval) (Value, Error) {
+func (f _float) GetField(ev Eval, name string) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
 
-func (f _float) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
+func (f _float) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }

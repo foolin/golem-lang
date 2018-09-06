@@ -94,14 +94,14 @@ func (ch *channel) HasField(name string) (bool, Error) {
 	return ok, nil
 }
 
-func (ch *channel) GetField(name string, ev Eval) (Value, Error) {
+func (ch *channel) GetField(ev Eval, name string) (Value, Error) {
 	if method, ok := chanMethods[name]; ok {
 		return method.ToFunc(ch, name), nil
 	}
 	return nil, NoSuchFieldError(name)
 }
 
-func (ch *channel) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
+func (ch *channel) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
 
 	if method, ok := chanMethods[name]; ok {
 		return method.Invoke(ch, ev, params)

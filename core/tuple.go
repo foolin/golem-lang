@@ -107,10 +107,10 @@ func (tp tuple) HasField(name string) (bool, Error) {
 	return false, nil
 }
 
-func (tp tuple) GetField(name string, ev Eval) (Value, Error) {
+func (tp tuple) GetField(ev Eval, name string) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
 
-func (tp tuple) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
+func (tp tuple) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }

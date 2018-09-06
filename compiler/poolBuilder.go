@@ -71,27 +71,6 @@ func (p *poolBuilder) build() *bc.Pool {
 
 //--------------------------------------------------------------
 
-type constEntries []*g.HEntry
-
-func (items constEntries) Len() int {
-	return len(items)
-}
-
-func (items constEntries) Less(i, j int) bool {
-
-	x, ok := items[i].Value.(g.Int)
-	g.Assert(ok)
-
-	y, ok := items[j].Value.(g.Int)
-	g.Assert(ok)
-
-	return x.IntVal() < y.IntVal()
-}
-
-func (items constEntries) Swap(i, j int) {
-	items[i], items[j] = items[j], items[i]
-}
-
 func (p *poolBuilder) makeConstants() []g.Basic {
 
 	n := int(p.constants.Len().IntVal())
@@ -102,7 +81,11 @@ func (p *poolBuilder) makeConstants() []g.Basic {
 		entries = append(entries, itr.Get())
 	}
 
-	sort.Sort(constEntries(entries))
+	sort.Slice(entries, func(i, j int) bool {
+		x := entries[i].Value.(g.Int)
+		y := entries[j].Value.(g.Int)
+		return x.IntVal() < y.IntVal()
+	})
 
 	constants := make([]g.Basic, n)
 	for i, e := range entries {

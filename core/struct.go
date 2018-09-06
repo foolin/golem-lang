@@ -130,7 +130,7 @@ func (st *_struct) ToStr(ev Eval) (Str, Error) {
 		buf.WriteString(name)
 		buf.WriteString(": ")
 
-		v, err := st.GetField(name, ev)
+		v, err := st.GetField(ev, name)
 		if err != nil {
 			return nil, err
 		}
@@ -183,12 +183,12 @@ func (st *_struct) Eq(ev Eval, val Value) (Bool, Error) {
 			return False, nil
 		}
 
-		a, err := st.GetField(name, ev)
+		a, err := st.GetField(ev, name)
 		if err != nil {
 			return nil, err
 		}
 
-		b, err := that.GetField(name, ev)
+		b, err := that.GetField(ev, name)
 		if err != nil {
 			return nil, err
 		}
@@ -217,21 +217,21 @@ func (st *_struct) HasField(name string) (bool, Error) {
 	return st.fieldMap.has(name), nil
 }
 
-func (st *_struct) GetField(name string, ev Eval) (Value, Error) {
-	return st.fieldMap.get(name, ev)
+func (st *_struct) GetField(ev Eval, name string) (Value, Error) {
+	return st.fieldMap.get(ev, name)
 }
 
-func (st *_struct) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
-	return st.fieldMap.invoke(name, ev, params)
+func (st *_struct) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
+	return st.fieldMap.invoke(ev, name, params)
 }
 
-func (st *_struct) SetField(name string, ev Eval, val Value) Error {
+func (st *_struct) SetField(ev Eval, name string, val Value) Error {
 
 	if st.frozen {
 		return ImmutableValueError()
 	}
 
-	return st.fieldMap.set(name, ev, val)
+	return st.fieldMap.set(ev, name, val)
 }
 
 func (st *_struct) Internal(args ...interface{}) {

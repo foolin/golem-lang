@@ -154,84 +154,84 @@ func TestMultipleMethod(t *testing.T) {
 	ok(t, val, err, NewInt(15))
 }
 
-//--------------------------------------------------------------
-
-func show(val Value) {
-	//println(val.ToStr(nil).String())
-}
-
-const iterate = 2 * 1000 * 1000
-
-//const iterate = 4
-
-func TestBenchmarkDirectInvoke(t *testing.T) {
-
-	var i1 = NewInt(1)
-	var i2 = NewInt(2)
-
-	for i := 0; i < iterate; i++ {
-		val := i1.Add(i2)
-		show(val)
-	}
-}
-
-func TestBenchmarkFuncInvoke(t *testing.T) {
-
-	fn := NewFixedNativeFunc(
-		[]Type{IntType, IntType},
-		false,
-		func(ev Eval, params []Value) (Value, Error) {
-			a := params[0].(Int)
-			b := params[1].(Int)
-			return a.Add(b), nil
-		})
-
-	var i1 = NewInt(1)
-	var i2 = NewInt(2)
-
-	for i := 0; i < iterate; i++ {
-		val, _ := fn.Invoke(nil, []Value{i1, i2})
-		show(val)
-	}
-}
-
-func TestBenchmarkMethodInvoke(t *testing.T) {
-
-	m := NewFixedMethod(
-		[]Type{IntType},
-		false,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
-			n := self.(Int)
-			p := params[0].(Int)
-			return n.Add(p), nil
-		})
-
-	var i1 = NewInt(1)
-	var i2 = NewInt(2)
-
-	for i := 0; i < iterate; i++ {
-		val, _ := m.Invoke(i1, nil, []Value{i2})
-		show(val)
-	}
-}
-
-func TestBenchmarkMethodFuncInvoke(t *testing.T) {
-
-	m := NewFixedMethod(
-		[]Type{IntType},
-		false,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
-			n := self.(Int)
-			p := params[0].(Int)
-			return n.Add(p), nil
-		})
-
-	var i1 = NewInt(1)
-	var i2 = NewInt(2)
-
-	for i := 0; i < iterate; i++ {
-		fn := m.ToFunc(i1, "foo")
-		val, _ := fn.Invoke(nil, []Value{i2})
-		show(val)
-	}
-}
+////--------------------------------------------------------------
+//
+//func show(val Value) {
+//	//println(val.ToStr(nil).String())
+//}
+//
+//const iterate = 2 * 1000 * 1000
+//
+////const iterate = 4
+//
+//func TestBenchmarkDirectInvoke(t *testing.T) {
+//
+//	var i1 = NewInt(1)
+//	var i2 = NewInt(2)
+//
+//	for i := 0; i < iterate; i++ {
+//		val := i1.Add(i2)
+//		show(val)
+//	}
+//}
+//
+//func TestBenchmarkFuncInvoke(t *testing.T) {
+//
+//	fn := NewFixedNativeFunc(
+//		[]Type{IntType, IntType},
+//		false,
+//		func(ev Eval, params []Value) (Value, Error) {
+//			a := params[0].(Int)
+//			b := params[1].(Int)
+//			return a.Add(b), nil
+//		})
+//
+//	var i1 = NewInt(1)
+//	var i2 = NewInt(2)
+//
+//	for i := 0; i < iterate; i++ {
+//		val, _ := fn.Invoke(nil, []Value{i1, i2})
+//		show(val)
+//	}
+//}
+//
+//func TestBenchmarkMethodInvoke(t *testing.T) {
+//
+//	m := NewFixedMethod(
+//		[]Type{IntType},
+//		false,
+//		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+//			n := self.(Int)
+//			p := params[0].(Int)
+//			return n.Add(p), nil
+//		})
+//
+//	var i1 = NewInt(1)
+//	var i2 = NewInt(2)
+//
+//	for i := 0; i < iterate; i++ {
+//		val, _ := m.Invoke(i1, nil, []Value{i2})
+//		show(val)
+//	}
+//}
+//
+//func TestBenchmarkMethodFuncInvoke(t *testing.T) {
+//
+//	m := NewFixedMethod(
+//		[]Type{IntType},
+//		false,
+//		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+//			n := self.(Int)
+//			p := params[0].(Int)
+//			return n.Add(p), nil
+//		})
+//
+//	var i1 = NewInt(1)
+//	var i2 = NewInt(2)
+//
+//	for i := 0; i < iterate; i++ {
+//		fn := m.ToFunc(i1, "foo")
+//		val, _ := fn.Invoke(nil, []Value{i2})
+//		show(val)
+//	}
+//}

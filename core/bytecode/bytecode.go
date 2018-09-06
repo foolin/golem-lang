@@ -69,6 +69,7 @@ const (
 	NewList
 	NewSet
 	NewTuple
+	CheckTuple
 
 	GetField
 	InvokeField
@@ -89,9 +90,6 @@ const (
 	NewIter
 	IterNext
 	IterGet
-
-	//CheckCast
-	CheckTuple
 
 	Pop
 	Dup
@@ -254,8 +252,6 @@ func String(bc byte) string {
 	case IterGet:
 		return "IterGet"
 
-	//case CheckCast:
-	//	return "CheckCast"
 	case CheckTuple:
 		return "CheckTuple"
 
@@ -299,7 +295,7 @@ func Size(bc byte) int {
 		NewStruct, GetField,
 		InitField, InitProperty, InitReadonlyProperty,
 		SetField, IncField,
-		NewDict, NewList, NewSet, NewTuple /*CheckCast,*/, CheckTuple:
+		NewDict, NewList, NewSet, NewTuple, CheckTuple:
 
 		return 3
 

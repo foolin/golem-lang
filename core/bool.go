@@ -94,10 +94,10 @@ func (b _bool) HasField(name string) (bool, Error) {
 	return false, nil
 }
 
-func (b _bool) GetField(name string, ev Eval) (Value, Error) {
+func (b _bool) GetField(ev Eval, name string) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }
 
-func (b _bool) InvokeField(name string, ev Eval, params []Value) (Value, Error) {
+func (b _bool) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
 	return nil, NoSuchFieldError(name)
 }

@@ -1267,30 +1267,17 @@ func parseFloat(text string) float64 {
 
 func getSortedCaptureParents(f ast.FuncScope) []ast.Variable {
 
-	// First sort the captures by child index
-	sorted := byChildIndex{}
-	for _, v := range f.GetCaptures() {
-		sorted = append(sorted, v)
-	}
-	sort.Sort(sorted)
+	// Sort the captures by child index
+	caps := []ast.Capture{}
+	caps = append(caps, f.GetCaptures()...)
+	sort.Slice(caps, func(i, j int) bool {
+		return caps[i].Child().Index() < caps[j].Child().Index()
+	})
 
-	// Then use the sorted list to create the proper ordering of parents
+	// Use the sorted list to create the proper ordering of parents
 	parents := []ast.Variable{}
-	for _, c := range sorted {
+	for _, c := range caps {
 		parents = append(parents, c.Parent())
 	}
 	return parents
-}
-
-type byChildIndex []ast.Capture
-
-// Variables are sorted by Index
-func (c byChildIndex) Len() int {
-	return len(c)
-}
-func (c byChildIndex) Swap(i, j int) {
-	c[i], c[j] = c[j], c[i]
-}
-func (c byChildIndex) Less(i, j int) bool {
-	return c[i].Child().Index() < c[j].Child().Index()
 }
