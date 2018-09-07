@@ -74,6 +74,7 @@ func init() {
 
 		opPushTry,
 		opPopTry,
+		opRecover,
 		opThrow,
 
 		opNewStruct,
@@ -232,6 +233,10 @@ func opReturn(itp *Interpreter, f *frame) (g.Value, g.Error) {
 	f.ip += 3
 
 	return nil, nil
+}
+
+func opRecover(itp *Interpreter, f *frame) (g.Value, g.Error) {
+	panic("TODO")
 }
 
 func opPushTry(itp *Interpreter, f *frame) (g.Value, g.Error) {
