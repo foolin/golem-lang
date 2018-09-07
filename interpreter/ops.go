@@ -216,6 +216,15 @@ func opReturn(itp *Interpreter, f *frame) (g.Value, g.Error) {
 	n := len(f.stack) - 1
 	result := f.stack[n]
 
+	// if we are handling an error then 'return' has different semantics.
+	if f.isHandlingError {
+		// If we are on the last frame, then we are done.
+		if f.isLast {
+			return result, nil
+		}
+		return nil, nil
+	}
+
 	// discard the frame
 	itp.popFrame()
 

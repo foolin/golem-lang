@@ -41,14 +41,14 @@ func testCompile(t *testing.T, code string) *bc.Module {
 	return mods[0]
 }
 
-func testInterpret(mods []*bc.Module) *Interpreter {
-	intp := NewInterpreter(builtinMgr, mods)
-	_, err := intp.InitModules()
-	if err != nil {
-		panic(err)
-	}
-	return intp
-}
+//func testInterpret(mods []*bc.Module) *Interpreter {
+//	intp := NewInterpreter(builtinMgr, mods)
+//	_, err := intp.InitModules()
+//	if err != nil {
+//		panic(err)
+//	}
+//	return intp
+//}
 
 func ok(t *testing.T, val interface{}, err g.Error, expect interface{}) {
 
@@ -63,24 +63,24 @@ func ok(t *testing.T, val interface{}, err g.Error, expect interface{}) {
 	}
 }
 
-func fail(t *testing.T, code string, expect ErrorStruct) {
-
-	mod := testCompile(t, code)
-	intp := NewInterpreter(builtinMgr, []*bc.Module{mod})
-
-	result, err := intp.InitModules()
-	if result != nil {
-		panic(result)
-	}
-
-	eq, e := expect.Eq(nil, err)
-	tassert(t, e == nil)
-
-	if !eq.(g.Bool).BoolVal() {
-		t.Error(err, " != ", expect)
-		panic("fail")
-	}
-}
+//func fail(t *testing.T, code string, expect ErrorStruct) {
+//
+//	mod := testCompile(t, code)
+//	intp := NewInterpreter(builtinMgr, []*bc.Module{mod})
+//
+//	result, err := intp.InitModules()
+//	if result != nil {
+//		panic(result)
+//	}
+//
+//	eq, e := expect.Eq(nil, err)
+//	tassert(t, e == nil)
+//
+//	if !eq.(g.Bool).BoolVal() {
+//		t.Error(err, " != ", expect)
+//		panic("fail")
+//	}
+//}
 
 func TestModuleContents(t *testing.T) {
 

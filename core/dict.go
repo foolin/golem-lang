@@ -130,6 +130,7 @@ func (d *dict) Remove(ev Eval, key Value) (Dict, Error) {
 }
 
 func (d *dict) AddAll(ev Eval, val Value) (Dict, Error) {
+
 	if d.frozen {
 		return nil, ImmutableValue()
 	}
@@ -154,19 +155,20 @@ func (d *dict) AddAll(ev Eval, val Value) (Dict, Error) {
 			return nil, err
 		}
 
-		if tp, ok := v.(tuple); ok {
-			if len(tp) == 2 {
-				err = d.hashMap.Put(ev, tp[0], tp[1])
-				if err != nil {
-					return nil, err
-				}
-			} else {
-				return nil, InvalidArgument(
-					fmt.Sprintf("Expected Tuple of length %d, not length %d",
-						2, len(tp)))
-			}
-		} else {
+		tp, ok := v.(tuple)
+		if !ok {
 			return nil, TypeMismatch(TupleType, v.Type())
+		}
+
+		if len(tp) != 2 {
+			return nil, InvalidArgument(
+				fmt.Sprintf("Expected Tuple of length %d, not length %d",
+					2, len(tp)))
+		}
+
+		err = d.hashMap.Put(ev, tp[0], tp[1])
+		if err != nil {
+			return nil, err
 		}
 
 		b, err = itr.IterNext(ev)

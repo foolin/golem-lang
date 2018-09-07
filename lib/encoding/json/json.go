@@ -22,7 +22,7 @@ var Marshal g.Value = g.NewFixedNativeFunc(
 		return marshal(ev, params[0])
 	})
 
-// Marshal marshals a Value into a JSON string
+// MarshalIndent marshals a Value into a JSON string
 var MarshalIndent g.Value = g.NewFixedNativeFunc(
 	[]g.Type{g.AnyType, g.StrType, g.StrType}, true,
 	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {

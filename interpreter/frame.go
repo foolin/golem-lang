@@ -5,7 +5,7 @@
 package interpreter
 
 import (
-	"fmt"
+	//"fmt"
 
 	g "github.com/mjarmy/golem-lang/core"
 	bc "github.com/mjarmy/golem-lang/core/bytecode"
@@ -13,22 +13,24 @@ import (
 
 // A frame is an execution environment for a function.
 type frame struct {
-	fn     bc.Func
-	locals []*bc.Ref
-
-	// whether this is the last frame that will be processed during the current Eval()
-	isLast bool
+	fn          bc.Func
+	locals      []*bc.Ref
+	btc         []byte
+	pool        *bc.Pool
+	handlerPool []bc.ErrorHandler
 
 	stack        []g.Value
 	handlerStack []bc.ErrorHandler
 
-	// current instruction point
+	// instruction pointer
 	ip int
 
-	// useful things from the function template
-	btc         []byte
-	pool        *bc.Pool
-	handlerPool []bc.ErrorHandler
+	// whether this is the last frame that will be processed
+	// during the current Eval()
+	isLast bool
+
+	// whether we are currently handling an error
+	isHandlingError bool
 }
 
 func newFrame(fn bc.Func, locals []*bc.Ref, isLast bool) *frame {
@@ -39,17 +41,18 @@ func newFrame(fn bc.Func, locals []*bc.Ref, isLast bool) *frame {
 	handlerPool := fn.Template().ErrorHandlers
 
 	return &frame{
-		fn:     fn,
-		locals: locals,
-		isLast: isLast,
-
-		stack:        []g.Value{},
-		handlerStack: []bc.ErrorHandler{},
-		ip:           0,
-
+		fn:          fn,
+		locals:      locals,
 		btc:         btc,
 		pool:        pool,
 		handlerPool: handlerPool,
+
+		stack:        []g.Value{},
+		handlerStack: []bc.ErrorHandler{},
+
+		ip:              0,
+		isLast:          isLast,
+		isHandlingError: false,
 	}
 }
 
@@ -68,42 +71,42 @@ func (f *frame) popHandler() bc.ErrorHandler {
 	return h
 }
 
-//-------------------------------------------------------------------
-
-func toStr(val g.Value) string {
-	s, err := val.ToStr(nil)
-	if err != nil {
-		panic(err)
-	}
-	return s.String()
-}
-
-func dumpFrames(frames []*frame) {
-
-	fmt.Printf("-----------------------------------------\n")
-
-	for i, f := range frames {
-		fmt.Printf("frame %d\n", i)
-		dumpFrame(f)
-	}
-}
-
-func dumpFrame(f *frame) {
-
-	fmt.Printf("    locals:\n")
-	for i, r := range f.locals {
-		fmt.Printf("        %d: %s\n", i, toStr(r.Val))
-	}
-
-	fmt.Printf("    stack:\n")
-	for i, v := range f.stack {
-		fmt.Printf("        %d: %s\n", i, toStr(v))
-	}
-
-	fmt.Printf("    handlerStack:\n")
-	for i, v := range f.handlerStack {
-		fmt.Printf("        %d: %s\n", i, v)
-	}
-
-	fmt.Printf("    ip: %d\n", f.ip)
-}
+////-------------------------------------------------------------------
+//
+//func toStr(val g.Value) string {
+//	s, err := val.ToStr(nil)
+//	if err != nil {
+//		panic(err)
+//	}
+//	return s.String()
+//}
+//
+//func dumpFrames(frames []*frame) {
+//
+//	fmt.Printf("-----------------------------------------\n")
+//
+//	for i, f := range frames {
+//		fmt.Printf("frame %d\n", i)
+//		dumpFrame(f)
+//	}
+//}
+//
+//func dumpFrame(f *frame) {
+//
+//	fmt.Printf("    locals:\n")
+//	for i, r := range f.locals {
+//		fmt.Printf("        %d: %s\n", i, toStr(r.Val))
+//	}
+//
+//	fmt.Printf("    stack:\n")
+//	for i, v := range f.stack {
+//		fmt.Printf("        %d: %s\n", i, toStr(v))
+//	}
+//
+//	fmt.Printf("    handlerStack:\n")
+//	for i, v := range f.handlerStack {
+//		fmt.Printf("        %d: %s\n", i, v)
+//	}
+//
+//	fmt.Printf("    ip: %d\n", f.ip)
+//}
