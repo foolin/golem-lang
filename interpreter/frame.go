@@ -14,15 +14,36 @@ import (
 // A frame is an execution environment for a function.
 // The interpreter manages a stack of frames.
 type frame struct {
-	fn       bc.Func
-	locals   []*bc.Ref
+	fn     bc.Func
+	locals []*bc.Ref
+
 	stack    []g.Value
 	handlers []bc.ErrorHandler
 	ip       int
+
+	btc         []byte
+	pool        *bc.Pool
+	handlerPool []bc.ErrorHandler
 }
 
 func newFrame(fn bc.Func, locals []*bc.Ref) *frame {
-	return &frame{fn, locals, []g.Value{}, []bc.ErrorHandler{}, 0}
+
+	btc := fn.Template().Bytecodes
+	pool := fn.Template().Module.Pool
+	handlerPool := fn.Template().ErrorHandlers
+
+	return &frame{
+		fn:     fn,
+		locals: locals,
+
+		stack:    []g.Value{},
+		handlers: []bc.ErrorHandler{},
+		ip:       0,
+
+		btc:         btc,
+		pool:        pool,
+		handlerPool: handlerPool,
+	}
 }
 
 func (f *frame) numHandlers() int {

@@ -156,6 +156,7 @@ func (itp *Interpreter) handleError(lastFrame int, es ErrorStruct) (g.Value, Err
 		itp.popFrame()
 
 		// there are no handlers available
+		// TODO make sure this works, e.g. if an error is thrown from a property
 		if itp.numFrames() < lastFrame {
 			return nil, es
 		}
@@ -176,6 +177,7 @@ func (itp *Interpreter) handleError(lastFrame int, es ErrorStruct) (g.Value, Err
 		}
 	}
 
+	// finally
 	if h.FinallyBegin != -1 {
 		f.stack = append(f.stack, es)
 		result, es = itp.runTryClause(h.FinallyBegin, h.FinallyBegin)

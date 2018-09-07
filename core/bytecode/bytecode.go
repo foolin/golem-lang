@@ -54,6 +54,9 @@ const (
 	Not
 	Complement
 
+	Pop
+	Dup
+
 	NewFunc
 	FuncCapture
 	FuncLocal
@@ -92,9 +95,6 @@ const (
 	NewIter
 	IterNext
 	IterGet
-
-	Pop
-	Dup
 
 	// These are temporary values created during compilation.
 	// The interpreter will panic if it encounters them.
