@@ -216,20 +216,11 @@ func opReturn(itp *Interpreter, f *frame) (g.Value, g.Error) {
 	n := len(f.stack) - 1
 	result := f.stack[n]
 
-	// if we are handling an error then 'return' has different semantics.
-	if f.isHandlingError {
-		// If we are on the last frame, then we are done.
-		if f.isLast {
-			return result, nil
-		}
-		return nil, nil
-	}
-
 	// discard the frame
 	itp.popFrame()
 
-	// If we are on the last frame, then we are done.
-	if f.isLast {
+	// If we are on the base frame of the current Eval(), then we are done.
+	if f.isBase {
 		return result, nil
 	}
 
@@ -246,7 +237,7 @@ func opReturn(itp *Interpreter, f *frame) (g.Value, g.Error) {
 func opPushTry(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	p := bc.DecodeParam(f.btc, f.ip)
-	f.pushHandler(f.handlerPool[p])
+	f.pushHandler(f.fn.Template().ErrorHandlers[p])
 	f.ip += 3
 
 	return nil, nil

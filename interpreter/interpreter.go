@@ -93,6 +93,7 @@ func (itp *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
 
 // EvalBytecode evaluates a bytecode.Func
 func (itp *Interpreter) EvalBytecode(fn bc.Func, params []g.Value) (g.Value, ErrorStruct) {
+
 	val, err := itp.eval(fn, newLocals(fn.Template().NumLocals, params))
 	if err != nil {
 		return nil, err
@@ -116,6 +117,26 @@ func (itp *Interpreter) pushFrame(f *frame) {
 
 func (itp *Interpreter) popFrame() {
 	itp.frames = itp.frames[:itp.numFrames()-1]
+}
+
+func (itp *Interpreter) popErrorHandler() (bc.ErrorHandler, bool) {
+
+	f := itp.peekFrame()
+	if f.numHandlers() > 0 {
+		return f.popHandler(), true
+	}
+
+	for !f.isBase {
+		itp.popFrame()
+
+		f = itp.peekFrame()
+		if f.numHandlers() > 0 {
+			return f.popHandler(), true
+		}
+	}
+
+	itp.popFrame()
+	return bc.ErrorHandler{}, false
 }
 
 func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct) {
@@ -153,7 +174,7 @@ func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 
 		// there are no handlers available
 		// TODO make sure this works, e.g. if an error is thrown from a property
-		if f.isLast {
+		if f.isBase {
 			return nil, es
 		}
 
