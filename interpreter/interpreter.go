@@ -20,7 +20,8 @@ type Interpreter struct {
 	builtInMgr g.BuiltinManager
 	modules    []*bc.Module
 	modMap     map[string]*bc.Module
-	frames     []*frame
+
+	frames []*frame
 }
 
 // NewInterpreter creates a new Interpreter
@@ -168,6 +169,7 @@ func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 		result, es = itp.runTryClause(h.CatchBegin, h.CatchEnd)
 		if es != nil {
 			// probably need to handle this recursively?
+			// we should probably pop the current frame too
 			panic("TODO error inside try clause")
 		}
 	}
@@ -178,20 +180,26 @@ func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 		result, es = itp.runTryClause(h.FinallyBegin, h.FinallyBegin)
 		if es != nil {
 			// probably need to handle this recursively?
+			// we should probably pop the current frame too
 			panic("TODO error inside try clause")
 		}
 	}
 
-	// done
-	return result, nil
+	if result != nil {
+		panic("TODO return inside try clause")
+		//// we are going to return from this function, so
+		//// we need to pop the frame
+		//return result, nil
+	}
+
+	// carry on inside the current frame
+	return nil, nil
 }
 
 func (itp *Interpreter) runTryClause(begin, end int) (g.Value, ErrorStruct) {
 
 	f := itp.peekFrame()
-
 	f.ip = begin
-
 	for f.ip < end {
 
 		result, err := itp.advance()
@@ -200,7 +208,7 @@ func (itp *Interpreter) runTryClause(begin, end int) (g.Value, ErrorStruct) {
 		}
 
 		if result != nil {
-			// the current frame was popped, which is bad
+			// the current frame was popped in opReturn, which is bad
 			panic("TODO return inside try clause")
 		}
 	}

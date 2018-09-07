@@ -12,7 +12,6 @@ import (
 )
 
 // A frame is an execution environment for a function.
-// The interpreter manages a stack of frames.
 type frame struct {
 	fn     bc.Func
 	locals []*bc.Ref
