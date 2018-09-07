@@ -23,7 +23,7 @@ compile:
 	cp lib/path/path.glm         build/lib/path/path.glm 
 	cp lib/regexp/regexp.glm     build/lib/regexp/regexp.glm 
 
-build: clean fmt vet test compile 
+build: clean fmt vet test compile
 	cd bench_test && ../build/golem core_test.glm
 	cd bench_test && ../build/golem encoding_test.glm
 	cd bench_test && ../build/golem os_test.glm

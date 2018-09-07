@@ -78,8 +78,8 @@ func (p *Pool) String() string {
 			buf.WriteString(fmt.Sprintf("            %d: %v\n", j, ln))
 		}
 
-		buf.WriteString(fmt.Sprintf("        ExceptionHandlers:\n"))
-		for j, eh := range t.ExceptionHandlers {
+		buf.WriteString(fmt.Sprintf("        ErrorHandlers:\n"))
+		for j, eh := range t.ErrorHandlers {
 			buf.WriteString(fmt.Sprintf("            %d: %v\n", j, eh))
 		}
 	}

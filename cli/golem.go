@@ -144,19 +144,21 @@ func main() {
 	// setup
 	//-------------------------------------------------------------
 
-	// save home directory of golem executable, and local directory
+	// home directory of golem executable
 	homeDir := homeDir()
+
+	// local directory
 	localDir, e := os.Getwd()
 	if e != nil {
 		exitError(e)
 	}
 
-	// use command line builtins
+	// use all of the available builtin functions
 	var builtins []*g.BuiltinEntry = append(
 		g.StandardBuiltins,
 		g.UnsandboxedBuiltins...)
 
-	// add a builtin for the standard library
+	// add a builtin function for the standard library
 	builtins = append(
 		builtins,
 		&g.BuiltinEntry{Name: "_lib", Value: lib.BuiltinLib})
@@ -213,7 +215,7 @@ func main() {
 		exitError(fmt.Errorf("ArityMismatch: main function must have 1 parameter"))
 	}
 
-	// turn the command-line arguments into a List-of-Str
+	// turn the command line arguments into a List-of-Str
 	argList := commandLineArguments()
 
 	// interpret the main function

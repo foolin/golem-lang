@@ -14,6 +14,10 @@ import (
 	bc "github.com/mjarmy/golem-lang/core/bytecode"
 )
 
+//---------------------------------------------------------------
+// The Golem Compiler
+//---------------------------------------------------------------
+
 // Compiler compiles an AST into bc
 type Compiler interface {
 	ast.Visitor
@@ -31,7 +35,7 @@ type compiler struct {
 
 	btc      []byte
 	lnum     []bc.LineNumberEntry
-	handlers []bc.ExceptionHandler
+	handlers []bc.ErrorHandler
 }
 
 // NewCompiler creates a new Compiler
@@ -170,20 +174,20 @@ func (c *compiler) compileFunc(fe *ast.FnExpr) *bc.FuncTemplate {
 	arity, optional := makeArity(fe)
 
 	tpl := &bc.FuncTemplate{
-		Module:            c.mod,
-		Arity:             arity,
-		OptionalParams:    optional,
-		NumCaptures:       fe.Scope.NumCaptures(),
-		NumLocals:         fe.Scope.NumLocals(),
-		Bytecodes:         nil,
-		LineNumberTable:   nil,
-		ExceptionHandlers: nil,
+		Module:          c.mod,
+		Arity:           arity,
+		OptionalParams:  optional,
+		NumCaptures:     fe.Scope.NumCaptures(),
+		NumLocals:       fe.Scope.NumLocals(),
+		Bytecodes:       nil,
+		LineNumberTable: nil,
+		ErrorHandlers:   nil,
 	}
 
 	// reset template info for current func
 	c.btc = []byte{}
 	c.lnum = []bc.LineNumberEntry{}
-	c.handlers = []bc.ExceptionHandler{}
+	c.handlers = []bc.ErrorHandler{}
 
 	// TODO LoadNull and ReturnStmt are workarounds for the fact that
 	// we have not yet written a Control Flow Graph
@@ -194,7 +198,7 @@ func (c *compiler) compileFunc(fe *ast.FnExpr) *bc.FuncTemplate {
 	// save template info
 	tpl.Bytecodes = c.btc
 	tpl.LineNumberTable = c.lnum
-	tpl.ExceptionHandlers = c.handlers
+	tpl.ErrorHandlers = c.handlers
 
 	return tpl
 }
@@ -693,68 +697,71 @@ func (c *compiler) visitReturn(rt *ast.ReturnStmt) {
 	c.push(rt.Begin(), bc.Return)
 }
 
+func (c *compiler) compileTryBlock(block *ast.BlockNode) {
+
+	c.pushBytecode(block.Begin(), bc.PushTry, len(c.handlers))
+	c.Visit(block)
+	c.push(block.End(), bc.PopTry)
+}
+
+func (c *compiler) compileCatchBlock(
+	tryEnd ast.Pos,
+	ident *ast.IdentExpr,
+	block *ast.BlockNode) int {
+
+	// push a jump, so we'll skip the catch block during normal execution
+	catchEnd := c.push(tryEnd, bc.Jump, 0xFF, 0xFF)
+
+	// save the beginning of the catch
+	catch := len(c.btc)
+
+	// store the error (which the interpreter
+	// has thoughtfully put on the stack for us
+	// as part of the error recovery process)
+	v := ident.Variable
+	g.Assert(!v.IsCapture())
+	c.pushBytecode(ident.Begin(), bc.StoreLocal, v.Index())
+
+	// compile the catch
+	c.Visit(block)
+
+	// fix the jump
+	c.setJump(catchEnd, c.btcLen())
+
+	return catch
+}
+
+func (c *compiler) compileFinallyBlock(block *ast.BlockNode) int {
+
+	finally := len(c.btc)
+	c.Visit(block)
+	return finally
+}
+
 func (c *compiler) visitTry(t *ast.TryStmt) {
 
-	begin := len(c.btc)
-	c.Visit(t.TryBlock)
-	end := len(c.btc)
+	// try
+	c.compileTryBlock(t.TryBlock)
 
-	//////////////////////////
 	// catch
-
 	catch := -1
 	if t.CatchBlock != nil {
-
-		// push a jump, so we'll skip the catch block during normal execution
-		catchEnd := c.push(t.TryBlock.End(), bc.Jump, 0xFF, 0xFF)
-
-		// save the beginning of the catch
-		catch = len(c.btc)
-
-		// store the exception that the interpreter has put on the stack for us
-		v := t.CatchIdent.Variable
-		g.Assert(!v.IsCapture())
-		c.pushBytecode(t.CatchIdent.Begin(), bc.StoreLocal, v.Index())
-
-		// compile the catch
-		c.Visit(t.CatchBlock)
-
-		// pop the exception
-		c.push(t.CatchBlock.End(), bc.Pop)
-
-		// add a Done to mark the end of the catch block
-		c.push(t.CatchBlock.End(), bc.Done)
-
-		// fix the jump
-		c.setJump(catchEnd, c.btcLen())
+		catch = c.compileCatchBlock(
+			t.TryBlock.End(), t.CatchIdent, t.CatchBlock)
 	}
 
-	//////////////////////////
 	// finally
-
 	finally := -1
 	if t.FinallyBlock != nil {
-
-		// save the beginning of the finally
-		finally = len(c.btc)
-
-		// compile the finally
-		c.Visit(t.FinallyBlock)
-
-		// add a Done to mark the end of the finally block
-		c.push(t.FinallyBlock.End(), bc.Done)
+		finally = c.compileFinallyBlock(t.FinallyBlock)
 	}
 
-	//////////////////////////
 	// done
-
-	// sanity check
-	g.Assert(!(catch == -1 && finally == -1))
-	c.handlers = append(c.handlers, bc.ExceptionHandler{
-		Begin:   begin,
-		End:     end,
+	g.Assert(!(catch == -1 && finally == -1)) // sanity check
+	c.handlers = append(c.handlers, bc.ErrorHandler{
 		Catch:   catch,
 		Finally: finally,
+		End:     len(c.btc),
 	})
 }
 

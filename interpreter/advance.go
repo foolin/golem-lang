@@ -13,14 +13,11 @@ import (
 // Advance the interpreter forwards by one opcode.
 func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
-	frameIndex := len(itp.frames) - 1
-	f := itp.frames[frameIndex]
+	f, fidx := itp.peekFrame()
 
 	n := len(f.stack) - 1 // top of stack
 	btc := f.fn.Template().Bytecodes
 	pool := f.fn.Template().Module.Pool
-
-	//dumpFrames(itp.frames)
 
 	switch btc[f.ip] {
 
@@ -86,7 +83,7 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 			// push a new frame
 			locals := newLocals(fn.Template().NumLocals, params)
-			itp.frames = append(itp.frames, &frame{fn, locals, []g.Value{}, 0})
+			itp.pushFrame(newFrame(fn, locals))
 
 		case g.NativeFunc:
 
@@ -121,22 +118,41 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		result := f.stack[n]
 
 		// pop the old frame
-		itp.frames = itp.frames[:frameIndex]
+		itp.popFrame()
 
 		// If we are on the last frame, then we are done.
-		if frameIndex == lastFrame {
+		if fidx == lastFrame {
 			return result, nil
 		}
 
 		// push the result onto the new top frame
-		f = itp.frames[len(itp.frames)-1]
+		f, _ = itp.peekFrame()
 		f.stack = append(f.stack, result)
 
 		// advance the instruction pointer now that we are done invoking
 		f.ip += 3
 
-	case bc.Done:
-		panic("Done cannot be executed directly")
+	case bc.PushTry:
+
+		p := bc.DecodeParam(btc, f.ip)
+		f.pushHandler(f.fn.Template().ErrorHandlers[p])
+		f.ip += 3
+
+	case bc.PopTry:
+
+		f.popHandler()
+		f.ip++
+
+	case bc.Throw:
+
+		// get str from stack
+		s, ok := f.stack[n].(g.Str)
+		if !ok {
+			return nil, g.TypeMismatch(g.StrType, f.stack[n].Type())
+		}
+
+		// throw an error
+		return nil, g.Error(fmt.Errorf("%s", s.String()))
 
 	case bc.Go:
 
@@ -150,10 +166,9 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 
 			intp := NewInterpreter(itp.builtInMgr, itp.modules)
 			go (func() {
-				_, errStruct := intp.EvalBytecode(fn, params)
-				if errStruct != nil {
+				_, es := intp.EvalBytecode(fn, params)
+				if es != nil {
 					panic("TODO how to handle exceptions in goroutines")
-					//fmt.Printf("%v\n", errStruct.Error())
 				}
 			})()
 
@@ -171,17 +186,6 @@ func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
 		default:
 			return nil, g.TypeMismatch(g.FuncType, f.stack[n-p].Type())
 		}
-
-	case bc.Throw:
-
-		// get str from stack
-		s, ok := f.stack[n].(g.Str)
-		if !ok {
-			return nil, g.TypeMismatch(g.StrType, f.stack[n].Type())
-		}
-
-		// throw an error
-		return nil, g.Error(fmt.Errorf("%s", s.String()))
 
 	case bc.NewFunc:
 

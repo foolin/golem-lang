@@ -5,7 +5,7 @@
 package compiler
 
 import (
-	//"fmt"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -107,7 +107,7 @@ func TestExpression(t *testing.T) {
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
 					{Index: 16, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			}},
 	})
 
@@ -134,7 +134,7 @@ func TestExpression(t *testing.T) {
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
 					{Index: 16, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			}},
 	})
 
@@ -161,7 +161,7 @@ func TestExpression(t *testing.T) {
 					{Index: 4, LineNum: 2},
 					{Index: 5, LineNum: 1},
 					{Index: 6, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			}},
 	})
 
@@ -184,7 +184,7 @@ func TestExpression(t *testing.T) {
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
 					{Index: 8, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			}},
 	})
 
@@ -207,7 +207,7 @@ func TestExpression(t *testing.T) {
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
 					{Index: 6, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			}},
 	})
 
@@ -230,7 +230,7 @@ func TestExpression(t *testing.T) {
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
 					{Index: 4, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			}},
 	})
 
@@ -256,7 +256,7 @@ func TestExpression(t *testing.T) {
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
 					{Index: 7, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			}},
 	})
 
@@ -285,7 +285,7 @@ func TestExpression(t *testing.T) {
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
 					{Index: 10, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			}},
 	})
 
@@ -313,7 +313,7 @@ func TestExpression(t *testing.T) {
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
 					{Index: 21, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			}},
 	})
 
@@ -341,7 +341,7 @@ func TestExpression(t *testing.T) {
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
 					{Index: 21, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			}},
 	})
 }
@@ -374,7 +374,7 @@ func TestAssignment(t *testing.T) {
 					{Index: 8, LineNum: 2},
 					{Index: 11, LineNum: 3},
 					{Index: 18, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			}},
 	})
 }
@@ -419,7 +419,7 @@ func TestIf(t *testing.T) {
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
 					{Index: 17, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			}},
 	})
 
@@ -463,7 +463,7 @@ func TestIf(t *testing.T) {
 					{Index: 18, LineNum: 5},
 					{Index: 24, LineNum: 7},
 					{Index: 30, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			}},
 	})
 }
@@ -496,7 +496,7 @@ func TestWhile(t *testing.T) {
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 1},
 					{Index: 20, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			}},
 	})
 
@@ -531,7 +531,7 @@ func TestWhile(t *testing.T) {
 					{Index: 1, LineNum: 1},
 					{Index: 13, LineNum: 2},
 					{Index: 34, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			}},
 	})
 }
@@ -568,7 +568,7 @@ func TestReturn(t *testing.T) {
 					{Index: 12, LineNum: 1},
 					{Index: 13, LineNum: 2},
 					{Index: 20, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			}},
 	})
 }
@@ -614,7 +614,7 @@ let b = fn(x) {
 					{Index: 1, LineNum: 2},
 					{Index: 7, LineNum: 3},
 					{Index: 13, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			},
 			&bc.FuncTemplate{
 				Arity:       fixedArity(0),
@@ -628,7 +628,7 @@ let b = fn(x) {
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 2},
 					{Index: 4, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			},
 			&bc.FuncTemplate{
 				Arity:       fixedArity(1),
@@ -651,7 +651,7 @@ let b = fn(x) {
 					{Index: 1, LineNum: 4},
 					{Index: 7, LineNum: 7},
 					{Index: 24, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			},
 			&bc.FuncTemplate{
 				Arity:       fixedArity(1),
@@ -667,7 +667,7 @@ let b = fn(x) {
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 5},
 					{Index: 8, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			}},
 	})
 
@@ -722,7 +722,7 @@ c(2, 3)
 					{Index: 25, LineNum: 6},
 					{Index: 32, LineNum: 7},
 					{Index: 44, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			},
 			&bc.FuncTemplate{
 				Arity:       fixedArity(0),
@@ -733,7 +733,7 @@ c(2, 3)
 					bc.Return},
 				LineNumberTable: []bc.LineNumberEntry{
 					{Index: 0, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			},
 			&bc.FuncTemplate{
 				Arity:       fixedArity(1),
@@ -747,7 +747,7 @@ c(2, 3)
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 3},
 					{Index: 4, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			},
 			&bc.FuncTemplate{
 				Arity:       fixedArity(2),
@@ -767,7 +767,7 @@ c(2, 3)
 					{Index: 0, LineNum: 0},
 					{Index: 1, LineNum: 4},
 					{Index: 18, LineNum: 0}},
-				ExceptionHandlers: nil,
+				ErrorHandlers: nil,
 			}},
 	})
 }
@@ -800,7 +800,7 @@ const accumGen = fn(n) {
 				{Index: 0, LineNum: 0},
 				{Index: 1, LineNum: 2},
 				{Index: 7, LineNum: 0}},
-			ExceptionHandlers: nil,
+			ErrorHandlers: nil,
 		}, &bc.FuncTemplate{
 			Arity:       fixedArity(1),
 			NumCaptures: 0,
@@ -815,7 +815,7 @@ const accumGen = fn(n) {
 				{Index: 0, LineNum: 0},
 				{Index: 1, LineNum: 3},
 				{Index: 8, LineNum: 0}},
-			ExceptionHandlers: nil,
+			ErrorHandlers: nil,
 		}, &bc.FuncTemplate{
 			Arity:       fixedArity(1),
 			NumCaptures: 1,
@@ -835,7 +835,7 @@ const accumGen = fn(n) {
 				{Index: 1, LineNum: 4},
 				{Index: 12, LineNum: 5},
 				{Index: 16, LineNum: 0}},
-			ExceptionHandlers: nil,
+			ErrorHandlers: nil,
 		}},
 	})
 
@@ -875,7 +875,7 @@ const accumGen = fn(n) {
 				{Index: 1, LineNum: 2},
 				{Index: 7, LineNum: 3},
 				{Index: 16, LineNum: 0}},
-			ExceptionHandlers: nil,
+			ErrorHandlers: nil,
 		}, &bc.FuncTemplate{
 			Arity:       fixedArity(1),
 			NumCaptures: 1,
@@ -891,7 +891,7 @@ const accumGen = fn(n) {
 				{Index: 0, LineNum: 0},
 				{Index: 1, LineNum: 4},
 				{Index: 11, LineNum: 0}},
-			ExceptionHandlers: nil,
+			ErrorHandlers: nil,
 		}, &bc.FuncTemplate{
 			Arity:       fixedArity(1),
 			NumCaptures: 2,
@@ -913,7 +913,7 @@ const accumGen = fn(n) {
 				{Index: 1, LineNum: 5},
 				{Index: 16, LineNum: 6},
 				{Index: 20, LineNum: 0}},
-			ExceptionHandlers: nil,
+			ErrorHandlers: nil,
 		}},
 	})
 }
@@ -965,7 +965,7 @@ let d = b--
 				{Index: 13, LineNum: 4},
 				{Index: 25, LineNum: 5},
 				{Index: 37, LineNum: 0}},
-			ExceptionHandlers: nil,
+			ErrorHandlers: nil,
 		}},
 	})
 }
@@ -992,29 +992,6 @@ func TestImport(t *testing.T) {
 	tassert(t, mods[1].Name == "a")
 	tassert(t, mods[2].Name == "b")
 	tassert(t, mods[3].Name == "c")
-}
-
-func TestTry(t *testing.T) {
-
-	code := `
-let a = 1
-try {
-    a++
-}
-finally {
-    a++
-}
-`
-	mod := testCompile(t, code)
-
-	tassert(t, mod.Pool.Templates[0].ExceptionHandlers[0] ==
-		bc.ExceptionHandler{
-			Begin:   5,
-			End:     14,
-			Catch:   -1,
-			Finally: 14,
-		})
-
 }
 
 func TestInvokeField(t *testing.T) {
@@ -1084,22 +1061,27 @@ let p = ls.iter().next()
 				{Index: 49, LineNum: 8},
 				{Index: 65, LineNum: 0},
 			},
-			ExceptionHandlers: nil,
+			ErrorHandlers: nil,
 		}},
 	})
 }
 
-//func TestScratch(t *testing.T) {
-//
-//	code := `
-//fn(a...) {}
-//fn(a = 1) {}
-//fn(a, b = 1, c = 2) {}
-//`
-//	mod := testCompile(t, code)
-//
-//	fmt.Println("----------------------------")
-//	fmt.Println(code)
-//	fmt.Println("----------------------------")
-//	fmt.Println(mod.Pool)
-//}
+func TestScratch(t *testing.T) {
+
+	code := `
+try {
+    println('try')
+} catch e {
+    println('catch: ' + e.error)
+} finally {
+    println('finally')
+}
+println('done')
+`
+	mod := testCompile(t, code)
+
+	fmt.Println("----------------------------")
+	fmt.Println(code)
+	fmt.Println("----------------------------")
+	fmt.Println(mod.Pool)
+}

@@ -14,14 +14,14 @@ import (
 // instance.  Templates are created at compile time, and
 // are immutable at run time.
 type FuncTemplate struct {
-	Module            *Module
-	Arity             g.Arity
-	OptionalParams    []g.Value
-	NumCaptures       int
-	NumLocals         int
-	Bytecodes         []byte
-	LineNumberTable   []LineNumberEntry
-	ExceptionHandlers []ExceptionHandler
+	Module          *Module
+	Arity           g.Arity
+	OptionalParams  []g.Value
+	NumCaptures     int
+	NumLocals       int
+	Bytecodes       []byte
+	LineNumberTable []LineNumberEntry
+	ErrorHandlers   []ErrorHandler
 }
 
 // LineNumberEntry tracks which sequence of opcodes are on a given line
@@ -37,22 +37,17 @@ func (ln LineNumberEntry) String() string {
 		ln.LineNum)
 }
 
-// ExceptionHandler handles exceptions for a given block of opcodes,
+// ErrorHandler handles error that are thrown for a given block of opcodes,
 // by providing the instruction pointers for 'catch' and 'finally'
-type ExceptionHandler struct {
-	Begin   int
-	End     int
+type ErrorHandler struct {
 	Catch   int
 	Finally int
+	End     int
 }
 
-func (eh ExceptionHandler) String() string {
+func (eh ErrorHandler) String() string {
 	return fmt.Sprintf(
-		"ExceptionHandler(Begin: %d, End: %d, Catch: %d, Finally: %d)",
-		eh.Begin,
-		eh.End,
-		eh.Catch,
-		eh.Finally)
+		"ErrorHandler(Catch: %d, Finally: %d, End: %d)", eh.Catch, eh.Finally, eh.End)
 }
 
 // LineNumber returns the line number for the opcode at the given instruction pointer

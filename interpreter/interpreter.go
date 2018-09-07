@@ -13,12 +13,13 @@ import (
 
 //---------------------------------------------------------------
 // The Golem Interpreter
+//---------------------------------------------------------------
 
-// Interpreter interprets Golem bc.
+// Interpreter interprets Golem bytecode.
 type Interpreter struct {
+	builtInMgr g.BuiltinManager
 	modules    []*bc.Module
 	modMap     map[string]*bc.Module
-	builtInMgr g.BuiltinManager
 	frames     []*frame
 }
 
@@ -33,9 +34,9 @@ func NewInterpreter(
 	}
 
 	return &Interpreter{
+		builtInMgr: builtInMgr,
 		modules:    modules,
 		modMap:     modMap,
-		builtInMgr: builtInMgr,
 		frames:     []*frame{},
 	}
 }
@@ -69,18 +70,15 @@ func (itp *Interpreter) InitModules() ([]g.Value, ErrorStruct) {
 	return result, nil
 }
 
-//-------------------------------------------------------------------------
-// Eval
-
 // Eval evaluates a Func.
 func (itp *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
 
 	switch t := fn.(type) {
 
 	case bc.Func:
-		val, errStruct := itp.EvalBytecode(t, params)
-		if errStruct != nil {
-			return nil, errStruct.Error()
+		val, es := itp.EvalBytecode(t, params)
+		if es != nil {
+			return nil, es.Error()
 		}
 		return val, nil
 
@@ -103,122 +101,87 @@ func (itp *Interpreter) EvalBytecode(fn bc.Func, params []g.Value) (g.Value, Err
 
 //-------------------------------------------------------------------------
 
-func (itp *Interpreter) eval(
-	fn bc.Func,
-	locals []*bc.Ref) (result g.Value, errStruct ErrorStruct) {
+func (itp *Interpreter) numFrames() int {
+	return len(itp.frames)
+}
 
-	lastFrame := len(itp.frames)
-	itp.frames = append(itp.frames, &frame{fn, locals, []g.Value{}, 0})
+func (itp *Interpreter) peekFrame() (*frame, int) {
+	n := itp.numFrames() - 1
+	return itp.frames[n], n
+}
 
+func (itp *Interpreter) pushFrame(f *frame) {
+	itp.frames = append(itp.frames, f)
+}
+
+func (itp *Interpreter) popFrame() {
+	itp.frames = itp.frames[:itp.numFrames()-1]
+}
+
+func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct) {
+
+	lastFrame := itp.numFrames()
+	itp.frames = append(itp.frames, newFrame(fn, locals))
+
+	var result g.Value
 	var err g.Error
+	var es ErrorStruct
+
+	// advance until we get a result
 	for result == nil {
 		result, err = itp.advance(lastFrame)
+
+		// an error was thrown
 		if err != nil {
-			result, errStruct = itp.walkStack(newErrorStruct(err, itp.stackTrace()))
-			if errStruct != nil {
-				return nil, errStruct
+			es = newErrorStruct(err, itp.stackTrace())
+			result, es = itp.handleError(es)
+			if es != nil {
+				return nil, es
 			}
 		}
 	}
 
+	// success
 	return result, nil
 }
 
-func (itp *Interpreter) walkStack(errStruct ErrorStruct) (g.Value, ErrorStruct) {
+func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 
-	// unwind the frames
-	for len(itp.frames) > 0 {
-		frameIndex := len(itp.frames) - 1
-		f := itp.frames[frameIndex]
-		instPtr := f.ip
-
-		// visit exception handlers
-		tpl := f.fn.Template()
-		for _, eh := range tpl.ExceptionHandlers {
-
-			// found an active handler
-			if instPtr >= eh.Begin && instPtr < eh.End {
-
-				if eh.Catch != -1 {
-					f.ip = eh.Catch
-					f.stack = append(f.stack, errStruct)
-					cres, cerr := itp.runTryClause(f, frameIndex)
-					if cerr != nil {
-
-						// save the error
-						errStruct = newErrorStruct(cerr, itp.stackTrace())
-
-						// run finally clause
-						if eh.Finally != -1 {
-							f.ip = eh.Finally
-							fres, ferr := itp.runTryClause(f, frameIndex)
-							if ferr != nil {
-								// save the error
-								errStruct = newErrorStruct(ferr, itp.stackTrace())
-							} else if fres != nil {
-								// stop unwinding the stack
-								return fres, nil
-							}
-						}
-
-					} else {
-
-						// run finally clause
-						if eh.Finally != -1 {
-							f.ip = eh.Finally
-							fres, ferr := itp.runTryClause(f, frameIndex)
-							if ferr == nil && fres != nil {
-								// stop unwinding the stack
-								return fres, nil
-							}
-						}
-
-						// done!
-						return cres, nil
-					}
-				} else {
-					g.Assert(eh.Finally != -1)
-					f.ip = eh.Finally
-					fres, ferr := itp.runTryClause(f, frameIndex)
-					if ferr != nil {
-						// save the error
-						errStruct = newErrorStruct(ferr, itp.stackTrace())
-					} else if fres != nil {
-						// stop unwinding the stack
-						return fres, nil
-					}
-				}
-			}
+	// pop frames until we find one with a handler
+	f, _ := itp.peekFrame()
+	for f.numHandlers() == 0 {
+		itp.popFrame()
+		if itp.numFrames() == 0 {
+			return nil, es
 		}
-
-		// pop the frame
-		itp.frames = itp.frames[:frameIndex]
+		f, _ = itp.peekFrame()
 	}
 
-	return nil, errStruct
-}
+	var result g.Value
+	h := f.popHandler()
 
-func (itp *Interpreter) runTryClause(f *frame, frameIndex int) (g.Value, g.Error) {
-
-	btc := f.fn.Template().Bytecodes
-	for btc[f.ip] != bc.Done {
-
-		result, err := itp.advance(frameIndex)
-		if result != nil || err != nil {
-			return result, err
-		}
+	// catch
+	if h.Catch != -1 {
+		panic("TODO")
+		//f.stack = append(f.stack, es)
 	}
-	f.ip++
 
-	return nil, nil
+	// finally
+	if h.Finally != -1 {
+	}
+
+	// done
+	if es != nil {
+		return nil, es
+	}
+	return result, nil
 }
 
 func (itp *Interpreter) stackTrace() []string {
 
-	n := len(itp.frames)
 	stack := []string{}
 
-	for i := n - 1; i >= 0; i-- {
+	for i := itp.numFrames() - 1; i >= 0; i-- {
 		tpl := itp.frames[i].fn.Template()
 		lineNum := tpl.LineNumber(itp.frames[i].ip)
 		stack = append(stack, fmt.Sprintf("    at %s:%d", tpl.Module.Path, lineNum))
@@ -245,60 +208,4 @@ func (itp *Interpreter) lookupModule(name string) (*bc.Module, g.Error) {
 		return mod, nil
 	}
 	return nil, g.UndefinedModule(name)
-}
-
-//--------------------------------------------------------------
-// ErrorStruct
-//--------------------------------------------------------------
-
-type (
-	// ErrorStruct is a Struct that describes an Error
-	ErrorStruct interface {
-		g.Struct
-		Error() g.Error
-		StackTrace() []string
-	}
-
-	errorStruct struct {
-		g.Struct
-		err        g.Error
-		stackTrace []string
-	}
-)
-
-func newErrorStruct(err g.Error, stackTrace []string) ErrorStruct {
-
-	// make List-of-Str
-	vals := make([]g.Value, len(stackTrace))
-	for i, s := range stackTrace {
-		vals[i] = mustStr(s)
-	}
-	list, e := g.NewList(vals).Freeze(nil)
-	g.Assert(e == nil)
-
-	stc, e := g.NewFrozenFieldStruct(
-		map[string]g.Field{
-			"error":      g.NewReadonlyField(mustStr(err.Error())),
-			"stackTrace": g.NewReadonlyField(list),
-		})
-	g.Assert(e == nil)
-
-	return &errorStruct{stc, err, stackTrace}
-}
-
-func (e *errorStruct) Error() g.Error {
-	return e.err
-}
-
-func (e *errorStruct) StackTrace() []string {
-	return e.stackTrace
-}
-
-// This *should* be impossible...
-func mustStr(s string) g.Str {
-	sv, err := g.NewStr(s)
-	if err != nil {
-		panic("internal interpreter error")
-	}
-	return sv
 }

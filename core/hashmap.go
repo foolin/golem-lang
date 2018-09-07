@@ -24,7 +24,7 @@ func EmptyHashMap() *HashMap {
 	return h
 }
 
-// NewHashMap creates an empty HashMap
+// NewHashMap creates a HashMap
 func NewHashMap(ev Eval, entries []*HEntry) (*HashMap, Error) {
 	capacity := 5
 	buckets := make([][]*HEntry, capacity)
@@ -83,8 +83,8 @@ func (hm *HashMap) Get(ev Eval, key Value) (value Value, err Error) {
 		}
 	}()
 
-	b := hm.buckets[hm._lookupBucket(ev, key)]
-	n := hm._indexOf(ev, b, key)
+	b := hm.buckets[hm.lookupBucket(ev, key)]
+	n := hm.indexOf(ev, b, key)
 	if n == -1 {
 		return Null, nil
 	}
@@ -106,8 +106,8 @@ func (hm *HashMap) Contains(ev Eval, key Value) (flag Bool, err Error) {
 		}
 	}()
 
-	b := hm.buckets[hm._lookupBucket(ev, key)]
-	n := hm._indexOf(ev, b, key)
+	b := hm.buckets[hm.lookupBucket(ev, key)]
+	n := hm.indexOf(ev, b, key)
 	if n == -1 {
 		return False, nil
 	}
@@ -130,9 +130,9 @@ func (hm *HashMap) Remove(ev Eval, key Value) (flag Bool, err Error) {
 		}
 	}()
 
-	h := hm._lookupBucket(ev, key)
+	h := hm.lookupBucket(ev, key)
 	b := hm.buckets[h]
-	n := hm._indexOf(ev, b, key)
+	n := hm.indexOf(ev, b, key)
 	if n == -1 {
 		return False, nil
 	}
@@ -155,12 +155,12 @@ func (hm *HashMap) Put(ev Eval, key Value, value Value) (err Error) {
 		}
 	}()
 
-	h := hm._lookupBucket(ev, key)
-	n := hm._indexOf(ev, hm.buckets[h], key)
+	h := hm.lookupBucket(ev, key)
+	n := hm.indexOf(ev, hm.buckets[h], key)
 	if n == -1 {
-		if hm._tooFull() {
-			hm._rehash(ev)
-			h = hm._lookupBucket(ev, key)
+		if hm.tooFull() {
+			hm.rehash(ev)
+			h = hm.lookupBucket(ev, key)
 		}
 		hm.buckets[h] = append(hm.buckets[h], &HEntry{key, value})
 		hm.size++
@@ -178,9 +178,8 @@ func (hm *HashMap) Len() Int {
 }
 
 //--------------------------------------------------------------
-// these are internal methods -- don't call them directly
 
-func (hm *HashMap) _indexOf(ev Eval, b []*HEntry, key Value) int {
+func (hm *HashMap) indexOf(ev Eval, b []*HEntry, key Value) int {
 	for i, e := range b {
 
 		eq, err := e.Key.Eq(ev, key)
@@ -195,25 +194,25 @@ func (hm *HashMap) _indexOf(ev Eval, b []*HEntry, key Value) int {
 	return -1
 }
 
-func (hm *HashMap) _tooFull() bool {
+func (hm *HashMap) tooFull() bool {
 	headroom := (hm.size + 1) << 1
 	return headroom > len(hm.buckets)
 }
 
-func (hm *HashMap) _rehash(ev Eval) {
+func (hm *HashMap) rehash(ev Eval) {
 	oldBuckets := hm.buckets
 
 	capacity := len(hm.buckets)<<1 + 1
 	hm.buckets = make([][]*HEntry, capacity)
 	for _, b := range oldBuckets {
 		for _, e := range b {
-			h := hm._lookupBucket(ev, e.Key)
+			h := hm.lookupBucket(ev, e.Key)
 			hm.buckets[h] = append(hm.buckets[h], e)
 		}
 	}
 }
 
-func (hm *HashMap) _lookupBucket(ev Eval, key Value) int {
+func (hm *HashMap) lookupBucket(ev Eval, key Value) int {
 
 	// panic on an un-hashable value
 	hc, err := key.HashCode(ev)

@@ -83,7 +83,7 @@ func TestLineNumber(t *testing.T) {
 			{11, 3},
 			{20, 4},
 			{29, 0}},
-		ExceptionHandlers: nil,
+		ErrorHandlers: nil,
 	}
 
 	tassert(t, tp.LineNumber(0) == 0)

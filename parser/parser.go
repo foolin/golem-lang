@@ -12,8 +12,9 @@ import (
 	"github.com/mjarmy/golem-lang/scanner"
 )
 
-//--------------------------------------------------------------
-// Parser
+//---------------------------------------------------------------
+// The Golem Parser
+//---------------------------------------------------------------
 
 // Parser parses Golem source code, and creates an Abstract Syntax Tree.
 type Parser struct {

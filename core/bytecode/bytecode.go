@@ -61,7 +61,9 @@ const (
 	Invoke
 	Go
 	Return
-	Done
+
+	PushTry
+	PopTry
 	Throw
 
 	NewStruct
@@ -199,8 +201,11 @@ func String(bc byte) string {
 		return "Go"
 	case Return:
 		return "Return"
-	case Done:
-		return "Done"
+
+	case PushTry:
+		return "PushTry"
+	case PopTry:
+		return "PopTry"
 	case Throw:
 		return "Throw"
 
@@ -281,7 +286,7 @@ func Size(bc byte) int {
 		Plus, Inc, Sub, Mul, Div,
 		Rem, BitAnd, BitOr, BitXor, LeftShift, RightShift,
 		Negate, Not, Complement,
-		Return, Done, Throw,
+		Return, PopTry, Throw,
 		GetIndex, SetIndex, IncIndex, Slice, SliceFrom, SliceTo,
 		NewIter, IterNext, IterGet, Pop, Dup:
 
@@ -291,7 +296,7 @@ func Size(bc byte) int {
 		ImportModule, LoadBuiltin, LoadConst,
 		LoadLocal, LoadCapture, StoreLocal, StoreCapture,
 		Jump, JumpTrue, JumpFalse, Break, Continue,
-		NewFunc, FuncCapture, FuncLocal, Invoke, Go,
+		NewFunc, FuncCapture, FuncLocal, Invoke, Go, PushTry,
 		NewStruct, GetField,
 		InitField, InitProperty, InitReadonlyProperty,
 		SetField, IncField,
