@@ -11,7 +11,7 @@ import (
 	bc "github.com/mjarmy/golem-lang/core/bytecode"
 )
 
-type op func(*Interpreter, *frame, int) (g.Value, g.Error)
+type op func(*Interpreter, *frame) (g.Value, g.Error)
 
 var ops []op
 
@@ -106,15 +106,15 @@ func init() {
 }
 
 // advance the interpreter forwards by one opcode.
-func (itp *Interpreter) advance(lastFrame int) (g.Value, g.Error) {
-	f, _ := itp.peekFrame()
+func (itp *Interpreter) advance() (g.Value, g.Error) {
+	f := itp.peekFrame()
 	op := ops[f.btc[f.ip]]
-	return op(itp, f, lastFrame)
+	return op(itp, f)
 }
 
 //--------------------------------------------------------------
 
-func opInvoke(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opInvoke(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -178,7 +178,7 @@ func opInvoke(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 
 		// push a new frame
 		locals := newLocals(fn.Template().NumLocals, params)
-		itp.pushFrame(newFrame(fn, locals))
+		itp.pushFrame(newFrame(fn, locals, false))
 
 	case g.NativeFunc:
 
@@ -202,10 +202,7 @@ func opInvoke(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opReturn(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
-
-	_, frameIndex := itp.peekFrame()
-	n := len(f.stack) - 1
+func opReturn(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	//// TODO once we've written a Control Flow Graph
 	//// turn this sanity check on to make sure we are managing
@@ -216,18 +213,19 @@ func opReturn(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	//}
 
 	// get result from top of stack
+	n := len(f.stack) - 1
 	result := f.stack[n]
 
-	// pop the old frame
+	// discard the frame
 	itp.popFrame()
 
 	// If we are on the last frame, then we are done.
-	if frameIndex == lastFrame {
+	if f.isLast {
 		return result, nil
 	}
 
 	// push the result onto the new top frame
-	f, _ = itp.peekFrame()
+	f = itp.peekFrame()
 	f.stack = append(f.stack, result)
 
 	// advance the instruction pointer now that we are done invoking
@@ -236,7 +234,7 @@ func opReturn(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opPushTry(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opPushTry(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	p := bc.DecodeParam(f.btc, f.ip)
 	f.pushHandler(f.handlerPool[p])
@@ -245,7 +243,7 @@ func opPushTry(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opPopTry(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opPopTry(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	f.popHandler()
 	f.ip++
@@ -253,7 +251,7 @@ func opPopTry(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opThrow(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opThrow(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -265,7 +263,7 @@ func opThrow(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, g.Error(fmt.Errorf("%s", s.String()))
 }
 
-func opGo(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opGo(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -303,7 +301,7 @@ func opGo(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opNewFunc(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opNewFunc(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	// push a function
 	p := bc.DecodeParam(f.btc, f.ip)
@@ -315,7 +313,7 @@ func opNewFunc(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opFuncLocal(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opFuncLocal(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -330,7 +328,7 @@ func opFuncLocal(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opFuncCapture(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opFuncCapture(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -345,7 +343,7 @@ func opFuncCapture(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error)
 	return nil, nil
 }
 
-func opNewList(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opNewList(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -360,7 +358,7 @@ func opNewList(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opNewSet(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opNewSet(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -380,7 +378,7 @@ func opNewSet(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opNewTuple(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opNewTuple(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -395,7 +393,7 @@ func opNewTuple(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opCheckTuple(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opCheckTuple(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -424,7 +422,7 @@ func opCheckTuple(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) 
 	return nil, nil
 }
 
-func opNewDict(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opNewDict(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -449,7 +447,7 @@ func opNewDict(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opNewStruct(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opNewStruct(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	p := bc.DecodeParam(f.btc, f.ip)
 	def := f.pool.StructDefs[p]
@@ -469,7 +467,7 @@ func opNewStruct(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opNewIter(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opNewIter(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -487,7 +485,7 @@ func opNewIter(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opIterNext(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opIterNext(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -505,7 +503,7 @@ func opIterNext(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opIterGet(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opIterGet(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -523,7 +521,7 @@ func opIterGet(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opGetField(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opGetField(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -542,7 +540,7 @@ func opGetField(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opInvokeField(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opInvokeField(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -566,7 +564,7 @@ func opInvokeField(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error)
 	return nil, nil
 }
 
-func opSetField(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opSetField(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -596,7 +594,7 @@ func opSetField(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opInitField(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opInitField(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -615,7 +613,7 @@ func opInitField(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opInitProperty(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opInitProperty(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -638,7 +636,7 @@ func opInitProperty(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error
 	return nil, nil
 }
 
-func opInitReadonlyProperty(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opInitReadonlyProperty(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -660,7 +658,7 @@ func opInitReadonlyProperty(itp *Interpreter, f *frame, lastFrame int) (g.Value,
 	return nil, nil
 }
 
-func opIncField(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opIncField(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -699,7 +697,7 @@ func opIncField(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opGetIndex(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opGetIndex(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -724,7 +722,7 @@ func opGetIndex(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opSetIndex(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opSetIndex(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -752,7 +750,7 @@ func opSetIndex(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opIncIndex(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opIncIndex(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -790,7 +788,7 @@ func opIncIndex(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opSlice(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opSlice(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -816,7 +814,7 @@ func opSlice(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opSliceFrom(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opSliceFrom(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -841,7 +839,7 @@ func opSliceFrom(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opSliceTo(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opSliceTo(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -866,7 +864,7 @@ func opSliceTo(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opLoadNull(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opLoadNull(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	f.stack = append(f.stack, g.Null)
 	f.ip++
@@ -874,7 +872,7 @@ func opLoadNull(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opLoadTrue(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opLoadTrue(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	f.stack = append(f.stack, g.True)
 	f.ip++
@@ -882,7 +880,7 @@ func opLoadTrue(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opLoadFalse(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opLoadFalse(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	f.stack = append(f.stack, g.False)
 	f.ip++
@@ -890,7 +888,7 @@ func opLoadFalse(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opLoadZero(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opLoadZero(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	f.stack = append(f.stack, g.Zero)
 	f.ip++
@@ -898,7 +896,7 @@ func opLoadZero(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opLoadOne(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opLoadOne(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	f.stack = append(f.stack, g.One)
 	f.ip++
@@ -906,7 +904,7 @@ func opLoadOne(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opLoadNegOne(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opLoadNegOne(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	f.stack = append(f.stack, g.NegOne)
 	f.ip++
@@ -914,7 +912,7 @@ func opLoadNegOne(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) 
 	return nil, nil
 }
 
-func opImportModule(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opImportModule(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	// get the module name from the f.pool
 	p := bc.DecodeParam(f.btc, f.ip)
@@ -934,7 +932,7 @@ func opImportModule(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error
 	return nil, nil
 }
 
-func opLoadBuiltin(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opLoadBuiltin(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	p := bc.DecodeParam(f.btc, f.ip)
 	f.stack = append(f.stack, itp.builtInMgr.Builtins()[p])
@@ -943,7 +941,7 @@ func opLoadBuiltin(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error)
 	return nil, nil
 }
 
-func opLoadConst(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opLoadConst(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	p := bc.DecodeParam(f.btc, f.ip)
 	f.stack = append(f.stack, f.pool.Constants[p])
@@ -952,7 +950,7 @@ func opLoadConst(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opLoadLocal(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opLoadLocal(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	p := bc.DecodeParam(f.btc, f.ip)
 	f.stack = append(f.stack, f.locals[p].Val)
@@ -961,7 +959,7 @@ func opLoadLocal(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opLoadCapture(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opLoadCapture(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	p := bc.DecodeParam(f.btc, f.ip)
 	f.stack = append(f.stack, f.fn.GetCapture(p).Val)
@@ -970,7 +968,7 @@ func opLoadCapture(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error)
 	return nil, nil
 }
 
-func opStoreLocal(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opStoreLocal(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -982,7 +980,7 @@ func opStoreLocal(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) 
 	return nil, nil
 }
 
-func opStoreCapture(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opStoreCapture(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -994,14 +992,14 @@ func opStoreCapture(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error
 	return nil, nil
 }
 
-func opJump(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opJump(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	f.ip = bc.DecodeParam(f.btc, f.ip)
 
 	return nil, nil
 }
 
-func opJumpTrue(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opJumpTrue(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1020,7 +1018,7 @@ func opJumpTrue(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opJumpFalse(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opJumpFalse(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1039,7 +1037,7 @@ func opJumpFalse(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opEq(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opEq(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1054,7 +1052,7 @@ func opEq(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opNe(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opNe(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1069,7 +1067,7 @@ func opNe(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opLt(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opLt(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1090,7 +1088,7 @@ func opLt(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opLte(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opLte(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1111,7 +1109,7 @@ func opLte(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opGt(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opGt(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1132,7 +1130,7 @@ func opGt(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opGte(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opGte(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1153,7 +1151,7 @@ func opGte(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opCmp(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opCmp(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1174,7 +1172,7 @@ func opCmp(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opPlus(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opPlus(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1189,7 +1187,7 @@ func opPlus(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opInc(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opInc(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1204,7 +1202,7 @@ func opInc(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opNot(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opNot(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1219,7 +1217,7 @@ func opNot(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opSub(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opSub(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1241,7 +1239,7 @@ func opSub(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opMul(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opMul(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1263,7 +1261,7 @@ func opMul(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opDiv(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opDiv(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1288,7 +1286,7 @@ func opDiv(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opNegate(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opNegate(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1304,7 +1302,7 @@ func opNegate(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opRem(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opRem(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1326,7 +1324,7 @@ func opRem(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opBitAnd(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opBitAnd(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1348,7 +1346,7 @@ func opBitAnd(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opBitOr(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opBitOr(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1370,7 +1368,7 @@ func opBitOr(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opBitXor(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opBitXor(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1392,7 +1390,7 @@ func opBitXor(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opLeftShift(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opLeftShift(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1417,7 +1415,7 @@ func opLeftShift(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opRightShift(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opRightShift(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1442,7 +1440,7 @@ func opRightShift(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) 
 	return nil, nil
 }
 
-func opComplement(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opComplement(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1458,7 +1456,7 @@ func opComplement(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) 
 	return nil, nil
 }
 
-func opDup(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opDup(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 
@@ -1468,7 +1466,7 @@ func opDup(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opPop(itp *Interpreter, f *frame, lastFrame int) (g.Value, g.Error) {
+func opPop(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
 

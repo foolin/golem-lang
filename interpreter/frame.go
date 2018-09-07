@@ -17,17 +17,24 @@ type frame struct {
 	fn     bc.Func
 	locals []*bc.Ref
 
-	stack    []g.Value
-	handlers []bc.ErrorHandler
-	ip       int
+	// whether this is the last frame that will be processed during the current Eval()
+	isLast bool
 
+	stack        []g.Value
+	handlerStack []bc.ErrorHandler
+
+	// current instruction point
+	ip int
+
+	// useful things from the function template
 	btc         []byte
 	pool        *bc.Pool
 	handlerPool []bc.ErrorHandler
 }
 
-func newFrame(fn bc.Func, locals []*bc.Ref) *frame {
+func newFrame(fn bc.Func, locals []*bc.Ref, isLast bool) *frame {
 
+	// save this stuff so we don't have to look it up later
 	btc := fn.Template().Bytecodes
 	pool := fn.Template().Module.Pool
 	handlerPool := fn.Template().ErrorHandlers
@@ -35,10 +42,11 @@ func newFrame(fn bc.Func, locals []*bc.Ref) *frame {
 	return &frame{
 		fn:     fn,
 		locals: locals,
+		isLast: isLast,
 
-		stack:    []g.Value{},
-		handlers: []bc.ErrorHandler{},
-		ip:       0,
+		stack:        []g.Value{},
+		handlerStack: []bc.ErrorHandler{},
+		ip:           0,
 
 		btc:         btc,
 		pool:        pool,
@@ -47,17 +55,17 @@ func newFrame(fn bc.Func, locals []*bc.Ref) *frame {
 }
 
 func (f *frame) numHandlers() int {
-	return len(f.handlers)
+	return len(f.handlerStack)
 }
 
 func (f *frame) pushHandler(h bc.ErrorHandler) {
-	f.handlers = append(f.handlers, h)
+	f.handlerStack = append(f.handlerStack, h)
 }
 
 func (f *frame) popHandler() bc.ErrorHandler {
 	n := f.numHandlers() - 1
-	h := f.handlers[n]
-	f.handlers = f.handlers[:n]
+	h := f.handlerStack[n]
+	f.handlerStack = f.handlerStack[:n]
 	return h
 }
 
@@ -93,8 +101,8 @@ func dumpFrame(f *frame) {
 		fmt.Printf("        %d: %s\n", i, toStr(v))
 	}
 
-	fmt.Printf("    handlers:\n")
-	for i, v := range f.handlers {
+	fmt.Printf("    handlerStack:\n")
+	for i, v := range f.handlerStack {
 		fmt.Printf("        %d: %s\n", i, v)
 	}
 

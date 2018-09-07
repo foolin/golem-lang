@@ -105,9 +105,8 @@ func (itp *Interpreter) numFrames() int {
 	return len(itp.frames)
 }
 
-func (itp *Interpreter) peekFrame() (*frame, int) {
-	n := itp.numFrames() - 1
-	return itp.frames[n], n
+func (itp *Interpreter) peekFrame() *frame {
+	return itp.frames[itp.numFrames()-1]
 }
 
 func (itp *Interpreter) pushFrame(f *frame) {
@@ -120,8 +119,7 @@ func (itp *Interpreter) popFrame() {
 
 func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct) {
 
-	lastFrame := itp.numFrames()
-	itp.frames = append(itp.frames, newFrame(fn, locals))
+	itp.frames = append(itp.frames, newFrame(fn, locals, true))
 
 	var result g.Value
 	var err g.Error
@@ -129,12 +127,12 @@ func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct
 
 	// advance until we get a result
 	for result == nil {
-		result, err = itp.advance(lastFrame)
+		result, err = itp.advance()
 
 		// an error was thrown
 		if err != nil {
 			es = newErrorStruct(err, itp.stackTrace())
-			result, es = itp.handleError(lastFrame, es)
+			result, es = itp.handleError(es)
 			if es != nil {
 				return nil, es
 			}
@@ -145,23 +143,20 @@ func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct
 	return result, nil
 }
 
-func (itp *Interpreter) handleError(lastFrame int, es ErrorStruct) (g.Value, ErrorStruct) {
-
-	// sanity check
-	g.Assert(itp.numFrames() >= lastFrame)
+func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 
 	// pop frames until we find one with a handler
-	f, _ := itp.peekFrame()
+	f := itp.peekFrame()
 	for f.numHandlers() == 0 {
 		itp.popFrame()
 
 		// there are no handlers available
 		// TODO make sure this works, e.g. if an error is thrown from a property
-		if itp.numFrames() < lastFrame {
+		if f.isLast {
 			return nil, es
 		}
 
-		f, _ = itp.peekFrame()
+		f = itp.peekFrame()
 	}
 
 	var result g.Value
@@ -193,12 +188,13 @@ func (itp *Interpreter) handleError(lastFrame int, es ErrorStruct) (g.Value, Err
 
 func (itp *Interpreter) runTryClause(begin, end int) (g.Value, ErrorStruct) {
 
-	f, fidx := itp.peekFrame()
+	f := itp.peekFrame()
+
 	f.ip = begin
 
 	for f.ip < end {
 
-		result, err := itp.advance(fidx)
+		result, err := itp.advance()
 		if err != nil {
 			return nil, newErrorStruct(err, itp.stackTrace())
 		}
