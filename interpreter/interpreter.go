@@ -134,7 +134,7 @@ func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct
 		// an error was thrown
 		if err != nil {
 			es = newErrorStruct(err, itp.stackTrace())
-			result, es = itp.handleError(es)
+			result, es = itp.handleError(lastFrame, es)
 			if es != nil {
 				return nil, es
 			}
@@ -145,15 +145,21 @@ func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct
 	return result, nil
 }
 
-func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
+func (itp *Interpreter) handleError(lastFrame int, es ErrorStruct) (g.Value, ErrorStruct) {
+
+	// sanity check
+	g.Assert(itp.numFrames() >= lastFrame)
 
 	// pop frames until we find one with a handler
 	f, _ := itp.peekFrame()
 	for f.numHandlers() == 0 {
 		itp.popFrame()
-		if itp.numFrames() == 0 {
+
+		// there are no handlers available
+		if itp.numFrames() < lastFrame {
 			return nil, es
 		}
+
 		f, _ = itp.peekFrame()
 	}
 
@@ -161,20 +167,47 @@ func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 	h := f.popHandler()
 
 	// catch
-	if h.Catch != -1 {
-		panic("TODO")
-		//f.stack = append(f.stack, es)
+	if h.CatchBegin != -1 {
+		f.stack = append(f.stack, es)
+		result, es = itp.runTryClause(h.CatchBegin, h.CatchEnd)
+		if es != nil {
+			// probably need to handle this recursively?
+			panic("TODO error inside try clause")
+		}
 	}
 
-	// finally
-	if h.Finally != -1 {
+	if h.FinallyBegin != -1 {
+		f.stack = append(f.stack, es)
+		result, es = itp.runTryClause(h.FinallyBegin, h.FinallyBegin)
+		if es != nil {
+			// probably need to handle this recursively?
+			panic("TODO error inside try clause")
+		}
 	}
 
 	// done
-	if es != nil {
-		return nil, es
-	}
 	return result, nil
+}
+
+func (itp *Interpreter) runTryClause(begin, end int) (g.Value, ErrorStruct) {
+
+	f, fidx := itp.peekFrame()
+	f.ip = begin
+
+	for f.ip < end {
+
+		result, err := itp.advance(fidx)
+		if err != nil {
+			return nil, newErrorStruct(err, itp.stackTrace())
+		}
+
+		if result != nil {
+			// the current frame was popped, which is bad
+			panic("TODO return inside try clause")
+		}
+	}
+
+	return nil, nil
 }
 
 func (itp *Interpreter) stackTrace() []string {

@@ -24,7 +24,7 @@ type FuncTemplate struct {
 	ErrorHandlers   []ErrorHandler
 }
 
-// LineNumberEntry tracks which sequence of opcodes are on a given line
+// LineNumberEntry tracks which sequence of opcodes are on a given source code line
 type LineNumberEntry struct {
 	Index   int
 	LineNum int
@@ -33,21 +33,24 @@ type LineNumberEntry struct {
 func (ln LineNumberEntry) String() string {
 	return fmt.Sprintf(
 		"LineNumberEntry(Index: %d, LineNum: %d)",
-		ln.Index,
-		ln.LineNum)
+		ln.Index, ln.LineNum)
 }
 
-// ErrorHandler handles error that are thrown for a given block of opcodes,
-// by providing the instruction pointers for 'catch' and 'finally'
+// ErrorHandler handles errors that are thrown for a given block of opcodes,
+// by providing the instruction pointers for 'catch' and 'finally'.
+// Begin is inclusive, and End is exclusive.
 type ErrorHandler struct {
-	Catch   int
-	Finally int
-	End     int
+	CatchBegin   int
+	CatchEnd     int
+	FinallyBegin int
+	FinallyEnd   int
 }
 
 func (eh ErrorHandler) String() string {
 	return fmt.Sprintf(
-		"ErrorHandler(Catch: %d, Finally: %d, End: %d)", eh.Catch, eh.Finally, eh.End)
+		"ErrorHandler(Catch: (%d,%d), Finally: (%d,%d))",
+		eh.CatchBegin, eh.CatchEnd,
+		eh.FinallyBegin, eh.FinallyEnd)
 }
 
 // LineNumber returns the line number for the opcode at the given instruction pointer

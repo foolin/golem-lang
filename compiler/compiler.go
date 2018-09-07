@@ -707,17 +707,15 @@ func (c *compiler) compileTryBlock(block *ast.BlockNode) {
 func (c *compiler) compileCatchBlock(
 	tryEnd ast.Pos,
 	ident *ast.IdentExpr,
-	block *ast.BlockNode) int {
+	block *ast.BlockNode) (int, int) {
 
-	// push a jump, so we'll skip the catch block during normal execution
-	catchEnd := c.push(tryEnd, bc.Jump, 0xFF, 0xFF)
+	// push a jump, so that we'll skip the catch block during normal execution
+	skipCatch := c.push(tryEnd, bc.Jump, 0xFF, 0xFF)
 
-	// save the beginning of the catch
-	catch := len(c.btc)
+	begin := len(c.btc)
 
-	// store the error (which the interpreter
-	// has thoughtfully put on the stack for us
-	// as part of the error recovery process)
+	// store the error (which the interpreter has put on the stack
+	// for us as part of the error recovery process)
 	v := ident.Variable
 	g.Assert(!v.IsCapture())
 	c.pushBytecode(ident.Begin(), bc.StoreLocal, v.Index())
@@ -726,16 +724,18 @@ func (c *compiler) compileCatchBlock(
 	c.Visit(block)
 
 	// fix the jump
-	c.setJump(catchEnd, c.btcLen())
+	c.setJump(skipCatch, c.btcLen())
 
-	return catch
+	return begin, len(c.btc)
 }
 
-func (c *compiler) compileFinallyBlock(block *ast.BlockNode) int {
+func (c *compiler) compileFinallyBlock(block *ast.BlockNode) (int, int) {
 
-	finally := len(c.btc)
+	begin := len(c.btc)
+
 	c.Visit(block)
-	return finally
+
+	return begin, len(c.btc)
 }
 
 func (c *compiler) visitTry(t *ast.TryStmt) {
@@ -744,24 +744,27 @@ func (c *compiler) visitTry(t *ast.TryStmt) {
 	c.compileTryBlock(t.TryBlock)
 
 	// catch
-	catch := -1
+	cbegin := -1
+	cend := -1
 	if t.CatchBlock != nil {
-		catch = c.compileCatchBlock(
+		cbegin, cend = c.compileCatchBlock(
 			t.TryBlock.End(), t.CatchIdent, t.CatchBlock)
 	}
 
 	// finally
-	finally := -1
+	fbegin := -1
+	fend := -1
 	if t.FinallyBlock != nil {
-		finally = c.compileFinallyBlock(t.FinallyBlock)
+		fbegin, fend = c.compileFinallyBlock(t.FinallyBlock)
 	}
 
 	// done
-	g.Assert(!(catch == -1 && finally == -1)) // sanity check
+	g.Assert(!(cbegin == -1 && fbegin == -1)) // sanity check
 	c.handlers = append(c.handlers, bc.ErrorHandler{
-		Catch:   catch,
-		Finally: finally,
-		End:     len(c.btc),
+		CatchBegin:   cbegin,
+		CatchEnd:     cend,
+		FinallyBegin: fbegin,
+		FinallyEnd:   fend,
 	})
 }
 
