@@ -148,7 +148,7 @@ func failInterp(t *testing.T, mods []*bc.Module, expect ErrorStruct) {
 	_, es := intp.InitModules()
 	tassert(t, es != nil)
 
-	//dumpErrorStruct("failInterp", es)
+	dumpErrorStruct("failInterp", es)
 	tassert(t, reflect.DeepEqual(es, expect))
 }
 
@@ -176,22 +176,67 @@ func TestHandleError(t *testing.T) {
 				"    at foo.glm:2",
 				"    at foo.glm:3"}))
 
-	//	fmt.Printf("--------------------------------------------------------------\n")
-	//	code = `
-	//		let s = struct {
-	//			p: prop { ||=> 1 },
-	//			q: prop { ||=> 1/0 }
-	//		}
-	//
-	//		println(s.p)
-	//		println(s.q)
-	//	`
-	//	failInterp(t, []*bc.Module{testCompile(t, code)},
-	//		newErrorStruct(
-	//			g.DivideByZero(),
-	//			[]string{
-	//				"    at foo.glm:2",
-	//				"    at foo.glm:3"}))
+	fmt.Printf("--------------------------------------------------------------\n")
+	code = `
+		let s = struct {
+			q: prop { ||=> 1/0 }
+		}
+		let a = s.q
+		`
+	failInterp(t, []*bc.Module{testCompile(t, code)},
+		newErrorStruct(
+			g.DivideByZero(),
+			[]string{
+				"    at foo.glm:3",
+				"    at foo.glm:5"}))
+
+	fmt.Printf("--------------------------------------------------------------\n")
+	code = `
+		[1, 2, 3].map(
+			|e| => 1/0)
+		`
+	failInterp(t, []*bc.Module{testCompile(t, code)},
+		newErrorStruct(
+			g.DivideByZero(),
+			[]string{
+				"    at foo.glm:3",
+				"    at foo.glm:2"}))
+
+	fmt.Printf("--------------------------------------------------------------\n")
+	code = `
+		let s = struct {
+			q: prop { fn() {
+					[1, 2, 3].map(
+						|e| => 1/0)
+				}
+			}
+		}
+		s.q
+		`
+	failInterp(t, []*bc.Module{testCompile(t, code)},
+		newErrorStruct(
+			g.DivideByZero(),
+			[]string{
+				"    at foo.glm:5",
+				"    at foo.glm:4",
+				"    at foo.glm:9"}))
+
+	fmt.Printf("--------------------------------------------------------------\n")
+	code = `
+		let s = struct {
+			q: prop { ||=> 1/0 }
+		}
+
+		let a = [1, 2, 3].map(
+			|e| => s.q)
+		`
+	failInterp(t, []*bc.Module{testCompile(t, code)},
+		newErrorStruct(
+			g.DivideByZero(),
+			[]string{
+				"    at foo.glm:3",
+				"    at foo.glm:7",
+				"    at foo.glm:6"}))
 }
 
 func TestTry(t *testing.T) {

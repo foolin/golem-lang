@@ -71,3 +71,14 @@ func (fs *frameStack) stackTrace() []string {
 
 	return stack
 }
+
+//func dumpFrames(frames []*frame) {
+//
+//	fmt.Printf("-----------------------------------------\n")
+//
+//	for i, f := range frames {
+//		fmt.Printf("frame %d\n", i)
+//		dump(f)
+//	}
+//}
+//

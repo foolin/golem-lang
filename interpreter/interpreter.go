@@ -58,9 +58,9 @@ func (itp *Interpreter) InitModules() ([]g.Value, ErrorStruct) {
 		initFn := bc.NewBytecodeFunc(initTpl)
 
 		// invoke the "init" function
-		val, err := itp.eval(initFn, mod.Refs)
-		if err != nil {
-			return nil, err
+		val, es := itp.eval(initFn, mod.Refs)
+		if es != nil {
+			return nil, es
 		}
 
 		// prepend the value so that the result will be in the same order as itp.modules
@@ -77,7 +77,7 @@ func (itp *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
 	case bc.Func:
 		val, es := itp.EvalBytecode(t, params)
 		if es != nil {
-			return nil, es.Error()
+			return nil, es
 		}
 		return val, nil
 
@@ -91,9 +91,9 @@ func (itp *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
 
 func (itp *Interpreter) EvalBytecode(fn bc.Func, params []g.Value) (g.Value, ErrorStruct) {
 
-	val, err := itp.eval(fn, newLocals(fn.Template().NumLocals, params))
-	if err != nil {
-		return nil, err
+	val, es := itp.eval(fn, newLocals(fn.Template().NumLocals, params))
+	if es != nil {
+		return nil, es
 	}
 	return val, nil
 }
@@ -113,7 +113,6 @@ func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct
 
 	var result g.Value
 	var err g.Error
-	var es ErrorStruct
 
 	// advance until we get a result
 	for result == nil {
@@ -121,7 +120,19 @@ func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct
 
 		// an error was thrown
 		if err != nil {
-			es = newErrorStruct(err, itp.frameStack.stackTrace())
+
+			// If the error is already an ErrorStruct, that means it is being
+			// propagated back up from a Property or a (Map,Reduce,Filter),
+			// or some such, by unwinding recursive calls to Eval().  In that case,
+			// we should preserve the ErrorStruct since we want to pass its
+			// stack trace back all the way back up.
+			es, ok := err.(ErrorStruct)
+			if !ok {
+				// If the error not already an ErrorStruct, then we create one.
+				es = newErrorStruct(err, itp.frameStack.stackTrace())
+			}
+
+			// handle the error
 			result, es = itp.handleError(es)
 			if es != nil {
 				return nil, es
@@ -136,8 +147,6 @@ func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct
 func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 
 	h, ok := itp.frameStack.popErrorHandler()
-	//fmt.Printf("handleError aaa %s, %v\n", h, ok)
-	//dumpErrorStruct("handleError", es)
 
 	if !ok {
 		return nil, es
@@ -174,8 +183,13 @@ func (itp *Interpreter) runTryClause(begin int) (g.Value, ErrorStruct) {
 	for f.btc[f.ip] != bc.TryDone {
 
 		result, err := itp.advance()
-		if result != nil || err != nil {
-			return result, newErrorStruct(err, itp.frameStack.stackTrace())
+
+		if err != nil {
+			panic("TODO")
+		}
+
+		if result != nil {
+			return result, nil
 		}
 
 		f = itp.frameStack.peek()

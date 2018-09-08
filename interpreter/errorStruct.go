@@ -11,10 +11,10 @@ import (
 )
 
 type (
-	// ErrorStruct is a Struct that describes an Error
+	// ErrorStruct is a core.Struct that is also a core.Error.
 	ErrorStruct interface {
 		g.Struct
-		Error() g.Error
+		Error() string
 		StackTrace() []string
 	}
 
@@ -45,8 +45,8 @@ func newErrorStruct(err g.Error, stackTrace []string) ErrorStruct {
 	return &errorStruct{stc, err, stackTrace}
 }
 
-func (e *errorStruct) Error() g.Error {
-	return e.err
+func (e *errorStruct) Error() string {
+	return e.err.Error()
 }
 
 func (e *errorStruct) StackTrace() []string {
