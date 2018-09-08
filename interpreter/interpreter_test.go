@@ -148,7 +148,7 @@ func failInterp(t *testing.T, mods []*bc.Module, expect ErrorStruct) {
 	_, es := intp.InitModules()
 	tassert(t, es != nil)
 
-	dumpErrorStruct("failInterp", es)
+	//dumpErrorStruct("failInterp", es)
 	tassert(t, reflect.DeepEqual(es, expect))
 }
 
@@ -243,48 +243,18 @@ func TestTry(t *testing.T) {
 
 	fmt.Printf("--------------------------------------------------------------\n")
 	code := `
-		let a = 0
-		try {
-			1/0
-		} catch e {
-			a = 1
-		}
-		assert(a == 1)
-		`
+			let a = 0
+			try {
+				1/0
+			} catch e {
+				a = 1
+			}
+			assert(a == 1)
+			`
 	okInterp(t, []*bc.Module{testCompile(t, code)})
 
 	fmt.Printf("--------------------------------------------------------------\n")
 	code = `
-		let b = 0
-		try {
-			1/0
-		} finally {
-			b = 1
-		}
-		assert(b == 1)
-		`
-	okInterp(t, []*bc.Module{testCompile(t, code)})
-
-	fmt.Printf("--------------------------------------------------------------\n")
-	code = `
-		let a = 0
-		let b = 0
-		try {
-			1/0
-		} catch e {
-			a = 1
-		} finally {
-			b = 1
-		}
-		assert(a == 1)
-		assert(b == 1)
-		`
-	okInterp(t, []*bc.Module{testCompile(t, code)})
-
-	fmt.Printf("--------------------------------------------------------------\n")
-	code = `
-		let a = 0
-		try {
 			let b = 0
 			try {
 				1/0
@@ -292,29 +262,58 @@ func TestTry(t *testing.T) {
 				b = 1
 			}
 			assert(b == 1)
-		} catch e {
-			a = 1
-		}
-		assert(a == 0)
-		`
+			`
 	okInterp(t, []*bc.Module{testCompile(t, code)})
 
-	//	fmt.Printf("--------------------------------------------------------------\n")
-	//	code = `
-	//		let b = 0
-	//		try {
-	//			let a = 0
-	//			try {
-	//				1/0
-	//			} catch e {
-	//				a = 1
-	//			}
-	//			assert(a == 1)
-	//		} finally {
-	//			b = 1
-	//		}
-	//		assert(b == 1)
-	//	`
-	//	mod = testCompile(t, code)
-	//	okInterp(t, []*bc.Module{mod})
+	fmt.Printf("--------------------------------------------------------------\n")
+	code = `
+			let a = 0
+			let b = 0
+			try {
+				1/0
+			} catch e {
+				a = 1
+			} finally {
+				b = 1
+			}
+			assert(a == 1)
+			assert(b == 1)
+			`
+	okInterp(t, []*bc.Module{testCompile(t, code)})
+
+	fmt.Printf("--------------------------------------------------------------\n")
+	code = `
+			let a = 0
+			try {
+				let b = 0
+				try {
+					1/0
+				} finally {
+					b = 1
+				}
+				assert(b == 1)
+			} catch e {
+				a = 1
+			}
+			assert(a == 0)
+			`
+	okInterp(t, []*bc.Module{testCompile(t, code)})
+
+	fmt.Printf("--------------------------------------------------------------\n")
+	code = `
+			let b = 0
+			try {
+				let a = 0
+				try {
+					1/0
+				} catch e {
+					a = 1
+				}
+				assert(a == 1)
+			} finally {
+				b = 1
+			}
+			assert(b == 1)
+		`
+	okInterp(t, []*bc.Module{testCompile(t, code)})
 }

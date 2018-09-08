@@ -712,7 +712,7 @@ func (c *compiler) compileTryBlock(block *ast.BlockNode) int {
 func (c *compiler) compileCatchBlock(
 	tryEnd ast.Pos,
 	ident *ast.IdentExpr,
-	block *ast.BlockNode) int {
+	block *ast.BlockNode) (int, int) {
 
 	// push a jump, so that we'll skip the catch block during normal execution
 	skipCatch := c.push(tryEnd, bc.Jump, 0xFF, 0xFF)
@@ -727,20 +727,18 @@ func (c *compiler) compileCatchBlock(
 
 	// compile the catch
 	c.Visit(block)
-	c.push(block.End(), bc.TryDone)
 
 	// fix the jump
 	c.setJump(skipCatch, c.btcLen())
 
-	return begin
+	return begin, len(c.btc)
 }
 
-func (c *compiler) compileFinallyBlock(block *ast.BlockNode) int {
+func (c *compiler) compileFinallyBlock(block *ast.BlockNode) (int, int) {
 
 	begin := len(c.btc)
 	c.Visit(block)
-	c.push(block.End(), bc.TryDone)
-	return begin
+	return begin, len(c.btc)
 }
 
 func (c *compiler) visitTry(t *ast.TryStmt) {
@@ -748,40 +746,28 @@ func (c *compiler) visitTry(t *ast.TryStmt) {
 	// try
 	handlerIdx := c.compileTryBlock(t.TryBlock)
 
-	begin := len(c.btc)
-
 	// catch
-	catch := -1
+	catchBegin := -1
+	catchEnd := -1
 	if t.CatchBlock != nil {
-		catch = c.compileCatchBlock(
+		catchBegin, catchEnd = c.compileCatchBlock(
 			t.TryBlock.End(), t.CatchIdent, t.CatchBlock)
 	}
 
 	// finally
-	finally := -1
+	finallyBegin := -1
+	finallyEnd := -1
 	if t.FinallyBlock != nil {
-		finally = c.compileFinallyBlock(t.FinallyBlock)
-	}
-
-	end := len(c.btc)
-
-	// replace Return with TryReturn
-	ip := begin
-	for ip < end {
-		if c.btc[ip] == bc.Return {
-			c.btc[ip] = bc.TryReturn
-		}
-
-		ip += bc.Size(c.btc[ip])
+		finallyBegin, finallyEnd = c.compileFinallyBlock(t.FinallyBlock)
 	}
 
 	// done
-	g.Assert(!(catch == -1 && finally == -1)) // sanity check
+	g.Assert(!(catchBegin == -1 && finallyBegin == -1)) // sanity check
 	c.handlers[handlerIdx] = bc.ErrorHandler{
-		Catch:   catch,
-		Finally: finally,
-		End:     end,
-	}
+		CatchBegin:   catchBegin,
+		CatchEnd:     catchEnd,
+		FinallyBegin: finallyBegin,
+		FinallyEnd:   finallyEnd}
 }
 
 func (c *compiler) visitThrow(t *ast.ThrowStmt) {

@@ -39,6 +39,7 @@ func newErrorStruct(err g.Error, stackTrace []string) ErrorStruct {
 		map[string]g.Field{
 			"error":      g.NewReadonlyField(mustStr(err.Error())),
 			"stackTrace": g.NewReadonlyField(list),
+			// TODO $toStr for convenience when printing stack trace
 		})
 	g.Assert(e == nil)
 

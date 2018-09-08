@@ -102,6 +102,7 @@ func (itp *Interpreter) EvalBytecode(fn bc.Func, params []g.Value) (g.Value, Err
 
 // advance the interpreter forwards by one opcode.
 func (itp *Interpreter) advance() (g.Value, g.Error) {
+
 	f := itp.frameStack.peek()
 	op := ops[f.btc[f.ip]]
 	return op(itp, f)
@@ -111,10 +112,9 @@ func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct
 
 	itp.frameStack.push(newFrame(fn, locals, true))
 
+	// advance until we get a result
 	var result g.Value
 	var err g.Error
-
-	// advance until we get a result
 	for result == nil {
 		result, err = itp.advance()
 
@@ -122,10 +122,9 @@ func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct
 		if err != nil {
 
 			// If the error is already an ErrorStruct, that means it is being
-			// propagated back up from a Property or a (Map,Reduce,Filter),
-			// or some such, by unwinding recursive calls to Eval().  In that case,
-			// we should preserve the ErrorStruct since we want to pass its
-			// stack trace back all the way back up.
+			// propagated back up by unwinding recursive calls to Eval().  In that
+			// case we should preserve the ErrorStruct, since we want to pass its
+			// stack trace all the way back up.
 			es, ok := err.(ErrorStruct)
 			if !ok {
 				// If the error not already an ErrorStruct, then we create one.
@@ -147,55 +146,68 @@ func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct
 func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 
 	h, ok := itp.frameStack.popErrorHandler()
-
 	if !ok {
 		return nil, es
 	}
 
+	//-------------------------------------------
+
 	f := itp.frameStack.peek()
+	f.isHandlingError = true
+	endIp := -1
 	var result g.Value
 
 	// catch
-	if h.Catch != -1 {
+	if h.CatchBegin != -1 {
+		endIp = h.CatchEnd
 		f.stack = append(f.stack, es)
-		result, es = itp.runTryClause(h.Catch)
+		result, es = itp.runTryClause(h.CatchBegin, h.CatchEnd)
 	}
 
 	// finally
-	if h.Finally != -1 {
-		result, es = itp.runTryClause(h.Finally)
+	if h.FinallyBegin != -1 {
+		endIp = h.FinallyEnd
+		result, es = itp.runTryClause(h.FinallyBegin, h.FinallyEnd)
 	}
 
-	// found error
+	g.Assert(endIp != -1)
+	f.isHandlingError = false
+
+	//-------------------------------------------
+
 	if es != nil {
+		panic("TODO")
+	}
+	if result != nil {
 		panic("TODO")
 	}
 
 	// carry on inside the current frame
-	f.ip = h.End
-	return result, nil
+	f.ip = endIp
+	return nil, nil
 }
 
-func (itp *Interpreter) runTryClause(begin int) (g.Value, ErrorStruct) {
+func (itp *Interpreter) runTryClause(beginIp, endIp int) (g.Value, ErrorStruct) {
 
-	f := itp.frameStack.peek()
-	f.ip = begin
-	for f.btc[f.ip] != bc.TryDone {
+	itp.frameStack.peek().ip = beginIp
 
-		result, err := itp.advance()
-
-		if err != nil {
-			panic("TODO")
+	var result g.Value
+	var err g.Error
+	for {
+		f := itp.frameStack.peek()
+		if f.isHandlingError && f.ip >= endIp {
+			g.Assert(f.ip == endIp)
+			return nil, nil
 		}
 
+		result, err = itp.advance()
+		if err != nil {
+			return nil, newErrorStruct(err, itp.frameStack.stackTrace())
+		}
 		if result != nil {
 			return result, nil
 		}
-
-		f = itp.frameStack.peek()
 	}
-
-	return nil, nil
 }
 
 func newLocals(numLocals int, params []g.Value) []*bc.Ref {

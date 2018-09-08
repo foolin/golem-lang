@@ -20,31 +20,32 @@ type frame struct {
 
 	stack    []g.Value
 	handlers []bc.ErrorHandler
+	ip       int // instruction pointer
 
 	// isBase specifies whether this is the base frame
 	// of the current Eval().
 	isBase bool
 
-	// instruction pointer
-	ip int
+	// isHandlingError specifies whether this frame is
+	// currently handling and error.
+	isHandlingError bool
 }
 
 func newFrame(fn bc.Func, locals []*bc.Ref, isBase bool) *frame {
 
-	// save these so we don't have to look them up later
-	btc := fn.Template().Bytecodes
-	pool := fn.Template().Module.Pool
-
 	return &frame{
 		fn:     fn,
 		locals: locals,
-		btc:    btc,
-		pool:   pool,
+		// save these so we don't have to look them up later
+		btc:  fn.Template().Bytecodes,
+		pool: fn.Template().Module.Pool,
 
 		stack:    make([]g.Value, 0, 10),
 		handlers: []bc.ErrorHandler{},
-		isBase:   isBase,
 		ip:       0,
+
+		isBase:          isBase,
+		isHandlingError: false,
 	}
 }
 
