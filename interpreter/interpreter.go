@@ -119,24 +119,11 @@ func (itp *Interpreter) popFrame() {
 	itp.frames = itp.frames[:itp.numFrames()-1]
 }
 
-func (itp *Interpreter) popErrorHandler() (bc.ErrorHandler, bool) {
-
+// advance the interpreter forwards by one opcode.
+func (itp *Interpreter) advance() (g.Value, g.Error) {
 	f := itp.peekFrame()
-	if f.numHandlers() > 0 {
-		return f.popHandler(), true
-	}
-
-	for !f.isBase {
-		itp.popFrame()
-
-		f = itp.peekFrame()
-		if f.numHandlers() > 0 {
-			return f.popHandler(), true
-		}
-	}
-
-	itp.popFrame()
-	return bc.ErrorHandler{}, false
+	op := ops[f.btc[f.ip]]
+	return op(itp, f)
 }
 
 func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct) {
@@ -165,73 +152,74 @@ func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct
 	return result, nil
 }
 
-func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
+func (itp *Interpreter) popErrorHandler() (bc.ErrorHandler, bool) {
 
-	// pop frames until we find one with a handler
 	f := itp.peekFrame()
-	for f.numHandlers() == 0 {
-		itp.popFrame()
-
-		// there are no handlers available
-		// TODO make sure this works, e.g. if an error is thrown from a property
-		if f.isBase {
-			return nil, es
-		}
-
-		f = itp.peekFrame()
+	if f.numHandlers() > 0 {
+		return f.popHandler(), true
 	}
 
+	for !f.isBase {
+		itp.popFrame()
+
+		f = itp.peekFrame()
+		if f.numHandlers() > 0 {
+			return f.popHandler(), true
+		}
+	}
+
+	itp.popFrame()
+	return bc.ErrorHandler{}, false
+}
+
+func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
+
+	h, ok := itp.popErrorHandler()
+	if !ok {
+		return nil, es
+	}
+
+	f := itp.peekFrame()
 	var result g.Value
-	h := f.popHandler()
 
 	// catch
-	if h.CatchBegin != -1 {
+	if h.Catch != -1 {
 		f.stack = append(f.stack, es)
-		result, es = itp.runTryClause(h.CatchBegin, h.CatchEnd)
-		if es != nil {
-			// probably need to handle this recursively?
-			// we should probably pop the current frame too
-			panic("TODO error inside try clause")
-		}
+		result, es = itp.runTryClause(h.Catch)
 	}
 
 	// finally
-	if h.FinallyBegin != -1 {
-		f.stack = append(f.stack, es)
-		result, es = itp.runTryClause(h.FinallyBegin, h.FinallyBegin)
-		if es != nil {
-			// probably need to handle this recursively?
-			// we should probably pop the current frame too
-			panic("TODO error inside try clause")
-		}
+	if h.Finally != -1 {
+		result, es = itp.runTryClause(h.Finally)
 	}
 
+	// found error
+	if es != nil {
+		panic("TODO")
+	}
+
+	// found result
 	if result != nil {
-		panic("TODO return inside try clause")
-		//// we are going to return from this function, so
-		//// we need to pop the frame
-		//return result, nil
+		panic("TODO")
 	}
 
 	// carry on inside the current frame
+	f.ip = h.End
 	return nil, nil
 }
 
-func (itp *Interpreter) runTryClause(begin, end int) (g.Value, ErrorStruct) {
+func (itp *Interpreter) runTryClause(begin int) (g.Value, ErrorStruct) {
 
 	f := itp.peekFrame()
 	f.ip = begin
-	for f.ip < end {
+	for f.btc[f.ip] != bc.TryDone {
 
 		result, err := itp.advance()
-		if err != nil {
-			return nil, newErrorStruct(err, itp.stackTrace())
+		if result != nil || err != nil {
+			return result, newErrorStruct(err, itp.stackTrace())
 		}
 
-		if result != nil {
-			// the current frame was popped in opReturn, which is bad
-			panic("TODO return inside try clause")
-		}
+		f = itp.peekFrame()
 	}
 
 	return nil, nil

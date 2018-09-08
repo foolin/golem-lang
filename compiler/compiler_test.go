@@ -1070,13 +1070,19 @@ func TestScratch(t *testing.T) {
 
 	code := `
 try {
-    println('try')
+	1/0
+	return 1
 } catch e {
-    println('catch: ' + e.error)
+	fn a() {
+		return 2
+	}
+	return 3
 } finally {
-    println('finally')
+	fn b() {
+		return 4
+	}
+	return 5
 }
-println('done')
 `
 	mod := testCompile(t, code)
 

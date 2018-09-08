@@ -67,7 +67,8 @@ const (
 
 	PushTry
 	PopTry
-	Recover
+	TryReturn
+	TryDone
 	Throw
 
 	NewStruct
@@ -207,8 +208,10 @@ func String(bc byte) string {
 		return "PushTry"
 	case PopTry:
 		return "PopTry"
-	case Recover:
-		return "Recover"
+	case TryReturn:
+		return "TryReturn"
+	case TryDone:
+		return "TryDone"
 	case Throw:
 		return "Throw"
 
@@ -289,7 +292,7 @@ func Size(bc byte) int {
 		Plus, Inc, Sub, Mul, Div,
 		Rem, BitAnd, BitOr, BitXor, LeftShift, RightShift,
 		Negate, Not, Complement,
-		Return, PopTry, Throw, Recover,
+		Return, PopTry, Throw, TryReturn, TryDone,
 		GetIndex, SetIndex, IncIndex, Slice, SliceFrom, SliceTo,
 		NewIter, IterNext, IterGet, Pop, Dup:
 

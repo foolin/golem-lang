@@ -707,7 +707,7 @@ func (c *compiler) compileTryBlock(block *ast.BlockNode) {
 func (c *compiler) compileCatchBlock(
 	tryEnd ast.Pos,
 	ident *ast.IdentExpr,
-	block *ast.BlockNode) (int, int) {
+	block *ast.BlockNode) int {
 
 	// push a jump, so that we'll skip the catch block during normal execution
 	skipCatch := c.push(tryEnd, bc.Jump, 0xFF, 0xFF)
@@ -722,20 +722,20 @@ func (c *compiler) compileCatchBlock(
 
 	// compile the catch
 	c.Visit(block)
+	c.push(block.End(), bc.TryDone)
 
 	// fix the jump
 	c.setJump(skipCatch, c.btcLen())
 
-	return begin, len(c.btc)
+	return begin
 }
 
-func (c *compiler) compileFinallyBlock(block *ast.BlockNode) (int, int) {
+func (c *compiler) compileFinallyBlock(block *ast.BlockNode) int {
 
 	begin := len(c.btc)
-
 	c.Visit(block)
-
-	return begin, len(c.btc)
+	c.push(block.End(), bc.TryDone)
+	return begin
 }
 
 func (c *compiler) visitTry(t *ast.TryStmt) {
@@ -743,28 +743,39 @@ func (c *compiler) visitTry(t *ast.TryStmt) {
 	// try
 	c.compileTryBlock(t.TryBlock)
 
+	begin := len(c.btc)
+
 	// catch
-	cbegin := -1
-	cend := -1
+	catch := -1
 	if t.CatchBlock != nil {
-		cbegin, cend = c.compileCatchBlock(
+		catch = c.compileCatchBlock(
 			t.TryBlock.End(), t.CatchIdent, t.CatchBlock)
 	}
 
 	// finally
-	fbegin := -1
-	fend := -1
+	finally := -1
 	if t.FinallyBlock != nil {
-		fbegin, fend = c.compileFinallyBlock(t.FinallyBlock)
+		finally = c.compileFinallyBlock(t.FinallyBlock)
+	}
+
+	end := len(c.btc)
+
+	// replace Return with TryReturn
+	ip := begin
+	for ip < end {
+		if c.btc[ip] == bc.Return {
+			c.btc[ip] = bc.TryReturn
+		}
+
+		ip += bc.Size(c.btc[ip])
 	}
 
 	// done
-	g.Assert(!(cbegin == -1 && fbegin == -1)) // sanity check
+	g.Assert(!(catch == -1 && finally == -1)) // sanity check
 	c.handlers = append(c.handlers, bc.ErrorHandler{
-		CatchBegin:   cbegin,
-		CatchEnd:     cend,
-		FinallyBegin: fbegin,
-		FinallyEnd:   fend,
+		Catch:   catch,
+		Finally: finally,
+		End:     end,
 	})
 }
 

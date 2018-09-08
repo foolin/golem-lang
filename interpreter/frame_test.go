@@ -13,8 +13,8 @@ import (
 
 func TestFrames(t *testing.T) {
 
-	h1 := bc.ErrorHandler{CatchBegin: 1}
-	h2 := bc.ErrorHandler{CatchBegin: 2}
+	h1 := bc.ErrorHandler{Catch: 1}
+	h2 := bc.ErrorHandler{Catch: 2}
 
 	//---------------------------------------
 
@@ -24,7 +24,7 @@ func TestFrames(t *testing.T) {
 			handlers: []bc.ErrorHandler{},
 		},
 	}}
-	dumpFrames(itp.frames)
+	//dumpFrames(itp.frames)
 
 	_, ok := itp.popErrorHandler()
 
@@ -39,7 +39,7 @@ func TestFrames(t *testing.T) {
 			handlers: []bc.ErrorHandler{h1},
 		},
 	}}
-	dumpFrames(itp.frames)
+	//dumpFrames(itp.frames)
 
 	h, ok := itp.popErrorHandler()
 
@@ -55,7 +55,7 @@ func TestFrames(t *testing.T) {
 			handlers: []bc.ErrorHandler{h1, h2},
 		},
 	}}
-	dumpFrames(itp.frames)
+	//dumpFrames(itp.frames)
 
 	h, ok = itp.popErrorHandler()
 
@@ -75,7 +75,7 @@ func TestFrames(t *testing.T) {
 			handlers: []bc.ErrorHandler{},
 		},
 	}}
-	dumpFrames(itp.frames)
+	//dumpFrames(itp.frames)
 
 	h, ok = itp.popErrorHandler()
 
@@ -99,7 +99,7 @@ func TestFrames(t *testing.T) {
 			handlers: []bc.ErrorHandler{},
 		},
 	}}
-	dumpFrames(itp.frames)
+	//dumpFrames(itp.frames)
 
 	h, ok = itp.popErrorHandler()
 
@@ -123,7 +123,7 @@ func TestFrames(t *testing.T) {
 			handlers: []bc.ErrorHandler{},
 		},
 	}}
-	dumpFrames(itp.frames)
+	//dumpFrames(itp.frames)
 
 	_, ok = itp.popErrorHandler()
 

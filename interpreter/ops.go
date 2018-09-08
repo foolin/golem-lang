@@ -74,7 +74,8 @@ func init() {
 
 		opPushTry,
 		opPopTry,
-		opRecover,
+		opTryReturn,
+		opTryDone,
 		opThrow,
 
 		opNewStruct,
@@ -104,13 +105,6 @@ func init() {
 		opIterNext,
 		opIterGet,
 	}
-}
-
-// advance the interpreter forwards by one opcode.
-func (itp *Interpreter) advance() (g.Value, g.Error) {
-	f := itp.peekFrame()
-	op := ops[f.btc[f.ip]]
-	return op(itp, f)
 }
 
 //--------------------------------------------------------------
@@ -235,8 +229,19 @@ func opReturn(itp *Interpreter, f *frame) (g.Value, g.Error) {
 	return nil, nil
 }
 
-func opRecover(itp *Interpreter, f *frame) (g.Value, g.Error) {
-	panic("TODO")
+func opTryReturn(itp *Interpreter, f *frame) (g.Value, g.Error) {
+
+	n := len(f.stack) - 1
+
+	result := f.stack[n]
+	f.stack = f.stack[:n]
+	f.ip++
+
+	return result, nil
+}
+
+func opTryDone(itp *Interpreter, f *frame) (g.Value, g.Error) {
+	panic("unreachable")
 }
 
 func opPushTry(itp *Interpreter, f *frame) (g.Value, g.Error) {

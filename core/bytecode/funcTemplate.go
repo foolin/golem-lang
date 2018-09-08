@@ -38,19 +38,16 @@ func (ln LineNumberEntry) String() string {
 
 // ErrorHandler handles errors that are thrown for a given block of opcodes,
 // by providing the instruction pointers for 'catch' and 'finally'.
-// Begin is inclusive, and End is exclusive.
 type ErrorHandler struct {
-	CatchBegin   int
-	CatchEnd     int
-	FinallyBegin int
-	FinallyEnd   int
+	Catch   int
+	Finally int
+	End     int
 }
 
 func (eh ErrorHandler) String() string {
 	return fmt.Sprintf(
-		"ErrorHandler(Catch: (%d,%d), Finally: (%d,%d))",
-		eh.CatchBegin, eh.CatchEnd,
-		eh.FinallyBegin, eh.FinallyEnd)
+		"ErrorHandler(Catch: %d, Finally: %d, End: %d))",
+		eh.Catch, eh.Finally, eh.End)
 }
 
 // LineNumber returns the line number for the opcode at the given instruction pointer
