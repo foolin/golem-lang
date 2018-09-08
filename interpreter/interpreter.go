@@ -5,8 +5,6 @@
 package interpreter
 
 import (
-	"fmt"
-
 	g "github.com/mjarmy/golem-lang/core"
 	bc "github.com/mjarmy/golem-lang/core/bytecode"
 )
@@ -21,7 +19,7 @@ type Interpreter struct {
 	modules    []*bc.Module
 	modMap     map[string]*bc.Module
 
-	frames []*frame
+	frameStack *frameStack
 }
 
 // NewInterpreter creates a new Interpreter
@@ -38,7 +36,7 @@ func NewInterpreter(
 		builtInMgr: builtInMgr,
 		modules:    modules,
 		modMap:     modMap,
-		frames:     []*frame{},
+		frameStack: newFrameStack(),
 	}
 }
 
@@ -91,7 +89,6 @@ func (itp *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
 	}
 }
 
-// EvalBytecode evaluates a bytecode.Func
 func (itp *Interpreter) EvalBytecode(fn bc.Func, params []g.Value) (g.Value, ErrorStruct) {
 
 	val, err := itp.eval(fn, newLocals(fn.Template().NumLocals, params))
@@ -103,32 +100,16 @@ func (itp *Interpreter) EvalBytecode(fn bc.Func, params []g.Value) (g.Value, Err
 
 //-------------------------------------------------------------------------
 
-func (itp *Interpreter) numFrames() int {
-	return len(itp.frames)
-}
-
-func (itp *Interpreter) peekFrame() *frame {
-	return itp.frames[itp.numFrames()-1]
-}
-
-func (itp *Interpreter) pushFrame(f *frame) {
-	itp.frames = append(itp.frames, f)
-}
-
-func (itp *Interpreter) popFrame() {
-	itp.frames = itp.frames[:itp.numFrames()-1]
-}
-
 // advance the interpreter forwards by one opcode.
 func (itp *Interpreter) advance() (g.Value, g.Error) {
-	f := itp.peekFrame()
+	f := itp.frameStack.peek()
 	op := ops[f.btc[f.ip]]
 	return op(itp, f)
 }
 
 func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct) {
 
-	itp.frames = append(itp.frames, newFrame(fn, locals, true))
+	itp.frameStack.push(newFrame(fn, locals, true))
 
 	var result g.Value
 	var err g.Error
@@ -140,7 +121,7 @@ func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct
 
 		// an error was thrown
 		if err != nil {
-			es = newErrorStruct(err, itp.stackTrace())
+			es = newErrorStruct(err, itp.frameStack.stackTrace())
 			result, es = itp.handleError(es)
 			if es != nil {
 				return nil, es
@@ -152,34 +133,17 @@ func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct
 	return result, nil
 }
 
-func (itp *Interpreter) popErrorHandler() (bc.ErrorHandler, bool) {
-
-	f := itp.peekFrame()
-	if f.numHandlers() > 0 {
-		return f.popHandler(), true
-	}
-
-	for !f.isBase {
-		itp.popFrame()
-
-		f = itp.peekFrame()
-		if f.numHandlers() > 0 {
-			return f.popHandler(), true
-		}
-	}
-
-	itp.popFrame()
-	return bc.ErrorHandler{}, false
-}
-
 func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 
-	h, ok := itp.popErrorHandler()
+	h, ok := itp.frameStack.popErrorHandler()
+	//fmt.Printf("handleError aaa %s, %v\n", h, ok)
+	//dumpErrorStruct("handleError", es)
+
 	if !ok {
 		return nil, es
 	}
 
-	f := itp.peekFrame()
+	f := itp.frameStack.peek()
 	var result g.Value
 
 	// catch
@@ -205,32 +169,19 @@ func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 
 func (itp *Interpreter) runTryClause(begin int) (g.Value, ErrorStruct) {
 
-	f := itp.peekFrame()
+	f := itp.frameStack.peek()
 	f.ip = begin
 	for f.btc[f.ip] != bc.TryDone {
 
 		result, err := itp.advance()
 		if result != nil || err != nil {
-			return result, newErrorStruct(err, itp.stackTrace())
+			return result, newErrorStruct(err, itp.frameStack.stackTrace())
 		}
 
-		f = itp.peekFrame()
+		f = itp.frameStack.peek()
 	}
 
 	return nil, nil
-}
-
-func (itp *Interpreter) stackTrace() []string {
-
-	stack := []string{}
-
-	for i := itp.numFrames() - 1; i >= 0; i-- {
-		tpl := itp.frames[i].fn.Template()
-		lineNum := tpl.LineNumber(itp.frames[i].ip)
-		stack = append(stack, fmt.Sprintf("    at %s:%d", tpl.Module.Path, lineNum))
-	}
-
-	return stack
 }
 
 func newLocals(numLocals int, params []g.Value) []*bc.Ref {

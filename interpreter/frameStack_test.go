@@ -11,7 +11,7 @@ import (
 	bc "github.com/mjarmy/golem-lang/core/bytecode"
 )
 
-func TestFrames(t *testing.T) {
+func TestFrameStack(t *testing.T) {
 
 	h1 := bc.ErrorHandler{Catch: 1}
 	h2 := bc.ErrorHandler{Catch: 2}
@@ -20,51 +20,51 @@ func TestFrames(t *testing.T) {
 
 	//---------------------------------------
 
-	itp := &Interpreter{frames: []*frame{
+	fs := &frameStack{frames: []*frame{
 		&frame{
 			isBase:   true,
 			handlers: []bc.ErrorHandler{},
 		},
 	}}
-	//dumpFrames(itp.frames)
+	//dumpFrames(fs.frames)
 
-	_, ok := itp.popErrorHandler()
+	_, ok := fs.popErrorHandler()
 	tassert(t, !ok)
-	tassert(t, itp.numFrames() == 0)
+	tassert(t, fs.num() == 0)
 
 	//---------------------------------------
 
-	itp = &Interpreter{frames: []*frame{
+	fs = &frameStack{frames: []*frame{
 		&frame{
 			isBase:   true,
 			handlers: []bc.ErrorHandler{h1},
 		},
 	}}
-	//dumpFrames(itp.frames)
+	//dumpFrames(fs.frames)
 
-	h, ok := itp.popErrorHandler()
+	h, ok := fs.popErrorHandler()
 	tassert(t, reflect.DeepEqual(h, h1))
-	tassert(t, itp.numFrames() == 1)
-	tassert(t, reflect.DeepEqual(itp.peekFrame().handlers, []bc.ErrorHandler{}))
+	tassert(t, fs.num() == 1)
+	tassert(t, reflect.DeepEqual(fs.peek().handlers, []bc.ErrorHandler{}))
 
 	//---------------------------------------
 
-	itp = &Interpreter{frames: []*frame{
+	fs = &frameStack{frames: []*frame{
 		&frame{
 			isBase:   true,
 			handlers: []bc.ErrorHandler{h1, h2},
 		},
 	}}
-	//dumpFrames(itp.frames)
+	//dumpFrames(fs.frames)
 
-	h, ok = itp.popErrorHandler()
+	h, ok = fs.popErrorHandler()
 	tassert(t, reflect.DeepEqual(h, h2))
-	tassert(t, itp.numFrames() == 1)
-	tassert(t, reflect.DeepEqual(itp.peekFrame().handlers, []bc.ErrorHandler{h1}))
+	tassert(t, fs.num() == 1)
+	tassert(t, reflect.DeepEqual(fs.peek().handlers, []bc.ErrorHandler{h1}))
 
 	//---------------------------------------
 
-	itp = &Interpreter{frames: []*frame{
+	fs = &frameStack{frames: []*frame{
 		&frame{
 			isBase:   true,
 			handlers: []bc.ErrorHandler{h1, h2},
@@ -74,16 +74,16 @@ func TestFrames(t *testing.T) {
 			handlers: []bc.ErrorHandler{},
 		},
 	}}
-	//dumpFrames(itp.frames)
+	//dumpFrames(fs.frames)
 
-	h, ok = itp.popErrorHandler()
+	h, ok = fs.popErrorHandler()
 	tassert(t, reflect.DeepEqual(h, h2))
-	tassert(t, itp.numFrames() == 1)
-	tassert(t, reflect.DeepEqual(itp.peekFrame().handlers, []bc.ErrorHandler{h1}))
+	tassert(t, fs.num() == 1)
+	tassert(t, reflect.DeepEqual(fs.peek().handlers, []bc.ErrorHandler{h1}))
 
 	//---------------------------------------
 
-	itp = &Interpreter{frames: []*frame{
+	fs = &frameStack{frames: []*frame{
 		&frame{
 			isBase:   true,
 			handlers: []bc.ErrorHandler{},
@@ -97,16 +97,16 @@ func TestFrames(t *testing.T) {
 			handlers: []bc.ErrorHandler{},
 		},
 	}}
-	//dumpFrames(itp.frames)
+	//dumpFrames(fs.frames)
 
-	h, ok = itp.popErrorHandler()
+	h, ok = fs.popErrorHandler()
 	tassert(t, reflect.DeepEqual(h, h1))
-	tassert(t, itp.numFrames() == 2)
-	tassert(t, reflect.DeepEqual(itp.peekFrame().handlers, []bc.ErrorHandler{}))
+	tassert(t, fs.num() == 2)
+	tassert(t, reflect.DeepEqual(fs.peek().handlers, []bc.ErrorHandler{}))
 
 	//---------------------------------------
 
-	itp = &Interpreter{frames: []*frame{
+	fs = &frameStack{frames: []*frame{
 		&frame{
 			isBase:   true,
 			handlers: []bc.ErrorHandler{},
@@ -120,16 +120,16 @@ func TestFrames(t *testing.T) {
 			handlers: []bc.ErrorHandler{},
 		},
 	}}
-	//dumpFrames(itp.frames)
+	//dumpFrames(fs.frames)
 
-	_, ok = itp.popErrorHandler()
+	_, ok = fs.popErrorHandler()
 
 	tassert(t, !ok)
-	tassert(t, itp.numFrames() == 0)
+	tassert(t, fs.num() == 0)
 
 	//---------------------------------------
 
-	itp = &Interpreter{frames: []*frame{
+	fs = &frameStack{frames: []*frame{
 		&frame{
 			isBase:   true,
 			handlers: []bc.ErrorHandler{},
@@ -151,29 +151,29 @@ func TestFrames(t *testing.T) {
 			handlers: []bc.ErrorHandler{},
 		},
 	}}
-	//dumpFrames(itp.frames)
+	//dumpFrames(fs.frames)
 
-	h, ok = itp.popErrorHandler()
+	h, ok = fs.popErrorHandler()
 	tassert(t, reflect.DeepEqual(h, h4))
-	tassert(t, itp.numFrames() == 4)
-	tassert(t, reflect.DeepEqual(itp.peekFrame().handlers, []bc.ErrorHandler{}))
+	tassert(t, fs.num() == 4)
+	tassert(t, reflect.DeepEqual(fs.peek().handlers, []bc.ErrorHandler{}))
 
-	h, ok = itp.popErrorHandler()
+	h, ok = fs.popErrorHandler()
 	tassert(t, reflect.DeepEqual(h, h3))
-	tassert(t, itp.numFrames() == 3)
-	tassert(t, reflect.DeepEqual(itp.peekFrame().handlers, []bc.ErrorHandler{}))
+	tassert(t, fs.num() == 3)
+	tassert(t, reflect.DeepEqual(fs.peek().handlers, []bc.ErrorHandler{}))
 
-	h, ok = itp.popErrorHandler()
+	h, ok = fs.popErrorHandler()
 	tassert(t, reflect.DeepEqual(h, h2))
-	tassert(t, itp.numFrames() == 2)
-	tassert(t, reflect.DeepEqual(itp.peekFrame().handlers, []bc.ErrorHandler{h1}))
+	tassert(t, fs.num() == 2)
+	tassert(t, reflect.DeepEqual(fs.peek().handlers, []bc.ErrorHandler{h1}))
 
-	h, ok = itp.popErrorHandler()
+	h, ok = fs.popErrorHandler()
 	tassert(t, reflect.DeepEqual(h, h1))
-	tassert(t, itp.numFrames() == 2)
-	tassert(t, reflect.DeepEqual(itp.peekFrame().handlers, []bc.ErrorHandler{}))
+	tassert(t, fs.num() == 2)
+	tassert(t, reflect.DeepEqual(fs.peek().handlers, []bc.ErrorHandler{}))
 
-	_, ok = itp.popErrorHandler()
+	_, ok = fs.popErrorHandler()
 	tassert(t, !ok)
-	tassert(t, itp.numFrames() == 0)
+	tassert(t, fs.num() == 0)
 }

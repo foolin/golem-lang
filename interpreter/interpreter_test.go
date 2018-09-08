@@ -5,6 +5,7 @@
 package interpreter
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -13,10 +14,6 @@ import (
 	bc "github.com/mjarmy/golem-lang/core/bytecode"
 	"github.com/mjarmy/golem-lang/scanner"
 )
-
-// NOTE: Most of the test suite for the interpreter is over in
-// 'bench_test/core_test.glm'. Testing is done there by running the Golem CLI
-// application against Golem code.
 
 func tassert(t *testing.T, flag bool) {
 	if !flag {
@@ -27,6 +24,7 @@ func tassert(t *testing.T, flag bool) {
 
 var builtins []*g.BuiltinEntry = []*g.BuiltinEntry{
 	{Name: "assert", Value: g.BuiltinAssert},
+	{Name: "println", Value: g.BuiltinPrintln},
 }
 
 var builtinMgr = g.NewBuiltinManager(builtins)
@@ -35,6 +33,9 @@ func testCompile(t *testing.T, code string) *bc.Module {
 
 	source := &scanner.Source{Name: "foo", Path: "foo.glm", Code: code}
 	mods, errs := compiler.CompileSourceFully(builtinMgr, source, nil)
+	if errs != nil {
+		fmt.Printf("%v\n", errs)
+	}
 	tassert(t, errs == nil)
 	tassert(t, len(mods) == 1)
 
@@ -134,178 +135,141 @@ assert([1, 2, 3] == [a.x, b.y, c.z])
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 
-//func testInterpret(mods []*bc.Module) *Interpreter {
-//	intp := NewInterpreter(builtinMgr, mods)
-//	_, err := intp.InitModules()
-//	if err != nil {
-//		panic(err)
-//	}
-//	return intp
-//}
-//
-//func fail(t *testing.T, code string, expect ErrorStruct) {
-//
-//	mod := testCompile(t, code)
-//	intp := NewInterpreter(builtinMgr, []*bc.Module{mod})
-//
-//	result, err := intp.InitModules()
-//	if result != nil {
-//		panic(result)
-//	}
-//
-//	eq, e := expect.Eq(nil, err)
-//	tassert(t, e == nil)
-//
-//	if !eq.(g.Bool).BoolVal() {
-//		t.Error(err, " != ", expect)
-//		panic("fail")
-//	}
-//}
-//
-//func TestFinally(t *testing.T) {
-//
-//	code := `
-//let a = 1
-//try {
-//    3 / 0
-//} finally {
-//    a = 2
-//}
-//try {
-//    3 / 0
-//} finally {
-//    a = 3
-//}
-//`
-//	fail(t, code,
-//		newErrorStruct(
-//			g.DivideByZero(),
-//			[]string{
-//				"    at foo.glm:4"}))
-//
-//	code = `
-//let a = 1;
-//try {
-//	try {
-//		3 / 0;
-//	} finally {
-//		a++;
-//	}
-//} finally {
-//	a++;
-//}
-//`
-//	fail(t, code,
-//		newErrorStruct(
-//			g.DivideByZero(),
-//			[]string{
-//				"    at foo.glm:5"}))
-//
-//	code = `
-//let a = 1;
-//let b = fn() { a++; };
-//try {
-//	try {
-//		3 / 0;
-//	} finally {
-//		a++;
-//		b();
-//	}
-//} finally {
-//	a++;
-//}
-//`
-//	fail(t, code,
-//		newErrorStruct(
-//			g.DivideByZero(),
-//			[]string{
-//				"    at foo.glm:6"}))
-//
-//	code = `
-//let a = 1
-//let b = fn() {
-//	try {
-//		try {
-//			3 / 0
-//		} finally {
-//			a++
-//		}
-//	} finally {
-//		a++
-//	}
-//}
-//try {
-//	b()
-//} finally {
-//	a++
-//}
-//`
-//	//mod = testCompile(t, code)
-//	//fmt.Println("----------------------------")
-//	//fmt.Println(code)
-//	//fmt.Println(mod)
-//
-//	fail(t, code,
-//		newErrorStruct(
-//			g.DivideByZero(),
-//			[]string{
-//				"    at foo.glm:6",
-//				"    at foo.glm:15"}))
-//
-//	code = `
-//let b = fn() {
-//	try {
-//	} finally {
-//		return 1;
-//	}
-//	return 2;
-//};
-//assert(b() == 1);
-//`
-//	mod := testCompile(t, code)
-//	testInterpret([]*bc.Module{mod})
-//
-//	code = `
-//let a = 1;
-//let b = fn() {
-//	try {
-//		try {
-//		} finally {
-//			return 1;
-//		}
-//		a = 3;
-//	} finally {
-//		a = 2;
-//	}
-//};
-//assert(b() == 1);
-//assert(a == 1);
-//`
-//	mod = testCompile(t, code)
-//	testInterpret([]*bc.Module{mod})
-//
-//	code = `
-//try {
-//	assert(1,2,3);
-//} finally {
-//}
-//`
-//	fail(t, code,
-//		newErrorStruct(
-//			g.ArityMismatch(1, 3),
-//			[]string{
-//				"    at foo.glm:3"}))
-//
-//	code = `
-//try {
-//	assert(1,2,3);
-//} finally {
-//	1/0;
-//}
-//`
-//	fail(t, code,
-//		newErrorStruct(
-//			g.DivideByZero(),
-//			[]string{
-//				"    at foo.glm:5"}))
-//}
+func okInterp(t *testing.T, mods []*bc.Module) {
+	intp := NewInterpreter(builtinMgr, mods)
+	_, es := intp.InitModules()
+	if es != nil {
+		panic(es)
+	}
+}
+
+func failInterp(t *testing.T, mods []*bc.Module, expect ErrorStruct) {
+	intp := NewInterpreter(builtinMgr, mods)
+	_, es := intp.InitModules()
+	tassert(t, es != nil)
+
+	//dumpErrorStruct("failInterp", es)
+	tassert(t, reflect.DeepEqual(es, expect))
+}
+
+func TestHandleError(t *testing.T) {
+
+	fmt.Printf("--------------------------------------------------------------\n")
+	code := `
+		1/0
+		`
+	failInterp(t, []*bc.Module{testCompile(t, code)},
+		newErrorStruct(
+			g.DivideByZero(),
+			[]string{
+				"    at foo.glm:2"}))
+
+	fmt.Printf("--------------------------------------------------------------\n")
+	code = `
+		let a = (|| => 1/0)
+		a()
+		`
+	failInterp(t, []*bc.Module{testCompile(t, code)},
+		newErrorStruct(
+			g.DivideByZero(),
+			[]string{
+				"    at foo.glm:2",
+				"    at foo.glm:3"}))
+
+	//	fmt.Printf("--------------------------------------------------------------\n")
+	//	code = `
+	//		let s = struct {
+	//			p: prop { ||=> 1 },
+	//			q: prop { ||=> 1/0 }
+	//		}
+	//
+	//		println(s.p)
+	//		println(s.q)
+	//	`
+	//	failInterp(t, []*bc.Module{testCompile(t, code)},
+	//		newErrorStruct(
+	//			g.DivideByZero(),
+	//			[]string{
+	//				"    at foo.glm:2",
+	//				"    at foo.glm:3"}))
+}
+
+func TestTry(t *testing.T) {
+
+	fmt.Printf("--------------------------------------------------------------\n")
+	code := `
+		let a = 0
+		try {
+			1/0
+		} catch e {
+			a = 1
+		}
+		assert(a == 1)
+		`
+	okInterp(t, []*bc.Module{testCompile(t, code)})
+
+	fmt.Printf("--------------------------------------------------------------\n")
+	code = `
+		let b = 0
+		try {
+			1/0
+		} finally {
+			b = 1
+		}
+		assert(b == 1)
+		`
+	okInterp(t, []*bc.Module{testCompile(t, code)})
+
+	fmt.Printf("--------------------------------------------------------------\n")
+	code = `
+		let a = 0
+		let b = 0
+		try {
+			1/0
+		} catch e {
+			a = 1
+		} finally {
+			b = 1
+		}
+		assert(a == 1)
+		assert(b == 1)
+		`
+	okInterp(t, []*bc.Module{testCompile(t, code)})
+
+	fmt.Printf("--------------------------------------------------------------\n")
+	code = `
+		let a = 0
+		try {
+			let b = 0
+			try {
+				1/0
+			} finally {
+				b = 1
+			}
+			assert(b == 1)
+		} catch e {
+			a = 1
+		}
+		assert(a == 0)
+		`
+	okInterp(t, []*bc.Module{testCompile(t, code)})
+
+	//	fmt.Printf("--------------------------------------------------------------\n")
+	//	code = `
+	//		let b = 0
+	//		try {
+	//			let a = 0
+	//			try {
+	//				1/0
+	//			} catch e {
+	//				a = 1
+	//			}
+	//			assert(a == 1)
+	//		} finally {
+	//			b = 1
+	//		}
+	//		assert(b == 1)
+	//	`
+	//	mod = testCompile(t, code)
+	//	okInterp(t, []*bc.Module{mod})
+}

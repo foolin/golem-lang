@@ -173,7 +173,7 @@ func opInvoke(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 		// push a new frame
 		locals := newLocals(fn.Template().NumLocals, params)
-		itp.pushFrame(newFrame(fn, locals, false))
+		itp.frameStack.push(newFrame(fn, locals, false))
 
 	case g.NativeFunc:
 
@@ -212,7 +212,7 @@ func opReturn(itp *Interpreter, f *frame) (g.Value, g.Error) {
 	result := f.stack[n]
 
 	// discard the frame
-	itp.popFrame()
+	itp.frameStack.pop()
 
 	// If we are on the base frame of the current Eval(), then we are done.
 	if f.isBase {
@@ -220,7 +220,7 @@ func opReturn(itp *Interpreter, f *frame) (g.Value, g.Error) {
 	}
 
 	// push the result onto the new top frame
-	f = itp.peekFrame()
+	f = itp.frameStack.peek()
 	f.stack = append(f.stack, result)
 
 	// advance the instruction pointer now that we are done invoking
