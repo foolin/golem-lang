@@ -198,11 +198,6 @@ func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 		panic("TODO")
 	}
 
-	//// found result
-	//if result != nil {
-	//	panic("TODO")
-	//}
-
 	// carry on inside the current frame
 	f.ip = h.End
 	return result, nil

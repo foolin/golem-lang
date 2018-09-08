@@ -1070,19 +1070,20 @@ let p = ls.iter().next()
 
 func TestScratch(t *testing.T) {
 
-	code := `let b = 0
+	code := `
+let a = 0
 try {
-    let a = 0
+    let b = 0
     try {
         1/0
-    } catch e {
-        a = 1
+    } finally {
+        b = 1
     }
-    assert(a == 1)
-} finally {
-    b = 1
+    assert(b == 1)
+} catch e {
+    a = 1
 }
-assert(b == 1)
+assert(a == 0)
 `
 	lines := strings.Split(code, "\n")
 

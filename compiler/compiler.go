@@ -697,13 +697,16 @@ func (c *compiler) visitReturn(rt *ast.ReturnStmt) {
 	c.push(rt.Begin(), bc.Return)
 }
 
-func (c *compiler) compileTryBlock(block *ast.BlockNode) {
+func (c *compiler) compileTryBlock(block *ast.BlockNode) int {
 
-	c.pushBytecode(block.Begin(), bc.PushTry, len(c.handlers))
+	handlerIdx := len(c.handlers)
+	c.pushBytecode(block.Begin(), bc.PushTry, handlerIdx)
 	c.handlers = append(c.handlers, &bc.ErrorHandler{})
 
 	c.Visit(block)
 	c.push(block.End(), bc.PopTry)
+
+	return handlerIdx
 }
 
 func (c *compiler) compileCatchBlock(
@@ -743,7 +746,7 @@ func (c *compiler) compileFinallyBlock(block *ast.BlockNode) int {
 func (c *compiler) visitTry(t *ast.TryStmt) {
 
 	// try
-	c.compileTryBlock(t.TryBlock)
+	handlerIdx := c.compileTryBlock(t.TryBlock)
 
 	begin := len(c.btc)
 
@@ -774,7 +777,7 @@ func (c *compiler) visitTry(t *ast.TryStmt) {
 
 	// done
 	g.Assert(!(catch == -1 && finally == -1)) // sanity check
-	handler := c.handlers[len(c.handlers)-1]
+	handler := c.handlers[handlerIdx]
 	handler.Catch = catch
 	handler.Finally = finally
 	handler.End = end
