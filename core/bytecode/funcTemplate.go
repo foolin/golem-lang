@@ -21,7 +21,7 @@ type FuncTemplate struct {
 	NumLocals       int
 	Bytecodes       []byte
 	LineNumberTable []LineNumberEntry
-	ErrorHandlers   []*ErrorHandler
+	ErrorHandlers   []ErrorHandler
 }
 
 // LineNumberEntry tracks which sequence of opcodes are on a given source code line

@@ -152,11 +152,11 @@ func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct
 	return result, nil
 }
 
-func (itp *Interpreter) popErrorHandler() *bc.ErrorHandler {
+func (itp *Interpreter) popErrorHandler() (bc.ErrorHandler, bool) {
 
 	f := itp.peekFrame()
 	if f.numHandlers() > 0 {
-		return f.popHandler()
+		return f.popHandler(), true
 	}
 
 	for !f.isBase {
@@ -164,18 +164,18 @@ func (itp *Interpreter) popErrorHandler() *bc.ErrorHandler {
 
 		f = itp.peekFrame()
 		if f.numHandlers() > 0 {
-			return f.popHandler()
+			return f.popHandler(), true
 		}
 	}
 
 	itp.popFrame()
-	return nil
+	return bc.ErrorHandler{}, false
 }
 
 func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 
-	h := itp.popErrorHandler()
-	if h == nil {
+	h, ok := itp.popErrorHandler()
+	if !ok {
 		return nil, es
 	}
 

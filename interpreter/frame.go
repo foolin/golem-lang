@@ -19,7 +19,7 @@ type frame struct {
 	pool   *bc.Pool
 
 	stack    []g.Value
-	handlers []*bc.ErrorHandler
+	handlers []bc.ErrorHandler
 
 	// isBase specifies whether this is the base frame
 	// of the current Eval().
@@ -42,7 +42,7 @@ func newFrame(fn bc.Func, locals []*bc.Ref, isBase bool) *frame {
 		pool:   pool,
 
 		stack:    make([]g.Value, 0, 10),
-		handlers: []*bc.ErrorHandler{},
+		handlers: []bc.ErrorHandler{},
 		isBase:   isBase,
 		ip:       0,
 	}
@@ -52,11 +52,11 @@ func (f *frame) numHandlers() int {
 	return len(f.handlers)
 }
 
-func (f *frame) pushHandler(h *bc.ErrorHandler) {
+func (f *frame) pushHandler(h bc.ErrorHandler) {
 	f.handlers = append(f.handlers, h)
 }
 
-func (f *frame) popHandler() *bc.ErrorHandler {
+func (f *frame) popHandler() bc.ErrorHandler {
 	n := f.numHandlers() - 1
 	h := f.handlers[n]
 	f.handlers = f.handlers[:n]
