@@ -22,6 +22,14 @@ type Pool struct {
 
 func (p *Pool) String() string {
 
+	return p.Dump(func(curLine int) string {
+		return fmt.Sprintf("// line %d", curLine)
+	})
+
+}
+
+func (p *Pool) Dump(printLine func(int) string) string {
+
 	var buf bytes.Buffer
 
 	buf.WriteString("Constants:\n")
@@ -50,23 +58,23 @@ func (p *Pool) String() string {
 		curLine := -1
 		for ip < len(btc) {
 			buf.WriteString("            ")
-			buf.WriteString(FmtBytecode(btc, ip))
+			buf.WriteString(padRight(FmtBytecode(btc, ip), 28))
 
-			bc := btc[ip]
-			switch bc {
-			case GetField, ImportModule, LoadConst: //  InitField, SetField, IncField
-				q := DecodeParam(btc, ip)
-				c := p.Constants[q]
-				buf.WriteString(fmt.Sprintf(" # %s '%v'", c.Type(), c))
-			case InvokeField:
-				q, _ := DecodeWideParams(btc, ip)
-				c := p.Constants[q]
-				buf.WriteString(fmt.Sprintf(" # %s '%v'", c.Type(), c))
-			}
+			//bc := btc[ip]
+			//switch bc {
+			//case GetField, ImportModule, LoadConst: //  InitField, SetField, IncField
+			//	q := DecodeParam(btc, ip)
+			//	c := p.Constants[q]
+			//	buf.WriteString(fmt.Sprintf(" # %s '%v'", c.Type(), c))
+			//case InvokeField:
+			//	q, _ := DecodeWideParams(btc, ip)
+			//	c := p.Constants[q]
+			//	buf.WriteString(fmt.Sprintf(" # %s '%v'", c.Type(), c))
+			//}
 
 			if curLine != t.LineNumber(ip) {
 				curLine = t.LineNumber(ip)
-				buf.WriteString(fmt.Sprintf("  // line %d", curLine))
+				buf.WriteString(printLine(curLine))
 			}
 
 			buf.WriteString("\n")

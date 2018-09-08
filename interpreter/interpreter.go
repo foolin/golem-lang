@@ -152,11 +152,11 @@ func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct
 	return result, nil
 }
 
-func (itp *Interpreter) popErrorHandler() (bc.ErrorHandler, bool) {
+func (itp *Interpreter) popErrorHandler() *bc.ErrorHandler {
 
 	f := itp.peekFrame()
 	if f.numHandlers() > 0 {
-		return f.popHandler(), true
+		return f.popHandler()
 	}
 
 	for !f.isBase {
@@ -164,18 +164,18 @@ func (itp *Interpreter) popErrorHandler() (bc.ErrorHandler, bool) {
 
 		f = itp.peekFrame()
 		if f.numHandlers() > 0 {
-			return f.popHandler(), true
+			return f.popHandler()
 		}
 	}
 
 	itp.popFrame()
-	return bc.ErrorHandler{}, false
+	return nil
 }
 
 func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 
-	h, ok := itp.popErrorHandler()
-	if !ok {
+	h := itp.popErrorHandler()
+	if h == nil {
 		return nil, es
 	}
 
@@ -198,14 +198,14 @@ func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 		panic("TODO")
 	}
 
-	// found result
-	if result != nil {
-		panic("TODO")
-	}
+	//// found result
+	//if result != nil {
+	//	panic("TODO")
+	//}
 
 	// carry on inside the current frame
 	f.ip = h.End
-	return nil, nil
+	return result, nil
 }
 
 func (itp *Interpreter) runTryClause(begin int) (g.Value, ErrorStruct) {

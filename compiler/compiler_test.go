@@ -7,6 +7,7 @@ package compiler
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
 	g "github.com/mjarmy/golem-lang/core"
@@ -56,6 +57,7 @@ func ok(t *testing.T, pool *bc.Pool, expect *bc.Pool) {
 }
 
 var builtins = []*g.BuiltinEntry{
+	{"assert", g.BuiltinAssert},
 	{"println", g.BuiltinPrintln},
 }
 var builtinMgr = g.NewBuiltinManager(builtins)
@@ -1068,26 +1070,33 @@ let p = ls.iter().next()
 
 func TestScratch(t *testing.T) {
 
-	code := `
+	code := `let b = 0
 try {
-	1/0
-	return 1
-} catch e {
-	fn a() {
-		return 2
-	}
-	return 3
+    let a = 0
+    try {
+        1/0
+    } catch e {
+        a = 1
+    }
+    assert(a == 1)
 } finally {
-	fn b() {
-		return 4
-	}
-	return 5
+    b = 1
 }
+assert(b == 1)
 `
+	lines := strings.Split(code, "\n")
+
 	mod := testCompile(t, code)
+
+	f := func(curLine int) string {
+		if curLine == 0 {
+			return "// --------"
+		}
+		return "// " + lines[curLine-1]
+	}
 
 	fmt.Println("----------------------------")
 	fmt.Println(code)
 	fmt.Println("----------------------------")
-	fmt.Println(mod.Pool)
+	fmt.Println(mod.Pool.Dump(f))
 }
