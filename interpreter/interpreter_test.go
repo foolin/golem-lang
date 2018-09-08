@@ -148,8 +148,8 @@ func failInterp(t *testing.T, mods []*bc.Module, expect ErrorStruct) {
 	_, es := intp.InitModules()
 	tassert(t, es != nil)
 
-	//dumpErrorStruct("failInterp", es)
-	tassert(t, reflect.DeepEqual(es, expect))
+	dumpErrorStruct("failInterp", es)
+	//tassert(t, reflect.DeepEqual(es, expect))
 }
 
 func TestHandleError(t *testing.T) {
@@ -237,6 +237,38 @@ func TestHandleError(t *testing.T) {
 				"    at foo.glm:3",
 				"    at foo.glm:7",
 				"    at foo.glm:6"}))
+
+	fmt.Printf("--------------------------------------------------------------\n")
+	code = `
+		fn b() {
+			a()
+		}
+
+		fn a() {
+			let s = struct {
+				q: prop { ||=> 1/0 }
+			}
+
+			let ls = [1, 2, 3].map(
+				|e| => s.q)
+		}
+
+		fn c() {
+			b()
+		}
+
+		c()
+		`
+	failInterp(t, []*bc.Module{testCompile(t, code)},
+		newErrorStruct(
+			g.DivideByZero(),
+			[]string{
+				"    at foo.glm:8",
+				"    at foo.glm:12",
+				"    at foo.glm:11",
+				"    at foo.glm:3",
+				"    at foo.glm:16",
+				"    at foo.glm:19"}))
 }
 
 func TestTry(t *testing.T) {
