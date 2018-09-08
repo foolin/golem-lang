@@ -15,6 +15,8 @@ func TestFrames(t *testing.T) {
 
 	h1 := bc.ErrorHandler{Catch: 1}
 	h2 := bc.ErrorHandler{Catch: 2}
+	h3 := bc.ErrorHandler{Catch: 3}
+	h4 := bc.ErrorHandler{Catch: 4}
 
 	//---------------------------------------
 
@@ -27,7 +29,6 @@ func TestFrames(t *testing.T) {
 	//dumpFrames(itp.frames)
 
 	_, ok := itp.popErrorHandler()
-
 	tassert(t, !ok)
 	tassert(t, itp.numFrames() == 0)
 
@@ -42,7 +43,6 @@ func TestFrames(t *testing.T) {
 	//dumpFrames(itp.frames)
 
 	h, ok := itp.popErrorHandler()
-
 	tassert(t, reflect.DeepEqual(h, h1))
 	tassert(t, itp.numFrames() == 1)
 	tassert(t, reflect.DeepEqual(itp.peekFrame().handlers, []bc.ErrorHandler{}))
@@ -58,7 +58,6 @@ func TestFrames(t *testing.T) {
 	//dumpFrames(itp.frames)
 
 	h, ok = itp.popErrorHandler()
-
 	tassert(t, reflect.DeepEqual(h, h2))
 	tassert(t, itp.numFrames() == 1)
 	tassert(t, reflect.DeepEqual(itp.peekFrame().handlers, []bc.ErrorHandler{h1}))
@@ -78,7 +77,6 @@ func TestFrames(t *testing.T) {
 	//dumpFrames(itp.frames)
 
 	h, ok = itp.popErrorHandler()
-
 	tassert(t, reflect.DeepEqual(h, h2))
 	tassert(t, itp.numFrames() == 1)
 	tassert(t, reflect.DeepEqual(itp.peekFrame().handlers, []bc.ErrorHandler{h1}))
@@ -102,7 +100,6 @@ func TestFrames(t *testing.T) {
 	//dumpFrames(itp.frames)
 
 	h, ok = itp.popErrorHandler()
-
 	tassert(t, reflect.DeepEqual(h, h1))
 	tassert(t, itp.numFrames() == 2)
 	tassert(t, reflect.DeepEqual(itp.peekFrame().handlers, []bc.ErrorHandler{}))
@@ -127,6 +124,56 @@ func TestFrames(t *testing.T) {
 
 	_, ok = itp.popErrorHandler()
 
+	tassert(t, !ok)
+	tassert(t, itp.numFrames() == 0)
+
+	//---------------------------------------
+
+	itp = &Interpreter{frames: []*frame{
+		&frame{
+			isBase:   true,
+			handlers: []bc.ErrorHandler{},
+		},
+		&frame{
+			isBase:   false,
+			handlers: []bc.ErrorHandler{h1, h2},
+		},
+		&frame{
+			isBase:   false,
+			handlers: []bc.ErrorHandler{h3},
+		},
+		&frame{
+			isBase:   false,
+			handlers: []bc.ErrorHandler{h4},
+		},
+		&frame{
+			isBase:   false,
+			handlers: []bc.ErrorHandler{},
+		},
+	}}
+	//dumpFrames(itp.frames)
+
+	h, ok = itp.popErrorHandler()
+	tassert(t, reflect.DeepEqual(h, h4))
+	tassert(t, itp.numFrames() == 4)
+	tassert(t, reflect.DeepEqual(itp.peekFrame().handlers, []bc.ErrorHandler{}))
+
+	h, ok = itp.popErrorHandler()
+	tassert(t, reflect.DeepEqual(h, h3))
+	tassert(t, itp.numFrames() == 3)
+	tassert(t, reflect.DeepEqual(itp.peekFrame().handlers, []bc.ErrorHandler{}))
+
+	h, ok = itp.popErrorHandler()
+	tassert(t, reflect.DeepEqual(h, h2))
+	tassert(t, itp.numFrames() == 2)
+	tassert(t, reflect.DeepEqual(itp.peekFrame().handlers, []bc.ErrorHandler{h1}))
+
+	h, ok = itp.popErrorHandler()
+	tassert(t, reflect.DeepEqual(h, h1))
+	tassert(t, itp.numFrames() == 2)
+	tassert(t, reflect.DeepEqual(itp.peekFrame().handlers, []bc.ErrorHandler{}))
+
+	_, ok = itp.popErrorHandler()
 	tassert(t, !ok)
 	tassert(t, itp.numFrames() == 0)
 }
