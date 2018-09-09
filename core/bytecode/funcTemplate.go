@@ -36,22 +36,6 @@ func (ln LineNumberEntry) String() string {
 		ln.Index, ln.LineNum)
 }
 
-// ErrorHandler handles errors that are thrown for a given block of opcodes,
-// by providing the instruction pointers for 'catch' and 'finally'.
-type ErrorHandler struct {
-	CatchBegin   int
-	CatchEnd     int
-	FinallyBegin int
-	FinallyEnd   int
-}
-
-func (eh ErrorHandler) String() string {
-	return fmt.Sprintf(
-		"ErrorHandler(Catch: (%d,%d), Finally: (%d,%d)))",
-		eh.CatchBegin, eh.CatchEnd,
-		eh.FinallyBegin, eh.FinallyEnd)
-}
-
 // LineNumber returns the line number for the opcode at the given instruction pointer
 func (t *FuncTemplate) LineNumber(instPtr int) int {
 
@@ -64,4 +48,32 @@ func (t *FuncTemplate) LineNumber(instPtr int) int {
 		}
 	}
 	return table[n].LineNum
+}
+
+// ErrorHandler handles errors that are thrown for a given block of opcodes,
+// by providing the instruction pointers for 'catch' and 'finally'.
+type ErrorHandler struct {
+	Catch   TryClause
+	Finally TryClause
+}
+
+func (eh ErrorHandler) String() string {
+	return fmt.Sprintf(
+		"ErrorHandler(Catch: (%s), Finally: (%s)))",
+		eh.Catch, eh.Finally)
+}
+
+// Try Clause contains the instruction pointers for the begin and end
+// of a catch-clause or finally-clause
+type TryClause struct {
+	Begin int
+	End   int
+}
+
+func (tc TryClause) String() string {
+	return fmt.Sprintf("%d, %d", tc.Begin, tc.End)
+}
+
+func (tc TryClause) IsValid() bool {
+	return tc.Begin != -1
 }

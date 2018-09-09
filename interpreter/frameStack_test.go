@@ -13,10 +13,10 @@ import (
 
 func TestFrameStack(t *testing.T) {
 
-	h1 := bc.ErrorHandler{CatchBegin: 1}
-	h2 := bc.ErrorHandler{CatchBegin: 2}
-	h3 := bc.ErrorHandler{CatchBegin: 3}
-	h4 := bc.ErrorHandler{CatchBegin: 4}
+	h1 := bc.ErrorHandler{Catch: bc.TryClause{Begin: 1}, Finally: bc.TryClause{}}
+	h2 := bc.ErrorHandler{Catch: bc.TryClause{Begin: 2}, Finally: bc.TryClause{}}
+	h3 := bc.ErrorHandler{Catch: bc.TryClause{Begin: 3}, Finally: bc.TryClause{}}
+	h4 := bc.ErrorHandler{Catch: bc.TryClause{Begin: 4}, Finally: bc.TryClause{}}
 
 	//---------------------------------------
 

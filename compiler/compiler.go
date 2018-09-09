@@ -712,7 +712,7 @@ func (c *compiler) compileTryBlock(block *ast.BlockNode) int {
 func (c *compiler) compileCatchBlock(
 	tryEnd ast.Pos,
 	ident *ast.IdentExpr,
-	block *ast.BlockNode) (int, int) {
+	block *ast.BlockNode) bc.TryClause {
 
 	// push a jump, so that we'll skip the catch block during normal execution
 	skipCatch := c.push(tryEnd, bc.Jump, 0xFF, 0xFF)
@@ -731,14 +731,20 @@ func (c *compiler) compileCatchBlock(
 	// fix the jump
 	c.setJump(skipCatch, c.btcLen())
 
-	return begin, len(c.btc)
+	return bc.TryClause{
+		Begin: begin,
+		End:   len(c.btc),
+	}
 }
 
-func (c *compiler) compileFinallyBlock(block *ast.BlockNode) (int, int) {
+func (c *compiler) compileFinallyBlock(block *ast.BlockNode) bc.TryClause {
 
 	begin := len(c.btc)
 	c.Visit(block)
-	return begin, len(c.btc)
+	return bc.TryClause{
+		Begin: begin,
+		End:   len(c.btc),
+	}
 }
 
 func (c *compiler) visitTry(t *ast.TryStmt) {
@@ -747,28 +753,22 @@ func (c *compiler) visitTry(t *ast.TryStmt) {
 	handlerIdx := c.compileTryBlock(t.TryBlock)
 
 	// catch
-	catchBegin := -1
-	catchEnd := -1
+	var catch = bc.TryClause{Begin: -1, End: -1}
 	if t.CatchBlock != nil {
-		catchBegin, catchEnd = c.compileCatchBlock(
-			t.TryBlock.End(), t.CatchIdent, t.CatchBlock)
+		catch = c.compileCatchBlock(t.TryBlock.End(), t.CatchIdent, t.CatchBlock)
 	}
 
 	// finally
-	finallyBegin := -1
-	finallyEnd := -1
+	var finally = bc.TryClause{Begin: -1, End: -1}
 	if t.FinallyBlock != nil {
-		finallyBegin, finallyEnd = c.compileFinallyBlock(
-			t.FinallyBlock)
+		finally = c.compileFinallyBlock(t.FinallyBlock)
 	}
 
 	// done
-	g.Assert(!(catchBegin == -1 && finallyBegin == -1)) // sanity check
 	c.handlers[handlerIdx] = bc.ErrorHandler{
-		CatchBegin:   catchBegin,
-		CatchEnd:     catchEnd,
-		FinallyBegin: finallyBegin,
-		FinallyEnd:   finallyEnd}
+		Catch:   catch,
+		Finally: finally,
+	}
 }
 
 func (c *compiler) visitThrow(t *ast.ThrowStmt) {

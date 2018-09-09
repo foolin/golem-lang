@@ -182,24 +182,20 @@ func (itp *Interpreter) handleError(res g.Value, es ErrorStruct) (g.Value, Error
 	endIP := -1
 
 	// catch
-	var catchRes g.Value
-	var catchEs ErrorStruct
-	var catchEnd bool = true
-	if h.CatchBegin != -1 {
-		endIP = h.CatchEnd
+	var catch = clause{nil, nil, true}
+	if h.Catch.IsValid() {
+		endIP = h.Catch.End
 		f.stack = append(f.stack, es)
-		catchRes, catchEs, catchEnd = itp.runTryClause(h.CatchBegin, h.CatchEnd)
-		debugString(fmt.Sprintf("handleError catch (%v, %v)\n", catchRes, catchEs))
+		catch = itp.runTryClause(h.Catch)
+		//debugString(fmt.Sprintf("handleError catch (%v, %v)\n", catchRes, catchEs))
 	}
 
 	// finally
-	var finRes g.Value
-	var finEs ErrorStruct
-	var finEnd bool = true
-	if h.FinallyBegin != -1 {
-		endIP = h.FinallyEnd
-		finRes, finEs, finEnd = itp.runTryClause(h.FinallyBegin, h.FinallyEnd)
-		debugString(fmt.Sprintf("handleError finally (%v, %v)\n", finRes, finEs))
+	var finally = clause{nil, nil, true}
+	if h.Finally.IsValid() {
+		endIP = h.Finally.End
+		finally = itp.runTryClause(h.Finally)
+		//debugString(fmt.Sprintf("handleError finally (%v, %v)\n", finRes, finEs))
 	}
 
 	g.Assert(endIP != -1)
@@ -207,20 +203,20 @@ func (itp *Interpreter) handleError(res g.Value, es ErrorStruct) (g.Value, Error
 
 	//-------------------------------------------
 
-	if !finEnd {
+	if !finally.ended {
 		debugString(fmt.Sprintf("handleError fin did not end\n"))
-		if finRes != nil {
-			f.stack = append(f.stack, res)
+		if finally.res != nil {
+			f.stack = append(f.stack, finally.res)
 		}
-		return itp.handleError(finRes, finEs)
+		return itp.handleError(finally.res, finally.es)
 	}
 
-	if !catchEnd {
+	if !catch.ended {
 		debugString(fmt.Sprintf("handleError catch did not end\n"))
-		if catchRes != nil {
-			f.stack = append(f.stack, res)
+		if catch.res != nil {
+			f.stack = append(f.stack, catch.res)
 		}
-		return itp.handleError(catchRes, catchEs)
+		return itp.handleError(catch.res, catch.es)
 	}
 
 	// carry on inside the current frame
@@ -229,25 +225,32 @@ func (itp *Interpreter) handleError(res g.Value, es ErrorStruct) (g.Value, Error
 	return itp.eval()
 }
 
-func (itp *Interpreter) runTryClause(beginIP, endIP int) (g.Value, ErrorStruct, bool) {
+type clause struct {
+	res   g.Value
+	es    ErrorStruct
+	ended bool
+}
 
-	debugString(fmt.Sprintf("runTryClause %d, %d\n", beginIP, endIP))
+func (itp *Interpreter) runTryClause(tc bc.TryClause) clause {
 
-	itp.frameStack.peek().ip = beginIP
+	debugString(fmt.Sprintf("runTryClause %d, %d\n", tc.Begin, tc.End))
+
+	itp.frameStack.peek().ip = tc.Begin
 
 	for {
 		f := itp.frameStack.peek()
-		if f.isHandlingError && f.ip >= endIP {
-			g.Assert(f.ip == endIP)
-			return nil, nil, true
+		if f.isHandlingError && f.ip >= tc.End {
+			g.Assert(f.ip == tc.End)
+			return clause{nil, nil, true}
 		}
 
 		res, err := itp.advance()
 		if err != nil {
-			return nil, newErrorStruct(err, itp.frameStack.stackTrace()), false
+			es := newErrorStruct(err, itp.frameStack.stackTrace())
+			return clause{nil, es, false}
 		}
 		if res != nil {
-			return res, nil, false
+			return clause{res, nil, false}
 		}
 	}
 }
