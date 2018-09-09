@@ -91,7 +91,7 @@ func (f *frame) dump() {
 		fmt.Printf("        %d: %s\n", i, v)
 	}
 
-	fmt.Printf("    isBase: %v\n", f.isBase)
-
 	fmt.Printf("    ip: %d\n", f.ip)
+	fmt.Printf("    isBase: %v\n", f.isBase)
+	fmt.Printf("    isHandlingError: %v\n", f.isHandlingError)
 }

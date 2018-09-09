@@ -1080,8 +1080,7 @@ fn a() {
         return 'y'
     }
 }
-let n = a()
-assert(false)
+assert(a() == 'y')
 `
 	lines := strings.Split(code, "\n")
 

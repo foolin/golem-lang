@@ -264,22 +264,21 @@ func TestStackTrace(t *testing.T) {
 				"    at foo.glm:19"}))
 }
 
-func TestDebug(t *testing.T) {
-
-	debugInterpreter = true
-
-	code := `
-fn a() {
-    try {
-        1/0
-    } catch e {
-        return 'x'
-    } finally {
-        return 'y'
-    }
-}
-let n = a()
-assert(false)
-`
-	okInterp(t, []*bc.Module{testCompile(t, code)})
-}
+//func TestDebug(t *testing.T) {
+//
+//	debugInterpreter = true
+//
+//	code := `
+//fn a() {
+//    try {
+//        1/0
+//    } catch e {
+//        return 'x'
+//    } finally {
+//        return 'y'
+//    }
+//}
+//assert(a() == 'y')
+//`
+//	okInterp(t, []*bc.Module{testCompile(t, code)})
+//}

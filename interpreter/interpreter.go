@@ -46,7 +46,7 @@ func NewInterpreter(
 // are initialized in reverse order.
 func (itp *Interpreter) InitModules() ([]g.Value, ErrorStruct) {
 
-	result := []g.Value{}
+	values := []g.Value{}
 	for i := len(itp.modules) - 1; i >= 0; i-- {
 		mod := itp.modules[i]
 
@@ -60,15 +60,16 @@ func (itp *Interpreter) InitModules() ([]g.Value, ErrorStruct) {
 		initFn := bc.NewBytecodeFunc(initTpl)
 
 		// invoke the "init" function
-		val, es := itp.eval(initFn, mod.Refs)
+		itp.frameStack.push(newFrame(initFn, mod.Refs, true))
+		val, es := itp.eval()
 		if es != nil {
 			return nil, es
 		}
 
-		// prepend the value so that the result will be in the same order as itp.modules
-		result = append([]g.Value{val}, result...)
+		// prepend the value so that the values will be in the same order as itp.modules
+		values = append([]g.Value{val}, values...)
 	}
-	return result, nil
+	return values, nil
 }
 
 // Eval evaluates a Func.
@@ -94,7 +95,9 @@ func (itp *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
 // EvalBytecode evaluates a bytecode.Func.
 func (itp *Interpreter) EvalBytecode(fn bc.Func, params []g.Value) (g.Value, ErrorStruct) {
 
-	val, es := itp.eval(fn, newLocals(fn.Template().NumLocals, params))
+	locals := newLocals(fn.Template().NumLocals, params)
+	itp.frameStack.push(newFrame(fn, locals, true))
+	val, es := itp.eval()
 	if es != nil {
 		return nil, es
 	}
@@ -127,15 +130,13 @@ func (itp *Interpreter) advance() (g.Value, g.Error) {
 	return op(itp, f)
 }
 
-func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct) {
+func (itp *Interpreter) eval() (g.Value, ErrorStruct) {
 
-	itp.frameStack.push(newFrame(fn, locals, true))
-
-	// advance until we get a result
-	var result g.Value
+	// advance until we get a res
+	var res g.Value
 	var err g.Error
-	for result == nil {
-		result, err = itp.advance()
+	for res == nil {
+		res, err = itp.advance()
 
 		// an error was thrown
 		if err != nil {
@@ -151,7 +152,7 @@ func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct
 			}
 
 			// handle the error
-			result, es = itp.handleError(es)
+			res, es = itp.handleError(nil, es)
 			if es != nil {
 				return nil, es
 			}
@@ -159,15 +160,17 @@ func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct
 	}
 
 	// success
-	return result, nil
+	return res, nil
 }
 
-func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
+func (itp *Interpreter) handleError(res g.Value, es ErrorStruct) (g.Value, ErrorStruct) {
+
+	debugString(fmt.Sprintf("handleError es %v\n", es))
 
 	// find an error handler
 	h, ok := itp.frameStack.popErrorHandler()
 	if !ok {
-		return nil, es
+		return res, es
 	}
 
 	debugString(fmt.Sprintf("handleError popped %v\n", h))
@@ -177,21 +180,26 @@ func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 	f := itp.frameStack.peek()
 	f.isHandlingError = true
 	endIP := -1
-	var result g.Value
 
 	// catch
+	var catchRes g.Value
+	var catchEs ErrorStruct
+	var catchEnd bool = true
 	if h.CatchBegin != -1 {
 		endIP = h.CatchEnd
 		f.stack = append(f.stack, es)
-		result, es = itp.runTryClause(h.CatchBegin, h.CatchEnd)
-		debugString(fmt.Sprintf("handleError catch %v, %v\n", result, es))
+		catchRes, catchEs, catchEnd = itp.runTryClause(h.CatchBegin, h.CatchEnd)
+		debugString(fmt.Sprintf("handleError catch (%v, %v)\n", catchRes, catchEs))
 	}
 
 	// finally
+	var finRes g.Value
+	var finEs ErrorStruct
+	var finEnd bool = true
 	if h.FinallyBegin != -1 {
 		endIP = h.FinallyEnd
-		result, es = itp.runTryClause(h.FinallyBegin, h.FinallyEnd)
-		debugString(fmt.Sprintf("handleError finally %v, %v\n", result, es))
+		finRes, finEs, finEnd = itp.runTryClause(h.FinallyBegin, h.FinallyEnd)
+		debugString(fmt.Sprintf("handleError finally (%v, %v)\n", finRes, finEs))
 	}
 
 	g.Assert(endIP != -1)
@@ -199,17 +207,29 @@ func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 
 	//-------------------------------------------
 
-	// handle error recursively
-	if es != nil {
-		return itp.handleError(es)
+	if !finEnd {
+		debugString(fmt.Sprintf("handleError fin did not end\n"))
+		if finRes != nil {
+			f.stack = append(f.stack, res)
+		}
+		return itp.handleError(finRes, finEs)
+	}
+
+	if !catchEnd {
+		debugString(fmt.Sprintf("handleError catch did not end\n"))
+		if catchRes != nil {
+			f.stack = append(f.stack, res)
+		}
+		return itp.handleError(catchRes, catchEs)
 	}
 
 	// carry on inside the current frame
 	f.ip = endIP
-	return result, nil
+	debugString(fmt.Sprintf("handleError carry on %d\n", f.ip))
+	return itp.eval()
 }
 
-func (itp *Interpreter) runTryClause(beginIP, endIP int) (g.Value, ErrorStruct) {
+func (itp *Interpreter) runTryClause(beginIP, endIP int) (g.Value, ErrorStruct, bool) {
 
 	debugString(fmt.Sprintf("runTryClause %d, %d\n", beginIP, endIP))
 
@@ -219,15 +239,15 @@ func (itp *Interpreter) runTryClause(beginIP, endIP int) (g.Value, ErrorStruct) 
 		f := itp.frameStack.peek()
 		if f.isHandlingError && f.ip >= endIP {
 			g.Assert(f.ip == endIP)
-			return nil, nil
+			return nil, nil, true
 		}
 
-		result, err := itp.advance()
+		res, err := itp.advance()
 		if err != nil {
-			return nil, newErrorStruct(err, itp.frameStack.stackTrace())
+			return nil, newErrorStruct(err, itp.frameStack.stackTrace()), false
 		}
-		if result != nil {
-			return result, nil
+		if res != nil {
+			return res, nil, false
 		}
 	}
 }

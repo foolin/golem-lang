@@ -214,7 +214,10 @@ func opReturn(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	case f.isHandlingError:
 
-		// done -- don't discard the frame, we still need it.
+		// remove the result from the stack
+		f.stack = f.stack[:n]
+
+		// done
 		return result, nil
 
 	case f.isBase:

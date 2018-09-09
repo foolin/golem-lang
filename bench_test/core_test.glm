@@ -1858,8 +1858,74 @@ fn testTry() {
 			}
 			assert(b == 1)
         },
+
+        //====================================
+        //------------------------------------
+        // return, return
         fn () {
+            fn a() {
+                try {
+                    1/0
+                } catch e {
+                    return 'x'
+                } finally {
+                    return 'y'
+                }
+                assert(false)
+            }
+            assert(a() == 'y')
+        },
+        //------------------------------------
+        // return, err
+        fn () {
+            fn a() {
+                try {
+                    1/0
+                } catch e {
+                    return 'x'
+                } finally {
+                    throw 'TestError: y'
+                }
+                assert(false)
+            }
+            fail(a, 'TestError: y')
+        },
+
+        //====================================
+        //------------------------------------
+        // err, return
+        fn () {
+            fn a() {
+                try {
+                    1/0
+                } catch e {
+                    throw e
+                } finally {
+                    return 'y'
+                }
+                assert(false)
+            }
+            assert(a() == 'y')
+        },
+        //------------------------------------
+        // err, nothing
+        fn () {
+            let n = 0
+            fn a() {
+                try {
+                    1/0
+                } catch e {
+                    throw e.error
+                } finally {
+                    n++
+                }
+                assert(false)
+            }
+            fail(a, 'DivideByZero')
+            assert(n == 1)
         }
+
+        //====================================
     ]
     for f in funcs { f(); }
 }
