@@ -21,14 +21,13 @@ type Pool struct {
 }
 
 func (p *Pool) String() string {
-
-	return p.Dump(func(curLine int) string {
+	return p.DebugString(func(curLine int) string {
 		return fmt.Sprintf("// line %d", curLine)
 	})
-
 }
 
-func (p *Pool) Dump(printLine func(int) string) string {
+// DebugString prints diagnositc information
+func (p *Pool) DebugString(printLine func(int) string) string {
 
 	var buf bytes.Buffer
 

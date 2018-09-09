@@ -5,7 +5,7 @@
 package interpreter
 
 import (
-	"fmt"
+	//"fmt"
 
 	g "github.com/mjarmy/golem-lang/core"
 )
@@ -63,9 +63,9 @@ func mustStr(s string) g.Str {
 	return sv
 }
 
-func dumpErrorStruct(msg string, es ErrorStruct) {
-	fmt.Printf("dumpErrorStruct %s %s\n", msg, es.Error())
-	for _, s := range es.StackTrace() {
-		fmt.Printf("%s\n", s)
-	}
-}
+//func dumpErrorStruct(msg string, es ErrorStruct) {
+//	fmt.Printf("dumpErrorStruct %s %s\n", msg, es.Error())
+//	for _, s := range es.StackTrace() {
+//		fmt.Printf("%s\n", s)
+//	}
+//}

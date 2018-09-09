@@ -261,136 +261,6 @@ fn testAssignment() {
     for f in funcs { f(); }
 }
 
-//fn testTry() {
-//    println('testTry')
-//
-//    const funcs = [
-//        fn () {
-//            println('begin func 0')
-//            fail(|| => 3 / 0, "DivideByZero")
-//            fail(fn() {
-//                    try {
-//                        3 / 0
-//                    } catch e2 {
-//                        assert()
-//                    }
-//                },
-//                "ArityMismatch: Expected 1 parameter, got 0")
-//            println('end   func 0')
-//        },
-//        fn () {
-//            println('begin func 1')
-//            const a = 0
-//            const b = 0
-//            try {
-//                3 / 0
-//            } catch e {
-//                a = 1
-//            }
-//            try {
-//                3 / 0
-//            } catch e {
-//                b = 2
-//            }
-//            assert(a == 1)
-//            assert(b == 2)
-//            println('end   func 1')
-//        },
-//        fn () {
-//            println('begin func 2')
-//            const a = 0
-//            try {
-//                3 / 0
-//            } catch e {
-//                a = 1
-//            } finally {
-//                a = 2
-//            }
-//            assert(a == 2)
-//            println('end   func 2')
-//        },
-//        fn () {
-//            println('begin func 3')
-//            const a = 0
-//            //const f = fn() {
-//            //    try {
-//            //        3 / 0
-//            //    } catch e {
-//            //        return 1
-//            //    } finally {
-//            //        a = 2
-//            //    }
-//            //}
-//            //const b = f()
-//            //assert(b == 1)
-//            //assert(a == 2)
-//            println('end   func 3')
-//        },
-//        fn () {
-//            println('begin func 4')
-//            //const a = 0
-//            //const f = fn() {
-//            //    try {
-//            //        3 / 0
-//            //    } catch e {
-//            //        return 1
-//            //    } finally {
-//            //        a = 2
-//            //    }
-//            //}
-//            //const b = f()
-//            //assert(b == 1)
-//            //assert(a == 2)
-//            println('end   func 4')
-//        }
-//        //fn () {
-//        //    println('func 4')
-//        //    const a = 0
-//        //    const b = 0
-//        //    //try {
-//        //    //    try {
-//        //    //        3 / 0
-//        //    //    } catch e {
-//        //    //        assert(1,2,3)
-//        //    //    } finally {
-//        //    //        a = 1
-//        //    //    }
-//        //    //} catch e {
-//        //    //    b = 2
-//        //    //}
-//        //    //assert(a == 1)
-//        //    //assert(b == 2)
-//        //}
-//        ////fn () {
-//        ////    println('throw test')
-//        ////    //try {
-//        ////        //throw 'abcdef';
-//        ////        //assert(false)
-//        ////    //} catch e {
-//        ////    //    println(e)
-//        ////    //}
-//        ////}
-//    ]
-//    println('len funcs ', len(funcs))
-//
-//    //funcs[0]()
-//    //funcs[1]()
-//    //funcs[2]()
-//    funcs[3]()
-//    funcs[4]()
-//
-//    //for i in range(0, len(funcs)) {
-//    //    const f = funcs[i]
-//    //    println('testing ', i, ': ', f)
-//    //    f()
-//    //}
-//    
-//    //for f in funcs { 
-//    //    println('testing ', f)
-//    //    f() 
-//    //}
-//}
-
 fn testFlowControl() {
     const funcs = [
         fn () {
@@ -856,6 +726,14 @@ fn testStr() {
     fail(|| => s.map(|a,b| => null),   "ArityMismatch: map function must have 1 parameter")
     fail(|| => s.map(fn(a...) {}),     "ArityMismatch: map function must have 1 parameter")
     fail(|| => s.map(fn(a, b = 2) {}), "ArityMismatch: map function must have 1 parameter")
+
+    s = 'abc'
+    const c = s.contains
+    const x = c('b')
+    const y = s.contains('z')
+    const ls = [1]
+    const p = iter(ls).next()
+    assert([true, false, true] == [x, y, p])
 }
 
 fn testList() {
@@ -1916,16 +1794,74 @@ fn testMerge() {
     fail(|| => merge(f, g, b), 'InvalidArgument: Cannot merge structs unless they are all frozen, or all unfrozen')
 }
 
-fn testInvokeField() {
-    const s = 'abc'
-    const c = s.contains
-    const x = c('b')
-    const y = s.contains('z')
+fn testTry() {
 
-    const ls = [1]
-    const p = iter(ls).next()
-
-    assert([true, false, true] == [x, y, p])
+    const funcs = [
+        fn () {
+			let a = 0
+			try {
+				1/0
+			} catch e {
+				a = 1
+			}
+			assert(a == 1)
+        },
+        fn () {
+			let b = 0
+			try {
+				1/0
+			} finally {
+				b = 1
+			}
+			assert(b == 1)
+        },
+        fn () {
+			let a = 0
+			let b = 0
+			try {
+				1/0
+			} catch e {
+				a = 1
+			} finally {
+				b = 1
+			}
+			assert(a == 1)
+			assert(b == 1)
+        },
+        fn () {
+			let a = 0
+			try {
+				let b = 0
+				try {
+					1/0
+				} finally {
+					b = 1
+				}
+				assert(b == 1)
+			} catch e {
+				a = 1
+			}
+			assert(a == 0)
+        },
+        fn () {
+			let b = 0
+			try {
+				let a = 0
+				try {
+					1/0
+				} catch e {
+					a = 1
+				}
+				assert(a == 1)
+			} finally {
+				b = 1
+			}
+			assert(b == 1)
+        },
+        fn () {
+        }
+    ]
+    for f in funcs { f(); }
 }
 
 fn main(args) {
@@ -1942,8 +1878,7 @@ fn main(args) {
     testExpressions() 
     testAssignment()
     testFlowControl()
-    testInvokeField()
-//    testTry() TODO try-catch-finally appears to be broken
+    testTry()
 
     testFunc()
     testCapture()
@@ -1958,6 +1893,7 @@ fn main(args) {
     testStr()
     testInt()
     testFloat()
+
     testList()
     testRange()
     testTuple()
@@ -1967,5 +1903,4 @@ fn main(args) {
     testMerge() 
     testChan() // TODO this appears to be broken
 }
-
 

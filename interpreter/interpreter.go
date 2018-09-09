@@ -89,6 +89,7 @@ func (itp *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
 	}
 }
 
+// EvalBytecode evaluates a bytecode.Func.
 func (itp *Interpreter) EvalBytecode(fn bc.Func, params []g.Value) (g.Value, ErrorStruct) {
 
 	val, es := itp.eval(fn, newLocals(fn.Template().NumLocals, params))
@@ -145,6 +146,7 @@ func (itp *Interpreter) eval(fn bc.Func, locals []*bc.Ref) (g.Value, ErrorStruct
 
 func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 
+	// find an error handler
 	h, ok := itp.frameStack.popErrorHandler()
 	if !ok {
 		return nil, es
@@ -154,53 +156,49 @@ func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 
 	f := itp.frameStack.peek()
 	f.isHandlingError = true
-	endIp := -1
+	endIP := -1
 	var result g.Value
 
 	// catch
 	if h.CatchBegin != -1 {
-		endIp = h.CatchEnd
+		endIP = h.CatchEnd
 		f.stack = append(f.stack, es)
 		result, es = itp.runTryClause(h.CatchBegin, h.CatchEnd)
 	}
 
 	// finally
 	if h.FinallyBegin != -1 {
-		endIp = h.FinallyEnd
+		endIP = h.FinallyEnd
 		result, es = itp.runTryClause(h.FinallyBegin, h.FinallyEnd)
 	}
 
-	g.Assert(endIp != -1)
+	g.Assert(endIP != -1)
 	f.isHandlingError = false
 
 	//-------------------------------------------
 
+	// handle error recursively
 	if es != nil {
-		panic("TODO")
-	}
-	if result != nil {
-		panic("TODO")
+		return itp.handleError(es)
 	}
 
 	// carry on inside the current frame
-	f.ip = endIp
-	return nil, nil
+	f.ip = endIP
+	return result, nil
 }
 
-func (itp *Interpreter) runTryClause(beginIp, endIp int) (g.Value, ErrorStruct) {
+func (itp *Interpreter) runTryClause(beginIP, endIP int) (g.Value, ErrorStruct) {
 
-	itp.frameStack.peek().ip = beginIp
+	itp.frameStack.peek().ip = beginIP
 
-	var result g.Value
-	var err g.Error
 	for {
 		f := itp.frameStack.peek()
-		if f.isHandlingError && f.ip >= endIp {
-			g.Assert(f.ip == endIp)
+		if f.isHandlingError && f.ip >= endIP {
+			g.Assert(f.ip == endIP)
 			return nil, nil
 		}
 
-		result, err = itp.advance()
+		result, err := itp.advance()
 		if err != nil {
 			return nil, newErrorStruct(err, itp.frameStack.stackTrace())
 		}

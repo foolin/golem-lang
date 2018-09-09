@@ -758,7 +758,8 @@ func (c *compiler) visitTry(t *ast.TryStmt) {
 	finallyBegin := -1
 	finallyEnd := -1
 	if t.FinallyBlock != nil {
-		finallyBegin, finallyEnd = c.compileFinallyBlock(t.FinallyBlock)
+		finallyBegin, finallyEnd = c.compileFinallyBlock(
+			t.FinallyBlock)
 	}
 
 	// done

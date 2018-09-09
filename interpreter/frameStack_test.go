@@ -42,7 +42,7 @@ func TestFrameStack(t *testing.T) {
 	}}
 	//dumpFrames(fs.frames)
 
-	h, ok := fs.popErrorHandler()
+	h, _ := fs.popErrorHandler()
 	tassert(t, reflect.DeepEqual(h, h1))
 	tassert(t, fs.num() == 1)
 	tassert(t, reflect.DeepEqual(fs.peek().handlers, []bc.ErrorHandler{}))
@@ -57,7 +57,7 @@ func TestFrameStack(t *testing.T) {
 	}}
 	//dumpFrames(fs.frames)
 
-	h, ok = fs.popErrorHandler()
+	h, _ = fs.popErrorHandler()
 	tassert(t, reflect.DeepEqual(h, h2))
 	tassert(t, fs.num() == 1)
 	tassert(t, reflect.DeepEqual(fs.peek().handlers, []bc.ErrorHandler{h1}))
@@ -76,7 +76,7 @@ func TestFrameStack(t *testing.T) {
 	}}
 	//dumpFrames(fs.frames)
 
-	h, ok = fs.popErrorHandler()
+	h, _ = fs.popErrorHandler()
 	tassert(t, reflect.DeepEqual(h, h2))
 	tassert(t, fs.num() == 1)
 	tassert(t, reflect.DeepEqual(fs.peek().handlers, []bc.ErrorHandler{h1}))
@@ -99,7 +99,7 @@ func TestFrameStack(t *testing.T) {
 	}}
 	//dumpFrames(fs.frames)
 
-	h, ok = fs.popErrorHandler()
+	h, _ = fs.popErrorHandler()
 	tassert(t, reflect.DeepEqual(h, h1))
 	tassert(t, fs.num() == 2)
 	tassert(t, reflect.DeepEqual(fs.peek().handlers, []bc.ErrorHandler{}))
@@ -153,22 +153,22 @@ func TestFrameStack(t *testing.T) {
 	}}
 	//dumpFrames(fs.frames)
 
-	h, ok = fs.popErrorHandler()
+	h, _ = fs.popErrorHandler()
 	tassert(t, reflect.DeepEqual(h, h4))
 	tassert(t, fs.num() == 4)
 	tassert(t, reflect.DeepEqual(fs.peek().handlers, []bc.ErrorHandler{}))
 
-	h, ok = fs.popErrorHandler()
+	h, _ = fs.popErrorHandler()
 	tassert(t, reflect.DeepEqual(h, h3))
 	tassert(t, fs.num() == 3)
 	tassert(t, reflect.DeepEqual(fs.peek().handlers, []bc.ErrorHandler{}))
 
-	h, ok = fs.popErrorHandler()
+	h, _ = fs.popErrorHandler()
 	tassert(t, reflect.DeepEqual(h, h2))
 	tassert(t, fs.num() == 2)
 	tassert(t, reflect.DeepEqual(fs.peek().handlers, []bc.ErrorHandler{h1}))
 
-	h, ok = fs.popErrorHandler()
+	h, _ = fs.popErrorHandler()
 	tassert(t, reflect.DeepEqual(h, h1))
 	tassert(t, fs.num() == 2)
 	tassert(t, reflect.DeepEqual(fs.peek().handlers, []bc.ErrorHandler{}))

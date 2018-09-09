@@ -16,6 +16,7 @@ type op func(*Interpreter, *frame) (g.Value, g.Error)
 var ops []op
 
 func init() {
+	// these must always be in exactly the same order as the bytecode definitions
 	ops = []op{
 		opLoadNull,
 		opLoadTrue,
@@ -74,8 +75,6 @@ func init() {
 
 		opPushTry,
 		opPopTry,
-		//opTryReturn,
-		//opTryDone,
 		opThrow,
 
 		opNewStruct,
@@ -230,21 +229,6 @@ func opReturn(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	return nil, nil
 }
-
-//func opTryReturn(itp *Interpreter, f *frame) (g.Value, g.Error) {
-//
-//	n := len(f.stack) - 1
-//
-//	result := f.stack[n]
-//	f.stack = f.stack[:n]
-//	f.ip++
-//
-//	return result, nil
-//}
-//
-//func opTryDone(itp *Interpreter, f *frame) (g.Value, g.Error) {
-//	panic("unreachable")
-//}
 
 func opPushTry(itp *Interpreter, f *frame) (g.Value, g.Error) {
 

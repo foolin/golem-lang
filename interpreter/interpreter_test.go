@@ -5,7 +5,7 @@
 package interpreter
 
 import (
-	"fmt"
+	//"fmt"
 	"reflect"
 	"testing"
 
@@ -33,9 +33,9 @@ func testCompile(t *testing.T, code string) *bc.Module {
 
 	source := &scanner.Source{Name: "foo", Path: "foo.glm", Code: code}
 	mods, errs := compiler.CompileSourceFully(builtinMgr, source, nil)
-	if errs != nil {
-		fmt.Printf("%v\n", errs)
-	}
+	//if errs != nil {
+	//	fmt.Printf("%v\n", errs)
+	//}
 	tassert(t, errs == nil)
 	tassert(t, len(mods) == 1)
 
@@ -135,26 +135,25 @@ assert([1, 2, 3] == [a.x, b.y, c.z])
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 
-func okInterp(t *testing.T, mods []*bc.Module) {
-	intp := NewInterpreter(builtinMgr, mods)
-	_, es := intp.InitModules()
-	if es != nil {
-		panic(es)
-	}
-}
+//func okInterp(t *testing.T, mods []*bc.Module) {
+//	intp := NewInterpreter(builtinMgr, mods)
+//	_, es := intp.InitModules()
+//	if es != nil {
+//		panic(es)
+//	}
+//}
 
 func failInterp(t *testing.T, mods []*bc.Module, expect ErrorStruct) {
 	intp := NewInterpreter(builtinMgr, mods)
 	_, es := intp.InitModules()
 	tassert(t, es != nil)
 
-	dumpErrorStruct("failInterp", es)
-	//tassert(t, reflect.DeepEqual(es, expect))
+	//dumpErrorStruct("failInterp", es)
+	tassert(t, reflect.DeepEqual(es, expect))
 }
 
-func TestHandleError(t *testing.T) {
+func TestStackTrace(t *testing.T) {
 
-	fmt.Printf("--------------------------------------------------------------\n")
 	code := `
 		1/0
 		`
@@ -164,7 +163,6 @@ func TestHandleError(t *testing.T) {
 			[]string{
 				"    at foo.glm:2"}))
 
-	fmt.Printf("--------------------------------------------------------------\n")
 	code = `
 		let a = (|| => 1/0)
 		a()
@@ -176,7 +174,6 @@ func TestHandleError(t *testing.T) {
 				"    at foo.glm:2",
 				"    at foo.glm:3"}))
 
-	fmt.Printf("--------------------------------------------------------------\n")
 	code = `
 		let s = struct {
 			q: prop { ||=> 1/0 }
@@ -190,7 +187,6 @@ func TestHandleError(t *testing.T) {
 				"    at foo.glm:3",
 				"    at foo.glm:5"}))
 
-	fmt.Printf("--------------------------------------------------------------\n")
 	code = `
 		[1, 2, 3].map(
 			|e| => 1/0)
@@ -202,7 +198,6 @@ func TestHandleError(t *testing.T) {
 				"    at foo.glm:3",
 				"    at foo.glm:2"}))
 
-	fmt.Printf("--------------------------------------------------------------\n")
 	code = `
 		let s = struct {
 			q: prop { fn() {
@@ -221,7 +216,6 @@ func TestHandleError(t *testing.T) {
 				"    at foo.glm:4",
 				"    at foo.glm:9"}))
 
-	fmt.Printf("--------------------------------------------------------------\n")
 	code = `
 		let s = struct {
 			q: prop { ||=> 1/0 }
@@ -238,7 +232,6 @@ func TestHandleError(t *testing.T) {
 				"    at foo.glm:7",
 				"    at foo.glm:6"}))
 
-	fmt.Printf("--------------------------------------------------------------\n")
 	code = `
 		fn b() {
 			a()
@@ -269,83 +262,4 @@ func TestHandleError(t *testing.T) {
 				"    at foo.glm:3",
 				"    at foo.glm:16",
 				"    at foo.glm:19"}))
-}
-
-func TestTry(t *testing.T) {
-
-	fmt.Printf("--------------------------------------------------------------\n")
-	code := `
-			let a = 0
-			try {
-				1/0
-			} catch e {
-				a = 1
-			}
-			assert(a == 1)
-			`
-	okInterp(t, []*bc.Module{testCompile(t, code)})
-
-	fmt.Printf("--------------------------------------------------------------\n")
-	code = `
-			let b = 0
-			try {
-				1/0
-			} finally {
-				b = 1
-			}
-			assert(b == 1)
-			`
-	okInterp(t, []*bc.Module{testCompile(t, code)})
-
-	fmt.Printf("--------------------------------------------------------------\n")
-	code = `
-			let a = 0
-			let b = 0
-			try {
-				1/0
-			} catch e {
-				a = 1
-			} finally {
-				b = 1
-			}
-			assert(a == 1)
-			assert(b == 1)
-			`
-	okInterp(t, []*bc.Module{testCompile(t, code)})
-
-	fmt.Printf("--------------------------------------------------------------\n")
-	code = `
-			let a = 0
-			try {
-				let b = 0
-				try {
-					1/0
-				} finally {
-					b = 1
-				}
-				assert(b == 1)
-			} catch e {
-				a = 1
-			}
-			assert(a == 0)
-			`
-	okInterp(t, []*bc.Module{testCompile(t, code)})
-
-	fmt.Printf("--------------------------------------------------------------\n")
-	code = `
-			let b = 0
-			try {
-				let a = 0
-				try {
-					1/0
-				} catch e {
-					a = 1
-				}
-				assert(a == 1)
-			} finally {
-				b = 1
-			}
-			assert(b == 1)
-		`
-	okInterp(t, []*bc.Module{testCompile(t, code)})
 }
