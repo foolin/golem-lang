@@ -5,7 +5,7 @@
 package interpreter
 
 import (
-	//"fmt"
+	"fmt"
 
 	g "github.com/mjarmy/golem-lang/core"
 	bc "github.com/mjarmy/golem-lang/core/bytecode"
@@ -66,32 +66,32 @@ func (f *frame) popHandler() bc.ErrorHandler {
 
 //-------------------------------------------------------------------
 
-//func toStr(val g.Value) string {
-//	s, err := val.ToStr(nil)
-//	if err != nil {
-//		panic(err)
-//	}
-//	return s.String()
-//}
-//
-//func dump(f *frame) {
-//
-//	fmt.Printf("    locals:\n")
-//	for i, r := range f.locals {
-//		fmt.Printf("        %d: %s\n", i, toStr(r.Val))
-//	}
-//
-//	fmt.Printf("    stack:\n")
-//	for i, v := range f.stack {
-//		fmt.Printf("        %d: %s\n", i, toStr(v))
-//	}
-//
-//	fmt.Printf("    handlers:\n")
-//	for i, v := range f.handlers {
-//		fmt.Printf("        %d: %s\n", i, v)
-//	}
-//
-//	fmt.Printf("    isBase: %v\n", f.isBase)
-//
-//	fmt.Printf("    ip: %d\n", f.ip)
-//}
+func toStr(val g.Value) string {
+	s, err := val.ToStr(nil)
+	if err != nil {
+		panic(err)
+	}
+	return s.String()
+}
+
+func (f *frame) dump() {
+
+	fmt.Printf("    locals:\n")
+	for i, r := range f.locals {
+		fmt.Printf("        %d: %s\n", i, toStr(r.Val))
+	}
+
+	fmt.Printf("    stack:\n")
+	for i, v := range f.stack {
+		fmt.Printf("        %d: %s\n", i, toStr(v))
+	}
+
+	fmt.Printf("    handlers:\n")
+	for i, v := range f.handlers {
+		fmt.Printf("        %d: %s\n", i, v)
+	}
+
+	fmt.Printf("    isBase: %v\n", f.isBase)
+
+	fmt.Printf("    ip: %d\n", f.ip)
+}

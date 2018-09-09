@@ -5,9 +5,9 @@
 package compiler
 
 import (
-	//"fmt"
+	"fmt"
 	"reflect"
-	//"strings"
+	"strings"
 	"testing"
 
 	g "github.com/mjarmy/golem-lang/core"
@@ -1068,36 +1068,34 @@ let p = ls.iter().next()
 	})
 }
 
-//func TestScratch(t *testing.T) {
-//
-//	code := `
-//let b = 0
-//try {
-//	let a = 0
-//	try {
-//		1/0
-//	} catch e {
-//		a = 1
-//	}
-//	assert(a == 1)
-//} finally {
-//	b = 1
-//}
-//assert(b == 1)
-//`
-//	lines := strings.Split(code, "\n")
-//
-//	mod := testCompile(t, code)
-//
-//	f := func(curLine int) string {
-//		if curLine == 0 {
-//			return "// --------"
-//		}
-//		return "// " + lines[curLine-1]
-//	}
-//
-//	fmt.Println("----------------------------")
-//	fmt.Println(code)
-//	fmt.Println("----------------------------")
-//	fmt.Println(mod.Pool.DebugString(f))
-//}
+func TestDebug(t *testing.T) {
+
+	code := `
+fn a() {
+    try {
+        1/0
+    } catch e {
+        return 'x'
+    } finally {
+        return 'y'
+    }
+}
+let n = a()
+assert(false)
+`
+	lines := strings.Split(code, "\n")
+
+	mod := testCompile(t, code)
+
+	f := func(curLine int) string {
+		if curLine == 0 {
+			return "// --------"
+		}
+		return "// " + lines[curLine-1]
+	}
+
+	fmt.Println("----------------------------")
+	fmt.Println(code)
+	fmt.Println("----------------------------")
+	fmt.Println(mod.Pool.DebugString(f))
+}

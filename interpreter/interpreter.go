@@ -5,6 +5,8 @@
 package interpreter
 
 import (
+	"fmt"
+
 	g "github.com/mjarmy/golem-lang/core"
 	bc "github.com/mjarmy/golem-lang/core/bytecode"
 )
@@ -101,10 +103,26 @@ func (itp *Interpreter) EvalBytecode(fn bc.Func, params []g.Value) (g.Value, Err
 
 //-------------------------------------------------------------------------
 
+var debugInterpreter bool
+
+func debugString(s string) {
+	if debugInterpreter {
+		fmt.Printf(s)
+	}
+}
+
 // advance the interpreter forwards by one opcode.
 func (itp *Interpreter) advance() (g.Value, g.Error) {
 
 	f := itp.frameStack.peek()
+
+	if debugInterpreter {
+		fmt.Printf("=========================================\n")
+		fmt.Printf("ip: %s\n", bc.FmtBytecode(f.btc, f.ip))
+		fmt.Printf("\n")
+		itp.frameStack.dump()
+	}
+
 	op := ops[f.btc[f.ip]]
 	return op(itp, f)
 }
@@ -152,6 +170,8 @@ func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 		return nil, es
 	}
 
+	debugString(fmt.Sprintf("handleError popped %v\n", h))
+
 	//-------------------------------------------
 
 	f := itp.frameStack.peek()
@@ -164,12 +184,14 @@ func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 		endIP = h.CatchEnd
 		f.stack = append(f.stack, es)
 		result, es = itp.runTryClause(h.CatchBegin, h.CatchEnd)
+		debugString(fmt.Sprintf("handleError catch %v, %v\n", result, es))
 	}
 
 	// finally
 	if h.FinallyBegin != -1 {
 		endIP = h.FinallyEnd
 		result, es = itp.runTryClause(h.FinallyBegin, h.FinallyEnd)
+		debugString(fmt.Sprintf("handleError finally %v, %v\n", result, es))
 	}
 
 	g.Assert(endIP != -1)
@@ -188,6 +210,8 @@ func (itp *Interpreter) handleError(es ErrorStruct) (g.Value, ErrorStruct) {
 }
 
 func (itp *Interpreter) runTryClause(beginIP, endIP int) (g.Value, ErrorStruct) {
+
+	debugString(fmt.Sprintf("runTryClause %d, %d\n", beginIP, endIP))
 
 	itp.frameStack.peek().ip = beginIP
 

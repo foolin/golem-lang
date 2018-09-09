@@ -210,24 +210,36 @@ func opReturn(itp *Interpreter, f *frame) (g.Value, g.Error) {
 	n := len(f.stack) - 1
 	result := f.stack[n]
 
-	// discard the frame
-	itp.frameStack.pop()
+	switch {
 
-	// If we are on the base frame of the current Eval(),
-	// or we are currently trying to recover from an error,
-	// then we are done.
-	if f.isBase || f.isHandlingError {
+	case f.isHandlingError:
+
+		// done -- don't discard the frame, we still need it.
 		return result, nil
+
+	case f.isBase:
+
+		// discard the current frame
+		itp.frameStack.pop()
+
+		// done
+		return result, nil
+
+	default:
+
+		// discard the current frame
+		itp.frameStack.pop()
+
+		// push the result onto the new top frame
+		f = itp.frameStack.peek()
+		f.stack = append(f.stack, result)
+
+		// advance the instruction pointer now that we are done invoking
+		f.ip += 3
+
+		// done
+		return nil, nil
 	}
-
-	// push the result onto the new top frame
-	f = itp.frameStack.peek()
-	f.stack = append(f.stack, result)
-
-	// advance the instruction pointer now that we are done invoking
-	f.ip += 3
-
-	return nil, nil
 }
 
 func opPushTry(itp *Interpreter, f *frame) (g.Value, g.Error) {

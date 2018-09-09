@@ -135,13 +135,13 @@ assert([1, 2, 3] == [a.x, b.y, c.z])
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 
-//func okInterp(t *testing.T, mods []*bc.Module) {
-//	intp := NewInterpreter(builtinMgr, mods)
-//	_, es := intp.InitModules()
-//	if es != nil {
-//		panic(es)
-//	}
-//}
+func okInterp(t *testing.T, mods []*bc.Module) {
+	intp := NewInterpreter(builtinMgr, mods)
+	_, es := intp.InitModules()
+	if es != nil {
+		panic(es)
+	}
+}
 
 func failInterp(t *testing.T, mods []*bc.Module, expect ErrorStruct) {
 	intp := NewInterpreter(builtinMgr, mods)
@@ -262,4 +262,24 @@ func TestStackTrace(t *testing.T) {
 				"    at foo.glm:3",
 				"    at foo.glm:16",
 				"    at foo.glm:19"}))
+}
+
+func TestDebug(t *testing.T) {
+
+	debugInterpreter = true
+
+	code := `
+fn a() {
+    try {
+        1/0
+    } catch e {
+        return 'x'
+    } finally {
+        return 'y'
+    }
+}
+let n = a()
+assert(false)
+`
+	okInterp(t, []*bc.Module{testCompile(t, code)})
 }
