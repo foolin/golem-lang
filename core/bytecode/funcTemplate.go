@@ -63,7 +63,7 @@ func (eh ErrorHandler) String() string {
 		eh.Catch, eh.Finally)
 }
 
-// Try Clause contains the instruction pointers for the begin and end
+// TryClause contains the instruction pointers for the begin and end
 // of a catch-clause or finally-clause
 type TryClause struct {
 	Begin int
@@ -74,6 +74,7 @@ func (tc TryClause) String() string {
 	return fmt.Sprintf("%d, %d", tc.Begin, tc.End)
 }
 
-func (tc TryClause) IsValid() bool {
-	return tc.Begin != -1
+// IsEmpty returns whether the try clause contains any code.
+func (tc TryClause) IsEmpty() bool {
+	return tc.Begin == -1
 }

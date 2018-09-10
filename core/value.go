@@ -69,7 +69,6 @@ type (
 	// Basic represents the immutable types Null, Bool, Str, Int and Float
 	Basic interface {
 		Value
-
 		basicMarker()
 	}
 
@@ -146,19 +145,6 @@ type (
 		LeftShift(Int) (Int, Error)
 		RightShift(Int) (Int, Error)
 		Complement() Int
-	}
-)
-
-//---------------------------------------------------------------
-// Func
-
-type (
-	// Func is a function
-	Func interface {
-		Value
-
-		Arity() Arity
-		Invoke(Eval, []Value) (Value, Error)
 	}
 )
 
@@ -286,6 +272,17 @@ type (
 		IterGet(Eval) (Value, Error)
 	}
 )
+
+//---------------------------------------------------------------
+// Func
+
+// Func is a function
+type Func interface {
+	Value
+
+	Arity() Arity
+	Invoke(Eval, []Value) (Value, Error)
+}
 
 //---------------------------------------------------------------
 // Chan

@@ -16,7 +16,7 @@ type op func(*Interpreter, *frame) (g.Value, g.Error)
 var ops []op
 
 func init() {
-	// these must always be in exactly the same order as the bytecode definitions
+	// these must always be in exactly the same order as the definitions in core/bytecode
 	ops = []op{
 		opLoadNull,
 		opLoadTrue,
@@ -925,22 +925,19 @@ func opLoadNegOne(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 func opImportModule(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
-	// get the module name from the f.pool
+	// get the module name from the pool
 	p := bc.DecodeParam(f.btc, f.ip)
 	name, ok := f.pool.Constants[p].(g.Str)
 	g.Assert(ok)
 
 	// Lookup the module.
-	mod, err := itp.lookupModule(name.String())
-	if err != nil {
-		return nil, err
+	if mod, ok := itp.modMap[name.String()]; ok {
+		f.stack = append(f.stack, mod.Contents)
+		f.ip += 3
+
+		return nil, nil
 	}
-
-	// Push the module's contents onto the stack
-	f.stack = append(f.stack, mod.Contents)
-	f.ip += 3
-
-	return nil, nil
+	return nil, g.UndefinedModule(name.String())
 }
 
 func opLoadBuiltin(itp *Interpreter, f *frame) (g.Value, g.Error) {

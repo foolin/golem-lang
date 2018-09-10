@@ -9,6 +9,10 @@ import (
 	"github.com/mjarmy/golem-lang/ast"
 )
 
+//---------------------------------------------------------------
+// The Golem Analyzer
+//---------------------------------------------------------------
+
 // Analyzer analyzes an AST.
 type Analyzer interface {
 	ast.Visitor

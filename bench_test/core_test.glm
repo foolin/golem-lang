@@ -1890,6 +1890,23 @@ fn testTry() {
             }
             fail(a, 'TestError: y')
         },
+        //------------------------------------
+        // return, nothing
+        fn () {
+            let n = 0
+            fn a() {
+                try {
+                    1/0
+                } catch e {
+                    return 'x'
+                } finally {
+                    n++
+                }
+                assert(false)
+            }
+            assert(a() == 'x')
+            assert(n == 1)
+        },
 
         //====================================
         //------------------------------------
@@ -1908,6 +1925,21 @@ fn testTry() {
             assert(a() == 'y')
         },
         //------------------------------------
+        // err, err
+        fn () {
+            fn a() {
+                try {
+                    1/0
+                } catch e {
+                    throw e
+                } finally {
+                    throw 'TestError'
+                }
+                assert(false)
+            }
+            fail(a, 'TestError')
+        },
+        //------------------------------------
         // err, nothing
         fn () {
             let n = 0
@@ -1923,9 +1955,111 @@ fn testTry() {
             }
             fail(a, 'DivideByZero')
             assert(n == 1)
-        }
+        },
 
         //====================================
+        //------------------------------------
+        // nothing, return
+        fn () {
+            let n = 0
+            fn a() {
+                try {
+                    1/0
+                } catch e {
+                    n++
+                } finally {
+                    return 'y'
+                }
+                assert(false)
+            }
+            assert(a() == 'y')
+            assert(n == 1)
+        },
+        //------------------------------------
+        // nothing, error
+        fn () {
+            let n = 0
+            fn a() {
+                try {
+                    1/0
+                } catch e {
+                    n++
+                } finally {
+                    throw 'TestError'
+                }
+                assert(false)
+            }
+            fail(a, 'TestError')
+            assert(n == 1)
+        },
+        //------------------------------------
+        // nothing, nothing
+        fn () {
+            let p = 0
+            let q = 0
+            fn a() {
+                try {
+                    1/0
+                } catch e {
+                    p++
+                } finally {
+                    q++
+                }
+                return 'z'
+            }
+            assert(a() == 'z')
+            assert(p == 1)
+            assert(q == 1)
+        },
+
+        //====================================
+        fn () {
+            let p = 0
+            let q = 0
+
+            fn a() {
+                try {
+                    1/0
+                } catch e {
+                    throw e.error
+                } finally {
+                    q++
+                }
+                assert(false)
+            }
+
+            fn b() {
+                a()
+            }
+
+            fn c() {
+                try {
+                    b()
+                } catch e {
+                    assert(e.error == 'DivideByZero')
+                    p++
+                } finally {
+                    throw 'TestError'
+                }
+                assert(false)
+            }
+
+            fn d() {
+                c()
+            }
+
+            fail(a, 'DivideByZero')
+            assert([p,q] == [0,1])
+
+            fail(b, 'DivideByZero')
+            assert([p,q] == [0,2])
+
+            fail(c, 'TestError')
+            assert([p,q] == [1,3])
+
+            fail(d, 'TestError')
+            assert([p,q] == [2,4])
+        }
     ]
     for f in funcs { f(); }
 }
