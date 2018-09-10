@@ -279,37 +279,37 @@ func opGo(itp *Interpreter, f *frame) (g.Value, g.Error) {
 	n := len(f.stack) - 1
 
 	p := bc.DecodeParam(f.btc, f.ip)
-	params := f.stack[n-p+1:]
+	params := g.CopyValues(f.stack[n-p+1:])
+	fn := f.stack[n-p]
+	f.stack = f.stack[:n-p]
 
-	switch fn := f.stack[n-p].(type) {
+	switch t := fn.(type) {
 	case bc.Func:
-		f.stack = f.stack[:n-p]
-		f.ip += 3
 
-		intp := NewInterpreter(itp.builtInMgr, itp.modules)
+		f.ip += 3
+		goItp := NewInterpreter(itp.builtInMgr, itp.modules)
 		go (func() {
-			_, es := intp.EvalBytecode(fn, params)
+			_, es := goItp.EvalBytecode(t, params)
 			if es != nil {
 				panic("TODO how to handle exceptions in goroutines")
 			}
 		})()
+		return nil, nil
 
 	case g.NativeFunc:
-		f.stack = f.stack[:n-p]
-		f.ip += 3
 
+		f.ip += 3
 		go (func() {
-			_, err := fn.Invoke(itp, params)
+			_, err := t.Invoke(itp, params)
 			if err != nil {
 				fmt.Printf("%v\n", err)
 			}
 		})()
+		return nil, nil
 
 	default:
 		return nil, g.TypeMismatch(g.FuncType, f.stack[n-p].Type())
 	}
-
-	return nil, nil
 }
 
 func opNewFunc(itp *Interpreter, f *frame) (g.Value, g.Error) {

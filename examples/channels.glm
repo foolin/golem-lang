@@ -2,19 +2,15 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-fn sum(a, c) {
-    let total = 0
-    for v in a {
-        total += v
-    }
-    c.send(total)
+fn sum(s, c) {
+	c.send(s.reduce(0, |acc, x| => acc+x))
 }
 
-let a = [1, 2, 3, 4, 5, 6]
-let n = len(a) / 2
+let s = [7, 2, 8, -9, 4, 0]
+let n = len(s)/2
 let c = chan()
 
-go sum(a[:n], c)
-go sum(a[n:], c)
+go sum(s[:n], c)
+go sum(s[n:], c)
 
-assert([c.recv(), c.recv()] == [15, 6])
+println([c.recv(), c.recv()])

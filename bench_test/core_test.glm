@@ -35,6 +35,15 @@ fn iterate(ibl) {
 
 fn testExpressions() {
 
+    assert(42 == zork.quux)
+
+    assert(assert == assert);
+    assert(print == print);
+    assert(println == println);
+    assert(assert != print);
+    assert(assert != println);
+    assert(print != println);
+
     assert((2 + 3) * -4 / 10 == -2)
     assert((2*2*2*2 + 2*3*(8 - 1) + 2) / (17 - 2*2*2 - -1) == 6)
 
@@ -658,6 +667,7 @@ fn testStr() {
     fail(|| => itr.get(), 'NoSuchElement')
 
     const f = s.contains
+    println(s)
     assert(true == f('ab'))
     assert(true == s.contains('這是我'))
     assert(true == s.contains('們ab'))
@@ -859,8 +869,7 @@ fn testList() {
             assert(b == [null])
             assert(a.add == a.add)
             assert(b.add == b.add)
-            assert(a.add != b.add)
-            assert(b.add != a.add)
+            assert(a.add == b.add)
 
             const f = b.add
             f(5)
@@ -1342,6 +1351,7 @@ fn testTuple() {
 }
 
 fn testChan() {
+    println('>>>>>>>>>>>>>>>>>>>>>>>>>> testChan')
 
     const p = chan()
     const q = chan(1)
@@ -1373,39 +1383,26 @@ fn testChan() {
     assert(p.send == getField(p, 'send'))
     assert(p.recv == getField(p, 'recv'))
 
-    //assert(!hasField(p, 'bogus'))
-    //fail(|| => getField(p, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    //fail(|| => setField(p, 'bogus', null), "TypeMismatch: Expected Struct, not Chan")
-    //fail(|| => p.bogus = 1, "TypeMismatch: Expected Struct, not Chan")
+    assert(!hasField(p, 'bogus'))
+    fail(|| => getField(p, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => setField(p, 'bogus', null), "TypeMismatch: Expected Struct, not Chan")
+    fail(|| => p.bogus = 1, "TypeMismatch: Expected Struct, not Chan")
 
-//    //-------------------------------------------------
-//
-//    fn sum(a, c) {
-//        println(['sum aaa ', a])
-//        const total = 0
-//        for v in a {
-//            total += v
-//        }
-//        println(['sum bbb ', total])
-//        c.send(total)
-//    }
-//
-//    const a = [7, 2, 8, -9, 4, 0]
-//    const n = len(a) / 2
-//    println([n, a[:n], a[n:], a])
-//    const c = chan()
-//
-//    go sum(a[:n], c)
-//    go sum(a[n:], c)
-//    const x = c.recv()
-//    const y = c.recv()
-//    println([x, y])
-//    //assert([x, y] == [-5, 17])
-//
-//    //const ch = chan(2)
-//    //ch.send(1)
-//    //ch.send(2)
-//    //assert([ch.recv(), ch.recv()] == [1, 2])
+    //-------------------------------------------------
+
+    fn sum(s, c) {
+        c.send(s.reduce(0, |acc, x| => acc+x))
+    }
+
+    let s = [7, 2, 8, -9, 4, 0]
+    let n = len(s)/2
+    let c = chan()
+
+    go sum(s[:n], c)
+    go sum(s[n:], c)
+
+    let result = [c.recv(), c.recv()]
+    assert(result == [-5, 17] || result == [17, -5])
 }
 
 fn testArity() {
@@ -2065,20 +2062,18 @@ fn testTry() {
 }
 
 fn main(args) {
-
-    assert(42 == zork.quux)
-
-    assert(assert == assert);
-    assert(print == print);
-    assert(println == println);
-    assert(assert != print);
-    assert(assert != println);
-    assert(print != println);
+    println('main')
 
     testExpressions() 
     testAssignment()
     testFlowControl()
-    testTry()
+    //testTry()
+
+    testNull()
+    testBool()
+    //testStr()
+    testInt()
+    testFloat()
 
     testFunc()
     testCapture()
@@ -2088,19 +2083,14 @@ fn main(args) {
     testVariadic() 
     testMultiple() 
 
-    testNull()
-    testBool()
-    testStr()
-    testInt()
-    testFloat()
+    testChan()
 
-    testList()
-    testRange()
-    testTuple()
-    testDict() 
-    testSet() 
-    testStruct() 
-    testMerge() 
-    testChan() // TODO this appears to be broken
+    //testList()
+    //testRange()
+    //testTuple()
+    //testDict() 
+    //testSet() 
+    //testStruct() 
+    //testMerge() 
 }
 
