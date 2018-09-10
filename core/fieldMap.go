@@ -4,6 +4,11 @@
 
 package core
 
+import (
+//"fmt"
+//"sync"
+)
+
 type (
 	fieldMap interface {
 		names() []string
@@ -122,6 +127,8 @@ func (fm *hashFieldMap) replace(name string, field Field) {
 type methodFieldMap struct {
 	self    interface{}
 	methods map[string]Method
+	//funcs   map[string]NativeFunc
+	//mx      sync.Mutex
 }
 
 func (fm *methodFieldMap) names() []string {
@@ -142,6 +149,19 @@ func (fm *methodFieldMap) has(name string) bool {
 func (fm *methodFieldMap) get(ev Eval, name string) (Value, Error) {
 
 	if m, ok := fm.methods[name]; ok {
+
+		//fm.mx.Lock()
+		//defer fm.mx.Unlock()
+
+		//native, ok := fm.funcs[name]
+		//if !ok {
+		//	//fmt.Printf("methodFieldMap.get %v %v\n", fm.self, name)
+		//	native = m.ToFunc(fm.self, name)
+		//	fm.funcs[name] = native
+		//}
+
+		//return native, nil
+
 		return m.ToFunc(fm.self, name), nil
 	}
 	return nil, NoSuchField(name)

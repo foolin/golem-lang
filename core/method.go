@@ -4,10 +4,6 @@
 
 package core
 
-import (
-//"fmt"
-)
-
 type (
 	// A Method knows how to invoke some native code on behalf
 	// of a given 'self' parameter, without having to actually create
@@ -46,15 +42,11 @@ func NewWrapperMethod(wrapper WrapperMethodInvoke) Method {
 
 func (m *wrapperMethod) Invoke(self interface{}, ev Eval, params []Value) (Value, Error) {
 
-	//fmt.Printf("Wrapper Method Invoke\n")
-
 	Assert(len(params) == 0)
 	return m.invoke(self), nil
 }
 
 func (m *wrapperMethod) ToFunc(self interface{}, methodName string) NativeFunc {
-
-	//fmt.Printf("Wrapper Method ToFunc\n")
 
 	nf := NewFixedNativeFunc(
 		[]Type{}, false,
@@ -90,8 +82,6 @@ func (m *nullaryMethod) Invoke(self interface{}, ev Eval, params []Value) (Value
 }
 
 func (m *nullaryMethod) ToFunc(self interface{}, methodName string) NativeFunc {
-
-	//fmt.Printf("Nullary Method ToFunc\n")
 
 	nf := NewFixedNativeFunc(
 		[]Type{}, false,
@@ -144,8 +134,6 @@ func NewFixedMethod(
 
 func (m *fixedMethod) Invoke(self interface{}, ev Eval, params []Value) (Value, Error) {
 
-	//fmt.Printf("Method Invoke\n")
-
 	err := vetFixedParams(params, m.requiredTypes, m.allowNull)
 	if err != nil {
 		return nil, err
@@ -154,8 +142,6 @@ func (m *fixedMethod) Invoke(self interface{}, ev Eval, params []Value) (Value, 
 }
 
 func (m *fixedMethod) ToFunc(self interface{}, methodName string) NativeFunc {
-
-	//fmt.Printf("Method ToFunc\n")
 
 	nf := NewFixedNativeFunc(
 		m.requiredTypes,
@@ -285,11 +271,10 @@ func (m *multipleMethod) ToFunc(self interface{}, methodName string) NativeFunc 
 //--------------------------------------------------------------
 
 // A methodFunc is a function that is created only
-// when we really need to have it. The 'same' methodFunc can end up
-// being created more than once, so equality has special semantics.
+// when we really need to have it.
 
-// For self parameters that are Values, equality is based on Eq(),
-// otherwise its based on '=='
+// Equality has special semantics.  For self parameters that are Values,
+// equality is based on Eq(), // otherwise its based on '=='.
 func selfEq(ev Eval, this, that interface{}) (Bool, Error) {
 
 	valThis, okThis := this.(Value)
@@ -319,8 +304,6 @@ type fixedMethodFunc struct {
 func (f *fixedMethodFunc) Eq(ev Eval, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *fixedMethodFunc:
-		// Equality is based on whether the two funcs have the same self,
-		// and the same name.
 		eq, err := selfEq(ev, f.self, t.self)
 		if err != nil {
 			return nil, err
@@ -343,8 +326,6 @@ type variadicMethodFunc struct {
 func (f *variadicMethodFunc) Eq(ev Eval, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *variadicMethodFunc:
-		// Equality is based on whether the two funcs have the same self,
-		// and the same name.
 		eq, err := selfEq(ev, f.self, t.self)
 		if err != nil {
 			return nil, err
@@ -367,8 +348,6 @@ type multipleMethodFunc struct {
 func (f *multipleMethodFunc) Eq(ev Eval, v Value) (Bool, Error) {
 	switch t := v.(type) {
 	case *multipleMethodFunc:
-		// Equality is based on whether the two funcs have the same self,
-		// and the same name.
 		eq, err := selfEq(ev, f.self, t.self)
 		if err != nil {
 			return nil, err

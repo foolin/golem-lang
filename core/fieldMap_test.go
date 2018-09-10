@@ -5,10 +5,10 @@
 package core
 
 import (
-	//"fmt"
 	"reflect"
 	"sort"
 	"strings"
+	//"sync"
 	"testing"
 )
 
@@ -68,10 +68,11 @@ func TestMethodFieldMap(t *testing.T) {
 		})
 
 	var fm fieldMap = &methodFieldMap{
-		NewInt(7),
-		map[string]Method{
-			"a": method,
-		}}
+		self:    NewInt(7),
+		methods: map[string]Method{"a": method},
+		//funcs:   map[string]NativeFunc{},
+		//mx:      sync.Mutex{},
+	}
 
 	tassert(t, reflect.DeepEqual([]string{"a"}, fm.names()))
 	tassert(t, fm.has("a"))
@@ -136,8 +137,8 @@ func TestMergeFieldMaps(t *testing.T) {
 	tassert(t, x.(*hashFieldMap).replacable)
 
 	var y fieldMap = &methodFieldMap{
-		next(),
-		map[string]Method{
+		self: next(),
+		methods: map[string]Method{
 			"b": NewFixedMethod(
 				[]Type{}, false,
 				func(self interface{}, ev Eval, params []Value) (Value, Error) {
@@ -156,7 +157,10 @@ func TestMergeFieldMaps(t *testing.T) {
 					n := self.(Int).IntVal()
 					return NewInt(int64(n*100 + 2)), nil
 				}),
-		}}
+		},
+		//funcs: map[string]NativeFunc{},
+		//mx:    sync.Mutex{},
+	}
 
 	var z fieldMap = &hashFieldMap{
 		map[string]Field{

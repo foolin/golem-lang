@@ -7,6 +7,7 @@ package core
 import (
 	"bytes"
 	"fmt"
+	//"sync"
 
 	"github.com/mjarmy/golem-lang/scanner"
 )
@@ -69,6 +70,8 @@ func NewMethodStruct(self interface{}, methods map[string]Method) (Struct, Error
 		fieldMap: &methodFieldMap{
 			self:    self,
 			methods: methods,
+			//funcs:   map[string]NativeFunc{},
+			//mx:      sync.Mutex{},
 		},
 		frozen: true,
 	}, nil
