@@ -8,30 +8,35 @@ import (
 	"testing"
 )
 
-func TestMethodEq(t *testing.T) {
-
-	m := NewFixedMethod(
-		[]Type{},
-		false,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
-			n := self.(int)
-			return NewInt(int64(n * n)), nil
-		})
-
+func testMethodEq(t *testing.T, m Method) {
 	a1 := m.ToFunc(1, "foo")
 	a2 := m.ToFunc(1, "foo")
+	a3 := m.ToFunc(2, "foo")
 
 	val, err := a1.Eq(nil, a2)
 	ok(t, val, err, True)
 
+	val, err = a1.Eq(nil, a3)
+	ok(t, val, err, False)
+
+	val, err = a2.Eq(nil, a3)
+	ok(t, val, err, False)
+
 	b1 := m.ToFunc(NewInt(1), "foo")
 	b2 := m.ToFunc(NewInt(1), "foo")
+	b3 := m.ToFunc(NewInt(2), "foo")
 
 	val, err = b1.Eq(nil, b2)
 	ok(t, val, err, True)
 
+	val, err = b1.Eq(nil, b3)
+	ok(t, val, err, False)
+
+	val, err = b2.Eq(nil, b3)
+	ok(t, val, err, False)
+
 	val, err = a1.Eq(nil, b1)
-	ok(t, val, err, True)
+	ok(t, val, err, False)
 }
 
 func TestFixedMethod(t *testing.T) {
@@ -43,6 +48,7 @@ func TestFixedMethod(t *testing.T) {
 			n := self.(int)
 			return NewInt(int64(n * n)), nil
 		})
+	testMethodEq(t, m)
 
 	val, err := m.Invoke(10, nil, []Value{})
 	ok(t, val, err, NewInt(100))
@@ -101,6 +107,7 @@ func TestVariadicMethod(t *testing.T) {
 			}
 			return NewInt(int64(n)), nil
 		})
+	testMethodEq(t, m)
 
 	val, err := m.Invoke(10, nil, []Value{NewInt(2), NewInt(3)})
 	ok(t, val, err, NewInt(15))
@@ -128,6 +135,7 @@ func TestMultipleMethod(t *testing.T) {
 
 			return NewInt(int64(n)), nil
 		})
+	testMethodEq(t, m)
 
 	val, err := m.Invoke(10, nil, []Value{NewInt(2)})
 	ok(t, val, err, NewInt(12))

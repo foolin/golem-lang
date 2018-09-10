@@ -5,7 +5,7 @@
 package core
 
 import (
-	"sync"
+//"fmt"
 )
 
 type (
@@ -37,16 +37,16 @@ type (
 
 type wrapperMethod struct {
 	invoke WrapperMethodInvoke
-	mx     sync.Mutex
-	fn     NativeFunc
 }
 
 // NewWrapperMethod creates a new wrapper Method.
 func NewWrapperMethod(wrapper WrapperMethodInvoke) Method {
-	return &wrapperMethod{wrapper, sync.Mutex{}, nil}
+	return &wrapperMethod{wrapper}
 }
 
 func (m *wrapperMethod) Invoke(self interface{}, ev Eval, params []Value) (Value, Error) {
+
+	//fmt.Printf("Wrapper Method Invoke\n")
 
 	Assert(len(params) == 0)
 	return m.invoke(self), nil
@@ -54,18 +54,18 @@ func (m *wrapperMethod) Invoke(self interface{}, ev Eval, params []Value) (Value
 
 func (m *wrapperMethod) ToFunc(self interface{}, methodName string) NativeFunc {
 
-	m.mx.Lock()
-	defer m.mx.Unlock()
+	//fmt.Printf("Wrapper Method ToFunc\n")
 
-	if m.fn == nil {
-		m.fn = NewFixedNativeFunc(
-			[]Type{}, false,
-			func(ev Eval, params []Value) (Value, Error) {
-				return m.invoke(self), nil
-			})
-	}
+	nf := NewFixedNativeFunc(
+		[]Type{}, false,
+		func(ev Eval, params []Value) (Value, Error) {
+			return m.invoke(self), nil
+		})
 
-	return m.fn
+	return &fixedMethodFunc{
+		self,
+		methodName,
+		nf.(*nativeFixedFunc)}
 }
 
 //--------------------------------------------------------------
@@ -74,35 +74,35 @@ func (m *wrapperMethod) ToFunc(self interface{}, methodName string) NativeFunc {
 
 type nullaryMethod struct {
 	invoke NullaryMethodInvoke
-	mx     sync.Mutex
-	fn     NativeFunc
 }
 
 // NewNullaryMethod creates a new nullary Method.
 func NewNullaryMethod(nullary NullaryMethodInvoke) Method {
-	return &nullaryMethod{nullary, sync.Mutex{}, nil}
+	return &nullaryMethod{nullary}
 }
 
 func (m *nullaryMethod) Invoke(self interface{}, ev Eval, params []Value) (Value, Error) {
+
+	//fmt.Printf("Nullary Method Invoke\n")
+
 	Assert(len(params) == 0)
 	return m.invoke(self, ev)
 }
 
 func (m *nullaryMethod) ToFunc(self interface{}, methodName string) NativeFunc {
 
-	m.mx.Lock()
-	defer m.mx.Unlock()
+	//fmt.Printf("Nullary Method ToFunc\n")
 
-	if m.fn == nil {
-		m.fn = NewFixedNativeFunc(
-			[]Type{}, false,
-			func(ev Eval, params []Value) (Value, Error) {
-				return m.invoke(self, ev)
-			})
+	nf := NewFixedNativeFunc(
+		[]Type{}, false,
+		func(ev Eval, params []Value) (Value, Error) {
+			return m.invoke(self, ev)
+		})
 
-	}
-
-	return m.fn
+	return &fixedMethodFunc{
+		self,
+		methodName,
+		nf.(*nativeFixedFunc)}
 }
 
 //--------------------------------------------------------------
@@ -112,8 +112,6 @@ func (m *nullaryMethod) ToFunc(self interface{}, methodName string) NativeFunc {
 type method struct {
 	arity  Arity
 	invoke MethodInvoke
-	mx     sync.Mutex
-	fn     NativeFunc
 }
 
 //--------------------------------------------------------------
@@ -139,12 +137,14 @@ func NewFixedMethod(
 	}
 
 	return &fixedMethod{
-		&method{arity, invoke, sync.Mutex{}, nil},
+		&method{arity, invoke},
 		requiredTypes, allowNull,
 	}
 }
 
 func (m *fixedMethod) Invoke(self interface{}, ev Eval, params []Value) (Value, Error) {
+
+	//fmt.Printf("Method Invoke\n")
 
 	err := vetFixedParams(params, m.requiredTypes, m.allowNull)
 	if err != nil {
@@ -155,19 +155,19 @@ func (m *fixedMethod) Invoke(self interface{}, ev Eval, params []Value) (Value, 
 
 func (m *fixedMethod) ToFunc(self interface{}, methodName string) NativeFunc {
 
-	m.mx.Lock()
-	defer m.mx.Unlock()
+	//fmt.Printf("Method ToFunc\n")
 
-	if m.fn == nil {
-		m.fn = NewFixedNativeFunc(
-			m.requiredTypes,
-			m.allowNull,
-			func(ev Eval, params []Value) (Value, Error) {
-				return m.invoke(self, ev, params)
-			})
-	}
+	nf := NewFixedNativeFunc(
+		m.requiredTypes,
+		m.allowNull,
+		func(ev Eval, params []Value) (Value, Error) {
+			return m.invoke(self, ev, params)
+		})
 
-	return m.fn
+	return &fixedMethodFunc{
+		self,
+		methodName,
+		nf.(*nativeFixedFunc)}
 }
 
 //--------------------------------------------------------------
@@ -195,7 +195,7 @@ func NewVariadicMethod(
 	}
 
 	return &variadicMethod{
-		&method{arity, invoke, sync.Mutex{}, nil},
+		&method{arity, invoke},
 		requiredTypes, variadicType, allowNull,
 	}
 }
@@ -211,20 +211,18 @@ func (m *variadicMethod) Invoke(self interface{}, ev Eval, params []Value) (Valu
 
 func (m *variadicMethod) ToFunc(self interface{}, methodName string) NativeFunc {
 
-	m.mx.Lock()
-	defer m.mx.Unlock()
+	nf := NewVariadicNativeFunc(
+		m.requiredTypes,
+		m.variadicType,
+		m.allowNull,
+		func(ev Eval, params []Value) (Value, Error) {
+			return m.invoke(self, ev, params)
+		})
 
-	if m.fn == nil {
-		m.fn = NewVariadicNativeFunc(
-			m.requiredTypes,
-			m.variadicType,
-			m.allowNull,
-			func(ev Eval, params []Value) (Value, Error) {
-				return m.invoke(self, ev, params)
-			})
-	}
-
-	return m.fn
+	return &variadicMethodFunc{
+		self,
+		methodName,
+		nf.(*nativeVariadicFunc)}
 }
 
 //--------------------------------------------------------------
@@ -252,7 +250,7 @@ func NewMultipleMethod(
 	}
 
 	return &multipleMethod{
-		&method{arity, invoke, sync.Mutex{}, nil},
+		&method{arity, invoke},
 		requiredTypes, optionalTypes, allowNull,
 	}
 }
@@ -268,18 +266,115 @@ func (m *multipleMethod) Invoke(self interface{}, ev Eval, params []Value) (Valu
 
 func (m *multipleMethod) ToFunc(self interface{}, methodName string) NativeFunc {
 
-	m.mx.Lock()
-	defer m.mx.Unlock()
+	nf := NewMultipleNativeFunc(
+		m.requiredTypes,
+		m.optionalTypes,
+		m.allowNull,
+		func(ev Eval, params []Value) (Value, Error) {
+			return m.invoke(self, ev, params)
+		})
 
-	if m.fn == nil {
-		m.fn = NewMultipleNativeFunc(
-			m.requiredTypes,
-			m.optionalTypes,
-			m.allowNull,
-			func(ev Eval, params []Value) (Value, Error) {
-				return m.invoke(self, ev, params)
-			})
+	return &multipleMethodFunc{
+		self,
+		methodName,
+		nf.(*nativeMultipleFunc)}
+}
+
+//--------------------------------------------------------------
+// methodFunc
+//--------------------------------------------------------------
+
+// A methodFunc is a function that is created only
+// when we really need to have it. The 'same' methodFunc can end up
+// being created more than once, so equality has special semantics.
+
+// For self parameters that are Values, equality is based on Eq(),
+// otherwise its based on '=='
+func selfEq(ev Eval, this, that interface{}) (Bool, Error) {
+
+	valThis, okThis := this.(Value)
+	valThat, okThat := that.(Value)
+
+	switch {
+	case okThis && okThat:
+		return valThis.Eq(ev, valThat)
+
+	case !okThis && !okThat:
+		return NewBool(this == that), nil
+
+	default:
+		return False, nil
 	}
+}
 
-	return m.fn
+//---------------------------------------------
+// fixed
+
+type fixedMethodFunc struct {
+	self interface{}
+	name string
+	*nativeFixedFunc
+}
+
+func (f *fixedMethodFunc) Eq(ev Eval, v Value) (Bool, Error) {
+	switch t := v.(type) {
+	case *fixedMethodFunc:
+		// Equality is based on whether the two funcs have the same self,
+		// and the same name.
+		eq, err := selfEq(ev, f.self, t.self)
+		if err != nil {
+			return nil, err
+		}
+		return NewBool(eq.BoolVal() && (f.name == t.name)), nil
+	default:
+		return False, nil
+	}
+}
+
+//---------------------------------------------
+// variadic
+
+type variadicMethodFunc struct {
+	self interface{}
+	name string
+	*nativeVariadicFunc
+}
+
+func (f *variadicMethodFunc) Eq(ev Eval, v Value) (Bool, Error) {
+	switch t := v.(type) {
+	case *variadicMethodFunc:
+		// Equality is based on whether the two funcs have the same self,
+		// and the same name.
+		eq, err := selfEq(ev, f.self, t.self)
+		if err != nil {
+			return nil, err
+		}
+		return NewBool(eq.BoolVal() && (f.name == t.name)), nil
+	default:
+		return False, nil
+	}
+}
+
+//---------------------------------------------
+// multiple
+
+type multipleMethodFunc struct {
+	self interface{}
+	name string
+	*nativeMultipleFunc
+}
+
+func (f *multipleMethodFunc) Eq(ev Eval, v Value) (Bool, Error) {
+	switch t := v.(type) {
+	case *multipleMethodFunc:
+		// Equality is based on whether the two funcs have the same self,
+		// and the same name.
+		eq, err := selfEq(ev, f.self, t.self)
+		if err != nil {
+			return nil, err
+		}
+		return NewBool(eq.BoolVal() && (f.name == t.name)), nil
+	default:
+		return False, nil
+	}
 }
