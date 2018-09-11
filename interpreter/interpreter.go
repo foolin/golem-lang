@@ -168,25 +168,20 @@ func (itp *Interpreter) handleError(res g.Value, es ErrorStruct) (g.Value, Error
 	}
 
 	//-------------------------------------------
-	// run the 'catch' and 'finally' clauses
+	// run the catch and finally clauses
 
 	f := itp.frameStack.peek()
 	f.isHandlingError = true
-	endIP := -1
 
-	// run catch
-	catch := runClause{}
+	responses := []response{}
+
 	if !h.Catch.IsEmpty() {
-		endIP = h.Catch.End
 		f.stack = append(f.stack, es) // put error on stack
-		catch = itp.runTryClause(h.Catch)
+		responses = append(responses, itp.runTryClause(h.Catch))
 	}
 
-	// run finally
-	finally := runClause{}
 	if !h.Finally.IsEmpty() {
-		endIP = h.Finally.End
-		finally = itp.runTryClause(h.Finally)
+		responses = append(responses, itp.runTryClause(h.Finally))
 	}
 
 	f.isHandlingError = false
@@ -194,52 +189,48 @@ func (itp *Interpreter) handleError(res g.Value, es ErrorStruct) (g.Value, Error
 	//-------------------------------------------
 	// figure out how to proceed
 
-	// finally
-	if finally.finishedEarly {
-		if finally.result != nil {
-			f.stack = append(f.stack, finally.result)
-		}
-		return itp.handleError(finally.result, finally.err)
-	}
-
-	// catch
-	if catch.finishedEarly {
-		if catch.result != nil {
-			f.stack = append(f.stack, catch.result)
-		}
-		return itp.handleError(catch.result, catch.err)
+	r := responses[len(responses)-1]
+	if r.finishedEarly {
+		panic("TODO")
+		//if finally.result != nil {
+		//	f.stack = append(f.stack, finally.result)
+		//}
+		//return itp.handleError(finally.result, finally.err)
 	}
 
 	// error recovery was successful
-	f.ip = endIP
+	f.ip = r.tryClause.End
 	return itp.eval()
 }
 
-type runClause struct {
+type response struct {
+	tryClause     bc.TryClause
 	result        g.Value
-	err           ErrorStruct
+	es            ErrorStruct
 	finishedEarly bool
 }
 
 // run a 'catch' or 'finally' clause
-func (itp *Interpreter) runTryClause(tc bc.TryClause) runClause {
+func (itp *Interpreter) runTryClause(tc bc.TryClause) response {
 
 	itp.frameStack.peek().ip = tc.Begin
 
 	for {
 		f := itp.frameStack.peek()
+
+		// we've reached the end of the clause
 		if f.isHandlingError && f.ip >= tc.End {
 			g.Assert(f.ip == tc.End)
-			return runClause{nil, nil, false}
+			return response{tc, nil, nil, false}
 		}
 
 		res, err := itp.advance()
 		if err != nil {
 			es := newErrorStruct(err, itp.frameStack.stackTrace())
-			return runClause{nil, es, true}
+			return response{tc, nil, es, true}
 		}
 		if res != nil {
-			return runClause{res, nil, true}
+			return response{tc, res, nil, true}
 		}
 	}
 }

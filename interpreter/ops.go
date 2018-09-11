@@ -111,87 +111,101 @@ func init() {
 func opInvoke(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	n := len(f.stack) - 1
-
 	p := bc.DecodeParam(f.btc, f.ip)
-	params := f.stack[n-p+1:]
 
 	switch fn := f.stack[n-p].(type) {
 	case bc.Func:
-
-		// check arity, and modify params if necessary
-		arity := fn.Template().Arity
-		numParams := len(params)
-		numReq := int(arity.Required)
-
-		switch arity.Kind {
-
-		case g.FixedArity:
-
-			if numParams != numReq {
-				return nil, g.ArityMismatch(numReq, numParams)
-			}
-
-		case g.VariadicArity:
-
-			if numParams < numReq {
-				return nil, g.ArityMismatchAtLeast(numReq, numParams)
-			}
-
-			// turn any extra params into a list
-			req := params[:numReq]
-			vrd := params[numReq:]
-			params = append(req, g.NewList(g.CopyValues(vrd)))
-
-		case g.MultipleArity:
-
-			if numParams < numReq {
-				return nil, g.ArityMismatchAtLeast(numReq, numParams)
-			}
-
-			numOpt := int(arity.Optional)
-			if numParams > (numReq + numOpt) {
-				return nil, g.ArityMismatchAtMost(numReq+numOpt, numParams)
-			}
-
-			// add any missing optional params
-			if numParams < (numReq + numOpt) {
-				opt := fn.Template().OptionalParams
-				missing := g.CopyValues(opt[numParams-numReq:])
-				params = append(params, missing...)
-			}
-
-		default:
-			panic("unreachable")
-		}
-
-		// Pop from stack. Note this is the only opcode that pops
-		// the stack before doing the actual operation.  Also note that
-		// we do not actually advance the instruction pointer here.
-		// That is done in bc.Return.
-		f.stack = f.stack[:n-p]
-
-		// push a new frame
-		locals := newLocals(fn.Template().NumLocals, params)
-		itp.frameStack.push(newFrame(fn, locals, false))
+		return invokeBytecode(itp, f, fn, n, p)
 
 	case g.NativeFunc:
-
-		val, err := fn.Invoke(itp, params)
-		if err != nil {
-			return nil, err
-		}
-
-		// pop from stack
-		f.stack = f.stack[:n-p]
-
-		// push result
-		f.stack = append(f.stack, val)
-
-		f.ip += 3
+		return invokeNative(itp, f, fn, n, p)
 
 	default:
 		return nil, g.TypeMismatch(g.FuncType, f.stack[n-p].Type())
 	}
+}
+
+func invokeBytecode(itp *Interpreter, f *frame, fn bc.Func, n, p int) (g.Value, g.Error) {
+
+	params := f.stack[n-p+1:]
+
+	// check arity, and modify params if necessary
+	arity := fn.Template().Arity
+	numParams := len(params)
+	numReq := int(arity.Required)
+
+	switch arity.Kind {
+
+	case g.FixedArity:
+
+		if numParams != numReq {
+			return nil, g.ArityMismatch(numReq, numParams)
+		}
+
+	case g.VariadicArity:
+
+		if numParams < numReq {
+			return nil, g.ArityMismatchAtLeast(numReq, numParams)
+		}
+
+		// turn any extra params into a list
+		req := params[:numReq]
+		vrd := params[numReq:]
+		params = append(req, g.NewList(g.CopyValues(vrd)))
+
+	case g.MultipleArity:
+
+		if numParams < numReq {
+			return nil, g.ArityMismatchAtLeast(numReq, numParams)
+		}
+
+		numOpt := int(arity.Optional)
+		if numParams > (numReq + numOpt) {
+			return nil, g.ArityMismatchAtMost(numReq+numOpt, numParams)
+		}
+
+		// add any missing optional params
+		if numParams < (numReq + numOpt) {
+			opt := fn.Template().OptionalParams
+			missing := g.CopyValues(opt[numParams-numReq:])
+			params = append(params, missing...)
+		}
+
+	default:
+		panic("unreachable")
+	}
+
+	// Pop from stack.
+	f.stack = f.stack[:n-p]
+
+	// push a new frame
+	locals := newLocals(fn.Template().NumLocals, params)
+	itp.frameStack.push(newFrame(fn, locals, false))
+
+	// NOTE: we do not actually advance the instruction pointer here.
+	// We aren't done with the invocation until the bc.Return of the
+	// new frame has been encountered.
+
+	return nil, nil
+}
+
+func invokeNative(itp *Interpreter, f *frame, fn g.NativeFunc, n, p int) (g.Value, g.Error) {
+
+	params := f.stack[n-p+1:]
+
+	val, err := fn.Invoke(itp, params)
+	if err != nil {
+		return nil, err
+	}
+
+	// pop from stack
+	f.stack = f.stack[:n-p]
+
+	// push result
+	f.stack = append(f.stack, val)
+
+	// advance
+	f.ip += 3
 
 	return nil, nil
 }
@@ -233,11 +247,12 @@ func opReturn(itp *Interpreter, f *frame) (g.Value, g.Error) {
 		// discard the current frame
 		itp.frameStack.pop()
 
-		// push the result onto the new top frame
+		// push the result onto the parent frame
 		f = itp.frameStack.peek()
 		f.stack = append(f.stack, result)
 
-		// advance the instruction pointer now that we are done invoking
+		// advance past the bc.Invoke of the parent frame
+		g.Assert(f.btc[f.ip] == bc.Invoke)
 		f.ip += 3
 
 		// done
