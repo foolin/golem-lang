@@ -256,29 +256,35 @@ func TestStackTrace(t *testing.T) {
 				"    at foo.glm:19"}))
 }
 
-//func okInterp(t *testing.T, mods []*bc.Module) {
-//	intp := NewInterpreter(builtinMgr, mods)
-//	_, es := intp.InitModules()
-//	if es != nil {
-//		panic(es)
-//	}
-//}
-//
-//func TestDebug(t *testing.T) {
-//
-//	debugInterpreter = true
-//
-//	code := `
-//fn a() {
-//    try {
-//        1/0
-//    } catch e {
-//        return 'x'
-//    } finally {
-//        return 'y'
-//    }
-//}
-//assert(a() == 'y')
-//`
-//	okInterp(t, []*bc.Module{testCompile(t, code)})
-//}
+func okInterp(t *testing.T, mods []*bc.Module) {
+	intp := NewInterpreter(builtinMgr, mods)
+	_, es := intp.InitModules()
+	if es != nil {
+		panic(es)
+	}
+}
+
+func TestDebug(t *testing.T) {
+
+	debugInterpreter = true
+
+	code := `
+fn a() {
+    println('---- begin')
+    try {
+        println('---- try')
+        1/0
+    } catch e {
+        println('---- catch')
+        return 2
+    } finally {
+        println('---- finally')
+        return 3
+    }
+    println('---- end')
+}
+println(a())
+//assert(a() == 3)
+`
+	okInterp(t, []*bc.Module{testCompile(t, code)})
+}

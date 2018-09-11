@@ -5,7 +5,7 @@
 package interpreter
 
 import (
-	//"fmt"
+	"fmt"
 
 	g "github.com/mjarmy/golem-lang/core"
 	bc "github.com/mjarmy/golem-lang/core/bytecode"
@@ -166,6 +166,7 @@ func (itp *Interpreter) handleError(res g.Value, es ErrorStruct) (g.Value, Error
 	if !ok {
 		return res, es
 	}
+	debugString(fmt.Sprintf("itp.handleError %s\n", h))
 
 	//-------------------------------------------
 	// run the catch and finally clauses
@@ -173,15 +174,26 @@ func (itp *Interpreter) handleError(res g.Value, es ErrorStruct) (g.Value, Error
 	f := itp.frameStack.peek()
 	f.isHandlingError = true
 
-	responses := []response{}
+	responses := []*response{}
+	endIp := -1
 
 	if !h.Catch.IsEmpty() {
+		endIp = h.Catch.End
+
 		f.stack = append(f.stack, es) // put error on stack
-		responses = append(responses, itp.runTryClause(h.Catch))
+		r := itp.runTryClause(h.Catch)
+		if r != nil {
+			responses = append(responses, r)
+		}
 	}
 
 	if !h.Finally.IsEmpty() {
-		responses = append(responses, itp.runTryClause(h.Finally))
+		endIp = h.Finally.End
+
+		r := itp.runTryClause(h.Finally)
+		if r != nil {
+			responses = append(responses, r)
+		}
 	}
 
 	f.isHandlingError = false
@@ -189,29 +201,36 @@ func (itp *Interpreter) handleError(res g.Value, es ErrorStruct) (g.Value, Error
 	//-------------------------------------------
 	// figure out how to proceed
 
-	r := responses[len(responses)-1]
-	if r.finishedEarly {
-		panic("TODO")
-		//if finally.result != nil {
-		//	f.stack = append(f.stack, finally.result)
-		//}
-		//return itp.handleError(finally.result, finally.err)
+	// error recovery was successful
+	if len(responses) == 0 {
+		f.ip = endIp
+		return itp.eval()
 	}
 
-	// error recovery was successful
-	f.ip = r.tryClause.End
-	return itp.eval()
+	r := responses[len(responses)-1]
+
+	// invoke the return op
+	if r.result != nil {
+		g.Assert(r.es == nil)
+
+		f.stack = append(f.stack, r.result)
+		f.ip = r.resultIp
+		return itp.eval()
+	}
+
+	// throw an error
+	g.Assert(r.es != nil)
+	return itp.handleError(nil, r.es)
 }
 
 type response struct {
-	tryClause     bc.TryClause
-	result        g.Value
-	es            ErrorStruct
-	finishedEarly bool
+	result   g.Value
+	resultIp int
+	es       ErrorStruct
 }
 
-// run a 'catch' or 'finally' clause
-func (itp *Interpreter) runTryClause(tc bc.TryClause) response {
+// run a 'catch' or 'r' clause
+func (itp *Interpreter) runTryClause(tc bc.TryClause) *response {
 
 	itp.frameStack.peek().ip = tc.Begin
 
@@ -221,39 +240,32 @@ func (itp *Interpreter) runTryClause(tc bc.TryClause) response {
 		// we've reached the end of the clause
 		if f.isHandlingError && f.ip >= tc.End {
 			g.Assert(f.ip == tc.End)
-			return response{tc, nil, nil, false}
+			return nil
 		}
 
 		res, err := itp.advance()
 		if err != nil {
 			es := newErrorStruct(err, itp.frameStack.stackTrace())
-			return response{tc, nil, es, true}
+			return &response{nil, -1, es}
 		}
 		if res != nil {
-			return response{tc, res, nil, true}
+			g.Assert(f.btc[f.ip] == bc.Return)
+			return &response{res, f.ip, nil}
 		}
 	}
 }
-
-//var debugInterpreter bool
-//
-//func debugString(s string) {
-//	if debugInterpreter {
-//		fmt.Printf(s)
-//	}
-//}
 
 // advance the interpreter forwards by one opcode.
 func (itp *Interpreter) advance() (g.Value, g.Error) {
 
 	f := itp.frameStack.peek()
 
-	//if debugInterpreter {
-	//	fmt.Printf("=========================================\n")
-	//	fmt.Printf("ip: %s\n", bc.FmtBytecode(f.btc, f.ip))
-	//	fmt.Printf("\n")
-	//	itp.frameStack.dump()
-	//}
+	if debugInterpreter {
+		fmt.Printf("=========================================\n")
+		fmt.Printf("ip: %s\n", bc.FmtBytecode(f.btc, f.ip))
+		fmt.Printf("\n")
+		itp.frameStack.debug()
+	}
 
 	op := ops[f.btc[f.ip]]
 	return op(itp, f)
