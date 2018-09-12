@@ -243,16 +243,22 @@ func (itp *Interpreter) runTryClause(tc bc.TryClause) *response {
 			return nil
 		}
 
+		// there is an explicit return inside the clause
+		if f.isHandlingError && f.btc[f.ip] == bc.Return {
+			n := len(f.stack) - 1
+			res := f.stack[n]
+			f.stack = f.stack[:n]
+			return &response{res, f.ip, nil}
+		}
+
 		res, err := itp.advance()
+		g.Assert(res == nil)
 		if err != nil {
 			es := newErrorStruct(err, itp.frameStack.stackTrace())
 			return &response{nil, -1, es}
 		}
-		if res != nil {
-			g.Assert(f.btc[f.ip] == bc.Return)
-			return &response{res, f.ip, nil}
-		}
 	}
+
 }
 
 // advance the interpreter forwards by one opcode.

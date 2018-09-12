@@ -54,18 +54,10 @@ func (e *errorStruct) StackTrace() []string {
 	return e.stackTrace
 }
 
-// This *should* be impossible...
 func mustStr(s string) g.Str {
 	sv, err := g.NewStr(s)
 	if err != nil {
-		panic("internal interpreter error")
+		panic(err)
 	}
 	return sv
 }
-
-//func dumpErrorStruct(msg string, es ErrorStruct) {
-//	fmt.Printf("dumpErrorStruct %s %s\n", msg, es.Error())
-//	for _, s := range es.StackTrace() {
-//		fmt.Printf("%s\n", s)
-//	}
-//}
