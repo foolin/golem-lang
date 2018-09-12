@@ -1,9 +1,8 @@
 # The Golem Programming Language
 
 Golem is a general purpose, interpreted language, with first-class 
-functions and a dynamic type system.  Golem's primary use case is to be
-embedded inside a Go program, similar to how Lua is designed to be 
-embedded inside a C program.
+functions and a dynamic type system.  Golem can be used as a command-line application,
+but it is also easy to embed Golem inside a Golang progam.
 
 Golem combines the concurrency system of Go with the embeddability 
 of Lua, while borrowing many ideas from other scripting languages like
