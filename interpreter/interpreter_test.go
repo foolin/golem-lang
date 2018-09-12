@@ -5,7 +5,7 @@
 package interpreter
 
 import (
-	//"fmt"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -33,9 +33,9 @@ func testCompile(t *testing.T, code string) *bc.Module {
 
 	source := &scanner.Source{Name: "foo", Path: "foo.glm", Code: code}
 	mods, errs := compiler.CompileSourceFully(builtinMgr, source, nil)
-	//if errs != nil {
-	//	fmt.Printf("%v\n", errs)
-	//}
+	if errs != nil {
+		fmt.Printf("%v\n", errs)
+	}
 	tassert(t, errs == nil)
 	tassert(t, len(mods) == 1)
 
@@ -256,35 +256,73 @@ func TestStackTrace(t *testing.T) {
 				"    at foo.glm:19"}))
 }
 
-func okInterp(t *testing.T, mods []*bc.Module) {
-	intp := NewInterpreter(builtinMgr, mods)
-	_, es := intp.InitModules()
-	if es != nil {
-		panic(es)
-	}
-}
-
-func TestDebug(t *testing.T) {
-
-	debugInterpreter = true
-
-	code := `
-fn a() {
-    println('---- begin')
-    try {
-        println('---- try')
-        1/0
-    } catch e {
-        println('---- catch')
-        return 2
-    } finally {
-        println('---- finally')
-        return 3
-    }
-    println('---- end')
-}
-println(a())
-//assert(a() == 3)
-`
-	okInterp(t, []*bc.Module{testCompile(t, code)})
-}
+//func okInterp(t *testing.T, mods []*bc.Module) {
+//	intp := NewInterpreter(builtinMgr, mods)
+//	_, es := intp.InitModules()
+//	if es != nil {
+//		panic(es)
+//	}
+//}
+//
+//func TestDebug(t *testing.T) {
+//
+//	debugInterpreter = true
+//
+//	code := `
+//fn fail(func, err) {
+//    try {
+//        func()
+//        assert(false)
+//    } catch e {
+//        //println(e.error)
+//        assert(err == e.error)
+//    }
+//}
+//            let p = 0
+//            let q = 0
+//
+//            fn a() {
+//                try {
+//                    1/0
+//                } catch e {
+//                    throw e.error
+//                } finally {
+//                    q++
+//                }
+//                assert(false)
+//            }
+//
+//            fn b() {
+//                a()
+//            }
+//
+//            fn c() {
+//                try {
+//                    b()
+//                } catch e {
+//                    assert(e.error == 'DivideByZero')
+//                    p++
+//                } finally {
+//                    throw 'TestError'
+//                }
+//                assert(false)
+//            }
+//
+//            fn d() {
+//                c()
+//            }
+//
+//            fail(a, 'DivideByZero')
+//            assert([p,q] == [0,1])
+//
+//            //fail(b, 'DivideByZero')
+//            //assert([p,q] == [0,2])
+//
+//            //fail(c, 'TestError')
+//            //assert([p,q] == [1,3])
+//
+//            //fail(d, 'TestError')
+//            //assert([p,q] == [2,4])
+//`
+//	okInterp(t, []*bc.Module{testCompile(t, code)})
+//}

@@ -2055,6 +2055,21 @@ fn testTry() {
 
             fail(d, 'TestError')
             assert([p,q] == [2,4])
+        },
+        fn () {
+            fn a() {
+                try {
+                    throw 'a'
+                }
+                catch e {
+                    [1].map(fn(e) {
+                        let s = struct {
+                            p: prop { || => 1/0 }
+                        }
+                        s.p
+                    })
+                }
+            }
         }
     ]
     let n = 0

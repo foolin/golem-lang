@@ -189,11 +189,11 @@ func invokeBytecode(itp *Interpreter, f *frame, fn bc.Func, n, p int) (g.Value, 
 	return nil, nil
 }
 
-func invokeNative(itp *Interpreter, f *frame, fn g.NativeFunc, n, p int) (g.Value, g.Error) {
+func invokeNative(ev g.Eval, f *frame, fn g.NativeFunc, n, p int) (g.Value, g.Error) {
 
 	params := f.stack[n-p+1:]
 
-	val, err := fn.Invoke(itp, params)
+	val, err := fn.Invoke(ev, params)
 	if err != nil {
 		return nil, err
 	}
