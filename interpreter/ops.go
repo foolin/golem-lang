@@ -224,20 +224,16 @@ func opReturn(itp *Interpreter, f *frame) (g.Value, g.Error) {
 	n := len(f.stack) - 1
 	result := f.stack[n]
 
+	// discard the current frame
+	itp.frameStack.pop()
+
 	switch {
 
 	case f.isBase:
 
-		// discard the current frame
-		itp.frameStack.pop()
-
-		// done
 		return result, nil
 
 	default:
-
-		// discard the current frame
-		itp.frameStack.pop()
 
 		// push the result onto the parent frame
 		f = itp.frameStack.peek()
@@ -247,7 +243,6 @@ func opReturn(itp *Interpreter, f *frame) (g.Value, g.Error) {
 		g.Assert(f.btc[f.ip] == bc.Invoke)
 		f.ip += 3
 
-		// done
 		return nil, nil
 	}
 }
