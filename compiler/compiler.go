@@ -18,7 +18,7 @@ import (
 // The Golem Compiler
 //---------------------------------------------------------------
 
-// Compiler compiles an AST into bc
+// Compiler compiles an AST into bytecode
 type Compiler interface {
 	ast.Visitor
 
