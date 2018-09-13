@@ -15,7 +15,7 @@ type parserErrorKind int
 const (
 	unexpectedChar parserErrorKind = iota
 	unexpectedToken
-	unexpectedReservedWork
+	unexpectedReservedWord
 	unexpectedEOF
 	invalidPostfix
 	invalidFor
@@ -46,7 +46,7 @@ func (e *parserError) Error() string {
 	case unexpectedToken:
 		return fmt.Sprintf("Unexpected Token '%v' at %s:%v", e.token.Text, e.path, e.token.Position)
 
-	case unexpectedReservedWork:
+	case unexpectedReservedWord:
 		return fmt.Sprintf("Unexpected Reserved Word '%v' at %s:%v", e.token.Text, e.path, e.token.Position)
 
 	case unexpectedEOF:

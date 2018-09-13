@@ -1565,7 +1565,7 @@ func (p *Parser) unexpected() error {
 		return newParserError(p.scn.Source.Path, unexpectedEOF, p.cur.token)
 
 	case ast.Reserved:
-		return newParserError(p.scn.Source.Path, unexpectedReservedWork, p.cur.token)
+		return newParserError(p.scn.Source.Path, unexpectedReservedWord, p.cur.token)
 
 	default:
 		return newParserError(p.scn.Source.Path, unexpectedToken, p.cur.token)
