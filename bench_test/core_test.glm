@@ -603,7 +603,7 @@ fn testStr() {
     assert(set { 
         'contains', 'index', 'lastIndex', 
         'hasPrefix', 'hasSuffix',
-        'replace', 'split', 'toChars', 'map'
+        'replace', 'split', 'trim', 'toChars', 'map'
     } == fields(s))
     for f in fields(s) {
         assert(hasField(s, f))
@@ -615,6 +615,7 @@ fn testStr() {
     assert(s.hasSuffix == getField(s, 'hasSuffix'))
     assert(s.replace == getField(s, 'replace'))
     assert(s.split == getField(s, 'split'))
+    assert(s.trim == getField(s, 'trim'))
     assert(s.toChars == getField(s, 'toChars'))
     assert(s.map == getField(s, 'map'))
 
@@ -743,6 +744,9 @@ fn testStr() {
     const ls = [1]
     const p = iter(ls).next()
     assert([true, false, true] == [x, y, p])
+
+    s = '\t\nabc \n\t'
+    assert('abc' == s.trim('\n\t '))
 }
 
 fn testList() {

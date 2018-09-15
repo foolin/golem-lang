@@ -1,14 +1,43 @@
 import os
 
-fn main(args) {
+fn typesHeader() {
+    return [
+`Golem has a set of standard types.  Each type determines a set of values 
+together with operations and fields specific to those values.`,
+'']
+}
 
-    println(os.stat('generateDocs.glm').name())
-    let f = os.create('temp.md')
+fn typeDoc(name) {
+    let result = []
+    let f = os.open(name)
     try {
-        f.writeLines(['abcdef'])
+        let lines = f.readLines()
+        for ln in lines {
+            ln = ln.trim('\t')
+            if ln.hasPrefix('//*') {
+                result.add(ln == '//*' ? '' : ln[4:])
+            }
+        }
+
     } finally {
         f.close()
     }
+    return result
+}
 
+fn main(args) {
+
+    let types = []
+
+    types.addAll(typesHeader())
+    types.addAll(typeDoc('../core/null.go'))
+    types.addAll(typeDoc('../core/bool.go'))
+
+    let f = os.create('types.md')
+    try {
+        f.writeLines(types)
+    } finally {
+        f.close()
+    }
 }
 

@@ -235,6 +235,13 @@ func (s str) Split(sep Str) List {
 	return NewList(result)
 }
 
+func (s str) Trim(cutset Str) Str {
+	a := string(s)
+	b := string(cutset.(str))
+
+	return str(strings.Trim(a, b))
+}
+
 func (s str) ToChars() List {
 
 	runes := []rune(string(s))
@@ -315,6 +322,12 @@ var strMethods = map[string]Method{
 		[]Type{StrType}, false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			return self.(Str).Split(params[0].(Str)), nil
+		}),
+
+	"trim": NewFixedMethod(
+		[]Type{StrType}, false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			return self.(Str).Trim(params[0].(Str)), nil
 		}),
 
 	"toChars": NewNullaryMethod(

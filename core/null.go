@@ -4,15 +4,19 @@
 
 package core
 
-// Null represents the null value
-var Null NullValue = &null{1019}
-
+//* #Null
+//*
+//* Null represents the absence of a value. The only instance of Null is `null`.
+//*
 type null struct {
 	// https://golang.org/ref/spec#Size_and_alignment_guarantees
 	// Zero-size variables share the same address, so we use a placeholder
 	// to give Null a size.
 	placeholder int
 }
+
+// Null represents the null value
+var Null NullValue = &null{1019}
 
 func (n *null) basicMarker() {}
 

@@ -4,6 +4,11 @@
 
 package core
 
+//* #Bool
+//*
+//* Bool represents boolean truth values.  The only instances of
+//* Bool are `true` and `false`.
+//*
 type _bool bool
 
 // True is true

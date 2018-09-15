@@ -109,6 +109,7 @@ type (
 		HasSuffix(Str) Bool
 		Replace(Str, Str, Int) Str
 		Split(Str) List
+		Trim(Str) Str
 		ToChars() List
 		Map(Eval, StrMapper) (Str, Error)
 	}
