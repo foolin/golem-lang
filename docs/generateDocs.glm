@@ -1,21 +1,30 @@
 import os
 
-fn typesHeader() {
-    return [
-`Golem has a set of standard types.  Each type determines a set of values 
-together with operations and fields specific to those values.`,
-'']
-}
+const footer = [
+    '',
+`_This document uses documentation from [go](https://github.com/golang/go), which
+is licensed under the BSD-3-Clause license._`
+]
 
-fn typeDoc(name) {
+
+fn doc(name) {
     let result = []
     let f = os.open(name)
     try {
         let lines = f.readLines()
+        let isDoc = false
         for ln in lines {
             ln = ln.trim('\t')
-            if ln.hasPrefix('//*') {
-                result.add(ln == '//*' ? '' : ln[4:])
+            if isDoc {
+                if ln.hasPrefix('*/') {
+                    isDoc = false
+                } else {
+                    result.add(ln)
+                }
+            } else {
+                if ln.hasPrefix('/*doc') {
+                    isDoc = true
+                }
             }
         }
 
@@ -29,9 +38,13 @@ fn main(args) {
 
     let types = []
 
-    types.addAll(typesHeader())
-    types.addAll(typeDoc('../core/null.go'))
-    types.addAll(typeDoc('../core/bool.go'))
+    types.addAll(doc('../core/value.go'))
+    types.addAll(doc('../core/null.go'))
+    types.addAll(doc('../core/bool.go'))
+    types.addAll(doc('../core/int.go'))
+    types.addAll(doc('../core/float.go'))
+    types.addAll(doc('../core/str.go'))
+    types.addAll(footer)
 
     let f = os.create('types.md')
     try {

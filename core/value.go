@@ -8,6 +8,34 @@ import (
 	"fmt"
 )
 
+/*doc
+Golem has a set of standard types.  Each type has a set of values,
+together with operators and fields specific to those values.
+
+Basic Types:
+
+  * [Null](#null)
+  * [Bool](#bool)
+  * [Int](#int)
+  * [Float](#float)
+  * [Str](#str)
+
+Composite Types:
+
+  * [List](#list)
+  * [Range](#range)
+  * [Tuple](#tuple)
+  * [Dict](#dict)
+  * [Set](#set)
+  * [Struct](#struct)
+
+Other Types:
+
+  * [Func](#func)
+  * [Chan](#chan)
+
+*/
+
 //---------------------------------------------------------------
 // Value
 //---------------------------------------------------------------

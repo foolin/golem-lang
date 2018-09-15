@@ -15,16 +15,16 @@ const (
 
 	NullType
 	BoolType
-	StrType
 	IntType
 	FloatType
-	FuncType
+	StrType
 	ListType
 	RangeType
 	TupleType
 	DictType
 	SetType
 	StructType
+	FuncType
 	ChanType
 )
 
@@ -35,14 +35,12 @@ func (t Type) String() string {
 		return "Null"
 	case BoolType:
 		return "Bool"
-	case StrType:
-		return "Str"
 	case IntType:
 		return "Int"
 	case FloatType:
 		return "Float"
-	case FuncType:
-		return "Func"
+	case StrType:
+		return "Str"
 	case ListType:
 		return "List"
 	case RangeType:
@@ -55,6 +53,8 @@ func (t Type) String() string {
 		return "Set"
 	case StructType:
 		return "Struct"
+	case FuncType:
+		return "Func"
 	case ChanType:
 		return "Chan"
 

@@ -4,10 +4,14 @@
 
 package core
 
-//* #Null
-//*
-//* Null represents the absence of a value. The only instance of Null is `null`.
-//*
+/*doc
+## Null
+
+Null represents the absence of a value. The only instance of Null is `null`.
+
+Null has no valid operators, and no fields.
+
+*/
 type null struct {
 	// https://golang.org/ref/spec#Size_and_alignment_guarantees
 	// Zero-size variables share the same address, so we use a placeholder
