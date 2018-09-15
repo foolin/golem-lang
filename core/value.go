@@ -12,25 +12,20 @@ import (
 Golem has a set of standard types.  Each type has a set of values,
 together with operators and fields specific to those values.
 
-Basic Types:
-
+* Basic Types:
   * [Null](#null)
   * [Bool](#bool)
   * [Int](#int)
   * [Float](#float)
   * [Str](#str)
-
-Composite Types:
-
+* Composite Types:
   * [List](#list)
   * [Range](#range)
   * [Tuple](#tuple)
   * [Dict](#dict)
   * [Set](#set)
   * [Struct](#struct)
-
-Other Types:
-
+* Other Types:
   * [Func](#func)
   * [Chan](#chan)
 

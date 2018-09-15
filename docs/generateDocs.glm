@@ -6,8 +6,7 @@ const footer = [
 is licensed under the BSD-3-Clause license._`
 ]
 
-
-fn doc(name) {
+fn docs(name) {
     let result = []
     let f = os.open(name)
     try {
@@ -38,12 +37,18 @@ fn main(args) {
 
     let types = []
 
-    types.addAll(doc('../core/value.go'))
-    types.addAll(doc('../core/null.go'))
-    types.addAll(doc('../core/bool.go'))
-    types.addAll(doc('../core/int.go'))
-    types.addAll(doc('../core/float.go'))
-    types.addAll(doc('../core/str.go'))
+    types.addAll(docs('../core/value.go'))
+
+    types.addAll(['# Basic Types', ''])
+    types.addAll(docs('../core/null.go'))
+    types.addAll(docs('../core/bool.go'))
+    types.addAll(docs('../core/int.go'))
+    types.addAll(docs('../core/float.go'))
+    types.addAll(docs('../core/str.go'))
+
+    types.addAll(['# Composite Types', ''])
+    types.addAll(docs('../core/list.go'))
+
     types.addAll(footer)
 
     let f = os.create('types.md')

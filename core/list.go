@@ -11,8 +11,19 @@ import (
 	"strings"
 )
 
-//---------------------------------------------------------------
-// list
+/*doc
+## List
+
+A List is an ordered array of values.
+
+Valid operators for List are:
+	* The equality operators `==`, `!=`,
+	* The index operator `a[x]`
+	* The slice operators `a[x:y]`, `a[x:]`, `a[:y]`
+
+The index operator and slice operators always return a List.
+
+*/
 
 type list struct {
 	values []Value
@@ -386,6 +397,11 @@ func (i *listIterator) IterGet(ev Eval) (Value, Error) {
 //--------------------------------------------------------------
 // fields
 
+/*doc
+List has the following fields:
+
+*/
+
 var listMethods = map[string]Method{
 
 	"add": NewFixedMethod(
@@ -408,17 +424,40 @@ var listMethods = map[string]Method{
 			return ls.Clear()
 		}),
 
-	"isEmpty": NewNullaryMethod(
-		func(self interface{}, ev Eval) (Value, Error) {
-			ls := self.(List)
-			return ls.IsEmpty(), nil
-		}),
-
 	"contains": NewFixedMethod(
 		[]Type{AnyType}, true,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			ls := self.(List)
 			return ls.Contains(ev, params[0])
+		}),
+
+	"filter": NewFixedMethod(
+		[]Type{FuncType}, false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			ls := self.(List)
+
+			// check arity
+			fn := params[0].(Func)
+			expected := Arity{FixedArity, 1, 0}
+			if fn.Arity() != expected {
+				return nil, fmt.Errorf(
+					"ArityMismatch: filter function must have 1 parameter")
+			}
+
+			// invoke
+			return ls.Filter(ev, func(ev Eval, v Value) (Bool, Error) {
+				val, err := fn.Invoke(ev, []Value{v})
+				if err != nil {
+					return nil, err
+				}
+
+				result, ok := val.(Bool)
+				if !ok {
+					return nil, fmt.Errorf(
+						"TypeMismatch: filter function must return Bool, not %s", val.Type())
+				}
+				return result, nil
+			})
 		}),
 
 	"indexOf": NewFixedMethod(
@@ -428,11 +467,10 @@ var listMethods = map[string]Method{
 			return ls.IndexOf(ev, params[0])
 		}),
 
-	"remove": NewFixedMethod(
-		[]Type{IntType}, true,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+	"isEmpty": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
 			ls := self.(List)
-			return ls.Remove(ev, params[0].(Int))
+			return ls.IsEmpty(), nil
 		}),
 
 	"join": NewMultipleMethod(
@@ -452,42 +490,6 @@ var listMethods = map[string]Method{
 			}
 
 			return ls.Join(ev, delim)
-		}),
-
-	"sort": NewMultipleMethod(
-		[]Type{},
-		[]Type{FuncType},
-		false,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
-			ls := self.(List)
-
-			// if no function was provided, just use the default Lesser
-			if len(params) == 0 {
-				return ls.Sort(ev, DefaultLesser)
-			}
-
-			// check arity
-			fn := params[0].(Func)
-			expected := Arity{FixedArity, 2, 0}
-			if fn.Arity() != expected {
-				return nil, fmt.Errorf(
-					"ArityMismatch: sort function must have 2 parameters")
-			}
-
-			// invoke
-			return ls.Sort(ev, func(ev Eval, a Value, b Value) (Bool, Error) {
-				val, err := fn.Invoke(ev, []Value{a, b})
-				if err != nil {
-					return nil, err
-				}
-
-				result, ok := val.(Bool)
-				if !ok {
-					return nil, fmt.Errorf(
-						"TypeMismatch: sort function must return Bool, not %s", val.Type())
-				}
-				return result, nil
-			})
 		}),
 
 	"map": NewFixedMethod(
@@ -534,22 +536,36 @@ var listMethods = map[string]Method{
 			})
 		}),
 
-	"filter": NewFixedMethod(
-		[]Type{FuncType}, false,
+	"remove": NewFixedMethod(
+		[]Type{IntType}, true,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			ls := self.(List)
+			return ls.Remove(ev, params[0].(Int))
+		}),
+
+	"sort": NewMultipleMethod(
+		[]Type{},
+		[]Type{FuncType},
+		false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			ls := self.(List)
 
+			// if no function was provided, just use the default Lesser
+			if len(params) == 0 {
+				return ls.Sort(ev, DefaultLesser)
+			}
+
 			// check arity
 			fn := params[0].(Func)
-			expected := Arity{FixedArity, 1, 0}
+			expected := Arity{FixedArity, 2, 0}
 			if fn.Arity() != expected {
 				return nil, fmt.Errorf(
-					"ArityMismatch: filter function must have 1 parameter")
+					"ArityMismatch: sort function must have 2 parameters")
 			}
 
 			// invoke
-			return ls.Filter(ev, func(ev Eval, v Value) (Bool, Error) {
-				val, err := fn.Invoke(ev, []Value{v})
+			return ls.Sort(ev, func(ev Eval, a Value, b Value) (Bool, Error) {
+				val, err := fn.Invoke(ev, []Value{a, b})
 				if err != nil {
 					return nil, err
 				}
@@ -557,7 +573,7 @@ var listMethods = map[string]Method{
 				result, ok := val.(Bool)
 				if !ok {
 					return nil, fmt.Errorf(
-						"TypeMismatch: filter function must return Bool, not %s", val.Type())
+						"TypeMismatch: sort function must return Bool, not %s", val.Type())
 				}
 				return result, nil
 			})

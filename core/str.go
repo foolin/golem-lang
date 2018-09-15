@@ -24,88 +24,6 @@ Valid operators for Str are:
 
 The index operator and slice operators always return a Str.
 
-/*doc
-Str has the following fields, all of which are [Funcs](#func):
-
-#### `contains`
-`contains` reports whether a substring is within a string.
-
-	* signature: `contains(substr <Str>) <Bool>`
-	* example: `'abcdef'.contains('de')`
-
-#### `hasPrefix`
-`hasPrefix` tests whether a string begins with a prefix.
-
-	* signature: `hasPrefix(prefix <Str>) <Bool>`
-	* example: `'abcdef'.hasPrefix('ab')`
-
-#### `hasSuffix`
-`hasSuffix` tests whether a string ends with a suffix.
-
-	* signature: `hasSuffix(suffix <Str>) <Bool>`
-	* example: `'abcdef'.hasSuffix('ab')`
-
-#### `index`
-`index` returns the index of the first instance of a substring in a string.
-or -1 if the substring is not present.
-
-	* signature: `index(substr <Str>) <Int>`
-	* example: `'abcab'.index('ab')`
-
-#### `lastIndex`
-`lastIndex` returns the index of the last instance of a substring in a string,
-or -1 if the substring is not present.
-
-	* signature: `lastIndex(substr <Str>) <Int>`
-	* example: `'abcab'.lastIndex('ab')`
-
-#### `map`
-`map` returns a copy of a string with all its characters modified according to
-the mapping function.  The mapping function must accept one Str parameter,
-and must return a Str.
-
-	* signature: `map(mapping <Func>) <Str>`
-	* example:
-
-```
-let s = 'abc(def)[x,y,z]'
-let t = s.map(fn(c) {
-    return c >= 'a' && c <= 'z' ? c : ''
-})
-println(t)
-```
-
-#### `replace`
-`replace` returns a copy of a string with the first n non-overlapping instances
-of `old` replaced by `new`. If `old` is empty, it matches at the beginning of a string
-and after each UTF-8 sequence, yielding up to k+1 replacements for a k-rune string.
-If `n` < 0, there is no limit on the number of replacements.  The parameter `n` is
-optional, and defaults to -1.
-
-	* signature: `replace(old <Str>, new <Str>, n = -1 <Int>) <Int>`
-	* example: `'abcab'.replace('a', 'x')`
-
-#### `split`
-`split` slices a string into all substrings separated by sep and returns a list of the substrings between those separators.
-
-If the string does not contain sep and sep is not empty, `split` returns a list of length 1 whose only element is the string.
-
-If sep is empty, `split` splits after each UTF-8 sequence. If both the string and sep are empty, `split` returns an empty list.
-
-	* signature: `split(sep <Str>) <List>`
-	* example: `'a,b,c'.split(',')`
-
-#### `toChars`
-`toChars` splits a string into a list of single-rune Strs.
-
-	* signature: `toChars() <List>`
-	* example: `'xyz'.toChars()`
-
-#### `trim`
-`trim` returns a new string with all leading and trailing runes contained in cutset removed.
-
-	* signature: `trim(<Str>) <Str>`
-	* example: `'\t\tabc\n'.trim('\t\n')`
 */
 
 type str string
@@ -370,38 +288,103 @@ func (s str) Map(ev Eval, mapper StrMapper) (Str, Error) {
 //--------------------------------------------------------------
 // fields
 
+/*doc
+Str has the following fields:
+
+*/
+
 var strMethods = map[string]Method{
 
+	/*doc
+	#### `contains`
+	`contains` reports whether a substring is within a string.
+
+		* signature: `contains(substr <Str>) <Bool>`
+		* example: `'abcdef'.contains('de')`
+
+	*/
 	"contains": NewFixedMethod(
 		[]Type{StrType}, false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			return self.(Str).Contains(params[0].(Str)), nil
 		}),
 
+	/*doc
+	#### `hasPrefix`
+	`hasPrefix` tests whether a string begins with a prefix.
+
+		* signature: `hasPrefix(prefix <Str>) <Bool>`
+		* example: `'abcdef'.hasPrefix('ab')`
+
+	*/
 	"hasPrefix": NewFixedMethod(
 		[]Type{StrType}, false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			return self.(Str).HasPrefix(params[0].(Str)), nil
 		}),
 
+	/*doc
+	#### `hasSuffix`
+	`hasSuffix` tests whether a string ends with a suffix.
+
+		* signature: `hasSuffix(suffix <Str>) <Bool>`
+		* example: `'abcdef'.hasSuffix('ab')`
+
+	*/
 	"hasSuffix": NewFixedMethod(
 		[]Type{StrType}, false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			return self.(Str).HasSuffix(params[0].(Str)), nil
 		}),
 
+	/*doc
+	#### `index`
+	`index` returns the index of the first instance of a substring in a string.
+	or -1 if the substring is not present.
+
+		* signature: `index(substr <Str>) <Int>`
+		* example: `'abcab'.index('ab')`
+
+	*/
 	"index": NewFixedMethod(
 		[]Type{StrType}, false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			return self.(Str).Index(params[0].(Str)), nil
 		}),
 
+	/*doc
+	#### `lastIndex`
+	`lastIndex` returns the index of the last instance of a substring in a string,
+	or -1 if the substring is not present.
+
+		* signature: `lastIndex(substr <Str>) <Int>`
+		* example: `'abcab'.lastIndex('ab')`
+
+	*/
 	"lastIndex": NewFixedMethod(
 		[]Type{StrType}, false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			return self.(Str).LastIndex(params[0].(Str)), nil
 		}),
 
+	/*doc
+	#### `map`
+	`map` returns a copy of a string with all its characters modified according to
+	the mapping function.  The mapping function must accept one Str parameter,
+	and must return a Str.
+
+		* signature: `map(mapping <Func>) <Str>`
+		* example:
+
+	```
+	let s = 'abc(def)[x,y,z]'
+	let t = s.map(fn(c) {
+	    return c >= 'a' && c <= 'z' ? c : ''
+	})
+	println(t)
+	```
+
+	*/
 	"map": NewFixedMethod(
 		[]Type{FuncType}, false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
@@ -431,6 +414,18 @@ var strMethods = map[string]Method{
 			})
 		}),
 
+	/*doc
+	#### `replace`
+	`replace` returns a copy of a string with the first n non-overlapping instances
+	of `old` replaced by `new`. If `old` is empty, it matches at the beginning of a string
+	and after each UTF-8 sequence, yielding up to k+1 replacements for a k-rune string.
+	If `n` < 0, there is no limit on the number of replacements.  The parameter `n` is
+	optional, and defaults to -1.
+
+		* signature: `replace(old <Str>, new <Str>, n = -1 <Int>) <Int>`
+		* example: `'abcab'.replace('a', 'x')`
+
+	*/
 	"replace": NewMultipleMethod(
 		[]Type{StrType, StrType},
 		[]Type{IntType},
@@ -445,18 +440,49 @@ var strMethods = map[string]Method{
 			return self.(Str).Replace(old, new, n), nil
 		}),
 
+	/*doc
+	#### `split`
+	`split` slices a string into all substrings separated by sep and returns a list
+	of the substrings between those separators.
+
+	If the string does not contain sep and sep is not empty, `split` returns a list
+	of length 1 whose only element is the string.
+
+	If sep is empty, `split` splits after each UTF-8 sequence. If both the string
+	and sep are empty, `split` returns an empty list.
+
+		* signature: `split(sep <Str>) <List>`
+		* example: `'a,b,c'.split(',')`
+
+	*/
 	"split": NewFixedMethod(
 		[]Type{StrType}, false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			return self.(Str).Split(params[0].(Str)), nil
 		}),
 
+	/*doc
+	#### `toChars`
+	`toChars` splits a string into a list of single-rune Strs.
+
+		* signature: `toChars() <List>`
+		* example: `'xyz'.toChars()`
+
+	*/
 	"toChars": NewNullaryMethod(
 		func(self interface{}, ev Eval) (Value, Error) {
 			s := self.(Str)
 			return s.ToChars(), nil
 		}),
 
+	/*doc
+	#### `trim`
+	`trim` returns a new string with all leading and trailing runes contained in cutset removed.
+
+		* signature: `trim(<Str>) <Str>`
+		* example: `'\t\tabc\n'.trim('\t\n')`
+
+	*/
 	"trim": NewFixedMethod(
 		[]Type{StrType}, false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {

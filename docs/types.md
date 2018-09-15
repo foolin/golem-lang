@@ -1,27 +1,24 @@
 Golem has a set of standard types.  Each type has a set of values,
 together with operators and fields specific to those values.
 
-Basic Types:
-
+* Basic Types:
   * [Null](#null)
   * [Bool](#bool)
   * [Int](#int)
   * [Float](#float)
   * [Str](#str)
-
-Composite Types:
-
+* Composite Types:
   * [List](#list)
   * [Range](#range)
   * [Tuple](#tuple)
   * [Dict](#dict)
   * [Set](#set)
   * [Struct](#struct)
-
-Other Types:
-
+* Other Types:
   * [Func](#func)
   * [Chan](#chan)
+
+# Basic Types
 
 ## Null
 
@@ -86,8 +83,7 @@ Valid operators for Str are:
 
 The index operator and slice operators always return a Str.
 
-/*doc
-Str has the following fields, all of which are [Funcs](#func):
+Str has the following fields:
 
 #### `contains`
 `contains` reports whether a substring is within a string.
@@ -148,11 +144,14 @@ optional, and defaults to -1.
 * example: `'abcab'.replace('a', 'x')`
 
 #### `split`
-`split` slices a string into all substrings separated by sep and returns a list of the substrings between those separators.
+`split` slices a string into all substrings separated by sep and returns a list
+of the substrings between those separators.
 
-If the string does not contain sep and sep is not empty, `split` returns a list of length 1 whose only element is the string.
+If the string does not contain sep and sep is not empty, `split` returns a list
+of length 1 whose only element is the string.
 
-If sep is empty, `split` splits after each UTF-8 sequence. If both the string and sep are empty, `split` returns an empty list.
+If sep is empty, `split` splits after each UTF-8 sequence. If both the string
+and sep are empty, `split` returns an empty list.
 
 * signature: `split(sep <Str>) <List>`
 * example: `'a,b,c'.split(',')`
@@ -168,6 +167,22 @@ If sep is empty, `split` splits after each UTF-8 sequence. If both the string an
 
 * signature: `trim(<Str>) <Str>`
 * example: `'\t\tabc\n'.trim('\t\n')`
+
+# Composite Types
+
+## List
+
+A List is an ordered array of values.
+
+Valid operators for List are:
+* The equality operators `==`, `!=`,
+* The index operator `a[x]`
+* The slice operators `a[x:y]`, `a[x:]`, `a[:y]`
+
+The index operator and slice operators always return a List.
+
+List has the following fields:
+
 
 _This document uses documentation from [go](https://github.com/golang/go), which
 is licensed under the BSD-3-Clause license._
