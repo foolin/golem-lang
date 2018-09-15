@@ -1,0 +1,14 @@
+import os
+
+fn main(args) {
+
+    println(os.stat('generateDocs.glm').name())
+    let f = os.create('temp.md')
+    try {
+        f.writeLines(['abcdef'])
+    } finally {
+        f.close()
+    }
+
+}
+

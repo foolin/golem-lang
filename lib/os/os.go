@@ -20,9 +20,10 @@ func init() {
 	var err error
 	Os, err = g.NewFrozenFieldStruct(
 		map[string]g.Field{
-			"exit": g.NewField(exit),
-			"open": g.NewField(open),
-			"stat": g.NewField(stat),
+			"exit":   g.NewField(exit),
+			"open":   g.NewField(open),
+			"create": g.NewField(create),
+			"stat":   g.NewField(stat),
 		})
 	g.Assert(err == nil)
 }
@@ -46,6 +47,19 @@ var open g.Value = g.NewFixedNativeFunc(
 		s := params[0].(g.Str)
 
 		f, err := os.Open(s.String())
+		if err != nil {
+			return nil, g.Error(fmt.Errorf("OsError: %s", err.Error()))
+		}
+		return newFile(f), nil
+	})
+
+// create creates a file
+var create g.Value = g.NewFixedNativeFunc(
+	[]g.Type{g.StrType}, false,
+	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
+		s := params[0].(g.Str)
+
+		f, err := os.Create(s.String())
 		if err != nil {
 			return nil, g.Error(fmt.Errorf("OsError: %s", err.Error()))
 		}
@@ -138,10 +152,18 @@ var fileMethods = map[string]g.Method{
 			return readLines(f)
 		}),
 
+	"writeLines": g.NewFixedMethod(
+		[]g.Type{g.ListType}, true,
+		func(self interface{}, ev g.Eval, params []g.Value) (g.Value, g.Error) {
+			f := self.(*os.File)
+			lines := params[0].(g.List)
+			return g.Null, writeLines(ev, f, lines)
+		}),
+
 	"close": g.NewNullaryMethod(
 		func(self interface{}, ev g.Eval) (g.Value, g.Error) {
 			f := self.(*os.File)
-			err := close(f)
+			err := closeFile(f)
 			if err != nil {
 				return nil, err
 			}
@@ -165,17 +187,37 @@ func readLines(f io.Reader) (g.List, g.Error) {
 		lines = append(lines, s)
 	}
 
-	if err := scanner.Err(); err != nil {
-		return nil, g.Error(fmt.Errorf("OsError: %s", err.Error()))
+	if e := scanner.Err(); e != nil {
+		return nil, g.Error(fmt.Errorf("OsError: %s", e.Error()))
 	}
 
 	return g.NewList(lines), nil
 }
 
-func close(f io.Closer) g.Error {
-	err := f.Close()
-	if err != nil {
-		return g.Error(fmt.Errorf("OsError: %s", err.Error()))
+func writeLines(ev g.Eval, f *os.File, lines g.List) g.Error {
+
+	for _, v := range lines.Values() {
+		s, err := v.ToStr(ev)
+		if err != nil {
+			return err
+		}
+		_, e := f.WriteString(s.String())
+		if e != nil {
+			return g.Error(fmt.Errorf("OsError: %s", e.Error()))
+		}
+		_, e = f.WriteString("\n")
+		if e != nil {
+			return g.Error(fmt.Errorf("OsError: %s", e.Error()))
+		}
+	}
+
+	return nil
+}
+
+func closeFile(f io.Closer) g.Error {
+	e := f.Close()
+	if e != nil {
+		return g.Error(fmt.Errorf("OsError: %s", e.Error()))
 	}
 	return nil
 }
