@@ -48,6 +48,14 @@ fn main(args) {
 
     types.addAll(['# Composite Types', ''])
     types.addAll(docs('../core/list.go'))
+    types.addAll(docs('../core/tuple.go'))
+    types.addAll(docs('../core/range.go'))
+    types.addAll(docs('../core/dict.go'))
+    types.addAll(docs('../core/set.go'))
+
+    types.addAll(['# Other Types', ''])
+    types.addAll(docs('../core/bytecode/func.go'))
+    types.addAll(docs('../core/channel.go'))
 
     types.addAll(footer)
 

@@ -22,8 +22,9 @@ Valid operators for Int are:
 	* The postfix operators `++`, `--`
 
 When applying an arithmetic operator `+`, `-`, `*`, `/`to an Int, if the other
-operand is a Float, then the result will be a Float,
-otherwise the result will be an Int.
+operand is a Float, then the result will be a Float, otherwise the result will be an Int.
+
+Ints are [`hashable`](#TODO)
 
 Int has no fields.
 

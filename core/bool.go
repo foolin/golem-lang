@@ -15,6 +15,8 @@ Valid operators for Bool are:
 	* The boolean operators `||` `&&`
 	* The unary negation operator `!`
 
+Bools are [`hashable`](#TODO)
+
 Bool has no fields.
 
 */

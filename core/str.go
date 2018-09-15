@@ -22,7 +22,13 @@ Valid operators for Str are:
 	* The index operator `a[x]`
 	* The slice operators `a[x:y]`, `a[x:]`, `a[:y]`
 
-The index operator and slice operators always return a Str.
+The index operator always returns a single-rune Str.
+
+The slice operators always return a Str.
+
+Strs have a [`len()`](#TODO) and are [`iterable`](#TODO).
+
+Strs are [`hashable`](#TODO)
 
 */
 
@@ -297,6 +303,7 @@ var strMethods = map[string]Method{
 
 	/*doc
 	#### `contains`
+
 	`contains` reports whether a substring is within a string.
 
 		* signature: `contains(substr <Str>) <Bool>`
@@ -311,6 +318,7 @@ var strMethods = map[string]Method{
 
 	/*doc
 	#### `hasPrefix`
+
 	`hasPrefix` tests whether a string begins with a prefix.
 
 		* signature: `hasPrefix(prefix <Str>) <Bool>`
@@ -325,6 +333,7 @@ var strMethods = map[string]Method{
 
 	/*doc
 	#### `hasSuffix`
+
 	`hasSuffix` tests whether a string ends with a suffix.
 
 		* signature: `hasSuffix(suffix <Str>) <Bool>`
@@ -339,6 +348,7 @@ var strMethods = map[string]Method{
 
 	/*doc
 	#### `index`
+
 	`index` returns the index of the first instance of a substring in a string.
 	or -1 if the substring is not present.
 
@@ -354,6 +364,7 @@ var strMethods = map[string]Method{
 
 	/*doc
 	#### `lastIndex`
+
 	`lastIndex` returns the index of the last instance of a substring in a string,
 	or -1 if the substring is not present.
 
@@ -369,11 +380,14 @@ var strMethods = map[string]Method{
 
 	/*doc
 	#### `map`
-	`map` returns a copy of a string with all its characters modified according to
-	the mapping function.  The mapping function must accept one Str parameter,
-	and must return a Str.
+
+	`map` returns a copy of the string with all its characters modified according to
+	the mapping function.
+
+	The mapping function must accept one Str parameter, and must return a Str.
 
 		* signature: `map(mapping <Func>) <Str>`
+		* mapping signature: `fn(s <Str>) <Str>`
 		* example:
 
 	```
@@ -416,6 +430,7 @@ var strMethods = map[string]Method{
 
 	/*doc
 	#### `replace`
+
 	`replace` returns a copy of a string with the first n non-overlapping instances
 	of `old` replaced by `new`. If `old` is empty, it matches at the beginning of a string
 	and after each UTF-8 sequence, yielding up to k+1 replacements for a k-rune string.
@@ -442,6 +457,7 @@ var strMethods = map[string]Method{
 
 	/*doc
 	#### `split`
+
 	`split` slices a string into all substrings separated by sep and returns a list
 	of the substrings between those separators.
 
@@ -463,6 +479,7 @@ var strMethods = map[string]Method{
 
 	/*doc
 	#### `toChars`
+
 	`toChars` splits a string into a list of single-rune Strs.
 
 		* signature: `toChars() <List>`
@@ -477,6 +494,7 @@ var strMethods = map[string]Method{
 
 	/*doc
 	#### `trim`
+
 	`trim` returns a new string with all leading and trailing runes contained in cutset removed.
 
 		* signature: `trim(<Str>) <Str>`

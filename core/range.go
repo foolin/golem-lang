@@ -10,8 +10,22 @@ import (
 	"reflect"
 )
 
-//---------------------------------------------------------------
-// rng
+/*doc
+## Range
+
+A Range is a representation of an immutable sequence of integers.
+Note that a Aange doesn't actually contain a list of all its
+Ints -- it produces them one at a time on demand.
+
+Valid operators for Range are:
+	* The equality operators `==`, `!=`
+	* The index operator `a[x]`
+
+The index operator always return an Int.
+
+Ranges have a [`len()`](#TODO) and are [`iterable`](#TODO).
+
+*/
 
 type rng struct {
 	from  int64
@@ -123,27 +137,67 @@ func (i *rangeIterator) IterGet(ev Eval) (Value, Error) {
 //--------------------------------------------------------------
 // fields
 
+/*doc
+Range has the following fields:
+
+*/
+
 var rangeMethods = map[string]Method{
 
+	/*doc
+	#### `count`
+
+	`count` is the total number of Ints in the range.
+
+		* signature: `count() <Int>`
+
+	*/
+	"count": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
+			r := self.(Range)
+			return r.Count(), nil
+		}),
+
+	/*doc
+	#### `from`
+
+	`from` is the first Int in the range, inclusive
+
+		* signature: `from() <Int>`
+
+	*/
 	"from": NewNullaryMethod(
 		func(self interface{}, ev Eval) (Value, Error) {
 			r := self.(Range)
 			return r.From(), nil
 		}),
-	"to": NewNullaryMethod(
-		func(self interface{}, ev Eval) (Value, Error) {
-			r := self.(Range)
-			return r.To(), nil
-		}),
+
+	/*doc
+	#### `step`
+
+	`step` is the distance between succesive Ints in the range.
+
+		* signature: `step() <Int>`
+
+	*/
 	"step": NewNullaryMethod(
 		func(self interface{}, ev Eval) (Value, Error) {
 			r := self.(Range)
 			return r.Step(), nil
 		}),
-	"count": NewNullaryMethod(
+
+	/*doc
+	#### `to`
+
+	`to` is the last Int in the range, exclusive
+
+		* signature: `to() <Int>`
+
+	*/
+	"to": NewNullaryMethod(
 		func(self interface{}, ev Eval) (Value, Error) {
 			r := self.(Range)
-			return r.Count(), nil
+			return r.To(), nil
 		}),
 }
 

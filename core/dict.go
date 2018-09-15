@@ -9,6 +9,22 @@ import (
 	"fmt"
 )
 
+/*doc
+## Dict
+
+A Dict is an [associative array](https://en.wikipedia.org/wiki/Associative_array),
+in which the keys are all [`hashable`](#TODO).
+
+Valid operators for Dict are:
+	* The equality operators `==`, `!=`
+	* The index operator `a[x]`
+
+Dict have a [`len()`](#TODO) and are [`iterable`](#TODO).
+
+Each iterated element in a Dict is a 2-Tuple containing a key-value pair.
+
+*/
+
 type dict struct {
 	hashMap *HashMap
 	frozen  bool
@@ -215,22 +231,31 @@ func (i *dictIterator) IterGet(ev Eval) (Value, Error) {
 }
 
 //--------------------------------------------------------------
+// fields
+
+/*doc
+Dict has the following fields:
+
+*/
 
 var dictMethods = map[string]Method{
 
-	"isEmpty": NewNullaryMethod(
-		func(self interface{}, ev Eval) (Value, Error) {
-			d := self.(Dict)
-			return d.IsEmpty(), nil
-		}),
+	/*doc
+	#### `addAll`
 
-	"contains": NewFixedMethod(
-		[]Type{AnyType}, true,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
-			d := self.(Dict)
-			return d.Contains(ev, params[0])
-		}),
+	`addAll` adds all of the values in the given [Iterable](#TODO) to the dict,
+	and returns the modified dict.
+	Each iterated element must be a 2-Tuple containing a key-value pair.
 
+		* signature: `addAll(itr <Iterable>) <Dict>`
+		* example:
+
+	```
+	let d = dict {'a': 1, 'b': 2}
+	println(d.addAll([('b', 2), ('c', 3)]))
+	```
+
+	*/
 	"addAll": NewFixedMethod(
 		[]Type{AnyType}, false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
@@ -238,12 +263,78 @@ var dictMethods = map[string]Method{
 			return d.AddAll(ev, params[0])
 		}),
 
+	/*doc
+	#### `clear`
+
+	`clear` removes all of the entries from the dict, and returns the empty dict.
+
+		* signature: `clear() <Dict>`
+		* example:
+
+	```
+	let d = dict {'a': 1, 'b': 2}
+	println(d.clear())
+	```
+
+	*/
 	"clear": NewNullaryMethod(
 		func(self interface{}, ev Eval) (Value, Error) {
 			d := self.(Dict)
 			return d.Clear()
 		}),
 
+	/*doc
+	#### `contains`
+
+	`contains` returns whether the given key is present in the dict.
+
+		* signature: `contains(key <Value>) <Bool>`
+		* example:
+
+	```
+	let d = dict {'a': 1, 'b': 2}
+	println(d.contains('b'))
+	```
+
+	*/
+	"contains": NewFixedMethod(
+		[]Type{AnyType}, true,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			d := self.(Dict)
+			return d.Contains(ev, params[0])
+		}),
+
+	/*doc
+	#### `isEmpty`
+
+	`isEmpty` returns whether the dict contains any values.
+
+		* signature: `isEmpty() <Bool>`
+		* example: `println(dict {}.isEmpty())`
+
+	*/
+	"isEmpty": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
+			d := self.(Dict)
+			return d.IsEmpty(), nil
+		}),
+
+	/*doc
+	#### `remove`
+
+	`remove` remove the entry associated with the given key from the dict,
+	and returns modified dict.  If the key is not present in the dict, then
+	the dict is unmodified.
+
+		* signature: `remove(key <Value>) <Dict>`
+		* example:
+
+	````
+	let d = dict {'a': 1, 'b': 2}
+	println(d.remove('a'))
+	````
+
+	*/
 	"remove": NewFixedMethod(
 		[]Type{AnyType}, false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {

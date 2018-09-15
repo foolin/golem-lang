@@ -234,9 +234,9 @@ type (
 	// Range is an immutable, iterable representation of a sequence of integers
 	Range interface {
 		Composite
-		Indexable
 		Lenable
 		Iterable
+		Indexable
 
 		From() Int
 		To() Int
@@ -244,7 +244,7 @@ type (
 		Count() Int
 	}
 
-	// Tuple is an immutable tuple of two or more values
+	// Tuple is an immutable sequence of two or more values
 	Tuple interface {
 		Composite
 		Indexable

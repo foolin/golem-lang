@@ -8,6 +8,16 @@ import (
 	"fmt"
 )
 
+/*doc
+## Chan
+
+A Chan is a conduit through which you can send and receive values.
+
+Valid operators for Chan are:
+	* The equality operators `==`, `!=`
+
+*/
+
 type channel struct {
 	ch chan Value
 }
@@ -63,8 +73,21 @@ func (ch *channel) Recv() Value {
 //--------------------------------------------------------------
 // fields
 
+/*doc
+Chan has the following fields:
+
+*/
+
 var chanMethods = map[string]Method{
 
+	/*doc
+	#### `send`
+
+	`send` sends a value to the chan.
+
+		* signature: `send(val <Value>)`
+
+	*/
 	"send": NewFixedMethod(
 		[]Type{AnyType}, true,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
@@ -73,6 +96,14 @@ var chanMethods = map[string]Method{
 			return Null, nil
 		}),
 
+	/*doc
+	#### `recv`
+
+	`recv` receives a value from the chan.
+
+		* signature: `recv() <Value>`
+
+	*/
 	"recv": NewNullaryMethod(
 		func(self interface{}, ev Eval) (Value, Error) {
 			ch := self.(Chan)

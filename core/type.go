@@ -19,8 +19,8 @@ const (
 	FloatType
 	StrType
 	ListType
-	RangeType
 	TupleType
+	RangeType
 	DictType
 	SetType
 	StructType
@@ -43,10 +43,10 @@ func (t Type) String() string {
 		return "Str"
 	case ListType:
 		return "List"
-	case RangeType:
-		return "Range"
 	case TupleType:
 		return "Tuple"
+	case RangeType:
+		return "Range"
 	case DictType:
 		return "Dict"
 	case SetType:

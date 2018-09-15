@@ -23,6 +23,8 @@ Valid operators for Float are:
 
 Applying an arithmetic operator to a Float always returns a Float.
 
+Floats are [`hashable`](#TODO)
+
 Float has no fields.
 
 */
