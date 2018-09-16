@@ -2,6 +2,7 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
+import golem
 import zork
 
 fn fail(func, err) {
@@ -158,11 +159,11 @@ fn testInt() {
     assert('1' == str(1))
     assert('Int' == type(1))
 
-    assert(set {} == fields(1))
-    assert(!hasField(1, 'bogus'))
+    assert(set {} == golem.fields(1))
+    assert(!golem.hasField(1, 'bogus'))
     fail(|| => 1 .bogus, "NoSuchField: Field 'bogus' not found") // Note that '1.bogus' fails to parse
-    fail(|| => getField(1, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => setField(1, 'bogus', null), "TypeMismatch: Expected Struct, not Int")
+    fail(|| => golem.getField(1, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => golem.setField(1, 'bogus', null), "TypeMismatch: Expected Struct, not Int")
     fail(|| => 1 .bogus = 'z', "TypeMismatch: Expected Struct, not Int")
 }
 
@@ -184,11 +185,11 @@ fn testFloat() {
     assert('1.1' == str(1.1))
     assert('Float' == type(1.1))
 
-    assert(set {} == fields(1.1))
-    assert(!hasField(1.1, 'bogus'))
+    assert(set {} == golem.fields(1.1))
+    assert(!golem.hasField(1.1, 'bogus'))
     fail(|| => 1.1 .bogus, "NoSuchField: Field 'bogus' not found") // Note that '1.1.bogus' fails to parse
-    fail(|| => getField(1.1, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => setField(1.1, 'bogus', null), "TypeMismatch: Expected Struct, not Float")
+    fail(|| => golem.getField(1.1, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => golem.setField(1.1, 'bogus', null), "TypeMismatch: Expected Struct, not Float")
     fail(|| => 1.1 .bogus = 'z', "TypeMismatch: Expected Struct, not Float")
 
     assert(1.0 + 2.0 == 3.0)
@@ -386,11 +387,11 @@ fn testFunc() {
     assert(str(f).hasPrefix('func<'))
     assert('Func' == type(f))
 
-    assert(set {} == fields(f))
-    assert(!hasField(f, 'bogus'))
+    assert(set {} == golem.fields(f))
+    assert(!golem.hasField(f, 'bogus'))
     fail(|| => f.bogus, "NoSuchField: Field 'bogus' not found")
-    fail(|| => getField(f, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => setField(f, 'bogus', null), "TypeMismatch: Expected Struct, not Func")
+    fail(|| => golem.getField(f, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => golem.setField(f, 'bogus', null), "TypeMismatch: Expected Struct, not Func")
     fail(|| => f.bogus = 'z', "TypeMismatch: Expected Struct, not Func")
 
     //------------------------------------------
@@ -516,13 +517,13 @@ fn testNull() {
     assert('null' == str(null)) // this is convenient
     assert('Null' == type(null)) // this is convenient
 
-    fail(|| => fields(null), "NullValue")
-    fail(|| => hasField(null, 'bogus'), "NullValue")
+    fail(|| => golem.fields(null), "NullValue")
+    fail(|| => golem.hasField(null, 'bogus'), "NullValue")
 
-    fail(|| => getField(null, 'bogus'), "NullValue")
+    fail(|| => golem.getField(null, 'bogus'), "NullValue")
     fail(|| => null.bogus, "NullValue")
     fail(|| => null.bogus(), "NullValue")
-    fail(|| => setField(null, 'bogus', null), "NullValue")
+    fail(|| => golem.setField(null, 'bogus', null), "NullValue")
     fail(|| => null.bogus = 1, "NullValue")
 }
 
@@ -558,21 +559,21 @@ fn testBool() {
     assert('Bool' == type(true))
     assert('Bool' == type(false))
 
-    assert(set{} == fields(true))
-    assert(set{} == fields(false))
+    assert(set{} == golem.fields(true))
+    assert(set{} == golem.fields(false))
 
-    assert(false == hasField(true, 'bogus'))
-    assert(false == hasField(false, 'bogus'))
+    assert(false == golem.hasField(true, 'bogus'))
+    assert(false == golem.hasField(false, 'bogus'))
 
-    fail(|| => getField(true,  'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => getField(false, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => golem.getField(true,  'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => golem.getField(false, 'bogus'), "NoSuchField: Field 'bogus' not found")
     fail(|| => true.bogus, "NoSuchField: Field 'bogus' not found")
     fail(|| => false.bogus, "NoSuchField: Field 'bogus' not found")
     fail(|| => true.bogus(), "NoSuchField: Field 'bogus' not found")
     fail(|| => false.bogus(), "NoSuchField: Field 'bogus' not found")
 
-    fail(|| => setField(true, 'bogus', null), "TypeMismatch: Expected Struct, not Bool")
-    fail(|| => setField(false, 'bogus', null), "TypeMismatch: Expected Struct, not Bool")
+    fail(|| => golem.setField(true, 'bogus', null), "TypeMismatch: Expected Struct, not Bool")
+    fail(|| => golem.setField(false, 'bogus', null), "TypeMismatch: Expected Struct, not Bool")
     fail(|| => true.bogus = 1,  "TypeMismatch: Expected Struct, not Bool")
     fail(|| => false.bogus = 1, "TypeMismatch: Expected Struct, not Bool")
 }
@@ -604,24 +605,24 @@ fn testStr() {
         'contains', 'index', 'lastIndex', 
         'hasPrefix', 'hasSuffix',
         'replace', 'split', 'trim', 'toChars', 'map'
-    } == fields(s))
-    for f in fields(s) {
-        assert(hasField(s, f))
+    } == golem.fields(s))
+    for f in golem.fields(s) {
+        assert(golem.hasField(s, f))
     }
-    assert(s.contains == getField(s, 'contains'))
-    assert(s.index == getField(s, 'index'))
-    assert(s.lastIndex == getField(s, 'lastIndex'))
-    assert(s.hasPrefix == getField(s, 'hasPrefix'))
-    assert(s.hasSuffix == getField(s, 'hasSuffix'))
-    assert(s.replace == getField(s, 'replace'))
-    assert(s.split == getField(s, 'split'))
-    assert(s.trim == getField(s, 'trim'))
-    assert(s.toChars == getField(s, 'toChars'))
-    assert(s.map == getField(s, 'map'))
+    assert(s.contains == golem.getField(s, 'contains'))
+    assert(s.index == golem.getField(s, 'index'))
+    assert(s.lastIndex == golem.getField(s, 'lastIndex'))
+    assert(s.hasPrefix == golem.getField(s, 'hasPrefix'))
+    assert(s.hasSuffix == golem.getField(s, 'hasSuffix'))
+    assert(s.replace == golem.getField(s, 'replace'))
+    assert(s.split == golem.getField(s, 'split'))
+    assert(s.trim == golem.getField(s, 'trim'))
+    assert(s.toChars == golem.getField(s, 'toChars'))
+    assert(s.map == golem.getField(s, 'map'))
 
-    assert(!hasField(s, 'bogus'))
-    fail(|| => getField(s, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => setField(s, 'bogus', null), "TypeMismatch: Expected Struct, not Str")
+    assert(!golem.hasField(s, 'bogus'))
+    fail(|| => golem.getField(s, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => golem.setField(s, 'bogus', null), "TypeMismatch: Expected Struct, not Str")
     fail(|| => s.bogus = 1, "TypeMismatch: Expected Struct, not Str")
 
     //---------------------------------------------
@@ -808,27 +809,27 @@ fn testList() {
         'clear',
         'remove', 
         'sort' 
-    } == fields(x))
-    for f in fields(x) {
-        assert(hasField(x, f))
+    } == golem.fields(x))
+    for f in golem.fields(x) {
+        assert(golem.hasField(x, f))
     }
-    assert(x.isEmpty == getField(x, 'isEmpty'))
-    assert(x.contains == getField(x, 'contains'))
-    assert(x.join == getField(x, 'join'))
-    assert(x.indexOf == getField(x, 'indexOf'))
-    assert(x.map == getField(x, 'map'))
-    assert(x.reduce == getField(x, 'reduce'))
-    assert(x.filter == getField(x, 'filter'))
+    assert(x.isEmpty == golem.getField(x, 'isEmpty'))
+    assert(x.contains == golem.getField(x, 'contains'))
+    assert(x.join == golem.getField(x, 'join'))
+    assert(x.indexOf == golem.getField(x, 'indexOf'))
+    assert(x.map == golem.getField(x, 'map'))
+    assert(x.reduce == golem.getField(x, 'reduce'))
+    assert(x.filter == golem.getField(x, 'filter'))
 
-    assert(x.add == getField(x, 'add'))
-    assert(x.addAll == getField(x, 'addAll'))
-    assert(x.clear == getField(x, 'clear'))
-    assert(x.remove == getField(x, 'remove'))
-    assert(x.sort == getField(x, 'sort'))
+    assert(x.add == golem.getField(x, 'add'))
+    assert(x.addAll == golem.getField(x, 'addAll'))
+    assert(x.clear == golem.getField(x, 'clear'))
+    assert(x.remove == golem.getField(x, 'remove'))
+    assert(x.sort == golem.getField(x, 'sort'))
 
-    assert(!hasField(x, 'bogus'))
-    fail(|| => getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not List")
+    assert(!golem.hasField(x, 'bogus'))
+    fail(|| => golem.getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => golem.setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not List")
     fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct, not List")
 
     //-------------------------------------------------
@@ -1079,20 +1080,20 @@ fn testDict() {
         'addAll',
         'clear',
         'remove' 
-    } == fields(x))
-    for f in fields(x) {
-        assert(hasField(x, f))
+    } == golem.fields(x))
+    for f in golem.fields(x) {
+        assert(golem.hasField(x, f))
     }
-    assert(x.isEmpty == getField(x, 'isEmpty'))
-    assert(x.contains == getField(x, 'contains'))
+    assert(x.isEmpty == golem.getField(x, 'isEmpty'))
+    assert(x.contains == golem.getField(x, 'contains'))
 
-    assert(x.addAll == getField(x, 'addAll'))
-    assert(x.clear == getField(x, 'clear'))
-    assert(x.remove == getField(x, 'remove'))
+    assert(x.addAll == golem.getField(x, 'addAll'))
+    assert(x.clear == golem.getField(x, 'clear'))
+    assert(x.remove == golem.getField(x, 'remove'))
 
-    assert(!hasField(x, 'bogus'))
-    fail(|| => getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not Dict")
+    assert(!golem.hasField(x, 'bogus'))
+    fail(|| => golem.getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => golem.setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not Dict")
     fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct, not Dict")
 
     //-------------------------------------------------
@@ -1226,21 +1227,21 @@ fn testSet() {
         'addAll',
         'clear',
         'remove' 
-    } == fields(x))
-    for f in fields(x) {
-        assert(hasField(x, f))
+    } == golem.fields(x))
+    for f in golem.fields(x) {
+        assert(golem.hasField(x, f))
     }
-    assert(x.isEmpty == getField(x, 'isEmpty'))
-    assert(x.contains == getField(x, 'contains'))
+    assert(x.isEmpty == golem.getField(x, 'isEmpty'))
+    assert(x.contains == golem.getField(x, 'contains'))
 
-    assert(x.add == getField(x, 'add'))
-    assert(x.addAll == getField(x, 'addAll'))
-    assert(x.clear == getField(x, 'clear'))
-    assert(x.remove == getField(x, 'remove'))
+    assert(x.add == golem.getField(x, 'add'))
+    assert(x.addAll == golem.getField(x, 'addAll'))
+    assert(x.clear == golem.getField(x, 'clear'))
+    assert(x.remove == golem.getField(x, 'remove'))
 
-    assert(!hasField(x, 'bogus'))
-    fail(|| => getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not Set")
+    assert(!golem.hasField(x, 'bogus'))
+    fail(|| => golem.getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => golem.setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not Set")
     fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct, not Set")
 
     //-------------------------------------------------
@@ -1341,11 +1342,11 @@ fn testTuple() {
 
     assert('Tuple' == type(x))
 
-    assert(set { } == fields(x))
+    assert(set { } == golem.fields(x))
 
-    assert(!hasField(x, 'bogus'))
-    fail(|| => getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not Tuple")
+    assert(!golem.hasField(x, 'bogus'))
+    fail(|| => golem.getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => golem.setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not Tuple")
     fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct, not Tuple")
 
     //-----------------------------------------------
@@ -1378,16 +1379,16 @@ fn testChan() {
     assert(set { 
         'send', 
         'recv' 
-    } == fields(p))
-    for f in fields(p) {
-        assert(hasField(p, f))
+    } == golem.fields(p))
+    for f in golem.fields(p) {
+        assert(golem.hasField(p, f))
     }
-    assert(p.send == getField(p, 'send'))
-    assert(p.recv == getField(p, 'recv'))
+    assert(p.send == golem.getField(p, 'send'))
+    assert(p.recv == golem.getField(p, 'recv'))
 
-    assert(!hasField(p, 'bogus'))
-    fail(|| => getField(p, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => setField(p, 'bogus', null), "TypeMismatch: Expected Struct, not Chan")
+    assert(!golem.hasField(p, 'bogus'))
+    fail(|| => golem.getField(p, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => golem.setField(p, 'bogus', null), "TypeMismatch: Expected Struct, not Chan")
     fail(|| => p.bogus = 1, "TypeMismatch: Expected Struct, not Chan")
 
     //-------------------------------------------------
@@ -1418,13 +1419,13 @@ fn testArity() {
     const v = []
     const d = 
         dict{}.addAll(
-            [].addAll(fields(v))
-                .map(|n| => (n, arity(getField(v, n)))))
+            [].addAll(golem.fields(v))
+                .map(|n| => (n, arity(golem.getField(v, n)))))
 
     //// TODO
     //const v = []
-    //const s = stream(fields(v))
-    //    .map(|n| => struct { name: n, field: getField(v, n) })
+    //const s = stream(golem.fields(v))
+    //    .map(|n| => struct { name: n, field: golem.getField(v, n) })
     //    .map(|s| => (s.name, arity(s.field)))
     //const d = dict{}.addAll(s.toIter())  // option 1
     //const e = s.toDict()                 // option 2
@@ -1546,18 +1547,18 @@ fn testRange() {
     assert('Range' == type(x))
 
     const rng = range(0, 10)
-    assert(set { 'to', 'count', 'step', 'from' } == fields(rng))
-    for f in fields(rng) {
-        assert(hasField(rng, f))
+    assert(set { 'to', 'count', 'step', 'from' } == golem.fields(rng))
+    for f in golem.fields(rng) {
+        assert(golem.hasField(rng, f))
     }
-    assert(rng.to == getField(rng, 'to'))
-    assert(rng.count == getField(rng, 'count'))
-    assert(rng.step == getField(rng, 'step'))
-    assert(rng.from == getField(rng, 'from'))
+    assert(rng.to == golem.getField(rng, 'to'))
+    assert(rng.count == golem.getField(rng, 'count'))
+    assert(rng.step == golem.getField(rng, 'step'))
+    assert(rng.from == golem.getField(rng, 'from'))
 
-    assert(!hasField(rng, 'bogus'))
-    fail(|| => getField(rng, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => setField(rng, 'bogus', null), "TypeMismatch: Expected Struct, not Range")
+    assert(!golem.hasField(rng, 'bogus'))
+    fail(|| => golem.getField(rng, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    fail(|| => golem.setField(rng, 'bogus', null), "TypeMismatch: Expected Struct, not Range")
     fail(|| => rng.bogus = 1, "TypeMismatch: Expected Struct, not Range")
 
     //-----------------------------------------
@@ -1650,9 +1651,9 @@ fn testStruct() {
 
             assert('Struct' == type(x))
 
-            assert(!hasField(x, 'bogus'))
-            fail(|| => getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
-            fail(|| => setField(x, 'bogus', null), "NoSuchField: Field 'bogus' not found")
+            assert(!golem.hasField(x, 'bogus'))
+            fail(|| => golem.getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
+            fail(|| => golem.setField(x, 'bogus', null), "NoSuchField: Field 'bogus' not found")
             fail(|| => x.bogus = 1, "NoSuchField: Field 'bogus' not found")
         },
         fn () {
@@ -1736,8 +1737,8 @@ fn testStruct() {
             const r = newRectangle(2, 3)
             const b = newBox(r, 4)
 
-            assert(fields(r) == set { 'width', 'height', 'area' })
-            assert(fields(b) == set { 'width', 'depth', 'height', 'volume', 'area' })
+            assert(golem.fields(r) == set { 'width', 'height', 'area' })
+            assert(golem.fields(b) == set { 'width', 'depth', 'height', 'volume', 'area' })
 
             assert([b.width, b.height, b.depth, b.area(), b.volume()] == [2, 3, 4, 6, 24])
             r.width = 5

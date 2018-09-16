@@ -15,10 +15,12 @@ test:
 compile: 
 	go build -o build/golem cli/golem.go
 	mkdir -p build/lib/encoding
+	mkdir -p build/lib/golem
 	mkdir -p build/lib/os
 	mkdir -p build/lib/path
 	mkdir -p build/lib/regexp
 	cp lib/encoding/encoding.glm build/lib/encoding/encoding.glm 
+	cp lib/golem/golem.glm       build/lib/golem/golem.glm 
 	cp lib/os/os.glm             build/lib/os/os.glm 
 	cp lib/path/path.glm         build/lib/path/path.glm 
 	cp lib/regexp/regexp.glm     build/lib/regexp/regexp.glm 

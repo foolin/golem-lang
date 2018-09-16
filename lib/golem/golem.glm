@@ -1,0 +1,10 @@
+// Copyright 2018 The Golem Language Authors. All rights reserved.
+// Use of this source code is governed by a MIT-style
+// license that can be found in the LICENSE file.
+
+const _golem = _lib("golem")
+
+const fields = _golem.fields
+const hasField = _golem.hasField
+const getField = _golem.getField
+const setField = _golem.setField

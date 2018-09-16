@@ -72,16 +72,12 @@ are suitable for use in sandboxed environments.
 * [`arity()`](#arity)
 * [`assert()`](#assert)
 * [`chan()`](#chan)
-* [`fields()`](#fields)
 * [`freeze()`](#freeze)
 * [`frozen()`](#frozen)
-* [`getField()`](#getField)
-* [`hasField()`](#hasField)
 * [`iter()`](#iter)
 * [`len()`](#len)
 * [`merge()`](#merge)
 * [`range()`](#range)
-* [`setField()`](#setField)
 * [`str()`](#str)
 * [`type()`](#type)
 
@@ -93,16 +89,12 @@ var StandardBuiltins = []*BuiltinEntry{
 	{"arity", BuiltinArity},
 	{"assert", BuiltinAssert},
 	{"chan", BuiltinChan},
-	{"fields", BuiltinFields},
 	{"freeze", BuiltinFreeze},
 	{"frozen", BuiltinFrozen},
-	{"getField", BuiltinGetField},
-	{"hasField", BuiltinHasField},
 	{"iter", BuiltinIter},
 	{"len", BuiltinLen},
 	{"merge", BuiltinMerge},
 	{"range", BuiltinRange},
-	{"setField", BuiltinSetField},
 	{"str", BuiltinStr},
 	{"type", BuiltinType},
 }
@@ -203,43 +195,6 @@ var BuiltinChan = NewMultipleNativeFunc(
 	})
 
 /*doc
-#### `fields`
-
-`fields` returns a Set of the names of a value's fields.
-
-	* signature: `fields(value <Value>) <Set>`
-	* example:
-
-	```
-    println(fields([]))
-    println(fields(struct { a: 1, b: 2}))
-	```
-
-*/
-
-// BuiltinFields returns the fields of a Value
-var BuiltinFields = NewFixedNativeFunc(
-	[]Type{AnyType},
-	false,
-	func(ev Eval, params []Value) (Value, Error) {
-
-		fields, err := params[0].FieldNames()
-		if err != nil {
-			return nil, err
-		}
-
-		entries := make([]Value, len(fields))
-		for i, k := range fields {
-			entry, err := NewStr(k)
-			if err != nil {
-				return nil, err
-			}
-			entries[i] = entry
-		}
-		return NewSet(ev, entries)
-	})
-
-/*doc
 #### `freeze`
 
 `freeze` freezes a value, if it is not already frozen.  Its OK to call `freeze`
@@ -279,62 +234,6 @@ var BuiltinFrozen = NewFixedNativeFunc(
 	false,
 	func(ev Eval, params []Value) (Value, Error) {
 		return params[0].Frozen(ev)
-	})
-
-/*doc
-#### `getField`
-
-`getField` returns the value associated with a field name.
-
-	* signature: `getField(value <Value>, name <Str>) <Value>`
-	* example:
-
-	```
-    let a = [1, 2]
-    let f = getField(a, 'add')
-    f(3)
-    println(a)
-	```
-
-*/
-
-// BuiltinGetField gets the Value associated with a field name
-var BuiltinGetField = NewFixedNativeFunc(
-	[]Type{AnyType, StrType},
-	false,
-	func(ev Eval, params []Value) (Value, Error) {
-		field := params[1].(Str)
-
-		return params[0].GetField(ev, field.String())
-	})
-
-/*doc
-#### `hasField`
-
-`hasField` returns whether a value has a field with a given name.
-
-	* signature: `getField(value <Value>, name <Str>) <Bool>`
-	* example:
-
-	```
-    let a = [1, 2]
-    println(hasField(a, 'add'))
-	```
-
-*/
-
-// BuiltinHasField gets the Value associated with a Struct's field name.
-var BuiltinHasField = NewFixedNativeFunc(
-	[]Type{AnyType, StrType},
-	false,
-	func(ev Eval, params []Value) (Value, Error) {
-		field := params[1].(Str)
-
-		b, err := params[0].HasField(field.String())
-		if err != nil {
-			return nil, err
-		}
-		return NewBool(b), nil
 	})
 
 /*doc
@@ -471,47 +370,6 @@ var BuiltinRange = NewMultipleNativeFunc(
 
 		}
 		return NewRange(from.IntVal(), to.IntVal(), step.IntVal())
-	})
-
-/*doc
-#### `setField`
-
-`setField` sets the value associated with a field name. `setField` only works
-on Structs -- you cannot set the fields of other types. `setField` returns `null`
-if it was successful.
-
-	* signature: `setField(s <Struct>, name <Str>, value <Value>) <Null>`
-	* example:
-
-	```
-    let s = struct { a: 1, b: 2 }
-    setField(s, 'a', 3)
-    println(s)
-	```
-
-*/
-
-// BuiltinSetField sets the Value associated with a Struct's field name.
-var BuiltinSetField = NewFixedNativeFunc(
-	[]Type{StructType, StrType, AnyType},
-	true,
-	func(ev Eval, params []Value) (Value, Error) {
-
-		if params[0].Type() == NullType {
-			return nil, NullValueError()
-		}
-		if params[1].Type() == NullType {
-			return nil, NullValueError()
-		}
-
-		st := params[0].(Struct)
-		fld := params[1].(Str)
-
-		err := st.SetField(ev, fld.String(), params[2])
-		if err != nil {
-			return nil, err
-		}
-		return Null, nil
 	})
 
 /*doc

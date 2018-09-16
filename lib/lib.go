@@ -9,6 +9,7 @@ import (
 
 	g "github.com/mjarmy/golem-lang/core"
 	"github.com/mjarmy/golem-lang/lib/encoding"
+	"github.com/mjarmy/golem-lang/lib/golem"
 	"github.com/mjarmy/golem-lang/lib/os"
 	"github.com/mjarmy/golem-lang/lib/path"
 	"github.com/mjarmy/golem-lang/lib/regexp"
@@ -22,14 +23,16 @@ var BuiltinLib = g.NewFixedNativeFunc(
 		name := values[0].(g.Str)
 
 		switch name.String() {
+		case "encoding":
+			return encoding.Encoding, nil
+		case "golem":
+			return golem.Golem, nil
 		case "os":
 			return os.Os, nil
 		case "path":
 			return path.Path, nil
 		case "regexp":
 			return regexp.Regexp, nil
-		case "encoding":
-			return encoding.Encoding, nil
 		default:
 			return nil, g.Error(fmt.Errorf(
 				"LibraryNotFound: Library '%s' not found", name.String()))
