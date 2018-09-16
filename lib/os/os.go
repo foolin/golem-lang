@@ -13,6 +13,14 @@ import (
 	g "github.com/mjarmy/golem-lang/core"
 )
 
+/*doc
+
+## os
+
+Module os provides a platform-independent interface to operating system functionality.
+
+*/
+
 // Os is the "os" module in the standard library
 var Os g.Struct
 
@@ -20,38 +28,42 @@ func init() {
 	var err error
 	Os, err = g.NewFrozenFieldStruct(
 		map[string]g.Field{
+			"create": g.NewField(create),
 			"exit":   g.NewField(exit),
 			"open":   g.NewField(open),
-			"create": g.NewField(create),
 			"stat":   g.NewField(stat),
 		})
 	g.Assert(err == nil)
 }
 
-// exit exits the program
-var exit g.Value = g.NewFixedNativeFunc(
-	[]g.Type{g.IntType}, false,
-	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
-		n := params[0].(g.Int)
+/*doc
 
-		os.Exit(int(n.IntVal()))
+### Functions
 
-		// we will never actually get here
-		return g.Null, nil
-	})
+*/
 
-// open opens a file
-var open g.Value = g.NewFixedNativeFunc(
-	[]g.Type{g.StrType}, false,
-	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
-		s := params[0].(g.Str)
+/*doc
+#### `create`
 
-		f, err := os.Open(s.String())
-		if err != nil {
-			return nil, g.Error(fmt.Errorf("OsError: %s", err.Error()))
-		}
-		return newFile(f), nil
-	})
+`create` creates the named file with mode 0666 (before umask), truncating it if
+it already exists. If successful, methods on the returned [file](#file)
+can be used for I/O.
+
+	* signature: `create(name <Str>) <Struct>`
+	* example:
+
+	```
+    import os
+
+    let f = os.create('foo.txt')
+    try {
+        // do something with the file
+    } finally {
+        f.close()
+    }
+	```
+
+*/
 
 // create creates a file
 var create g.Value = g.NewFixedNativeFunc(
@@ -66,6 +78,92 @@ var create g.Value = g.NewFixedNativeFunc(
 		return newFile(f), nil
 	})
 
+/*doc
+#### `exit`
+
+`exit` causes the current program to exit with the given status code. Conventionally,
+code zero indicates success, non-zero an error. The program terminates immediately.
+
+	* signature: `exit(code <Int>) <Null>`
+	* example:
+
+	```
+	import os
+
+	os.exit(-1)
+	```
+
+*/
+
+// exit exits the program
+var exit g.Value = g.NewFixedNativeFunc(
+	[]g.Type{g.IntType}, false,
+	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
+		n := params[0].(g.Int)
+
+		os.Exit(int(n.IntVal()))
+
+		// we will never actually get here
+		return g.Null, nil
+	})
+
+/*doc
+#### `open`
+
+`open` opens the named file for reading. If successful, methods on the
+returned [file](#file) can be used for reading.
+
+	* signature: `open(name <Str>) <Struct>`
+	* example:
+
+	```
+    import os
+
+    let f = os.open('foo.txt')
+    try {
+        // do something with the file
+    } finally {
+        f.close()
+    }
+	```
+
+*/
+
+// open opens a file
+var open g.Value = g.NewFixedNativeFunc(
+	[]g.Type{g.StrType}, false,
+	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
+		s := params[0].(g.Str)
+
+		f, err := os.Open(s.String())
+		if err != nil {
+			return nil, g.Error(fmt.Errorf("OsError: %s", err.Error()))
+		}
+		return newFile(f), nil
+	})
+
+/*doc
+#### `stat`
+
+`stat` returns a [fileInfo](#fileinfo) describing the named file.
+
+	* signature: `stat(name <Str>) <Struct>`
+	* example:
+
+	```
+    import os
+
+    let s = os.stat('foo.txt')
+    println([
+        'name: ' + s.name(),
+        'size: ' + s.size(),
+        'mode: ' + s.mode(),
+        'isDir: ' + s.isDir()
+    ])
+	```
+
+*/
+
 // stat stats a file
 var stat g.Value = g.NewFixedNativeFunc(
 	[]g.Type{g.StrType}, false,
@@ -73,7 +171,7 @@ var stat g.Value = g.NewFixedNativeFunc(
 		s := params[0].(g.Str)
 
 		// TODO os.Lstat
-		// TODO followSymLink == false, same as os.Lstat
+		// followSymLink == false, same as os.Lstat
 		//
 		//followSymLink := g.True
 		//if len(params) == 2 {
@@ -97,6 +195,19 @@ var stat g.Value = g.NewFixedNativeFunc(
 
 //-------------------------------------------------------------------------
 
+/*doc
+
+### Structs
+
+*/
+
+/*doc
+#### `fileInfo`
+
+A `fileInfo` is a struct that describes a file and is returned by stat.
+
+*/
+
 // NewFileInfo creates a struct for 'os.FileInfo'
 func NewFileInfo(info os.FileInfo) g.Struct {
 	stc, err := g.NewMethodStruct(info, fileInfoMethods)
@@ -105,6 +216,12 @@ func NewFileInfo(info os.FileInfo) g.Struct {
 }
 
 var fileInfoMethods = map[string]g.Method{
+
+	/*doc
+	##### `name`
+	`name` is the base name of the file
+	* signature: `name() <Str>`
+	*/
 
 	"name": g.NewNullaryMethod(
 		func(self interface{}, ev g.Eval) (g.Value, g.Error) {
@@ -115,11 +232,23 @@ var fileInfoMethods = map[string]g.Method{
 			return g.NewStr(info.Name())
 		}),
 
+	/*doc
+	##### `size`
+	`size` is the length in bytes for regular files; system-dependent for others
+	* signature: `size() <Int>`
+	*/
+
 	"size": g.NewWrapperMethod(
 		func(self interface{}) g.Value {
 			info := self.(os.FileInfo)
 			return g.NewInt(info.Size())
 		}),
+
+	/*doc
+	##### `mode`
+	`mode` is the file mode bits
+	* signature: `mode() <Int>`
+	*/
 
 	"mode": g.NewWrapperMethod(
 		func(self interface{}) g.Value {
@@ -127,7 +256,14 @@ var fileInfoMethods = map[string]g.Method{
 			return g.NewInt(int64(info.Mode()))
 		}),
 
-	//		//g.NewField("modTime", true, ModTime() time.Time TODO
+	// TODO
+	// g.NewField("modTime", true, ModTime() time.Time
+
+	/*doc
+	##### `isDir`
+	`isDir` is an abbreviation for Mode().IsDir()
+	* signature: `isDir() <Str>`
+	*/
 
 	"isDir": g.NewWrapperMethod(
 		func(self interface{}) g.Value {
@@ -138,6 +274,13 @@ var fileInfoMethods = map[string]g.Method{
 
 //-------------------------------------------------------------------------
 
+/*doc
+#### `file`
+
+A `file` is a struct that represents an open file descriptor.
+
+*/
+
 func newFile(f *os.File) g.Struct {
 	stc, err := g.NewMethodStruct(f, fileMethods)
 	g.Assert(err == nil)
@@ -146,12 +289,22 @@ func newFile(f *os.File) g.Struct {
 
 var fileMethods = map[string]g.Method{
 
+	/*doc
+	##### `readLines`
+	`readLines` returns a List of Strs, for each line of text in the file.
+	* signature: `readLines() <List>`
+	*/
 	"readLines": g.NewNullaryMethod(
 		func(self interface{}, ev g.Eval) (g.Value, g.Error) {
 			f := self.(*os.File)
 			return readLines(f)
 		}),
 
+	/*doc
+	##### `writeLines`
+	`writeLines` writes a List of Strs to the file as a sequence of lines.
+	* signature: `writeLines(<List>) <Null>`
+	*/
 	"writeLines": g.NewFixedMethod(
 		[]g.Type{g.ListType}, true,
 		func(self interface{}, ev g.Eval, params []g.Value) (g.Value, g.Error) {
@@ -160,6 +313,13 @@ var fileMethods = map[string]g.Method{
 			return g.Null, writeLines(ev, f, lines)
 		}),
 
+	/*doc
+	##### `close`
+	`close` closes the File, rendering it unusable for I/O. On files that support
+	SetDeadline, any pending I/O operations will be canceled and return immediately
+	with an error.
+	* signature: `close() <Null>`
+	*/
 	"close": g.NewNullaryMethod(
 		func(self interface{}, ev g.Eval) (g.Value, g.Error) {
 			f := self.(*os.File)

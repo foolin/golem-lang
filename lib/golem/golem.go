@@ -8,6 +8,15 @@ import (
 	g "github.com/mjarmy/golem-lang/core"
 )
 
+/*doc
+
+## golem
+
+The golem module defines functions that perform introspection and transformation
+on Golem values and code.
+
+*/
+
 // Golem is the "golem" module in the standard library
 var Golem g.Struct
 
@@ -32,8 +41,10 @@ func init() {
 	* example:
 
 	```
-    println(fields([]))
-    println(fields(struct { a: 1, b: 2}))
+    import golem
+
+    println(golem.fields([]))
+    println(golem.fields(struct { a: 1, b: 2}))
 	```
 
 */
@@ -68,8 +79,10 @@ var fields = g.NewFixedNativeFunc(
 	* example:
 
 	```
+    import golem
+
     let a = [1, 2]
-    let f = getField(a, 'add')
+    let f = golem.getField(a, 'add')
     f(3)
     println(a)
 	```
@@ -94,8 +107,10 @@ var getField = g.NewFixedNativeFunc(
 	* example:
 
 	```
+    import golem
+
     let a = [1, 2]
-    println(hasField(a, 'add'))
+    println(golem.hasField(a, 'add'))
 	```
 
 */
@@ -124,8 +139,10 @@ if it was successful.
 	* example:
 
 	```
+    import golem
+
     let s = struct { a: 1, b: 2 }
-    setField(s, 'a', 3)
+    golem.setField(s, 'a', 3)
     println(s)
 	```
 

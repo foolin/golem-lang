@@ -1,3 +1,7 @@
+// Copyright 2018 The Golem Language Authors. All rights reserved.
+// Use of this source code is governed by a MIT-style
+// license that can be found in the LICENSE file.
+
 import os
 
 const footer = [
@@ -87,8 +91,37 @@ fn docBuiltins() {
     }
 }
 
+fn docLibrary() {
+
+    let d = []
+    d.add('# Standard Library')
+    d.add('')
+    d.add('* [encoding](#encoding)')
+    d.add('  * [json](#encodingjson)')
+    d.add('* [golem](#golem)')
+    d.add('* [os](#os)')
+    d.add('* [path](#path)')
+    d.add('  * [filepath](#pathfilepath)')
+    d.add('')
+    d.addAll(docs('../lib/encoding/encoding.go'))
+    d.addAll(docs('../lib/encoding/json/json.go'))
+    d.addAll(docs('../lib/golem/golem.go'))
+    d.addAll(docs('../lib/os/os.go'))
+    d.addAll(docs('../lib/path/path.go'))
+    d.addAll(docs('../lib/path/filepath/filepath.go'))
+    d.addAll(footer)
+
+    let f = os.create('library.md')
+    try {
+        f.writeLines(d)
+    } finally {
+        f.close()
+    }
+}
+
 fn main(args) {
     docTypes()
     docBuiltins()
+    docLibrary()
 }
 

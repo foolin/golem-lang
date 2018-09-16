@@ -1297,7 +1297,7 @@ func getSortedCaptureParents(f ast.FuncScope) []ast.Variable {
 
 //--------------------------------------------------------------
 
-// This is impossible, because every string in the AST is
+// It is impossible for this to fail, because every string in the AST is
 // guaranteed by the scanner to be UTF-8.
 func mustStr(s string) g.Str {
 	sv, err := g.NewStr(s)

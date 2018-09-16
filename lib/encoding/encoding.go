@@ -9,6 +9,15 @@ import (
 	"github.com/mjarmy/golem-lang/lib/encoding/json"
 )
 
+/*doc
+
+## encoding
+
+The encoding module defines functionality that converts
+data to and from byte-level and textual representations.
+
+*/
+
 // Encoding is the "encoding" module in the standard library
 var Encoding g.Struct
 
