@@ -1,3 +1,4 @@
+# Types
 Golem has a set of standard types.  Each type has a set of values,
 together with operators and fields specific to those values.
 
@@ -388,6 +389,7 @@ Tuples have no fields.
 A Range is a representation of an immutable sequence of integers.
 Note that a Aange doesn't actually contain a list of all its
 Ints -- it produces them one at a time on demand.
+A new Range is created by the [`range()`](#TODO) builtin function.
 
 Valid operators for Range are:
 * The equality operators `==`, `!=`
@@ -492,10 +494,10 @@ the dict is unmodified.
 * signature: `remove(key <Value>) <Dict>`
 * example:
 
-````
+```
 let d = dict {'a': 1, 'b': 2}
 println(d.remove('a'))
-````
+```
 
 ## Set
 
@@ -596,6 +598,7 @@ Funcs have no fields.
 ## Chan
 
 A Chan is a conduit through which you can send and receive values.
+A new Chan is created by the [`chan()`](#TODO) builtin function.
 
 Valid operators for Chan are:
 * The equality operators `==`, `!=`

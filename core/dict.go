@@ -329,10 +329,10 @@ var dictMethods = map[string]Method{
 		* signature: `remove(key <Value>) <Dict>`
 		* example:
 
-	````
+	```
 	let d = dict {'a': 1, 'b': 2}
 	println(d.remove('a'))
-	````
+	```
 
 	*/
 	"remove": NewFixedMethod(

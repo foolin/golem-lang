@@ -16,6 +16,7 @@ import (
 A Range is a representation of an immutable sequence of integers.
 Note that a Aange doesn't actually contain a list of all its
 Ints -- it produces them one at a time on demand.
+A new Range is created by the [`range()`](#TODO) builtin function.
 
 Valid operators for Range are:
 	* The equality operators `==`, `!=`

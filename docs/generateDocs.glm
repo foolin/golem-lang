@@ -33,37 +33,62 @@ fn docs(name) {
     return result
 }
 
-fn main(args) {
+fn docTypes() {
 
-    let types = []
+    let d = []
+    d.add('# Types')
 
-    types.addAll(docs('../core/value.go'))
+    d.addAll(docs('../core/value.go'))
 
-    types.addAll(['# Basic Types', ''])
-    types.addAll(docs('../core/null.go'))
-    types.addAll(docs('../core/bool.go'))
-    types.addAll(docs('../core/int.go'))
-    types.addAll(docs('../core/float.go'))
-    types.addAll(docs('../core/str.go'))
+    d.addAll(['# Basic Types', ''])
+    d.addAll(docs('../core/null.go'))
+    d.addAll(docs('../core/bool.go'))
+    d.addAll(docs('../core/int.go'))
+    d.addAll(docs('../core/float.go'))
+    d.addAll(docs('../core/str.go'))
 
-    types.addAll(['# Composite Types', ''])
-    types.addAll(docs('../core/list.go'))
-    types.addAll(docs('../core/tuple.go'))
-    types.addAll(docs('../core/range.go'))
-    types.addAll(docs('../core/dict.go'))
-    types.addAll(docs('../core/set.go'))
+    d.addAll(['# Composite Types', ''])
+    d.addAll(docs('../core/list.go'))
+    d.addAll(docs('../core/tuple.go'))
+    d.addAll(docs('../core/range.go'))
+    d.addAll(docs('../core/dict.go'))
+    d.addAll(docs('../core/set.go'))
 
-    types.addAll(['# Other Types', ''])
-    types.addAll(docs('../core/bytecode/func.go'))
-    types.addAll(docs('../core/channel.go'))
+    d.addAll(['# Other Types', ''])
+    d.addAll(docs('../core/bytecode/func.go'))
+    d.addAll(docs('../core/channel.go'))
 
-    types.addAll(footer)
+    d.addAll(footer)
 
     let f = os.create('types.md')
     try {
-        f.writeLines(types)
+        f.writeLines(d)
     } finally {
         f.close()
     }
+}
+
+fn docBuiltins() {
+
+    let d = []
+    d.add('# Builtin Functions')
+    d.add('')
+    d.add('* [Standard Builtins](#standard-builtins)')
+    d.add('* [Unsandboxed Builtins](#unsandboxed-builtins)')
+    d.add('')
+    d.addAll(docs('../core/builtins.go'))
+    d.addAll(footer)
+
+    let f = os.create('builtins.md')
+    try {
+        f.writeLines(d)
+    } finally {
+        f.close()
+    }
+}
+
+fn main(args) {
+    docTypes()
+    docBuiltins()
 }
 

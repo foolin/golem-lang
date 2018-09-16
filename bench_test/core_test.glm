@@ -514,7 +514,7 @@ fn testNull() {
     fail(|| => len(null), "NullValue")
     fail(|| => range(null, null), "NullValue")
     assert('null' == str(null)) // this is convenient
-    fail(|| => type(null), "NullValue")
+    assert('Null' == type(null)) // this is convenient
 
     fail(|| => fields(null), "NullValue")
     fail(|| => hasField(null, 'bogus'), "NullValue")

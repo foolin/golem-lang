@@ -60,228 +60,72 @@ func (b *builtinManager) IndexOf(s string) int {
 
 //-----------------------------------------------------------------
 
+/*doc
+
+## Standard Builtins
+
+Golem has a collection of standard builtin functions that provide
+various kinds of important functionality. All of the standard builtins
+are "pure" functions that do not do any form of I/O. As such they
+are suitable for use in sandboxed environments.
+
+* [`arity()`](#arity)
+* [`assert()`](#assert)
+* [`chan()`](#chan)
+* [`fields()`](#fields)
+* [`freeze()`](#freeze)
+* [`frozen()`](#frozen)
+* [`getField()`](#getField)
+* [`hasField()`](#hasField)
+* [`iter()`](#iter)
+* [`len()`](#len)
+* [`merge()`](#merge)
+* [`range()`](#range)
+* [`setField()`](#setField)
+* [`str()`](#str)
+* [`type()`](#type)
+
+*/
+
 // StandardBuiltins containts the built-ins that are
 // pure functions.  These functions do not do any form of I/O.
 var StandardBuiltins = []*BuiltinEntry{
+	{"arity", BuiltinArity},
 	{"assert", BuiltinAssert},
-
+	{"chan", BuiltinChan},
+	{"fields", BuiltinFields},
 	{"freeze", BuiltinFreeze},
 	{"frozen", BuiltinFrozen},
-	{"iter", BuiltinIter},
-	{"len", BuiltinLen},
-	{"range", BuiltinRange},
-	{"str", BuiltinStr},
-	{"type", BuiltinType},
-
-	{"fields", BuiltinFields},
 	{"getField", BuiltinGetField},
 	{"hasField", BuiltinHasField},
-	{"setField", BuiltinSetField},
-
-	{"arity", BuiltinArity},
-	{"chan", BuiltinChan},
+	{"iter", BuiltinIter},
+	{"len", BuiltinLen},
 	{"merge", BuiltinMerge},
+	{"range", BuiltinRange},
+	{"setField", BuiltinSetField},
+	{"str", BuiltinStr},
+	{"type", BuiltinType},
 }
 
 //-----------------------------------------------------------------
 
-// BuiltinStr converts a single value to a Str
-var BuiltinStr = NewFixedNativeFunc(
-	[]Type{AnyType},
-	false,
-	func(ev Eval, params []Value) (Value, Error) {
-		return params[0].ToStr(ev)
-	})
+/*doc
+#### `arity`
 
-// BuiltinLen returns the length of a single Lenable
-var BuiltinLen = NewFixedNativeFunc(
-	[]Type{AnyType},
-	false,
-	func(ev Eval, params []Value) (Value, Error) {
+`arity` returns a Struct describing the [arity](https://en.wikipedia.org/wiki/Arity) of a Func.
+A func's arity type is always either "Fixed", "Variadic", or "Multiple".
 
-		if params[0].Type() == NullType {
-			return nil, NullValueError()
-		}
+	* signature: `arity(f <Func>) <Struct>`
+	* example:
 
-		if ln, ok := params[0].(Lenable); ok {
-			return ln.Len(ev)
-		}
-		return nil, LenableMismatch(params[0].Type())
-	})
+	```
+    assert(arity(println) == struct { kind: "Variadic", required: 0 })
+    assert(arity(len)     == struct { kind: "Fixed",    required: 1 })
+    assert(arity(range)   == struct { kind: "Multiple", required: 2, optional: 1 })
+	```
+*/
 
-// BuiltinIter returns the length of a single Lenable
-var BuiltinIter = NewFixedNativeFunc(
-	[]Type{AnyType},
-	false,
-	func(ev Eval, params []Value) (Value, Error) {
-
-		if params[0].Type() == NullType {
-			return nil, NullValueError()
-		}
-
-		if ibl, ok := params[0].(Iterable); ok {
-			return ibl.NewIterator(ev)
-		}
-		return nil, IterableMismatch(params[0].Type())
-	})
-
-// BuiltinRange creates a new Range
-var BuiltinRange = NewMultipleNativeFunc(
-	[]Type{IntType, IntType},
-	[]Type{IntType},
-	false,
-	func(ev Eval, params []Value) (Value, Error) {
-		from := params[0].(Int)
-		to := params[1].(Int)
-		step := One
-		if len(params) == 3 {
-			step = params[2].(Int)
-
-		}
-		return NewRange(from.IntVal(), to.IntVal(), step.IntVal())
-	})
-
-// BuiltinAssert asserts that a single Bool is True
-var BuiltinAssert = NewFixedNativeFunc(
-	[]Type{BoolType}, false,
-	func(ev Eval, params []Value) (Value, Error) {
-		b := params[0].(Bool)
-		if b.BoolVal() {
-			return True, nil
-		}
-		return nil, AssertionFailed()
-	})
-
-// BuiltinMerge merges structs together.
-var BuiltinMerge = NewVariadicNativeFunc(
-	[]Type{StructType, StructType},
-	StructType,
-	false,
-	func(ev Eval, params []Value) (Value, Error) {
-		structs := make([]Struct, len(params))
-		for i, v := range params {
-			structs[i] = v.(Struct)
-		}
-		return MergeStructs(structs)
-	})
-
-// BuiltinChan creates a new Chan.  If an Int is passed in,
-// it is used to create a buffered Chan.
-var BuiltinChan = NewMultipleNativeFunc(
-	[]Type{},
-	[]Type{IntType},
-	false,
-	func(ev Eval, params []Value) (Value, Error) {
-
-		if len(params) == 0 {
-			return NewChan(), nil
-		}
-
-		size := params[0].(Int)
-		return NewBufferedChan(int(size.IntVal())), nil
-	})
-
-// BuiltinType returns the Str representation of the Type of a single Value
-var BuiltinType = NewFixedNativeFunc(
-	[]Type{AnyType},
-	// Subtlety: Null has a type, but for the purposes of type()
-	// we are going to pretend that it doesn't
-	true,
-	func(ev Eval, params []Value) (Value, Error) {
-
-		if params[0].Type() == NullType {
-			return nil, NullValueError()
-		}
-
-		return NewStr(params[0].Type().String())
-	})
-
-// BuiltinFreeze freezes a single Value.
-var BuiltinFreeze = NewFixedNativeFunc(
-	[]Type{AnyType},
-	false,
-	func(ev Eval, params []Value) (Value, Error) {
-		return params[0].Freeze(ev)
-	})
-
-// BuiltinFrozen returns whether a single Value is Frozen.
-var BuiltinFrozen = NewFixedNativeFunc(
-	[]Type{AnyType},
-	false,
-	func(ev Eval, params []Value) (Value, Error) {
-		return params[0].Frozen(ev)
-	})
-
-// BuiltinFields returns the fields of a Struct
-var BuiltinFields = NewFixedNativeFunc(
-	[]Type{AnyType},
-	false,
-	func(ev Eval, params []Value) (Value, Error) {
-
-		fields, err := params[0].FieldNames()
-		if err != nil {
-			return nil, err
-		}
-
-		entries := make([]Value, len(fields))
-		for i, k := range fields {
-			entry, err := NewStr(k)
-			if err != nil {
-				return nil, err
-			}
-			entries[i] = entry
-		}
-		return NewSet(ev, entries)
-	})
-
-// BuiltinGetField gets the Value associated with a Struct's field name.
-var BuiltinGetField = NewFixedNativeFunc(
-	[]Type{AnyType, StrType},
-	false,
-	func(ev Eval, params []Value) (Value, Error) {
-		field := params[1].(Str)
-
-		return params[0].GetField(ev, field.String())
-	})
-
-// BuiltinHasField gets the Value associated with a Struct's field name.
-var BuiltinHasField = NewFixedNativeFunc(
-	[]Type{AnyType, StrType},
-	false,
-	func(ev Eval, params []Value) (Value, Error) {
-		field := params[1].(Str)
-
-		b, err := params[0].HasField(field.String())
-		if err != nil {
-			return nil, err
-		}
-		return NewBool(b), nil
-	})
-
-// BuiltinSetField sets the Value associated with a Struct's field name.
-var BuiltinSetField = NewFixedNativeFunc(
-	[]Type{StructType, StrType, AnyType},
-	true,
-	func(ev Eval, params []Value) (Value, Error) {
-
-		if params[0].Type() == NullType {
-			return nil, NullValueError()
-		}
-		if params[1].Type() == NullType {
-			return nil, NullValueError()
-		}
-
-		st := params[0].(Struct)
-		fld := params[1].(Str)
-
-		err := st.SetField(ev, fld.String(), params[2])
-		if err != nil {
-			return nil, err
-		}
-		return Null, nil
-	})
-
-// BuiltinArity returns the arity of a function.
+// BuiltinArity returns a Struct describing the arity of a Func.
 var BuiltinArity = NewFixedNativeFunc(
 	[]Type{FuncType},
 	false,
@@ -308,13 +152,440 @@ var BuiltinArity = NewFixedNativeFunc(
 		return NewFrozenFieldStruct(fields)
 	})
 
+/*doc
+#### `assert`
+
+`assert` accepts a single boolean value, and throws an error
+if the value is not equal to `true`.  `assert` returns `true`
+if it does not throw an error.
+
+	* signature: `assert(b <Bool>) <Bool>`
+	* example: `assert(0 < 1)`
+
+*/
+
+// BuiltinAssert asserts that a single Bool is True
+var BuiltinAssert = NewFixedNativeFunc(
+	[]Type{BoolType}, false,
+	func(ev Eval, params []Value) (Value, Error) {
+		b := params[0].(Bool)
+		if b.BoolVal() {
+			return True, nil
+		}
+		return nil, AssertionFailed()
+	})
+
+/*doc
+#### `chan`
+
+`chan` creates a channel of values.  `chan` has a single optional size parameter that
+defaults to 0.  If size is 0, an unbuffered channel will be created.
+If the size is greater than 0, then a buffered channel of that size will be created.
+
+	* signature: `chan(size = 0 <Int>) <Chan>`
+	* example: `let ch = chan()`
+
+*/
+
+// BuiltinChan creates a new Chan.
+var BuiltinChan = NewMultipleNativeFunc(
+	[]Type{},
+	[]Type{IntType},
+	false,
+	func(ev Eval, params []Value) (Value, Error) {
+
+		if len(params) == 0 {
+			return NewChan(), nil
+		}
+
+		size := params[0].(Int)
+		return NewBufferedChan(int(size.IntVal())), nil
+	})
+
+/*doc
+#### `fields`
+
+`fields` returns a Set of the names of a value's fields.
+
+	* signature: `fields(value <Value>) <Set>`
+	* example:
+
+	```
+    println(fields([]))
+    println(fields(struct { a: 1, b: 2}))
+	```
+
+*/
+
+// BuiltinFields returns the fields of a Value
+var BuiltinFields = NewFixedNativeFunc(
+	[]Type{AnyType},
+	false,
+	func(ev Eval, params []Value) (Value, Error) {
+
+		fields, err := params[0].FieldNames()
+		if err != nil {
+			return nil, err
+		}
+
+		entries := make([]Value, len(fields))
+		for i, k := range fields {
+			entry, err := NewStr(k)
+			if err != nil {
+				return nil, err
+			}
+			entries[i] = entry
+		}
+		return NewSet(ev, entries)
+	})
+
+/*doc
+#### `freeze`
+
+`freeze` freezes a value, if it is not already frozen.  Its OK to call `freeze`
+on values that are already frozen.  The value is returned after it is frozen.
+
+	* signature: `freeze(value <Value>) <Freeze>`
+	* example: `freeze([1, 2])`
+
+*/
+
+// BuiltinFreeze freezes a single Value.
+var BuiltinFreeze = NewFixedNativeFunc(
+	[]Type{AnyType},
+	false,
+	func(ev Eval, params []Value) (Value, Error) {
+		return params[0].Freeze(ev)
+	})
+
+/*doc
+#### `frozen`
+
+`frozen` returns whether or not a value is frozen.
+
+	* signature: `frozen(value <Value>) <Bool>`
+	* example:
+
+	```
+    println(frozen('a'))
+    println(frozen([3, 4]))
+	```
+
+*/
+
+// BuiltinFrozen returns whether a single Value is Frozen.
+var BuiltinFrozen = NewFixedNativeFunc(
+	[]Type{AnyType},
+	false,
+	func(ev Eval, params []Value) (Value, Error) {
+		return params[0].Frozen(ev)
+	})
+
+/*doc
+#### `getField`
+
+`getField` returns the value associated with a field name.
+
+	* signature: `getField(value <Value>, name <Str>) <Value>`
+	* example:
+
+	```
+    let a = [1, 2]
+    let f = getField(a, 'add')
+    f(3)
+    println(a)
+	```
+
+*/
+
+// BuiltinGetField gets the Value associated with a field name
+var BuiltinGetField = NewFixedNativeFunc(
+	[]Type{AnyType, StrType},
+	false,
+	func(ev Eval, params []Value) (Value, Error) {
+		field := params[1].(Str)
+
+		return params[0].GetField(ev, field.String())
+	})
+
+/*doc
+#### `hasField`
+
+`hasField` returns whether a value has a field with a given name.
+
+	* signature: `getField(value <Value>, name <Str>) <Bool>`
+	* example:
+
+	```
+    let a = [1, 2]
+    println(hasField(a, 'add'))
+	```
+
+*/
+
+// BuiltinHasField gets the Value associated with a Struct's field name.
+var BuiltinHasField = NewFixedNativeFunc(
+	[]Type{AnyType, StrType},
+	false,
+	func(ev Eval, params []Value) (Value, Error) {
+		field := params[1].(Str)
+
+		b, err := params[0].HasField(field.String())
+		if err != nil {
+			return nil, err
+		}
+		return NewBool(b), nil
+	})
+
+/*doc
+#### `iter`
+
+`iter` returns an iterator for an Iterable value.  Str, List, Range, Dict,
+and Set are iterable.
+
+An iterator is a Struct that has two fields:
+
+* A `next()` function that
+returns whether there are any more values in the iterator,
+and advances the iterator forwards if there is another value.
+
+* A `get()` function that returns the currently available value.
+
+By convention, a new iterator has to have `next()` called on it to advance
+to the first available value. Calling `get()` before the first call to `next()`
+throws an error.
+
+	* signature: `iter(value <Iterable>) <Struct>`
+	* `next` signature: `next() <Bool>`
+	* `get` signature: `get() <Value>`
+	* example:
+
+	```
+    let a = [1, 2, 3]
+    let itr = iter(a)
+    while itr.next() {
+        println(itr.get())
+    }
+	```
+
+*/
+
+// BuiltinIter returns an iterator for an Iterable value.
+var BuiltinIter = NewFixedNativeFunc(
+	[]Type{AnyType},
+	false,
+	func(ev Eval, params []Value) (Value, Error) {
+
+		if params[0].Type() == NullType {
+			return nil, NullValueError()
+		}
+
+		if ibl, ok := params[0].(Iterable); ok {
+			return ibl.NewIterator(ev)
+		}
+		return nil, IterableMismatch(params[0].Type())
+	})
+
+/*doc
+#### `len`
+
+`len` returns the length of a value that has a length.  Str, List, Tuple, Range, Dict,
+and Set have a length
+
+	* signature: `len(value <Lenable>) <Int>`
+	* example: `println(len('abc'))`
+
+*/
+
+// BuiltinLen returns the length of a single Lenable
+var BuiltinLen = NewFixedNativeFunc(
+	[]Type{AnyType},
+	false,
+	func(ev Eval, params []Value) (Value, Error) {
+
+		if params[0].Type() == NullType {
+			return nil, NullValueError()
+		}
+
+		if ln, ok := params[0].(Lenable); ok {
+			return ln.Len(ev)
+		}
+		return nil, LenableMismatch(params[0].Type())
+	})
+
+/*doc
+#### `merge`
+
+`merge` merges structs together into a new struct.  Consult the [tour](#TODO)
+for a detailed description of how `merge` works.
+
+	* signature: `merge(structs... <Struct>) <Struct>`
+
+*/
+
+// BuiltinMerge merges structs together.
+var BuiltinMerge = NewVariadicNativeFunc(
+	[]Type{StructType, StructType},
+	StructType,
+	false,
+	func(ev Eval, params []Value) (Value, Error) {
+		structs := make([]Struct, len(params))
+		for i, v := range params {
+			structs[i] = v.(Struct)
+		}
+		return MergeStructs(structs)
+	})
+
+/*doc
+#### `range`
+
+`range` creates a Range, starting at "from" (inclusive) and going until
+"to" (exclusive).
+
+The optional "step" parameter, which defaults to 1,
+specifies the distance between succesive integers in the range.  You can
+create a "backwards" range by specify a negative step value, and a "from"
+that is less than "to".
+
+	* signature: `range(from <Int>, to <Int>, step = 1 <Int>) <Range>`
+	* example:
+
+	```
+    for i in range(0, 5) {
+        println(i)
+    }
+	```
+*/
+
+// BuiltinRange creates a new Range
+var BuiltinRange = NewMultipleNativeFunc(
+	[]Type{IntType, IntType},
+	[]Type{IntType},
+	false,
+	func(ev Eval, params []Value) (Value, Error) {
+		from := params[0].(Int)
+		to := params[1].(Int)
+		step := One
+		if len(params) == 3 {
+			step = params[2].(Int)
+
+		}
+		return NewRange(from.IntVal(), to.IntVal(), step.IntVal())
+	})
+
+/*doc
+#### `setField`
+
+`setField` sets the value associated with a field name. `setField` only works
+on Structs -- you cannot set the fields of other types. `setField` returns `null`
+if it was successful.
+
+	* signature: `setField(s <Struct>, name <Str>, value <Value>) <Null>`
+	* example:
+
+	```
+    let s = struct { a: 1, b: 2 }
+    setField(s, 'a', 3)
+    println(s)
+	```
+
+*/
+
+// BuiltinSetField sets the Value associated with a Struct's field name.
+var BuiltinSetField = NewFixedNativeFunc(
+	[]Type{StructType, StrType, AnyType},
+	true,
+	func(ev Eval, params []Value) (Value, Error) {
+
+		if params[0].Type() == NullType {
+			return nil, NullValueError()
+		}
+		if params[1].Type() == NullType {
+			return nil, NullValueError()
+		}
+
+		st := params[0].(Struct)
+		fld := params[1].(Str)
+
+		err := st.SetField(ev, fld.String(), params[2])
+		if err != nil {
+			return nil, err
+		}
+		return Null, nil
+	})
+
+/*doc
+#### `str`
+
+`str` returns a Str representation of a value.
+
+	* signature: `str(value <Value>) <Str>`
+	* example: `println(str([null, true, 1, 'abc']))`
+
+*/
+
+// BuiltinStr converts a single value to a Str
+var BuiltinStr = NewFixedNativeFunc(
+	[]Type{AnyType},
+	false,
+	func(ev Eval, params []Value) (Value, Error) {
+		return params[0].ToStr(ev)
+	})
+
+/*doc
+#### `type`
+
+`type` returns the type of a value.
+
+	* signature: `type(value <Value>) <Str>`
+	* example:
+
+	```
+    println(type(1.23))
+    let a = [null, true, 1, 'xyz']
+    println(a.map(type))
+	```
+
+*/
+
+// BuiltinType returns the Str representation of the Type of a single Value
+var BuiltinType = NewFixedNativeFunc(
+	[]Type{AnyType},
+	true,
+	func(ev Eval, params []Value) (Value, Error) {
+
+		return NewStr(params[0].Type().String())
+	})
+
 //-----------------------------------------------------------------
+
+/*doc
+
+## Unsandboxed Builtins
+
+Golem also has a couple of "unsandboxed" builtins.  These functions
+perform I/O, so they should not be included in sandboxed Golem
+environments.
+
+* [`print()`](#print)
+* [`println()`](#println)
+
+*/
 
 // UnsandboxedBuiltins are builtins that are not pure functions
 var UnsandboxedBuiltins = []*BuiltinEntry{
 	{"print", BuiltinPrint},
 	{"println", BuiltinPrintln},
 }
+
+/*doc
+#### `print`
+
+`print` prints a sequence of values to STDOUT.
+
+	* signature: `print(values... <Value>) <Null>`
+
+*/
 
 // BuiltinPrint prints to stdout.
 var BuiltinPrint = NewVariadicNativeFunc(
@@ -330,6 +601,15 @@ var BuiltinPrint = NewVariadicNativeFunc(
 
 		return Null, nil
 	})
+
+/*doc
+#### `println`
+
+`println` prints a sequence of values to STDOUT, followed by a "\n".
+
+	* signature: `println(values... <Value>) <Null>`
+
+*/
 
 // BuiltinPrintln prints to stdout.
 var BuiltinPrintln = NewVariadicNativeFunc(
