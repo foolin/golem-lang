@@ -39,12 +39,12 @@ func TestList(t *testing.T) {
 	var err Error
 
 	v, err = ls.ToStr(nil)
-	ok(t, v, err, mustStr("[ ]"))
+	ok(t, v, err, MustStr("[ ]"))
 
 	v, err = ls.Eq(nil, NewList([]Value{}))
 	ok(t, v, err, True)
 
-	v, err = ls.Eq(nil, NewList([]Value{mustStr("a")}))
+	v, err = ls.Eq(nil, NewList([]Value{MustStr("a")}))
 	ok(t, v, err, False)
 
 	v, err = ls.Eq(nil, Null)
@@ -53,29 +53,29 @@ func TestList(t *testing.T) {
 	v, err = ls.Len(nil)
 	ok(t, v, err, Zero)
 
-	_, err = ls.Add(nil, mustStr("a"))
+	_, err = ls.Add(nil, MustStr("a"))
 	tassert(t, err == nil)
 
 	v, err = ls.Eq(nil, NewList([]Value{}))
 	ok(t, v, err, False)
 
-	v, err = ls.Eq(nil, NewList([]Value{mustStr("a")}))
+	v, err = ls.Eq(nil, NewList([]Value{MustStr("a")}))
 	ok(t, v, err, True)
 
 	v, err = ls.Len(nil)
 	ok(t, v, err, One)
 
 	v, err = ls.Get(nil, Zero)
-	ok(t, v, err, mustStr("a"))
+	ok(t, v, err, MustStr("a"))
 
-	err = ls.Set(nil, Zero, mustStr("b"))
+	err = ls.Set(nil, Zero, MustStr("b"))
 	tassert(t, err == nil)
 
 	v, err = ls.Get(nil, Zero)
-	ok(t, v, err, mustStr("b"))
+	ok(t, v, err, MustStr("b"))
 
 	v, err = ls.Get(nil, NegOne)
-	ok(t, v, err, mustStr("b"))
+	ok(t, v, err, MustStr("b"))
 
 	v, err = ls.Get(nil, One)
 	fail(t, v, err, "IndexOutOfBounds: 1")
@@ -87,13 +87,13 @@ func TestList(t *testing.T) {
 	fail(t, nil, err, "IndexOutOfBounds: 1")
 
 	v, err = ls.ToStr(nil)
-	ok(t, v, err, mustStr("[ true ]"))
+	ok(t, v, err, MustStr("[ true ]"))
 
-	_, err = ls.Add(nil, mustStr("z"))
+	_, err = ls.Add(nil, MustStr("z"))
 	tassert(t, err == nil)
 
 	v, err = ls.ToStr(nil)
-	ok(t, v, err, mustStr("[ true, z ]"))
+	ok(t, v, err, MustStr("[ true, z ]"))
 }
 
 func newDict(entries []*HEntry) Dict {
@@ -112,7 +112,7 @@ func TestDict(t *testing.T) {
 	var err Error
 
 	v, err = d.ToStr(nil)
-	ok(t, v, err, mustStr("dict { }"))
+	ok(t, v, err, MustStr("dict { }"))
 
 	v, err = d.Eq(nil, newDict([]*HEntry{}))
 	ok(t, v, err, True)
@@ -123,41 +123,41 @@ func TestDict(t *testing.T) {
 	v, err = d.Len(nil)
 	ok(t, v, err, Zero)
 
-	v, err = d.Get(nil, mustStr("a"))
+	v, err = d.Get(nil, MustStr("a"))
 	ok(t, v, err, Null)
 
-	err = d.Set(nil, mustStr("a"), One)
+	err = d.Set(nil, MustStr("a"), One)
 	tassert(t, err == nil)
 
-	v, err = d.Get(nil, mustStr("a"))
+	v, err = d.Get(nil, MustStr("a"))
 	ok(t, v, err, One)
 
 	v, err = d.Eq(nil, newDict([]*HEntry{}))
 	ok(t, v, err, False)
 
-	v, err = d.Eq(nil, newDict([]*HEntry{{mustStr("a"), One}}))
+	v, err = d.Eq(nil, newDict([]*HEntry{{MustStr("a"), One}}))
 	ok(t, v, err, True)
 
 	v, err = d.Len(nil)
 	ok(t, v, err, One)
 
 	v, err = d.ToStr(nil)
-	ok(t, v, err, mustStr("dict { a: 1 }"))
+	ok(t, v, err, MustStr("dict { a: 1 }"))
 
-	err = d.Set(nil, mustStr("b"), NewInt(2))
+	err = d.Set(nil, MustStr("b"), NewInt(2))
 	tassert(t, err == nil)
 
-	v, err = d.Get(nil, mustStr("b"))
+	v, err = d.Get(nil, MustStr("b"))
 	ok(t, v, err, NewInt(2))
 
 	v, err = d.ToStr(nil)
-	ok(t, v, err, mustStr("dict { b: 2, a: 1 }"))
+	ok(t, v, err, MustStr("dict { b: 2, a: 1 }"))
 
 	tp := NewTuple([]Value{One, Zero})
 	d = newDict([]*HEntry{{tp, True}})
 
 	v, err = d.ToStr(nil)
-	ok(t, v, err, mustStr("dict { (1, 0): true }"))
+	ok(t, v, err, MustStr("dict { (1, 0): true }"))
 
 	v, err = d.Get(nil, tp)
 	ok(t, v, err, True)
@@ -185,7 +185,7 @@ func TestSet(t *testing.T) {
 	var err Error
 
 	v, err = s.ToStr(nil)
-	ok(t, v, err, mustStr("set { }"))
+	ok(t, v, err, MustStr("set { }"))
 
 	v, err = s.Eq(nil, newSet([]Value{}))
 	ok(t, v, err, True)
@@ -202,7 +202,7 @@ func TestSet(t *testing.T) {
 	s = newSet([]Value{One})
 
 	v, err = s.ToStr(nil)
-	ok(t, v, err, mustStr("set { 1 }"))
+	ok(t, v, err, MustStr("set { 1 }"))
 
 	v, err = s.Eq(nil, newSet([]Value{}))
 	ok(t, v, err, False)
@@ -219,7 +219,7 @@ func TestSet(t *testing.T) {
 	s = newSet([]Value{One, Zero, Zero, One})
 
 	v, err = s.ToStr(nil)
-	ok(t, v, err, mustStr("set { 0, 1 }"))
+	ok(t, v, err, MustStr("set { 0, 1 }"))
 
 	v, err = s.Len(nil)
 	ok(t, v, err, NewInt(2))
@@ -260,7 +260,7 @@ func TestTuple(t *testing.T) {
 	fail(t, v, err, "IndexOutOfBounds: 2")
 
 	v, err = tp.ToStr(nil)
-	ok(t, v, err, mustStr("(1, 0)"))
+	ok(t, v, err, MustStr("(1, 0)"))
 
 	v, err = tp.Len(nil)
 	ok(t, v, err, NewInt(2))

@@ -46,7 +46,7 @@ func TestFixedNativeFunc(t *testing.T) {
 	val, err = fn.Invoke(nil, []Value{})
 	fail(t, val, err, "ArityMismatch: Expected 1 parameter, got 0")
 
-	val, err = fn.Invoke(nil, []Value{mustStr("a")})
+	val, err = fn.Invoke(nil, []Value{MustStr("a")})
 	fail(t, val, err, "TypeMismatch: Expected Int, not Str")
 
 	//----------------------------------------------
@@ -71,7 +71,7 @@ func TestFixedNativeFunc(t *testing.T) {
 	val, err = fn.Invoke(nil, []Value{})
 	fail(t, val, err, "ArityMismatch: Expected 1 parameter, got 0")
 
-	val, err = fn.Invoke(nil, []Value{mustStr("a")})
+	val, err = fn.Invoke(nil, []Value{MustStr("a")})
 	fail(t, val, err, "TypeMismatch: Expected Int, not Str")
 }
 
@@ -107,13 +107,13 @@ func TestVariadicNativeFunc(t *testing.T) {
 	val, err = fn.Invoke(nil, []Value{})
 	fail(t, val, err, "ArityMismatch: Expected at least 1 parameter, got 0")
 
-	val, err = fn.Invoke(nil, []Value{mustStr("a")})
+	val, err = fn.Invoke(nil, []Value{MustStr("a")})
 	fail(t, val, err, "TypeMismatch: Expected Int, not Str")
 
 	val, err = fn.Invoke(nil, []Value{Null})
 	fail(t, val, err, "NullValue")
 
-	val, err = fn.Invoke(nil, []Value{Zero, mustStr("a"), False})
+	val, err = fn.Invoke(nil, []Value{Zero, MustStr("a"), False})
 	fail(t, val, err, "TypeMismatch: Expected Bool, not Str")
 
 	val, err = fn.Invoke(nil, []Value{Zero, Null, False})
@@ -132,14 +132,14 @@ func TestMultipleNativeFunc(t *testing.T) {
 		func(ev Eval, params []Value) (Value, Error) {
 
 			if len(params) == 1 {
-				params = append(params, mustStr("a"))
+				params = append(params, MustStr("a"))
 			}
 
 			if len(params) == 2 {
 				params = append(params, False)
 			}
 
-			s := mustStr("")
+			s := MustStr("")
 			for _, v := range params {
 				val, err := v.ToStr(ev)
 				if err != nil {
@@ -159,21 +159,21 @@ func TestMultipleNativeFunc(t *testing.T) {
 	val, err = fn.Invoke(nil, []Value{Zero, Zero, Zero, Zero})
 	fail(t, val, err, "ArityMismatch: Expected at most 3 parameters, got 4")
 
-	val, err = fn.Invoke(nil, []Value{Zero, Zero, mustStr("d")})
+	val, err = fn.Invoke(nil, []Value{Zero, Zero, MustStr("d")})
 	fail(t, val, err, "TypeMismatch: Expected Str, not Int")
 
-	val, err = fn.Invoke(nil, []Value{Zero, mustStr("c"), Null})
+	val, err = fn.Invoke(nil, []Value{Zero, MustStr("c"), Null})
 	fail(t, val, err, "NullValue")
 
-	val, err = fn.Invoke(nil, []Value{Zero, mustStr("c"), Zero})
+	val, err = fn.Invoke(nil, []Value{Zero, MustStr("c"), Zero})
 	fail(t, val, err, "TypeMismatch: Expected Bool, not Int")
 
-	val, err = fn.Invoke(nil, []Value{Zero, mustStr("c"), True})
-	ok(t, val, err, mustStr("0ctrue"))
+	val, err = fn.Invoke(nil, []Value{Zero, MustStr("c"), True})
+	ok(t, val, err, MustStr("0ctrue"))
 
-	val, err = fn.Invoke(nil, []Value{Zero, mustStr("c")})
-	ok(t, val, err, mustStr("0cfalse"))
+	val, err = fn.Invoke(nil, []Value{Zero, MustStr("c")})
+	ok(t, val, err, MustStr("0cfalse"))
 
 	val, err = fn.Invoke(nil, []Value{Zero})
-	ok(t, val, err, mustStr("0afalse"))
+	ok(t, val, err, MustStr("0afalse"))
 }

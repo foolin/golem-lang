@@ -52,9 +52,9 @@ func TestHashFieldMap(t *testing.T) {
 	err = fm.set(nil, "c", One)
 	fail(t, nil, err, "NoSuchField: Field 'c' not found")
 
-	fm.replace("a", NewField(mustStr("abc")))
+	fm.replace("a", NewField(MustStr("abc")))
 	val, err = fm.get(nil, "a")
-	ok(t, val, err, mustStr("abc"))
+	ok(t, val, err, MustStr("abc"))
 }
 
 func TestMethodFieldMap(t *testing.T) {

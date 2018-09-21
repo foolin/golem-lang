@@ -90,7 +90,7 @@ func TestFixedMethod(t *testing.T) {
 	val, err = fn.Invoke(nil, []Value{})
 	fail(t, val, err, "ArityMismatch: Expected 1 parameter, got 0")
 
-	val, err = fn.Invoke(nil, []Value{mustStr("a")})
+	val, err = fn.Invoke(nil, []Value{MustStr("a")})
 	fail(t, val, err, "TypeMismatch: Expected Int, not Str")
 }
 

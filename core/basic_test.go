@@ -17,14 +17,6 @@ func tassert(t *testing.T, flag bool) {
 	}
 }
 
-func mustStr(s string) Str {
-	sv, err := NewStr(s)
-	if err != nil {
-		panic(err)
-	}
-	return sv
-}
-
 func ok(t *testing.T, val interface{}, err Error, expect interface{}) {
 
 	if err != nil {
@@ -75,7 +67,7 @@ func TestNull(t *testing.T) {
 	var err Error
 
 	val, err = Null.ToStr(nil)
-	ok(t, val, err, mustStr("null"))
+	ok(t, val, err, MustStr("null"))
 
 	val, err = Null.Eq(nil, Null)
 	ok(t, val, err, True)
@@ -101,9 +93,9 @@ func TestBool(t *testing.T) {
 	var err Error
 
 	val, err = True.ToStr(nil)
-	ok(t, val, err, mustStr("true"))
+	ok(t, val, err, MustStr("true"))
 	val, err = False.ToStr(nil)
-	ok(t, val, err, mustStr("false"))
+	ok(t, val, err, MustStr("false"))
 
 	okType(t, True, BoolType)
 	okType(t, False, BoolType)
@@ -119,7 +111,7 @@ func TestBool(t *testing.T) {
 	ok(t, val, err, False)
 	val, err = False.Eq(nil, True)
 	ok(t, val, err, False)
-	val, err = False.Eq(nil, mustStr("a"))
+	val, err = False.Eq(nil, MustStr("a"))
 	ok(t, val, err, False)
 
 	val, err = True.Cmp(nil, False)
@@ -149,16 +141,16 @@ func TestBool(t *testing.T) {
 }
 
 func TestStr(t *testing.T) {
-	a := mustStr("a")
-	b := mustStr("b")
+	a := MustStr("a")
+	b := MustStr("b")
 
 	var val Value
 	var err Error
 
 	val, err = a.ToStr(nil)
-	ok(t, val, err, mustStr("a"))
+	ok(t, val, err, MustStr("a"))
 	val, err = b.ToStr(nil)
-	ok(t, val, err, mustStr("b"))
+	ok(t, val, err, MustStr("b"))
 
 	okType(t, a, StrType)
 	val, err = a.Eq(nil, b)
@@ -167,7 +159,7 @@ func TestStr(t *testing.T) {
 	ok(t, val, err, False)
 	val, err = a.Eq(nil, a)
 	ok(t, val, err, True)
-	val, err = a.Eq(nil, mustStr("a"))
+	val, err = a.Eq(nil, MustStr("a"))
 	ok(t, val, err, True)
 
 	val, err = a.Cmp(nil, NewInt(1))
@@ -179,7 +171,7 @@ func TestStr(t *testing.T) {
 	val, err = b.Cmp(nil, a)
 	ok(t, val, err, NewInt(1))
 
-	ab := mustStr("ab")
+	ab := MustStr("ab")
 	val, err = ab.Get(nil, NewInt(0))
 	ok(t, val, err, a)
 	val, err = ab.Get(nil, NewInt(1))
@@ -191,22 +183,22 @@ func TestStr(t *testing.T) {
 	val, err = ab.Get(nil, NewInt(2))
 	fail(t, val, err, "IndexOutOfBounds: 2")
 
-	val, err = mustStr("").Len(nil)
+	val, err = MustStr("").Len(nil)
 	ok(t, val, err, Zero)
 
-	val, err = mustStr("a").Len(nil)
+	val, err = MustStr("a").Len(nil)
 	ok(t, val, err, One)
 
-	val, err = mustStr("abcde").Len(nil)
+	val, err = MustStr("abcde").Len(nil)
 	ok(t, val, err, NewInt(5))
 
 	// unicode
-	a = mustStr("日本語")
+	a = MustStr("日本語")
 	val, err = a.Len(nil)
 	ok(t, val, err, NewInt(3))
 
 	val, err = a.Get(nil, NewInt(2))
-	ok(t, val, err, mustStr("語"))
+	ok(t, val, err, MustStr("語"))
 }
 
 func TestInt(t *testing.T) {
@@ -218,9 +210,9 @@ func TestInt(t *testing.T) {
 	var err Error
 
 	val, err = a.ToStr(nil)
-	ok(t, val, err, mustStr("0"))
+	ok(t, val, err, MustStr("0"))
 	val, err = b.ToStr(nil)
-	ok(t, val, err, mustStr("1"))
+	ok(t, val, err, MustStr("1"))
 
 	okType(t, a, IntType)
 
@@ -312,9 +304,9 @@ func TestFloat(t *testing.T) {
 	var err Error
 
 	val, err = a.ToStr(nil)
-	ok(t, val, err, mustStr("0.1"))
+	ok(t, val, err, MustStr("0.1"))
 	val, err = b.ToStr(nil)
-	ok(t, val, err, mustStr("1.2"))
+	ok(t, val, err, MustStr("1.2"))
 
 	val, err = a.Eq(nil, b)
 	ok(t, val, err, False)
@@ -329,7 +321,7 @@ func TestFloat(t *testing.T) {
 	g := NewFloat(1.0)
 	i := NewInt(0)
 	j := NewInt(1)
-	val, err = f.Cmp(nil, mustStr("f"))
+	val, err = f.Cmp(nil, MustStr("f"))
 	fail(t, val, err, "TypeMismatch: Types Float and Str cannot be compared")
 	val, err = f.Cmp(nil, f)
 	ok(t, val, err, NewInt(0))
@@ -390,7 +382,7 @@ func TestBasic(t *testing.T) {
 	entries[Zero] = True
 	entries[NewFloat(0.123)] = True
 	entries[False] = True
-	entries[mustStr("abc")] = True
+	entries[MustStr("abc")] = True
 }
 
 func TestBasicHashCode(t *testing.T) {
@@ -415,10 +407,10 @@ func TestBasicHashCode(t *testing.T) {
 	h, err = NewFloat(-1.23e45).HashCode(nil)
 	ok(t, h, err, NewInt(-3941894481896550236))
 
-	h, err = mustStr("").HashCode(nil)
+	h, err = MustStr("").HashCode(nil)
 	ok(t, h, err, NewInt(0))
 
-	h, err = mustStr("abcdef").HashCode(nil)
+	h, err = MustStr("abcdef").HashCode(nil)
 	ok(t, h, err, NewInt(1928994870288439732))
 }
 

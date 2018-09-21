@@ -48,6 +48,14 @@ func NewStr(s string) (Str, Error) {
 	return str(s), nil
 }
 
+func MustStr(s string) Str {
+	sv, err := NewStr(s)
+	if err != nil {
+		panic(err)
+	}
+	return sv
+}
+
 func (s str) String() string {
 	return string(s)
 }

@@ -30,14 +30,14 @@ func newErrorStruct(err g.Error, stackTrace []string) ErrorStruct {
 	// make List-of-Str
 	vals := make([]g.Value, len(stackTrace))
 	for i, s := range stackTrace {
-		vals[i] = mustStr(s)
+		vals[i] = g.MustStr(s)
 	}
 	list, e := g.NewList(vals).Freeze(nil)
 	g.Assert(e == nil)
 
 	stc, e := g.NewFrozenFieldStruct(
 		map[string]g.Field{
-			"error":      g.NewReadonlyField(mustStr(err.Error())),
+			"error":      g.NewReadonlyField(g.MustStr(err.Error())),
 			"stackTrace": g.NewReadonlyField(list),
 			// TODO $toStr for convenience when printing stack trace
 		})
@@ -52,12 +52,4 @@ func (e *errorStruct) Error() string {
 
 func (e *errorStruct) StackTrace() []string {
 	return e.stackTrace
-}
-
-func mustStr(s string) g.Str {
-	sv, err := g.NewStr(s)
-	if err != nil {
-		panic(err)
-	}
-	return sv
 }

@@ -367,7 +367,7 @@ func (c *compiler) visitImport(imp *ast.ImportStmt) {
 		c.pushBytecode(
 			ident.Begin(),
 			bc.ImportModule,
-			c.poolBuilder.constIndex(mustStr(sym)))
+			c.poolBuilder.constIndex(g.MustStr(sym)))
 
 		// store module in identifer
 		v := ident.Variable
@@ -411,7 +411,7 @@ func (c *compiler) visitAssignment(asn *ast.AssignmentExpr) {
 		c.pushBytecode(
 			t.Key.Position,
 			bc.SetField,
-			c.poolBuilder.constIndex(mustStr(t.Key.Text)))
+			c.poolBuilder.constIndex(g.MustStr(t.Key.Text)))
 
 	case *ast.IndexExpr:
 
@@ -462,7 +462,7 @@ func (c *compiler) visitPostfixExpr(pe *ast.PostfixExpr) {
 		c.pushBytecode(
 			t.Key.Position,
 			bc.IncField,
-			c.poolBuilder.constIndex(mustStr(t.Key.Text)))
+			c.poolBuilder.constIndex(g.MustStr(t.Key.Text)))
 
 	case *ast.IndexExpr:
 
@@ -944,7 +944,7 @@ func (c *compiler) visitBasicExpr(basic *ast.BasicExpr) {
 		c.pushBytecode(
 			basic.Token.Position,
 			bc.LoadConst,
-			c.poolBuilder.constIndex(mustStr(basic.Token.Text)))
+			c.poolBuilder.constIndex(g.MustStr(basic.Token.Text)))
 
 	case ast.Int:
 		c.pushInt(
@@ -977,7 +977,7 @@ func toBasicValue(basic *ast.BasicExpr) g.Value {
 		return g.False
 
 	case ast.Str:
-		return mustStr(basic.Token.Text)
+		return g.MustStr(basic.Token.Text)
 
 	case ast.Int:
 		return g.NewInt(parseInt(basic.Token.Text))
@@ -1034,7 +1034,7 @@ func (c *compiler) visitInvoke(inv *ast.InvokeExpr) {
 		c.pushWideBytecode(
 			fe.Key.Position,
 			bc.InvokeField,
-			c.poolBuilder.constIndex(mustStr(fe.Key.Text)),
+			c.poolBuilder.constIndex(g.MustStr(fe.Key.Text)),
 			len(inv.Params))
 		return
 	}
@@ -1094,7 +1094,7 @@ func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 				c.pushBytecode(
 					v.Begin(),
 					bc.InitReadonlyProperty,
-					c.poolBuilder.constIndex(mustStr(k.Text)))
+					c.poolBuilder.constIndex(g.MustStr(k.Text)))
 
 			} else {
 
@@ -1104,7 +1104,7 @@ func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 				c.pushBytecode(
 					v.Begin(),
 					bc.InitProperty,
-					c.poolBuilder.constIndex(mustStr(k.Text)))
+					c.poolBuilder.constIndex(g.MustStr(k.Text)))
 			}
 		} else {
 
@@ -1113,7 +1113,7 @@ func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 			c.pushBytecode(
 				v.Begin(),
 				bc.InitField,
-				c.poolBuilder.constIndex(mustStr(k.Text)))
+				c.poolBuilder.constIndex(g.MustStr(k.Text)))
 		}
 	}
 }
@@ -1136,7 +1136,7 @@ func (c *compiler) visitFieldExpr(fe *ast.FieldExpr) {
 	c.pushBytecode(
 		fe.Key.Position,
 		bc.GetField,
-		c.poolBuilder.constIndex(mustStr(fe.Key.Text)))
+		c.poolBuilder.constIndex(g.MustStr(fe.Key.Text)))
 }
 
 func (c *compiler) visitIndexExpr(ie *ast.IndexExpr) {
@@ -1293,16 +1293,4 @@ func getSortedCaptureParents(f ast.FuncScope) []ast.Variable {
 		parents = append(parents, c.Parent())
 	}
 	return parents
-}
-
-//--------------------------------------------------------------
-
-// It is impossible for this to fail, because every string in the AST is
-// guaranteed by the scanner to be UTF-8.
-func mustStr(s string) g.Str {
-	sv, err := g.NewStr(s)
-	if err != nil {
-		panic("unreachable")
-	}
-	return sv
 }

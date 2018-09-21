@@ -169,7 +169,7 @@ func TestExpression(t *testing.T) {
 
 	mod = testCompile(t, "'a' * 1.23e4")
 	ok(t, mod.Pool, &bc.Pool{
-		Constants:  []g.Basic{mustStr("a"), g.NewFloat(float64(12300))},
+		Constants:  []g.Basic{g.MustStr("a"), g.NewFloat(float64(12300))},
 		StructDefs: [][]string{},
 		Templates: []*bc.FuncTemplate{
 			&bc.FuncTemplate{
@@ -192,7 +192,7 @@ func TestExpression(t *testing.T) {
 
 	mod = testCompile(t, "'a' == true")
 	ok(t, mod.Pool, &bc.Pool{
-		Constants:  []g.Basic{mustStr("a")},
+		Constants:  []g.Basic{g.MustStr("a")},
 		StructDefs: [][]string{},
 		Templates: []*bc.FuncTemplate{
 			&bc.FuncTemplate{
@@ -505,7 +505,7 @@ func TestWhile(t *testing.T) {
 	code = "let a = 'z'; while (0 < 1) \n{ break; continue; let b = 2; }; let c = 3;"
 	mod = testCompile(t, code)
 	ok(t, mod.Pool, &bc.Pool{
-		Constants:  []g.Basic{mustStr("z"), g.NewInt(2), g.NewInt(3)},
+		Constants:  []g.Basic{g.MustStr("z"), g.NewInt(2), g.NewInt(3)},
 		StructDefs: [][]string{},
 		Templates: []*bc.FuncTemplate{
 			&bc.FuncTemplate{
@@ -1016,12 +1016,12 @@ let p = ls.iter().next()
 
 	ok(t, mod.Pool, &bc.Pool{
 		Constants: []g.Basic{
-			mustStr("abc"),
-			mustStr("contains"),
-			mustStr("b"),
-			mustStr("z"),
-			mustStr("iter"),
-			mustStr("next"),
+			g.MustStr("abc"),
+			g.MustStr("contains"),
+			g.MustStr("b"),
+			g.MustStr("z"),
+			g.MustStr("iter"),
+			g.MustStr("next"),
 		},
 
 		StructDefs: [][]string{},
