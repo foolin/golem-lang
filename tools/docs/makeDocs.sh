@@ -2,6 +2,7 @@
 
 pandoc md/index.md    -o ../../docs/index.html
 pandoc md/tutorial.md -o ../../docs/tutorial.html
+pandoc md/reference.md    -o ../../docs/reference.html
 
 ../../build/golem makeDocs.glm
 

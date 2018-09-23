@@ -76,7 +76,6 @@ func getElem(id js.Value) js.Value {
 }
 
 func setOut(out js.Value, s string) {
-	//out.Set("innerHTML", "<pre>"+s+"</pre>")
 	out.Set("innerHTML", s)
 }
 

@@ -9,10 +9,6 @@ body {
 	font-size: 14px;
 }
 
-.header {
-    color: #458588;
-}
-
 h1 {
     padding-bottom: 0.3em;
     font-size: 2em;
@@ -26,6 +22,7 @@ h2 {
 }
 
 h1, h2, h3, h4, h5, h6 {
+    color: #076678;
     margin-top: 24px;
     margin-bottom: 16px;
     font-weight: 600;

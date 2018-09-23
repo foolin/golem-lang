@@ -1,8 +1,6 @@
 # The Golem Programming Language
 
-Table of Contents
-
-* Tutorial
+* [Tutorial](tutorial.html)
   * [Hello, world.](tutorial.html#hello-world.)
   * [Basic Types](tutorial.html#basic-types)
   * [Comments](tutorial.html#comments)
@@ -23,35 +21,7 @@ Table of Contents
   * [Modules](tutorial.html#modules)
   * [Command Line Interface](tutorial.html#command-line-interface)
   * [Standard Library](tutorial.html#standard-library)
-* Reference
-  * Types
-    * [Null](#null)
-    * [Bool](#bool)
-    * [Int](#int)
-    * [Float](#float)
-    * [Str](#str)
-    * [List](#list)
-    * [Range](#range)
-    * [Tuple](#tuple)
-    * [Dict](#dict)
-    * [Set](#set)
-    * [Struct](#struct)
-    * [Func](#func)
-    * [Chan](#chan)
-  * Builtin Functions
-    * [arity](#arity)
-    * [assert](#assert)
-    * [chan](#chan)
-    * [freeze](#freeze)
-    * [frozen](#frozen)
-    * [iter](#iter)
-    * [len](#len)
-    * [merge](#merge)
-    * [range](#range)
-    * [str](#str)
-    * [type](#type)
-  * Standard Library
-    * [encoding](#encoding)
-    * [golem](#golem)
-    * [os](#os)
-    * [path](#path)
+* [Reference](reference.html)
+  * [Types](reference.html#types)
+  * [Builtin Functions](reference.html#builtin-functions)
+  * [Standard Library](reference.html#standard-library)

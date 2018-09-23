@@ -69,6 +69,7 @@ fn wrapHtml(name, title, path) {
 
 wrapHtml('../../docs/index.html', 'The Golem Programming Language', '')
 wrapHtml('../../docs/tutorial.html', 'Golem Tutorial', '')
+wrapHtml('../../docs/reference.html', 'Golem Reference', '')
 
 //fn docs(name) {
 //    let result = []

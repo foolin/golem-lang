@@ -1,4 +1,4 @@
-# The Golem Tutorial
+# The Golem Programming Language Tutorial
 
 Welcome to the tutorial for the Golem Programming Language.
 

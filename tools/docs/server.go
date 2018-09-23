@@ -13,7 +13,7 @@ import (
 func main() {
 
 	port := flag.String("port", "8080", "port on localhost")
-	dir := flag.String("dir", "../../docs", "directory to server")
+	dir := flag.String("dir", "../../docs", "directory to serve")
 
 	log.Printf("Serving '" + *dir + "' on port " + *port)
 	http.ListenAndServe(":"+*port, http.FileServer(http.Dir(*dir)))
