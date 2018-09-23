@@ -9,8 +9,9 @@
         <script src="wasm_init.js"></script>
     </head>
     <body>
+        <div class="div-wrapper">
 
-<h1 id="golem-tutorial">Golem Tutorial</h1>
+<h1 id="the-golem-tutorial">The Golem Tutorial</h1>
 <p>Welcome to the tutorial for the Golem Programming Language.</p>
 <ul>
 <li><a href="#hello-world.">Hello, world.</a></li>
@@ -31,6 +32,7 @@
 <li><a href="#immutabilty">Immutabilty</a></li>
 <li><a href="#type-introspection">Type Introspection</a></li>
 <li><a href="#modules">Modules</a></li>
+<li><a href="#command-line-interface">Command Line Interface</a></li>
 <li><a href="#standard-library">Standard Library</a></li>
 </ul>
 <h2 id="hello-world.">Hello, world.</h2>
@@ -41,7 +43,7 @@
 <pre><code>println(&#39;Hello, world.&#39;);</code></pre>
 <p>and then run it like so:</p>
 <pre><code>./build/golem tutorial.glm</code></pre>
-<p>The function <code>println</code> is built in to the Golem CLI. There are <a href="#TODO">several</a>of these builtin functions in Golem.</p>
+<p>The function <code>println</code> is built in to the Golem CLI. There are <a href="#TODO">several</a> of these builtin functions in Golem.</p>
 <p>If you are a vim user, there is a <a href="https://github.com/mjarmy/golem-lang-vim">vim plugin</a> for Golem that you can install, that provides syntax highlighting.</p>
 <p>You may have noticed that there is a semicolon at the end of the println statement. Semicolons are optional in Golem – you are not required to include a semicolon after each statement in your code, although you can do so if you wish.</p>
 <p>However, semicolons are required if you want to write multiple separate statements on a single line:</p>
@@ -530,11 +532,21 @@ println(types)</code></pre>
 <pre><code>import foo
 
 assert(foo.square(5) == 25)</code></pre>
+<h2 id="command-line-interface">Command Line Interface</h2>
+<p><em>TODO</em> To get started, you must first compile a version of the Golem Command Line Interface, or “CLI”. This requires that you have the Go language toolchain installed on your system, with at least version 1.9.</p>
+<p>Clone the Golem <a href="https://github.com/mjarmy/golem-lang">repository</a> into the proper place in your go development environment, <code>cd</code> into the top level directory, and type <code>make</code>. This will build Golem, and place the <code>golem</code> CLI executable in a sub-directory called <code>build</code>.</p>
+<p>Golem’s CLI doesn’t have a <a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop">REPL</a>, so follow along by entering Golem source code into a text file (‘tutorial.glm’, for example), and then running the file from the command line to look at the results.</p>
+<p>So, fire up your text editor of choice, and type the following program into a file named ‘tutorial.glm’:</p>
+<pre><code>println(&#39;Hello, world.&#39;);</code></pre>
+<p>and then run it like so:</p>
+<pre><code>./build/golem tutorial.glm</code></pre>
+<p>If you are a vim user, there is a <a href="https://github.com/mjarmy/golem-lang-vim">vim plugin</a> for Golem that you can install, that provides syntax highlighting.</p>
 <h2 id="standard-library">Standard Library</h2>
 <p>Golem has a <a href="#TODO">Standard Library</a> that is implemented as a collection of modules.</p>
 <p>When embedding the Golem interpreter in a Go program, some or all of the standard library can be included in the sandboxed environment. The Golem CLI makes the entire standard library available.</p>
 <p>To use one of the modules from the standard library, simply import it like you would any module, e.g. <code>import os</code>.</p>
 
-        <p><small><em>This document uses documentation from [go](https://github.com/golang/go), which is licensed under the BSD-3-Clause license.</em></small>
+            <p><small><em>This document uses documentation from <a href="https://github.com/golang/go">go</a> , which is licensed under the BSD-3-Clause license.</em></small>
+        </div>
     </body>
 </html>

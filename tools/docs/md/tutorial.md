@@ -1,4 +1,4 @@
-# Golem Tutorial
+# The Golem Tutorial
 
 Welcome to the tutorial for the Golem Programming Language.
 
@@ -20,6 +20,7 @@ Welcome to the tutorial for the Golem Programming Language.
 * [Immutabilty](#immutabilty)
 * [Type Introspection](#type-introspection)
 * [Modules](#modules)
+* [Command Line Interface](#command-line-interface)
 * [Standard Library](#standard-library)
 
 ## Hello, world.
@@ -52,7 +53,7 @@ and then run it like so:
 ./build/golem tutorial.glm
 ```
 
-The function `println` is built in to the Golem CLI.  There are [several](#TODO)of these 
+The function `println` is built in to the Golem CLI.  There are [several](#TODO) of these 
 builtin functions in Golem.
 
 If you are a vim user, there is a [vim plugin](https://github.com/mjarmy/golem-lang-vim) for 
@@ -938,6 +939,40 @@ import foo
 
 assert(foo.square(5) == 25)
 ```
+
+## Command Line Interface
+
+_TODO_
+To get started, you must first compile a version of the Golem
+Command Line Interface, or "CLI".  This requires that you have the Go language 
+toolchain installed on your system, with at least version 1.9.
+
+Clone the Golem [repository](https://github.com/mjarmy/golem-lang) into the proper
+place in your go development environment, `cd` into the top level directory, 
+and type `make`.  This will build Golem, and place the `golem` CLI executable 
+in a sub-directory called `build`.
+
+Golem's CLI  doesn't have a 
+[REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop), so 
+follow along by entering Golem source code into a text file 
+('tutorial.glm', for example), and then running the file from 
+the command line to look at the results.
+
+So, fire up your text editor of choice, and type the following 
+program into a file named 'tutorial.glm':
+
+```
+println('Hello, world.');
+```
+
+and then run it like so:
+
+```
+./build/golem tutorial.glm
+```
+
+If you are a vim user, there is a [vim plugin](https://github.com/mjarmy/golem-lang-vim) for 
+Golem that you can install, that provides syntax highlighting.
 
 ## Standard Library
 

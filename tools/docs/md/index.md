@@ -3,7 +3,6 @@
 Table of Contents
 
 * Tutorial
-  * [Golem Tutorial](tutorial.html/#golem-tutorial)
   * [Hello, world.](tutorial.html/#hello-world.)
   * [Basic Types](tutorial.html/#basic-types)
   * [Comments](tutorial.html/#comments)
@@ -22,6 +21,7 @@ Table of Contents
   * [Immutabilty](tutorial.html/#immutabilty)
   * [Type Introspection](tutorial.html/#type-introspection)
   * [Modules](tutorial.html/#modules)
+  * [Command Line Interface](tutorial.html/#command-line-interface)
   * [Standard Library](tutorial.html/#standard-library)
 * Reference
   * Types
