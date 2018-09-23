@@ -28,16 +28,43 @@ fn writeFile(name, text) {
     }
 }
 
+const header = readFile('html/header.html')
+const footer = readFile('html/footer.html')
+const play   = readFile('html/play.html')
+
+const preBegin = '<pre><code>'
+const preEnd   = '</code></pre>'
+
+let playCounter = 0
+
+fn wrapCode(code) {
+    const counter = playCounter++
+    const rows = len(code.split('\n')) + 1
+
+    return play
+        .replace('${code}', code)
+        .replace('${counter}', str(counter))
+        .replace('${rows}', str(rows))
+}
+
 fn wrapHtml(name, title, path) {
 
-    let header = readFile('html/header.html')
-    header = header.replace('${title}', title)
-    header = header.replace('${path}', path)
+    let h = header.replace('${title}', title)
+    h = h.replace('${path}', path)
 
-    const body   = readFile(name)
-    const footer = readFile('html/footer.html')
+    let body = readFile(name)
+    let a = body.index(preBegin)
+    while a != -1 {
+        let b = a + len(preBegin)
+        let c = body.index(preEnd)
+        let d = c + len(preEnd)
+        
+        body = body[:a] + wrapCode(body[b:c]) + body[d:]
 
-    writeFile(name, [header, body, footer].join('\n'))
+        a = body.index(preBegin)
+    }
+
+    writeFile(name, [h, body, footer].join('\n'))
 }
 
 wrapHtml('../../docs/index.html', 'The Golem Programming Language', '')
