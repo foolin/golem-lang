@@ -1,0 +1,160 @@
+// Copyright 2018 The Golem Language Authors. All rights reserved.
+// Use of this source code is governed by a MIT-style
+// license that can be found in the LICENSE file.
+
+import os
+
+// TODO replace with io.ioutil.ReadFile
+fn readFile(name) {
+    // TODO with
+    let f
+    try {
+        f = os.open(name)
+        return f.readLines().join('\n')
+    } finally {
+        f.close()
+    }
+}
+
+// TODO replace with io.ioutil.WriteFile
+fn writeFile(name, text) {
+    // TODO with
+    let f
+    try {
+        f = os.create(name)
+        f.writeLines(text.split('\n'))
+    } finally {
+        f.close()
+    }
+}
+
+fn wrapHtml(name, title, path) {
+
+    let header = readFile('html/header.html')
+    header = header.replace('${title}', title)
+    header = header.replace('${path}', path)
+
+    const body   = readFile(name)
+    const footer = readFile('html/footer.html')
+
+    writeFile(name, [header, body, footer].join('\n'))
+}
+
+wrapHtml('../../docs/index.html', 'The Golem Programming Language', '')
+wrapHtml('../../docs/tutorial.html', 'Golem Tutorial', '')
+
+//fn docs(name) {
+//    let result = []
+//    let f = os.open(name)
+//    try {
+//        let lines = f.readLines()
+//        let isDoc = false
+//        for ln in lines {
+//            ln = ln.trim('\t')
+//            if isDoc {
+//                if ln.hasPrefix('*/') {
+//                    isDoc = false
+//                } else {
+//                    result.add(ln)
+//                }
+//            } else {
+//                if ln.hasPrefix('/*doc') {
+//                    isDoc = true
+//                }
+//            }
+//        }
+//
+//    } finally {
+//        f.close()
+//    }
+//    return result
+//}
+//
+//fn docTypes() {
+//
+//    let d = []
+//    d.add('# Types')
+//
+//    d.addAll(docs('../core/value.go'))
+//
+//    d.addAll(['# Basic Types', ''])
+//    d.addAll(docs('../core/null.go'))
+//    d.addAll(docs('../core/bool.go'))
+//    d.addAll(docs('../core/int.go'))
+//    d.addAll(docs('../core/float.go'))
+//    d.addAll(docs('../core/str.go'))
+//
+//    d.addAll(['# Composite Types', ''])
+//    d.addAll(docs('../core/list.go'))
+//    d.addAll(docs('../core/tuple.go'))
+//    d.addAll(docs('../core/range.go'))
+//    d.addAll(docs('../core/dict.go'))
+//    d.addAll(docs('../core/set.go'))
+//
+//    d.addAll(['# Other Types', ''])
+//    d.addAll(docs('../core/bytecode/func.go'))
+//    d.addAll(docs('../core/channel.go'))
+//
+//    d.addAll(footer)
+//
+//    let f = os.create('types.md')
+//    try {
+//        f.writeLines(d)
+//    } finally {
+//        f.close()
+//    }
+//}
+//
+//fn docBuiltins() {
+//
+//    let d = []
+//    d.add('# Builtin Functions')
+//    d.add('')
+//    d.add('* [Standard Builtins](#standard-builtins)')
+//    d.add('* [Unsandboxed Builtins](#unsandboxed-builtins)')
+//    d.add('')
+//    d.addAll(docs('../core/builtins.go'))
+//    d.addAll(footer)
+//
+//    let f = os.create('builtins.md')
+//    try {
+//        f.writeLines(d)
+//    } finally {
+//        f.close()
+//    }
+//}
+//
+//fn docLibrary() {
+//
+//    let d = []
+//    d.add('# Standard Library')
+//    d.add('')
+//    d.add('* [encoding](#encoding)')
+//    d.add('  * [json](#encodingjson)')
+//    d.add('* [golem](#golem)')
+//    d.add('* [os](#os)')
+//    d.add('* [path](#path)')
+//    d.add('  * [filepath](#pathfilepath)')
+//    d.add('')
+//    d.addAll(docs('../lib/encoding/encoding.go'))
+//    d.addAll(docs('../lib/encoding/json/json.go'))
+//    d.addAll(docs('../lib/golem/golem.go'))
+//    d.addAll(docs('../lib/os/os.go'))
+//    d.addAll(docs('../lib/path/path.go'))
+//    d.addAll(docs('../lib/path/filepath/filepath.go'))
+//    d.addAll(footer)
+//
+//    let f = os.create('library.md')
+//    try {
+//        f.writeLines(d)
+//    } finally {
+//        f.close()
+//    }
+//}
+//
+//fn main(args) {
+//    docTypes()
+//    docBuiltins()
+//    docLibrary()
+//}
+//

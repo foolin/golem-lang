@@ -34,4 +34,3 @@ build: clean fmt vet test compile
 
 lint:
 	gometalinter.v2  --disable=gocyclo  --disable=goconst ./...
-

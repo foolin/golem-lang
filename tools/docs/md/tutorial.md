@@ -1,6 +1,26 @@
-# Golem Tour
+# Golem Tutorial
 
-Welcome to a tour of the Golem Programming Language.
+Welcome to the tutorial for the Golem Programming Language.
+
+* [Hello, world.](#hello-world.)
+* [Basic Types](#basic-types)
+* [Comments](#comments)
+* [Variables](#variables)
+* [Collections](#collections)
+* [Fields](#fields)
+* [Control Structures](#control-structures)
+* [Operators and Expressions](#operators-and-expressions)
+* [Functions and Closures](#functions-and-closures)
+* [The `main()` function](#the-main-function)
+* [Structs](#structs)
+* [Properties](#properties)
+* [Combining Structs Together](#combining-structs-together)
+* [Error Handling](#error-handling)
+* [Concurrency](#concurrency)
+* [Immutabilty](#immutabilty)
+* [Type Introspection](#type-introspection)
+* [Modules](#modules)
+* [Standard Library](#standard-library)
 
 ## Hello, world.
 
@@ -582,7 +602,7 @@ println(arity(range))
 println(arity(println))
 ```
 
-## Passing In Arguments via main()
+## The `main()` function
 
 You can pass arguments into a Golem CLI program by defining a `main()` function, that
 accepts exactly one parameter.  The parameter will always be a list of the

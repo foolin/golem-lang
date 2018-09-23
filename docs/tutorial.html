@@ -1,0 +1,540 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Golem Tutorial</title>
+
+        <link type="text/css" rel="stylesheet" href="style.css">
+        <script src="wasm_exec.js"></script>
+        <script src="wasm_init.js"></script>
+    </head>
+    <body>
+
+<h1 id="golem-tutorial">Golem Tutorial</h1>
+<p>Welcome to the tutorial for the Golem Programming Language.</p>
+<ul>
+<li><a href="#hello-world.">Hello, world.</a></li>
+<li><a href="#basic-types">Basic Types</a></li>
+<li><a href="#comments">Comments</a></li>
+<li><a href="#variables">Variables</a></li>
+<li><a href="#collections">Collections</a></li>
+<li><a href="#fields">Fields</a></li>
+<li><a href="#control-structures">Control Structures</a></li>
+<li><a href="#operators-and-expressions">Operators and Expressions</a></li>
+<li><a href="#functions-and-closures">Functions and Closures</a></li>
+<li><a href="#the-main-function">The <code>main()</code> function</a></li>
+<li><a href="#structs">Structs</a></li>
+<li><a href="#properties">Properties</a></li>
+<li><a href="#combining-structs-together">Combining Structs Together</a></li>
+<li><a href="#error-handling">Error Handling</a></li>
+<li><a href="#concurrency">Concurrency</a></li>
+<li><a href="#immutabilty">Immutabilty</a></li>
+<li><a href="#type-introspection">Type Introspection</a></li>
+<li><a href="#modules">Modules</a></li>
+<li><a href="#standard-library">Standard Library</a></li>
+</ul>
+<h2 id="hello-world.">Hello, world.</h2>
+<p>To get started, you must first compile a version of the Golem Command Line Interface, or “CLI”. This requires that you have the Go language toolchain installed on your system, with at least version 1.9.</p>
+<p>Clone the Golem <a href="https://github.com/mjarmy/golem-lang">repository</a> into the proper place in your go development environment, <code>cd</code> into the top level directory, and type <code>make</code>. This will build Golem, and place the <code>golem</code> CLI executable in a sub-directory called <code>build</code>.</p>
+<p>Golem’s CLI doesn’t have a <a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop">REPL</a>, so follow along by entering Golem source code into a text file (‘tutorial.glm’, for example), and then running the file from the command line to look at the results.</p>
+<p>So, fire up your text editor of choice, and type the following program into a file named ‘tutorial.glm’:</p>
+<pre><code>println(&#39;Hello, world.&#39;);</code></pre>
+<p>and then run it like so:</p>
+<pre><code>./build/golem tutorial.glm</code></pre>
+<p>The function <code>println</code> is built in to the Golem CLI. There are <a href="#TODO">several</a>of these builtin functions in Golem.</p>
+<p>If you are a vim user, there is a <a href="https://github.com/mjarmy/golem-lang-vim">vim plugin</a> for Golem that you can install, that provides syntax highlighting.</p>
+<p>You may have noticed that there is a semicolon at the end of the println statement. Semicolons are optional in Golem – you are not required to include a semicolon after each statement in your code, although you can do so if you wish.</p>
+<p>However, semicolons are required if you want to write multiple separate statements on a single line:</p>
+<pre><code>print(&#39;Hello, &#39;); println(&#39;world.&#39;)</code></pre>
+<p>We will omit any optional semicolons in the rest of this tutorial.</p>
+<h2 id="basic-types">Basic Types</h2>
+<p>Golem’s basic primitive types include boolean, string, int and float. There is also <code>null</code>, which represents the absence of a value. Basic values are immutable.</p>
+<p>The two boolean values are <code>true</code> and <code>false</code>.</p>
+<p>Integer values in Golem are signed 64 bit integers, and Float values are IEEE-754 64-bit floating-point numbers. Ints are coerced to floats during arithmetic and checks for equality:</p>
+<pre><code>assert(12 / 4.0 == 3.0)
+assert(12 / 4.0 == 3)</code></pre>
+<p>Note that we used another builtin function, <code>assert</code>, which accepts a boolean value, and will throw an exception if the value that is passed into it is not <code>true</code>.</p>
+<p>Golem has the usual set of C-language-family operators that you would expect: <code>==</code>, <code>!=</code>, <code>||</code>, <code>&amp;&amp;</code>, <code>&lt;</code>, <code>&gt;</code>, <code>+</code>, <code>-</code>, and so forth.</p>
+<pre><code>println(1 + 2)
+println(42 / 7)</code></pre>
+<p>We will cover the operators in more detail later.</p>
+<p>Strings can be delimited either with a single quote or a double quote:</p>
+<pre><code>println(&#39;abc&#39;)
+println(&quot;abc&quot;)</code></pre>
+<p>When adding two values together, if one of the values is a string, and the other is not, then the other value is converted to a string, and the two strings are then concatenated together:</p>
+<pre><code>println(&#39;a&#39; + 1)</code></pre>
+<p>Unlike many other dynamic languages, Golem has no concept of ‘truthiness’. The only things that are true or false are boolean values:</p>
+<pre><code>assert(true)
+assert(!false)</code></pre>
+<p>So, <code>''</code>, <code>0</code>, <code>null</code>, etc. are <em>not</em> boolean, and and error will be thrown if you attempt to evaluate them in a place where a boolean value is expected.</p>
+<pre><code>assert(&#39;&#39;)</code></pre>
+<p>Another builtin function, <code>str</code>, returns the string representation of a value:</p>
+<pre><code>assert(str(3) == &#39;3&#39;)</code></pre>
+<h2 id="comments">Comments</h2>
+<p>Golem uses C-language-family comments: <code>/* ... */</code> for a block comment, and <code>//</code> for a line comment.</p>
+<h2 id="variables">Variables</h2>
+<p>Values can be assigned to variables. Variables are declared via either the <code>let</code> or <code>const</code> keyword. It is an error to refer to a variable before it has been declared.</p>
+<pre><code>let a = 1
+const b = 2
+a = b + 3
+println(a)</code></pre>
+<p>As you might expect, the value of a const variable cannot be changed once it has been assigned.</p>
+<p><code>let</code> and <code>const</code> are “statements” – they do not return a value. Assignments, on the other, are “expressions”, and evaluating an expression returns a value:</p>
+<pre><code>let a = 1
+let b = (a = 2)
+assert(a == b &amp;&amp; b == 2)</code></pre>
+<h2 id="collections">Collections</h2>
+<p>Golem has four collection data types: List, Dict, Set, and Tuple.</p>
+<p>You can create a list by enclosing a comma-delimited sequence of values in square brackets. Once you’ve created a list, you can use square brackets to access individual elements of a list (this is called the “index operator”).</p>
+<pre><code>let a = []
+let b = [3,4,5]
+assert(a.isEmpty())
+assert(b[0] == 3)</code></pre>
+<p>If the index value is negative, values will be indexed from the end of the list. This is a really handy way to get the last element of a list.</p>
+<pre><code>let a = [1,2,3]
+println(a[-1])</code></pre>
+<p>Use the “slice operator” to create a new list from part of an existing list or string. If you leave off the first or last value of the slice operation, the resulting slice will start at the beginning or end. Negative values work with slices in the same way that they do with lists.</p>
+<pre><code>let c = [4,5,6,7,8]
+println(c[1:3])
+println(c[:3])
+println(c[2:])
+println(c[1:-1])</code></pre>
+<p>Indexing and slicing works on strings too:</p>
+<pre><code>println(&#39;abc&#39;[1])
+println(&#39;abc&#39;[:-1])</code></pre>
+<p>Golem’s <code>dict</code> type is an <a href="https://en.wikipedia.org/wiki/Associative_array">associative array</a>. The keys of a <code>dict</code> can be any value that supports hashing (str, int, float, bool, or tuple).</p>
+<pre><code>let a = dict {&#39;x&#39;: 1, &#39;y&#39;: 2}
+assert(a[&#39;x&#39;] == 1)</code></pre>
+<p>A <code>set</code> is a unordered collection of distinct values. Any value that can act as a key in a dict can be a member of a set.</p>
+<pre><code>let a = set {&#39;x&#39;, &#39;y&#39;}
+assert(a.contains(&#39;x&#39;))</code></pre>
+<p>A <code>tuple</code> is an immutable list-like data structure. Tuples must have at least two values.</p>
+<pre><code>let a = (1, 2)
+assert(a[0] == 1)</code></pre>
+<p>The builtin function <code>len</code> can be used to get the length of any of the collections. <code>len</code> will also return the length of a string.</p>
+<pre><code>let a = [1, 2, 3]
+let b = &#39;lmnop&#39;
+let c = dict {&quot;x&quot;: 3}
+
+assert([len(a), len(b), len(c)] == [3,5,1])</code></pre>
+<h2 id="fields">Fields</h2>
+<p>A “field” is a built-in named value that is associated with a parent value. Fields are somewhat like what are called “methods” in other languages. Each type has a collection of fields that are associated with a given value.</p>
+<p>As an example, here is how to use some of the fields that are present on a list value:</p>
+<pre><code>let ls = []
+assert(ls.isEmpty())
+ls.add(&#39;a&#39;)
+ls.addAll([&#39;b&#39;, &#39;c&#39;])
+println(ls)
+println(ls.contains(&#39;c&#39;))
+println(ls.indexOf(&#39;b&#39;))
+println(ls.join(&#39;,&#39;))</code></pre>
+<p>Note that the fields we see in the above example – <code>isEmpty</code>, <code>add</code>, <code>addAll</code>, <code>contains</code>, <code>indexOf</code>, and <code>join</code> – are all <a href="#TODO">functions</a>. Most fields that are built in to the various Golem types are functions.</p>
+<p>See the <a href="#TODO">Type Reference</a> for a complete description of all the fields that are defined on the various types.</p>
+<h2 id="control-structures">Control Structures</h2>
+<p>Golem has a familiar set of control structures: <code>if</code>, <code>while</code>, <code>switch</code>, and <code>for</code>.</p>
+<pre><code>let a = 1
+while a &lt; 12 {
+    if a &lt; 3 {
+        a = a + 2
+    } else {
+        a = 15
+    }
+}
+assert(a == 15)</code></pre>
+<p>Golem also has <code>break</code> and <code>continue</code>, which will break out of a <code>while</code> or <code>for</code> loop, or continue at the top of the loop, as in other languages.</p>
+<p>Golem has ‘ternary-if’ expressions as well:</p>
+<pre><code>const a = 10
+let b = a &lt; 3 ? 4 : 5
+assert(b == 5)</code></pre>
+<p><code>switch</code> works roughly the same way as it does in other languages, except that you can switch on any value, not just integers. Also, there is no ‘fall-through’ – at most only one case will be executed. Therefore the <code>break</code> keyword is not applicable to switches.</p>
+<pre><code>let a = &#39;abc&#39;
+let b = 0
+switch a {
+    case 0:
+        b = 1
+    case &#39;abc&#39;:
+        b = 2
+    default:
+        b = 3
+}
+assert(b == 2)</code></pre>
+<p>You can have multiple expressions in a case statement. The body of the case will be executed if at least on of the expressions matches:</p>
+<pre><code>let s = &#39;&#39;
+let i = 0
+while i &lt; 4 {
+    switch i {
+        case 0, 1:
+            s += &#39;a&#39;
+        case 2:
+            s += &#39;b&#39;
+    }
+    i++
+}
+assert(s == &#39;aab&#39;)</code></pre>
+<p>You can leave the expression out after the <code>switch</code> keyword. This lets you switch on a sequence of boolean case statements, which is sometimes easier to read than a cascade of ‘if, else-if, else-if’ statmements:</p>
+<pre><code>let b = 0
+switch {
+    case 1 &lt; 2:
+        b = 1
+    default:
+        b = 2
+}
+assert(b == 1)</code></pre>
+<p>Golem’s <code>for</code> statement iterates over a sequence of values derived from an ‘iterable’ value. Lists, dicts, sets, and strings are iterable.</p>
+<pre><code>let a = [1, 2, 3]
+let z = 0
+for e in a {
+    z += e
+}
+assert(z == 6)</code></pre>
+<p>By convention, iterating over a dict produces a sequence of tuples. You can capture the values in the tuple directly in a <code>for</code> loop via “tuple destructuring”:</p>
+<pre><code>let d = dict { &quot;x&quot;: 1, &quot;y&quot;: 2, &quot;z&quot;: 3 }
+for (k, v) in d {
+    println(&quot;key: &quot;, k, &quot;, value: &quot;, v)
+}</code></pre>
+<p>There is one more iterable type – ranges. Ranges are created via the <code>range</code> builtin function. A range is an immutable value that represents a sequence of integers.</p>
+<pre><code>let list = [&quot;frog&quot;, &quot;cow&quot;, &quot;rabbit&quot;]
+for i in range(0, len(list)) {
+    if list[i] == &quot;cow&quot; {
+        println(&quot;The cow is at element &quot;, i)
+        break
+    }
+}</code></pre>
+<p>Note that ranges do not actually contain a list of all the specified integers. They simply represent a sequence that can be iterated over.</p>
+<h2 id="operators-and-expressions">Operators and Expressions</h2>
+<p>Golem has the following operators, with the following precedence (from low to high):</p>
+<table>
+<thead>
+<tr class="header">
+<th>Category</th>
+<th>Operators</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>or</td>
+<td><code>||</code></td>
+</tr>
+<tr class="even">
+<td>and</td>
+<td><code>&amp;&amp;</code></td>
+</tr>
+<tr class="odd">
+<td>comparative</td>
+<td><code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&lt;=&gt;</code></td>
+</tr>
+<tr class="even">
+<td>additive</td>
+<td><code>+</code>, <code>-</code>, <code>|</code>, <code>^</code></td>
+</tr>
+<tr class="odd">
+<td>multiplicative</td>
+<td><code>*</code>, <code>/</code>, <code>%</code>, <code>&amp;</code>, <code>&lt;&lt;</code>, <code>&gt;&gt;</code></td>
+</tr>
+<tr class="even">
+<td>unary</td>
+<td><code>-</code>, <code>!</code>, <code>~</code></td>
+</tr>
+<tr class="odd">
+<td>postfix</td>
+<td><code>++</code>, <code>--</code></td>
+</tr>
+</tbody>
+</table>
+<p>The ‘spaceship’ operator, <code>&lt;=&gt;</code>, returns -1, 0, or 1 if the left-hand operator is less than, equal to, or greater than the right-hand operator:</p>
+<pre><code>assert((5 &lt;=&gt; 10) == -1)</code></pre>
+<p>Note that <code>++</code> and <code>--</code> are postfix. Golem does not have any prefix operators.</p>
+<p>Golem also supports ’assignment operators`, which perform an operation and do an assignment at the same time, e.g.:</p>
+<pre><code>let a = 1, b = 2
+a += b // is the same as a = a + b</code></pre>
+<p>Here are the assignment operators:</p>
+<p><code>=+</code>, <code>=-</code>, <code>=*</code>, <code>=/</code>, <code>=%</code>, <code>=^</code>, <code>=&amp;</code>, <code>=|</code>, <code>=&lt;&lt;</code>, <code>=&gt;&gt;</code></p>
+<h2 id="functions-and-closures">Functions and Closures</h2>
+<p>Functions are first class values in Golem. They are created with the <code>fn</code> keyword.</p>
+<pre><code>let a = fn(x) {
+    return x * 7
+}
+assert(a(6) == 42)</code></pre>
+<p>Functions do not have to have an explicit <code>return</code> statement. If there is no <code>return</code>, they will return the last expression that was evaluated. If no expression is evaluated in the function, <code>null</code> is returned.</p>
+<pre><code>let a = fn() {}
+let b = fn(x) { x * x; }
+assert(a() == null)
+assert(b(3) == 9)</code></pre>
+<p>A <code>return</code> statement without a value is syntactically invalid – all return statements must include a value to return.</p>
+<p>Golem supports <a href="https://en.wikipedia.org/wiki/Closure_(computer_programming)">closures</a> as well – in fact closures are a fundamental mechanism in Golem for managing state. Here is an example of a closure that acts as a <a href="http://www.paulgraham.com/accgen.html">accumulator generator</a>:</p>
+<pre><code>let foo = fn(n) {
+    return fn(i) {
+        return n += i
+    }; 
+}
+let f = foo(4)
+assert([f(1), f(2), f(3)] == [5, 7, 10])</code></pre>
+<p>You can declare the formal parameters of a function to be constant. In the following example, the formal parameter ‘b’ is constant, so it cannot be changed inside the function:</p>
+<pre><code>let a = 1
+
+fn foo(const b) {
+    return a += b
+}
+
+foo(2)
+foo(3)
+assert(a == 6)</code></pre>
+<p>Golem also supports ‘lambda’ syntax, via the <code>=&gt;</code> operator. Lambdas provide a lightweight way to define a function on the fly. The body of a lambda function is a single expression.</p>
+<pre><code>let a = || =&gt; 3
+let b = |x| =&gt; x * x
+let c = |x, y| =&gt; (x + y) * 5
+
+assert(a() == 3)
+assert(b(2) == 4)
+assert(c(1, 2) == 15)</code></pre>
+<p>Consider the following program, in which function <code>a</code> calls function <code>b</code>:</p>
+<pre><code>const b = fn() {
+    return 42
+}
+const a = fn() {
+    return b()
+}
+println(a())</code></pre>
+<p>This program works because <code>b</code> is declared before <code>a</code>. However, if we reverse the order of declarations, we get a compilation error, because <code>b</code> has not yet been defined.</p>
+<pre><code>const a = fn() {
+    return b()
+}
+const b = fn() {
+    return 42
+}
+println(a())</code></pre>
+<p>It is often the case that we need to allow for forward references like the one above. Golem provides a feature called ‘Named Functions’ that offers this functionality. For example:</p>
+<pre><code>fn a() {
+    return b()
+}
+fn b() {
+    return 42
+}
+assert(a() == 42)</code></pre>
+<p>Note that the above program is identical in every way to the previous one, except for the forward references provided by the named function syntax.</p>
+<p>Some of the fields on certain types, like <code>list</code>, accept functions as parameters. Here is an example of how to use the <code>map</code>, <code>reduce</code>, and <code>filter</code> fields:</p>
+<pre><code>let ls = [1, 2, 3, 4, 5]
+let squares = ls.map(|x| =&gt; x * x)
+let addedUp = ls.reduce(0, |acc, x| =&gt; acc + x)
+let even = ls.filter(|x| =&gt; (x % 2 == 0))
+let strings = ls.map(str).reduce(&#39;&#39;, |acc, x| =&gt; acc + x)
+
+assert(squares == [1, 4, 9, 16, 25])
+assert(addedUp == 15)
+assert(even == [2, 4])
+assert(strings = &#39;12345&#39;)</code></pre>
+<p>Functions can be declared with optional parameters as well. In the following example, the <code>y</code> parameter defaults to 0 unless the function is invoked with two parameters:</p>
+<pre><code>fn a(x, y = 0) {
+    return x + y
+}
+
+println(a(1))
+println(a(1, 2))</code></pre>
+<p>You can declare more than one optional parameter, but they all must go at the end of the parameter declarations.</p>
+<p>Functions can also be declared with ‘variadic’ parameters. <code>println</code> is actually a variadic function – it will accept any number of parameters:</p>
+<pre><code>println(&#39;frog&#39;, &#39;cow&#39;, &#39;rabbit&#39;)</code></pre>
+<p>Use an ellipsis (three dots) to declare a variadic parameter:</p>
+<pre><code>fn a(x, ls...) {
+    ls.map(|e| =&gt; e + x)
+}
+
+println(a(1))
+println(a(1, 2))
+println(a(1, 2, 3))</code></pre>
+<p>The “extra” parameters are gathered together into a list. A variadic parameter must always be the last formal parameter. Also, you cannot mix optional parameters and variadic parameters in a declaration.</p>
+<p>There is a builtin function called <code>arity</code> that returns a <a href="#structs">struct</a> that describes the <a href="https://en.wikipedia.org/wiki/Arity">arity</a> of a function. Here is a snippet that prints the arity of 3 of the builtin functions we have already used:</p>
+<pre><code>println(arity(len))
+println(arity(range))
+println(arity(println))</code></pre>
+<h2 id="the-main-function">The <code>main()</code> function</h2>
+<p>You can pass arguments into a Golem CLI program by defining a <code>main()</code> function, that accepts exactly one parameter. The parameter will always be a list of the command line arguments.</p>
+<pre><code>fn main(args) {
+    for i in range(0, len(args)) {
+        println(&#39;argument &#39;, i, &#39; is &quot;&#39;, args[i], &#39;&quot;&#39;)
+    }
+}</code></pre>
+<h2 id="structs">Structs</h2>
+<p>Golem is not an object-oriented language. It does not have classes, objects, interfaces, inheritance, or constructors. What it does have, however, are values which we call “structs”.</p>
+<p>Structs are created via the <code>struct</code> keyword.</p>
+<pre><code>let s = struct { a: 1, b: 2 }</code></pre>
+<p>In the above example, we’ve created a struct that has two fields, <code>a</code> and <code>b</code>.</p>
+<p>Structs are similar to dicts in some ways, but quite different in others. The field names of a struct can only be strings, and furthermore they must be valid identifiers – they cannot have spaces or special characters.</p>
+<p>The dot operator, <code>.</code>, is used on structs to get or set the fields of a struct:</p>
+<pre><code>let s = struct { a: 1, b: 2 }
+assert(s.a == 1)
+s.a = 3
+assert(s.a == 3)</code></pre>
+<p>Once a struct is created, it cannot have new fields added to it, or existing fields removed. The <em>values</em> associated with the fields can be changed though, as we saw in the previous example.</p>
+<p>The <code>this</code> keyword is used in Golem to allow a struct to refer to itself. In Golem, <code>this</code> is only valid inside a struct, and it is always lexically scoped to refer to the innermost enclosing struct.</p>
+<pre><code>let s = struct { a: 1, b: 2, c: this.a + this.b }
+println(s)
+assert(s.c == 3)</code></pre>
+<p>The builtin-function <code>merge()</code> can be used to combine an arbitrary number of existing structs into a new struct.</p>
+<pre><code>let a = struct { x: 1, y: 2 }
+let b = struct { y: 3, z: 4 }
+let c = merge(a, b)
+
+println(a)
+println(b)
+println(c)
+
+a.x = 10
+
+println(a)
+println(b)
+println(c) // x is changed here too!</code></pre>
+<p>If there are any duplicated keys in the structs passed in to ‘merge()’, then the value associated with the first such key is used.</p>
+<p>Also, note in the above example that if you change a value in one of the structs passed in to merge(), the value changes in the merged struct as well. That is because the all three structs actually share a common set of fields. We will see later on that this behaviour can be quite useful.</p>
+<h2 id="properties">Properties</h2>
+<p>Structs can have properties defined on them, so that a given field has a ‘getter’ function, and optional ‘setter’ function. The getter function must take 0 parameters, and the setter function must take 1 parameter. If the setter function is omitted, the property is readonly. Properties are useful for hiding the inner workings of a struct behind a simpler facade. Here is an example (which uses <a href="#error-handling">try-catch</a>):</p>
+<pre><code>let x = 2
+let s = struct {
+
+    // &#39;a&#39; is a readonly property with a getter function.
+    a: prop { || =&gt; 1 },
+
+    // &#39;b&#39; is a property with getter and setters functions.
+    b: prop { || =&gt; x, |v| =&gt; x = v },
+
+    // &#39;a&#39; and &#39;b&#39; act like normal fields here.
+    c: || =&gt; this.a + this.b
+}
+
+try {
+    s.a = 42
+    assert(false) // we will never get here.
+} catch e {
+    println(e.error)
+}
+
+assert([s.a, s.b, x, s.c()] == [1, 2, 2, 3])
+
+s.b = 3
+assert([s.a, s.b, x, s.c()] == [1, 3, 3, 4])
+
+x = 4
+assert([s.a, s.b, x, s.c()] == [1, 4, 4, 5])</code></pre>
+<h2 id="combining-structs-together">Combining Structs Together</h2>
+<p>By using closures, structs and <code>merge()</code>, it is possible to simulate various features from other languages, including inheritance, multiple-inheritance, prototype chains, and the like.</p>
+<p>For instance, consider the following program:</p>
+<pre><code>fn newRectangle(w, h) {
+    return struct {
+        width:  prop { || =&gt; w, |val| =&gt; w = val },
+        height: prop { || =&gt; h, |val| =&gt; h = val },
+        area:   || =&gt; w * h
+    }
+}
+
+fn newBox(rect, d) {
+    return merge(
+        rect, 
+        struct {
+            depth:  prop { || =&gt; d, |val| =&gt; d = val },
+            volume: || =&gt; rect.area() * d
+        })
+}
+
+let r = newRectangle(2, 3)
+let b = newBox(r, 4)
+
+println([b.width, b.height, b.depth, b.area(), b.volume()])
+r.width = 5
+println([b.width, b.height, b.depth, b.area(), b.volume()])</code></pre>
+<p>The functions ‘newRectangle’ and ‘newBox’ are very much like what one might call ‘constructors’ in another language. The structs that they return have functions as entries (e.g. ‘area()’), and these functions refer to the ‘this’ keyword, and to captured variables. As such, the functions are quite a bit like what one might call a ‘method’ in another language.</p>
+<p>The use of the ‘merge()’ function to create a box out of a rectangle is similar to how inheritance is used in other languages. Does that mean that a Box is a subclass of a Rectangle? Not really, no. There is no such thing as a ‘class’ in Golem. However, due to the behaviour of merge(), they <em>are</em> inter-related in a way that is very much like inheritance.</p>
+<p>One of the primary goals of the Golem project is to explore the power provided by the simple building blocks of functions, closures, structs and merge(). It is hoped that the simplicity and flexibility of these elements can be used to create a variety of complex runtime structures that are easy to reason about and use.</p>
+<h2 id="error-handling">Error Handling</h2>
+<p>Golem uses the familiar ’try-catch-finally` syntax that exists in many C-family languages.</p>
+<pre><code>try {
+    let z = 4 / 0
+}
+catch e {
+    println(e.error) 
+    println(e.stackTrace) 
+}</code></pre>
+<p>The error value in a <code>catch</code> clause is always a struct with an <code>error</code> field and a <code>stackTrace</code> field.</p>
+<p>You can throw an exception using the <code>throw</code> keyword, followed by an expression that evaluates to a string.</p>
+<pre><code>try {
+    throw &#39;FooError: foo&#39;
+}
+catch e {
+    println(e.error) 
+    println(e.stackTrace) 
+}</code></pre>
+<p>There is also a <code>finally</code> clause, which is always executed no matter what happens inside the try block or catch clause:</p>
+<pre><code>try {
+    throw &#39;FooError: foo&#39;
+}
+catch e {
+    println(e.error) 
+    println(e.stackTrace) 
+}
+finally {
+    println(&#39;finally&#39;)
+}</code></pre>
+<p>A try block must always have either a catch clause, a try clause, or both.</p>
+<p>The try-catch mechanism works exactly the same way that it does in Java. Try statements can be nested, and errors that are not caught in a function are passed upwards in the call stack.</p>
+<h2 id="concurrency">Concurrency</h2>
+<p><strong>TODO</strong> explain this a bunch more.</p>
+<p>Golem uses the Go Language’s <a href="https://tour.golang.org/concurrency/1">concurrency system</a>. This means that Golem has ‘goroutines’, channels and the ability to send and receive messages. Go’s concurrency capabilities are quite powerful, and Golem is capable of using them all (<strong>TODO</strong> well, just not yet. We need to figure out how to provide access to <code>select</code>, mutexes and quite a few other things)</p>
+<pre><code>fn sum(s, c) {
+    c.send(s.reduce(0, |acc, x| =&gt; acc+x))
+}
+
+let s = [7, 2, 8, -9, 4, 0]
+let n = len(s)/2
+let c = chan()
+
+go sum(s[:n], c)
+go sum(s[n:], c)
+
+let result = [c.recv(), c.recv()]
+println(result)</code></pre>
+<h2 id="immutabilty">Immutabilty</h2>
+<p>Golem supports immutability via the <code>freeze()</code> builtin function, which makes a mutable value become immutable. You can check if a value is immutable via the <code>frozen()</code> builtin function. <code>freeze()</code> always returns the value that you pass into it.</p>
+<pre><code>let s = freeze(struct { a: 1, b: 2 })
+assert(frozen(s))
+
+try {
+    s.a = 0;       // This will throw an error.
+    assert(false); // We can&#39;t reach this statement.
+} catch e {
+    println(e.error)
+}</code></pre>
+<p><code>freeze()</code> only has an affect on Lists, Dicts, Sets and Structs. All other values are already immutable, so calling <code>freeze()</code> on them has no effect</p>
+<p>Immutabilty and concurrency go hand in hand. By using immutable values whenever possible, you can reduce the likelyhood of bugs in your concurrency code, and make it much easier to reason about as well.</p>
+<p>An important caveat regarding immutability is that although closures, like all functions, are immutable, they can still have enclosed state that can be modified. There is no way in Golem to freeze a closure after the fact so that it can no longer modify any of its captured variables. It is up to you to manage state properly if you are using closures.</p>
+<p>Here is the “accumulator generator” from a previous example. We freeze it this time, but it still has mutable state via the enclosed variable ‘n’:</p>
+<pre><code>let foo = freeze(fn(n) { 
+    return |i| =&gt; n += i
+})
+let f = foo(4)
+assert([f(1), f(2), f(3)] == [5, 7, 10])</code></pre>
+<h2 id="type-introspection">Type Introspection</h2>
+<p>There is a builtin function called <code>type()</code> that will return a string describing the type of a value. Here is a program that will print a list of every possible type:</p>
+<pre><code>let values = [
+    null, true, &quot;&quot;, 0, 0.0, fn(){}, 
+    [], range(0,1), (0,1), dict{}, set{}, 
+    struct{}, chan()]
+
+let types = values.map(type)
+
+println(types)</code></pre>
+<h2 id="modules">Modules</h2>
+<p>If you’ve been following along with the tutorial, you have been using a file called “tutorial.glm”. The Golem CLI actually compiles this file into a <code>module</code> called “tutorial”. Modules are the fundamental unit of compilation in Golem, and are also used for namespace management. All you need to do to create your own modules in the CLI is create a file with the name you want. As an example, lets create a module called foo, and reference in the tutorial module.</p>
+<p>In a file called “foo.glm”, place the following:</p>
+<pre><code>fn square(x) {
+    return x*x
+}</code></pre>
+<p>And then in your “tutorial.glm”, you can reference the “foo” module via the <code>import</code> statement, like this:</p>
+<pre><code>import foo
+
+assert(foo.square(5) == 25)</code></pre>
+<h2 id="standard-library">Standard Library</h2>
+<p>Golem has a <a href="#TODO">Standard Library</a> that is implemented as a collection of modules.</p>
+<p>When embedding the Golem interpreter in a Go program, some or all of the standard library can be included in the sandboxed environment. The Golem CLI makes the entire standard library available.</p>
+<p>To use one of the modules from the standard library, simply import it like you would any module, e.g. <code>import os</code>.</p>
+
+        <p><small><em>This document uses documentation from [go](https://github.com/golang/go), which is licensed under the BSD-3-Clause license.</em></small>
+    </body>
+</html>
