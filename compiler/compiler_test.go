@@ -65,7 +65,7 @@ var builtinMgr = g.NewBuiltinManager(builtins)
 func testCompile(t *testing.T, code string) *bc.Module {
 
 	source := &scanner.Source{Name: "foo", Path: "foo.glm", Code: code}
-	mods, errs := CompileSourceFully(builtinMgr, source, nil)
+	mods, errs := CompileSourceFully(builtinMgr, nil, source)
 	tassert(t, errs == nil)
 	tassert(t, len(mods) == 1)
 
@@ -987,7 +987,7 @@ func TestImport(t *testing.T) {
 		panic("unreachable")
 	}
 
-	mods, errs := CompileSourceFully(builtinMgr, srcMain, resolver)
+	mods, errs := CompileSourceFully(builtinMgr, resolver, srcMain)
 	tassert(t, errs == nil)
 	tassert(t, len(mods) == 4)
 	tassert(t, mods[0].Name == "foo")

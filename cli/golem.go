@@ -35,10 +35,7 @@ func exitErrors(errors []error) {
 }
 
 func exitInterpreter(es interpreter.ErrorStruct) {
-	fmt.Printf("Error: %s\n", es.Error())
-	for _, s := range es.StackTrace() {
-		fmt.Printf("%s\n", s)
-	}
+	fmt.Printf(es.String())
 	os.Exit(-1)
 }
 
@@ -177,7 +174,7 @@ func main() {
 
 	// compile
 	resolver := makeModuleResolver(homeDir, localDir)
-	mods, errs := compiler.CompileSourceFully(builtinMgr, src, resolver)
+	mods, errs := compiler.CompileSourceFully(builtinMgr, resolver, src)
 	if len(errs) > 0 {
 		exitErrors(errs)
 	}

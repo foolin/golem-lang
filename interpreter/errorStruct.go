@@ -5,7 +5,8 @@
 package interpreter
 
 import (
-	//"fmt"
+	"bytes"
+	"fmt"
 
 	g "github.com/mjarmy/golem-lang/core"
 )
@@ -14,6 +15,7 @@ type (
 	// ErrorStruct is a core.Struct that is also a core.Error.
 	ErrorStruct interface {
 		g.Struct
+		String() string
 		Error() string
 		StackTrace() []string
 	}
@@ -52,4 +54,13 @@ func (e *errorStruct) Error() string {
 
 func (e *errorStruct) StackTrace() []string {
 	return e.stackTrace
+}
+
+func (e *errorStruct) String() string {
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("Error: %s\n", e.Error()))
+	for _, s := range e.StackTrace() {
+		buf.WriteString(fmt.Sprintf("%s\n", s))
+	}
+	return buf.String()
 }

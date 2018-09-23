@@ -20,8 +20,8 @@ type ModuleResolver func(moduleName string) (*scanner.Source, error)
 // that is defined in the provided Source.
 func CompileSourceFully(
 	builtinMgr g.BuiltinManager,
-	source *scanner.Source,
-	resolver ModuleResolver) ([]*bc.Module, []error) {
+	resolver ModuleResolver,
+	source *scanner.Source) ([]*bc.Module, []error) {
 
 	sources := []*scanner.Source{source}
 	sourceSet := map[string]bool{source.Name: true}

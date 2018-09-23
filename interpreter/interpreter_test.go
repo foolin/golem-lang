@@ -32,7 +32,7 @@ var builtinMgr = g.NewBuiltinManager(builtins)
 func testCompile(t *testing.T, code string) *bc.Module {
 
 	source := &scanner.Source{Name: "foo", Path: "foo.glm", Code: code}
-	mods, errs := compiler.CompileSourceFully(builtinMgr, source, nil)
+	mods, errs := compiler.CompileSourceFully(builtinMgr, nil, source)
 	if errs != nil {
 		fmt.Printf("%v\n", errs)
 	}
@@ -121,7 +121,7 @@ assert([1, 2, 3] == [a.x, b.y, c.z])
 		return nil, g.UndefinedModule(moduleName)
 	}
 
-	mods, errs := compiler.CompileSourceFully(builtinMgr, srcMain, resolver)
+	mods, errs := compiler.CompileSourceFully(builtinMgr, resolver, srcMain)
 	tassert(t, errs == nil)
 	tassert(t, len(mods) == 4)
 
