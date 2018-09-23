@@ -55,14 +55,12 @@ a {
 
 /*------------------------------------------------------------*/
 
-/* example and drop-down playground */
 div.play {
 	padding: 0 20px 10px 20px;
 }
 
-div.play pre,
-div.play textarea,
-div.play .lines {
+div.play .output pre,
+div.play .input textarea {
 	padding: 0;
 	margin: 0;
 	font-family: Menlo, monospace;
@@ -72,15 +70,10 @@ div.play .lines {
 div.play .input {
 	padding: 10px;
 	margin-top: 10px;
-
-	-webkit-border-top-left-radius: 5px;
-	-webkit-border-top-right-radius: 5px;
-	-moz-border-radius-topleft: 5px;
-	-moz-border-radius-topright: 5px;
+	overflow: hidden;
+	max-width: 600px;
 	border-top-left-radius: 5px;
 	border-top-right-radius: 5px;
-
-	overflow: hidden;
 }
 div.play .input textarea {
 	width: 100%;
@@ -88,63 +81,53 @@ div.play .input textarea {
 	border: none;
 	outline: none;
 	resize: none;
-
 	overflow: hidden;
 }
-div#playground .input textarea {
-	overflow: auto;
-	resize: auto;
-}
-div.play .output {
-	border-top: none !important;
 
-	padding: 10px;
-	max-height: 200px;
-	overflow: auto;
-
-	-webkit-border-bottom-right-radius: 5px;
-	-webkit-border-bottom-left-radius: 5px;
-	-moz-border-radius-bottomright: 5px;
-	-moz-border-radius-bottomleft: 5px;
-	border-bottom-right-radius: 5px;
-	border-bottom-left-radius: 5px;
-}
-div.play .output pre {
-	padding: 0;
-
-	-webkit-border-radius: 0;
-	-moz-border-radius: 0;
-	border-radius: 0;
-}
 div.play .input,
 div.play .input textarea,
 div.play .output,
 div.play .output pre {
 	color: #3c3836;
-	background: #fbf1c7;
+	background: #fff5d7;
 }
+
+div.play .output {
+	padding: 10px;
+	overflow: auto;
+	max-height: 200px;
+	max-width: 600px;
+	border-top: none !important;
+	border-bottom-right-radius: 5px;
+	border-bottom-left-radius: 0;
+}
+div.play .output pre {
+	padding: 0;
+	border-radius: 0;
+}
+
 div.play .input,
 div.play .output {
 	border: 1px solid #3c3836;
 }
+
 div.play .buttons {
-	float: right;
-	padding: 10px 0 10px 0;
-	text-align: right;
+	padding: 0 0 10px 0;
 }
 
 .button {
     background: #ebdbd2;
     border: none;
     color: #3c3836;
-    padding: 12px;
+    padding: 8px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-size: 16px;
-    margin: 2px;
+    font-size: 14px;
+    margin: 0;
     cursor: pointer;
-    border-radius: 5px;
     border: 1px solid #3c3836;
+	border-top: none !important;
+	border-bottom-right-radius: 5px;
+	border-bottom-left-radius: 5px;
 }
-
