@@ -8,3 +8,5 @@ const exit = _os.exit
 const open = _os.open
 const create = _os.create
 const stat = _os.stat
+
+const exec = _os.exec

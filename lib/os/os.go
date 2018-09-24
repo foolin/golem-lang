@@ -11,6 +11,7 @@ import (
 	"os"
 
 	g "github.com/mjarmy/golem-lang/core"
+	"github.com/mjarmy/golem-lang/lib/os/exec"
 )
 
 /*doc
@@ -25,10 +26,17 @@ Module os provides a platform-independent interface to operating system function
 var Os g.Struct
 
 func init() {
-	var err error
+
+	exec, err := g.NewFrozenFieldStruct(
+		map[string]g.Field{
+			"runCommand": g.NewField(exec.RunCommand),
+		})
+	g.Assert(err == nil)
+
 	Os, err = g.NewFrozenFieldStruct(
 		map[string]g.Field{
 			"create": g.NewField(create),
+			"exec":   g.NewField(exec),
 			"exit":   g.NewField(exit),
 			"open":   g.NewField(open),
 			"stat":   g.NewField(stat),
