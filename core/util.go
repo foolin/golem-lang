@@ -69,7 +69,13 @@ func sliceIndices(from Value, to Value, length int) (int, int, Error) {
 		return -1, -1, err
 	}
 
-	return sliceBounds(f, length), sliceBounds(t, length), nil
+	fb := sliceBounds(f, length)
+	tb := sliceBounds(t, length)
+	if fb == length {
+		tb = fb
+	}
+
+	return fb, tb, nil
 }
 
 // https://en.wikipedia.org/wiki/Jenkins_hash_function

@@ -633,6 +633,7 @@ fn testStr() {
     assert(s[-2:-1] == '4');
     assert(s[-5:-4] == '');
     assert(s[3:4] == '');
+    assert(s[3:1] == '');
 
     s = '\u{1f496}\u{2665}\u{24}'
     assert('💖' == s[0])
@@ -990,6 +991,7 @@ fn testList() {
             assert(ls[-2:-1] == [4]);
             assert(ls[-5:-4] == []);
             assert(ls[3:4] == []);
+            assert(ls[3:2] == []);
 
             const a = [1, 2, 3]
             assert([false, false, false, false] == [a, a[0:1], a[0:], a[:1]].map(frozen))
