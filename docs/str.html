@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Golem Reference</title>
+
+        <link type="text/css" rel="stylesheet" href="style.css">
+        <script src="wasm_exec.js"></script>
+        <script src="wasm_init.js"></script>
+    </head>
+    <body>
+        <div class="div-wrapper">
+
+<h2 id="str">Str</h2>
+<p>Str is the set of all valid sequences of UTF-8-encoded “code points”, otherwise known as “runes”. Strs are immutable.</p>
+<p>Valid operators for Str are:</p>
+<ul>
+<li>The equality operators <code>==</code>, <code>!=</code>,</li>
+<li>The comparison operators <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&lt;=&gt;</code></li>
+<li>The index operator <code>a[x]</code></li>
+<li>The slice operators <code>a[x:y]</code>, <code>a[x:]</code>, <code>a[:y]</code></li>
+</ul>
+<p>The index operator always returns a single-rune Str.</p>
+<p>The slice operators always return a Str.</p>
+<p>Strs have a <a href="#TODO"><code>len()</code></a> and are <a href="#TODO"><code>iterable</code></a>.</p>
+<p>Strs are <a href="#TODO"><code>hashable</code></a></p>
+<p>Str has the following fields:</p>
+<ul>
+<li><a href="#contains">contains</a></li>
+<li><a href="#hasprefix">hasPrefix</a></li>
+<li><a href="#hassuffix">hasSuffix</a></li>
+<li><a href="#index">index</a></li>
+<li><a href="#lastindex">lastIndex</a></li>
+<li><a href="#map">map</a></li>
+<li><a href="#replace">replace</a></li>
+<li><a href="#split">split</a></li>
+<li><a href="#tochars">toChars</a></li>
+<li><a href="#trim">trim</a></li>
+</ul>
+<h3 id="contains"><code>contains</code></h3>
+<p><code>contains</code> reports whether a substring is within a string.</p>
+<ul>
+<li>signature: <code>contains(substr &lt;Str&gt;) &lt;Bool&gt;</code></li>
+<li>example: <code>'abcdef'.contains('de')</code></li>
+</ul>
+<h3 id="hasprefix"><code>hasPrefix</code></h3>
+<p><code>hasPrefix</code> tests whether a string begins with a prefix.</p>
+<ul>
+<li>signature: <code>hasPrefix(prefix &lt;Str&gt;) &lt;Bool&gt;</code></li>
+<li>example: <code>'abcdef'.hasPrefix('ab')</code></li>
+</ul>
+<h3 id="hassuffix"><code>hasSuffix</code></h3>
+<p><code>hasSuffix</code> tests whether a string ends with a suffix.</p>
+<ul>
+<li>signature: <code>hasSuffix(suffix &lt;Str&gt;) &lt;Bool&gt;</code></li>
+<li>example: <code>'abcdef'.hasSuffix('ab')</code></li>
+</ul>
+<h3 id="index"><code>index</code></h3>
+<p><code>index</code> returns the index of the first instance of a substring in a string. or -1 if the substring is not present.</p>
+<ul>
+<li>signature: <code>index(substr &lt;Str&gt;) &lt;Int&gt;</code></li>
+<li>example: <code>'abcab'.index('ab')</code></li>
+</ul>
+<h3 id="lastindex"><code>lastIndex</code></h3>
+<p><code>lastIndex</code> returns the index of the last instance of a substring in a string, or -1 if the substring is not present.</p>
+<ul>
+<li>signature: <code>lastIndex(substr &lt;Str&gt;) &lt;Int&gt;</code></li>
+<li>example: <code>'abcab'.lastIndex('ab')</code></li>
+</ul>
+<h3 id="map"><code>map</code></h3>
+<p><code>map</code> returns a copy of the string with all its characters modified according to the mapping function.</p>
+<p>The mapping function must accept one Str parameter, and must return a Str.</p>
+<ul>
+<li>signature: <code>map(mapping &lt;Func&gt;) &lt;Str&gt;</code></li>
+<li>mapping signature: <code>fn(s &lt;Str&gt;) &lt;Str&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src0" rows="6" spellcheck="false">let s = &#39;abc(def)[x,y,z]&#39;
+let t = s.map(fn(c) {
+    return c &gt;= &#39;a&#39; &amp;&amp; c &lt;= &#39;z&#39; ? c : &#39;&#39;
+})
+println(t)</textarea>
+    </div>
+    <div class="output"><pre id="result0"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src0', 'result0');">Run</button>
+    </div>
+</div>
+<h3 id="replace"><code>replace</code></h3>
+<p><code>replace</code> returns a copy of a string with the first n non-overlapping instances of <code>old</code> replaced by <code>new</code>. If <code>old</code> is empty, it matches at the beginning of a string and after each UTF-8 sequence, yielding up to k+1 replacements for a k-rune string. If <code>n</code> &lt; 0, there is no limit on the number of replacements. The parameter <code>n</code> is optional, and defaults to -1.</p>
+<ul>
+<li>signature: <code>replace(old &lt;Str&gt;, new &lt;Str&gt;, n = -1 &lt;Int&gt;) &lt;Int&gt;</code></li>
+<li>example: <code>'abcab'.replace('a', 'x')</code></li>
+</ul>
+<h3 id="split"><code>split</code></h3>
+<p><code>split</code> slices a string into all substrings separated by sep and returns a list of the substrings between those separators.</p>
+<p>If the string does not contain sep and sep is not empty, <code>split</code> returns a list of length 1 whose only element is the string.</p>
+<p>If sep is empty, <code>split</code> splits after each UTF-8 sequence. If both the string and sep are empty, <code>split</code> returns an empty list.</p>
+<ul>
+<li>signature: <code>split(sep &lt;Str&gt;) &lt;List&gt;</code></li>
+<li>example: <code>'a,b,c'.split(',')</code></li>
+</ul>
+<h3 id="tochars"><code>toChars</code></h3>
+<p><code>toChars</code> splits a string into a list of single-rune Strs.</p>
+<ul>
+<li>signature: <code>toChars() &lt;List&gt;</code></li>
+<li>example: <code>'xyz'.toChars()</code></li>
+</ul>
+<h3 id="trim"><code>trim</code></h3>
+<p><code>trim</code> returns a new string with all leading and trailing runes contained in cutset removed.</p>
+<ul>
+<li>signature: <code>trim(&lt;Str&gt;) &lt;Str&gt;</code></li>
+<li>example: <code>'\t\tabc\n'.trim('\t\n')</code></li>
+</ul>
+
+            <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
+        </div>
+    </body>
+</html>

@@ -15,6 +15,7 @@ A Chan is a conduit through which you can send and receive values.
 A new Chan is created by the [`chan()`](#TODO) builtin function.
 
 Valid operators for Chan are:
+
 	* The equality operators `==`, `!=`
 
 */
@@ -77,12 +78,15 @@ func (ch *channel) Recv() Value {
 /*doc
 Chan has the following fields:
 
+  * [send](#send)
+  * [recv](#recv)
+
 */
 
 var chanMethods = map[string]Method{
 
 	/*doc
-	#### `send`
+	### `send`
 
 	`send` sends a value to the chan.
 
@@ -98,7 +102,7 @@ var chanMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `recv`
+	### `recv`
 
 	`recv` receives a value from the chan.
 

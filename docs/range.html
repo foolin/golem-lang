@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Golem Reference</title>
+
+        <link type="text/css" rel="stylesheet" href="style.css">
+        <script src="wasm_exec.js"></script>
+        <script src="wasm_init.js"></script>
+    </head>
+    <body>
+        <div class="div-wrapper">
+
+<h2 id="range">Range</h2>
+<p>A Range is a representation of an immutable sequence of integers. Note that a Range doesn’t actually contain a list of all its Ints – it produces them one at a time on demand. A new Range is created by the <a href="#TODO"><code>range()</code></a> builtin function.</p>
+<p>Valid operators for Range are:</p>
+<ul>
+<li>The equality operators <code>==</code>, <code>!=</code></li>
+<li>The index operator <code>a[x]</code></li>
+</ul>
+<p>The index operator always return an Int.</p>
+<p>Ranges have a <a href="#TODO"><code>len()</code></a> and are <a href="#TODO"><code>iterable</code></a>.</p>
+<p>Range has the following fields:</p>
+<ul>
+<li><a href="#count">count</a></li>
+<li><a href="#from">from</a></li>
+<li><a href="#step">step</a></li>
+<li><a href="#to">to</a></li>
+</ul>
+<h3 id="count"><code>count</code></h3>
+<p><code>count</code> is the total number of Ints in the range.</p>
+<ul>
+<li>signature: <code>count() &lt;Int&gt;</code></li>
+</ul>
+<h3 id="from"><code>from</code></h3>
+<p><code>from</code> is the first Int in the range, inclusive</p>
+<ul>
+<li>signature: <code>from() &lt;Int&gt;</code></li>
+</ul>
+<h3 id="step"><code>step</code></h3>
+<p><code>step</code> is the distance between succesive Ints in the range.</p>
+<ul>
+<li>signature: <code>step() &lt;Int&gt;</code></li>
+</ul>
+<h3 id="to"><code>to</code></h3>
+<p><code>to</code> is the last Int in the range, exclusive</p>
+<ul>
+<li>signature: <code>to() &lt;Int&gt;</code></li>
+</ul>
+
+            <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
+        </div>
+    </body>
+</html>

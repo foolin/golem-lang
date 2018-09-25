@@ -17,6 +17,7 @@ Str is the set of all valid sequences of UTF-8-encoded "code points", otherwise
 known as "runes".  Strs are immutable.
 
 Valid operators for Str are:
+
 	* The equality operators `==`, `!=`,
 	* The comparison operators `>`, `>=`, `<`, `<=`, `<=>`
 	* The index operator `a[x]`
@@ -305,12 +306,23 @@ func (s str) Map(ev Eval, mapper StrMapper) (Str, Error) {
 /*doc
 Str has the following fields:
 
+  * [contains](#contains)
+  * [hasPrefix](#hasprefix)
+  * [hasSuffix](#hassuffix)
+  * [index](#index)
+  * [lastIndex](#lastindex)
+  * [map](#map)
+  * [replace](#replace)
+  * [split](#split)
+  * [toChars](#tochars)
+  * [trim](#trim)
+
 */
 
 var strMethods = map[string]Method{
 
 	/*doc
-	#### `contains`
+	### `contains`
 
 	`contains` reports whether a substring is within a string.
 
@@ -325,7 +337,7 @@ var strMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `hasPrefix`
+	### `hasPrefix`
 
 	`hasPrefix` tests whether a string begins with a prefix.
 
@@ -340,7 +352,7 @@ var strMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `hasSuffix`
+	### `hasSuffix`
 
 	`hasSuffix` tests whether a string ends with a suffix.
 
@@ -355,7 +367,7 @@ var strMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `index`
+	### `index`
 
 	`index` returns the index of the first instance of a substring in a string.
 	or -1 if the substring is not present.
@@ -371,7 +383,7 @@ var strMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `lastIndex`
+	### `lastIndex`
 
 	`lastIndex` returns the index of the last instance of a substring in a string,
 	or -1 if the substring is not present.
@@ -387,7 +399,7 @@ var strMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `map`
+	### `map`
 
 	`map` returns a copy of the string with all its characters modified according to
 	the mapping function.
@@ -437,7 +449,7 @@ var strMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `replace`
+	### `replace`
 
 	`replace` returns a copy of a string with the first n non-overlapping instances
 	of `old` replaced by `new`. If `old` is empty, it matches at the beginning of a string
@@ -464,7 +476,7 @@ var strMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `split`
+	### `split`
 
 	`split` slices a string into all substrings separated by sep and returns a list
 	of the substrings between those separators.
@@ -486,7 +498,7 @@ var strMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `toChars`
+	### `toChars`
 
 	`toChars` splits a string into a list of single-rune Strs.
 
@@ -501,7 +513,7 @@ var strMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `trim`
+	### `trim`
 
 	`trim` returns a new string with all leading and trailing runes contained in cutset removed.
 

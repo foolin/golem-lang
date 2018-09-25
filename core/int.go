@@ -14,6 +14,7 @@ import (
 Int is the set of all signed 64-bit integers (-9223372036854775808 to 9223372036854775807).
 
 Valid operators for Int are:
+
 	* The equality operators `==`, `!=`
 	* The comparison operators `>`, `>=`, `<`, `<=`, `<=>`
 	* The arithmetic operators `+`, `-`, `*`, `/`

@@ -3,35 +3,39 @@
 ## Types
 
 * Basic Types:
-  * [Null](types/null.html)
-  * [Bool](types/bool.html)
-  * [Int](types/int.html)
-  * [Float](types/float.html)
-  * [Str](types/str.html)
+  * [Null](null.html)
+  * [Bool](bool.html)
+  * [Int](int.html)
+  * [Float](float.html)
+  * [Str](str.html)
 * Composite Types:
-  * [List](types/list.html)
-  * [Range](types/range.html)
-  * [Tuple](types/tuple.html)
-  * [Dict](types/dict.html)
-  * [Set](types/set.html)
-  * [Struct](types/struct.html)
+  * [List](list.html)
+  * [Range](range.html)
+  * [Tuple](tuple.html)
+  * [Dict](dict.html)
+  * [Set](set.html)
+  * [Struct](struct.html)
 * Miscellaneous Types:
-  * [Func](types/func.html)
-  * [Chan](types/chan.html)
+  * [Func](func.html)
+  * [Chan](chan.html)
 
 ## Builtin Functions
 
-* [arity](#arity)
-* [assert](#assert)
-* [chan](#chan)
-* [freeze](#freeze)
-* [frozen](#frozen)
-* [iter](#iter)
-* [len](#len)
-* [merge](#merge)
-* [range](#range)
-* [str](#str)
-* [type](#type)
+* Standard Builtins:
+  * [arity](builtins.html#arity)
+  * [assert](builtins.html#assert)
+  * [chan](builtins.html#chan)
+  * [freeze](builtins.html#freeze)
+  * [frozen](builtins.html#frozen)
+  * [iter](builtins.html#iter)
+  * [len](builtins.html#len)
+  * [merge](builtins.html#merge)
+  * [range](builtins.html#range)
+  * [str](builtins.html#str)
+  * [type](builtins.html#type)
+* Unsandboxed Builtins:
+  * [print](builtins.html#print)
+  * [println](builtins.html#println)
 
 ## Standard Library
 
@@ -39,5 +43,6 @@
   * [json](#encodingjson)
 * [golem](#golem)
 * [os](#os)
+  * [exec](#osexec)
 * [path](#path)
   * [filepath](#pathfilepath)

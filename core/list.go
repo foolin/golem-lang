@@ -17,6 +17,7 @@ import (
 A List is an ordered array of values.
 
 Valid operators for List are:
+
 	* The equality operators `==`, `!=`
 	* The index operator `a[x]`
 	* The slice operators `a[x:y]`, `a[x:]`, `a[:y]`
@@ -404,12 +405,25 @@ func (i *listIterator) IterGet(ev Eval) (Value, Error) {
 /*doc
 List has the following fields:
 
+  * [add](#add)
+  * [addAll](#addall)
+  * [clear](#clear)
+  * [contains](#contains)
+  * [filter](#filter)
+  * [indexOf](#indexof)
+  * [isEmpty](#isempty)
+  * [join](#join)
+  * [map](#map)
+  * [reduce](#reduce)
+  * [remove](#remove)
+  * [sort](#sort)
+
 */
 
 var listMethods = map[string]Method{
 
 	/*doc
-	#### `add`
+	### `add`
 
 	`add` adds a value to the end of the list, and returns the modified list.
 
@@ -430,7 +444,7 @@ var listMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `addAll`
+	### `addAll`
 
 	`addAll` adds all of the values in the given [Iterable](#TODO) to the end of the list,
 	and returns the modified list.
@@ -452,7 +466,7 @@ var listMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `clear`
+	### `clear`
 
 	`clear` removes all of the values from the list, and returns the empty list.
 
@@ -472,7 +486,7 @@ var listMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `contains`
+	### `contains`
 
 	`contains` returns whether the given value is an element in the list.
 
@@ -493,7 +507,7 @@ var listMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `filter`
+	### `filter`
 
 	`filter` returns a new list by passing each of the elements of the current list
 	into the given predicate.  If the predicate returns `true` for an element, that
@@ -541,7 +555,7 @@ var listMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `indexOf`
+	### `indexOf`
 
 	`indexOf` returns the index of the given value in the list, or -1 if the value
 	is not contained in the list.
@@ -563,7 +577,7 @@ var listMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `isEmpty`
+	### `isEmpty`
 
 	`isEmpty` returns whether the list contains any values.
 
@@ -578,7 +592,7 @@ var listMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `join`
+	### `join`
 
 	Join concatenates the [`str()`](#TODO) of the elements of the list to create a single string.
 	The separator string sep is placed between elements in the resulting string.
@@ -608,7 +622,7 @@ var listMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `map`
+	### `map`
 
 	`map` returns a copy of the list with all its elements modified according to
 	the mapping function.  The original list is unmodified.
@@ -646,7 +660,7 @@ var listMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `reduce`
+	### `reduce`
 
 	`reduce` reduces the list to a single value, by applying a "reducer" function
 	to an accumulated value and each element in the list.
@@ -692,7 +706,7 @@ var listMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `remove`
+	### `remove`
 
 	`remove` remove the value at the given index from the list, and returns the
 	modified list.
@@ -710,7 +724,7 @@ var listMethods = map[string]Method{
 
 	/*doc
 
-	#### `sort`
+	### `sort`
 
 	`sort` sorts the elements in the list and returns the modified list.  If the
 	optional "lesser" function is provided, it is used to compare values in the list.

@@ -1,0 +1,216 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Golem Reference</title>
+
+        <link type="text/css" rel="stylesheet" href="style.css">
+        <script src="wasm_exec.js"></script>
+        <script src="wasm_init.js"></script>
+    </head>
+    <body>
+        <div class="div-wrapper">
+
+<h2 id="list">List</h2>
+<p>A List is an ordered array of values.</p>
+<p>Valid operators for List are:</p>
+<ul>
+<li>The equality operators <code>==</code>, <code>!=</code></li>
+<li>The index operator <code>a[x]</code></li>
+<li>The slice operators <code>a[x:y]</code>, <code>a[x:]</code>, <code>a[:y]</code></li>
+</ul>
+<p>The index operator can return a value of any type.</p>
+<p>The slice operators always return a List.</p>
+<p>Lists have a <a href="#TODO"><code>len()</code></a> and are <a href="#TODO"><code>iterable</code></a>.</p>
+<p>List has the following fields:</p>
+<ul>
+<li><a href="#add">add</a></li>
+<li><a href="#addall">addAll</a></li>
+<li><a href="#clear">clear</a></li>
+<li><a href="#contains">contains</a></li>
+<li><a href="#filter">filter</a></li>
+<li><a href="#indexof">indexOf</a></li>
+<li><a href="#isempty">isEmpty</a></li>
+<li><a href="#join">join</a></li>
+<li><a href="#map">map</a></li>
+<li><a href="#reduce">reduce</a></li>
+<li><a href="#remove">remove</a></li>
+<li><a href="#sort">sort</a></li>
+</ul>
+<h3 id="add"><code>add</code></h3>
+<p><code>add</code> adds a value to the end of the list, and returns the modified list.</p>
+<ul>
+<li>signature: <code>add(val &lt;Value&gt;) &lt;List&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src1" rows="3" spellcheck="false">let a = [1, 2, 3]
+println(a.add(4))</textarea>
+    </div>
+    <div class="output"><pre id="result1"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src1', 'result1');">Run</button>
+    </div>
+</div>
+<h3 id="addall"><code>addAll</code></h3>
+<p><code>addAll</code> adds all of the values in the given <a href="#TODO">Iterable</a> to the end of the list, and returns the modified list.</p>
+<ul>
+<li>signature: <code>addAll(itr &lt;Iterable&gt;) &lt;List&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src2" rows="3" spellcheck="false">let a = [1, 2]
+println(a.addAll([3, 4]))</textarea>
+    </div>
+    <div class="output"><pre id="result2"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src2', 'result2');">Run</button>
+    </div>
+</div>
+<h3 id="clear"><code>clear</code></h3>
+<p><code>clear</code> removes all of the values from the list, and returns the empty list.</p>
+<ul>
+<li>signature: <code>clear() &lt;List&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src3" rows="3" spellcheck="false">let a = [1, 2]
+println(a.clear())</textarea>
+    </div>
+    <div class="output"><pre id="result3"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src3', 'result3');">Run</button>
+    </div>
+</div>
+<h3 id="contains"><code>contains</code></h3>
+<p><code>contains</code> returns whether the given value is an element in the list.</p>
+<ul>
+<li>signature: <code>contains(val &lt;Value&gt;) &lt;Bool&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src4" rows="3" spellcheck="false">let a = [1, 2]
+println(a.contains(2))</textarea>
+    </div>
+    <div class="output"><pre id="result4"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src4', 'result4');">Run</button>
+    </div>
+</div>
+<h3 id="filter"><code>filter</code></h3>
+<p><code>filter</code> returns a new list by passing each of the elements of the current list into the given predicate. If the predicate returns <code>true</code> for an element, that element is added to the new list. The original list is unmodified.</p>
+<p>The predicate must accept one parameter of any type, and return a Bool.</p>
+<ul>
+<li>signature: <code>filter(predicate &lt;Func&gt;) &lt;List&gt;</code></li>
+<li>predicate signature: <code>fn(val &lt;Value&gt;) &lt;Bool&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src5" rows="3" spellcheck="false">let a = [1, 2, 3, 4, 5]
+println(a.filter(|e| =&gt; e % 2 == 0))</textarea>
+    </div>
+    <div class="output"><pre id="result5"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src5', 'result5');">Run</button>
+    </div>
+</div>
+<h3 id="indexof"><code>indexOf</code></h3>
+<p><code>indexOf</code> returns the index of the given value in the list, or -1 if the value is not contained in the list.</p>
+<ul>
+<li>signature: <code>indexOf(val &lt;Value&gt;) &lt;Int&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src6" rows="3" spellcheck="false">let a = [&#39;x&#39;, &#39;y&#39;, &#39;z&#39;]
+println(a.indexOf(&#39;z&#39;))</textarea>
+    </div>
+    <div class="output"><pre id="result6"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src6', 'result6');">Run</button>
+    </div>
+</div>
+<h3 id="isempty"><code>isEmpty</code></h3>
+<p><code>isEmpty</code> returns whether the list contains any values.</p>
+<ul>
+<li>signature: <code>isEmpty() &lt;Bool&gt;</code></li>
+<li>example: <code>println([].isEmpty())</code></li>
+</ul>
+<h3 id="join"><code>join</code></h3>
+<p>Join concatenates the <a href="#TODO"><code>str()</code></a> of the elements of the list to create a single string. The separator string sep is placed between elements in the resulting string. The sep parameter is optional, and defaults to the empty string <code>''</code>.</p>
+<ul>
+<li>signature: <code>join(sep = '' &lt;Str&gt;) &lt;Str&gt;</code></li>
+<li>example: <code>println([1,2,3].join(', '))</code></li>
+</ul>
+<h3 id="map"><code>map</code></h3>
+<p><code>map</code> returns a copy of the list with all its elements modified according to the mapping function. The original list is unmodified.</p>
+<p>The mapping function must accept one value, and must return one value.</p>
+<ul>
+<li>signature: <code>map(mapping &lt;Func&gt;) &lt;List&gt;</code></li>
+<li>mapping signature: <code>fn(val &lt;Value&gt;) &lt;Value&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src7" rows="4" spellcheck="false">let a = [1,2,3]
+let b = a.map(|e| =&gt; e * e)
+println(b)</textarea>
+    </div>
+    <div class="output"><pre id="result7"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src7', 'result7');">Run</button>
+    </div>
+</div>
+<h3 id="reduce"><code>reduce</code></h3>
+<p><code>reduce</code> reduces the list to a single value, by applying a “reducer” function to an accumulated value and each element in the list. Accumulation is done starting with the first element in the list, and ending with the last. The original list is unmodified.</p>
+<p>The reducer function must accept two values, and return one value.</p>
+<ul>
+<li>signature: <code>reduce(start &lt;Value&gt;, reducer &lt;Func&gt;) &lt;List&gt;</code></li>
+<li>reducer signature: <code>fn(accum &lt;Value&gt;, val &lt;Value&gt;) &lt;Value&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src8" rows="4" spellcheck="false">let a = [1,2,3]
+let b = a.reduce(0, |acc, e| =&gt; acc + e)
+println(b)</textarea>
+    </div>
+    <div class="output"><pre id="result8"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src8', 'result8');">Run</button>
+    </div>
+</div>
+<h3 id="remove"><code>remove</code></h3>
+<p><code>remove</code> remove the value at the given index from the list, and returns the modified list.</p>
+<ul>
+<li>signature: <code>remove(index &lt;Int&gt;) &lt;List&gt;</code></li>
+<li>example: <code>println(['a','b','c'].remove(2))</code></li>
+</ul>
+<h3 id="sort"><code>sort</code></h3>
+<p><code>sort</code> sorts the elements in the list and returns the modified list. If the optional “lesser” function is provided, it is used to compare values in the list. If the lesser function is not provided, then the <code>&lt;</code> operator is used.</p>
+<ul>
+<li>signature: <code>sort(lesser = null &lt;Func&gt;) &lt;List&gt;</code></li>
+<li>lesser signature: <code>fn(val &lt;Value&gt;, val &lt;Value&gt;) &lt;Bool&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src9" rows="4" spellcheck="false">let a = [7, 4, 11, 13, 6, 2, 9, 1]
+a.sort(|a, b| =&gt; b &lt; a) // sort in reverse
+println(a)</textarea>
+    </div>
+    <div class="output"><pre id="result9"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src9', 'result9');">Run</button>
+    </div>
+</div>
+
+            <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
+        </div>
+    </body>
+</html>

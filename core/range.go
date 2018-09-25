@@ -19,6 +19,7 @@ Ints -- it produces them one at a time on demand.
 A new Range is created by the [`range()`](#TODO) builtin function.
 
 Valid operators for Range are:
+
 	* The equality operators `==`, `!=`
 	* The index operator `a[x]`
 
@@ -141,12 +142,17 @@ func (i *rangeIterator) IterGet(ev Eval) (Value, Error) {
 /*doc
 Range has the following fields:
 
+  * [count](#count)
+  * [from](#from)
+  * [step](#step)
+  * [to](#to)
+
 */
 
 var rangeMethods = map[string]Method{
 
 	/*doc
-	#### `count`
+	### `count`
 
 	`count` is the total number of Ints in the range.
 
@@ -160,7 +166,7 @@ var rangeMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `from`
+	### `from`
 
 	`from` is the first Int in the range, inclusive
 
@@ -174,7 +180,7 @@ var rangeMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `step`
+	### `step`
 
 	`step` is the distance between succesive Ints in the range.
 
@@ -188,7 +194,7 @@ var rangeMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `to`
+	### `to`
 
 	`to` is the last Int in the range, exclusive
 

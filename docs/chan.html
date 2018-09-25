@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Golem Reference</title>
+
+        <link type="text/css" rel="stylesheet" href="style.css">
+        <script src="wasm_exec.js"></script>
+        <script src="wasm_init.js"></script>
+    </head>
+    <body>
+        <div class="div-wrapper">
+
+<h2 id="chan">Chan</h2>
+<p>A Chan is a conduit through which you can send and receive values. A new Chan is created by the <a href="#TODO"><code>chan()</code></a> builtin function.</p>
+<p>Valid operators for Chan are:</p>
+<ul>
+<li>The equality operators <code>==</code>, <code>!=</code></li>
+</ul>
+<p>Chan has the following fields:</p>
+<ul>
+<li><a href="#send">send</a></li>
+<li><a href="#recv">recv</a></li>
+</ul>
+<h3 id="send"><code>send</code></h3>
+<p><code>send</code> sends a value to the chan.</p>
+<ul>
+<li>signature: <code>send(val &lt;Value&gt;)</code></li>
+</ul>
+<h3 id="recv"><code>recv</code></h3>
+<p><code>recv</code> receives a value from the chan.</p>
+<ul>
+<li>signature: <code>recv() &lt;Value&gt;</code></li>
+</ul>
+
+            <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
+        </div>
+    </body>
+</html>

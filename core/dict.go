@@ -16,6 +16,7 @@ A Dict is an [associative array](https://en.wikipedia.org/wiki/Associative_array
 in which the keys are all [`hashable`](#TODO).
 
 Valid operators for Dict are:
+
 	* The equality operators `==`, `!=`
 	* The index operator `a[x]`
 
@@ -236,12 +237,18 @@ func (i *dictIterator) IterGet(ev Eval) (Value, Error) {
 /*doc
 Dict has the following fields:
 
+  * [addAll](#addall)
+  * [clear](#clear)
+  * [contains](#contains)
+  * [isEmpty](#isempty)
+  * [remove](#remove)
+
 */
 
 var dictMethods = map[string]Method{
 
 	/*doc
-	#### `addAll`
+	### `addAll`
 
 	`addAll` adds all of the values in the given [Iterable](#TODO) to the dict,
 	and returns the modified dict.
@@ -264,7 +271,7 @@ var dictMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `clear`
+	### `clear`
 
 	`clear` removes all of the entries from the dict, and returns the empty dict.
 
@@ -284,7 +291,7 @@ var dictMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `contains`
+	### `contains`
 
 	`contains` returns whether the given key is present in the dict.
 
@@ -305,7 +312,7 @@ var dictMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `isEmpty`
+	### `isEmpty`
 
 	`isEmpty` returns whether the dict contains any values.
 
@@ -320,7 +327,7 @@ var dictMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `remove`
+	### `remove`
 
 	`remove` remove the entry associated with the given key from the dict,
 	and returns modified dict.  If the key is not present in the dict, then

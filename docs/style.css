@@ -21,6 +21,12 @@ h2 {
     border-bottom: 1px solid #ddd;
 }
 
+h3 {
+    padding-bottom: 0.3em;
+    font-size: 1.25em;
+    border-bottom: 1px solid #ddd;
+}
+
 h1, h2, h3, h4, h5, h6 {
     color: #076678;
     margin-top: 24px;

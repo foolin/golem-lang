@@ -1,0 +1,179 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Golem Reference</title>
+
+        <link type="text/css" rel="stylesheet" href="style.css">
+        <script src="wasm_exec.js"></script>
+        <script src="wasm_init.js"></script>
+    </head>
+    <body>
+        <div class="div-wrapper">
+
+<h2 id="standard-builtins">Standard Builtins</h2>
+<p>Golem has a collection of standard builtin functions that provide various kinds of important functionality. All of the standard builtins are “pure” functions that do not do any form of I/O. As such they are suitable for use in sandboxed environments.</p>
+<ul>
+<li><a href="#arity"><code>arity()</code></a></li>
+<li><a href="#assert"><code>assert()</code></a></li>
+<li><a href="#chan"><code>chan()</code></a></li>
+<li><a href="#freeze"><code>freeze()</code></a></li>
+<li><a href="#frozen"><code>frozen()</code></a></li>
+<li><a href="#iter"><code>iter()</code></a></li>
+<li><a href="#len"><code>len()</code></a></li>
+<li><a href="#merge"><code>merge()</code></a></li>
+<li><a href="#range"><code>range()</code></a></li>
+<li><a href="#str"><code>str()</code></a></li>
+<li><a href="#type"><code>type()</code></a></li>
+</ul>
+<h3 id="arity"><code>arity</code></h3>
+<p><code>arity</code> returns a Struct describing the <a href="https://en.wikipedia.org/wiki/Arity">arity</a> of a Func. A func’s arity type is always either “Fixed”, “Variadic”, or “Multiple”.</p>
+<ul>
+<li>signature: <code>arity(f &lt;Func&gt;) &lt;Struct&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src19" rows="4" spellcheck="false">    assert(arity(println) == struct { kind: &quot;Variadic&quot;, required: 0 })
+    assert(arity(len)     == struct { kind: &quot;Fixed&quot;,    required: 1 })
+    assert(arity(range)   == struct { kind: &quot;Multiple&quot;, required: 2, optional: 1 })</textarea>
+    </div>
+    <div class="output"><pre id="result19"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src19', 'result19');">Run</button>
+    </div>
+</div>
+<h3 id="assert"><code>assert</code></h3>
+<p><code>assert</code> accepts a single boolean value, and throws an error if the value is not equal to <code>true</code>. <code>assert</code> returns <code>true</code> if it does not throw an error.</p>
+<ul>
+<li>signature: <code>assert(b &lt;Bool&gt;) &lt;Bool&gt;</code></li>
+<li>example: <code>assert(0 &lt; 1)</code></li>
+</ul>
+<h3 id="chan"><code>chan</code></h3>
+<p><code>chan</code> creates a channel of values. <code>chan</code> has a single optional size parameter that defaults to 0. If size is 0, an unbuffered channel will be created. If the size is greater than 0, then a buffered channel of that size will be created.</p>
+<ul>
+<li>signature: <code>chan(size = 0 &lt;Int&gt;) &lt;Chan&gt;</code></li>
+<li>example: <code>let ch = chan()</code></li>
+</ul>
+<h3 id="freeze"><code>freeze</code></h3>
+<p><code>freeze</code> freezes a value, if it is not already frozen. Its OK to call <code>freeze</code> on values that are already frozen. The value is returned after it is frozen.</p>
+<ul>
+<li>signature: <code>freeze(value &lt;Value&gt;) &lt;Freeze&gt;</code></li>
+<li>example: <code>freeze([1, 2])</code></li>
+</ul>
+<h3 id="frozen"><code>frozen</code></h3>
+<p><code>frozen</code> returns whether or not a value is frozen.</p>
+<ul>
+<li>signature: <code>frozen(value &lt;Value&gt;) &lt;Bool&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src20" rows="3" spellcheck="false">    println(frozen(&#39;a&#39;))
+    println(frozen([3, 4]))</textarea>
+    </div>
+    <div class="output"><pre id="result20"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src20', 'result20');">Run</button>
+    </div>
+</div>
+<h3 id="iter"><code>iter</code></h3>
+<p><code>iter</code> returns an iterator for an Iterable value. Str, List, Range, Dict, and Set are iterable.</p>
+<p>An iterator is a Struct that has two fields:</p>
+<ul>
+<li><p>A <code>next()</code> function that returns whether there are any more values in the iterator, and advances the iterator forwards if there is another value.</p></li>
+<li><p>A <code>get()</code> function that returns the currently available value.</p></li>
+</ul>
+<p>By convention, a new iterator has to have <code>next()</code> called on it to advance to the first available value. Calling <code>get()</code> before the first call to <code>next()</code> throws an error.</p>
+<ul>
+<li>signature: <code>iter(value &lt;Iterable&gt;) &lt;Struct&gt;</code></li>
+<li><code>next</code> signature: <code>next() &lt;Bool&gt;</code></li>
+<li><code>get</code> signature: <code>get() &lt;Value&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src21" rows="6" spellcheck="false">    let a = [1, 2, 3]
+    let itr = iter(a)
+    while itr.next() {
+        println(itr.get())
+    }</textarea>
+    </div>
+    <div class="output"><pre id="result21"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src21', 'result21');">Run</button>
+    </div>
+</div>
+<h3 id="len"><code>len</code></h3>
+<p><code>len</code> returns the length of a value that has a length. Str, List, Tuple, Range, Dict, and Set have a length</p>
+<ul>
+<li>signature: <code>len(value &lt;Lenable&gt;) &lt;Int&gt;</code></li>
+<li>example: <code>println(len('abc'))</code></li>
+</ul>
+<h3 id="merge"><code>merge</code></h3>
+<p><code>merge</code> merges structs together into a new struct. Consult the <a href="#TODO">tour</a> for a detailed description of how <code>merge</code> works.</p>
+<ul>
+<li>signature: <code>merge(structs... &lt;Struct&gt;) &lt;Struct&gt;</code></li>
+</ul>
+<h3 id="range"><code>range</code></h3>
+<p><code>range</code> creates a Range, starting at “from” (inclusive) and going until “to” (exclusive).</p>
+<p>The optional “step” parameter, which defaults to 1, specifies the distance between succesive integers in the range. You can create a “backwards” range by specify a negative step value, and a “from” that is less than “to”.</p>
+<ul>
+<li>signature: <code>range(from &lt;Int&gt;, to &lt;Int&gt;, step = 1 &lt;Int&gt;) &lt;Range&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src22" rows="4" spellcheck="false">    for i in range(0, 5) {
+        println(i)
+    }</textarea>
+    </div>
+    <div class="output"><pre id="result22"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src22', 'result22');">Run</button>
+    </div>
+</div>
+<h3 id="str"><code>str</code></h3>
+<p><code>str</code> returns a Str representation of a value.</p>
+<ul>
+<li>signature: <code>str(value &lt;Value&gt;) &lt;Str&gt;</code></li>
+<li>example: <code>println(str([null, true, 1, 'abc']))</code></li>
+</ul>
+<h3 id="type"><code>type</code></h3>
+<p><code>type</code> returns the type of a value.</p>
+<ul>
+<li>signature: <code>type(value &lt;Value&gt;) &lt;Str&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src23" rows="4" spellcheck="false">    println(type(1.23))
+    let a = [null, true, 1, &#39;xyz&#39;]
+    println(a.map(type))</textarea>
+    </div>
+    <div class="output"><pre id="result23"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src23', 'result23');">Run</button>
+    </div>
+</div>
+<h2 id="unsandboxed-builtins">Unsandboxed Builtins</h2>
+<p>Golem also has “unsandboxed” builtins. These functions perform I/O, so they should not be included in sandboxed Golem environments.</p>
+<ul>
+<li><a href="#print"><code>print()</code></a></li>
+<li><a href="#println"><code>println()</code></a></li>
+</ul>
+<h3 id="print"><code>print</code></h3>
+<p><code>print</code> prints a sequence of values to STDOUT.</p>
+<ul>
+<li>signature: <code>print(values... &lt;Value&gt;) &lt;Null&gt;</code></li>
+</ul>
+<h3 id="println"><code>println</code></h3>
+<p><code>println</code> prints a sequence of values to STDOUT, followed by a linefeed.</p>
+<ul>
+<li>signature: <code>println(values... &lt;Value&gt;) &lt;Null&gt;</code></li>
+</ul>
+
+            <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
+        </div>
+    </body>
+</html>

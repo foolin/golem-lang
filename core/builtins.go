@@ -102,7 +102,7 @@ var StandardBuiltins = []*BuiltinEntry{
 //-----------------------------------------------------------------
 
 /*doc
-#### `arity`
+### `arity`
 
 `arity` returns a Struct describing the [arity](https://en.wikipedia.org/wiki/Arity) of a Func.
 A func's arity type is always either "Fixed", "Variadic", or "Multiple".
@@ -145,7 +145,7 @@ var BuiltinArity = NewFixedNativeFunc(
 	})
 
 /*doc
-#### `assert`
+### `assert`
 
 `assert` accepts a single boolean value, and throws an error
 if the value is not equal to `true`.  `assert` returns `true`
@@ -168,7 +168,7 @@ var BuiltinAssert = NewFixedNativeFunc(
 	})
 
 /*doc
-#### `chan`
+### `chan`
 
 `chan` creates a channel of values.  `chan` has a single optional size parameter that
 defaults to 0.  If size is 0, an unbuffered channel will be created.
@@ -195,7 +195,7 @@ var BuiltinChan = NewMultipleNativeFunc(
 	})
 
 /*doc
-#### `freeze`
+### `freeze`
 
 `freeze` freezes a value, if it is not already frozen.  Its OK to call `freeze`
 on values that are already frozen.  The value is returned after it is frozen.
@@ -214,7 +214,7 @@ var BuiltinFreeze = NewFixedNativeFunc(
 	})
 
 /*doc
-#### `frozen`
+### `frozen`
 
 `frozen` returns whether or not a value is frozen.
 
@@ -237,7 +237,7 @@ var BuiltinFrozen = NewFixedNativeFunc(
 	})
 
 /*doc
-#### `iter`
+### `iter`
 
 `iter` returns an iterator for an Iterable value.  Str, List, Range, Dict,
 and Set are iterable.
@@ -286,7 +286,7 @@ var BuiltinIter = NewFixedNativeFunc(
 	})
 
 /*doc
-#### `len`
+### `len`
 
 `len` returns the length of a value that has a length.  Str, List, Tuple, Range, Dict,
 and Set have a length
@@ -313,7 +313,7 @@ var BuiltinLen = NewFixedNativeFunc(
 	})
 
 /*doc
-#### `merge`
+### `merge`
 
 `merge` merges structs together into a new struct.  Consult the [tour](#TODO)
 for a detailed description of how `merge` works.
@@ -336,7 +336,7 @@ var BuiltinMerge = NewVariadicNativeFunc(
 	})
 
 /*doc
-#### `range`
+### `range`
 
 `range` creates a Range, starting at "from" (inclusive) and going until
 "to" (exclusive).
@@ -373,7 +373,7 @@ var BuiltinRange = NewMultipleNativeFunc(
 	})
 
 /*doc
-#### `str`
+### `str`
 
 `str` returns a Str representation of a value.
 
@@ -391,7 +391,7 @@ var BuiltinStr = NewFixedNativeFunc(
 	})
 
 /*doc
-#### `type`
+### `type`
 
 `type` returns the type of a value.
 
@@ -421,7 +421,7 @@ var BuiltinType = NewFixedNativeFunc(
 
 ## Unsandboxed Builtins
 
-Golem also has a couple of "unsandboxed" builtins.  These functions
+Golem also has "unsandboxed" builtins.  These functions
 perform I/O, so they should not be included in sandboxed Golem
 environments.
 
@@ -437,7 +437,7 @@ var UnsandboxedBuiltins = []*BuiltinEntry{
 }
 
 /*doc
-#### `print`
+### `print`
 
 `print` prints a sequence of values to STDOUT.
 
@@ -461,9 +461,9 @@ var BuiltinPrint = NewVariadicNativeFunc(
 	})
 
 /*doc
-#### `println`
+### `println`
 
-`println` prints a sequence of values to STDOUT, followed by a "\n".
+`println` prints a sequence of values to STDOUT, followed by a linefeed.
 
 	* signature: `println(values... <Value>) <Null>`
 

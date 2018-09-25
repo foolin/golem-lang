@@ -14,6 +14,7 @@ import (
 A Set is an un-ordered collection of unique, [`hashable`](#TODO) values.
 
 Valid operators for Set are:
+
 	* The equality operators `==`, `!=`
 
 Sets have a [`len()`](#TODO) and are [`iterable`](#TODO).
@@ -219,12 +220,19 @@ func (i *setIterator) IterGet(ev Eval) (Value, Error) {
 /*doc
 Set has the following fields:
 
+  * [add](#add)
+  * [addAll](#addall)
+  * [clear](#clear)
+  * [contains](#contains)
+  * [isEmpty](#isempty)
+  * [remove](#remove)
+
 */
 
 var setMethods = map[string]Method{
 
 	/*doc
-	#### `add`
+	### `add`
 
 	`add` adds a value to the set, and returns the modified set.
 
@@ -245,7 +253,7 @@ var setMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `addAll`
+	### `addAll`
 
 	`addAll` adds all of the values in the given [Iterable](#TODO) to the set,
 	and returns the modified set.
@@ -267,7 +275,7 @@ var setMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `clear`
+	### `clear`
 
 	`clear` removes all of the values from the set, and returns the empty set.
 
@@ -287,7 +295,7 @@ var setMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `contains`
+	### `contains`
 
 	`contains` returns whether the given value is an element in the set.
 
@@ -308,7 +316,7 @@ var setMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `isEmpty`
+	### `isEmpty`
 
 	`isEmpty` returns whether the set contains any values.
 
@@ -323,7 +331,7 @@ var setMethods = map[string]Method{
 		}),
 
 	/*doc
-	#### `remove`
+	### `remove`
 
 	`remove` remove the value from the set, and returns the
 	modified set.  If the value is not present in the set, then

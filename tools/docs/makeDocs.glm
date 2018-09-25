@@ -3,13 +3,31 @@
 // license that can be found in the LICENSE file.
 
 import os
+import path
+
+const core = [
+    'null', 
+    'bool', 
+    'int', 
+    'float', 
+    'str',
+    'list', 
+    'range', 
+    'tuple', 
+    'dict', 
+    'set', 
+    'struct',
+    'func', 
+    'chan',
+    'builtins'
+]
 
 // TODO replace with io.ioutil.ReadFile
-fn readFile(name) {
+fn readFile(path) {
     // TODO with
     let f
     try {
-        f = os.open(name)
+        f = os.open(path)
         return f.readLines().join('\n')
     } finally {
         f.close()
@@ -17,16 +35,96 @@ fn readFile(name) {
 }
 
 // TODO replace with io.ioutil.WriteFile
-fn writeFile(name, text) {
+fn writeFile(path, text) {
     // TODO with
     let f
     try {
-        f = os.create(name)
+        f = os.create(path)
         f.writeLines(text.split('\n'))
     } finally {
         f.close()
     }
 }
+
+fn readLines(path) {
+    // TODO with
+    let f
+    try {
+        f = os.open(path)
+        return f.readLines()
+    } finally {
+        f.close()
+    }
+}
+
+fn writeLines(path, lines) {
+    // TODO with
+    let f
+    try {
+        f = os.create(path)
+        f.writeLines(lines)
+    } finally {
+        f.close()
+    }
+}
+
+//---------------------------------------------------------------
+// markdown
+//---------------------------------------------------------------
+
+fn docs(lines) {
+
+    let result = []
+    let isDoc = false
+    for ln in lines {
+        ln = ln.trim('\t')
+        if isDoc {
+            if ln.hasPrefix('*/') {
+                isDoc = false
+            } else {
+                result.add(ln)
+            }
+        } else {
+            if ln.hasPrefix('/*doc') {
+                isDoc = true
+            }
+        }
+    }
+    return result
+}
+
+
+fn createMarkdown() {
+
+    for c in core {
+        let readc = c
+        if c == 'func' {
+            readc = 'bytecode/func'
+        }
+        let lines = readLines('../../core/' + readc + '.go')
+        writeLines('md/core/' + c + '.md', docs(lines))
+    }
+
+    //path.filepath.walk('../../lib', fn(p, info) {
+    //    if !info.isDir() && path.filepath.ext(info.name()) == '.go' {
+    //        let a = len('../../lib/')
+    //        let b = p.lastIndex('/')
+    //        println([p, a, b])
+    //    
+    //        let md = p[len('../../lib/'):p.lastIndex('/')]
+    //        println(md)
+    //    }
+    //})
+
+    //for l in lib {
+    //    let lines = readLines('../../lib/' + readc + '.go')
+    //    writeLines('md/core/' + c + '.md', docs(lines))
+    //}
+}
+
+//---------------------------------------------------------------
+// html
+//---------------------------------------------------------------
 
 const header = readFile('html/header.html')
 const footer = readFile('html/footer.html')
@@ -47,10 +145,9 @@ fn wrapCode(code) {
         .replace('${rows}', str(rows))
 }
 
-fn wrapHtml(name, title, path) {
+fn wrapHtml(name, title) {
 
     let h = header.replace('${title}', title)
-    h = h.replace('${path}', path)
 
     let body = readFile(name)
     let a = body.index(preBegin)
@@ -67,45 +164,37 @@ fn wrapHtml(name, title, path) {
     writeFile(name, [h, body, footer].join('\n'))
 }
 
-//--------------------------------------------------------------
+const docsDir = '../../docs/'
 
-os.exec.runCommand('pandoc', 'md/index.md',      '-o', '../../docs/index.html')
-os.exec.runCommand('pandoc', 'md/tutorial.md',   '-o', '../../docs/tutorial.html')
-os.exec.runCommand('pandoc', 'md/reference.md',  '-o', '../../docs/reference.html')
+fn createHtml() {
 
-wrapHtml('../../docs/index.html', 'The Golem Programming Language', '')
-wrapHtml('../../docs/tutorial.html', 'Golem Tutorial', '')
-wrapHtml('../../docs/reference.html', 'Golem Reference', '')
+    for c in core {
+        let p = docsDir + c + '.html' 
+        os.exec.runCommand('pandoc', 'md/core/' + c + '.md', '-o', p)
+        wrapHtml(p, 'Golem Reference')
+    }
 
-//--------------------------------------------------------------
+    os.exec.runCommand('pandoc', 'md/index.md',      '-o', docsDir + 'index.html')
+    os.exec.runCommand('pandoc', 'md/tutorial.md',   '-o', docsDir + 'tutorial.html')
+    os.exec.runCommand('pandoc', 'md/reference.md',  '-o', docsDir + 'reference.html')
 
-//fn docs(name) {
-//    let result = []
-//    let f = os.open(name)
-//    try {
-//        let lines = f.readLines()
-//        let isDoc = false
-//        for ln in lines {
-//            ln = ln.trim('\t')
-//            if isDoc {
-//                if ln.hasPrefix('*/') {
-//                    isDoc = false
-//                } else {
-//                    result.add(ln)
-//                }
-//            } else {
-//                if ln.hasPrefix('/*doc') {
-//                    isDoc = true
-//                }
-//            }
-//        }
-//
-//    } finally {
-//        f.close()
-//    }
-//    return result
-//}
-//
+    wrapHtml(docsDir + 'index.html', 'The Golem Programming Language')
+    wrapHtml(docsDir + 'tutorial.html', 'Golem Tutorial')
+    wrapHtml(docsDir + 'reference.html', 'Golem Reference')
+}
+
+//---------------------------------------------------------------
+// main
+//---------------------------------------------------------------
+
+createMarkdown()
+
+createHtml()
+
+//---------------------------------------------------------------
+//---------------------------------------------------------------
+//---------------------------------------------------------------
+
 //fn docTypes() {
 //
 //    let d = []

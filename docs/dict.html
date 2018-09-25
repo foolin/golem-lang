@@ -1,0 +1,105 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Golem Reference</title>
+
+        <link type="text/css" rel="stylesheet" href="style.css">
+        <script src="wasm_exec.js"></script>
+        <script src="wasm_init.js"></script>
+    </head>
+    <body>
+        <div class="div-wrapper">
+
+<h2 id="dict">Dict</h2>
+<p>A Dict is an <a href="https://en.wikipedia.org/wiki/Associative_array">associative array</a>, in which the keys are all <a href="#TODO"><code>hashable</code></a>.</p>
+<p>Valid operators for Dict are:</p>
+<ul>
+<li>The equality operators <code>==</code>, <code>!=</code></li>
+<li>The index operator <code>a[x]</code></li>
+</ul>
+<p>Dict have a <a href="#TODO"><code>len()</code></a> and are <a href="#TODO"><code>iterable</code></a>.</p>
+<p>Each iterated element in a Dict is a 2-Tuple containing a key-value pair.</p>
+<p>Dict has the following fields:</p>
+<ul>
+<li><a href="#addall">addAll</a></li>
+<li><a href="#clear">clear</a></li>
+<li><a href="#contains">contains</a></li>
+<li><a href="#isempty">isEmpty</a></li>
+<li><a href="#remove">remove</a></li>
+</ul>
+<h3 id="addall"><code>addAll</code></h3>
+<p><code>addAll</code> adds all of the values in the given <a href="#TODO">Iterable</a> to the dict, and returns the modified dict. Each iterated element must be a 2-Tuple containing a key-value pair.</p>
+<ul>
+<li>signature: <code>addAll(itr &lt;Iterable&gt;) &lt;Dict&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src10" rows="3" spellcheck="false">let d = dict {&#39;a&#39;: 1, &#39;b&#39;: 2}
+println(d.addAll([(&#39;b&#39;, 2), (&#39;c&#39;, 3)]))</textarea>
+    </div>
+    <div class="output"><pre id="result10"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src10', 'result10');">Run</button>
+    </div>
+</div>
+<h3 id="clear"><code>clear</code></h3>
+<p><code>clear</code> removes all of the entries from the dict, and returns the empty dict.</p>
+<ul>
+<li>signature: <code>clear() &lt;Dict&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src11" rows="3" spellcheck="false">let d = dict {&#39;a&#39;: 1, &#39;b&#39;: 2}
+println(d.clear())</textarea>
+    </div>
+    <div class="output"><pre id="result11"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src11', 'result11');">Run</button>
+    </div>
+</div>
+<h3 id="contains"><code>contains</code></h3>
+<p><code>contains</code> returns whether the given key is present in the dict.</p>
+<ul>
+<li>signature: <code>contains(key &lt;Value&gt;) &lt;Bool&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src12" rows="3" spellcheck="false">let d = dict {&#39;a&#39;: 1, &#39;b&#39;: 2}
+println(d.contains(&#39;b&#39;))</textarea>
+    </div>
+    <div class="output"><pre id="result12"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src12', 'result12');">Run</button>
+    </div>
+</div>
+<h3 id="isempty"><code>isEmpty</code></h3>
+<p><code>isEmpty</code> returns whether the dict contains any values.</p>
+<ul>
+<li>signature: <code>isEmpty() &lt;Bool&gt;</code></li>
+<li>example: <code>println(dict {}.isEmpty())</code></li>
+</ul>
+<h3 id="remove"><code>remove</code></h3>
+<p><code>remove</code> remove the entry associated with the given key from the dict, and returns modified dict. If the key is not present in the dict, then the dict is unmodified.</p>
+<ul>
+<li>signature: <code>remove(key &lt;Value&gt;) &lt;Dict&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src13" rows="3" spellcheck="false">let d = dict {&#39;a&#39;: 1, &#39;b&#39;: 2}
+println(d.remove(&#39;a&#39;))</textarea>
+    </div>
+    <div class="output"><pre id="result13"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src13', 'result13');">Run</button>
+    </div>
+</div>
+
+            <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
+        </div>
+    </body>
+</html>

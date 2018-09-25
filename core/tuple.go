@@ -16,6 +16,7 @@ A Tuple is an immutable sequence of two or more values.  Tuples are similar to L
 but they have special semantics in certain Golem expressions and statements.
 
 Valid operators for Tuple are:
+
 	* The equality operators `==`, `!=`
 	* The index operator `a[x]`
 

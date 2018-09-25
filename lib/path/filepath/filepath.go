@@ -49,6 +49,24 @@ var Ext g.Value = g.NewFixedNativeFunc(
 		return g.NewStr(filepath.Ext(s.String()))
 	})
 
+/*doc
+#### `walk`
+
+`walk` walks the file tree rooted at root, calling walkFn for each file or directory
+in the tree, including root.  The walkFn must accept two parameters.  The first
+parameter will be the path of the current file, and the second will be the
+[fileInfo](TODO) for the file.
+
+	* signature: `Walk(root <Str>, walkFn <Func>) <Func>`
+	* example:
+
+	```
+	path.filepath.walk('.', fn(path, info) {
+		println([path, info.name(), info.isDir()])
+	})
+	```
+*/
+
 // walk walks a directory path
 var Walk g.Value = g.NewFixedNativeFunc(
 	[]g.Type{g.StrType, g.FuncType}, false,
