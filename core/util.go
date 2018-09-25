@@ -71,7 +71,7 @@ func sliceIndices(from Value, to Value, length int) (int, int, Error) {
 
 	fb := sliceBounds(f, length)
 	tb := sliceBounds(t, length)
-	if fb == length {
+	if fb > tb {
 		tb = fb
 	}
 
