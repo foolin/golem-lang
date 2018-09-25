@@ -10,6 +10,7 @@ import (
 	g "github.com/mjarmy/golem-lang/core"
 	"github.com/mjarmy/golem-lang/lib/encoding"
 	"github.com/mjarmy/golem-lang/lib/golem"
+	"github.com/mjarmy/golem-lang/lib/io"
 	"github.com/mjarmy/golem-lang/lib/os"
 	"github.com/mjarmy/golem-lang/lib/path"
 	"github.com/mjarmy/golem-lang/lib/regexp"
@@ -27,6 +28,8 @@ var BuiltinLib = g.NewFixedNativeFunc(
 			return encoding.Encoding, nil
 		case "golem":
 			return golem.Golem, nil
+		case "io":
+			return io.Io, nil
 		case "os":
 			return os.Os, nil
 		case "path":

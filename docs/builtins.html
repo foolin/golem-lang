@@ -11,6 +11,7 @@
     <body>
         <div class="div-wrapper">
 
+
 <h2 id="standard-builtins">Standard Builtins</h2>
 <p>Golem has a collection of standard builtin functions that provide various kinds of important functionality. All of the standard builtins are “pure” functions that do not do any form of I/O. As such they are suitable for use in sandboxed environments.</p>
 <ul>
@@ -43,6 +44,7 @@
         <button class="button" onClick="interpret('src19', 'result19');">Run</button>
     </div>
 </div>
+
 <h3 id="assert"><code>assert</code></h3>
 <p><code>assert</code> accepts a single boolean value, and throws an error if the value is not equal to <code>true</code>. <code>assert</code> returns <code>true</code> if it does not throw an error.</p>
 <ul>
@@ -77,6 +79,7 @@
         <button class="button" onClick="interpret('src20', 'result20');">Run</button>
     </div>
 </div>
+
 <h3 id="iter"><code>iter</code></h3>
 <p><code>iter</code> returns an iterator for an Iterable value. Str, List, Range, Dict, and Set are iterable.</p>
 <p>An iterator is a Struct that has two fields:</p>
@@ -104,6 +107,7 @@
         <button class="button" onClick="interpret('src21', 'result21');">Run</button>
     </div>
 </div>
+
 <h3 id="len"><code>len</code></h3>
 <p><code>len</code> returns the length of a value that has a length. Str, List, Tuple, Range, Dict, and Set have a length</p>
 <ul>
@@ -133,6 +137,7 @@
         <button class="button" onClick="interpret('src22', 'result22');">Run</button>
     </div>
 </div>
+
 <h3 id="str"><code>str</code></h3>
 <p><code>str</code> returns a Str representation of a value.</p>
 <ul>
@@ -156,6 +161,7 @@
         <button class="button" onClick="interpret('src23', 'result23');">Run</button>
     </div>
 </div>
+
 <h2 id="unsandboxed-builtins">Unsandboxed Builtins</h2>
 <p>Golem also has “unsandboxed” builtins. These functions perform I/O, so they should not be included in sandboxed Golem environments.</p>
 <ul>
@@ -172,6 +178,7 @@
 <ul>
 <li>signature: <code>println(values... &lt;Value&gt;) &lt;Null&gt;</code></li>
 </ul>
+
 
             <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
         </div>

@@ -11,6 +11,7 @@
     <body>
         <div class="div-wrapper">
 
+
 <h2 id="list">List</h2>
 <p>A List is an ordered array of values.</p>
 <p>Valid operators for List are:</p>
@@ -53,6 +54,7 @@ println(a.add(4))</textarea>
         <button class="button" onClick="interpret('src1', 'result1');">Run</button>
     </div>
 </div>
+
 <h3 id="addall"><code>addAll</code></h3>
 <p><code>addAll</code> adds all of the values in the given <a href="#TODO">Iterable</a> to the end of the list, and returns the modified list.</p>
 <ul>
@@ -69,6 +71,7 @@ println(a.addAll([3, 4]))</textarea>
         <button class="button" onClick="interpret('src2', 'result2');">Run</button>
     </div>
 </div>
+
 <h3 id="clear"><code>clear</code></h3>
 <p><code>clear</code> removes all of the values from the list, and returns the empty list.</p>
 <ul>
@@ -85,6 +88,7 @@ println(a.clear())</textarea>
         <button class="button" onClick="interpret('src3', 'result3');">Run</button>
     </div>
 </div>
+
 <h3 id="contains"><code>contains</code></h3>
 <p><code>contains</code> returns whether the given value is an element in the list.</p>
 <ul>
@@ -101,6 +105,7 @@ println(a.contains(2))</textarea>
         <button class="button" onClick="interpret('src4', 'result4');">Run</button>
     </div>
 </div>
+
 <h3 id="filter"><code>filter</code></h3>
 <p><code>filter</code> returns a new list by passing each of the elements of the current list into the given predicate. If the predicate returns <code>true</code> for an element, that element is added to the new list. The original list is unmodified.</p>
 <p>The predicate must accept one parameter of any type, and return a Bool.</p>
@@ -119,6 +124,7 @@ println(a.filter(|e| =&gt; e % 2 == 0))</textarea>
         <button class="button" onClick="interpret('src5', 'result5');">Run</button>
     </div>
 </div>
+
 <h3 id="indexof"><code>indexOf</code></h3>
 <p><code>indexOf</code> returns the index of the given value in the list, or -1 if the value is not contained in the list.</p>
 <ul>
@@ -135,6 +141,7 @@ println(a.indexOf(&#39;z&#39;))</textarea>
         <button class="button" onClick="interpret('src6', 'result6');">Run</button>
     </div>
 </div>
+
 <h3 id="isempty"><code>isEmpty</code></h3>
 <p><code>isEmpty</code> returns whether the list contains any values.</p>
 <ul>
@@ -166,6 +173,7 @@ println(b)</textarea>
         <button class="button" onClick="interpret('src7', 'result7');">Run</button>
     </div>
 </div>
+
 <h3 id="reduce"><code>reduce</code></h3>
 <p><code>reduce</code> reduces the list to a single value, by applying a “reducer” function to an accumulated value and each element in the list. Accumulation is done starting with the first element in the list, and ending with the last. The original list is unmodified.</p>
 <p>The reducer function must accept two values, and return one value.</p>
@@ -185,6 +193,7 @@ println(b)</textarea>
         <button class="button" onClick="interpret('src8', 'result8');">Run</button>
     </div>
 </div>
+
 <h3 id="remove"><code>remove</code></h3>
 <p><code>remove</code> remove the value at the given index from the list, and returns the modified list.</p>
 <ul>
@@ -209,6 +218,8 @@ println(a)</textarea>
         <button class="button" onClick="interpret('src9', 'result9');">Run</button>
     </div>
 </div>
+
+
 
             <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
         </div>

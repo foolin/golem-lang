@@ -2,6 +2,7 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
+import io
 import os
 import path
 
@@ -21,30 +22,6 @@ const core = [
     'chan',
     'builtins'
 ]
-
-// TODO replace with io.ioutil.ReadFile
-fn readFile(path) {
-    // TODO with
-    let f
-    try {
-        f = os.open(path)
-        return f.readLines().join('\n')
-    } finally {
-        f.close()
-    }
-}
-
-// TODO replace with io.ioutil.WriteFile
-fn writeFile(path, text) {
-    // TODO with
-    let f
-    try {
-        f = os.create(path)
-        f.writeLines(text.split('\n'))
-    } finally {
-        f.close()
-    }
-}
 
 fn readLines(path) {
     // TODO with
@@ -72,9 +49,9 @@ fn writeLines(path, lines) {
 // markdown
 //---------------------------------------------------------------
 
-fn docs(lines) {
+fn findDocs(lines) {
 
-    let result = []
+    let docs = []
     let isDoc = false
     for ln in lines {
         ln = ln.trim('\t')
@@ -82,7 +59,7 @@ fn docs(lines) {
             if ln.hasPrefix('*/') {
                 isDoc = false
             } else {
-                result.add(ln)
+                docs.add(ln)
             }
         } else {
             if ln.hasPrefix('/*doc') {
@@ -90,7 +67,7 @@ fn docs(lines) {
             }
         }
     }
-    return result
+    return docs
 }
 
 
@@ -102,33 +79,29 @@ fn createMarkdown() {
             readc = 'bytecode/func'
         }
         let lines = readLines('../../core/' + readc + '.go')
-        writeLines('md/core/' + c + '.md', docs(lines))
+        writeLines('md/core/' + c + '.md', findDocs(lines))
     }
 
-    //path.filepath.walk('../../lib', fn(p, info) {
-    //    if !info.isDir() && path.filepath.ext(info.name()) == '.go' {
-    //        let a = len('../../lib/')
-    //        let b = p.lastIndex('/')
-    //        println([p, a, b])
-    //    
-    //        let md = p[len('../../lib/'):p.lastIndex('/')]
-    //        println(md)
-    //    }
-    //})
-
-    //for l in lib {
-    //    let lines = readLines('../../lib/' + readc + '.go')
-    //    writeLines('md/core/' + c + '.md', docs(lines))
-    //}
+    path.filepath.walk('../../lib', fn(p, info) {
+        if !info.isDir() && path.filepath.ext(info.name()) == '.go' {
+            if p != '../../lib/lib.go' {
+                let lines = readLines(p)
+                let a = len('../../lib/')
+                let b = p.lastIndex('/')
+                let md = p[a:b].replace('/', '')
+                writeLines('md/lib/' + md + '.md', findDocs(lines))
+            }
+        }
+    })
 }
 
 //---------------------------------------------------------------
 // html
 //---------------------------------------------------------------
 
-const header = readFile('html/header.html')
-const footer = readFile('html/footer.html')
-const play   = readFile('html/play.html')
+const header = io.ioutil.readFileString('html/header.html')
+const footer = io.ioutil.readFileString('html/footer.html')
+const play   = io.ioutil.readFileString('html/play.html')
 
 const preBegin = '<pre><code>'
 const preEnd   = '</code></pre>'
@@ -145,23 +118,25 @@ fn wrapCode(code) {
         .replace('${rows}', str(rows))
 }
 
-fn wrapHtml(name, title) {
+fn wrapHtml(name, title, codeWrap = true) {
 
     let h = header.replace('${title}', title)
 
-    let body = readFile(name)
-    let a = body.index(preBegin)
-    while a != -1 {
-        let b = a + len(preBegin)
-        let c = body.index(preEnd)
-        let d = c + len(preEnd)
-        
-        body = body[:a] + wrapCode(body[b:c]) + body[d:]
+    let body = io.ioutil.readFileString(name)
+    if codeWrap {
+        let a = body.index(preBegin)
+        while a != -1 {
+            let b = a + len(preBegin)
+            let c = body.index(preEnd)
+            let d = c + len(preEnd)
+            
+            body = body[:a] + wrapCode(body[b:c]) + body[d:]
 
-        a = body.index(preBegin)
+            a = body.index(preBegin)
+        }
     }
 
-    writeFile(name, [h, body, footer].join('\n'))
+    io.ioutil.writeFileString(name, [h, body, footer].join('\n'))
 }
 
 const docsDir = '../../docs/'
@@ -173,6 +148,12 @@ fn createHtml() {
         os.exec.runCommand('pandoc', 'md/core/' + c + '.md', '-o', p)
         wrapHtml(p, 'Golem Reference')
     }
+    
+	//let lib = io.ioutil.readDir('md/lib')
+    //for f in lib {
+    //    wrapHtml(p, 'Golem Reference')
+    //    println([f.name(), f.isDir()])
+    //}
 
     os.exec.runCommand('pandoc', 'md/index.md',      '-o', docsDir + 'index.html')
     os.exec.runCommand('pandoc', 'md/tutorial.md',   '-o', docsDir + 'tutorial.html')
@@ -190,96 +171,3 @@ fn createHtml() {
 createMarkdown()
 
 createHtml()
-
-//---------------------------------------------------------------
-//---------------------------------------------------------------
-//---------------------------------------------------------------
-
-//fn docTypes() {
-//
-//    let d = []
-//    d.add('# Types')
-//
-//    d.addAll(docs('../core/value.go'))
-//
-//    d.addAll(['# Basic Types', ''])
-//    d.addAll(docs('../core/null.go'))
-//    d.addAll(docs('../core/bool.go'))
-//    d.addAll(docs('../core/int.go'))
-//    d.addAll(docs('../core/float.go'))
-//    d.addAll(docs('../core/str.go'))
-//
-//    d.addAll(['# Composite Types', ''])
-//    d.addAll(docs('../core/list.go'))
-//    d.addAll(docs('../core/tuple.go'))
-//    d.addAll(docs('../core/range.go'))
-//    d.addAll(docs('../core/dict.go'))
-//    d.addAll(docs('../core/set.go'))
-//
-//    d.addAll(['# Other Types', ''])
-//    d.addAll(docs('../core/bytecode/func.go'))
-//    d.addAll(docs('../core/channel.go'))
-//
-//    d.addAll(footer)
-//
-//    let f = os.create('types.md')
-//    try {
-//        f.writeLines(d)
-//    } finally {
-//        f.close()
-//    }
-//}
-//
-//fn docBuiltins() {
-//
-//    let d = []
-//    d.add('# Builtin Functions')
-//    d.add('')
-//    d.add('* [Standard Builtins](#standard-builtins)')
-//    d.add('* [Unsandboxed Builtins](#unsandboxed-builtins)')
-//    d.add('')
-//    d.addAll(docs('../core/builtins.go'))
-//    d.addAll(footer)
-//
-//    let f = os.create('builtins.md')
-//    try {
-//        f.writeLines(d)
-//    } finally {
-//        f.close()
-//    }
-//}
-//
-//fn docLibrary() {
-//
-//    let d = []
-//    d.add('# Standard Library')
-//    d.add('')
-//    d.add('* [encoding](#encoding)')
-//    d.add('  * [json](#encodingjson)')
-//    d.add('* [golem](#golem)')
-//    d.add('* [os](#os)')
-//    d.add('* [path](#path)')
-//    d.add('  * [filepath](#pathfilepath)')
-//    d.add('')
-//    d.addAll(docs('../lib/encoding/encoding.go'))
-//    d.addAll(docs('../lib/encoding/json/json.go'))
-//    d.addAll(docs('../lib/golem/golem.go'))
-//    d.addAll(docs('../lib/os/os.go'))
-//    d.addAll(docs('../lib/path/path.go'))
-//    d.addAll(docs('../lib/path/filepath/filepath.go'))
-//    d.addAll(footer)
-//
-//    let f = os.create('library.md')
-//    try {
-//        f.writeLines(d)
-//    } finally {
-//        f.close()
-//    }
-//}
-//
-//fn main(args) {
-//    docTypes()
-//    docBuiltins()
-//    docLibrary()
-//}
-//

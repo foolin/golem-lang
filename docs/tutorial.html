@@ -11,6 +11,7 @@
     <body>
         <div class="div-wrapper">
 
+
 <h1 id="the-golem-programming-language-tutorial">The Golem Programming Language Tutorial</h1>
 <p>Welcome to the tutorial for the Golem Programming Language.</p>
 <ul>
@@ -49,6 +50,7 @@
         <button class="button" onClick="interpret('src24', 'result24');">Run</button>
     </div>
 </div>
+
 <p>and then run it like so:</p>
 <div class="play">
     <div class="input">
@@ -59,6 +61,7 @@
         <button class="button" onClick="interpret('src25', 'result25');">Run</button>
     </div>
 </div>
+
 <p>The function <code>println</code> is built in to the Golem CLI. There are <a href="#TODO">several</a> of these builtin functions in Golem.</p>
 <p>If you are a vim user, there is a <a href="https://github.com/mjarmy/golem-lang-vim">vim plugin</a> for Golem that you can install, that provides syntax highlighting.</p>
 <p>You may have noticed that there is a semicolon at the end of the println statement. Semicolons are optional in Golem – you are not required to include a semicolon after each statement in your code, although you can do so if you wish.</p>
@@ -72,6 +75,7 @@
         <button class="button" onClick="interpret('src26', 'result26');">Run</button>
     </div>
 </div>
+
 <p>We will omit any optional semicolons in the rest of this tutorial.</p>
 <h2 id="basic-types">Basic Types</h2>
 <p>Golem’s basic primitive types include boolean, string, int and float. There is also <code>null</code>, which represents the absence of a value. Basic values are immutable.</p>
@@ -87,6 +91,7 @@ assert(12 / 4.0 == 3)</textarea>
         <button class="button" onClick="interpret('src27', 'result27');">Run</button>
     </div>
 </div>
+
 <p>Note that we used another builtin function, <code>assert</code>, which accepts a boolean value, and will throw an exception if the value that is passed into it is not <code>true</code>.</p>
 <p>Golem has the usual set of C-language-family operators that you would expect: <code>==</code>, <code>!=</code>, <code>||</code>, <code>&amp;&amp;</code>, <code>&lt;</code>, <code>&gt;</code>, <code>+</code>, <code>-</code>, and so forth.</p>
 <div class="play">
@@ -99,6 +104,7 @@ println(42 / 7)</textarea>
         <button class="button" onClick="interpret('src28', 'result28');">Run</button>
     </div>
 </div>
+
 <p>We will cover the operators in more detail later.</p>
 <p>Strings can be delimited either with a single quote or a double quote:</p>
 <div class="play">
@@ -111,6 +117,7 @@ println(&quot;abc&quot;)</textarea>
         <button class="button" onClick="interpret('src29', 'result29');">Run</button>
     </div>
 </div>
+
 <p>When adding two values together, if one of the values is a string, and the other is not, then the other value is converted to a string, and the two strings are then concatenated together:</p>
 <div class="play">
     <div class="input">
@@ -121,6 +128,7 @@ println(&quot;abc&quot;)</textarea>
         <button class="button" onClick="interpret('src30', 'result30');">Run</button>
     </div>
 </div>
+
 <p>Unlike many other dynamic languages, Golem has no concept of ‘truthiness’. The only things that are true or false are boolean values:</p>
 <div class="play">
     <div class="input">
@@ -132,6 +140,7 @@ assert(!false)</textarea>
         <button class="button" onClick="interpret('src31', 'result31');">Run</button>
     </div>
 </div>
+
 <p>So, <code>''</code>, <code>0</code>, <code>null</code>, etc. are <em>not</em> boolean, and and error will be thrown if you attempt to evaluate them in a place where a boolean value is expected.</p>
 <div class="play">
     <div class="input">
@@ -142,6 +151,7 @@ assert(!false)</textarea>
         <button class="button" onClick="interpret('src32', 'result32');">Run</button>
     </div>
 </div>
+
 <p>Another builtin function, <code>str</code>, returns the string representation of a value:</p>
 <div class="play">
     <div class="input">
@@ -152,6 +162,7 @@ assert(!false)</textarea>
         <button class="button" onClick="interpret('src33', 'result33');">Run</button>
     </div>
 </div>
+
 <h2 id="comments">Comments</h2>
 <p>Golem uses C-language-family comments: <code>/* ... */</code> for a block comment, and <code>//</code> for a line comment.</p>
 <h2 id="variables">Variables</h2>
@@ -168,6 +179,7 @@ println(a)</textarea>
         <button class="button" onClick="interpret('src34', 'result34');">Run</button>
     </div>
 </div>
+
 <p>As you might expect, the value of a const variable cannot be changed once it has been assigned.</p>
 <p><code>let</code> and <code>const</code> are “statements” – they do not return a value. Assignments, on the other, are “expressions”, and evaluating an expression returns a value:</p>
 <div class="play">
@@ -181,6 +193,7 @@ assert(a == b &amp;&amp; b == 2)</textarea>
         <button class="button" onClick="interpret('src35', 'result35');">Run</button>
     </div>
 </div>
+
 <h2 id="collections">Collections</h2>
 <p>Golem has four collection data types: List, Dict, Set, and Tuple.</p>
 <p>You can create a list by enclosing a comma-delimited sequence of values in square brackets. Once you’ve created a list, you can use square brackets to access individual elements of a list (this is called the “index operator”).</p>
@@ -196,6 +209,7 @@ assert(b[0] == 3)</textarea>
         <button class="button" onClick="interpret('src36', 'result36');">Run</button>
     </div>
 </div>
+
 <p>If the index value is negative, values will be indexed from the end of the list. This is a really handy way to get the last element of a list.</p>
 <div class="play">
     <div class="input">
@@ -207,6 +221,7 @@ println(a[-1])</textarea>
         <button class="button" onClick="interpret('src37', 'result37');">Run</button>
     </div>
 </div>
+
 <p>Use the “slice operator” to create a new list from part of an existing list or string. If you leave off the first or last value of the slice operation, the resulting slice will start at the beginning or end. Negative values work with slices in the same way that they do with lists.</p>
 <div class="play">
     <div class="input">
@@ -221,6 +236,7 @@ println(c[1:-1])</textarea>
         <button class="button" onClick="interpret('src38', 'result38');">Run</button>
     </div>
 </div>
+
 <p>Indexing and slicing works on strings too:</p>
 <div class="play">
     <div class="input">
@@ -232,6 +248,7 @@ println(&#39;abc&#39;[:-1])</textarea>
         <button class="button" onClick="interpret('src39', 'result39');">Run</button>
     </div>
 </div>
+
 <p>Golem’s <code>dict</code> type is an <a href="https://en.wikipedia.org/wiki/Associative_array">associative array</a>. The keys of a <code>dict</code> can be any value that supports hashing (str, int, float, bool, or tuple).</p>
 <div class="play">
     <div class="input">
@@ -243,6 +260,7 @@ assert(a[&#39;x&#39;] == 1)</textarea>
         <button class="button" onClick="interpret('src40', 'result40');">Run</button>
     </div>
 </div>
+
 <p>A <code>set</code> is a unordered collection of distinct values. Any value that can act as a key in a dict can be a member of a set.</p>
 <div class="play">
     <div class="input">
@@ -254,6 +272,7 @@ assert(a.contains(&#39;x&#39;))</textarea>
         <button class="button" onClick="interpret('src41', 'result41');">Run</button>
     </div>
 </div>
+
 <p>A <code>tuple</code> is an immutable list-like data structure. Tuples must have at least two values.</p>
 <div class="play">
     <div class="input">
@@ -265,6 +284,7 @@ assert(a[0] == 1)</textarea>
         <button class="button" onClick="interpret('src42', 'result42');">Run</button>
     </div>
 </div>
+
 <p>The builtin function <code>len</code> can be used to get the length of any of the collections. <code>len</code> will also return the length of a string.</p>
 <div class="play">
     <div class="input">
@@ -279,6 +299,7 @@ assert([len(a), len(b), len(c)] == [3,5,1])</textarea>
         <button class="button" onClick="interpret('src43', 'result43');">Run</button>
     </div>
 </div>
+
 <h2 id="fields">Fields</h2>
 <p>A “field” is a built-in named value that is associated with a parent value. Fields are somewhat like what are called “methods” in other languages. Each type has a collection of fields that are associated with a given value.</p>
 <p>As an example, here is how to use some of the fields that are present on a list value:</p>
@@ -298,6 +319,7 @@ println(ls.join(&#39;,&#39;))</textarea>
         <button class="button" onClick="interpret('src44', 'result44');">Run</button>
     </div>
 </div>
+
 <p>Note that the fields we see in the above example – <code>isEmpty</code>, <code>add</code>, <code>addAll</code>, <code>contains</code>, <code>indexOf</code>, and <code>join</code> – are all <a href="#TODO">functions</a>. Most fields that are built in to the various Golem types are functions.</p>
 <p>See the <a href="#TODO">Type Reference</a> for a complete description of all the fields that are defined on the various types.</p>
 <h2 id="control-structures">Control Structures</h2>
@@ -319,6 +341,7 @@ assert(a == 15)</textarea>
         <button class="button" onClick="interpret('src45', 'result45');">Run</button>
     </div>
 </div>
+
 <p>Golem also has <code>break</code> and <code>continue</code>, which will break out of a <code>while</code> or <code>for</code> loop, or continue at the top of the loop, as in other languages.</p>
 <p>Golem has ‘ternary-if’ expressions as well:</p>
 <div class="play">
@@ -332,6 +355,7 @@ assert(b == 5)</textarea>
         <button class="button" onClick="interpret('src46', 'result46');">Run</button>
     </div>
 </div>
+
 <p><code>switch</code> works roughly the same way as it does in other languages, except that you can switch on any value, not just integers. Also, there is no ‘fall-through’ – at most only one case will be executed. Therefore the <code>break</code> keyword is not applicable to switches.</p>
 <div class="play">
     <div class="input">
@@ -352,6 +376,7 @@ assert(b == 2)</textarea>
         <button class="button" onClick="interpret('src47', 'result47');">Run</button>
     </div>
 </div>
+
 <p>You can have multiple expressions in a case statement. The body of the case will be executed if at least on of the expressions matches:</p>
 <div class="play">
     <div class="input">
@@ -373,6 +398,7 @@ assert(s == &#39;aab&#39;)</textarea>
         <button class="button" onClick="interpret('src48', 'result48');">Run</button>
     </div>
 </div>
+
 <p>You can leave the expression out after the <code>switch</code> keyword. This lets you switch on a sequence of boolean case statements, which is sometimes easier to read than a cascade of ‘if, else-if, else-if’ statmements:</p>
 <div class="play">
     <div class="input">
@@ -390,6 +416,7 @@ assert(b == 1)</textarea>
         <button class="button" onClick="interpret('src49', 'result49');">Run</button>
     </div>
 </div>
+
 <p>Golem’s <code>for</code> statement iterates over a sequence of values derived from an ‘iterable’ value. Lists, dicts, sets, and strings are iterable.</p>
 <div class="play">
     <div class="input">
@@ -405,6 +432,7 @@ assert(z == 6)</textarea>
         <button class="button" onClick="interpret('src50', 'result50');">Run</button>
     </div>
 </div>
+
 <p>By convention, iterating over a dict produces a sequence of tuples. You can capture the values in the tuple directly in a <code>for</code> loop via “tuple destructuring”:</p>
 <div class="play">
     <div class="input">
@@ -418,6 +446,7 @@ for (k, v) in d {
         <button class="button" onClick="interpret('src51', 'result51');">Run</button>
     </div>
 </div>
+
 <p>There is one more iterable type – ranges. Ranges are created via the <code>range</code> builtin function. A range is an immutable value that represents a sequence of integers.</p>
 <div class="play">
     <div class="input">
@@ -434,6 +463,7 @@ for i in range(0, len(list)) {
         <button class="button" onClick="interpret('src52', 'result52');">Run</button>
     </div>
 </div>
+
 <p>Note that ranges do not actually contain a list of all the specified integers. They simply represent a sequence that can be iterated over.</p>
 <h2 id="operators-and-expressions">Operators and Expressions</h2>
 <p>Golem has the following operators, with the following precedence (from low to high):</p>
@@ -485,6 +515,7 @@ for i in range(0, len(list)) {
         <button class="button" onClick="interpret('src53', 'result53');">Run</button>
     </div>
 </div>
+
 <p>Note that <code>++</code> and <code>--</code> are postfix. Golem does not have any prefix operators.</p>
 <p>Golem also supports ’assignment operators`, which perform an operation and do an assignment at the same time, e.g.:</p>
 <div class="play">
@@ -497,6 +528,7 @@ a += b // is the same as a = a + b</textarea>
         <button class="button" onClick="interpret('src54', 'result54');">Run</button>
     </div>
 </div>
+
 <p>Here are the assignment operators:</p>
 <p><code>=+</code>, <code>=-</code>, <code>=*</code>, <code>=/</code>, <code>=%</code>, <code>=^</code>, <code>=&amp;</code>, <code>=|</code>, <code>=&lt;&lt;</code>, <code>=&gt;&gt;</code></p>
 <h2 id="functions-and-closures">Functions and Closures</h2>
@@ -513,6 +545,7 @@ assert(a(6) == 42)</textarea>
         <button class="button" onClick="interpret('src55', 'result55');">Run</button>
     </div>
 </div>
+
 <p>Functions do not have to have an explicit <code>return</code> statement. If there is no <code>return</code>, they will return the last expression that was evaluated. If no expression is evaluated in the function, <code>null</code> is returned.</p>
 <div class="play">
     <div class="input">
@@ -526,6 +559,7 @@ assert(b(3) == 9)</textarea>
         <button class="button" onClick="interpret('src56', 'result56');">Run</button>
     </div>
 </div>
+
 <p>A <code>return</code> statement without a value is syntactically invalid – all return statements must include a value to return.</p>
 <p>Golem supports <a href="https://en.wikipedia.org/wiki/Closure_(computer_programming)">closures</a> as well – in fact closures are a fundamental mechanism in Golem for managing state. Here is an example of a closure that acts as a <a href="http://www.paulgraham.com/accgen.html">accumulator generator</a>:</p>
 <div class="play">
@@ -543,6 +577,7 @@ assert([f(1), f(2), f(3)] == [5, 7, 10])</textarea>
         <button class="button" onClick="interpret('src57', 'result57');">Run</button>
     </div>
 </div>
+
 <p>You can declare the formal parameters of a function to be constant. In the following example, the formal parameter ‘b’ is constant, so it cannot be changed inside the function:</p>
 <div class="play">
     <div class="input">
@@ -561,6 +596,7 @@ assert(a == 6)</textarea>
         <button class="button" onClick="interpret('src58', 'result58');">Run</button>
     </div>
 </div>
+
 <p>Golem also supports ‘lambda’ syntax, via the <code>=&gt;</code> operator. Lambdas provide a lightweight way to define a function on the fly. The body of a lambda function is a single expression.</p>
 <div class="play">
     <div class="input">
@@ -577,6 +613,7 @@ assert(c(1, 2) == 15)</textarea>
         <button class="button" onClick="interpret('src59', 'result59');">Run</button>
     </div>
 </div>
+
 <p>Consider the following program, in which function <code>a</code> calls function <code>b</code>:</p>
 <div class="play">
     <div class="input">
@@ -593,6 +630,7 @@ println(a())</textarea>
         <button class="button" onClick="interpret('src60', 'result60');">Run</button>
     </div>
 </div>
+
 <p>This program works because <code>b</code> is declared before <code>a</code>. However, if we reverse the order of declarations, we get a compilation error, because <code>b</code> has not yet been defined.</p>
 <div class="play">
     <div class="input">
@@ -609,6 +647,7 @@ println(a())</textarea>
         <button class="button" onClick="interpret('src61', 'result61');">Run</button>
     </div>
 </div>
+
 <p>It is often the case that we need to allow for forward references like the one above. Golem provides a feature called ‘Named Functions’ that offers this functionality. For example:</p>
 <div class="play">
     <div class="input">
@@ -625,6 +664,7 @@ assert(a() == 42)</textarea>
         <button class="button" onClick="interpret('src62', 'result62');">Run</button>
     </div>
 </div>
+
 <p>Note that the above program is identical in every way to the previous one, except for the forward references provided by the named function syntax.</p>
 <p>Some of the fields on certain types, like <code>list</code>, accept functions as parameters. Here is an example of how to use the <code>map</code>, <code>reduce</code>, and <code>filter</code> fields:</p>
 <div class="play">
@@ -645,6 +685,7 @@ assert(strings = &#39;12345&#39;)</textarea>
         <button class="button" onClick="interpret('src63', 'result63');">Run</button>
     </div>
 </div>
+
 <p>Functions can be declared with optional parameters as well. In the following example, the <code>y</code> parameter defaults to 0 unless the function is invoked with two parameters:</p>
 <div class="play">
     <div class="input">
@@ -660,6 +701,7 @@ println(a(1, 2))</textarea>
         <button class="button" onClick="interpret('src64', 'result64');">Run</button>
     </div>
 </div>
+
 <p>You can declare more than one optional parameter, but they all must go at the end of the parameter declarations.</p>
 <p>Functions can also be declared with ‘variadic’ parameters. <code>println</code> is actually a variadic function – it will accept any number of parameters:</p>
 <div class="play">
@@ -671,6 +713,7 @@ println(a(1, 2))</textarea>
         <button class="button" onClick="interpret('src65', 'result65');">Run</button>
     </div>
 </div>
+
 <p>Use an ellipsis (three dots) to declare a variadic parameter:</p>
 <div class="play">
     <div class="input">
@@ -687,6 +730,7 @@ println(a(1, 2, 3))</textarea>
         <button class="button" onClick="interpret('src66', 'result66');">Run</button>
     </div>
 </div>
+
 <p>The “extra” parameters are gathered together into a list. A variadic parameter must always be the last formal parameter. Also, you cannot mix optional parameters and variadic parameters in a declaration.</p>
 <p>There is a builtin function called <code>arity</code> that returns a <a href="#structs">struct</a> that describes the <a href="https://en.wikipedia.org/wiki/Arity">arity</a> of a function. Here is a snippet that prints the arity of 3 of the builtin functions we have already used:</p>
 <div class="play">
@@ -700,6 +744,7 @@ println(arity(println))</textarea>
         <button class="button" onClick="interpret('src67', 'result67');">Run</button>
     </div>
 </div>
+
 <h2 id="the-main-function">The <code>main()</code> function</h2>
 <p>You can pass arguments into a Golem CLI program by defining a <code>main()</code> function, that accepts exactly one parameter. The parameter will always be a list of the command line arguments.</p>
 <div class="play">
@@ -715,6 +760,7 @@ println(arity(println))</textarea>
         <button class="button" onClick="interpret('src68', 'result68');">Run</button>
     </div>
 </div>
+
 <h2 id="structs">Structs</h2>
 <p>Golem is not an object-oriented language. It does not have classes, objects, interfaces, inheritance, or constructors. What it does have, however, are values which we call “structs”.</p>
 <p>Structs are created via the <code>struct</code> keyword.</p>
@@ -727,6 +773,7 @@ println(arity(println))</textarea>
         <button class="button" onClick="interpret('src69', 'result69');">Run</button>
     </div>
 </div>
+
 <p>In the above example, we’ve created a struct that has two fields, <code>a</code> and <code>b</code>.</p>
 <p>Structs are similar to dicts in some ways, but quite different in others. The field names of a struct can only be strings, and furthermore they must be valid identifiers – they cannot have spaces or special characters.</p>
 <p>The dot operator, <code>.</code>, is used on structs to get or set the fields of a struct:</p>
@@ -742,6 +789,7 @@ assert(s.a == 3)</textarea>
         <button class="button" onClick="interpret('src70', 'result70');">Run</button>
     </div>
 </div>
+
 <p>Once a struct is created, it cannot have new fields added to it, or existing fields removed. The <em>values</em> associated with the fields can be changed though, as we saw in the previous example.</p>
 <p>The <code>this</code> keyword is used in Golem to allow a struct to refer to itself. In Golem, <code>this</code> is only valid inside a struct, and it is always lexically scoped to refer to the innermost enclosing struct.</p>
 <div class="play">
@@ -755,6 +803,7 @@ assert(s.c == 3)</textarea>
         <button class="button" onClick="interpret('src71', 'result71');">Run</button>
     </div>
 </div>
+
 <p>The builtin-function <code>merge()</code> can be used to combine an arbitrary number of existing structs into a new struct.</p>
 <div class="play">
     <div class="input">
@@ -777,6 +826,7 @@ println(c) // x is changed here too!</textarea>
         <button class="button" onClick="interpret('src72', 'result72');">Run</button>
     </div>
 </div>
+
 <p>If there are any duplicated keys in the structs passed in to ‘merge()’, then the value associated with the first such key is used.</p>
 <p>Also, note in the above example that if you change a value in one of the structs passed in to merge(), the value changes in the merged struct as well. That is because the all three structs actually share a common set of fields. We will see later on that this behaviour can be quite useful.</p>
 <h2 id="properties">Properties</h2>
@@ -816,6 +866,7 @@ assert([s.a, s.b, x, s.c()] == [1, 4, 4, 5])</textarea>
         <button class="button" onClick="interpret('src73', 'result73');">Run</button>
     </div>
 </div>
+
 <h2 id="combining-structs-together">Combining Structs Together</h2>
 <p>By using closures, structs and <code>merge()</code>, it is possible to simulate various features from other languages, including inheritance, multiple-inheritance, prototype chains, and the like.</p>
 <p>For instance, consider the following program:</p>
@@ -850,6 +901,7 @@ println([b.width, b.height, b.depth, b.area(), b.volume()])</textarea>
         <button class="button" onClick="interpret('src74', 'result74');">Run</button>
     </div>
 </div>
+
 <p>The functions ‘newRectangle’ and ‘newBox’ are very much like what one might call ‘constructors’ in another language. The structs that they return have functions as entries (e.g. ‘area()’), and these functions refer to the ‘this’ keyword, and to captured variables. As such, the functions are quite a bit like what one might call a ‘method’ in another language.</p>
 <p>The use of the ‘merge()’ function to create a box out of a rectangle is similar to how inheritance is used in other languages. Does that mean that a Box is a subclass of a Rectangle? Not really, no. There is no such thing as a ‘class’ in Golem. However, due to the behaviour of merge(), they <em>are</em> inter-related in a way that is very much like inheritance.</p>
 <p>One of the primary goals of the Golem project is to explore the power provided by the simple building blocks of functions, closures, structs and merge(). It is hoped that the simplicity and flexibility of these elements can be used to create a variety of complex runtime structures that are easy to reason about and use.</p>
@@ -870,6 +922,7 @@ catch e {
         <button class="button" onClick="interpret('src75', 'result75');">Run</button>
     </div>
 </div>
+
 <p>The error value in a <code>catch</code> clause is always a struct with an <code>error</code> field and a <code>stackTrace</code> field.</p>
 <p>You can throw an exception using the <code>throw</code> keyword, followed by an expression that evaluates to a string.</p>
 <div class="play">
@@ -887,6 +940,7 @@ catch e {
         <button class="button" onClick="interpret('src76', 'result76');">Run</button>
     </div>
 </div>
+
 <p>There is also a <code>finally</code> clause, which is always executed no matter what happens inside the try block or catch clause:</p>
 <div class="play">
     <div class="input">
@@ -906,6 +960,7 @@ finally {
         <button class="button" onClick="interpret('src77', 'result77');">Run</button>
     </div>
 </div>
+
 <p>A try block must always have either a catch clause, a try clause, or both.</p>
 <p>The try-catch mechanism works exactly the same way that it does in Java. Try statements can be nested, and errors that are not caught in a function are passed upwards in the call stack.</p>
 <h2 id="concurrency">Concurrency</h2>
@@ -932,6 +987,7 @@ println(result)</textarea>
         <button class="button" onClick="interpret('src78', 'result78');">Run</button>
     </div>
 </div>
+
 <h2 id="immutabilty">Immutabilty</h2>
 <p>Golem supports immutability via the <code>freeze()</code> builtin function, which makes a mutable value become immutable. You can check if a value is immutable via the <code>frozen()</code> builtin function. <code>freeze()</code> always returns the value that you pass into it.</p>
 <div class="play">
@@ -951,6 +1007,7 @@ try {
         <button class="button" onClick="interpret('src79', 'result79');">Run</button>
     </div>
 </div>
+
 <p><code>freeze()</code> only has an affect on Lists, Dicts, Sets and Structs. All other values are already immutable, so calling <code>freeze()</code> on them has no effect</p>
 <p>Immutabilty and concurrency go hand in hand. By using immutable values whenever possible, you can reduce the likelyhood of bugs in your concurrency code, and make it much easier to reason about as well.</p>
 <p>An important caveat regarding immutability is that although closures, like all functions, are immutable, they can still have enclosed state that can be modified. There is no way in Golem to freeze a closure after the fact so that it can no longer modify any of its captured variables. It is up to you to manage state properly if you are using closures.</p>
@@ -968,6 +1025,7 @@ assert([f(1), f(2), f(3)] == [5, 7, 10])</textarea>
         <button class="button" onClick="interpret('src80', 'result80');">Run</button>
     </div>
 </div>
+
 <h2 id="type-introspection">Type Introspection</h2>
 <p>There is a builtin function called <code>type()</code> that will return a string describing the type of a value. Here is a program that will print a list of every possible type:</p>
 <div class="play">
@@ -986,6 +1044,7 @@ println(types)</textarea>
         <button class="button" onClick="interpret('src81', 'result81');">Run</button>
     </div>
 </div>
+
 <h2 id="modules">Modules</h2>
 <p>If you’ve been following along with the tutorial, you have been using a file called “tutorial.glm”. The Golem CLI actually compiles this file into a <code>module</code> called “tutorial”. Modules are the fundamental unit of compilation in Golem, and are also used for namespace management. All you need to do to create your own modules in the CLI is create a file with the name you want. As an example, lets create a module called foo, and reference in the tutorial module.</p>
 <p>In a file called “foo.glm”, place the following:</p>
@@ -1000,6 +1059,7 @@ println(types)</textarea>
         <button class="button" onClick="interpret('src82', 'result82');">Run</button>
     </div>
 </div>
+
 <p>And then in your “tutorial.glm”, you can reference the “foo” module via the <code>import</code> statement, like this:</p>
 <div class="play">
     <div class="input">
@@ -1012,6 +1072,7 @@ assert(foo.square(5) == 25)</textarea>
         <button class="button" onClick="interpret('src83', 'result83');">Run</button>
     </div>
 </div>
+
 <h2 id="command-line-interface">Command Line Interface</h2>
 <p><em>TODO</em> To get started, you must first compile a version of the Golem Command Line Interface, or “CLI”. This requires that you have the Go language toolchain installed on your system, with at least version 1.9.</p>
 <p>Clone the Golem <a href="https://github.com/mjarmy/golem-lang">repository</a> into the proper place in your go development environment, <code>cd</code> into the top level directory, and type <code>make</code>. This will build Golem, and place the <code>golem</code> CLI executable in a sub-directory called <code>build</code>.</p>
@@ -1026,6 +1087,7 @@ assert(foo.square(5) == 25)</textarea>
         <button class="button" onClick="interpret('src84', 'result84');">Run</button>
     </div>
 </div>
+
 <p>and then run it like so:</p>
 <div class="play">
     <div class="input">
@@ -1036,11 +1098,13 @@ assert(foo.square(5) == 25)</textarea>
         <button class="button" onClick="interpret('src85', 'result85');">Run</button>
     </div>
 </div>
+
 <p>If you are a vim user, there is a <a href="https://github.com/mjarmy/golem-lang-vim">vim plugin</a> for Golem that you can install, that provides syntax highlighting.</p>
 <h2 id="standard-library">Standard Library</h2>
 <p>Golem has a <a href="#TODO">Standard Library</a> that is implemented as a collection of modules.</p>
 <p>When embedding the Golem interpreter in a Go program, some or all of the standard library can be included in the sandboxed environment. The Golem CLI makes the entire standard library available.</p>
 <p>To use one of the modules from the standard library, simply import it like you would any module, e.g. <code>import os</code>.</p>
+
 
             <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
         </div>

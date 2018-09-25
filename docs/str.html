@@ -11,6 +11,7 @@
     <body>
         <div class="div-wrapper">
 
+
 <h2 id="str">Str</h2>
 <p>Str is the set of all valid sequences of UTF-8-encoded “code points”, otherwise known as “runes”. Strs are immutable.</p>
 <p>Valid operators for Str are:</p>
@@ -88,6 +89,7 @@ println(t)</textarea>
         <button class="button" onClick="interpret('src0', 'result0');">Run</button>
     </div>
 </div>
+
 <h3 id="replace"><code>replace</code></h3>
 <p><code>replace</code> returns a copy of a string with the first n non-overlapping instances of <code>old</code> replaced by <code>new</code>. If <code>old</code> is empty, it matches at the beginning of a string and after each UTF-8 sequence, yielding up to k+1 replacements for a k-rune string. If <code>n</code> &lt; 0, there is no limit on the number of replacements. The parameter <code>n</code> is optional, and defaults to -1.</p>
 <ul>
@@ -114,6 +116,7 @@ println(t)</textarea>
 <li>signature: <code>trim(&lt;Str&gt;) &lt;Str&gt;</code></li>
 <li>example: <code>'\t\tabc\n'.trim('\t\n')</code></li>
 </ul>
+
 
             <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
         </div>
