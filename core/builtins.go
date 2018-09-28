@@ -107,14 +107,15 @@ var StandardBuiltins = []*BuiltinEntry{
 `arity` returns a Struct describing the [arity](https://en.wikipedia.org/wiki/Arity) of a Func.
 A func's arity type is always either "Fixed", "Variadic", or "Multiple".
 
-	* signature: `arity(f <Func>) <Struct>`
-	* example:
+* signature: `arity(f <Func>) <Struct>`
+* example:
 
-	```
-    assert(arity(println) == struct { kind: "Variadic", required: 0 })
-    assert(arity(len)     == struct { kind: "Fixed",    required: 1 })
-    assert(arity(range)   == struct { kind: "Multiple", required: 2, optional: 1 })
-	```
+```
+assert(arity(println) == struct { kind: "Variadic", required: 0 })
+assert(arity(len)     == struct { kind: "Fixed",    required: 1 })
+assert(arity(range)   == struct { kind: "Multiple", required: 2, optional: 1 })
+```
+
 */
 
 // BuiltinArity returns a Struct describing the arity of a Func.
@@ -151,8 +152,8 @@ var BuiltinArity = NewFixedNativeFunc(
 if the value is not equal to `true`.  `assert` returns `true`
 if it does not throw an error.
 
-	* signature: `assert(b <Bool>) <Bool>`
-	* example: `assert(0 < 1)`
+* signature: `assert(b <Bool>) <Bool>`
+* example: `assert(0 < 1)`
 
 */
 
@@ -174,8 +175,8 @@ var BuiltinAssert = NewFixedNativeFunc(
 defaults to 0.  If size is 0, an unbuffered channel will be created.
 If the size is greater than 0, then a buffered channel of that size will be created.
 
-	* signature: `chan(size = 0 <Int>) <Chan>`
-	* example: `let ch = chan()`
+* signature: `chan(size = 0 <Int>) <Chan>`
+* example: `let ch = chan()`
 
 */
 
@@ -200,8 +201,8 @@ var BuiltinChan = NewMultipleNativeFunc(
 `freeze` freezes a value, if it is not already frozen.  Its OK to call `freeze`
 on values that are already frozen.  The value is returned after it is frozen.
 
-	* signature: `freeze(value <Value>) <Freeze>`
-	* example: `freeze([1, 2])`
+* signature: `freeze(value <Value>) <Freeze>`
+* example: `freeze([1, 2])`
 
 */
 
@@ -218,13 +219,13 @@ var BuiltinFreeze = NewFixedNativeFunc(
 
 `frozen` returns whether or not a value is frozen.
 
-	* signature: `frozen(value <Value>) <Bool>`
-	* example:
+* signature: `frozen(value <Value>) <Bool>`
+* example:
 
-	```
-    println(frozen('a'))
-    println(frozen([3, 4]))
-	```
+```
+println(frozen('a'))
+println(frozen([3, 4]))
+```
 
 */
 
@@ -254,18 +255,18 @@ By convention, a new iterator has to have `next()` called on it to advance
 to the first available value. Calling `get()` before the first call to `next()`
 throws an error.
 
-	* signature: `iter(value <Iterable>) <Struct>`
-	* `next` signature: `next() <Bool>`
-	* `get` signature: `get() <Value>`
-	* example:
+* signature: `iter(value <Iterable>) <Struct>`
+* `next` signature: `next() <Bool>`
+* `get` signature: `get() <Value>`
+* example:
 
-	```
-    let a = [1, 2, 3]
-    let itr = iter(a)
-    while itr.next() {
-        println(itr.get())
-    }
-	```
+```
+let a = [1, 2, 3]
+let itr = iter(a)
+while itr.next() {
+	println(itr.get())
+}
+```
 
 */
 
@@ -291,8 +292,8 @@ var BuiltinIter = NewFixedNativeFunc(
 `len` returns the length of a value that has a length.  Str, List, Tuple, Range, Dict,
 and Set have a length
 
-	* signature: `len(value <Lenable>) <Int>`
-	* example: `println(len('abc'))`
+* signature: `len(value <Lenable>) <Int>`
+* example: `println(len('abc'))`
 
 */
 
@@ -318,7 +319,7 @@ var BuiltinLen = NewFixedNativeFunc(
 `merge` merges structs together into a new struct.  Consult the [tour](#TODO)
 for a detailed description of how `merge` works.
 
-	* signature: `merge(structs... <Struct>) <Struct>`
+* signature: `merge(structs... <Struct>) <Struct>`
 
 */
 
@@ -346,14 +347,15 @@ specifies the distance between succesive integers in the range.  You can
 create a "backwards" range by specify a negative step value, and a "from"
 that is less than "to".
 
-	* signature: `range(from <Int>, to <Int>, step = 1 <Int>) <Range>`
-	* example:
+* signature: `range(from <Int>, to <Int>, step = 1 <Int>) <Range>`
+* example:
 
-	```
-    for i in range(0, 5) {
-        println(i)
-    }
-	```
+```
+for i in range(0, 5) {
+	println(i)
+}
+```
+
 */
 
 // BuiltinRange creates a new Range
@@ -377,8 +379,8 @@ var BuiltinRange = NewMultipleNativeFunc(
 
 `str` returns a Str representation of a value.
 
-	* signature: `str(value <Value>) <Str>`
-	* example: `println(str([null, true, 1, 'abc']))`
+* signature: `str(value <Value>) <Str>`
+* example: `println(str([null, true, 1, 'abc']))`
 
 */
 
@@ -395,14 +397,14 @@ var BuiltinStr = NewFixedNativeFunc(
 
 `type` returns the type of a value.
 
-	* signature: `type(value <Value>) <Str>`
-	* example:
+* signature: `type(value <Value>) <Str>`
+* example:
 
-	```
-    println(type(1.23))
-    let a = [null, true, 1, 'xyz']
-    println(a.map(type))
-	```
+```
+println(type(1.23))
+let a = [null, true, 1, 'xyz']
+println(a.map(type))
+```
 
 */
 
@@ -441,7 +443,7 @@ var UnsandboxedBuiltins = []*BuiltinEntry{
 
 `print` prints a sequence of values to STDOUT.
 
-	* signature: `print(values... <Value>) <Null>`
+* signature: `print(values... <Value>) <Null>`
 
 */
 
@@ -465,7 +467,7 @@ var BuiltinPrint = NewVariadicNativeFunc(
 
 `println` prints a sequence of values to STDOUT, followed by a linefeed.
 
-	* signature: `println(values... <Value>) <Null>`
+* signature: `println(values... <Value>) <Null>`
 
 */
 

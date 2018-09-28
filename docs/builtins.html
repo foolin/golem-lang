@@ -35,13 +35,13 @@
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src19" rows="4" spellcheck="false">    assert(arity(println) == struct { kind: &quot;Variadic&quot;, required: 0 })
-    assert(arity(len)     == struct { kind: &quot;Fixed&quot;,    required: 1 })
-    assert(arity(range)   == struct { kind: &quot;Multiple&quot;, required: 2, optional: 1 })</textarea>
+        <textarea id="src20" rows="4" spellcheck="false">assert(arity(println) == struct { kind: &quot;Variadic&quot;, required: 0 })
+assert(arity(len)     == struct { kind: &quot;Fixed&quot;,    required: 1 })
+assert(arity(range)   == struct { kind: &quot;Multiple&quot;, required: 2, optional: 1 })</textarea>
     </div>
-    <div class="output"><pre id="result19"></pre></div>
+    <div class="output"><pre id="result20"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src19', 'result19');">Run</button>
+        <button class="button" onClick="interpret('src20', 'result20');">Run</button>
     </div>
 </div>
 
@@ -71,12 +71,12 @@
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src20" rows="3" spellcheck="false">    println(frozen(&#39;a&#39;))
-    println(frozen([3, 4]))</textarea>
+        <textarea id="src21" rows="3" spellcheck="false">println(frozen(&#39;a&#39;))
+println(frozen([3, 4]))</textarea>
     </div>
-    <div class="output"><pre id="result20"></pre></div>
+    <div class="output"><pre id="result21"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src20', 'result20');">Run</button>
+        <button class="button" onClick="interpret('src21', 'result21');">Run</button>
     </div>
 </div>
 
@@ -96,15 +96,15 @@
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src21" rows="6" spellcheck="false">    let a = [1, 2, 3]
-    let itr = iter(a)
-    while itr.next() {
-        println(itr.get())
-    }</textarea>
+        <textarea id="src22" rows="6" spellcheck="false">let a = [1, 2, 3]
+let itr = iter(a)
+while itr.next() {
+    println(itr.get())
+}</textarea>
     </div>
-    <div class="output"><pre id="result21"></pre></div>
+    <div class="output"><pre id="result22"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src21', 'result21');">Run</button>
+        <button class="button" onClick="interpret('src22', 'result22');">Run</button>
     </div>
 </div>
 
@@ -128,13 +128,13 @@
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src22" rows="4" spellcheck="false">    for i in range(0, 5) {
-        println(i)
-    }</textarea>
+        <textarea id="src23" rows="4" spellcheck="false">for i in range(0, 5) {
+    println(i)
+}</textarea>
     </div>
-    <div class="output"><pre id="result22"></pre></div>
+    <div class="output"><pre id="result23"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src22', 'result22');">Run</button>
+        <button class="button" onClick="interpret('src23', 'result23');">Run</button>
     </div>
 </div>
 
@@ -152,13 +152,13 @@
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src23" rows="4" spellcheck="false">    println(type(1.23))
-    let a = [null, true, 1, &#39;xyz&#39;]
-    println(a.map(type))</textarea>
+        <textarea id="src24" rows="4" spellcheck="false">println(type(1.23))
+let a = [null, true, 1, &#39;xyz&#39;]
+println(a.map(type))</textarea>
     </div>
-    <div class="output"><pre id="result23"></pre></div>
+    <div class="output"><pre id="result24"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src23', 'result23');">Run</button>
+        <button class="button" onClick="interpret('src24', 'result24');">Run</button>
     </div>
 </div>
 

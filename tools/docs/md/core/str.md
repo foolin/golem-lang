@@ -20,16 +20,16 @@ Strs are [`hashable`](#TODO)
 
 Str has the following fields:
 
-  * [contains](#contains)
-  * [hasPrefix](#hasprefix)
-  * [hasSuffix](#hassuffix)
-  * [index](#index)
-  * [lastIndex](#lastindex)
-  * [map](#map)
-  * [replace](#replace)
-  * [split](#split)
-  * [toChars](#tochars)
-  * [trim](#trim)
+* [contains](#contains)
+* [hasPrefix](#hasprefix)
+* [hasSuffix](#hassuffix)
+* [index](#index)
+* [lastIndex](#lastindex)
+* [map](#map)
+* [replace](#replace)
+* [split](#split)
+* [toChars](#tochars)
+* [trim](#trim)
 
 ### `contains`
 

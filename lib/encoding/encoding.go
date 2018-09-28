@@ -18,6 +18,13 @@ data to and from byte-level and textual representations.
 
 */
 
+/*doc
+`encoding` has the following fields:
+
+  * [json](lib_encodingjson.html)
+
+*/
+
 // Encoding is the "encoding" module in the standard library
 var Encoding g.Struct
 

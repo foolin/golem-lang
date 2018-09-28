@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Golem Reference</title>
+
+        <link type="text/css" rel="stylesheet" href="style.css">
+        <script src="wasm_exec.js"></script>
+        <script src="wasm_init.js"></script>
+    </head>
+    <body>
+        <div class="div-wrapper">
+
+
+<h2 id="path.filepath"><code>path.filepath</code></h2>
+<p><code>path.filepath</code> implements utility routines for manipulating filename paths in a way compatible with the target operating system-defined file paths.</p>
+<p><code>path.filepath</code> has the following fields:</p>
+<ul>
+<li><a href="#ext">ext</a></li>
+<li><a href="#walk">walk</a></li>
+</ul>
+<h3 id="ext"><code>ext</code></h3>
+<p><code>ext</code> returns the file name extension used by path. The extension is the suffix beginning at the final dot in the final element of path; it is empty if there is no dot.</p>
+<ul>
+<li>signature: <code>ext(name &lt;Str&gt;) &lt;Str&gt;</code></li>
+<li>example:</li>
+</ul>
+<pre><code>import path
+println(path.filepath.ext(&#39;foo.txt&#39;))</code></pre>
+<h3 id="walk"><code>walk</code></h3>
+<p><code>walk</code> walks the file tree rooted at root, calling walkFn for each file or directory in the tree, including root. The walkFn must accept two parameters. The first parameter will be the path of the current file, and the second will be the <a href="TODO">fileInfo</a> for the file.</p>
+<ul>
+<li>signature: <code>Walk(root &lt;Str&gt;, walkFn &lt;Func&gt;) &lt;Func&gt;</code></li>
+<li>example:</li>
+</ul>
+<pre><code>import path
+path.filepath.walk(&#39;.&#39;, fn(path, info) {
+    println([path, info.name(), info.isDir()])
+})</code></pre>
+
+
+            <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
+        </div>
+    </body>
+</html>

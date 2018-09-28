@@ -17,6 +17,13 @@ Module path implements utility routines for manipulating slash-separated paths.
 
 */
 
+/*doc
+`encoding` has the following fields:
+
+  * [filepath](lib_pathfilepath.html)
+
+*/
+
 // Path is the "path" module in the standard library
 var Path g.Struct
 

@@ -1,10 +1,15 @@
 
-### `os.exec`
+## `os.exec`
 
 `os.exec` runs external commands.
 
-#### `runCommand`
+
+`os.exec` has the following fields:
+
+  * [runCommand](#runCommand)
+
+### `runCommand`
 
 `runCommand` TODO replace with command().run()
 
-* signature: `runCommand(path <Str>, args... <Str>) <Null>`
+    * signature: `runCommand(path <Str>, args... <Str>) <Null>`

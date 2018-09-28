@@ -15,7 +15,7 @@ A Set is an un-ordered collection of unique, [`hashable`](#TODO) values.
 
 Valid operators for Set are:
 
-	* The equality operators `==`, `!=`
+* The equality operators `==`, `!=`
 
 Sets have a [`len()`](#TODO) and are [`iterable`](#TODO).
 
@@ -220,12 +220,12 @@ func (i *setIterator) IterGet(ev Eval) (Value, Error) {
 /*doc
 Set has the following fields:
 
-  * [add](#add)
-  * [addAll](#addall)
-  * [clear](#clear)
-  * [contains](#contains)
-  * [isEmpty](#isempty)
-  * [remove](#remove)
+* [add](#add)
+* [addAll](#addall)
+* [clear](#clear)
+* [contains](#contains)
+* [isEmpty](#isempty)
+* [remove](#remove)
 
 */
 
@@ -236,8 +236,8 @@ var setMethods = map[string]Method{
 
 	`add` adds a value to the set, and returns the modified set.
 
-		* signature: `add(val <Value>) <Set>`
-		* example:
+	* signature: `add(val <Value>) <Set>`
+	* example:
 
 	```
 	let a = set {1, 2, 3}
@@ -258,8 +258,8 @@ var setMethods = map[string]Method{
 	`addAll` adds all of the values in the given [Iterable](#TODO) to the set,
 	and returns the modified set.
 
-		* signature: `addAll(itr <Iterable>) <Set>`
-		* example:
+	* signature: `addAll(itr <Iterable>) <Set>`
+	* example:
 
 	```
 	let a = set {1, 2}
@@ -279,8 +279,8 @@ var setMethods = map[string]Method{
 
 	`clear` removes all of the values from the set, and returns the empty set.
 
-		* signature: `clear() <Set>`
-		* example:
+	* signature: `clear() <Set>`
+	* example:
 
 	```
 	let a = set {1, 2}
@@ -299,8 +299,8 @@ var setMethods = map[string]Method{
 
 	`contains` returns whether the given value is an element in the set.
 
-		* signature: `contains(val <Value>) <Bool>`
-		* example:
+	* signature: `contains(val <Value>) <Bool>`
+	* example:
 
 	```
 	let a = set {1, 2}
@@ -320,8 +320,8 @@ var setMethods = map[string]Method{
 
 	`isEmpty` returns whether the set contains any values.
 
-		* signature: `isEmpty() <Bool>`
-		* example: `println(set{}.isEmpty())`
+	* signature: `isEmpty() <Bool>`
+	* example: `println(set{}.isEmpty())`
 
 	*/
 	"isEmpty": NewNullaryMethod(
@@ -337,8 +337,8 @@ var setMethods = map[string]Method{
 	modified set.  If the value is not present in the set, then
 	the set is unmodified.
 
-		* signature: `remove(value <Value>) <Set>`
-		* example:
+	* signature: `remove(value <Value>) <Set>`
+	* example:
 
 	```
 	let a = set {1, 2, 3}

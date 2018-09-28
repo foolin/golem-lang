@@ -23,6 +23,13 @@ for parallel execution.
 
 */
 
+/*doc
+`io` has the following fields:
+
+* [ioutil](lib_ioioutil.html)
+
+*/
+
 // Io is the "io" module in the standard library
 var Io g.Struct
 

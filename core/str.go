@@ -18,10 +18,10 @@ known as "runes".  Strs are immutable.
 
 Valid operators for Str are:
 
-	* The equality operators `==`, `!=`,
-	* The comparison operators `>`, `>=`, `<`, `<=`, `<=>`
-	* The index operator `a[x]`
-	* The slice operators `a[x:y]`, `a[x:]`, `a[:y]`
+* The equality operators `==`, `!=`,
+* The comparison operators `>`, `>=`, `<`, `<=`, `<=>`
+* The index operator `a[x]`
+* The slice operators `a[x:y]`, `a[x:]`, `a[:y]`
 
 The index operator always returns a single-rune Str.
 
@@ -306,16 +306,16 @@ func (s str) Map(ev Eval, mapper StrMapper) (Str, Error) {
 /*doc
 Str has the following fields:
 
-  * [contains](#contains)
-  * [hasPrefix](#hasprefix)
-  * [hasSuffix](#hassuffix)
-  * [index](#index)
-  * [lastIndex](#lastindex)
-  * [map](#map)
-  * [replace](#replace)
-  * [split](#split)
-  * [toChars](#tochars)
-  * [trim](#trim)
+* [contains](#contains)
+* [hasPrefix](#hasprefix)
+* [hasSuffix](#hassuffix)
+* [index](#index)
+* [lastIndex](#lastindex)
+* [map](#map)
+* [replace](#replace)
+* [split](#split)
+* [toChars](#tochars)
+* [trim](#trim)
 
 */
 
@@ -326,8 +326,8 @@ var strMethods = map[string]Method{
 
 	`contains` reports whether a substring is within a string.
 
-		* signature: `contains(substr <Str>) <Bool>`
-		* example: `'abcdef'.contains('de')`
+	* signature: `contains(substr <Str>) <Bool>`
+	* example: `'abcdef'.contains('de')`
 
 	*/
 	"contains": NewFixedMethod(
@@ -341,8 +341,8 @@ var strMethods = map[string]Method{
 
 	`hasPrefix` tests whether a string begins with a prefix.
 
-		* signature: `hasPrefix(prefix <Str>) <Bool>`
-		* example: `'abcdef'.hasPrefix('ab')`
+	* signature: `hasPrefix(prefix <Str>) <Bool>`
+	* example: `'abcdef'.hasPrefix('ab')`
 
 	*/
 	"hasPrefix": NewFixedMethod(
@@ -356,8 +356,8 @@ var strMethods = map[string]Method{
 
 	`hasSuffix` tests whether a string ends with a suffix.
 
-		* signature: `hasSuffix(suffix <Str>) <Bool>`
-		* example: `'abcdef'.hasSuffix('ab')`
+	* signature: `hasSuffix(suffix <Str>) <Bool>`
+	* example: `'abcdef'.hasSuffix('ab')`
 
 	*/
 	"hasSuffix": NewFixedMethod(
@@ -372,8 +372,8 @@ var strMethods = map[string]Method{
 	`index` returns the index of the first instance of a substring in a string.
 	or -1 if the substring is not present.
 
-		* signature: `index(substr <Str>) <Int>`
-		* example: `'abcab'.index('ab')`
+	* signature: `index(substr <Str>) <Int>`
+	* example: `'abcab'.index('ab')`
 
 	*/
 	"index": NewFixedMethod(
@@ -388,8 +388,8 @@ var strMethods = map[string]Method{
 	`lastIndex` returns the index of the last instance of a substring in a string,
 	or -1 if the substring is not present.
 
-		* signature: `lastIndex(substr <Str>) <Int>`
-		* example: `'abcab'.lastIndex('ab')`
+	* signature: `lastIndex(substr <Str>) <Int>`
+	* example: `'abcab'.lastIndex('ab')`
 
 	*/
 	"lastIndex": NewFixedMethod(
@@ -406,9 +406,9 @@ var strMethods = map[string]Method{
 
 	The mapping function must accept one Str parameter, and must return a Str.
 
-		* signature: `map(mapping <Func>) <Str>`
-		* mapping signature: `fn(s <Str>) <Str>`
-		* example:
+	* signature: `map(mapping <Func>) <Str>`
+	* mapping signature: `fn(s <Str>) <Str>`
+	* example:
 
 	```
 	let s = 'abc(def)[x,y,z]'
@@ -457,8 +457,8 @@ var strMethods = map[string]Method{
 	If `n` < 0, there is no limit on the number of replacements.  The parameter `n` is
 	optional, and defaults to -1.
 
-		* signature: `replace(old <Str>, new <Str>, n = -1 <Int>) <Int>`
-		* example: `'abcab'.replace('a', 'x')`
+	* signature: `replace(old <Str>, new <Str>, n = -1 <Int>) <Int>`
+	* example: `'abcab'.replace('a', 'x')`
 
 	*/
 	"replace": NewMultipleMethod(
@@ -487,8 +487,8 @@ var strMethods = map[string]Method{
 	If sep is empty, `split` splits after each UTF-8 sequence. If both the string
 	and sep are empty, `split` returns an empty list.
 
-		* signature: `split(sep <Str>) <List>`
-		* example: `'a,b,c'.split(',')`
+	* signature: `split(sep <Str>) <List>`
+	* example: `'a,b,c'.split(',')`
 
 	*/
 	"split": NewFixedMethod(
@@ -502,8 +502,8 @@ var strMethods = map[string]Method{
 
 	`toChars` splits a string into a list of single-rune Strs.
 
-		* signature: `toChars() <List>`
-		* example: `'xyz'.toChars()`
+	* signature: `toChars() <List>`
+	* example: `'xyz'.toChars()`
 
 	*/
 	"toChars": NewNullaryMethod(
@@ -517,8 +517,8 @@ var strMethods = map[string]Method{
 
 	`trim` returns a new string with all leading and trailing runes contained in cutset removed.
 
-		* signature: `trim(<Str>) <Str>`
-		* example: `'\t\tabc\n'.trim('\t\n')`
+	* signature: `trim(<Str>) <Str>`
+	* example: `'\t\tabc\n'.trim('\t\n')`
 
 	*/
 	"trim": NewFixedMethod(

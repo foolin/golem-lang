@@ -14,11 +14,11 @@ Each iterated element in a Dict is a 2-Tuple containing a key-value pair.
 
 Dict has the following fields:
 
-  * [addAll](#addall)
-  * [clear](#clear)
-  * [contains](#contains)
-  * [isEmpty](#isempty)
-  * [remove](#remove)
+* [addAll](#addall)
+* [clear](#clear)
+* [contains](#contains)
+* [isEmpty](#isempty)
+* [remove](#remove)
 
 ### `addAll`
 

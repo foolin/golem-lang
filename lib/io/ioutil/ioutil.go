@@ -15,30 +15,39 @@ import (
 
 /*doc
 
-### `io.ioutil`
+## `io.ioutil`
 
 `io.ioutil` implements some I/O utility functions.
 
 */
 
 /*doc
-#### `readDir`
+`io.ioutil` has the following fields:
+
+* [readDir](#readDir)
+* [readFileString](#readFileString)
+* [writeFileString](#writeFileString)
+
+*/
+
+/*doc
+### `readDir`
 
 `readDir` reads the directory named by dirname and returns a
 list of directory entries sorted by filename. The resulting
 list will be [fileinfo](#TODO) Structs.
 
-	* signature: `readDir(filename <Str>) <List>`
-	* example:
+* signature: `readDir(filename <Str>) <List>`
+* example:
 
-	```
-	import io
+```
+import io
+let files = io.ioutil.readDir('.')
+for f in files {
+	println([f.name(), f.isDir()])
+}
+```
 
-	let files = io.ioutil.readDir('.')
-    for f in files {
-        println([f.name(), f.isDir()])
-    }
-	```
 */
 
 // ReadDir reads a directory
@@ -59,18 +68,18 @@ var ReadDir g.Value = g.NewFixedNativeFunc(
 	})
 
 /*doc
-#### `readFileString`
+### `readFileString`
 
 `readFileString` reads an entire file as a stirng.
 
-	* signature: `readFile(filename <Str>) <Str>`
-	* example:
+* signature: `readFile(filename <Str>) <Str>`
+* example:
 
-	```
-	import io
+```
+import io
+println(io.ioutil.readFileString('testdata.txt'))
+```
 
-	println(io.ioutil.readFileString('testdata.txt'))
-	```
 */
 
 // ReadFileString reads an entire file as a stirng.
@@ -87,18 +96,18 @@ var ReadFileString g.Value = g.NewFixedNativeFunc(
 	})
 
 /*doc
-#### `writeFileString`
+### `writeFileString`
 
 `writeFileString` writes a string to a file
 
-	* signature: `writeFileString(filename <Str>, data <Str>) <Null>`
-	* example:
+* signature: `writeFileString(filename <Str>, data <Str>) <Null>`
+* example:
 
-	```
-	import io
+```
+import io
+io.ioutil.writeFileString('testdata.txt', 'abc')
+```
 
-	io.ioutil.writeFileString('testdata.txt', 'abc')
-	```
 */
 
 // WriteFileString writes a string to a file
@@ -109,7 +118,7 @@ var WriteFileString g.Value = g.NewFixedNativeFunc(
 		data := params[1].(g.Str)
 
 		// todo pass in FileMode
-		fileMode := os.FileMode(0644)
+		fileMode := os.FileMode(0666)
 		err := ioutil.WriteFile(filename.String(), []byte(data.String()), fileMode)
 		if err != nil {
 			return nil, g.Error(fmt.Errorf("IoError: %s", err.Error()))

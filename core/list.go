@@ -18,9 +18,9 @@ A List is an ordered array of values.
 
 Valid operators for List are:
 
-	* The equality operators `==`, `!=`
-	* The index operator `a[x]`
-	* The slice operators `a[x:y]`, `a[x:]`, `a[:y]`
+* The equality operators `==`, `!=`
+* The index operator `a[x]`
+* The slice operators `a[x:y]`, `a[x:]`, `a[:y]`
 
 The index operator can return a value of any type.
 
@@ -405,18 +405,18 @@ func (i *listIterator) IterGet(ev Eval) (Value, Error) {
 /*doc
 List has the following fields:
 
-  * [add](#add)
-  * [addAll](#addall)
-  * [clear](#clear)
-  * [contains](#contains)
-  * [filter](#filter)
-  * [indexOf](#indexof)
-  * [isEmpty](#isempty)
-  * [join](#join)
-  * [map](#map)
-  * [reduce](#reduce)
-  * [remove](#remove)
-  * [sort](#sort)
+* [add](#add)
+* [addAll](#addall)
+* [clear](#clear)
+* [contains](#contains)
+* [filter](#filter)
+* [indexOf](#indexof)
+* [isEmpty](#isempty)
+* [join](#join)
+* [map](#map)
+* [reduce](#reduce)
+* [remove](#remove)
+* [sort](#sort)
 
 */
 
@@ -427,8 +427,8 @@ var listMethods = map[string]Method{
 
 	`add` adds a value to the end of the list, and returns the modified list.
 
-		* signature: `add(val <Value>) <List>`
-		* example:
+	* signature: `add(val <Value>) <List>`
+	* example:
 
 	```
 	let a = [1, 2, 3]
@@ -449,8 +449,8 @@ var listMethods = map[string]Method{
 	`addAll` adds all of the values in the given [Iterable](#TODO) to the end of the list,
 	and returns the modified list.
 
-		* signature: `addAll(itr <Iterable>) <List>`
-		* example:
+	* signature: `addAll(itr <Iterable>) <List>`
+	* example:
 
 	```
 	let a = [1, 2]
@@ -470,8 +470,8 @@ var listMethods = map[string]Method{
 
 	`clear` removes all of the values from the list, and returns the empty list.
 
-		* signature: `clear() <List>`
-		* example:
+	* signature: `clear() <List>`
+	* example:
 
 	```
 	let a = [1, 2]
@@ -490,8 +490,8 @@ var listMethods = map[string]Method{
 
 	`contains` returns whether the given value is an element in the list.
 
-		* signature: `contains(val <Value>) <Bool>`
-		* example:
+	* signature: `contains(val <Value>) <Bool>`
+	* example:
 
 	```
 	let a = [1, 2]
@@ -515,9 +515,9 @@ var listMethods = map[string]Method{
 
 	The predicate must accept one parameter of any type, and return a Bool.
 
-		* signature: `filter(predicate <Func>) <List>`
-		* predicate signature: `fn(val <Value>) <Bool>`
-		* example:
+	* signature: `filter(predicate <Func>) <List>`
+	* predicate signature: `fn(val <Value>) <Bool>`
+	* example:
 
 	```
 	let a = [1, 2, 3, 4, 5]
@@ -560,8 +560,8 @@ var listMethods = map[string]Method{
 	`indexOf` returns the index of the given value in the list, or -1 if the value
 	is not contained in the list.
 
-		* signature: `indexOf(val <Value>) <Int>`
-		* example:
+	* signature: `indexOf(val <Value>) <Int>`
+	* example:
 
 	```
 	let a = ['x', 'y', 'z']
@@ -581,8 +581,8 @@ var listMethods = map[string]Method{
 
 	`isEmpty` returns whether the list contains any values.
 
-		* signature: `isEmpty() <Bool>`
-		* example: `println([].isEmpty())`
+	* signature: `isEmpty() <Bool>`
+	* example: `println([].isEmpty())`
 
 	*/
 	"isEmpty": NewNullaryMethod(
@@ -598,8 +598,8 @@ var listMethods = map[string]Method{
 	The separator string sep is placed between elements in the resulting string.
 	The sep parameter is optional, and defaults to the empty string `''`.
 
-		* signature: `join(sep = '' <Str>) <Str>`
-		* example: `println([1,2,3].join(', '))`
+	* signature: `join(sep = '' <Str>) <Str>`
+	* example: `println([1,2,3].join(', '))`
 
 	*/
 	"join": NewMultipleMethod(
@@ -629,9 +629,9 @@ var listMethods = map[string]Method{
 
 	The mapping function must accept one value, and must return one value.
 
-		* signature: `map(mapping <Func>) <List>`
-		* mapping signature: `fn(val <Value>) <Value>`
-		* example:
+	* signature: `map(mapping <Func>) <List>`
+	* mapping signature: `fn(val <Value>) <Value>`
+	* example:
 
 	```
 	let a = [1,2,3]
@@ -669,9 +669,9 @@ var listMethods = map[string]Method{
 
 	The reducer function must accept two values, and return one value.
 
-		* signature: `reduce(start <Value>, reducer <Func>) <List>`
-		* reducer signature: `fn(accum <Value>, val <Value>) <Value>`
-		* example:
+	* signature: `reduce(start <Value>, reducer <Func>) <List>`
+	* reducer signature: `fn(accum <Value>, val <Value>) <Value>`
+	* example:
 
 	```
 	let a = [1,2,3]
@@ -711,8 +711,8 @@ var listMethods = map[string]Method{
 	`remove` remove the value at the given index from the list, and returns the
 	modified list.
 
-		* signature: `remove(index <Int>) <List>`
-		* example: `println(['a','b','c'].remove(2))`
+	* signature: `remove(index <Int>) <List>`
+	* example: `println(['a','b','c'].remove(2))`
 
 	*/
 	"remove": NewFixedMethod(
@@ -730,9 +730,9 @@ var listMethods = map[string]Method{
 	optional "lesser" function is provided, it is used to compare values in the list.
 	If the lesser function is not provided, then the `<` operator is used.
 
-		* signature: `sort(lesser = null <Func>) <List>`
-		* lesser signature: `fn(val <Value>, val <Value>) <Bool>`
-		* example:
+	* signature: `sort(lesser = null <Func>) <List>`
+	* lesser signature: `fn(val <Value>, val <Value>) <Bool>`
+	* example:
 
 	```
 	let a = [7, 4, 11, 13, 6, 2, 9, 1]

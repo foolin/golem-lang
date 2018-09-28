@@ -142,10 +142,10 @@ func (i *rangeIterator) IterGet(ev Eval) (Value, Error) {
 /*doc
 Range has the following fields:
 
-  * [count](#count)
-  * [from](#from)
-  * [step](#step)
-  * [to](#to)
+* [count](#count)
+* [from](#from)
+* [step](#step)
+* [to](#to)
 
 */
 
@@ -156,7 +156,7 @@ var rangeMethods = map[string]Method{
 
 	`count` is the total number of Ints in the range.
 
-		* signature: `count() <Int>`
+	* signature: `count() <Int>`
 
 	*/
 	"count": NewNullaryMethod(
@@ -170,7 +170,7 @@ var rangeMethods = map[string]Method{
 
 	`from` is the first Int in the range, inclusive
 
-		* signature: `from() <Int>`
+	* signature: `from() <Int>`
 
 	*/
 	"from": NewNullaryMethod(
@@ -184,7 +184,7 @@ var rangeMethods = map[string]Method{
 
 	`step` is the distance between succesive Ints in the range.
 
-		* signature: `step() <Int>`
+	* signature: `step() <Int>`
 
 	*/
 	"step": NewNullaryMethod(
@@ -198,7 +198,7 @@ var rangeMethods = map[string]Method{
 
 	`to` is the last Int in the range, exclusive
 
-		* signature: `to() <Int>`
+	* signature: `to() <Int>`
 
 	*/
 	"to": NewNullaryMethod(

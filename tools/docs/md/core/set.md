@@ -10,12 +10,12 @@ Sets have a [`len()`](#TODO) and are [`iterable`](#TODO).
 
 Set has the following fields:
 
-  * [add](#add)
-  * [addAll](#addall)
-  * [clear](#clear)
-  * [contains](#contains)
-  * [isEmpty](#isempty)
-  * [remove](#remove)
+* [add](#add)
+* [addAll](#addall)
+* [clear](#clear)
+* [contains](#contains)
+* [isEmpty](#isempty)
+* [remove](#remove)
 
 ### `add`
 

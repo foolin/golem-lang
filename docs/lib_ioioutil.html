@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Golem Reference</title>
+
+        <link type="text/css" rel="stylesheet" href="style.css">
+        <script src="wasm_exec.js"></script>
+        <script src="wasm_init.js"></script>
+    </head>
+    <body>
+        <div class="div-wrapper">
+
+
+<h2 id="io.ioutil"><code>io.ioutil</code></h2>
+<p><code>io.ioutil</code> implements some I/O utility functions.</p>
+<p><code>io.ioutil</code> has the following fields:</p>
+<ul>
+<li><a href="#readDir">readDir</a></li>
+<li><a href="#readFileString">readFileString</a></li>
+<li><a href="#writeFileString">writeFileString</a></li>
+</ul>
+<h3 id="readdir"><code>readDir</code></h3>
+<p><code>readDir</code> reads the directory named by dirname and returns a list of directory entries sorted by filename. The resulting list will be <a href="#TODO">fileinfo</a> Structs.</p>
+<ul>
+<li>signature: <code>readDir(filename &lt;Str&gt;) &lt;List&gt;</code></li>
+<li>example:</li>
+</ul>
+<pre><code>import io
+let files = io.ioutil.readDir(&#39;.&#39;)
+for f in files {
+    println([f.name(), f.isDir()])
+}</code></pre>
+<h3 id="readfilestring"><code>readFileString</code></h3>
+<p><code>readFileString</code> reads an entire file as a stirng.</p>
+<ul>
+<li>signature: <code>readFile(filename &lt;Str&gt;) &lt;Str&gt;</code></li>
+<li>example:</li>
+</ul>
+<pre><code>import io
+println(io.ioutil.readFileString(&#39;testdata.txt&#39;))</code></pre>
+<h3 id="writefilestring"><code>writeFileString</code></h3>
+<p><code>writeFileString</code> writes a string to a file</p>
+<ul>
+<li>signature: <code>writeFileString(filename &lt;Str&gt;, data &lt;Str&gt;) &lt;Null&gt;</code></li>
+<li>example:</li>
+</ul>
+<pre><code>import io
+io.ioutil.writeFileString(&#39;testdata.txt&#39;, &#39;abc&#39;)</code></pre>
+
+
+            <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
+        </div>
+    </body>
+</html>

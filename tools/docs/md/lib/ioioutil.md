@@ -1,9 +1,15 @@
 
-### `io.ioutil`
+## `io.ioutil`
 
 `io.ioutil` implements some I/O utility functions.
 
-#### `readDir`
+`io.ioutil` has the following fields:
+
+* [readDir](#readDir)
+* [readFileString](#readFileString)
+* [writeFileString](#writeFileString)
+
+### `readDir`
 
 `readDir` reads the directory named by dirname and returns a
 list of directory entries sorted by filename. The resulting
@@ -14,13 +20,13 @@ list will be [fileinfo](#TODO) Structs.
 
 ```
 import io
-
 let files = io.ioutil.readDir('.')
-    for f in files {
-        println([f.name(), f.isDir()])
-    }
+for f in files {
+    println([f.name(), f.isDir()])
+}
 ```
-#### `readFileString`
+
+### `readFileString`
 
 `readFileString` reads an entire file as a stirng.
 
@@ -29,10 +35,10 @@ let files = io.ioutil.readDir('.')
 
 ```
 import io
-
 println(io.ioutil.readFileString('testdata.txt'))
 ```
-#### `writeFileString`
+
+### `writeFileString`
 
 `writeFileString` writes a string to a file
 
@@ -41,6 +47,6 @@ println(io.ioutil.readFileString('testdata.txt'))
 
 ```
 import io
-
 io.ioutil.writeFileString('testdata.txt', 'abc')
 ```
+

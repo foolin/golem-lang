@@ -52,18 +52,19 @@ fn writeLines(path, lines) {
 fn findDocs(lines) {
 
     let docs = []
-    let isDoc = false
+    let isDoc = false, indent
     for ln in lines {
-        ln = ln.trim('\t')
+        ln = ln.replace('\t', '    ')
         if isDoc {
-            if ln.hasPrefix('*/') {
+            if ln.trim(' ').hasPrefix('*/') {
                 isDoc = false
             } else {
-                docs.add(ln)
+                docs.add(ln[indent:])
             }
         } else {
-            if ln.hasPrefix('/*doc') {
+            if ln.trim(' ').hasPrefix('/*doc') {
                 isDoc = true
+                indent = ln.index('/*doc')
             }
         }
     }
@@ -123,6 +124,7 @@ fn wrapHtml(name, title, codeWrap = true) {
     let h = header.replace('${title}', title)
 
     let body = io.ioutil.readFileString(name)
+
     if codeWrap {
         let a = body.index(preBegin)
         while a != -1 {
@@ -143,17 +145,18 @@ const docsDir = '../../docs/'
 
 fn createHtml() {
 
-    for c in core {
-        let p = docsDir + c + '.html' 
-        os.exec.runCommand('pandoc', 'md/core/' + c + '.md', '-o', p)
+    for f in core {
+        let p = docsDir + f + '.html' 
+        os.exec.runCommand('pandoc', 'md/core/' + f + '.md', '-o', p)
         wrapHtml(p, 'Golem Reference')
     }
     
-	//let lib = io.ioutil.readDir('md/lib')
-    //for f in lib {
-    //    wrapHtml(p, 'Golem Reference')
-    //    println([f.name(), f.isDir()])
-    //}
+    let lib = io.ioutil.readDir('md/lib')
+    for f in lib {
+        let p = docsDir + 'lib_' + f.name()[:-3] + '.html' 
+        os.exec.runCommand('pandoc', 'md/lib/' + f.name(), '-o', p)
+        wrapHtml(p, 'Golem Reference', false)
+    }
 
     os.exec.runCommand('pandoc', 'md/index.md',      '-o', docsDir + 'index.html')
     os.exec.runCommand('pandoc', 'md/tutorial.md',   '-o', docsDir + 'tutorial.html')

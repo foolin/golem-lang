@@ -18,8 +18,8 @@ be invoked to perform a task.
 
 Valid operators for Func are:
 
-	* The equality operators `==`, `!=`
-	* The invocation operator `a(x)`
+* The equality operators `==`, `!=`
+* The invocation operator `a(x)`
 
 Funcs have an [`arity()`](#TODO)
 

@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Golem Reference</title>
+
+        <link type="text/css" rel="stylesheet" href="style.css">
+        <script src="wasm_exec.js"></script>
+        <script src="wasm_init.js"></script>
+    </head>
+    <body>
+        <div class="div-wrapper">
+
+
+<h1 id="regexp">regexp</h1>
+<p>Module regexp implements regular expression search.</p>
+<p>The syntax of the regular expressions accepted is the same general syntax used by Perl, Python, and other languages.</p>
+<p><code>regexp</code> has the following fields:</p>
+<ul>
+<li><a href="#compile">compile</a></li>
+</ul>
+<p><code>regexp</code> defines the following structs:</p>
+<ul>
+<li><a href="#regex">regex</a></li>
+</ul>
+<h2 id="fields">Fields</h2>
+<h3 id="compile"><code>compile</code></h3>
+<p><code>compile</code> parses a regular expression and returns, if successful, a <a href="#regex">regex</a> struct that can be used to match against text.</p>
+<ul>
+<li>signature: <code>compile(expr &lt;Str&gt;) &lt;Struct&gt;</code></li>
+</ul>
+<h2 id="structs">Structs</h2>
+<h3 id="regex"><code>regex</code></h3>
+<p><code>regex</code> is a Struct that is the representation of a compiled regular expression. A Regexp is safe for concurrent use by multiple goroutines, except for configuration methods, such as Longest.</p>
+<p>A <code>regex</code> struct has the fields:</p>
+<ul>
+<li><a href="#matchstring">matchString</a></li>
+</ul>
+<h4 id="matchstring"><code>matchString</code></h4>
+<p><code>matchString</code> reports whether the string s contains any match of the regular expression.</p>
+<ul>
+<li>signature: <code>matchString(&lt;Str&gt;) &lt;Bool&gt;</code></li>
+</ul>
+
+
+            <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
+        </div>
+    </body>
+</html>

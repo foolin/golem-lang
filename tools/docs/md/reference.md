@@ -39,10 +39,13 @@
 
 ## Standard Library
 
-* [encoding](#encoding)
-  * [json](#encodingjson)
-* [golem](#golem)
-* [os](#os)
-  * [exec](#osexec)
-* [path](#path)
-  * [filepath](#pathfilepath)
+* [encoding](lib_encoding.html)
+  * [encoding.json](lib_encodingjson.html)
+* [golem](lib_golem.html)
+* [io](lib_io.html)
+  * [io.ioutil](lib_ioioutil.html)
+* [os](lib_os.html)
+  * [os.exec](lib_osexec.html)
+* [path](lib_path.html)
+  * [path.filepath](lib_pathfilepath.html)
+* [regexp](lib_regexp.html)

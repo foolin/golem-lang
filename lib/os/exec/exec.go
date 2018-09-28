@@ -12,14 +12,22 @@ import (
 
 /*doc
 
-### `os.exec`
+## `os.exec`
 
 `os.exec` runs external commands.
 
 */
 
 /*doc
-#### `runCommand`
+
+`os.exec` has the following fields:
+
+  * [runCommand](#runCommand)
+
+*/
+
+/*doc
+### `runCommand`
 
 `runCommand` TODO replace with command().run()
 

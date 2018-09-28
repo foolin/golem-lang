@@ -7,8 +7,8 @@ A new Range is created by the [`range()`](#TODO) builtin function.
 
 Valid operators for Range are:
 
-* The equality operators `==`, `!=`
-* The index operator `a[x]`
+    * The equality operators `==`, `!=`
+    * The index operator `a[x]`
 
 The index operator always return an Int.
 
@@ -16,10 +16,10 @@ Ranges have a [`len()`](#TODO) and are [`iterable`](#TODO).
 
 Range has the following fields:
 
-  * [count](#count)
-  * [from](#from)
-  * [step](#step)
-  * [to](#to)
+* [count](#count)
+* [from](#from)
+* [step](#step)
+* [to](#to)
 
 ### `count`
 

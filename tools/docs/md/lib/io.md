@@ -9,3 +9,7 @@ Because these interfaces and primitives wrap lower-level operations with various
 implementations, unless otherwise informed clients should not assume they are safe
 for parallel execution.
 
+`io` has the following fields:
+
+* [ioutil](lib_ioioutil.html)
+

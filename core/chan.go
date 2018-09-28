@@ -16,7 +16,7 @@ A new Chan is created by the [`chan()`](#TODO) builtin function.
 
 Valid operators for Chan are:
 
-	* The equality operators `==`, `!=`
+* The equality operators `==`, `!=`
 
 */
 
@@ -78,8 +78,8 @@ func (ch *channel) Recv() Value {
 /*doc
 Chan has the following fields:
 
-  * [send](#send)
-  * [recv](#recv)
+* [send](#send)
+* [recv](#recv)
 
 */
 
@@ -90,7 +90,7 @@ var chanMethods = map[string]Method{
 
 	`send` sends a value to the chan.
 
-		* signature: `send(val <Value>)`
+	* signature: `send(val <Value>)`
 
 	*/
 	"send": NewFixedMethod(
@@ -106,7 +106,7 @@ var chanMethods = map[string]Method{
 
 	`recv` receives a value from the chan.
 
-		* signature: `recv() <Value>`
+	* signature: `recv() <Value>`
 
 	*/
 	"recv": NewNullaryMethod(

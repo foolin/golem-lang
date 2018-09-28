@@ -9,8 +9,8 @@ Valid operators for Chan are:
 
 Chan has the following fields:
 
-  * [send](#send)
-  * [recv](#recv)
+* [send](#send)
+* [recv](#recv)
 
 ### `send`
 

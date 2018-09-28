@@ -17,8 +17,8 @@ but they have special semantics in certain Golem expressions and statements.
 
 Valid operators for Tuple are:
 
-	* The equality operators `==`, `!=`
-	* The index operator `a[x]`
+* The equality operators `==`, `!=`
+* The index operator `a[x]`
 
 The index operator can return a value of any type.
 

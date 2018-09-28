@@ -27,10 +27,11 @@ A func's arity type is always either "Fixed", "Variadic", or "Multiple".
 * example:
 
 ```
-    assert(arity(println) == struct { kind: "Variadic", required: 0 })
-    assert(arity(len)     == struct { kind: "Fixed",    required: 1 })
-    assert(arity(range)   == struct { kind: "Multiple", required: 2, optional: 1 })
+assert(arity(println) == struct { kind: "Variadic", required: 0 })
+assert(arity(len)     == struct { kind: "Fixed",    required: 1 })
+assert(arity(range)   == struct { kind: "Multiple", required: 2, optional: 1 })
 ```
+
 ### `assert`
 
 `assert` accepts a single boolean value, and throws an error
@@ -65,8 +66,8 @@ on values that are already frozen.  The value is returned after it is frozen.
 * example:
 
 ```
-    println(frozen('a'))
-    println(frozen([3, 4]))
+println(frozen('a'))
+println(frozen([3, 4]))
 ```
 
 ### `iter`
@@ -92,11 +93,11 @@ throws an error.
 * example:
 
 ```
-    let a = [1, 2, 3]
-    let itr = iter(a)
-    while itr.next() {
-        println(itr.get())
-    }
+let a = [1, 2, 3]
+let itr = iter(a)
+while itr.next() {
+    println(itr.get())
+}
 ```
 
 ### `len`
@@ -128,10 +129,11 @@ that is less than "to".
 * example:
 
 ```
-    for i in range(0, 5) {
-        println(i)
-    }
+for i in range(0, 5) {
+    println(i)
+}
 ```
+
 ### `str`
 
 `str` returns a Str representation of a value.
@@ -147,9 +149,9 @@ that is less than "to".
 * example:
 
 ```
-    println(type(1.23))
-    let a = [null, true, 1, 'xyz']
-    println(a.map(type))
+println(type(1.23))
+let a = [null, true, 1, 'xyz']
+println(a.map(type))
 ```
 
 

@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Golem Reference</title>
+
+        <link type="text/css" rel="stylesheet" href="style.css">
+        <script src="wasm_exec.js"></script>
+        <script src="wasm_init.js"></script>
+    </head>
+    <body>
+        <div class="div-wrapper">
+
+
+<h2 id="os">os</h2>
+<p>Module os provides a platform-independent interface to operating system functionality.</p>
+<p><code>os</code> has the following fields:</p>
+<ul>
+<li><a href="#create">create</a></li>
+<li><a href="lib_osexec.html">exec</a></li>
+<li><a href="#exit">exit</a></li>
+<li><a href="#open">open</a></li>
+<li><a href="#stat">stat</a></li>
+</ul>
+<p><code>os</code> defines the following structs:</p>
+<ul>
+<li><a href="#fileinfo">fileInfo</a></li>
+<li><a href="#file">file</a></li>
+</ul>
+<h2 id="fields">Fields</h2>
+<h3 id="create"><code>create</code></h3>
+<p><code>create</code> creates the named file with mode 0666 (before umask), truncating it if it already exists. If successful, methods on the returned <a href="#file">file</a> can be used for I/O.</p>
+<ul>
+<li>signature: <code>create(name &lt;Str&gt;) &lt;Struct&gt;</code></li>
+<li>example:</li>
+</ul>
+<pre><code>import os
+
+let f = os.create(&#39;foo.txt&#39;)
+try {
+    // do something with the file
+} finally {
+    f.close()
+}</code></pre>
+<h3 id="exit"><code>exit</code></h3>
+<p><code>exit</code> causes the current program to exit with the given status code. Conventionally, code zero indicates success, non-zero an error. The program terminates immediately.</p>
+<ul>
+<li>signature: <code>exit(code &lt;Int&gt;) &lt;Null&gt;</code></li>
+<li>example:</li>
+</ul>
+<pre><code>import os
+
+os.exit(-1)</code></pre>
+<h3 id="open"><code>open</code></h3>
+<p><code>open</code> opens the named file for reading. If successful, methods on the returned <a href="#file">file</a> can be used for reading.</p>
+<ul>
+<li>signature: <code>open(name &lt;Str&gt;) &lt;Struct&gt;</code></li>
+<li>example:</li>
+</ul>
+<pre><code>import os
+
+let f = os.open(&#39;foo.txt&#39;)
+try {
+    // do something with the file
+} finally {
+    f.close()
+}</code></pre>
+<h3 id="stat"><code>stat</code></h3>
+<p><code>stat</code> returns a <a href="#fileinfo">fileInfo</a> describing the named file.</p>
+<ul>
+<li>signature: <code>stat(name &lt;Str&gt;) &lt;Struct&gt;</code></li>
+<li>example:</li>
+</ul>
+<pre><code>import os
+
+let s = os.stat(&#39;foo.txt&#39;)
+println([
+    &#39;name: &#39; + s.name(),
+    &#39;size: &#39; + s.size(),
+    &#39;mode: &#39; + s.mode(),
+    &#39;isDir: &#39; + s.isDir()
+])</code></pre>
+<h2 id="structs">Structs</h2>
+<h3 id="fileinfo"><code>fileInfo</code></h3>
+<p>A <code>fileInfo</code> is a struct that describes a file and is returned by stat.</p>
+<p>A <code>fileInfo</code> struct has the fields:</p>
+<ul>
+<li><a href="#isdir">isDir</a></li>
+<li><a href="#mode">mode</a></li>
+<li><a href="#name">name</a></li>
+<li><a href="#size">size</a></li>
+</ul>
+<h4 id="isdir"><code>isDir</code></h4>
+<p><code>isDir</code> is an abbreviation for Mode().IsDir()</p>
+<ul>
+<li>signature: <code>isDir() &lt;Str&gt;</code></li>
+</ul>
+<h4 id="mode"><code>mode</code></h4>
+<p><code>mode</code> is the file mode bits</p>
+<ul>
+<li>signature: <code>mode() &lt;Int&gt;</code></li>
+</ul>
+<h4 id="name"><code>name</code></h4>
+<p><code>name</code> is the base name of the file</p>
+<ul>
+<li>signature: <code>name() &lt;Str&gt;</code></li>
+</ul>
+<h4 id="size"><code>size</code></h4>
+<p><code>size</code> is the length in bytes for regular files; system-dependent for others</p>
+<ul>
+<li>signature: <code>size() &lt;Int&gt;</code></li>
+</ul>
+<h3 id="file"><code>file</code></h3>
+<p>A <code>file</code> is a struct that represents an open file descriptor.</p>
+<p>A <code>file</code> struct has the fields:</p>
+<ul>
+<li><a href="#close">close</a></li>
+<li><a href="#readlines">readLines</a></li>
+<li><a href="#writelines">writeLines</a></li>
+</ul>
+<h4 id="close"><code>close</code></h4>
+<p><code>close</code> closes the File, rendering it unusable for I/O. On files that support SetDeadline, any pending I/O operations will be canceled and return immediately with an error.</p>
+<ul>
+<li>signature: <code>close() &lt;Null&gt;</code></li>
+</ul>
+<h4 id="readlines"><code>readLines</code></h4>
+<p><code>readLines</code> returns a List of Strs, for each line of text in the file.</p>
+<ul>
+<li>signature: <code>readLines() &lt;List&gt;</code></li>
+</ul>
+<h4 id="writelines"><code>writeLines</code></h4>
+<p><code>writeLines</code> writes a List of Strs to the file as a sequence of lines.</p>
+<ul>
+<li>signature: <code>writeLines(&lt;List&gt;) &lt;Null&gt;</code></li>
+</ul>
+
+
+            <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
+        </div>
+    </body>
+</html>

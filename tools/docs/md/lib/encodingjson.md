@@ -1,9 +1,15 @@
 
-### `encoding.json`
+## `encoding.json`
 
 `encoding.json` implements encoding and decoding of JSON as defined in RFC 7159
 
-#### `marshal`
+`encoding.json` has the following fields:
+
+* [marshal](#marshal)
+* [marshalIndent](#marshalIndent)
+* [unmarshal](#unmarshal)
+
+### `marshal`
 
 `marshal` returns the JSON encoding of a value.  Null, Bool, Float Int, Str, and List
 are marshalled as their corresponding JSON elements.  Structs and Dicts are marshalled
@@ -14,11 +20,11 @@ as JSON objects. Other golem types cannot be marshalled.
 
 ```
 import encoding
-
 let s = struct { a: [1, 2, 3]}
 println(encoding.json.marshal(s))
 ```
-#### `marshalIndent`
+
+### `marshalIndent`
 
 `marshalIndent` is like `marshal` but applies indent to format the output.
 Each JSON element in the output will begin on a new line beginning with prefix
@@ -29,11 +35,11 @@ followed by one or more copies of indent according to the indentation nesting.
 
 ```
 import encoding
-
 let s = struct { a: [1, 2, 3]}
 println(encoding.json.marshalIndent(s, '', '  '))
 ```
-#### `unmarshal`
+
+### `unmarshal`
 
 `unmarshal` parses JSON-encoded data.
 The optional useStructs parameter, which defaults to false, specifies whether
@@ -46,11 +52,10 @@ Golem identifiers.
 
 ```
 import encoding
-
 let text = `{
   "a": [ 1, 2, 3 ]
 }`
-
 println(encoding.json.unmarshal(text))
 println(encoding.json.unmarshal(text, true))
 ```
+

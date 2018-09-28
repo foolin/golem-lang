@@ -16,18 +16,18 @@ Lists have a [`len()`](#TODO) and are [`iterable`](#TODO).
 
 List has the following fields:
 
-  * [add](#add)
-  * [addAll](#addall)
-  * [clear](#clear)
-  * [contains](#contains)
-  * [filter](#filter)
-  * [indexOf](#indexof)
-  * [isEmpty](#isempty)
-  * [join](#join)
-  * [map](#map)
-  * [reduce](#reduce)
-  * [remove](#remove)
-  * [sort](#sort)
+* [add](#add)
+* [addAll](#addall)
+* [clear](#clear)
+* [contains](#contains)
+* [filter](#filter)
+* [indexOf](#indexof)
+* [isEmpty](#isempty)
+* [join](#join)
+* [map](#map)
+* [reduce](#reduce)
+* [remove](#remove)
+* [sort](#sort)
 
 ### `add`
 

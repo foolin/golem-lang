@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Golem Reference</title>
+
+        <link type="text/css" rel="stylesheet" href="style.css">
+        <script src="wasm_exec.js"></script>
+        <script src="wasm_init.js"></script>
+    </head>
+    <body>
+        <div class="div-wrapper">
+
+
+<h2 id="encoding.json"><code>encoding.json</code></h2>
+<p><code>encoding.json</code> implements encoding and decoding of JSON as defined in RFC 7159</p>
+<p><code>encoding.json</code> has the following fields:</p>
+<ul>
+<li><a href="#marshal">marshal</a></li>
+<li><a href="#marshalIndent">marshalIndent</a></li>
+<li><a href="#unmarshal">unmarshal</a></li>
+</ul>
+<h3 id="marshal"><code>marshal</code></h3>
+<p><code>marshal</code> returns the JSON encoding of a value. Null, Bool, Float Int, Str, and List are marshalled as their corresponding JSON elements. Structs and Dicts are marshalled as JSON objects. Other golem types cannot be marshalled.</p>
+<ul>
+<li>signature: <code>marshal(value &lt;Value&gt;) &lt;Str&gt;</code></li>
+<li>example:</li>
+</ul>
+<pre><code>import encoding
+let s = struct { a: [1, 2, 3]}
+println(encoding.json.marshal(s))</code></pre>
+<h3 id="marshalindent"><code>marshalIndent</code></h3>
+<p><code>marshalIndent</code> is like <code>marshal</code> but applies indent to format the output. Each JSON element in the output will begin on a new line beginning with prefix followed by one or more copies of indent according to the indentation nesting.</p>
+<ul>
+<li>signature: <code>marshalIndent(value &lt;Value&gt;, prefix &lt;Str&gt;, indent &lt;Str&gt;) &lt;Str&gt;</code></li>
+<li>example:</li>
+</ul>
+<pre><code>import encoding
+let s = struct { a: [1, 2, 3]}
+println(encoding.json.marshalIndent(s, &#39;&#39;, &#39;  &#39;))</code></pre>
+<h3 id="unmarshal"><code>unmarshal</code></h3>
+<p><code>unmarshal</code> parses JSON-encoded data. The optional useStructs parameter, which defaults to false, specifies whether the data should be marshalled into structs rather than dicts. If this parameter is set to true, then the keys of the JSON objects in the data must all be valid Golem identifiers.</p>
+<ul>
+<li>signature: <code>unmarshal(text &lt;Str&gt;, useStructs = false &lt;Bool&gt;) &lt;Value&gt;</code></li>
+<li>example:</li>
+</ul>
+<pre><code>import encoding
+let text = `{
+  &quot;a&quot;: [ 1, 2, 3 ]
+}`
+println(encoding.json.unmarshal(text))
+println(encoding.json.unmarshal(text, true))</code></pre>
+
+
+            <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
+        </div>
+    </body>
+</html>
