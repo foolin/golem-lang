@@ -16,20 +16,9 @@
 <p>The golem module defines functions that perform introspection and transformation on Golem values and code.</p>
 <p><code>golem</code> has the following fields:</p>
 <ul>
-<li><a href="#fields">fields</a></li>
 <li><a href="#getField">getField</a></li>
-<li><a href="#hasField">hasField</a></li>
 <li><a href="#setField">setField</a></li>
 </ul>
-<h3 id="fields"><code>fields</code></h3>
-<p><code>fields</code> returns a Set of the names of a value’s fields.</p>
-<ul>
-<li>signature: <code>fields(value &lt;Value&gt;) &lt;Set&gt;</code></li>
-<li>example:</li>
-</ul>
-<pre><code>import golem
-println(golem.fields([]))
-println(golem.fields(struct { a: 1, b: 2}))</code></pre>
 <h3 id="getfield"><code>getField</code></h3>
 <p><code>getField</code> returns the value associated with a field name.</p>
 <ul>
@@ -41,15 +30,6 @@ let a = [1, 2]
 let f = golem.getField(a, &#39;add&#39;)
 f(3)
 println(a)</code></pre>
-<h3 id="hasfield"><code>hasField</code></h3>
-<p><code>hasField</code> returns whether a value has a field with a given name.</p>
-<ul>
-<li>signature: <code>getField(value &lt;Value&gt;, name &lt;Str&gt;) &lt;Bool&gt;</code></li>
-<li>example:</li>
-</ul>
-<pre><code>import golem
-let a = [1, 2]
-println(golem.hasField(a, &#39;add&#39;))</code></pre>
 <h3 id="setfield"><code>setField</code></h3>
 <p><code>setField</code> sets the value associated with a field name. <code>setField</code> only works on Structs – you cannot set the fields of other types. <code>setField</code> returns <code>null</code> if it was successful.</p>
 <ul>

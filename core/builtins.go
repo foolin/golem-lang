@@ -72,8 +72,10 @@ are suitable for use in sandboxed environments.
 * [`arity()`](#arity)
 * [`assert()`](#assert)
 * [`chan()`](#chan)
+* [`fields()`](#fields)
 * [`freeze()`](#freeze)
 * [`frozen()`](#frozen)
+* [`has()`](#has)
 * [`iter()`](#iter)
 * [`len()`](#len)
 * [`merge()`](#merge)
@@ -89,8 +91,10 @@ var StandardBuiltins = []*BuiltinEntry{
 	{"arity", BuiltinArity},
 	{"assert", BuiltinAssert},
 	{"chan", BuiltinChan},
+	{"fields", BuiltinFields},
 	{"freeze", BuiltinFreeze},
 	{"frozen", BuiltinFrozen},
+	{"has", BuiltinHas},
 	{"iter", BuiltinIter},
 	{"len", BuiltinLen},
 	{"merge", BuiltinMerge},
@@ -196,6 +200,41 @@ var BuiltinChan = NewMultipleNativeFunc(
 	})
 
 /*doc
+### `fields`
+
+`fields` returns a Set of the names of a value's fields.
+
+* signature: `fields(value <Value>) <Set>`
+* example:
+
+```
+println(fields([]))
+```
+
+*/
+
+var BuiltinFields = NewFixedNativeFunc(
+	[]Type{AnyType},
+	false,
+	func(ev Eval, params []Value) (Value, Error) {
+
+		fields, err := params[0].FieldNames()
+		if err != nil {
+			return nil, err
+		}
+
+		entries := make([]Value, len(fields))
+		for i, k := range fields {
+			entry, err := NewStr(k)
+			if err != nil {
+				return nil, err
+			}
+			entries[i] = entry
+		}
+		return NewSet(ev, entries)
+	})
+
+/*doc
 ### `freeze`
 
 `freeze` freezes a value, if it is not already frozen.  Its OK to call `freeze`
@@ -235,6 +274,34 @@ var BuiltinFrozen = NewFixedNativeFunc(
 	false,
 	func(ev Eval, params []Value) (Value, Error) {
 		return params[0].Frozen(ev)
+	})
+
+/*doc
+### `has`
+
+`has` returns whether a value has a field with a given name.
+
+* signature: `has(name <Str>) <Bool>`
+* example:
+
+```
+let a = [1, 2]
+println(has(a, 'add'))
+```
+
+*/
+
+var BuiltinHas = NewFixedNativeFunc(
+	[]Type{AnyType, StrType},
+	false,
+	func(ev Eval, params []Value) (Value, Error) {
+		field := params[1].(Str)
+
+		b, err := params[0].HasField(field.String())
+		if err != nil {
+			return nil, err
+		}
+		return NewBool(b), nil
 	})
 
 /*doc

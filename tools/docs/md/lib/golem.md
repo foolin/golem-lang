@@ -6,23 +6,8 @@ on Golem values and code.
 
 `golem` has the following fields:
 
-* [fields](#fields)
 * [getField](#getField)
-* [hasField](#hasField)
 * [setField](#setField)
-
-### `fields`
-
-`fields` returns a Set of the names of a value's fields.
-
-* signature: `fields(value <Value>) <Set>`
-* example:
-
-```
-import golem
-println(golem.fields([]))
-println(golem.fields(struct { a: 1, b: 2}))
-```
 
 ### `getField`
 
@@ -37,19 +22,6 @@ let a = [1, 2]
 let f = golem.getField(a, 'add')
 f(3)
 println(a)
-```
-
-### `hasField`
-
-`hasField` returns whether a value has a field with a given name.
-
-* signature: `getField(value <Value>, name <Str>) <Bool>`
-* example:
-
-```
-import golem
-let a = [1, 2]
-println(golem.hasField(a, 'add'))
 ```
 
 ### `setField`

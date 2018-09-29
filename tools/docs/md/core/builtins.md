@@ -9,8 +9,10 @@ are suitable for use in sandboxed environments.
 * [`arity()`](#arity)
 * [`assert()`](#assert)
 * [`chan()`](#chan)
+* [`fields()`](#fields)
 * [`freeze()`](#freeze)
 * [`frozen()`](#frozen)
+* [`has()`](#has)
 * [`iter()`](#iter)
 * [`len()`](#len)
 * [`merge()`](#merge)
@@ -50,6 +52,17 @@ If the size is greater than 0, then a buffered channel of that size will be crea
 * signature: `chan(size = 0 <Int>) <Chan>`
 * example: `let ch = chan()`
 
+### `fields`
+
+`fields` returns a Set of the names of a value's fields.
+
+* signature: `fields(value <Value>) <Set>`
+* example:
+
+```
+println(fields([]))
+```
+
 ### `freeze`
 
 `freeze` freezes a value, if it is not already frozen.  Its OK to call `freeze`
@@ -68,6 +81,18 @@ on values that are already frozen.  The value is returned after it is frozen.
 ```
 println(frozen('a'))
 println(frozen([3, 4]))
+```
+
+### `has`
+
+`has` returns whether a value has a field with a given name.
+
+* signature: `has(name <Str>) <Bool>`
+* example:
+
+```
+let a = [1, 2]
+println(has(a, 'add'))
 ```
 
 ### `iter`

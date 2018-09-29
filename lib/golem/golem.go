@@ -24,9 +24,7 @@ func init() {
 	var err error
 	Golem, err = g.NewFrozenFieldStruct(
 		map[string]g.Field{
-			"fields":   g.NewField(fields),
 			"getField": g.NewField(getField),
-			"hasField": g.NewField(hasField),
 			"setField": g.NewField(setField),
 		})
 	g.Assert(err == nil)
@@ -35,49 +33,10 @@ func init() {
 /*doc
 `golem` has the following fields:
 
-* [fields](#fields)
 * [getField](#getField)
-* [hasField](#hasField)
 * [setField](#setField)
 
 */
-
-/*doc
-### `fields`
-
-`fields` returns a Set of the names of a value's fields.
-
-* signature: `fields(value <Value>) <Set>`
-* example:
-
-```
-import golem
-println(golem.fields([]))
-println(golem.fields(struct { a: 1, b: 2}))
-```
-
-*/
-
-var fields = g.NewFixedNativeFunc(
-	[]g.Type{g.AnyType},
-	false,
-	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
-
-		fields, err := params[0].FieldNames()
-		if err != nil {
-			return nil, err
-		}
-
-		entries := make([]g.Value, len(fields))
-		for i, k := range fields {
-			entry, err := g.NewStr(k)
-			if err != nil {
-				return nil, err
-			}
-			entries[i] = entry
-		}
-		return g.NewSet(ev, entries)
-	})
 
 /*doc
 ### `getField`
@@ -104,35 +63,6 @@ var getField = g.NewFixedNativeFunc(
 		field := params[1].(g.Str)
 
 		return params[0].GetField(ev, field.String())
-	})
-
-/*doc
-### `hasField`
-
-`hasField` returns whether a value has a field with a given name.
-
-* signature: `getField(value <Value>, name <Str>) <Bool>`
-* example:
-
-```
-import golem
-let a = [1, 2]
-println(golem.hasField(a, 'add'))
-```
-
-*/
-
-var hasField = g.NewFixedNativeFunc(
-	[]g.Type{g.AnyType, g.StrType},
-	false,
-	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
-		field := params[1].(g.Str)
-
-		b, err := params[0].HasField(field.String())
-		if err != nil {
-			return nil, err
-		}
-		return g.NewBool(b), nil
 	})
 
 /*doc

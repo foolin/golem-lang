@@ -4,7 +4,5 @@
 
 const _golem = _lib("golem")
 
-const fields = _golem.fields
-const hasField = _golem.hasField
 const getField = _golem.getField
 const setField = _golem.setField
