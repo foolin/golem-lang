@@ -1,0 +1,188 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Golem Tour</title>
+
+        <link type="text/css" rel="stylesheet" href="style.css">
+        <script src="wasm_exec.js"></script>
+        <script src="wasm_init.js"></script>
+    </head>
+    <body>
+        <div class="div-wrapper">
+
+
+<h1 id="the-golem-programming-language-tour">The Golem Programming Language Tour</h1>
+<p>Welcome to the tour of the Golem Programming Language.</p>
+<h2 id="hello-world">Hello, world</h2>
+<p>Let’s get started with the proverbial hello world program. In this tour, we will be running Golem code directly in the browser, so press the <code>Run</code> button below to see the output of the program:</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src87" rows="1" spellcheck="false">println(&#39;Hello, world.&#39;);</textarea>
+    </div>
+    <div class="output"><pre id="result87"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src87', 'result87');">Run</button>
+    </div>
+</div>
+
+<p>You may have noticed that there is a semicolon at the end of the <code>println</code> statement. Semicolons are usually optional in Golem – they are required only if you want to write multiple separate statements on a single line. We will omit unnecessary semicolons in the rest of the tour.</p>
+<h2 id="basic-types">Basic Types</h2>
+<p>Golem’s basic primitive types include <a href="bool.html">bool</a>, <a href="int.html">int</a>, <a href="float.html">float</a> and <a href="str.html">string</a> There is also <a href="null.html">null</a>, which represents the absence of a value. Basic values are immutable.</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src88" rows="6" spellcheck="false">println(null)
+println(false)
+println(true)
+println(1 + 2)
+println(3.0 / 4.0)
+println(&#39;abc&#39; + &quot;def&quot;)</textarea>
+    </div>
+    <div class="output"><pre id="result88"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src88', 'result88');">Run</button>
+    </div>
+</div>
+
+<p>Golem has the usual set of C-language-family <a href="syntax.html#operator-precedence">operators</a> that you would expect: <code>==</code>, <code>!=</code>, <code>||</code>, <code>&amp;&amp;</code>, <code>&lt;</code>, <code>&gt;</code>, <code>+</code>, <code>-</code>, and so forth.</p>
+<p>Unlike many other dynamic languages, Golem has no concept of ‘truthiness’. The only things that are true or false are boolean values. So, <code>''</code>, <code>0</code>, <code>null</code>, etc. are <em>not</em> boolean, and and error will be thrown if you attempt to evaluate them in a place where a boolean value is expected.</p>
+<h2 id="comments">Comments</h2>
+<p>Golem uses C-language-family comments: <code>/* ... */</code> for a block comment, and <code>//</code> for a line comment.</p>
+<h2 id="variables">Variables</h2>
+<p>Values can be assigned to variables. Variables are declared via either the <code>let</code> or <code>const</code> keyword. It is an error to refer to a variable before it has been declared.</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src89" rows="4" spellcheck="false">let a = 1
+const b = 2
+a = b + 3
+println(a)</textarea>
+    </div>
+    <div class="output"><pre id="result89"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src89', 'result89');">Run</button>
+    </div>
+</div>
+
+<p>As you might expect, the value of a const variable cannot be changed once it has been assigned.</p>
+<p><code>let</code> and <code>const</code> are “statements” – they do not return a value. Assignments, on the other, are <a href="#TODO">expressions</a>, and evaluating an expression returns a value:</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src90" rows="3" spellcheck="false">let a = 1
+let b = (a = 2)
+assert(a == b &amp;&amp; b == 2)</textarea>
+    </div>
+    <div class="output"><pre id="result90"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src90', 'result90');">Run</button>
+    </div>
+</div>
+
+<h2 id="collections">Collections</h2>
+<p>Golem has four collection data types: <a href="list.html">List</a>, <a href="dict.html">Dict</a>, <a href="set.html">Set</a>, and <a href="tuple.html">Tuple</a></p>
+<h3 id="list">List</h3>
+<p>You can create a list by enclosing a comma-delimited sequence of values in square brackets. Once you’ve created a list, you can use square brackets to access individual elements of a list (this is called the “index operator”).</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src91" rows="5" spellcheck="false">let a = []
+let b = [3,4,5]
+assert(a.isEmpty())
+assert(b[0] == 3)
+println(b[-1]) // negative indexes start from the end</textarea>
+    </div>
+    <div class="output"><pre id="result91"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src91', 'result91');">Run</button>
+    </div>
+</div>
+
+<p>Use the “slice operator” to create a new list from part of an existing list. If you leave off the first or last value of the slice operation, the resulting slice will start at the beginning or end. Negative values work with slices in the same way that they do with lists.</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src92" rows="5" spellcheck="false">let c = [&#39;x&#39;, &#39;y&#39;, &#39;z&#39;]
+println(c[1:3])
+println(c[:3])
+println(c[2:])
+println(c[1:-1])</textarea>
+    </div>
+    <div class="output"><pre id="result92"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src92', 'result92');">Run</button>
+    </div>
+</div>
+
+<p>Indexing and slicing works on strings too:</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src93" rows="2" spellcheck="false">println(&#39;abc&#39;[1])
+println(&#39;abc&#39;[:-1])</textarea>
+    </div>
+    <div class="output"><pre id="result93"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src93', 'result93');">Run</button>
+    </div>
+</div>
+
+<h3 id="dict">Dict</h3>
+<p>Golem’s <code>dict</code> type is an <a href="https://en.wikipedia.org/wiki/Associative_array">associative array</a>. The keys of a dict can be any value that supports <a href="interfaces.html#hashable">hashing</a>.</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src94" rows="4" spellcheck="false">let a = dict {&#39;x&#39;: 1, &#39;y&#39;: 2}
+println(a[&#39;x&#39;])
+a[&#39;z&#39;] = 3
+println(a)</textarea>
+    </div>
+    <div class="output"><pre id="result94"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src94', 'result94');">Run</button>
+    </div>
+</div>
+
+<h3 id="set">Set</h3>
+<p>A <code>set</code> is a unordered collection of distinct values. Any value that can act as a key in a dict can be a member of a set.</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src95" rows="3" spellcheck="false">let a = set {&#39;x&#39;, &#39;y&#39;}
+println(a)
+println(a.contains(&#39;x&#39;))</textarea>
+    </div>
+    <div class="output"><pre id="result95"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src95', 'result95');">Run</button>
+    </div>
+</div>
+
+<h3 id="tuple">Tuple</h3>
+<p>A <code>tuple</code> is an immutable list-like data structure. Tuples must have at least two values.</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src96" rows="2" spellcheck="false">let a = (1, 2)
+println(a)</textarea>
+    </div>
+    <div class="output"><pre id="result96"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src96', 'result96');">Run</button>
+    </div>
+</div>
+
+<h3 id="len"><code>len</code></h3>
+<p>The builtin function <code>len</code> can be used to get the length of any of the collections. <code>len</code> will also return the length of a string.</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src97" rows="5" spellcheck="false">let a = [1, 2, 3]
+let b = &#39;lmnop&#39;
+let c = dict {&quot;x&quot;: 3}
+
+println([len(a), len(b), len(c)])</textarea>
+    </div>
+    <div class="output"><pre id="result97"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src97', 'result97');">Run</button>
+    </div>
+</div>
+
+
+
+            <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
+        </div>
+    </body>
+</html>

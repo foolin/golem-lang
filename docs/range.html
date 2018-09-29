@@ -13,22 +13,15 @@
 
 
 <h2 id="range">Range</h2>
-<p>A Range is a representation of an immutable sequence of integers. Note that a Range doesn’t actually contain a list of all its Ints – it produces them one at a time on demand. A new Range is created by the <a href="#TODO"><code>range()</code></a> builtin function.</p>
+<p>A Range is a representation of an immutable sequence of integers. Note that a Range doesn’t actually contain a list of all its Ints – it produces them one at a time on demand. A new Range is created by the <a href="builtins.html#range">range()</a> builtin function.</p>
 <p>Valid operators for Range are:</p>
-<div class="play">
-    <div class="input">
-        <textarea id="src10" rows="3" spellcheck="false">* The equality operators `==`, `!=`
-* The index operator `a[x]`</textarea>
-    </div>
-    <div class="output"><pre id="result10"></pre></div>
-    <div class="buttons">
-        <button class="button" onClick="interpret('src10', 'result10');">Run</button>
-    </div>
-</div>
-
+<ul>
+<li>The equality operators <code>==</code>, <code>!=</code></li>
+<li>The <a href="interfaces.html#indexable"><code>index</code></a> operator <code>a[x]</code></li>
+</ul>
 <p>The index operator always return an Int.</p>
-<p>Ranges have a <a href="#TODO"><code>len()</code></a> and are <a href="#TODO"><code>iterable</code></a>.</p>
-<p>Range has the following fields:</p>
+<p>Ranges are <a href="interfaces.html#lenable"><code>lenable</code></a> and <a href="interfaces.html#iterable"><code>iterable</code></a>.</p>
+<p>A Range has the following fields:</p>
 <ul>
 <li><a href="#count">count</a></li>
 <li><a href="#from">from</a></li>

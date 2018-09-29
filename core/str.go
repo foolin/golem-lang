@@ -16,20 +16,24 @@ import (
 Str is the set of all valid sequences of UTF-8-encoded "code points", otherwise
 known as "runes".  Strs are immutable.
 
+String literals can be surrounded by either single quotes or double quotes.  Backticks
+can also be used to create mulit-line strings.
+
 Valid operators for Str are:
 
 * The equality operators `==`, `!=`,
-* The comparison operators `>`, `>=`, `<`, `<=`, `<=>`
-* The index operator `a[x]`
-* The slice operators `a[x:y]`, `a[x:]`, `a[:y]`
+* The [`comparision`](interfaces.html#comparable) operators `>`, `>=`, `<`, `<=`, `<=>`
+* The [`index`](interfaces.html#indexable) operator `a[x]`
+* The [`slice`](interfaces.html#sliceable) operators `a[x:y]`, `a[x:]`, `a[:y]`
 
 The index operator always returns a single-rune Str.
 
 The slice operators always return a Str.
 
-Strs have a [`len()`](#TODO) and are [`iterable`](#TODO).
-
-Strs are [`hashable`](#TODO)
+Strs are
+[`hashable`](interfaces.html#hashable),
+[`lenable`](interfaces.html#lenable) and
+[`iterable`](interfaces.html#iterable).
 
 */
 
@@ -304,7 +308,7 @@ func (s str) Map(ev Eval, mapper StrMapper) (Str, Error) {
 // fields
 
 /*doc
-Str has the following fields:
+A Str has the following fields:
 
 * [contains](#contains)
 * [hasPrefix](#hasprefix)

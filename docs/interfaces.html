@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Golem Reference</title>
+
+        <link type="text/css" rel="stylesheet" href="style.css">
+        <script src="wasm_exec.js"></script>
+        <script src="wasm_init.js"></script>
+    </head>
+    <body>
+        <div class="div-wrapper">
+
+
+<h1 id="the-golem-programming-language-reference">The Golem Programming Language Reference</h1>
+<h2 id="interfaces">Interfaces</h2>
+<p>Interfaces define the various intrinsic capabilities of Golems standard types.</p>
+<h3 id="hashable">Hashable</h3>
+<p>A value is hashable if it can be a key in a <a href="dict.html">Dict</a> or <a href="set.html">Set</a>.</p>
+<p><a href="str.html">Str</a>, <a href="int.html">Int</a>, <a href="float.html">Float</a>, <a href="bool.html">Bool</a>, and <a href="tuple.html">Tuple</a> are hashable.</p>
+<h3 id="comparable">Comparable</h3>
+<p>A value is comparable if it supports the comparison operators <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&lt;=&gt;</code>.</p>
+<p><a href="str.html">Str</a>, <a href="int.html">Int</a>, <a href="float.html">Float</a>, and <a href="bool.html">Bool</a> are comparable.</p>
+<h3 id="indexable">Indexable</h3>
+<p>A value is indexable if it supports the index operator <code>a[x]</code>.</p>
+<p><a href="str.html">Str</a>, <a href="list.html">List</a>, <a href="range.html">Range</a>, <a href="tuple.html">Tuple</a> and <a href="dict.html">Dict</a> are indexable.</p>
+<h3 id="lenable">Lenable</h3>
+<p>A value is lenabale if it has a length. The builtin function <a href="builtins.html#len">len()</a> returns the length of a lenable value.</p>
+<p><a href="str.html">Str</a>, <a href="list.html">List</a>, <a href="range.html">Range</a>, <a href="tuple.html">Tuple</a>, <a href="dict.html">Dict</a> and <a href="set.html">Set</a> are lenable.</p>
+<h3 id="sliceable">Sliceable</h3>
+<p>A value is sliceable if it supports the slice operators <code>a[x:y]</code>, <code>a[x:]</code>, <code>a[:y]</code>.</p>
+<p><a href="str.html">Str</a> and <a href="list.html">List</a> are sliceable.</p>
+<h3 id="iterable">Iterable</h3>
+<p>A value is iterable if its entries can be iterated over. Iterable values can be the subject of a <code>for</code> loop. The builtin function <a href="builtins.html#iter">iter()</a> returns a <a href="struct.html">Struct</a> that can be used to iterate over the entries in an iterable value.</p>
+<p><a href="str.html">Str</a>, <a href="list.html">List</a>, <a href="range.html">Range</a>, <a href="dict.html">Dict</a> and <a href="set.html">Set</a> are iterable.</p>
+
+
+            <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
+        </div>
+    </body>
+</html>

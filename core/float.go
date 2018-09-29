@@ -18,15 +18,15 @@ Float is the set of all IEEE-754 64-bit floating-point numbers.
 Valid operators for Float are:
 
 * The equality operators `==`, `!=`
-* The comparison operators `>`, `>=`, `<`, `<=`, `<=>`
+* The [`comparision`](interfaces.html#comparable) operators `>`, `>=`, `<`, `<=`, `<=>`
 * The arithmetic operators `+`, `-`, `*`, `/`
 * The postfix operators `++`, `--`
 
 Applying an arithmetic operator to a Float always returns a Float.
 
-Floats are [`hashable`](#TODO)
+Floats are [`hashable`](interfaces.html#hashable)
 
-Float has no fields.
+Floats have no fields.
 
 */
 type _float float64

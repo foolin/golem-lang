@@ -27,9 +27,9 @@ A func's arity type is always either "Fixed", "Variadic", or "Multiple".
 * example:
 
 ```
-assert(arity(println) == struct { kind: "Variadic", required: 0 })
-assert(arity(len)     == struct { kind: "Fixed",    required: 1 })
-assert(arity(range)   == struct { kind: "Multiple", required: 2, optional: 1 })
+println(arity(len))
+println(arity(println))
+println(arity(range))
 ```
 
 ### `assert`
@@ -43,7 +43,7 @@ if it does not throw an error.
 
 ### `chan`
 
-`chan` creates a channel of values.  `chan` has a single optional size parameter that
+`chan` creates a [channel](chan.html) of values.  `chan` has a single optional size parameter that
 defaults to 0.  If size is 0, an unbuffered channel will be created.
 If the size is greater than 0, then a buffered channel of that size will be created.
 

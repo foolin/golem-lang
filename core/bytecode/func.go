@@ -21,7 +21,7 @@ Valid operators for Func are:
 * The equality operators `==`, `!=`
 * The invocation operator `a(x)`
 
-Funcs have an [`arity()`](#TODO)
+Funcs have an [`arity()`](builtins.html#arity)
 
 Funcs have no fields.
 

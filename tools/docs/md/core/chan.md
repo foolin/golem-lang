@@ -1,7 +1,7 @@
 ## Chan
 
 A Chan is a conduit through which you can send and receive values.
-A new Chan is created by the [`chan()`](#TODO) builtin function.
+A new Chan is created by the [`chan()`](builtins.html#chan) builtin function.
 
 Valid operators for Chan are:
 

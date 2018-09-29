@@ -51,8 +51,8 @@ fn writeLines(path, lines) {
 
 fn findDocs(lines) {
 
-    let docs = []
-    let isDoc = false, indent
+    let docs = [], isDoc = false, indent
+
     for ln in lines {
         ln = ln.replace('\t', '    ')
         if isDoc {
@@ -111,7 +111,7 @@ let playCounter = 0
 
 fn wrapCode(code) {
     const counter = playCounter++
-    const rows = len(code.split('\n')) + 1
+    const rows = len(code.split('\n'))
 
     return play
         .replace('${code}', code)
@@ -160,11 +160,17 @@ fn createHtml() {
 
     os.exec.runCommand('pandoc', 'md/index.md',      '-o', docsDir + 'index.html')
     os.exec.runCommand('pandoc', 'md/tutorial.md',   '-o', docsDir + 'tutorial.html')
+    os.exec.runCommand('pandoc', 'md/tour.md',       '-o', docsDir + 'tour.html')
     os.exec.runCommand('pandoc', 'md/reference.md',  '-o', docsDir + 'reference.html')
+    os.exec.runCommand('pandoc', 'md/syntax.md',     '-o', docsDir + 'syntax.html')
+    os.exec.runCommand('pandoc', 'md/interfaces.md', '-o', docsDir + 'interfaces.html')
 
     wrapHtml(docsDir + 'index.html', 'The Golem Programming Language')
     wrapHtml(docsDir + 'tutorial.html', 'Golem Tutorial')
+    wrapHtml(docsDir + 'tour.html', 'Golem Tour')
     wrapHtml(docsDir + 'reference.html', 'Golem Reference')
+    wrapHtml(docsDir + 'syntax.html', 'Golem Reference')
+    wrapHtml(docsDir + 'interfaces.html', 'Golem Reference')
 }
 
 //---------------------------------------------------------------

@@ -9,7 +9,11 @@ package core
 
 Null represents the absence of a value. The only instance of Null is `null`.
 
-Null has no valid operators, and no fields.
+Valid operators for Nul are:
+
+* The equality operators `==`, `!=`
+
+Null has no fields.
 
 */
 type null struct {

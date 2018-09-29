@@ -19,14 +19,16 @@ A List is an ordered array of values.
 Valid operators for List are:
 
 * The equality operators `==`, `!=`
-* The index operator `a[x]`
-* The slice operators `a[x:y]`, `a[x:]`, `a[:y]`
+* The [`index`](interfaces.html#indexable) operator `a[x]`
+* The [`slice`](interfaces.html#sliceable) operators `a[x:y]`, `a[x:]`, `a[:y]`
 
 The index operator can return a value of any type.
 
 The slice operators always return a List.
 
-Lists have a [`len()`](#TODO) and are [`iterable`](#TODO).
+Lists are
+[`lenable`](interfaces.html#lenable) and
+[`iterable`](interfaces.html#iterable).
 
 */
 
@@ -403,7 +405,7 @@ func (i *listIterator) IterGet(ev Eval) (Value, Error) {
 // fields
 
 /*doc
-List has the following fields:
+A List has the following fields:
 
 * [add](#add)
 * [addAll](#addall)
@@ -446,8 +448,8 @@ var listMethods = map[string]Method{
 	/*doc
 	### `addAll`
 
-	`addAll` adds all of the values in the given [Iterable](#TODO) to the end of the list,
-	and returns the modified list.
+	`addAll` adds all of the values in the given [Iterable](interfaces.html#iterable) to
+	the end of the list, and returns the modified list.
 
 	* signature: `addAll(itr <Iterable>) <List>`
 	* example:
@@ -594,12 +596,17 @@ var listMethods = map[string]Method{
 	/*doc
 	### `join`
 
-	Join concatenates the [`str()`](#TODO) of the elements of the list to create a single string.
-	The separator string sep is placed between elements in the resulting string.
-	The sep parameter is optional, and defaults to the empty string `''`.
+	Join concatenates the [str()](builtins.html#str) representation of the elements of the list to
+	create a single string.  The separator string sep is placed between elements in
+	the resulting string.  The sep parameter is optional, and defaults
+	to the empty string `''`.
 
 	* signature: `join(sep = '' <Str>) <Str>`
-	* example: `println([1,2,3].join(', '))`
+	* example:
+
+	```
+	println([1,2,3].join(':'))
+	```
 
 	*/
 	"join": NewMultipleMethod(

@@ -19,23 +19,36 @@
   * [Func](func.html)
   * [Chan](chan.html)
 
+## Interfaces
+
+* [Hashable](interfaces.html#hashable)
+* [Comparable](interfaces.html#comparable)
+* [Indexable](interfaces.html#indexable)
+* [Lenable](interfaces.html#lenable)
+* [Sliceable](interfaces.html#sliceable)
+* [Iterable](interfaces.html#iterable)
+
 ## Builtin Functions
 
 * Standard Builtins:
-  * [arity](builtins.html#arity)
-  * [assert](builtins.html#assert)
-  * [chan](builtins.html#chan)
-  * [freeze](builtins.html#freeze)
-  * [frozen](builtins.html#frozen)
-  * [iter](builtins.html#iter)
-  * [len](builtins.html#len)
-  * [merge](builtins.html#merge)
-  * [range](builtins.html#range)
-  * [str](builtins.html#str)
-  * [type](builtins.html#type)
+  * [arity()](builtins.html#arity)
+  * [assert()](builtins.html#assert)
+  * [chan()](builtins.html#chan)
+  * [freeze()](builtins.html#freeze)
+  * [frozen()](builtins.html#frozen)
+  * [iter()](builtins.html#iter)
+  * [len()](builtins.html#len)
+  * [merge()](builtins.html#merge)
+  * [range()](builtins.html#range)
+  * [str()](builtins.html#str)
+  * [type()](builtins.html#type)
 * Unsandboxed Builtins:
-  * [print](builtins.html#print)
-  * [println](builtins.html#println)
+  * [print()](builtins.html#print)
+  * [println()](builtins.html#println)
+
+## Syntax
+
+* [Operator Precedence](syntax.html#operator-precedence)
 
 ## Standard Library
 

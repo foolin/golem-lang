@@ -43,7 +43,7 @@
 <p>So, fire up your text editor of choice, and type the following program into a file named ‘tutorial.glm’:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src25" rows="2" spellcheck="false">println(&#39;Hello, world.&#39;);</textarea>
+        <textarea id="src25" rows="1" spellcheck="false">println(&#39;Hello, world.&#39;);</textarea>
     </div>
     <div class="output"><pre id="result25"></pre></div>
     <div class="buttons">
@@ -54,7 +54,7 @@
 <p>and then run it like so:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src26" rows="2" spellcheck="false">./build/golem tutorial.glm</textarea>
+        <textarea id="src26" rows="1" spellcheck="false">./build/golem tutorial.glm</textarea>
     </div>
     <div class="output"><pre id="result26"></pre></div>
     <div class="buttons">
@@ -68,7 +68,7 @@
 <p>However, semicolons are required if you want to write multiple separate statements on a single line:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src27" rows="2" spellcheck="false">print(&#39;Hello, &#39;); println(&#39;world.&#39;)</textarea>
+        <textarea id="src27" rows="1" spellcheck="false">print(&#39;Hello, &#39;); println(&#39;world.&#39;)</textarea>
     </div>
     <div class="output"><pre id="result27"></pre></div>
     <div class="buttons">
@@ -83,7 +83,7 @@
 <p>Integer values in Golem are signed 64 bit integers, and Float values are IEEE-754 64-bit floating-point numbers. Ints are coerced to floats during arithmetic and checks for equality:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src28" rows="3" spellcheck="false">assert(12 / 4.0 == 3.0)
+        <textarea id="src28" rows="2" spellcheck="false">assert(12 / 4.0 == 3.0)
 assert(12 / 4.0 == 3)</textarea>
     </div>
     <div class="output"><pre id="result28"></pre></div>
@@ -96,7 +96,7 @@ assert(12 / 4.0 == 3)</textarea>
 <p>Golem has the usual set of C-language-family operators that you would expect: <code>==</code>, <code>!=</code>, <code>||</code>, <code>&amp;&amp;</code>, <code>&lt;</code>, <code>&gt;</code>, <code>+</code>, <code>-</code>, and so forth.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src29" rows="3" spellcheck="false">println(1 + 2)
+        <textarea id="src29" rows="2" spellcheck="false">println(1 + 2)
 println(42 / 7)</textarea>
     </div>
     <div class="output"><pre id="result29"></pre></div>
@@ -109,7 +109,7 @@ println(42 / 7)</textarea>
 <p>Strings can be delimited either with a single quote or a double quote:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src30" rows="3" spellcheck="false">println(&#39;abc&#39;)
+        <textarea id="src30" rows="2" spellcheck="false">println(&#39;abc&#39;)
 println(&quot;abc&quot;)</textarea>
     </div>
     <div class="output"><pre id="result30"></pre></div>
@@ -121,7 +121,7 @@ println(&quot;abc&quot;)</textarea>
 <p>When adding two values together, if one of the values is a string, and the other is not, then the other value is converted to a string, and the two strings are then concatenated together:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src31" rows="2" spellcheck="false">println(&#39;a&#39; + 1)</textarea>
+        <textarea id="src31" rows="1" spellcheck="false">println(&#39;a&#39; + 1)</textarea>
     </div>
     <div class="output"><pre id="result31"></pre></div>
     <div class="buttons">
@@ -132,7 +132,7 @@ println(&quot;abc&quot;)</textarea>
 <p>Unlike many other dynamic languages, Golem has no concept of ‘truthiness’. The only things that are true or false are boolean values:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src32" rows="3" spellcheck="false">assert(true)
+        <textarea id="src32" rows="2" spellcheck="false">assert(true)
 assert(!false)</textarea>
     </div>
     <div class="output"><pre id="result32"></pre></div>
@@ -144,7 +144,7 @@ assert(!false)</textarea>
 <p>So, <code>''</code>, <code>0</code>, <code>null</code>, etc. are <em>not</em> boolean, and and error will be thrown if you attempt to evaluate them in a place where a boolean value is expected.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src33" rows="2" spellcheck="false">assert(&#39;&#39;)</textarea>
+        <textarea id="src33" rows="1" spellcheck="false">assert(&#39;&#39;)</textarea>
     </div>
     <div class="output"><pre id="result33"></pre></div>
     <div class="buttons">
@@ -155,7 +155,7 @@ assert(!false)</textarea>
 <p>Another builtin function, <code>str</code>, returns the string representation of a value:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src34" rows="2" spellcheck="false">assert(str(3) == &#39;3&#39;)</textarea>
+        <textarea id="src34" rows="1" spellcheck="false">assert(str(3) == &#39;3&#39;)</textarea>
     </div>
     <div class="output"><pre id="result34"></pre></div>
     <div class="buttons">
@@ -169,7 +169,7 @@ assert(!false)</textarea>
 <p>Values can be assigned to variables. Variables are declared via either the <code>let</code> or <code>const</code> keyword. It is an error to refer to a variable before it has been declared.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src35" rows="5" spellcheck="false">let a = 1
+        <textarea id="src35" rows="4" spellcheck="false">let a = 1
 const b = 2
 a = b + 3
 println(a)</textarea>
@@ -184,7 +184,7 @@ println(a)</textarea>
 <p><code>let</code> and <code>const</code> are “statements” – they do not return a value. Assignments, on the other, are “expressions”, and evaluating an expression returns a value:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src36" rows="4" spellcheck="false">let a = 1
+        <textarea id="src36" rows="3" spellcheck="false">let a = 1
 let b = (a = 2)
 assert(a == b &amp;&amp; b == 2)</textarea>
     </div>
@@ -199,7 +199,7 @@ assert(a == b &amp;&amp; b == 2)</textarea>
 <p>You can create a list by enclosing a comma-delimited sequence of values in square brackets. Once you’ve created a list, you can use square brackets to access individual elements of a list (this is called the “index operator”).</p>
 <div class="play">
     <div class="input">
-        <textarea id="src37" rows="5" spellcheck="false">let a = []
+        <textarea id="src37" rows="4" spellcheck="false">let a = []
 let b = [3,4,5]
 assert(a.isEmpty())
 assert(b[0] == 3)</textarea>
@@ -213,7 +213,7 @@ assert(b[0] == 3)</textarea>
 <p>If the index value is negative, values will be indexed from the end of the list. This is a really handy way to get the last element of a list.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src38" rows="3" spellcheck="false">let a = [1,2,3]
+        <textarea id="src38" rows="2" spellcheck="false">let a = [1,2,3]
 println(a[-1])</textarea>
     </div>
     <div class="output"><pre id="result38"></pre></div>
@@ -225,7 +225,7 @@ println(a[-1])</textarea>
 <p>Use the “slice operator” to create a new list from part of an existing list or string. If you leave off the first or last value of the slice operation, the resulting slice will start at the beginning or end. Negative values work with slices in the same way that they do with lists.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src39" rows="6" spellcheck="false">let c = [4,5,6,7,8]
+        <textarea id="src39" rows="5" spellcheck="false">let c = [4,5,6,7,8]
 println(c[1:3])
 println(c[:3])
 println(c[2:])
@@ -240,7 +240,7 @@ println(c[1:-1])</textarea>
 <p>Indexing and slicing works on strings too:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src40" rows="3" spellcheck="false">println(&#39;abc&#39;[1])
+        <textarea id="src40" rows="2" spellcheck="false">println(&#39;abc&#39;[1])
 println(&#39;abc&#39;[:-1])</textarea>
     </div>
     <div class="output"><pre id="result40"></pre></div>
@@ -252,7 +252,7 @@ println(&#39;abc&#39;[:-1])</textarea>
 <p>Golem’s <code>dict</code> type is an <a href="https://en.wikipedia.org/wiki/Associative_array">associative array</a>. The keys of a <code>dict</code> can be any value that supports hashing (str, int, float, bool, or tuple).</p>
 <div class="play">
     <div class="input">
-        <textarea id="src41" rows="3" spellcheck="false">let a = dict {&#39;x&#39;: 1, &#39;y&#39;: 2}
+        <textarea id="src41" rows="2" spellcheck="false">let a = dict {&#39;x&#39;: 1, &#39;y&#39;: 2}
 assert(a[&#39;x&#39;] == 1)</textarea>
     </div>
     <div class="output"><pre id="result41"></pre></div>
@@ -264,7 +264,7 @@ assert(a[&#39;x&#39;] == 1)</textarea>
 <p>A <code>set</code> is a unordered collection of distinct values. Any value that can act as a key in a dict can be a member of a set.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src42" rows="3" spellcheck="false">let a = set {&#39;x&#39;, &#39;y&#39;}
+        <textarea id="src42" rows="2" spellcheck="false">let a = set {&#39;x&#39;, &#39;y&#39;}
 assert(a.contains(&#39;x&#39;))</textarea>
     </div>
     <div class="output"><pre id="result42"></pre></div>
@@ -276,7 +276,7 @@ assert(a.contains(&#39;x&#39;))</textarea>
 <p>A <code>tuple</code> is an immutable list-like data structure. Tuples must have at least two values.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src43" rows="3" spellcheck="false">let a = (1, 2)
+        <textarea id="src43" rows="2" spellcheck="false">let a = (1, 2)
 assert(a[0] == 1)</textarea>
     </div>
     <div class="output"><pre id="result43"></pre></div>
@@ -288,7 +288,7 @@ assert(a[0] == 1)</textarea>
 <p>The builtin function <code>len</code> can be used to get the length of any of the collections. <code>len</code> will also return the length of a string.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src44" rows="6" spellcheck="false">let a = [1, 2, 3]
+        <textarea id="src44" rows="5" spellcheck="false">let a = [1, 2, 3]
 let b = &#39;lmnop&#39;
 let c = dict {&quot;x&quot;: 3}
 
@@ -305,7 +305,7 @@ assert([len(a), len(b), len(c)] == [3,5,1])</textarea>
 <p>As an example, here is how to use some of the fields that are present on a list value:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src45" rows="9" spellcheck="false">let ls = []
+        <textarea id="src45" rows="8" spellcheck="false">let ls = []
 assert(ls.isEmpty())
 ls.add(&#39;a&#39;)
 ls.addAll([&#39;b&#39;, &#39;c&#39;])
@@ -326,7 +326,7 @@ println(ls.join(&#39;,&#39;))</textarea>
 <p>Golem has a familiar set of control structures: <code>if</code>, <code>while</code>, <code>switch</code>, and <code>for</code>.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src46" rows="10" spellcheck="false">let a = 1
+        <textarea id="src46" rows="9" spellcheck="false">let a = 1
 while a &lt; 12 {
     if a &lt; 3 {
         a = a + 2
@@ -346,7 +346,7 @@ assert(a == 15)</textarea>
 <p>Golem has ‘ternary-if’ expressions as well:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src47" rows="4" spellcheck="false">const a = 10
+        <textarea id="src47" rows="3" spellcheck="false">const a = 10
 let b = a &lt; 3 ? 4 : 5
 assert(b == 5)</textarea>
     </div>
@@ -359,7 +359,7 @@ assert(b == 5)</textarea>
 <p><code>switch</code> works roughly the same way as it does in other languages, except that you can switch on any value, not just integers. Also, there is no ‘fall-through’ – at most only one case will be executed. Therefore the <code>break</code> keyword is not applicable to switches.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src48" rows="12" spellcheck="false">let a = &#39;abc&#39;
+        <textarea id="src48" rows="11" spellcheck="false">let a = &#39;abc&#39;
 let b = 0
 switch a {
     case 0:
@@ -380,7 +380,7 @@ assert(b == 2)</textarea>
 <p>You can have multiple expressions in a case statement. The body of the case will be executed if at least on of the expressions matches:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src49" rows="13" spellcheck="false">let s = &#39;&#39;
+        <textarea id="src49" rows="12" spellcheck="false">let s = &#39;&#39;
 let i = 0
 while i &lt; 4 {
     switch i {
@@ -402,7 +402,7 @@ assert(s == &#39;aab&#39;)</textarea>
 <p>You can leave the expression out after the <code>switch</code> keyword. This lets you switch on a sequence of boolean case statements, which is sometimes easier to read than a cascade of ‘if, else-if, else-if’ statmements:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src50" rows="9" spellcheck="false">let b = 0
+        <textarea id="src50" rows="8" spellcheck="false">let b = 0
 switch {
     case 1 &lt; 2:
         b = 1
@@ -420,7 +420,7 @@ assert(b == 1)</textarea>
 <p>Golem’s <code>for</code> statement iterates over a sequence of values derived from an ‘iterable’ value. Lists, dicts, sets, and strings are iterable.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src51" rows="7" spellcheck="false">let a = [1, 2, 3]
+        <textarea id="src51" rows="6" spellcheck="false">let a = [1, 2, 3]
 let z = 0
 for e in a {
     z += e
@@ -436,7 +436,7 @@ assert(z == 6)</textarea>
 <p>By convention, iterating over a dict produces a sequence of tuples. You can capture the values in the tuple directly in a <code>for</code> loop via “tuple destructuring”:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src52" rows="5" spellcheck="false">let d = dict { &quot;x&quot;: 1, &quot;y&quot;: 2, &quot;z&quot;: 3 }
+        <textarea id="src52" rows="4" spellcheck="false">let d = dict { &quot;x&quot;: 1, &quot;y&quot;: 2, &quot;z&quot;: 3 }
 for (k, v) in d {
     println(&quot;key: &quot;, k, &quot;, value: &quot;, v)
 }</textarea>
@@ -450,7 +450,7 @@ for (k, v) in d {
 <p>There is one more iterable type – ranges. Ranges are created via the <code>range</code> builtin function. A range is an immutable value that represents a sequence of integers.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src53" rows="8" spellcheck="false">let list = [&quot;frog&quot;, &quot;cow&quot;, &quot;rabbit&quot;]
+        <textarea id="src53" rows="7" spellcheck="false">let list = [&quot;frog&quot;, &quot;cow&quot;, &quot;rabbit&quot;]
 for i in range(0, len(list)) {
     if list[i] == &quot;cow&quot; {
         println(&quot;The cow is at element &quot;, i)
@@ -508,7 +508,7 @@ for i in range(0, len(list)) {
 <p>The ‘spaceship’ operator, <code>&lt;=&gt;</code>, returns -1, 0, or 1 if the left-hand operator is less than, equal to, or greater than the right-hand operator:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src54" rows="2" spellcheck="false">assert((5 &lt;=&gt; 10) == -1)</textarea>
+        <textarea id="src54" rows="1" spellcheck="false">assert((5 &lt;=&gt; 10) == -1)</textarea>
     </div>
     <div class="output"><pre id="result54"></pre></div>
     <div class="buttons">
@@ -520,7 +520,7 @@ for i in range(0, len(list)) {
 <p>Golem also supports ’assignment operators`, which perform an operation and do an assignment at the same time, e.g.:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src55" rows="3" spellcheck="false">let a = 1, b = 2
+        <textarea id="src55" rows="2" spellcheck="false">let a = 1, b = 2
 a += b // is the same as a = a + b</textarea>
     </div>
     <div class="output"><pre id="result55"></pre></div>
@@ -535,7 +535,7 @@ a += b // is the same as a = a + b</textarea>
 <p>Functions are first class values in Golem. They are created with the <code>fn</code> keyword.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src56" rows="5" spellcheck="false">let a = fn(x) {
+        <textarea id="src56" rows="4" spellcheck="false">let a = fn(x) {
     return x * 7
 }
 assert(a(6) == 42)</textarea>
@@ -549,7 +549,7 @@ assert(a(6) == 42)</textarea>
 <p>Functions do not have to have an explicit <code>return</code> statement. If there is no <code>return</code>, they will return the last expression that was evaluated. If no expression is evaluated in the function, <code>null</code> is returned.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src57" rows="5" spellcheck="false">let a = fn() {}
+        <textarea id="src57" rows="4" spellcheck="false">let a = fn() {}
 let b = fn(x) { x * x; }
 assert(a() == null)
 assert(b(3) == 9)</textarea>
@@ -564,7 +564,7 @@ assert(b(3) == 9)</textarea>
 <p>Golem supports <a href="https://en.wikipedia.org/wiki/Closure_(computer_programming)">closures</a> as well – in fact closures are a fundamental mechanism in Golem for managing state. Here is an example of a closure that acts as a <a href="http://www.paulgraham.com/accgen.html">accumulator generator</a>:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src58" rows="8" spellcheck="false">let foo = fn(n) {
+        <textarea id="src58" rows="7" spellcheck="false">let foo = fn(n) {
     return fn(i) {
         return n += i
     }; 
@@ -581,7 +581,7 @@ assert([f(1), f(2), f(3)] == [5, 7, 10])</textarea>
 <p>You can declare the formal parameters of a function to be constant. In the following example, the formal parameter ‘b’ is constant, so it cannot be changed inside the function:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src59" rows="10" spellcheck="false">let a = 1
+        <textarea id="src59" rows="9" spellcheck="false">let a = 1
 
 fn foo(const b) {
     return a += b
@@ -600,7 +600,7 @@ assert(a == 6)</textarea>
 <p>Golem also supports ‘lambda’ syntax, via the <code>=&gt;</code> operator. Lambdas provide a lightweight way to define a function on the fly. The body of a lambda function is a single expression.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src60" rows="8" spellcheck="false">let a = || =&gt; 3
+        <textarea id="src60" rows="7" spellcheck="false">let a = || =&gt; 3
 let b = |x| =&gt; x * x
 let c = |x, y| =&gt; (x + y) * 5
 
@@ -617,7 +617,7 @@ assert(c(1, 2) == 15)</textarea>
 <p>Consider the following program, in which function <code>a</code> calls function <code>b</code>:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src61" rows="8" spellcheck="false">const b = fn() {
+        <textarea id="src61" rows="7" spellcheck="false">const b = fn() {
     return 42
 }
 const a = fn() {
@@ -634,7 +634,7 @@ println(a())</textarea>
 <p>This program works because <code>b</code> is declared before <code>a</code>. However, if we reverse the order of declarations, we get a compilation error, because <code>b</code> has not yet been defined.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src62" rows="8" spellcheck="false">const a = fn() {
+        <textarea id="src62" rows="7" spellcheck="false">const a = fn() {
     return b()
 }
 const b = fn() {
@@ -651,7 +651,7 @@ println(a())</textarea>
 <p>It is often the case that we need to allow for forward references like the one above. Golem provides a feature called ‘Named Functions’ that offers this functionality. For example:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src63" rows="8" spellcheck="false">fn a() {
+        <textarea id="src63" rows="7" spellcheck="false">fn a() {
     return b()
 }
 fn b() {
@@ -669,7 +669,7 @@ assert(a() == 42)</textarea>
 <p>Some of the fields on certain types, like <code>list</code>, accept functions as parameters. Here is an example of how to use the <code>map</code>, <code>reduce</code>, and <code>filter</code> fields:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src64" rows="11" spellcheck="false">let ls = [1, 2, 3, 4, 5]
+        <textarea id="src64" rows="10" spellcheck="false">let ls = [1, 2, 3, 4, 5]
 let squares = ls.map(|x| =&gt; x * x)
 let addedUp = ls.reduce(0, |acc, x| =&gt; acc + x)
 let even = ls.filter(|x| =&gt; (x % 2 == 0))
@@ -689,7 +689,7 @@ assert(strings = &#39;12345&#39;)</textarea>
 <p>Functions can be declared with optional parameters as well. In the following example, the <code>y</code> parameter defaults to 0 unless the function is invoked with two parameters:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src65" rows="7" spellcheck="false">fn a(x, y = 0) {
+        <textarea id="src65" rows="6" spellcheck="false">fn a(x, y = 0) {
     return x + y
 }
 
@@ -706,7 +706,7 @@ println(a(1, 2))</textarea>
 <p>Functions can also be declared with ‘variadic’ parameters. <code>println</code> is actually a variadic function – it will accept any number of parameters:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src66" rows="2" spellcheck="false">println(&#39;frog&#39;, &#39;cow&#39;, &#39;rabbit&#39;)</textarea>
+        <textarea id="src66" rows="1" spellcheck="false">println(&#39;frog&#39;, &#39;cow&#39;, &#39;rabbit&#39;)</textarea>
     </div>
     <div class="output"><pre id="result66"></pre></div>
     <div class="buttons">
@@ -717,7 +717,7 @@ println(a(1, 2))</textarea>
 <p>Use an ellipsis (three dots) to declare a variadic parameter:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src67" rows="8" spellcheck="false">fn a(x, ls...) {
+        <textarea id="src67" rows="7" spellcheck="false">fn a(x, ls...) {
     ls.map(|e| =&gt; e + x)
 }
 
@@ -735,7 +735,7 @@ println(a(1, 2, 3))</textarea>
 <p>There is a builtin function called <code>arity</code> that returns a <a href="#structs">struct</a> that describes the <a href="https://en.wikipedia.org/wiki/Arity">arity</a> of a function. Here is a snippet that prints the arity of 3 of the builtin functions we have already used:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src68" rows="4" spellcheck="false">println(arity(len))
+        <textarea id="src68" rows="3" spellcheck="false">println(arity(len))
 println(arity(range))
 println(arity(println))</textarea>
     </div>
@@ -749,7 +749,7 @@ println(arity(println))</textarea>
 <p>You can pass arguments into a Golem CLI program by defining a <code>main()</code> function, that accepts exactly one parameter. The parameter will always be a list of the command line arguments.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src69" rows="6" spellcheck="false">fn main(args) {
+        <textarea id="src69" rows="5" spellcheck="false">fn main(args) {
     for i in range(0, len(args)) {
         println(&#39;argument &#39;, i, &#39; is &quot;&#39;, args[i], &#39;&quot;&#39;)
     }
@@ -766,7 +766,7 @@ println(arity(println))</textarea>
 <p>Structs are created via the <code>struct</code> keyword.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src70" rows="2" spellcheck="false">let s = struct { a: 1, b: 2 }</textarea>
+        <textarea id="src70" rows="1" spellcheck="false">let s = struct { a: 1, b: 2 }</textarea>
     </div>
     <div class="output"><pre id="result70"></pre></div>
     <div class="buttons">
@@ -779,7 +779,7 @@ println(arity(println))</textarea>
 <p>The dot operator, <code>.</code>, is used on structs to get or set the fields of a struct:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src71" rows="5" spellcheck="false">let s = struct { a: 1, b: 2 }
+        <textarea id="src71" rows="4" spellcheck="false">let s = struct { a: 1, b: 2 }
 assert(s.a == 1)
 s.a = 3
 assert(s.a == 3)</textarea>
@@ -794,7 +794,7 @@ assert(s.a == 3)</textarea>
 <p>The <code>this</code> keyword is used in Golem to allow a struct to refer to itself. In Golem, <code>this</code> is only valid inside a struct, and it is always lexically scoped to refer to the innermost enclosing struct.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src72" rows="4" spellcheck="false">let s = struct { a: 1, b: 2, c: this.a + this.b }
+        <textarea id="src72" rows="3" spellcheck="false">let s = struct { a: 1, b: 2, c: this.a + this.b }
 println(s)
 assert(s.c == 3)</textarea>
     </div>
@@ -807,7 +807,7 @@ assert(s.c == 3)</textarea>
 <p>The builtin-function <code>merge()</code> can be used to combine an arbitrary number of existing structs into a new struct.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src73" rows="14" spellcheck="false">let a = struct { x: 1, y: 2 }
+        <textarea id="src73" rows="13" spellcheck="false">let a = struct { x: 1, y: 2 }
 let b = struct { y: 3, z: 4 }
 let c = merge(a, b)
 
@@ -833,7 +833,7 @@ println(c) // x is changed here too!</textarea>
 <p>Structs can have properties defined on them, so that a given field has a ‘getter’ function, and optional ‘setter’ function. The getter function must take 0 parameters, and the setter function must take 1 parameter. If the setter function is omitted, the property is readonly. Properties are useful for hiding the inner workings of a struct behind a simpler facade. Here is an example (which uses <a href="#error-handling">try-catch</a>):</p>
 <div class="play">
     <div class="input">
-        <textarea id="src74" rows="28" spellcheck="false">let x = 2
+        <textarea id="src74" rows="27" spellcheck="false">let x = 2
 let s = struct {
 
     // &#39;a&#39; is a readonly property with a getter function.
@@ -872,7 +872,7 @@ assert([s.a, s.b, x, s.c()] == [1, 4, 4, 5])</textarea>
 <p>For instance, consider the following program:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src75" rows="24" spellcheck="false">fn newRectangle(w, h) {
+        <textarea id="src75" rows="23" spellcheck="false">fn newRectangle(w, h) {
     return struct {
         width:  prop { || =&gt; w, |val| =&gt; w = val },
         height: prop { || =&gt; h, |val| =&gt; h = val },
@@ -909,7 +909,7 @@ println([b.width, b.height, b.depth, b.area(), b.volume()])</textarea>
 <p>Golem uses the familiar ’try-catch-finally` syntax that exists in many C-family languages.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src76" rows="8" spellcheck="false">try {
+        <textarea id="src76" rows="7" spellcheck="false">try {
     let z = 4 / 0
 }
 catch e {
@@ -927,7 +927,7 @@ catch e {
 <p>You can throw an exception using the <code>throw</code> keyword, followed by an expression that evaluates to a string.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src77" rows="8" spellcheck="false">try {
+        <textarea id="src77" rows="7" spellcheck="false">try {
     throw &#39;FooError: foo&#39;
 }
 catch e {
@@ -944,7 +944,7 @@ catch e {
 <p>There is also a <code>finally</code> clause, which is always executed no matter what happens inside the try block or catch clause:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src78" rows="11" spellcheck="false">try {
+        <textarea id="src78" rows="10" spellcheck="false">try {
     throw &#39;FooError: foo&#39;
 }
 catch e {
@@ -968,7 +968,7 @@ finally {
 <p>Golem uses the Go Language’s <a href="https://tour.golang.org/concurrency/1">concurrency system</a>. This means that Golem has ‘goroutines’, channels and the ability to send and receive messages. Go’s concurrency capabilities are quite powerful, and Golem is capable of using them all (<strong>TODO</strong> well, just not yet. We need to figure out how to provide access to <code>select</code>, mutexes and quite a few other things)</p>
 <div class="play">
     <div class="input">
-        <textarea id="src79" rows="14" spellcheck="false">fn sum(s, c) {
+        <textarea id="src79" rows="13" spellcheck="false">fn sum(s, c) {
     c.send(s.reduce(0, |acc, x| =&gt; acc+x))
 }
 
@@ -992,7 +992,7 @@ println(result)</textarea>
 <p>Golem supports immutability via the <code>freeze()</code> builtin function, which makes a mutable value become immutable. You can check if a value is immutable via the <code>frozen()</code> builtin function. <code>freeze()</code> always returns the value that you pass into it.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src80" rows="10" spellcheck="false">let s = freeze(struct { a: 1, b: 2 })
+        <textarea id="src80" rows="9" spellcheck="false">let s = freeze(struct { a: 1, b: 2 })
 assert(frozen(s))
 
 try {
@@ -1014,7 +1014,7 @@ try {
 <p>Here is the “accumulator generator” from a previous example. We freeze it this time, but it still has mutable state via the enclosed variable ‘n’:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src81" rows="6" spellcheck="false">let foo = freeze(fn(n) { 
+        <textarea id="src81" rows="5" spellcheck="false">let foo = freeze(fn(n) { 
     return |i| =&gt; n += i
 })
 let f = foo(4)
@@ -1030,7 +1030,7 @@ assert([f(1), f(2), f(3)] == [5, 7, 10])</textarea>
 <p>There is a builtin function called <code>type()</code> that will return a string describing the type of a value. Here is a program that will print a list of every possible type:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src82" rows="9" spellcheck="false">let values = [
+        <textarea id="src82" rows="8" spellcheck="false">let values = [
     null, true, &quot;&quot;, 0, 0.0, fn(){}, 
     [], range(0,1), (0,1), dict{}, set{}, 
     struct{}, chan()]
@@ -1050,7 +1050,7 @@ println(types)</textarea>
 <p>In a file called “foo.glm”, place the following:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src83" rows="4" spellcheck="false">fn square(x) {
+        <textarea id="src83" rows="3" spellcheck="false">fn square(x) {
     return x*x
 }</textarea>
     </div>
@@ -1063,7 +1063,7 @@ println(types)</textarea>
 <p>And then in your “tutorial.glm”, you can reference the “foo” module via the <code>import</code> statement, like this:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src84" rows="4" spellcheck="false">import foo
+        <textarea id="src84" rows="3" spellcheck="false">import foo
 
 assert(foo.square(5) == 25)</textarea>
     </div>
@@ -1080,7 +1080,7 @@ assert(foo.square(5) == 25)</textarea>
 <p>So, fire up your text editor of choice, and type the following program into a file named ‘tutorial.glm’:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src85" rows="2" spellcheck="false">println(&#39;Hello, world.&#39;);</textarea>
+        <textarea id="src85" rows="1" spellcheck="false">println(&#39;Hello, world.&#39;);</textarea>
     </div>
     <div class="output"><pre id="result85"></pre></div>
     <div class="buttons">
@@ -1091,7 +1091,7 @@ assert(foo.square(5) == 25)</textarea>
 <p>and then run it like so:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src86" rows="2" spellcheck="false">./build/golem tutorial.glm</textarea>
+        <textarea id="src86" rows="1" spellcheck="false">./build/golem tutorial.glm</textarea>
     </div>
     <div class="output"><pre id="result86"></pre></div>
     <div class="buttons">

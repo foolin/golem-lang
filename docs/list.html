@@ -17,13 +17,13 @@
 <p>Valid operators for List are:</p>
 <ul>
 <li>The equality operators <code>==</code>, <code>!=</code></li>
-<li>The index operator <code>a[x]</code></li>
-<li>The slice operators <code>a[x:y]</code>, <code>a[x:]</code>, <code>a[:y]</code></li>
+<li>The <a href="interfaces.html#indexable"><code>index</code></a> operator <code>a[x]</code></li>
+<li>The <a href="interfaces.html#sliceable"><code>slice</code></a> operators <code>a[x:y]</code>, <code>a[x:]</code>, <code>a[:y]</code></li>
 </ul>
 <p>The index operator can return a value of any type.</p>
 <p>The slice operators always return a List.</p>
-<p>Lists have a <a href="#TODO"><code>len()</code></a> and are <a href="#TODO"><code>iterable</code></a>.</p>
-<p>List has the following fields:</p>
+<p>Lists are <a href="interfaces.html#lenable"><code>lenable</code></a> and <a href="interfaces.html#iterable"><code>iterable</code></a>.</p>
+<p>A List has the following fields:</p>
 <ul>
 <li><a href="#add">add</a></li>
 <li><a href="#addall">addAll</a></li>
@@ -46,7 +46,7 @@
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src1" rows="3" spellcheck="false">let a = [1, 2, 3]
+        <textarea id="src1" rows="2" spellcheck="false">let a = [1, 2, 3]
 println(a.add(4))</textarea>
     </div>
     <div class="output"><pre id="result1"></pre></div>
@@ -56,14 +56,14 @@ println(a.add(4))</textarea>
 </div>
 
 <h3 id="addall"><code>addAll</code></h3>
-<p><code>addAll</code> adds all of the values in the given <a href="#TODO">Iterable</a> to the end of the list, and returns the modified list.</p>
+<p><code>addAll</code> adds all of the values in the given <a href="interfaces.html#iterable">Iterable</a> to the end of the list, and returns the modified list.</p>
 <ul>
 <li>signature: <code>addAll(itr &lt;Iterable&gt;) &lt;List&gt;</code></li>
 <li>example:</li>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src2" rows="3" spellcheck="false">let a = [1, 2]
+        <textarea id="src2" rows="2" spellcheck="false">let a = [1, 2]
 println(a.addAll([3, 4]))</textarea>
     </div>
     <div class="output"><pre id="result2"></pre></div>
@@ -80,7 +80,7 @@ println(a.addAll([3, 4]))</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src3" rows="3" spellcheck="false">let a = [1, 2]
+        <textarea id="src3" rows="2" spellcheck="false">let a = [1, 2]
 println(a.clear())</textarea>
     </div>
     <div class="output"><pre id="result3"></pre></div>
@@ -97,7 +97,7 @@ println(a.clear())</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src4" rows="3" spellcheck="false">let a = [1, 2]
+        <textarea id="src4" rows="2" spellcheck="false">let a = [1, 2]
 println(a.contains(2))</textarea>
     </div>
     <div class="output"><pre id="result4"></pre></div>
@@ -116,7 +116,7 @@ println(a.contains(2))</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src5" rows="3" spellcheck="false">let a = [1, 2, 3, 4, 5]
+        <textarea id="src5" rows="2" spellcheck="false">let a = [1, 2, 3, 4, 5]
 println(a.filter(|e| =&gt; e % 2 == 0))</textarea>
     </div>
     <div class="output"><pre id="result5"></pre></div>
@@ -133,7 +133,7 @@ println(a.filter(|e| =&gt; e % 2 == 0))</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src6" rows="3" spellcheck="false">let a = [&#39;x&#39;, &#39;y&#39;, &#39;z&#39;]
+        <textarea id="src6" rows="2" spellcheck="false">let a = [&#39;x&#39;, &#39;y&#39;, &#39;z&#39;]
 println(a.indexOf(&#39;z&#39;))</textarea>
     </div>
     <div class="output"><pre id="result6"></pre></div>
@@ -149,11 +149,21 @@ println(a.indexOf(&#39;z&#39;))</textarea>
 <li>example: <code>println([].isEmpty())</code></li>
 </ul>
 <h3 id="join"><code>join</code></h3>
-<p>Join concatenates the <a href="#TODO"><code>str()</code></a> of the elements of the list to create a single string. The separator string sep is placed between elements in the resulting string. The sep parameter is optional, and defaults to the empty string <code>''</code>.</p>
+<p>Join concatenates the <a href="builtins.html#str">str()</a> representation of the elements of the list to create a single string. The separator string sep is placed between elements in the resulting string. The sep parameter is optional, and defaults to the empty string <code>''</code>.</p>
 <ul>
 <li>signature: <code>join(sep = '' &lt;Str&gt;) &lt;Str&gt;</code></li>
-<li>example: <code>println([1,2,3].join(', '))</code></li>
+<li>example:</li>
 </ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src7" rows="1" spellcheck="false">println([1,2,3].join(&#39;:&#39;))</textarea>
+    </div>
+    <div class="output"><pre id="result7"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src7', 'result7');">Run</button>
+    </div>
+</div>
+
 <h3 id="map"><code>map</code></h3>
 <p><code>map</code> returns a copy of the list with all its elements modified according to the mapping function. The original list is unmodified.</p>
 <p>The mapping function must accept one value, and must return one value.</p>
@@ -164,13 +174,13 @@ println(a.indexOf(&#39;z&#39;))</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src7" rows="4" spellcheck="false">let a = [1,2,3]
+        <textarea id="src8" rows="3" spellcheck="false">let a = [1,2,3]
 let b = a.map(|e| =&gt; e * e)
 println(b)</textarea>
     </div>
-    <div class="output"><pre id="result7"></pre></div>
+    <div class="output"><pre id="result8"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src7', 'result7');">Run</button>
+        <button class="button" onClick="interpret('src8', 'result8');">Run</button>
     </div>
 </div>
 
@@ -184,13 +194,13 @@ println(b)</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src8" rows="4" spellcheck="false">let a = [1,2,3]
+        <textarea id="src9" rows="3" spellcheck="false">let a = [1,2,3]
 let b = a.reduce(0, |acc, e| =&gt; acc + e)
 println(b)</textarea>
     </div>
-    <div class="output"><pre id="result8"></pre></div>
+    <div class="output"><pre id="result9"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src8', 'result8');">Run</button>
+        <button class="button" onClick="interpret('src9', 'result9');">Run</button>
     </div>
 </div>
 
@@ -209,13 +219,13 @@ println(b)</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src9" rows="4" spellcheck="false">let a = [7, 4, 11, 13, 6, 2, 9, 1]
+        <textarea id="src10" rows="3" spellcheck="false">let a = [7, 4, 11, 13, 6, 2, 9, 1]
 a.sort(|a, b| =&gt; b &lt; a) // sort in reverse
 println(a)</textarea>
     </div>
-    <div class="output"><pre id="result9"></pre></div>
+    <div class="output"><pre id="result10"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src9', 'result9');">Run</button>
+        <button class="button" onClick="interpret('src10', 'result10');">Run</button>
     </div>
 </div>
 

@@ -16,16 +16,18 @@ import (
 A Range is a representation of an immutable sequence of integers.
 Note that a Range doesn't actually contain a list of all its
 Ints -- it produces them one at a time on demand.
-A new Range is created by the [`range()`](#TODO) builtin function.
+A new Range is created by the [range()](builtins.html#range) builtin function.
 
 Valid operators for Range are:
 
-	* The equality operators `==`, `!=`
-	* The index operator `a[x]`
+* The equality operators `==`, `!=`
+* The [`index`](interfaces.html#indexable) operator `a[x]`
 
 The index operator always return an Int.
 
-Ranges have a [`len()`](#TODO) and are [`iterable`](#TODO).
+Ranges are
+[`lenable`](interfaces.html#lenable) and
+[`iterable`](interfaces.html#iterable).
 
 */
 
@@ -140,7 +142,7 @@ func (i *rangeIterator) IterGet(ev Eval) (Value, Error) {
 // fields
 
 /*doc
-Range has the following fields:
+A Range has the following fields:
 
 * [count](#count)
 * [from](#from)

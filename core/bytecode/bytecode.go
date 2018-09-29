@@ -316,7 +316,7 @@ func Size(bc byte) int {
 // EncodeParam encodes a bytecode parameter into 2 bytes.
 func EncodeParam(p int) (byte, byte) {
 
-	// TODO implicit wide indexing
+	// NOTE: maybe some day we can implement wide indexing
 	if p >= (2 << 16) {
 		panic("Internal Compiler Error")
 	}

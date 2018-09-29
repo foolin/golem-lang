@@ -1,14 +1,16 @@
 ## Set
 
-A Set is an un-ordered collection of unique, [`hashable`](#TODO) values.
+A Set is an un-ordered collection of unique, [`hashable`](interfaces.html#hashable) values.
 
 Valid operators for Set are:
 
 * The equality operators `==`, `!=`
 
-Sets have a [`len()`](#TODO) and are [`iterable`](#TODO).
+Sets are
+[`lenable`](interfaces.html#lenable) and
+[`iterable`](interfaces.html#iterable).
 
-Set has the following fields:
+A Set has the following fields:
 
 * [add](#add)
 * [addAll](#addall)
@@ -31,8 +33,8 @@ println(a.add(4))
 
 ### `addAll`
 
-`addAll` adds all of the values in the given [Iterable](#TODO) to the set,
-and returns the modified set.
+`addAll` adds all of the values in the given [Iterable](interfaces.html#iterable) to
+the set, and returns the modified set.
 
 * signature: `addAll(itr <Iterable>) <Set>`
 * example:

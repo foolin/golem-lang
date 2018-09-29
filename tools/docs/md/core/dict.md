@@ -1,18 +1,20 @@
 ## Dict
 
 A Dict is an [associative array](https://en.wikipedia.org/wiki/Associative_array),
-in which the keys are all [`hashable`](#TODO).
+in which the keys are all [`hashable`](interfaces.html#hashable).
 
 Valid operators for Dict are:
 
 * The equality operators `==`, `!=`
-* The index operator `a[x]`
+* The [`index`](interfaces.html#indexable) operator `a[x]`
 
-Dict have a [`len()`](#TODO) and are [`iterable`](#TODO).
+Dicts are
+[`lenable`](interfaces.html#lenable) and
+[`iterable`](interfaces.html#iterable).
 
 Each iterated element in a Dict is a 2-Tuple containing a key-value pair.
 
-Dict has the following fields:
+A Dict has the following fields:
 
 * [addAll](#addall)
 * [clear](#clear)
@@ -22,8 +24,8 @@ Dict has the following fields:
 
 ### `addAll`
 
-`addAll` adds all of the values in the given [Iterable](#TODO) to the dict,
-and returns the modified dict.
+`addAll` adds all of the values in the given [Iterable](interfaces.html#iterable)
+to the dict, and returns the modified dict.
 Each iterated element must be a 2-Tuple containing a key-value pair.
 
 * signature: `addAll(itr <Iterable>) <Dict>`

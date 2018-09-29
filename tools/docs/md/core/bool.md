@@ -9,7 +9,7 @@ Valid operators for Bool are:
 * The boolean operators `||` `&&`
 * The unary negation operator `!`
 
-Bools are [`hashable`](#TODO)
+Bools are [`hashable`](interfaces.html#hashable)
 
 Bool has no fields.
 

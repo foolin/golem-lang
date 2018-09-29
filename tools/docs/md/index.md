@@ -23,5 +23,7 @@
   * [Standard Library](tutorial.html#standard-library)
 * [Reference](reference.html)
   * [Types](reference.html#types)
+  * [Interfaces](reference.html#interfaces)
   * [Builtin Functions](reference.html#builtin-functions)
+  * [Syntax](reference.html#syntax)
   * [Standard Library](reference.html#standard-library)

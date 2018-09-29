@@ -91,8 +91,8 @@ func makeRegexp(r *regexp.Regexp) g.Struct {
 /*doc
 ### `regex`
 
-`regex` is a Struct that is the representation of a compiled regular expression. A
-Regexp is safe for concurrent use by multiple goroutines, except for configuration
+A `regex` is a Struct that is the representation of a compiled regular expression. The
+struct is safe for concurrent use by multiple goroutines, except for configuration
 methods, such as Longest.
 
 A `regex` struct has the fields:

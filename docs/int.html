@@ -14,18 +14,19 @@
 
 <h2 id="int">Int</h2>
 <p>Int is the set of all signed 64-bit integers (-9223372036854775808 to 9223372036854775807).</p>
-<p>Valid operators for Int are:</p>
+<p>Integer literals can either be in decimal format, e.g. <code>123</code>, or hexidecimal format, e.g. <code>0xabcd</code>.</p>
+<p>Valid operators for an Int are:</p>
 <ul>
 <li>The equality operators <code>==</code>, <code>!=</code></li>
-<li>The comparison operators <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&lt;=&gt;</code></li>
+<li>The <a href="interfaces.html#comparable"><code>comparision</code></a> operators <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&lt;=&gt;</code></li>
 <li>The arithmetic operators <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code></li>
 <li>The integer arithmetic operators <code>|</code>, <code>^</code>, <code>%</code>, <code>&amp;</code>, <code>&lt;&lt;</code>, <code>&gt;&gt;</code></li>
 <li>The unary integer complement operator <code>~</code></li>
 <li>The postfix operators <code>++</code>, <code>--</code></li>
 </ul>
-<p>When applying an arithmetic operator <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>to an Int, if the other operand is a Float, then the result will be a Float, otherwise the result will be an Int.</p>
-<p>Ints are <a href="#TODO"><code>hashable</code></a></p>
-<p>Int has no fields.</p>
+<p>When applying an arithmetic operator <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code> to an Int, if the other operand is a Float, then the result will be a Float, otherwise the result will be an Int.</p>
+<p>Ints are <a href="interfaces.html#hashable"><code>hashable</code></a></p>
+<p>An Int has no fields.</p>
 
 
             <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
