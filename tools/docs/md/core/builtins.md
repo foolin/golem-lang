@@ -110,10 +110,28 @@ and Set have a length
 
 ### `merge`
 
-`merge` merges structs together into a new struct.  Consult the [tour](#TODO)
-for a detailed description of how `merge` works.
+`merge` combines an arbitrary number of existing structs into a new struct.  If
+there are any duplicated keys in the structs passed in to 'merge()', then the
+value associated with the first such key is used.
 
 * signature: `merge(structs... <Struct>) <Struct>`
+* example:
+
+```
+let a = struct { x: 1, y: 2 }
+let b = struct { y: 3, z: 4 }
+let c = merge(a, b)
+
+println(a)
+println(b)
+println(c)
+
+a.x = 10
+
+println(a)
+println(b)
+println(c) // x is changed here too!
+```
 
 ### `range`
 

@@ -14,4 +14,6 @@ Golem's operators have the following precedence, from low to high:
 | additive       | `+`, `-`, <code>&#124;</code>, `^` |
 | multiplicative | `*`, `/`, `%`, `&`, `<<`, `>>` |
 | unary          | `-`, `!`, `~` |
-| postfix        | `++`, `--`  |
+| incremental    | `++`, `--`  |
+
+Note that `++`, `--` are always postfix.

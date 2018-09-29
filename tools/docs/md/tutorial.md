@@ -603,20 +603,6 @@ println(arity(range))
 println(arity(println))
 ```
 
-## The `main()` function
-
-You can pass arguments into a Golem CLI program by defining a `main()` function, that
-accepts exactly one parameter.  The parameter will always be a list of the
-command line arguments.
-
-```
-fn main(args) {
-    for i in range(0, len(args)) {
-        println('argument ', i, ' is "', args[i], '"')
-    }
-}
-```
-
 ## Structs
 
 Golem is not an object-oriented language.  It does not have classes, objects, interfaces,
@@ -941,6 +927,21 @@ assert(foo.square(5) == 25)
 ```
 
 ## Command Line Interface
+
+## The `main()` function
+
+You can pass arguments into a Golem CLI program by defining a `main()` function, that
+accepts exactly one parameter.  The parameter will always be a list of the
+command line arguments.
+
+```
+fn main(args) {
+    for i in range(0, len(args)) {
+        println('argument ', i, ' is "', args[i], '"')
+    }
+}
+```
+
 
 _TODO_
 To get started, you must first compile a version of the Golem
