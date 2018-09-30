@@ -72,7 +72,7 @@ func interpret(i []js.Value) {
 
 	// compile
 	code := in.Get("value").String()
-	mod, err := interpreter.CompileCode(code, builtins, nil)
+	mod, err := interpreter.CompileCode(code, builtins)
 	if err != nil {
 		setOut(out, err.Error())
 		return
