@@ -35,7 +35,7 @@ var Io g.Struct
 
 func init() {
 
-	ioutil, err := g.NewFrozenFieldStruct(
+	ioutil, err := g.NewFrozenStruct(
 		map[string]g.Field{
 			"readDir":         g.NewField(ioutil.ReadDir),
 			"readFileString":  g.NewField(ioutil.ReadFileString),
@@ -44,7 +44,7 @@ func init() {
 
 	g.Assert(err == nil)
 
-	Io, err = g.NewFrozenFieldStruct(
+	Io, err = g.NewFrozenStruct(
 		map[string]g.Field{
 			"ioutil": g.NewField(ioutil),
 		})

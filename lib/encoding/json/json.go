@@ -279,7 +279,7 @@ func toStruct(ev g.Eval, ifc map[string]interface{}) (g.Value, g.Error) {
 
 		fields[k] = g.NewField(val)
 	}
-	return g.NewFieldStruct(fields)
+	return g.NewStruct(fields)
 }
 
 func toDict(ev g.Eval, ifc map[string]interface{}) (g.Value, g.Error) {

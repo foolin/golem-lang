@@ -5,18 +5,62 @@
 package compiler
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"sort"
 	"strconv"
 
+	"github.com/mjarmy/golem-lang/analyzer"
 	"github.com/mjarmy/golem-lang/ast"
 	g "github.com/mjarmy/golem-lang/core"
 	bc "github.com/mjarmy/golem-lang/core/bytecode"
+	"github.com/mjarmy/golem-lang/parser"
+	"github.com/mjarmy/golem-lang/scanner"
 )
 
 //---------------------------------------------------------------
 // The Golem Compiler
 //---------------------------------------------------------------
+
+// CompileSource compiles a Module from Source
+func CompileSource(
+	source *scanner.Source,
+	builtins []*g.Builtin) (*ast.Module, *bc.Module, error) {
+
+	builtinMgr := newBuiltinManager(builtins)
+
+	// scan
+	scanner, err := scanner.NewScanner(source)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// parse
+	parser := parser.NewParser(scanner, builtinMgr.contains)
+	astMod, err := parser.ParseModule()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// analyze
+	anl := analyzer.NewAnalyzer(astMod)
+	errs := anl.Analyze()
+	if len(errs) > 0 {
+		var buf bytes.Buffer
+		for i, e := range errs {
+			if i > 0 {
+				buf.WriteString("\n")
+			}
+			buf.WriteString(e.Error())
+		}
+		return nil, nil, errors.New(buf.String())
+	}
+
+	// compile
+	cmp := newCompiler(astMod, builtinMgr)
+	return astMod, cmp.Compile(), nil
+}
 
 // Compiler compiles an AST into bytecode
 type Compiler interface {
@@ -27,7 +71,7 @@ type Compiler interface {
 
 type compiler struct {
 	poolBuilder *poolBuilder
-	builtInMgr  BuiltinManager
+	builtinMgr  *builtinManager
 	mod         *bc.Module
 
 	funcs   []*ast.FnExpr
@@ -39,20 +83,20 @@ type compiler struct {
 }
 
 // NewCompiler creates a new Compiler
-func NewCompiler(
-	builtInMgr BuiltinManager,
-	astMod *ast.Module) Compiler {
+func NewCompiler(astMod *ast.Module, builtins []*g.Builtin) Compiler {
 
-	mod := &bc.Module{
-		Name: astMod.Name,
-		Path: astMod.Path,
-	}
+	return newCompiler(astMod, newBuiltinManager(builtins))
+}
+
+func newCompiler(astMod *ast.Module, builtinMgr *builtinManager) Compiler {
+
+	mod := bc.NewModule(astMod.Name, astMod.Path)
 
 	// the 'init' function is always the first function in the list
 	funcs := []*ast.FnExpr{astMod.InitFunc}
 
 	return &compiler{
-		builtInMgr:  builtInMgr,
+		builtinMgr:  builtinMgr,
 		poolBuilder: newPoolBuilder(),
 		mod:         mod,
 		funcs:       funcs,
@@ -63,7 +107,7 @@ func NewCompiler(
 	}
 }
 
-// Compile compiles a Module
+// Compile compiles an ast.Module into a bytecode.Module
 func (c *compiler) Compile() *bc.Module {
 
 	// compile all the funcs
@@ -74,7 +118,7 @@ func (c *compiler) Compile() *bc.Module {
 
 	// done
 	c.mod.Pool = c.poolBuilder.build()
-	c.mod.Contents = c.makeModuleContents()
+	c.mod.SetContents(c.makeModuleContents())
 	return c.mod
 }
 
@@ -104,7 +148,7 @@ func (c *compiler) makeModuleContents() g.Struct {
 		}
 	}
 
-	stc, err := g.NewFieldStruct(fields)
+	stc, err := g.NewStruct(fields)
 	g.Assert(err == nil)
 	return stc
 }
@@ -1001,7 +1045,7 @@ func (c *compiler) visitIdentExpr(ident *ast.IdentExpr) {
 
 func (c *compiler) visitBuiltinExpr(blt *ast.BuiltinExpr) {
 
-	c.pushBytecode(blt.Fn.Position, bc.LoadBuiltin, c.builtInMgr.IndexOf(blt.Fn.Text))
+	c.pushBytecode(blt.Fn.Position, bc.LoadBuiltin, c.builtinMgr.indexOf(blt.Fn.Text))
 }
 
 func (c *compiler) visitFunc(fe *ast.FnExpr) {

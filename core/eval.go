@@ -4,14 +4,11 @@
 
 package core
 
-// Eval evaluates Funcs.
-//
-// If the function is a NativeFunc, then Eval will call native golang code.
-//
-// If the function is a bytecode.Func, then Eval will evaluate the function's bytecode.
-// In practice, this means that an Eval is actually always a full-fledged instance
+// Eval evaluates Funcs.  In practice, an Eval is actually always a full-fledged instance
 // of the Golem Interpreter.
 type Eval interface {
 	// Eval evaluates a Func.
+	// If the function is a NativeFunc, then Eval will call native golang code.
+	// If the function is a bytecode.Func, then Eval will evaluate the function's bytecode.
 	Eval(Func, []Value) (Value, Error)
 }

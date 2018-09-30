@@ -115,7 +115,7 @@ func valuesEq(ev Eval, as []Value, bs []Value) (Bool, Error) {
 
 func iteratorStruct() Struct {
 
-	stc, err := NewFrozenFieldStruct(
+	stc, err := NewFrozenStruct(
 		map[string]Field{
 			"next": NewReadonlyField(Null),
 			"get":  NewReadonlyField(Null),

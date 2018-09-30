@@ -10,7 +10,7 @@ import (
 
 func TestStruct(t *testing.T) {
 
-	fs, err := NewFieldStruct(
+	fs, err := NewStruct(
 		map[string]Field{
 			"goto": NewField(NewInt(0)),
 		})

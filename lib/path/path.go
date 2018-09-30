@@ -29,14 +29,14 @@ var Path g.Struct
 
 func init() {
 
-	filepath, err := g.NewFrozenFieldStruct(
+	filepath, err := g.NewFrozenStruct(
 		map[string]g.Field{
 			"ext":  g.NewField(fpath.Ext),
 			"walk": g.NewField(fpath.Walk),
 		})
 	g.Assert(err == nil)
 
-	Path, err = g.NewFrozenFieldStruct(
+	Path, err = g.NewFrozenStruct(
 		map[string]g.Field{
 			"filepath": g.NewField(filepath),
 		})

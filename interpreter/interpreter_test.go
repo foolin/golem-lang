@@ -5,13 +5,11 @@
 package interpreter
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/mjarmy/golem-lang/compiler"
 	g "github.com/mjarmy/golem-lang/core"
-	bc "github.com/mjarmy/golem-lang/core/bytecode"
 	"github.com/mjarmy/golem-lang/scanner"
 )
 
@@ -22,22 +20,9 @@ func tassert(t *testing.T, flag bool) {
 	}
 }
 
-var builtinMgr = compiler.NewBuiltinManager(map[string]g.Value{
-	"assert":  g.BuiltinAssert,
-	"println": g.BuiltinPrintln,
-})
-
-func testCompile(t *testing.T, code string) *bc.Module {
-
-	source := &scanner.Source{Name: "foo", Path: "foo.glm", Code: code}
-	mods, errs := compiler.CompileSourceFully(builtinMgr, nil, source)
-	if errs != nil {
-		fmt.Printf("%v\n", errs)
-	}
-	tassert(t, errs == nil)
-	tassert(t, len(mods) == 1)
-
-	return mods[0]
+var builtins = []*g.Builtin{
+	{"assert", g.BuiltinAssert},
+	{"println", g.BuiltinPrintln},
 }
 
 func ok(t *testing.T, val interface{}, err g.Error, expect interface{}) {
@@ -53,6 +38,40 @@ func ok(t *testing.T, val interface{}, err g.Error, expect interface{}) {
 	}
 }
 
+func TestEvalCode(t *testing.T) {
+
+	val, err := EvalCode("1 + 2", nil, nil)
+	ok(t, val, err, g.NewInt(3))
+
+	blt := []*g.Builtin{{"a", g.NewInt(2)}}
+	val, err = EvalCode("1 + a", blt, nil)
+	ok(t, val, err, g.NewInt(3))
+
+	stc, err := g.NewStruct(map[string]g.Field{
+		"b": g.NewField(g.NewInt(1)),
+	})
+	tassert(t, err == nil)
+	var mod g.Module = g.NewNativeModule("foo", stc)
+
+	val, err = EvalCode("import foo; foo.b + a", blt, []g.Module{mod})
+	ok(t, val, err, g.NewInt(3))
+}
+
+func TestCompileCode(t *testing.T) {
+
+	blt := []*g.Builtin{{"a", g.NewInt(2)}}
+
+	mod, err := CompileCode("1 + a", blt, nil)
+	tassert(t, err == nil)
+
+	val, err := NewInterpreter(blt, nil).EvalModule(mod)
+	ok(t, val, err, g.NewInt(3))
+
+	blt[0].Value = g.NewInt(4)
+	val, err = NewInterpreter(blt, nil).EvalModule(mod)
+	ok(t, val, err, g.NewInt(5))
+}
+
 func TestModuleContents(t *testing.T) {
 
 	code := `
@@ -60,13 +79,11 @@ let a = 0
 const b = "xyz"
 fn c() {}
 `
-	mod := testCompile(t, code)
-	itp := NewInterpreter(builtinMgr, []*bc.Module{mod})
+	mod, err := CompileCode(code, builtins, nil)
+	_, es := NewInterpreter(builtins, nil).EvalModule(mod)
+	tassert(t, es == nil)
 
-	result, es := itp.InitModules()
-	tassert(t, es == nil && len(result) == 1)
-
-	stc := mod.Contents
+	stc := mod.Contents()
 
 	val, err := stc.GetField(nil, "a")
 	tassert(t, err == nil && val.Type() == g.IntType)
@@ -87,55 +104,62 @@ let a = 1
 return a + 2
 let b = 5
 `
-	mod = testCompile(t, code)
-	itp = NewInterpreter(builtinMgr, []*bc.Module{mod})
+	mod, err = CompileCode(code, builtins, nil)
+	val, es = NewInterpreter(builtins, nil).EvalModule(mod)
+	tassert(t, es == nil)
+	ok(t, val, nil, g.NewInt(3))
 
-	result, es = itp.InitModules()
-	tassert(t, es == nil && len(result) == 1)
-	ok(t, result[0], nil, g.NewInt(3))
-
-	stc = mod.Contents
+	stc = mod.Contents()
 	val, err = stc.GetField(nil, "a")
 	ok(t, val, err, g.One)
 	val, err = stc.GetField(nil, "b")
 	ok(t, val, err, g.Null)
 }
 
-func TestImport(t *testing.T) {
-
-	srcMain := &scanner.Source{Name: "foo", Path: "foo.glm", Code: `
-import a, b, c
-assert([1, 2, 3] == [a.x, b.y, c.z])
-`}
-	sourceMap := map[string]*scanner.Source{
-		"a": &scanner.Source{Name: "a", Path: "a.glm", Code: "import c; let x = 1;"},
-		"b": &scanner.Source{Name: "b", Path: "b.glm", Code: "import c; let y = c.z - 1;"},
-		"c": &scanner.Source{Name: "c", Path: "c.glm", Code: "let z = 3;"},
-	}
-	resolver := func(moduleName string) (*scanner.Source, error) {
-		if src, ok := sourceMap[moduleName]; ok {
-			return src, nil
-		}
-		return nil, g.UndefinedModule(moduleName)
-	}
-
-	mods, errs := compiler.CompileSourceFully(builtinMgr, resolver, srcMain)
-	tassert(t, errs == nil)
-	tassert(t, len(mods) == 4)
-
-	itp := NewInterpreter(builtinMgr, mods)
-	result, es := itp.InitModules()
-	tassert(t, es == nil)
-	tassert(t, len(result) == 4)
-}
+//func TestImport(t *testing.T) {
+//
+//	srcMain := &scanner.Source{Name: "foo", Path: "foo.glm", Code: `
+//import a, b, c
+//assert([1, 2, 3] == [a.x, b.y, c.z])
+//`}
+//	sourceMap := map[string]*scanner.Source{
+//		"a": &scanner.Source{Name: "a", Path: "a.glm", Code: "import c; let x = 1;"},
+//		"b": &scanner.Source{Name: "b", Path: "b.glm", Code: "import c; let y = c.z - 1;"},
+//		"c": &scanner.Source{Name: "c", Path: "c.glm", Code: "let z = 3;"},
+//	}
+//	resolver := func(moduleName string) (*scanner.Source, error) {
+//		if src, ok := sourceMap[moduleName]; ok {
+//			return src, nil
+//		}
+//		return nil, g.UndefinedModule(moduleName)
+//	}
+//
+//	mods, errs := compiler.CompileSourceFully(builtins, resolver, srcMain)
+//	tassert(t, errs == nil)
+//	tassert(t, len(mods) == 4)
+//	tassert(t, mods[0].Name() == "foo")
+//	tassert(t, mods[1].Name() == "a")
+//	tassert(t, mods[2].Name() == "b")
+//	tassert(t, mods[3].Name() == "c")
+//
+//	itp := NewInterpreter(builtins, mods)
+//	result, es := itp.InitModules()
+//	tassert(t, es == nil)
+//	tassert(t, len(result) == 4)
+//}
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 
-func failInterp(t *testing.T, mods []*bc.Module, expect ErrorStruct) {
-	intp := NewInterpreter(builtinMgr, mods)
-	_, es := intp.InitModules()
+func failInterp(t *testing.T, code string, expect ErrorStruct) {
+
+	source := &scanner.Source{Name: "foo", Path: "foo.glm", Code: code}
+	_, mod, err := compiler.CompileSource(source, builtins)
+	tassert(t, err == nil)
+
+	intp := NewInterpreter(builtins, nil)
+	_, es := intp.EvalModule(mod)
 	tassert(t, es != nil)
 
 	//dumpErrorStruct("failInterp", es)
@@ -147,7 +171,7 @@ func TestStackTrace(t *testing.T) {
 	code := `
 		1/0
 		`
-	failInterp(t, []*bc.Module{testCompile(t, code)},
+	failInterp(t, code,
 		newErrorStruct(
 			g.DivideByZero(),
 			[]string{
@@ -157,7 +181,7 @@ func TestStackTrace(t *testing.T) {
 		let a = (|| => 1/0)
 		a()
 		`
-	failInterp(t, []*bc.Module{testCompile(t, code)},
+	failInterp(t, code,
 		newErrorStruct(
 			g.DivideByZero(),
 			[]string{
@@ -170,7 +194,7 @@ func TestStackTrace(t *testing.T) {
 		}
 		let a = s.q
 		`
-	failInterp(t, []*bc.Module{testCompile(t, code)},
+	failInterp(t, code,
 		newErrorStruct(
 			g.DivideByZero(),
 			[]string{
@@ -181,7 +205,7 @@ func TestStackTrace(t *testing.T) {
 		[1, 2, 3].map(
 			|e| => 1/0)
 		`
-	failInterp(t, []*bc.Module{testCompile(t, code)},
+	failInterp(t, code,
 		newErrorStruct(
 			g.DivideByZero(),
 			[]string{
@@ -198,7 +222,7 @@ func TestStackTrace(t *testing.T) {
 		}
 		s.q
 		`
-	failInterp(t, []*bc.Module{testCompile(t, code)},
+	failInterp(t, code,
 		newErrorStruct(
 			g.DivideByZero(),
 			[]string{
@@ -214,7 +238,7 @@ func TestStackTrace(t *testing.T) {
 		let a = [1, 2, 3].map(
 			|e| => s.q)
 		`
-	failInterp(t, []*bc.Module{testCompile(t, code)},
+	failInterp(t, code,
 		newErrorStruct(
 			g.DivideByZero(),
 			[]string{
@@ -242,7 +266,7 @@ func TestStackTrace(t *testing.T) {
 
 		c()
 		`
-	failInterp(t, []*bc.Module{testCompile(t, code)},
+	failInterp(t, code,
 		newErrorStruct(
 			g.DivideByZero(),
 			[]string{
@@ -255,7 +279,7 @@ func TestStackTrace(t *testing.T) {
 }
 
 //func okInterp(t *testing.T, mods []*bc.Module) {
-//	intp := NewInterpreter(builtinMgr, mods)
+//	intp := NewInterpreter(builtins, mods)
 //	_, es := intp.InitModules()
 //	if es != nil {
 //		panic(es)
@@ -322,5 +346,5 @@ func TestStackTrace(t *testing.T) {
 //            //fail(d, 'TestError')
 //            //assert([p,q] == [2,4])
 //`
-//	okInterp(t, []*bc.Module{testCompile(t, code)})
+//	okInterp(t, testCompile(t, code))
 //}

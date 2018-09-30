@@ -27,13 +27,13 @@ var Os g.Struct
 
 func init() {
 
-	exec, err := g.NewFrozenFieldStruct(
+	exec, err := g.NewFrozenStruct(
 		map[string]g.Field{
 			"runCommand": g.NewField(exec.RunCommand),
 		})
 	g.Assert(err == nil)
 
-	Os, err = g.NewFrozenFieldStruct(
+	Os, err = g.NewFrozenStruct(
 		map[string]g.Field{
 			"create": g.NewField(create),
 			"exec":   g.NewField(exec),

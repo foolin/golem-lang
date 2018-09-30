@@ -8,6 +8,12 @@ import (
 	"fmt"
 )
 
+// A Builtin is a built-in value
+type Builtin struct {
+	Name  string
+	Value Value
+}
+
 /*doc
 
 ## Standard Builtins
@@ -35,20 +41,20 @@ are suitable for use in sandboxed environments.
 
 // StandardBuiltins containts the built-ins that are
 // pure functions.  These functions do not do any form of I/O.
-var StandardBuiltins = map[string]Value{
-	"arity":  BuiltinArity,
-	"assert": BuiltinAssert,
-	"chan":   BuiltinChan,
-	"fields": BuiltinFields,
-	"freeze": BuiltinFreeze,
-	"frozen": BuiltinFrozen,
-	"has":    BuiltinHas,
-	"iter":   BuiltinIter,
-	"len":    BuiltinLen,
-	"merge":  BuiltinMerge,
-	"range":  BuiltinRange,
-	"str":    BuiltinStr,
-	"type":   BuiltinType,
+var StandardBuiltins = []*Builtin{
+	{"arity", BuiltinArity},
+	{"assert", BuiltinAssert},
+	{"chan", BuiltinChan},
+	{"fields", BuiltinFields},
+	{"freeze", BuiltinFreeze},
+	{"frozen", BuiltinFrozen},
+	{"has", BuiltinHas},
+	{"iter", BuiltinIter},
+	{"len", BuiltinLen},
+	{"merge", BuiltinMerge},
+	{"range", BuiltinRange},
+	{"str", BuiltinStr},
+	{"type", BuiltinType},
 }
 
 //-----------------------------------------------------------------
@@ -94,7 +100,7 @@ var BuiltinArity = NewFixedNativeFunc(
 			fields["optional"] = NewReadonlyField(o)
 		}
 
-		return NewFrozenFieldStruct(fields)
+		return NewFrozenStruct(fields)
 	})
 
 /*doc
@@ -466,9 +472,9 @@ environments.
 */
 
 // UnsandboxedBuiltins are builtins that are not pure functions
-var UnsandboxedBuiltins = map[string]Value{
-	"print":   BuiltinPrint,
-	"println": BuiltinPrintln,
+var UnsandboxedBuiltins = []*Builtin{
+	{"print", BuiltinPrint},
+	{"println", BuiltinPrintln},
 }
 
 /*doc

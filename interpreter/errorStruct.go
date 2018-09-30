@@ -37,7 +37,7 @@ func newErrorStruct(err g.Error, stackTrace []string) ErrorStruct {
 	list, e := g.NewList(vals).Freeze(nil)
 	g.Assert(e == nil)
 
-	stc, e := g.NewFrozenFieldStruct(
+	stc, e := g.NewFrozenStruct(
 		map[string]g.Field{
 			"error":      g.NewReadonlyField(g.MustStr(err.Error())),
 			"stackTrace": g.NewReadonlyField(list),

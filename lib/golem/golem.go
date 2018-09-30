@@ -22,7 +22,7 @@ var Golem g.Struct
 
 func init() {
 	var err error
-	Golem, err = g.NewFrozenFieldStruct(
+	Golem, err = g.NewFrozenStruct(
 		map[string]g.Field{
 			"getField": g.NewField(getField),
 			"setField": g.NewField(setField),

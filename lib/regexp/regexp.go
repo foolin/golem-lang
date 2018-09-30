@@ -39,7 +39,7 @@ var Regexp g.Struct
 
 func init() {
 	var err error
-	Regexp, err = g.NewFrozenFieldStruct(
+	Regexp, err = g.NewFrozenStruct(
 		map[string]g.Field{
 			"compile": g.NewField(compile),
 		})

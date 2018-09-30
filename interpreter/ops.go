@@ -289,7 +289,12 @@ func opGo(itp *Interpreter, f *frame) (g.Value, g.Error) {
 	case bc.Func:
 
 		f.ip += 3
-		goItp := NewInterpreter(itp.builtInMgr, itp.modules)
+		goItp := &Interpreter{
+			builtins:   itp.builtins,
+			library:    itp.library,
+			libMap:     itp.libMap,
+			frameStack: newFrameStack(),
+		}
 		go (func() {
 			_, es := goItp.EvalBytecode(t, params)
 			if es != nil {
@@ -469,7 +474,7 @@ func opNewStruct(itp *Interpreter, f *frame) (g.Value, g.Error) {
 		fields[name] = g.NewField(g.Null)
 	}
 
-	stc, err := g.NewFieldStruct(fields)
+	stc, err := g.NewStruct(fields)
 	if err != nil {
 		return nil, err
 	}
@@ -933,8 +938,8 @@ func opImportModule(itp *Interpreter, f *frame) (g.Value, g.Error) {
 	g.Assert(ok)
 
 	// Lookup the module.
-	if mod, ok := itp.modMap[name.String()]; ok {
-		f.stack = append(f.stack, mod.Contents)
+	if mod, ok := itp.libMap[name.String()]; ok {
+		f.stack = append(f.stack, mod.Contents())
 		f.ip += 3
 
 		return nil, nil
@@ -945,7 +950,7 @@ func opImportModule(itp *Interpreter, f *frame) (g.Value, g.Error) {
 func opLoadBuiltin(itp *Interpreter, f *frame) (g.Value, g.Error) {
 
 	p := bc.DecodeParam(f.btc, f.ip)
-	f.stack = append(f.stack, itp.builtInMgr.Builtins()[p])
+	f.stack = append(f.stack, itp.builtins[p].Value)
 	f.ip += 3
 
 	return nil, nil

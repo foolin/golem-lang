@@ -56,19 +56,18 @@ func ok(t *testing.T, pool *bc.Pool, expect *bc.Pool) {
 	}
 }
 
-var builtinMgr = NewBuiltinManager(map[string]g.Value{
-	"assert":  g.BuiltinAssert,
-	"println": g.BuiltinPrintln,
-})
+var builtins = []*g.Builtin{
+	{"assert", g.BuiltinAssert},
+	{"println", g.BuiltinPrintln},
+}
 
 func testCompile(t *testing.T, code string) *bc.Module {
 
 	source := &scanner.Source{Name: "foo", Path: "foo.glm", Code: code}
-	mods, errs := CompileSourceFully(builtinMgr, nil, source)
-	tassert(t, errs == nil)
-	tassert(t, len(mods) == 1)
+	_, mod, err := CompileSource(source, builtins)
+	tassert(t, err == nil)
 
-	return mods[0]
+	return mod
 }
 
 func fixedArity(numParams int) g.Arity {
@@ -969,30 +968,6 @@ let d = b--
 			ErrorHandlers: nil,
 		}},
 	})
-}
-
-func TestImport(t *testing.T) {
-
-	srcMain := &scanner.Source{Name: "foo", Path: "foo.glm", Code: "import a, b;"}
-	sourceMap := map[string]*scanner.Source{
-		"a": &scanner.Source{Name: "a", Path: "a.glm", Code: "import c;"},
-		"b": &scanner.Source{Name: "b", Path: "b.glm", Code: "import c;"},
-		"c": &scanner.Source{Name: "c", Path: "c.glm", Code: ""},
-	}
-	resolver := func(moduleName string) (*scanner.Source, error) {
-		if src, ok := sourceMap[moduleName]; ok {
-			return src, nil
-		}
-		panic("unreachable")
-	}
-
-	mods, errs := CompileSourceFully(builtinMgr, resolver, srcMain)
-	tassert(t, errs == nil)
-	tassert(t, len(mods) == 4)
-	tassert(t, mods[0].Name == "foo")
-	tassert(t, mods[1].Name == "a")
-	tassert(t, mods[2].Name == "b")
-	tassert(t, mods[3].Name == "c")
 }
 
 func TestInvokeField(t *testing.T) {

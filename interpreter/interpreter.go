@@ -5,75 +5,98 @@
 package interpreter
 
 import (
-	//	"fmt"
-
 	"github.com/mjarmy/golem-lang/compiler"
 	g "github.com/mjarmy/golem-lang/core"
 	bc "github.com/mjarmy/golem-lang/core/bytecode"
+	"github.com/mjarmy/golem-lang/scanner"
 )
 
 //---------------------------------------------------------------
 // The Golem Interpreter
 //---------------------------------------------------------------
 
+// EvalCode is a convenience method for compiling Golem source code into
+// a bytecode.Module, and then interpreting the module.
+func EvalCode(
+	code string,
+	builtins []*g.Builtin,
+	library []g.Module) (g.Value, g.Error) {
+
+	mod, err := CompileCode(code, builtins, library)
+	if err != nil {
+		return nil, err
+	}
+
+	itp := NewInterpreter(builtins, library)
+	return itp.EvalModule(mod)
+}
+
+// CompileCode is a convenience method for compiling Golem source code into
+// a bytecode.Module.
+func CompileCode(
+	code string,
+	builtins []*g.Builtin,
+	library []g.Module) (*bc.Module, g.Error) {
+
+	source := &scanner.Source{Name: "", Path: "", Code: code}
+	_, mod, err := compiler.CompileSource(source, builtins)
+	if err != nil {
+		return nil, g.Error(err)
+	}
+
+	return mod, nil
+}
+
 // Interpreter interprets Golem bytecode.
 type Interpreter struct {
-	builtInMgr compiler.BuiltinManager
-	modules    []*bc.Module
-	modMap     map[string]*bc.Module
+	builtins []*g.Builtin
+	library  []g.Module
+	libMap   map[string]g.Module
 
 	frameStack *frameStack
 }
 
 // NewInterpreter creates a new Interpreter
 func NewInterpreter(
-	builtInMgr compiler.BuiltinManager,
-	modules []*bc.Module) *Interpreter {
+	builtins []*g.Builtin,
+	library []g.Module) *Interpreter {
 
-	modMap := make(map[string]*bc.Module)
-	for _, m := range modules {
-		modMap[m.Name] = m
+	libMap := make(map[string]g.Module)
+	for _, m := range library {
+		libMap[m.Name()] = m
 	}
 
 	return &Interpreter{
-		builtInMgr: builtInMgr,
-		modules:    modules,
-		modMap:     modMap,
+		builtins:   builtins,
+		library:    library,
+		libMap:     libMap,
 		frameStack: newFrameStack(),
 	}
 }
 
-// InitModules initializes each of the Modules.  Note that the modules
-// are initialized in reverse order.
-func (itp *Interpreter) InitModules() ([]g.Value, ErrorStruct) {
+// EvalModule evaluates a bytecode.Module by calling its wrapper "init" Func.
+func (itp *Interpreter) EvalModule(mod *bc.Module) (g.Value, ErrorStruct) {
 
-	values := []g.Value{}
-	for i := len(itp.modules) - 1; i >= 0; i-- {
-		mod := itp.modules[i]
+	// the 'init' function is always the first template in the pool
+	initTpl := mod.Pool.Templates[0]
 
-		// the 'init' function is always the first template in the pool
-		initTpl := mod.Pool.Templates[0]
+	// create empty locals
+	mod.Refs = newLocals(initTpl.NumLocals, nil)
 
-		// create empty locals
-		mod.Refs = newLocals(initTpl.NumLocals, nil)
+	// make init function from template
+	initFn := bc.NewBytecodeFunc(initTpl)
 
-		// make init function from template
-		initFn := bc.NewBytecodeFunc(initTpl)
-
-		// invoke the "init" function
-		itp.frameStack.push(newFrame(initFn, mod.Refs, true))
-		val, es := itp.eval()
-		if es != nil {
-			return nil, es
-		}
-
-		// prepend the value so that the values will be in the same order as itp.modules
-		values = append([]g.Value{val}, values...)
+	// invoke the "init" function
+	itp.frameStack.push(newFrame(initFn, mod.Refs, true))
+	val, es := itp.eval()
+	if es != nil {
+		return nil, es
 	}
-	return values, nil
+	return val, nil
 }
 
-// Eval evaluates a Func.
+// Eval evaluates a Func.  Note that this method makes Interpreter
+// satisfy the core.Eval interface.
 func (itp *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
 
 	switch t := fn.(type) {

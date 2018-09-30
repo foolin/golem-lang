@@ -30,7 +30,7 @@ var Encoding g.Struct
 
 func init() {
 
-	json, err := g.NewFrozenFieldStruct(
+	json, err := g.NewFrozenStruct(
 		map[string]g.Field{
 			"marshal":       g.NewField(json.Marshal),
 			"marshalIndent": g.NewField(json.MarshalIndent),
@@ -38,7 +38,7 @@ func init() {
 		})
 	g.Assert(err == nil)
 
-	Encoding, err = g.NewFrozenFieldStruct(
+	Encoding, err = g.NewFrozenStruct(
 		map[string]g.Field{
 			"json": g.NewField(json),
 		})

@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	// NativeFunc is a Func that is implemented in Go rather than Golem
+	// A NativeFunc is a Func that is implemented in Go
 	NativeFunc interface {
 		Func
 	}

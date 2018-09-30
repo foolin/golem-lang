@@ -34,8 +34,8 @@ type _struct struct {
 	frozen   bool
 }
 
-// NewFieldStruct create a new Struct backed by Fields
-func NewFieldStruct(fields map[string]Field) (Struct, Error) {
+// NewStruct create a new Struct backed by Fields
+func NewStruct(fields map[string]Field) (Struct, Error) {
 
 	for key := range fields {
 		if !scanner.IsIdentifier(key) {
@@ -52,8 +52,8 @@ func NewFieldStruct(fields map[string]Field) (Struct, Error) {
 	}, nil
 }
 
-// NewFrozenFieldStruct create a new frozen Struct backed by Fields
-func NewFrozenFieldStruct(fields map[string]Field) (Struct, Error) {
+// NewFrozenStruct create a new frozen Struct backed by Fields
+func NewFrozenStruct(fields map[string]Field) (Struct, Error) {
 
 	for key := range fields {
 		if !scanner.IsIdentifier(key) {

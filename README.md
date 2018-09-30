@@ -1,11 +1,11 @@
 # The Golem Programming Language
 
-Golem is a general purpose, interpreted language, with a dynamic type system.  Golem 
-can be used as a command-line application, or it can be easily embedded inside 
-a [Go](https://golang.org/) progam.
+Golem is a general purpose, interpreted scripting language, that brings together ideas 
+from many other languages, including Go, Python, Javascript and Lua.
 
-Golem brings together ideas from many other languages, including Go, Python, 
-Javascript and Lua.
+Golem can be used as a full-fledged command-line application like `python3` or `node`, 
+or it can be easily embedded inside a [Go](https://golang.org/) progam,
+with as little as one line of code.
 
 Please consult the [documentation](https://mjarmy.github.io/golem-lang/) to learn 
 more about Golem.
