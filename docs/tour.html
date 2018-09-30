@@ -539,7 +539,7 @@ println([f(1), f(2), f(3)])</textarea>
     </div>
 </div>
 
-<p>Closures are a fundamental mechanism in Golem for managing state. We will have more to say about closures <a href="#merging-structs">later on</a> in the tour.</p>
+<p>Closures are a fundamental mechanism in Golem for managing state. We will have more to say about closures <a href="#using-structs-to-build-complex-values">later on</a> in the tour.</p>
 <h3 id="optional-parameters">Optional Parameters</h3>
 <p>Functions can be declared with optional parameters as well. In the following example, the <code>y</code> parameter defaults to 0 unless the function is invoked with two parameters:</p>
 <div class="play">
@@ -587,7 +587,7 @@ println(a(1, 2, 3))</textarea>
 
 <p>The “extra” parameters are gathered together into a list. A variadic parameter must always be the last formal parameter. Also, you cannot mix optional parameters and variadic parameters in a declaration.</p>
 <h3 id="arity">Arity</h3>
-<p>There is a builtin function called <a href="builtins.html#arity">arity</a> that returns a <a href="#structs">struct</a> that describes the <a href="https://en.wikipedia.org/wiki/Arity">arity</a> of a function. Here is a program that prints the arity of 3 of the builtin functions we have already used:</p>
+<p>There is a builtin function called <a href="builtins.html#arity">arity()</a> that returns a <a href="#structs">struct</a> that describes the <a href="https://en.wikipedia.org/wiki/Arity">arity</a> of a function. Here is a program that prints the arity of 3 of the builtin functions we have already used:</p>
 <div class="play">
     <div class="input">
         <textarea id="src60" rows="3" spellcheck="false">println(arity(len))
@@ -881,14 +881,14 @@ println([&#39;a&#39;, &#39;b&#39;, &#39;c&#39;].map(|e| =&gt; has(s, e)))</texta
 
 <h2 id="command-line-executable">Command Line Executable</h2>
 <p>Thus far, we have been running Golem in the browser via the magic of <a href="https://github.com/golang/go/wiki/WebAssembly">WebAssembly</a>.</p>
-<p>It is also possible to run Golem from the command line as an executable (and via many <a href="#embedding">other routes</a> as well).</p>
+<p>It is also possible to run Golem from the command line as an executable.</p>
 <p>To do this, you must first compile a version of the Golem. This requires that you have the Go language toolchain installed on your system, with at least version 1.9.</p>
 <p>Clone the Golem <a href="https://github.com/mjarmy/golem-lang">repository</a> into the proper place in your go development environment, <code>cd</code> into the top level directory of the repo, and type <code>make</code>. This will build Golem, and place the <code>golem</code> executable in a sub-directory called <code>build</code>.</p>
 <p>Then, fire up your <a href="https://github.com/mjarmy/golem-lang/wiki/IDE-Support">IDE</a> of choice, and type the Golem code of your choice into a file named “tour.glm”, and run it like so: <code>./build/golem tour.glm</code>.</p>
 <h3 id="modules">Modules</h3>
-<p>In addition to supporting all of the builtin functions that we have seen so far, the <code>golem</code> executable supports a new concept called “modules”.</p>
-<p>The Golem CLI actually compiles the “tour.glm” file that you made eariler into a <code>module</code> called “tour”. Modules are the fundamental unit of compilation in Golem, and are also used for namespace management.</p>
-<p>All you need to do to create your own modules that the <code>golem</code> executable can use is create a file with the name you want. As an example, lets create a module called foo, and reference in the tour module.</p>
+<p>In addition to supporting all of the builtin functions that we have seen so far, the <code>golem</code> executable supports a concept called “modules”.</p>
+<p>The Golem CLI actually compiles the “tour.glm” file that you made eariler into a module called “tour”. Modules are the fundamental unit of compilation in Golem, and are also used for namespace management.</p>
+<p>All you need to do to create your own modules that the <code>golem</code> executable can use is create a file with the name you want. As an example, lets create a module called “foo”, and reference it in the “tour” module.</p>
 <p>In a file called “foo.glm”, place the following:</p>
 <pre class="nowasm"><code>fn square(x) {
     return x*x
@@ -907,7 +907,11 @@ assert(foo.square(5) == 25)</code></pre>
 <p>Golem has a <a href="http://localhost:8080/reference.html#standard-library">Standard Library</a> that is implemented as a collection of modules. The standard library is based primarily on Go’s standard library.</p>
 <p>Golem’s standard library is rather small at this time – one of the major pieces of work still to be done is to build out the library.</p>
 <p>When embedding the Golem interpreter in a Go program, some or all of the standard library can be included in the sandboxed environment. The <code>golem</code> executable makes the entire standard library available.</p>
-<p>To use one of the modules from the standard library, simply import it like you would any module, e.g. <code>import os</code>.</p>
+<p>To use one of the modules from the standard library, simply import it like you would any module, e.g.:</p>
+<pre class="nowasm"><code>import regexp
+let r = regexp.compile(&#39;abc&#39;)
+println(r.matchString(&#39;xyzabc&#39;))
+println(r.matchString(&#39;123&#39;))</code></pre>
 <h3 id="examples">Examples</h3>
 <p>In the Golem github repo, there are a couple of good examples of substantial programs that can be run via the <code>golem</code> executable.</p>
 <p>First, there is the Golem program that creates the static web site that you are reading right now:</p>

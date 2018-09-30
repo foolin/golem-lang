@@ -468,7 +468,7 @@ println([f(1), f(2), f(3)])
 ```
 
 Closures are a fundamental mechanism in Golem for managing state.  We will have more 
-to say about closures [later on](#merging-structs) in the tour.
+to say about closures [later on](#using-structs-to-build-complex-values) in the tour.
 
 ### Optional Parameters
 
@@ -511,7 +511,7 @@ variadic parameters in a declaration.
 
 ### Arity
 
-There is a builtin function called [arity](builtins.html#arity) that returns 
+There is a builtin function called [arity()](builtins.html#arity) that returns 
 a [struct](#structs) that describes the [arity](https://en.wikipedia.org/wiki/Arity) 
 of a function.  Here is a program that prints the arity of 3 of the builtin functions 
 we have already used:
@@ -824,8 +824,7 @@ println(['a', 'b', 'c'].map(|e| => has(s, e)))
 Thus far, we have been running Golem in the browser via the magic of 
 [WebAssembly](https://github.com/golang/go/wiki/WebAssembly).  
 
-It is also possible to run Golem from the command line as an executable (and via many 
-[other routes](#embedding) as well).
+It is also possible to run Golem from the command line as an executable.
 
 To do this, you must first compile a version of the Golem.  This requires that you have 
 the Go language toolchain installed on your system, with at least version 1.9.
@@ -842,15 +841,15 @@ and run it like so: `./build/golem tour.glm`.
 ### Modules
 
 In addition to supporting all of the builtin functions that we have seen so far, 
-the `golem` executable supports a new concept called "modules".
+the `golem` executable supports a concept called "modules".
 
 The Golem CLI actually compiles the "tour.glm" file that you made eariler into a
-`module` called "tour".  Modules are the fundamental unit of compilation in Golem, 
+module called "tour".  Modules are the fundamental unit of compilation in Golem, 
 and are also used for namespace management. 
 
 All you need to do to create your own modules that the `golem` executable can use is
 create a file with the name you want.  As an example, lets create a module 
-called foo, and reference in the tour module.
+called "foo", and reference it in the "tour" module.
 
 In a file called "foo.glm", place the following:
 
@@ -896,7 +895,14 @@ the standard library can be included in the sandboxed environment. The
 `golem` executable makes the entire standard library available.
 
 To use one of the modules from the standard library, simply import it like
-you would any module, e.g. `import os`.
+you would any module, e.g.:
+
+```nowasm
+import regexp
+let r = regexp.compile('abc')
+println(r.matchString('xyzabc'))
+println(r.matchString('123'))
+```
 
 ### Examples
 
