@@ -569,7 +569,8 @@ println(s)
 
 ### Properties
 
-Structs can have properties defined on them, so that a given field has a 'getter' 
+Structs can have properties defined on them using the `prop` keyword, 
+so that a given field has a 'getter' 
 function, and optional 'setter' function.  The getter function must take 0 parameters, 
 and the setter function must take 1 parameter.  If the setter function is omitted,
 the property is readonly.  Properties are useful for hiding the inner workings
@@ -918,6 +919,6 @@ So far, we have seen Golem in action in two contexts: as a
 [WebAssembly](https://github.com/mjarmy/golem-lang/blob/master/tools/docs/wasm.go) executable, and
 a [command line](https://github.com/mjarmy/golem-lang/blob/master/cli/golem.go) executable.
 
-Golem is easy to embed in a Go program in other ways though.  If you are interested
-in learning more about how to embed Golem in Go, please head over to 
+However, it is easy to embed Golem inside a Go program in other ways.  If you are 
+interested in learning more about how to embed Golem in Go, please head over to 
 the [Embedding](embedding.html) document.

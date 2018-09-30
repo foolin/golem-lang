@@ -645,7 +645,7 @@ println(s)</textarea>
 </div>
 
 <h3 id="properties">Properties</h3>
-<p>Structs can have properties defined on them, so that a given field has a ‘getter’ function, and optional ‘setter’ function. The getter function must take 0 parameters, and the setter function must take 1 parameter. If the setter function is omitted, the property is readonly. Properties are useful for hiding the inner workings of a struct behind a simpler facade. Here is an example (which uses <a href="#errors">try-catch</a>):</p>
+<p>Structs can have properties defined on them using the <code>prop</code> keyword, so that a given field has a ‘getter’ function, and optional ‘setter’ function. The getter function must take 0 parameters, and the setter function must take 1 parameter. If the setter function is omitted, the property is readonly. Properties are useful for hiding the inner workings of a struct behind a simpler facade. Here is an example (which uses <a href="#errors">try-catch</a>):</p>
 <div class="play">
     <div class="input">
         <textarea id="src64" rows="25" spellcheck="false">let x = 2
@@ -916,7 +916,7 @@ assert(foo.square(5) == 25)</code></pre>
 <p><a href="https://github.com/mjarmy/golem-lang/blob/master/bench_test/core_test.glm" class="uri">https://github.com/mjarmy/golem-lang/blob/master/bench_test/core_test.glm</a></p>
 <h2 id="embedding">Embedding</h2>
 <p>So far, we have seen Golem in action in two contexts: as a <a href="https://github.com/mjarmy/golem-lang/blob/master/tools/docs/wasm.go">WebAssembly</a> executable, and a <a href="https://github.com/mjarmy/golem-lang/blob/master/cli/golem.go">command line</a> executable.</p>
-<p>Golem is easy to embed in a Go program in other ways though. If you are interested in learning more about how to embed Golem in Go, please head over to the <a href="embedding.html">Embedding</a> document.</p>
+<p>However, it is easy to embed Golem inside a Go program in other ways. If you are interested in learning more about how to embed Golem in Go, please head over to the <a href="embedding.html">Embedding</a> document.</p>
 
 
             <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
