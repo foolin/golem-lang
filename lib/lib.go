@@ -5,8 +5,6 @@
 package lib
 
 import (
-	"fmt"
-
 	g "github.com/mjarmy/golem-lang/core"
 	"github.com/mjarmy/golem-lang/lib/encoding"
 	"github.com/mjarmy/golem-lang/lib/golem"
@@ -16,28 +14,11 @@ import (
 	"github.com/mjarmy/golem-lang/lib/regexp"
 )
 
-// BuiltinLib looks up modules in the standard library
-var BuiltinLib = g.NewFixedNativeFunc(
-	[]g.Type{g.StrType}, false,
-	func(ev g.Eval, values []g.Value) (g.Value, g.Error) {
-
-		name := values[0].(g.Str)
-
-		switch name.String() {
-		case "encoding":
-			return encoding.Encoding, nil
-		case "golem":
-			return golem.Golem, nil
-		case "io":
-			return io.Io, nil
-		case "os":
-			return os.Os, nil
-		case "path":
-			return path.Path, nil
-		case "regexp":
-			return regexp.Regexp, nil
-		default:
-			return nil, g.Error(fmt.Errorf(
-				"LibraryNotFound: Library '%s' not found", name.String()))
-		}
-	})
+var StandardLibrary = []g.Module{
+	encoding.Encoding,
+	golem.Golem,
+	io.Io,
+	os.Os,
+	path.Path,
+	regexp.Regexp,
+}

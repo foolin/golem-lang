@@ -23,7 +23,7 @@ Module os provides a platform-independent interface to operating system function
 */
 
 // Os is the "os" module in the standard library
-var Os g.Struct
+var Os g.Module
 
 func init() {
 
@@ -33,7 +33,7 @@ func init() {
 		})
 	g.Assert(err == nil)
 
-	Os, err = g.NewFrozenStruct(
+	os, err := g.NewFrozenStruct(
 		map[string]g.Field{
 			"create": g.NewField(create),
 			"exec":   g.NewField(exec),
@@ -42,6 +42,8 @@ func init() {
 			"stat":   g.NewField(stat),
 		})
 	g.Assert(err == nil)
+
+	Os = g.NewNativeModule("os", os)
 }
 
 /*doc

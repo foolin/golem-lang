@@ -289,12 +289,7 @@ func opGo(itp *Interpreter, f *frame) (g.Value, g.Error) {
 	case bc.Func:
 
 		f.ip += 3
-		goItp := &Interpreter{
-			builtins:   itp.builtins,
-			library:    itp.library,
-			libMap:     itp.libMap,
-			frameStack: newFrameStack(),
-		}
+		goItp := NewInterpreter(itp.builtins, itp.library)
 		go (func() {
 			_, es := goItp.EvalBytecode(t, params)
 			if es != nil {
@@ -938,13 +933,18 @@ func opImportModule(itp *Interpreter, f *frame) (g.Value, g.Error) {
 	g.Assert(ok)
 
 	// Lookup the module.
-	if mod, ok := itp.libMap[name.String()]; ok {
-		f.stack = append(f.stack, mod.Contents())
-		f.ip += 3
-
-		return nil, nil
+	if itp.library == nil {
+		return nil, g.UndefinedModule(name.String())
 	}
-	return nil, g.UndefinedModule(name.String())
+
+	mod, err := itp.library.Get(itp, name.String())
+	if err != nil {
+		return nil, err
+	}
+
+	f.stack = append(f.stack, mod.Contents())
+	f.ip += 3
+	return nil, nil
 }
 
 func opLoadBuiltin(itp *Interpreter, f *frame) (g.Value, g.Error) {

@@ -25,7 +25,7 @@ Module path implements utility routines for manipulating slash-separated paths.
 */
 
 // Path is the "path" module in the standard library
-var Path g.Struct
+var Path g.Module
 
 func init() {
 
@@ -36,9 +36,11 @@ func init() {
 		})
 	g.Assert(err == nil)
 
-	Path, err = g.NewFrozenStruct(
+	path, err := g.NewFrozenStruct(
 		map[string]g.Field{
 			"filepath": g.NewField(filepath),
 		})
 	g.Assert(err == nil)
+
+	Path = g.NewNativeModule("path", path)
 }

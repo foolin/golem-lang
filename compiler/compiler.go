@@ -23,24 +23,24 @@ import (
 // The Golem Compiler
 //---------------------------------------------------------------
 
-// CompileSource compiles a Module from Source
+// CompileSource is a convenience function that compiles a Module from Source
 func CompileSource(
 	source *scanner.Source,
-	builtins []*g.Builtin) (*ast.Module, *bc.Module, error) {
+	builtins []*g.Builtin) (*bc.Module, error) {
 
 	builtinMgr := newBuiltinManager(builtins)
 
 	// scan
 	scanner, err := scanner.NewScanner(source)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// parse
 	parser := parser.NewParser(scanner, builtinMgr.contains)
 	astMod, err := parser.ParseModule()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// analyze
@@ -54,12 +54,12 @@ func CompileSource(
 			}
 			buf.WriteString(e.Error())
 		}
-		return nil, nil, errors.New(buf.String())
+		return nil, errors.New(buf.String())
 	}
 
 	// compile
 	cmp := newCompiler(astMod, builtinMgr)
-	return astMod, cmp.Compile(), nil
+	return cmp.Compile(), nil
 }
 
 // Compiler compiles an AST into bytecode

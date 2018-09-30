@@ -18,16 +18,17 @@ on Golem values and code.
 */
 
 // Golem is the "golem" module in the standard library
-var Golem g.Struct
+var Golem g.Module
 
 func init() {
-	var err error
-	Golem, err = g.NewFrozenStruct(
+	golem, err := g.NewFrozenStruct(
 		map[string]g.Field{
 			"getField": g.NewField(getField),
 			"setField": g.NewField(setField),
 		})
 	g.Assert(err == nil)
+
+	Golem = g.NewNativeModule("golem", golem)
 }
 
 /*doc

@@ -3,18 +3,9 @@
 // license that can be found in the LICENSE file.
 
 import encoding
+import util
 
 const json = encoding.json
-
-fn fail(func, err) {
-    try {
-        func()
-        assert(false)
-    } catch e {
-        //println(e.error)
-        assert(err == e.error)
-    }
-}
 
 fn roundTrip(from, useStructs = false) {
     const s = json.marshal(from)
@@ -57,12 +48,12 @@ fn testJson() {
   "c": 2.34
 }`)
 
-    fail(|| => json.unmarshal(json.marshal(from), true), "InvalidStructKey: 'a b' is not a valid struct key")
-    fail(|| => json.unmarshal('@'), "JsonError: invalid character '@' looking for beginning of value")
-    fail(|| => json.marshal(dict{1: 2}), 'JsonError: Int is not a valid object key')
-    fail(|| => json.marshal(dict{'a': set{}}), 'JsonError: Set cannot be marshalled')
+    util.fail(|| => json.unmarshal(json.marshal(from), true), "InvalidStructKey: 'a b' is not a valid struct key")
+    util.fail(|| => json.unmarshal('@'), "JsonError: invalid character '@' looking for beginning of value")
+    util.fail(|| => json.marshal(dict{1: 2}), 'JsonError: Int is not a valid object key')
+    util.fail(|| => json.marshal(dict{'a': set{}}), 'JsonError: Set cannot be marshalled')
 }
 
-fn main(args) {
+fn run() {
     testJson()
 }

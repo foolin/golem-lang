@@ -3,16 +3,7 @@
 // license that can be found in the LICENSE file.
 
 import regexp
-
-fn fail(func, err) {
-    try {
-        func()
-        assert(false)
-    } catch e {
-        //println(e.error)
-        assert(err == e.error)
-    }
-}
+import util
 
 fn testCompile() {
 
@@ -26,10 +17,10 @@ fn testCompile() {
         [rgx.matchString('foo[123]'), rgx.matchString('456')] == 
         [true, false])
 
-    fail(|| => regexp.compile('\\'), 
+    util.fail(|| => regexp.compile('\\'), 
         'RegexpError: error parsing regexp: trailing backslash at end of expression: ``')
 }
 
-fn main(args) {
+fn run() {
     testCompile()
 }

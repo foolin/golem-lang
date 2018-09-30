@@ -1,0 +1,24 @@
+// Copyright 2018 The Golem Language Authors. All rights reserved.
+// Use of this source code is governed by a MIT-style
+// license that can be found in the LICENSE file.
+
+import coreTest
+import encodingTest
+import osTest
+import pathTest
+import regexpTest
+
+fn main(args) {
+
+    let tests = [
+        ('coreTest', coreTest),
+        ('encodingTest', encodingTest),
+        ('osTest', osTest),
+        ('pathTest', pathTest),
+        ('regexpTest', regexpTest)
+    ]
+    for t in tests { 
+        println(t[0])
+        t[1].run() 
+    }
+}

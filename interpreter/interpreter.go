@@ -15,14 +15,14 @@ import (
 // The Golem Interpreter
 //---------------------------------------------------------------
 
-// EvalCode is a convenience method for compiling Golem source code into
+// EvalCode is a convenience function for compiling Golem source code into
 // a bytecode.Module, and then interpreting the module.
 func EvalCode(
 	code string,
 	builtins []*g.Builtin,
-	library []g.Module) (g.Value, g.Error) {
+	library Library) (g.Value, g.Error) {
 
-	mod, err := CompileCode(code, builtins, library)
+	mod, err := CompileCode(code, builtins)
 	if err != nil {
 		return nil, err
 	}
@@ -31,15 +31,14 @@ func EvalCode(
 	return itp.EvalModule(mod)
 }
 
-// CompileCode is a convenience method for compiling Golem source code into
+// CompileCode is a convenience function for compiling Golem source code into
 // a bytecode.Module.
 func CompileCode(
 	code string,
-	builtins []*g.Builtin,
-	library []g.Module) (*bc.Module, g.Error) {
+	builtins []*g.Builtin) (*bc.Module, g.Error) {
 
 	source := &scanner.Source{Name: "", Path: "", Code: code}
-	_, mod, err := compiler.CompileSource(source, builtins)
+	mod, err := compiler.CompileSource(source, builtins)
 	if err != nil {
 		return nil, g.Error(err)
 	}
@@ -49,27 +48,18 @@ func CompileCode(
 
 // Interpreter interprets Golem bytecode.
 type Interpreter struct {
-	builtins []*g.Builtin
-	library  []g.Module
-	libMap   map[string]g.Module
-
+	builtins   []*g.Builtin
+	library    Library
 	frameStack *frameStack
 }
 
-// NewInterpreter creates a new Interpreter
-func NewInterpreter(
-	builtins []*g.Builtin,
-	library []g.Module) *Interpreter {
-
-	libMap := make(map[string]g.Module)
-	for _, m := range library {
-		libMap[m.Name()] = m
-	}
+// NewInterpreter creates a new Interpreter.  If the library is nil,
+// then no modules can be imported.
+func NewInterpreter(builtins []*g.Builtin, library Library) *Interpreter {
 
 	return &Interpreter{
 		builtins:   builtins,
 		library:    library,
-		libMap:     libMap,
 		frameStack: newFrameStack(),
 	}
 }
@@ -95,8 +85,8 @@ func (itp *Interpreter) EvalModule(mod *bc.Module) (g.Value, ErrorStruct) {
 	return val, nil
 }
 
-// Eval evaluates a Func.  Note that this method makes Interpreter
-// satisfy the core.Eval interface.
+// Eval evaluates a Func.  Note that this method causes Interpreter
+// to implement the core.Eval interface.
 func (itp *Interpreter) Eval(fn g.Func, params []g.Value) (g.Value, g.Error) {
 
 	switch t := fn.(type) {

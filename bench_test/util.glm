@@ -2,6 +2,13 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-const _encoding = _lib("encoding")
+fn fail(func, err) {
+    try {
+        func()
+        assert(false)
+    } catch e {
+        //println(e.error)
+        assert(err == e.error)
+    }
+}
 
-const json = _encoding.json

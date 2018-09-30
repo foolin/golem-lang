@@ -911,7 +911,7 @@ right now:
 And second, there is a large program in the bench_test directory that allows Golem to 
 test itself as part of the build process:
 
-[https://github.com/mjarmy/golem-lang/blob/master/bench_test/core_test.glm](https://github.com/mjarmy/golem-lang/blob/master/bench_test/core_test.glm)
+[https://github.com/mjarmy/golem-lang/blob/master/bench_test/benchTest.glm](https://github.com/mjarmy/golem-lang/blob/master/bench_test/benchTest.glm)
 
 ## Embedding
 

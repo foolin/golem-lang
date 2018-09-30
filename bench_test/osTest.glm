@@ -3,25 +3,16 @@
 // license that can be found in the LICENSE file.
 
 import os
-
-fn fail(func, err) {
-    try {
-        func()
-        assert(false)
-    } catch e {
-        //println(e.error)
-        assert(err == e.error)
-    }
-}
+import util
 
 fn testExit() {
-    fail(|| => os.exit('foo'), 'TypeMismatch: Expected Int, not Str')
-    fail(|| => os.exit(1, 2), 'ArityMismatch: Expected 1 parameter, got 2')
+    util.fail(|| => os.exit('foo'), 'TypeMismatch: Expected Int, not Str')
+    util.fail(|| => os.exit(1, 2), 'ArityMismatch: Expected 1 parameter, got 2')
 }
 
 fn testReadLines() {
 
-    fail(
+    util.fail(
         || => os.open('data/no_such_file.txt'), 
         'OsError: open data/no_such_file.txt: no such file or directory')
 
@@ -39,11 +30,10 @@ fn testStat() {
     assert(props == [ 'lines.txt', false, 8, 420 ])
 }
 
-fn main(args) {
+fn run() {
     testExit()
     testReadLines()
     testStat()
-    os.exit(0)
 }
 
 

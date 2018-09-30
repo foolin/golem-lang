@@ -64,7 +64,7 @@ var builtins = []*g.Builtin{
 func testCompile(t *testing.T, code string) *bc.Module {
 
 	source := &scanner.Source{Name: "foo", Path: "foo.glm", Code: code}
-	_, mod, err := CompileSource(source, builtins)
+	mod, err := CompileSource(source, builtins)
 	tassert(t, err == nil)
 
 	return mod

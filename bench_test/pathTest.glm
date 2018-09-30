@@ -23,7 +23,7 @@ fn testWalk() {
         ('data/lines.txt', false, '.txt') ] == list)
 }
 
-fn main(args) {
+fn run() {
     testExt()
     testWalk()
 }

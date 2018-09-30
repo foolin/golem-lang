@@ -10,6 +10,7 @@ import (
 
 	"github.com/mjarmy/golem-lang/compiler"
 	g "github.com/mjarmy/golem-lang/core"
+	bc "github.com/mjarmy/golem-lang/core/bytecode"
 	"github.com/mjarmy/golem-lang/scanner"
 )
 
@@ -53,7 +54,7 @@ func TestEvalCode(t *testing.T) {
 	tassert(t, err == nil)
 	var mod g.Module = g.NewNativeModule("foo", stc)
 
-	val, err = EvalCode("import foo; foo.b + a", blt, []g.Module{mod})
+	val, err = EvalCode("import foo; foo.b + a", blt, NewLibrary([]g.Module{mod}, nil))
 	ok(t, val, err, g.NewInt(3))
 }
 
@@ -61,7 +62,7 @@ func TestCompileCode(t *testing.T) {
 
 	blt := []*g.Builtin{{"a", g.NewInt(2)}}
 
-	mod, err := CompileCode("1 + a", blt, nil)
+	mod, err := CompileCode("1 + a", blt)
 	tassert(t, err == nil)
 
 	val, err := NewInterpreter(blt, nil).EvalModule(mod)
@@ -79,7 +80,7 @@ let a = 0
 const b = "xyz"
 fn c() {}
 `
-	mod, err := CompileCode(code, builtins, nil)
+	mod, err := CompileCode(code, builtins)
 	_, es := NewInterpreter(builtins, nil).EvalModule(mod)
 	tassert(t, es == nil)
 
@@ -104,7 +105,7 @@ let a = 1
 return a + 2
 let b = 5
 `
-	mod, err = CompileCode(code, builtins, nil)
+	mod, err = CompileCode(code, builtins)
 	val, es = NewInterpreter(builtins, nil).EvalModule(mod)
 	tassert(t, es == nil)
 	ok(t, val, nil, g.NewInt(3))
@@ -116,37 +117,40 @@ let b = 5
 	ok(t, val, err, g.Null)
 }
 
-//func TestImport(t *testing.T) {
-//
-//	srcMain := &scanner.Source{Name: "foo", Path: "foo.glm", Code: `
-//import a, b, c
-//assert([1, 2, 3] == [a.x, b.y, c.z])
-//`}
-//	sourceMap := map[string]*scanner.Source{
-//		"a": &scanner.Source{Name: "a", Path: "a.glm", Code: "import c; let x = 1;"},
-//		"b": &scanner.Source{Name: "b", Path: "b.glm", Code: "import c; let y = c.z - 1;"},
-//		"c": &scanner.Source{Name: "c", Path: "c.glm", Code: "let z = 3;"},
-//	}
-//	resolver := func(moduleName string) (*scanner.Source, error) {
-//		if src, ok := sourceMap[moduleName]; ok {
-//			return src, nil
-//		}
-//		return nil, g.UndefinedModule(moduleName)
-//	}
-//
-//	mods, errs := compiler.CompileSourceFully(builtins, resolver, srcMain)
-//	tassert(t, errs == nil)
-//	tassert(t, len(mods) == 4)
-//	tassert(t, mods[0].Name() == "foo")
-//	tassert(t, mods[1].Name() == "a")
-//	tassert(t, mods[2].Name() == "b")
-//	tassert(t, mods[3].Name() == "c")
-//
-//	itp := NewInterpreter(builtins, mods)
-//	result, es := itp.InitModules()
-//	tassert(t, es == nil)
-//	tassert(t, len(result) == 4)
-//}
+func TestImport(t *testing.T) {
+
+	sourceMap := map[string]*scanner.Source{
+		"a": &scanner.Source{Name: "a", Path: "a.glm", Code: "import c; let x = 1;"},
+		"b": &scanner.Source{Name: "b", Path: "b.glm", Code: "import c; let y = c.z - 1;"},
+		"c": &scanner.Source{Name: "c", Path: "c.glm", Code: "let z = 3;"},
+	}
+
+	counter := 0
+	resolver := func(name string) (*bc.Module, error) {
+		if src, ok := sourceMap[name]; ok {
+			counter++
+			return compiler.CompileSource(src, nil)
+		}
+		return nil, g.UndefinedModule(name)
+	}
+
+	srcMain := &scanner.Source{
+		Name: "foo",
+		Path: "foo.glm",
+		Code: "import a, b, c; return [a.x, b.y, c.z]",
+	}
+	mod, err := compiler.CompileSource(srcMain, nil)
+	tassert(t, err == nil)
+
+	itp := NewInterpreter(nil, NewLibrary(nil, resolver))
+	val, err := itp.EvalModule(mod)
+	tassert(t, err == nil)
+	tassert(t, counter == 3)
+	tassert(t, reflect.DeepEqual(
+		val,
+		g.NewList([]g.Value{
+			g.NewInt(1), g.NewInt(2), g.NewInt(3)})))
+}
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
@@ -155,7 +159,7 @@ let b = 5
 func failInterp(t *testing.T, code string, expect ErrorStruct) {
 
 	source := &scanner.Source{Name: "foo", Path: "foo.glm", Code: code}
-	_, mod, err := compiler.CompileSource(source, builtins)
+	mod, err := compiler.CompileSource(source, builtins)
 	tassert(t, err == nil)
 
 	intp := NewInterpreter(builtins, nil)

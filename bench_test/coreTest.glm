@@ -3,17 +3,7 @@
 // license that can be found in the LICENSE file.
 
 import golem
-import zork
-
-fn fail(func, err) {
-    try {
-        func()
-        assert(false)
-    } catch e {
-        //println(e.error)
-        assert(err == e.error)
-    }
-}
+import util
 
 fn listify(ibl) {
     const ls = []
@@ -26,17 +16,15 @@ fn listify(ibl) {
 fn iterate(ibl) {
     const ls = []
     const itr = iter(ibl)
-    fail(|| => itr.get(), 'NoSuchElement')
+    util.fail(|| => itr.get(), 'NoSuchElement')
     while itr.next() {
         ls.add(itr.get())
     }
-    fail(|| => itr.get(), 'NoSuchElement')
+    util.fail(|| => itr.get(), 'NoSuchElement')
     return ls
 }
 
 fn testExpressions() {
-
-    assert(42 == zork.quux)
 
     assert(assert == assert);
     assert(print == print);
@@ -57,9 +45,9 @@ fn testExpressions() {
 "abc"
 def`)
 
-    fail(|| => true + null, 'TypeMismatch: Expected Int or Float, not Bool')
-    fail(|| => 1 + null, 'TypeMismatch: Expected Int or Float, not Null')
-    fail(|| => null + 1, 'TypeMismatch: Expected Int or Float, not Null')
+    util.fail(|| => true + null, 'TypeMismatch: Expected Int or Float, not Bool')
+    util.fail(|| => 1 + null, 'TypeMismatch: Expected Int or Float, not Null')
+    util.fail(|| => null + 1, 'TypeMismatch: Expected Int or Float, not Null')
 
     assert((true == 'a') == false)
     assert((3 * 7 + 4 == 5 * 5) == true)
@@ -68,10 +56,10 @@ def`)
 
     assert(!false == true)
     assert(!true == false)
-    fail(|| => !null, 'TypeMismatch: Expected Bool, not Null')
-    fail(|| => !'a', 'TypeMismatch: Expected Bool, not Str')
-    fail(|| => !1, 'TypeMismatch: Expected Bool, not Int')
-    fail(|| => !1.0, 'TypeMismatch: Expected Bool, not Float')
+    util.fail(|| => !null, 'TypeMismatch: Expected Bool, not Null')
+    util.fail(|| => !'a', 'TypeMismatch: Expected Bool, not Str')
+    util.fail(|| => !1, 'TypeMismatch: Expected Bool, not Int')
+    util.fail(|| => !1.0, 'TypeMismatch: Expected Bool, not Float')
 
     assert(1 < 2 == true)
     assert(1 <= 2 == true)
@@ -91,14 +79,14 @@ def`)
     assert((true  && false) == false)
     assert((false && true) == false)
     assert((false && 12) == false)
-    fail(|| => 12 && false, 'TypeMismatch: Expected Bool, not Int')
+    util.fail(|| => 12 && false, 'TypeMismatch: Expected Bool, not Int')
 
     assert(true  || (true == true))
     assert(true  || (false == true))
     assert(false || (true == true))
     assert(false || (false == false))
     assert(true  || (12 == true))
-    fail(|| => 12  || true, 'TypeMismatch: Expected Bool, not Int')
+    util.fail(|| => 12  || true, 'TypeMismatch: Expected Bool, not Int')
 
     assert(~0 == -1)
     assert(8 % 2 == 0)
@@ -110,16 +98,16 @@ def`)
 
     assert([-3,1,1,-1,-3,-7] == [~2, ~-2, 7 % -3, -11 % 2, -4 | -3, -17 ^ 22])
 
-    fail(|| => 1 << -1, 'InvalidArgument: Shift count cannot be less than zero')
-    fail(|| => 1 >> -1, 'InvalidArgument: Shift count cannot be less than zero')
+    util.fail(|| => 1 << -1, 'InvalidArgument: Shift count cannot be less than zero')
+    util.fail(|| => 1 >> -1, 'InvalidArgument: Shift count cannot be less than zero')
 
     assert([true][0] == true)
     assert('abc'[1] == 'b')
     assert('abc'[-1] == 'c')
-    fail(|| => 'abc'[3], 'IndexOutOfBounds: 3')
-    fail(|| => [true][2], 'IndexOutOfBounds: 2')
-    fail(|| => (1,2)[3], 'IndexOutOfBounds: 3')
-    fail(|| => range(0, 2)[2], 'IndexOutOfBounds: 2')
+    util.fail(|| => 'abc'[3], 'IndexOutOfBounds: 3')
+    util.fail(|| => [true][2], 'IndexOutOfBounds: 2')
+    util.fail(|| => (1,2)[3], 'IndexOutOfBounds: 3')
+    util.fail(|| => range(0, 2)[2], 'IndexOutOfBounds: 2')
 
     assert('abc'[1:] == 'bc')
     assert('abc'[:1] == 'a')
@@ -131,14 +119,14 @@ def`)
     assert([6,7,8,9][1:3] == [7,8])
     assert([6,7,8,9][1:1] == [])
 
-    fail(|| => len(true), 'TypeMismatch: Type Bool has no len()')
-    fail(|| => true[0], 'TypeMismatch: Type Bool cannot be indexed')
-    fail(|| => true[0] = 1, 'TypeMismatch: Type Bool cannot be indexed')
-    fail(|| => true[0:1], 'TypeMismatch: Type Bool cannot be sliced')
-    fail(|| => true[:1], 'TypeMismatch: Type Bool cannot be sliced')
-    fail(|| => true[0:], 'TypeMismatch: Type Bool cannot be sliced')
-    fail(|| => set {} < 3, 'TypeMismatch: Types Set and Int cannot be compared')
-    fail(|| => 3 > set {}, 'TypeMismatch: Types Int and Set cannot be compared')
+    util.fail(|| => len(true), 'TypeMismatch: Type Bool has no len()')
+    util.fail(|| => true[0], 'TypeMismatch: Type Bool cannot be indexed')
+    util.fail(|| => true[0] = 1, 'TypeMismatch: Type Bool cannot be indexed')
+    util.fail(|| => true[0:1], 'TypeMismatch: Type Bool cannot be sliced')
+    util.fail(|| => true[:1], 'TypeMismatch: Type Bool cannot be sliced')
+    util.fail(|| => true[0:], 'TypeMismatch: Type Bool cannot be sliced')
+    util.fail(|| => set {} < 3, 'TypeMismatch: Types Set and Int cannot be compared')
+    util.fail(|| => 3 > set {}, 'TypeMismatch: Types Int and Set cannot be compared')
 }
 
 fn testInt() {
@@ -153,18 +141,18 @@ fn testInt() {
     assert(1 == freeze(1))
     assert(frozen(1))
 
-    fail(|| => iter(1), "TypeMismatch: Type Int has no iter()")
-    fail(|| => len(1), "TypeMismatch: Type Int has no len()")
+    util.fail(|| => iter(1), "TypeMismatch: Type Int has no iter()")
+    util.fail(|| => len(1), "TypeMismatch: Type Int has no len()")
 
     assert('1' == str(1))
     assert('Int' == type(1))
 
     assert(set {} == fields(1))
     assert(!has(1, 'bogus'))
-    fail(|| => 1 .bogus, "NoSuchField: Field 'bogus' not found") // Note that '1.bogus' fails to parse
-    fail(|| => golem.getField(1, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => golem.setField(1, 'bogus', null), "TypeMismatch: Expected Struct, not Int")
-    fail(|| => 1 .bogus = 'z', "TypeMismatch: Expected Struct, not Int")
+    util.fail(|| => 1 .bogus, "NoSuchField: Field 'bogus' not found") // Note that '1.bogus' util.fails to parse
+    util.fail(|| => golem.getField(1, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    util.fail(|| => golem.setField(1, 'bogus', null), "TypeMismatch: Expected Struct, not Int")
+    util.fail(|| => 1 .bogus = 'z', "TypeMismatch: Expected Struct, not Int")
 }
 
 fn testFloat() {
@@ -179,24 +167,24 @@ fn testFloat() {
     assert(1.1 == freeze(1.1))
     assert(frozen(1.1))
 
-    fail(|| => iter(1.1), "TypeMismatch: Type Float has no iter()")
-    fail(|| => len(1.1), "TypeMismatch: Type Float has no len()")
+    util.fail(|| => iter(1.1), "TypeMismatch: Type Float has no iter()")
+    util.fail(|| => len(1.1), "TypeMismatch: Type Float has no len()")
 
     assert('1.1' == str(1.1))
     assert('Float' == type(1.1))
 
     assert(set {} == fields(1.1))
     assert(!has(1.1, 'bogus'))
-    fail(|| => 1.1 .bogus, "NoSuchField: Field 'bogus' not found") // Note that '1.1.bogus' fails to parse
-    fail(|| => golem.getField(1.1, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => golem.setField(1.1, 'bogus', null), "TypeMismatch: Expected Struct, not Float")
-    fail(|| => 1.1 .bogus = 'z', "TypeMismatch: Expected Struct, not Float")
+    util.fail(|| => 1.1 .bogus, "NoSuchField: Field 'bogus' not found") // Note that '1.1.bogus' util.fails to parse
+    util.fail(|| => golem.getField(1.1, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    util.fail(|| => golem.setField(1.1, 'bogus', null), "TypeMismatch: Expected Struct, not Float")
+    util.fail(|| => 1.1 .bogus = 'z', "TypeMismatch: Expected Struct, not Float")
 
     assert(1.0 + 2.0 == 3.0)
     assert(1.0 - 2.0 == -1.0)
     assert(3.0 * 2.0 == 6.0)
     assert(3.0 / 2.0 == 1.5)
-    fail(|| => 3.0 / 0.0, 'DivideByZero')
+    util.fail(|| => 3.0 / 0.0, 'DivideByZero')
 }
 
 fn testAssignment() {
@@ -238,7 +226,7 @@ fn testAssignment() {
             const d = b--
             assert([11, 19, 10, 20] == [a, b, c, d])
 
-            fail(fn() {
+            util.fail(fn() {
                     let e = 'abc'
                     e++
                 }, "TypeMismatch: Expected Int or Float, not Str")
@@ -250,7 +238,7 @@ fn testAssignment() {
             const d = b[0]--
             assert([[11], [19], 10, 20] == [a, b, c, d])
 
-            fail(fn() {
+            util.fail(fn() {
                     const e = ['abc']
                     e[0]++
                 }, "TypeMismatch: Expected Int or Float, not Str")
@@ -262,7 +250,7 @@ fn testAssignment() {
             const d = b.y--
             assert([struct { x: 11 }, struct { y: 19 }, 10, 20] == [a, b, c, d])
 
-            fail(fn() {
+            util.fail(fn() {
                     const e = struct { x: 'abc' }
                     e.x++
                 }, "TypeMismatch: Expected Int or Float, not Str")
@@ -381,18 +369,18 @@ fn testFunc() {
     assert(f == freeze(f))
     assert(frozen(f))
 
-    fail(|| => iter(f), "TypeMismatch: Type Func has no iter()")
-    fail(|| => len(f), "TypeMismatch: Type Func has no len()")
+    util.fail(|| => iter(f), "TypeMismatch: Type Func has no iter()")
+    util.fail(|| => len(f), "TypeMismatch: Type Func has no len()")
 
     assert(str(f).hasPrefix('func<'))
     assert('Func' == type(f))
 
     assert(set {} == fields(f))
     assert(!has(f, 'bogus'))
-    fail(|| => f.bogus, "NoSuchField: Field 'bogus' not found")
-    fail(|| => golem.getField(f, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => golem.setField(f, 'bogus', null), "TypeMismatch: Expected Struct, not Func")
-    fail(|| => f.bogus = 'z', "TypeMismatch: Expected Struct, not Func")
+    util.fail(|| => f.bogus, "NoSuchField: Field 'bogus' not found")
+    util.fail(|| => golem.getField(f, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    util.fail(|| => golem.setField(f, 'bogus', null), "TypeMismatch: Expected Struct, not Func")
+    util.fail(|| => f.bogus = 'z', "TypeMismatch: Expected Struct, not Func")
 
     //------------------------------------------
 
@@ -433,8 +421,8 @@ fn testFunc() {
     }
     assert(32 == foo(5))
 
-    fail(|| => 1/0, 'DivideByZero')
-    fail(|| => true(), 'TypeMismatch: Expected Func, not Bool')
+    util.fail(|| => 1/0, 'DivideByZero')
+    util.fail(|| => true(), 'TypeMismatch: Expected Func, not Bool')
 }
 
 fn testCapture() {
@@ -509,22 +497,22 @@ fn testNull() {
     assert(null != 1)
     assert(1 != null)
 
-    fail(|| => freeze(null), "NullValue")
-    fail(|| => frozen(null), "NullValue")
-    fail(|| => iter(null), "NullValue")
-    fail(|| => len(null), "NullValue")
-    fail(|| => range(null, null), "NullValue")
+    util.fail(|| => freeze(null), "NullValue")
+    util.fail(|| => frozen(null), "NullValue")
+    util.fail(|| => iter(null), "NullValue")
+    util.fail(|| => len(null), "NullValue")
+    util.fail(|| => range(null, null), "NullValue")
     assert('null' == str(null)) // this is convenient
     assert('Null' == type(null)) // this is convenient
 
-    fail(|| => fields(null), "NullValue")
-    fail(|| => has(null, 'bogus'), "NullValue")
+    util.fail(|| => fields(null), "NullValue")
+    util.fail(|| => has(null, 'bogus'), "NullValue")
 
-    fail(|| => golem.getField(null, 'bogus'), "NullValue")
-    fail(|| => null.bogus, "NullValue")
-    fail(|| => null.bogus(), "NullValue")
-    fail(|| => golem.setField(null, 'bogus', null), "NullValue")
-    fail(|| => null.bogus = 1, "NullValue")
+    util.fail(|| => golem.getField(null, 'bogus'), "NullValue")
+    util.fail(|| => null.bogus, "NullValue")
+    util.fail(|| => null.bogus(), "NullValue")
+    util.fail(|| => golem.setField(null, 'bogus', null), "NullValue")
+    util.fail(|| => null.bogus = 1, "NullValue")
 }
 
 fn testBool() {
@@ -543,15 +531,15 @@ fn testBool() {
     assert(frozen(true))
     assert(frozen(false))
 
-    fail(|| => iter(true), "TypeMismatch: Type Bool has no iter()")
-    fail(|| => iter(false), "TypeMismatch: Type Bool has no iter()")
-    fail(|| => len(true), "TypeMismatch: Type Bool has no len()")
-    fail(|| => len(false), "TypeMismatch: Type Bool has no len()")
+    util.fail(|| => iter(true), "TypeMismatch: Type Bool has no iter()")
+    util.fail(|| => iter(false), "TypeMismatch: Type Bool has no iter()")
+    util.fail(|| => len(true), "TypeMismatch: Type Bool has no len()")
+    util.fail(|| => len(false), "TypeMismatch: Type Bool has no len()")
 
-    fail(|| => range(true, 1), "TypeMismatch: Expected Int, not Bool")
-    fail(|| => range(false, 1), "TypeMismatch: Expected Int, not Bool")
-    fail(|| => range(1, true), "TypeMismatch: Expected Int, not Bool")
-    fail(|| => range(1, false), "TypeMismatch: Expected Int, not Bool")
+    util.fail(|| => range(true, 1), "TypeMismatch: Expected Int, not Bool")
+    util.fail(|| => range(false, 1), "TypeMismatch: Expected Int, not Bool")
+    util.fail(|| => range(1, true), "TypeMismatch: Expected Int, not Bool")
+    util.fail(|| => range(1, false), "TypeMismatch: Expected Int, not Bool")
 
     assert('true' == str(true))
     assert('false' == str(false))
@@ -565,17 +553,17 @@ fn testBool() {
     assert(false == has(true, 'bogus'))
     assert(false == has(false, 'bogus'))
 
-    fail(|| => golem.getField(true,  'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => golem.getField(false, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => true.bogus, "NoSuchField: Field 'bogus' not found")
-    fail(|| => false.bogus, "NoSuchField: Field 'bogus' not found")
-    fail(|| => true.bogus(), "NoSuchField: Field 'bogus' not found")
-    fail(|| => false.bogus(), "NoSuchField: Field 'bogus' not found")
+    util.fail(|| => golem.getField(true,  'bogus'), "NoSuchField: Field 'bogus' not found")
+    util.fail(|| => golem.getField(false, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    util.fail(|| => true.bogus, "NoSuchField: Field 'bogus' not found")
+    util.fail(|| => false.bogus, "NoSuchField: Field 'bogus' not found")
+    util.fail(|| => true.bogus(), "NoSuchField: Field 'bogus' not found")
+    util.fail(|| => false.bogus(), "NoSuchField: Field 'bogus' not found")
 
-    fail(|| => golem.setField(true, 'bogus', null), "TypeMismatch: Expected Struct, not Bool")
-    fail(|| => golem.setField(false, 'bogus', null), "TypeMismatch: Expected Struct, not Bool")
-    fail(|| => true.bogus = 1,  "TypeMismatch: Expected Struct, not Bool")
-    fail(|| => false.bogus = 1, "TypeMismatch: Expected Struct, not Bool")
+    util.fail(|| => golem.setField(true, 'bogus', null), "TypeMismatch: Expected Struct, not Bool")
+    util.fail(|| => golem.setField(false, 'bogus', null), "TypeMismatch: Expected Struct, not Bool")
+    util.fail(|| => true.bogus = 1,  "TypeMismatch: Expected Struct, not Bool")
+    util.fail(|| => false.bogus = 1, "TypeMismatch: Expected Struct, not Bool")
 }
 
 fn testStr() {
@@ -594,8 +582,8 @@ fn testStr() {
     assert(iter('a') != null)
     assert(1 == len('a'))
 
-    fail(|| => range('a', 1), "TypeMismatch: Expected Int, not Str")
-    fail(|| => range(1, 'a'), "TypeMismatch: Expected Int, not Str")
+    util.fail(|| => range('a', 1), "TypeMismatch: Expected Int, not Str")
+    util.fail(|| => range(1, 'a'), "TypeMismatch: Expected Int, not Str")
 
     assert('a' == str('a'))
     assert('Str' == type('a'))
@@ -621,9 +609,9 @@ fn testStr() {
     assert(s.map == golem.getField(s, 'map'))
 
     assert(!has(s, 'bogus'))
-    fail(|| => golem.getField(s, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => golem.setField(s, 'bogus', null), "TypeMismatch: Expected Struct, not Str")
-    fail(|| => s.bogus = 1, "TypeMismatch: Expected Struct, not Str")
+    util.fail(|| => golem.getField(s, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    util.fail(|| => golem.setField(s, 'bogus', null), "TypeMismatch: Expected Struct, not Str")
+    util.fail(|| => s.bogus = 1, "TypeMismatch: Expected Struct, not Str")
 
     //---------------------------------------------
 
@@ -659,16 +647,16 @@ fn testStr() {
     }
     assert('cba們我是這' == reverse)
 
-    fail(|| => iter('').get(), 'NoSuchElement')
+    util.fail(|| => iter('').get(), 'NoSuchElement')
     const count = 0
     const itr = iter(s)
-    fail(|| => itr.get(), 'NoSuchElement')
+    util.fail(|| => itr.get(), 'NoSuchElement')
     reverse = ''  
     while itr.next() {
         reverse = itr.get() + reverse
     }
     assert('cba們我是這' == reverse)
-    fail(|| => itr.get(), 'NoSuchElement')
+    util.fail(|| => itr.get(), 'NoSuchElement')
 
     const f = s.contains
     assert(true == f('ab'))
@@ -679,8 +667,8 @@ fn testStr() {
     assert(true == 'abcde'.contains('d'))
     assert(false == ''.contains('cd'))
     assert(false == ''.contains('d'))
-    fail(|| => s.contains(), 'ArityMismatch: Expected 1 parameter, got 0')
-    fail(|| => s.contains(1), 'TypeMismatch: Expected Str, not Int')
+    util.fail(|| => s.contains(), 'ArityMismatch: Expected 1 parameter, got 0')
+    util.fail(|| => s.contains(1), 'TypeMismatch: Expected Str, not Int')
 
     assert(0 == s.index('這是我'))
     assert(3 == s.index('們ab'))
@@ -689,8 +677,8 @@ fn testStr() {
     assert(3 == 'abcde'.index('d'))
     assert(-1 == ''.index('cd'))
     assert(-1 == ''.index('d'))
-    fail(|| => s.index(), 'ArityMismatch: Expected 1 parameter, got 0')
-    fail(|| => s.index(1), 'TypeMismatch: Expected Str, not Int')
+    util.fail(|| => s.index(), 'ArityMismatch: Expected 1 parameter, got 0')
+    util.fail(|| => s.index(1), 'TypeMismatch: Expected Str, not Int')
 
     s = "這是我們a們abc"
     assert(0 == s.lastIndex('這是我'))
@@ -700,31 +688,31 @@ fn testStr() {
     assert(5 == 'abcdcde'.lastIndex('d'))
     assert(-1 == ''.lastIndex('cd'))
     assert(-1 == ''.lastIndex('d'))
-    fail(|| => s.lastIndex(), 'ArityMismatch: Expected 1 parameter, got 0')
-    fail(|| => s.lastIndex(1), 'TypeMismatch: Expected Str, not Int')
+    util.fail(|| => s.lastIndex(), 'ArityMismatch: Expected 1 parameter, got 0')
+    util.fail(|| => s.lastIndex(1), 'TypeMismatch: Expected Str, not Int')
 
     assert(s.hasPrefix('這是我'))
     assert(!s.hasPrefix('bc'))
     assert(!''.hasPrefix('這是我'))
     assert(!''.hasPrefix('bc'))
-    fail(|| => s.lastIndex(), 'ArityMismatch: Expected 1 parameter, got 0')
-    fail(|| => s.lastIndex(1), 'TypeMismatch: Expected Str, not Int')
+    util.fail(|| => s.lastIndex(), 'ArityMismatch: Expected 1 parameter, got 0')
+    util.fail(|| => s.lastIndex(1), 'TypeMismatch: Expected Str, not Int')
 
     assert(!s.hasSuffix('這是我'))
     assert(s.hasSuffix('bc'))
     assert(!''.hasSuffix('這是我'))
     assert(!''.hasSuffix('bc'))
-    fail(|| => s.lastIndex(), 'ArityMismatch: Expected 1 parameter, got 0')
+    util.fail(|| => s.lastIndex(), 'ArityMismatch: Expected 1 parameter, got 0')
 
     assert("這是我zzbc" == s.replace('們a', 'z'))
     assert("這是我z們abc" == s.replace('們a', 'z', 1))
     assert('abc' == 'abc'.replace('x', 'y'))
-    fail(|| => s.replace(), 'ArityMismatch: Expected at least 2 parameters, got 0')
+    util.fail(|| => s.replace(), 'ArityMismatch: Expected at least 2 parameters, got 0')
 
     assert(['a', 'b', 'c'] == 'a,b,c'.split(','))
     assert(['abc'] == 'abc'.split(','))
     assert([''] == ''.split(','))
-    fail(|| => s.split(), 'ArityMismatch: Expected 1 parameter, got 0')
+    util.fail(|| => s.split(), 'ArityMismatch: Expected 1 parameter, got 0')
 
     let delims = set{}.addAll('()[]'.toChars())
     s = 'a]b)cdef(g[h]'.map(|r| => delims.contains(r) ? ' ' : r)
@@ -733,12 +721,12 @@ fn testStr() {
     assert(set{'[', ']', '(', ')'} == delims)
     assert('a b cdef g h ' == s)
 
-    fail(|| => s.map(|r| => 0), 'TypeMismatch: map function must return Str, not Int')
+    util.fail(|| => s.map(|r| => 0), 'TypeMismatch: map function must return Str, not Int')
 
-    fail(|| => s.map(|| => null),      "ArityMismatch: map function must have 1 parameter")
-    fail(|| => s.map(|a,b| => null),   "ArityMismatch: map function must have 1 parameter")
-    fail(|| => s.map(fn(a...) {}),     "ArityMismatch: map function must have 1 parameter")
-    fail(|| => s.map(fn(a, b = 2) {}), "ArityMismatch: map function must have 1 parameter")
+    util.fail(|| => s.map(|| => null),      "ArityMismatch: map function must have 1 parameter")
+    util.fail(|| => s.map(|a,b| => null),   "ArityMismatch: map function must have 1 parameter")
+    util.fail(|| => s.map(fn(a...) {}),     "ArityMismatch: map function must have 1 parameter")
+    util.fail(|| => s.map(fn(a, b = 2) {}), "ArityMismatch: map function must have 1 parameter")
 
     s = 'abc'
     const c = s.contains
@@ -776,10 +764,10 @@ fn testList() {
     assert(!frozen(x))
     assert(x == freeze(x))
     assert(frozen(x))
-    fail(|| => x.add(1), "ImmutableValue")
-    fail(|| => x.addAll(1), "ImmutableValue")
-    fail(|| => x.remove(1), "ImmutableValue")
-    fail(|| => x.clear(), "ImmutableValue")
+    util.fail(|| => x.add(1), "ImmutableValue")
+    util.fail(|| => x.addAll(1), "ImmutableValue")
+    util.fail(|| => x.remove(1), "ImmutableValue")
+    util.fail(|| => x.clear(), "ImmutableValue")
     x.isEmpty()
     x.contains(1)
     x.index(1)
@@ -830,9 +818,9 @@ fn testList() {
     assert(x.sort == golem.getField(x, 'sort'))
 
     assert(!has(x, 'bogus'))
-    fail(|| => golem.getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => golem.setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not List")
-    fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct, not List")
+    util.fail(|| => golem.getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    util.fail(|| => golem.setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not List")
+    util.fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct, not List")
 
     //-------------------------------------------------
 
@@ -845,15 +833,15 @@ fn testList() {
             assert(6 == count)
         },
         fn () {
-            fail(|| => iter([]).get(), 'NoSuchElement')
+            util.fail(|| => iter([]).get(), 'NoSuchElement')
             let count = 0
             const itr = iter([1, 2, 3])
-            fail(|| => itr.get(), 'NoSuchElement')
+            util.fail(|| => itr.get(), 'NoSuchElement')
             while itr.next() {
                 count += itr.get()
             }
             assert(6 == count)
-            fail(|| => itr.get(), 'NoSuchElement')
+            util.fail(|| => itr.get(), 'NoSuchElement')
         },
         fn () {
             const a = []
@@ -935,42 +923,42 @@ fn testList() {
             assert(ls == [1, 2, 4, 5])
             assert('null1245' == ls.reduce(null, |acc, x| => str(acc) + x))
 
-            fail(|| => ls.reduce(0, null), 'NullValue')
+            util.fail(|| => ls.reduce(0, null), 'NullValue')
         },
         fn () {
             let ls = freeze([2, 1, 3])
 
             assert([ 4, 1, 9 ] == ls.map(|a| => a*a) && [2, 1, 3] == ls)
-            fail(|| => ls.map(|| => null),      "ArityMismatch: map function must have 1 parameter")
-            fail(|| => ls.map(|a,b| => null),   "ArityMismatch: map function must have 1 parameter")
-            fail(|| => ls.map(fn(a...) {}),     "ArityMismatch: map function must have 1 parameter")
-            fail(|| => ls.map(fn(a, b = 2) {}), "ArityMismatch: map function must have 1 parameter")
+            util.fail(|| => ls.map(|| => null),      "ArityMismatch: map function must have 1 parameter")
+            util.fail(|| => ls.map(|a,b| => null),   "ArityMismatch: map function must have 1 parameter")
+            util.fail(|| => ls.map(fn(a...) {}),     "ArityMismatch: map function must have 1 parameter")
+            util.fail(|| => ls.map(fn(a, b = 2) {}), "ArityMismatch: map function must have 1 parameter")
 
             assert(6 == ls.reduce(0, |acc, a| => acc + a) && [2, 1, 3] == ls)
-            fail(|| => ls.reduce(0, || => null),      "ArityMismatch: reduce function must have 2 parameters")
-            fail(|| => ls.reduce(0, |a| => null),     "ArityMismatch: reduce function must have 2 parameters")
-            fail(|| => ls.reduce(0, fn(a...) {}),     "ArityMismatch: reduce function must have 2 parameters")
-            fail(|| => ls.reduce(0, fn(a, b = 2) {}), "ArityMismatch: reduce function must have 2 parameters")
+            util.fail(|| => ls.reduce(0, || => null),      "ArityMismatch: reduce function must have 2 parameters")
+            util.fail(|| => ls.reduce(0, |a| => null),     "ArityMismatch: reduce function must have 2 parameters")
+            util.fail(|| => ls.reduce(0, fn(a...) {}),     "ArityMismatch: reduce function must have 2 parameters")
+            util.fail(|| => ls.reduce(0, fn(a, b = 2) {}), "ArityMismatch: reduce function must have 2 parameters")
 
             assert([2, 1] == ls.filter(|a| => a < 3) && [2, 1, 3] == ls)
-            fail(|| => ls.filter(|a| => 0), 'TypeMismatch: filter function must return Bool, not Int')
+            util.fail(|| => ls.filter(|a| => 0), 'TypeMismatch: filter function must return Bool, not Int')
 
-            fail(|| => ls.filter(|| => null),      "ArityMismatch: filter function must have 1 parameter")
-            fail(|| => ls.filter(|a,b| => null),   "ArityMismatch: filter function must have 1 parameter")
-            fail(|| => ls.filter(fn(a...) {}),     "ArityMismatch: filter function must have 1 parameter")
-            fail(|| => ls.filter(fn(a, b = 2) {}), "ArityMismatch: filter function must have 1 parameter")
+            util.fail(|| => ls.filter(|| => null),      "ArityMismatch: filter function must have 1 parameter")
+            util.fail(|| => ls.filter(|a,b| => null),   "ArityMismatch: filter function must have 1 parameter")
+            util.fail(|| => ls.filter(fn(a...) {}),     "ArityMismatch: filter function must have 1 parameter")
+            util.fail(|| => ls.filter(fn(a, b = 2) {}), "ArityMismatch: filter function must have 1 parameter")
 
-            fail(|| => ls.sort(|a,b| => 0), 'ImmutableValue')
+            util.fail(|| => ls.sort(|a,b| => 0), 'ImmutableValue')
 
             ls = [2, 1, 3]
             assert([1, 2, 3] == ls.sort() && [1, 2, 3] == ls)
             assert([3, 2, 1] == ls.sort(|a,b| => b < a) &&  [3, 2, 1] == ls)
-            fail(|| => ls.sort(|a,b| => 0), 'TypeMismatch: sort function must return Bool, not Int')
+            util.fail(|| => ls.sort(|a,b| => 0), 'TypeMismatch: sort function must return Bool, not Int')
 
-            fail(|| => ls.sort(|| => null),      "ArityMismatch: sort function must have 2 parameters")
-            fail(|| => ls.sort(|a| => null),     "ArityMismatch: sort function must have 2 parameters")
-            fail(|| => ls.sort(fn(a...) {}),     "ArityMismatch: sort function must have 2 parameters")
-            fail(|| => ls.sort(fn(a, b = 2) {}), "ArityMismatch: sort function must have 2 parameters")
+            util.fail(|| => ls.sort(|| => null),      "ArityMismatch: sort function must have 2 parameters")
+            util.fail(|| => ls.sort(|a| => null),     "ArityMismatch: sort function must have 2 parameters")
+            util.fail(|| => ls.sort(fn(a...) {}),     "ArityMismatch: sort function must have 2 parameters")
+            util.fail(|| => ls.sort(fn(a, b = 2) {}), "ArityMismatch: sort function must have 2 parameters")
         },
         fn () {
             const ls = [3, 4, 5]
@@ -983,7 +971,7 @@ fn testList() {
             const b = a.map(fn(x) { n += x; x*x; })
             assert(b == [1, 4, 9] && n == 6)
 
-            fail(|| => [].remove('a'), 'TypeMismatch: Expected Int, not Str')
+            util.fail(|| => [].remove('a'), 'TypeMismatch: Expected Int, not Str')
         },
         fn () {
             const ls = [3,4,5];
@@ -1061,9 +1049,9 @@ fn testDict() {
     assert(!frozen(x))
     assert(x == freeze(x))
     assert(frozen(x))
-    fail(|| => x.addAll(1), "ImmutableValue")
-    fail(|| => x.remove(1), "ImmutableValue")
-    fail(|| => x.clear(), "ImmutableValue")
+    util.fail(|| => x.addAll(1), "ImmutableValue")
+    util.fail(|| => x.remove(1), "ImmutableValue")
+    util.fail(|| => x.clear(), "ImmutableValue")
     x.isEmpty()
     x.contains(1)
 
@@ -1096,9 +1084,9 @@ fn testDict() {
     assert(x.remove == golem.getField(x, 'remove'))
 
     assert(!has(x, 'bogus'))
-    fail(|| => golem.getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => golem.setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not Dict")
-    fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct, not Dict")
+    util.fail(|| => golem.getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    util.fail(|| => golem.setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not Dict")
+    util.fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct, not Dict")
 
     //-------------------------------------------------
 
@@ -1129,12 +1117,12 @@ fn testDict() {
         },
         fn () {
             const a = dict{}
-            fail(|| => a.addAll(false),      'TypeMismatch: Type Bool has no iter()')
-            fail(|| => a.addAll([false]),    'TypeMismatch: Expected Tuple, not Bool')
-            fail(|| => a.addAll([(1,2,3)]),  'InvalidArgument: Expected Tuple of length 2, not length 3')
-            fail(|| => a[[1,2]],             'TypeMismatch: Type List cannot be hashed')
-            fail(|| => a[[1,2]] = 3,         'TypeMismatch: Type List cannot be hashed')
-            fail(|| => a.contains([1,2]), 'TypeMismatch: Type List cannot be hashed')
+            util.fail(|| => a.addAll(false),      'TypeMismatch: Type Bool has no iter()')
+            util.fail(|| => a.addAll([false]),    'TypeMismatch: Expected Tuple, not Bool')
+            util.fail(|| => a.addAll([(1,2,3)]),  'InvalidArgument: Expected Tuple of length 2, not length 3')
+            util.fail(|| => a[[1,2]],             'TypeMismatch: Type List cannot be hashed')
+            util.fail(|| => a[[1,2]] = 3,         'TypeMismatch: Type List cannot be hashed')
+            util.fail(|| => a.contains([1,2]), 'TypeMismatch: Type List cannot be hashed')
         },
         fn () {
             const a = dict {};
@@ -1174,8 +1162,8 @@ fn testDict() {
             assert(b == [ 0, 1, 2, ((true,false), 1), ('y', 2)])
         },
         fn () {
-            fail(|| => dict {null: 'b'}, 'NullValue')
-            fail(|| => dict {[]: 'b'}, 'TypeMismatch: Type List cannot be hashed')
+            util.fail(|| => dict {null: 'b'}, 'NullValue')
+            util.fail(|| => dict {[]: 'b'}, 'TypeMismatch: Type List cannot be hashed')
         }
     ]
     for f in funcs { f(); }
@@ -1206,10 +1194,10 @@ fn testSet() {
     assert(!frozen(x))
     assert(x == freeze(x))
     assert(frozen(x))
-    fail(|| => x.add(1), "ImmutableValue")
-    fail(|| => x.addAll(1), "ImmutableValue")
-    fail(|| => x.remove(1), "ImmutableValue")
-    fail(|| => x.clear(), "ImmutableValue")
+    util.fail(|| => x.add(1), "ImmutableValue")
+    util.fail(|| => x.addAll(1), "ImmutableValue")
+    util.fail(|| => x.remove(1), "ImmutableValue")
+    util.fail(|| => x.clear(), "ImmutableValue")
     x.isEmpty()
     x.contains(1)
 
@@ -1244,9 +1232,9 @@ fn testSet() {
     assert(x.remove == golem.getField(x, 'remove'))
 
     assert(!has(x, 'bogus'))
-    fail(|| => golem.getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => golem.setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not Set")
-    fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct, not Set")
+    util.fail(|| => golem.getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    util.fail(|| => golem.setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not Set")
+    util.fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct, not Set")
 
     //-------------------------------------------------
 
@@ -1281,12 +1269,12 @@ fn testSet() {
             assert(a.add != a.addAll);
         },
         fn () {
-            fail(|| => set{}.addAll(false),   'TypeMismatch: Type Bool has no iter()')
-            fail(|| => set{}.add(3,4),        'ArityMismatch: Expected 1 parameter, got 2')
-            fail(|| => set{}.add([1,2]),      'TypeMismatch: Type List cannot be hashed')
-            fail(|| => set{}.contains([1,2]), 'TypeMismatch: Type List cannot be hashed')
-            fail(|| => set {'a', 'b', null},  'NullValue')
-            fail(|| => set {'a', 'b', []},    'TypeMismatch: Type List cannot be hashed')
+            util.fail(|| => set{}.addAll(false),   'TypeMismatch: Type Bool has no iter()')
+            util.fail(|| => set{}.add(3,4),        'ArityMismatch: Expected 1 parameter, got 2')
+            util.fail(|| => set{}.add([1,2]),      'TypeMismatch: Type List cannot be hashed')
+            util.fail(|| => set{}.contains([1,2]), 'TypeMismatch: Type List cannot be hashed')
+            util.fail(|| => set {'a', 'b', null},  'NullValue')
+            util.fail(|| => set {'a', 'b', []},    'TypeMismatch: Type List cannot be hashed')
         },
         fn () {
             const a = set{};
@@ -1337,7 +1325,7 @@ fn testTuple() {
     assert(x == freeze(x))
     assert(frozen(x))
 
-    fail(|| => iter(x), "TypeMismatch: Type Tuple has no iter()")
+    util.fail(|| => iter(x), "TypeMismatch: Type Tuple has no iter()")
     assert(len(x) == 2)
     assert(len(y) == 3)
 
@@ -1349,9 +1337,9 @@ fn testTuple() {
     assert(set { } == fields(x))
 
     assert(!has(x, 'bogus'))
-    fail(|| => golem.getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => golem.setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not Tuple")
-    fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct, not Tuple")
+    util.fail(|| => golem.getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    util.fail(|| => golem.setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not Tuple")
+    util.fail(|| => x.bogus = 1, "TypeMismatch: Expected Struct, not Tuple")
 
     //-----------------------------------------------
 
@@ -1374,8 +1362,8 @@ fn testChan() {
     assert(p == freeze(p))
     assert(frozen(p))
 
-    fail(|| => iter(p), "TypeMismatch: Type Chan has no iter()")
-    fail(|| => len(p), "TypeMismatch: Type Chan has no len()")
+    util.fail(|| => iter(p), "TypeMismatch: Type Chan has no iter()")
+    util.fail(|| => len(p), "TypeMismatch: Type Chan has no len()")
 
     assert(str(p).hasPrefix('chan<'))
     assert('Chan' == type(p))
@@ -1391,9 +1379,9 @@ fn testChan() {
     assert(p.recv == golem.getField(p, 'recv'))
 
     assert(!has(p, 'bogus'))
-    fail(|| => golem.getField(p, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => golem.setField(p, 'bogus', null), "TypeMismatch: Expected Struct, not Chan")
-    fail(|| => p.bogus = 1, "TypeMismatch: Expected Struct, not Chan")
+    util.fail(|| => golem.getField(p, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    util.fail(|| => golem.setField(p, 'bogus', null), "TypeMismatch: Expected Struct, not Chan")
+    util.fail(|| => p.bogus = 1, "TypeMismatch: Expected Struct, not Chan")
 
     //-------------------------------------------------
 
@@ -1414,7 +1402,7 @@ fn testChan() {
 
 fn testArity() {
 
-    fail(|| => arity(0), 'TypeMismatch: Expected Func, not Int')
+    util.fail(|| => arity(0), 'TypeMismatch: Expected Func, not Int')
 
     assert(arity(println) == struct { kind: "Variadic", required: 0 })
     assert(arity(len)     == struct { kind: "Fixed",    required: 1 })
@@ -1471,14 +1459,14 @@ fn testVariadic() {
     assert(f(0, 1, 2)    == [ 0, 1, 2 ])
     assert(f(0, 1, 2, 3) == [ 0, 1, 2, 3 ])
 
-    fail(|| => g(), 'ArityMismatch: Expected at least 1 parameter, got 0')
+    util.fail(|| => g(), 'ArityMismatch: Expected at least 1 parameter, got 0')
     assert(g(0)          == (0, [ ]))
     assert(g(0, 1)       == (0, [ 1 ]))
     assert(g(0, 1, 2)    == (0, [ 1, 2 ]))
     assert(g(0, 1, 2, 3) == (0, [ 1, 2, 3 ]))
 
-    fail(|| => h(),  'ArityMismatch: Expected at least 2 parameters, got 0')
-    fail(|| => h(0), 'ArityMismatch: Expected at least 2 parameters, got 1')
+    util.fail(|| => h(),  'ArityMismatch: Expected at least 2 parameters, got 0')
+    util.fail(|| => h(0), 'ArityMismatch: Expected at least 2 parameters, got 1')
     assert(h(0, 1)       == (0, 1, [ ]))
     assert(h(0, 1, 2)    == (0, 1, [ 2 ]))
     assert(h(0, 1, 2, 3) == (0, 1, [ 2, 3 ]))
@@ -1507,19 +1495,19 @@ fn testMultiple() {
     assert(f('x')           == ('x', 2, 3))
     assert(f('x', 'y')      == ('x', 'y', 3))
     assert(f('x', 'y', 'z') == ('x', 'y', 'z'))
-    fail(|| => f('x', 'y', 'z', 0), 'ArityMismatch: Expected at most 3 parameters, got 4')
+    util.fail(|| => f('x', 'y', 'z', 0), 'ArityMismatch: Expected at most 3 parameters, got 4')
 
-    fail(|| => g(), 'ArityMismatch: Expected at least 1 parameter, got 0')
+    util.fail(|| => g(), 'ArityMismatch: Expected at least 1 parameter, got 0')
     assert(g('x')           == ('x', 2, 3))
     assert(g('x', 'y')      == ('x', 'y', 3))
     assert(g('x', 'y', 'z') == ('x', 'y', 'z'))
-    fail(|| => g('x', 'y', 'z', 0), 'ArityMismatch: Expected at most 3 parameters, got 4')
+    util.fail(|| => g('x', 'y', 'z', 0), 'ArityMismatch: Expected at most 3 parameters, got 4')
 
-    fail(|| => h(),    'ArityMismatch: Expected at least 2 parameters, got 0')
-    fail(|| => h('x'), 'ArityMismatch: Expected at least 2 parameters, got 1')
+    util.fail(|| => h(),    'ArityMismatch: Expected at least 2 parameters, got 0')
+    util.fail(|| => h('x'), 'ArityMismatch: Expected at least 2 parameters, got 1')
     assert(h('x', 'y')      ==  ('x', 'y', 3))
     assert(h('x', 'y', 'z') ==  ('x', 'y', 'z'))
-    fail(|| => h('x', 'y', 'z', 0), 'ArityMismatch: Expected at most 3 parameters, got 4')
+    util.fail(|| => h('x', 'y', 'z', 0), 'ArityMismatch: Expected at most 3 parameters, got 4')
 }
 
 fn testRange() {
@@ -1561,13 +1549,13 @@ fn testRange() {
     assert(rng.from == golem.getField(rng, 'from'))
 
     assert(!has(rng, 'bogus'))
-    fail(|| => golem.getField(rng, 'bogus'), "NoSuchField: Field 'bogus' not found")
-    fail(|| => golem.setField(rng, 'bogus', null), "TypeMismatch: Expected Struct, not Range")
-    fail(|| => rng.bogus = 1, "TypeMismatch: Expected Struct, not Range")
+    util.fail(|| => golem.getField(rng, 'bogus'), "NoSuchField: Field 'bogus' not found")
+    util.fail(|| => golem.setField(rng, 'bogus', null), "TypeMismatch: Expected Struct, not Range")
+    util.fail(|| => rng.bogus = 1, "TypeMismatch: Expected Struct, not Range")
 
     //-----------------------------------------
 
-    fail(|| => iter(range(0,0)).get(), 'NoSuchElement')
+    util.fail(|| => iter(range(0,0)).get(), 'NoSuchElement')
 
     const a = range(0, 5)
     const b = range(0, 5, 2)
@@ -1613,13 +1601,13 @@ fn testRange() {
     } 
     assert(i == 4)
 
-    fail(|| => range(0, 0, 0), "InvalidArgument: step cannot be 0")
+    util.fail(|| => range(0, 0, 0), "InvalidArgument: step cannot be 0")
 }
 
 fn testStruct() {
 
-    fail(|| => len(struct{}), 'TypeMismatch: Type Struct has no len()')
-    fail(|| => iter(struct{}), 'TypeMismatch: Type Struct has no iter()')
+    util.fail(|| => len(struct{}), 'TypeMismatch: Type Struct has no len()')
+    util.fail(|| => iter(struct{}), 'TypeMismatch: Type Struct has no iter()')
 
     assert("struct { }" == str(struct {}))
     assert("struct { a: 1 }" == str(struct {a: 1}))
@@ -1651,14 +1639,14 @@ fn testStruct() {
             assert(!frozen(y))
             assert(y == freeze(y))
             assert(frozen(y))
-            fail(|| => y.a = 2, "ImmutableValue")
+            util.fail(|| => y.a = 2, "ImmutableValue")
 
             assert('Struct' == type(x))
 
             assert(!has(x, 'bogus'))
-            fail(|| => golem.getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
-            fail(|| => golem.setField(x, 'bogus', null), "NoSuchField: Field 'bogus' not found")
-            fail(|| => x.bogus = 1, "NoSuchField: Field 'bogus' not found")
+            util.fail(|| => golem.getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
+            util.fail(|| => golem.setField(x, 'bogus', null), "NoSuchField: Field 'bogus' not found")
+            util.fail(|| => x.bogus = 1, "NoSuchField: Field 'bogus' not found")
         },
         fn () {
             const w = struct {}
@@ -1671,7 +1659,7 @@ fn testStruct() {
             assert([3, 4, 5] == [z.a, z.b, z.c.d])
 
             for s in [w, x, y, z] {
-                fail(|| => s.bogus, "NoSuchField: Field 'bogus' not found")
+                util.fail(|| => s.bogus, "NoSuchField: Field 'bogus' not found")
             }
         },
         fn () {
@@ -1701,7 +1689,7 @@ fn testStruct() {
                 a: prop { || => 1 } 
             }
             assert(1 == s.a)
-            fail(|| => s.a = 2, "ReadonlyField: Field 'a' is readonly")
+            util.fail(|| => s.a = 2, "ReadonlyField: Field 'a' is readonly")
         },
         fn () {
             let x = 2
@@ -1710,7 +1698,7 @@ fn testStruct() {
                 b: prop { || => x, |v| => x = v },
                 c: || => this.a + this.b
             }
-            fail(|| => s.a = 2, "ReadonlyField: Field 'a' is readonly")
+            util.fail(|| => s.a = 2, "ReadonlyField: Field 'a' is readonly")
 
             assert([s.a, s.b, x, s.c()] == [1, 2, 2, 3])
 
@@ -1754,10 +1742,10 @@ fn testStruct() {
 
 fn testMerge() {
 
-    fail(|| => merge(), 'ArityMismatch: Expected at least 2 parameters, got 0')
-    fail(|| => merge(true), 'ArityMismatch: Expected at least 2 parameters, got 1')
-    fail(|| => merge(struct{}, false), 'TypeMismatch: Expected Struct, not Bool')
-    fail(|| => merge(struct{}, struct{}, struct{}, []), 'TypeMismatch: Expected Struct, not List')
+    util.fail(|| => merge(), 'ArityMismatch: Expected at least 2 parameters, got 0')
+    util.fail(|| => merge(true), 'ArityMismatch: Expected at least 2 parameters, got 1')
+    util.fail(|| => merge(struct{}, false), 'TypeMismatch: Expected Struct, not Bool')
+    util.fail(|| => merge(struct{}, struct{}, struct{}, []), 'TypeMismatch: Expected Struct, not List')
 
     const a = struct { x: 1, y: 2}
     const b = merge(a, struct { y: 3, z: 4})
@@ -1793,10 +1781,10 @@ fn testMerge() {
     assert([ false, false, false, true, true, true ] == ls)
 
     let error = 'InvalidArgument: Cannot merge structs unless they are all frozen, or all unfrozen'
-    fail(|| => merge(a, b, f), error)
-    fail(|| => merge(a, f, b), error)
-    fail(|| => merge(f, a, b), error)
-    fail(|| => merge(f, g, b), error)
+    util.fail(|| => merge(a, b, f), error)
+    util.fail(|| => merge(a, f, b), error)
+    util.fail(|| => merge(f, a, b), error)
+    util.fail(|| => merge(f, g, b), error)
 }
 
 fn testTry() {
@@ -1893,7 +1881,7 @@ fn testTry() {
                 }
                 assert(false)
             }
-            fail(a, 'TestError: y')
+            util.fail(a, 'TestError: y')
         },
         //------------------------------------
         // return, nothing
@@ -1942,7 +1930,7 @@ fn testTry() {
                 }
                 assert(false)
             }
-            fail(a, 'TestError')
+            util.fail(a, 'TestError')
         },
         //------------------------------------
         // err, nothing
@@ -1958,7 +1946,7 @@ fn testTry() {
                 }
                 assert(false)
             }
-            fail(a, 'DivideByZero')
+            util.fail(a, 'DivideByZero')
             assert(n == 1)
         },
 
@@ -1994,7 +1982,7 @@ fn testTry() {
                 }
                 assert(false)
             }
-            fail(a, 'TestError')
+            util.fail(a, 'TestError')
             assert(n == 1)
         },
         //------------------------------------
@@ -2053,16 +2041,16 @@ fn testTry() {
                 c()
             }
 
-            fail(a, 'DivideByZero')
+            util.fail(a, 'DivideByZero')
             assert([p,q] == [0,1])
 
-            fail(b, 'DivideByZero')
+            util.fail(b, 'DivideByZero')
             assert([p,q] == [0,2])
 
-            fail(c, 'TestError')
+            util.fail(c, 'TestError')
             assert([p,q] == [1,3])
 
-            fail(d, 'TestError')
+            util.fail(d, 'TestError')
             assert([p,q] == [2,4])
         },
         fn () {
@@ -2090,7 +2078,7 @@ fn testTry() {
     assert(n == len(funcs))
 }
 
-fn main(args) {
+fn run() {
 
     let funcs = [
 

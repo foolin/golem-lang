@@ -35,15 +35,16 @@ Perl, Python, and other languages.
 */
 
 // Regexp is the "regexp" module in the standard library
-var Regexp g.Struct
+var Regexp g.Module
 
 func init() {
-	var err error
-	Regexp, err = g.NewFrozenStruct(
+	rgx, err := g.NewFrozenStruct(
 		map[string]g.Field{
 			"compile": g.NewField(compile),
 		})
 	g.Assert(err == nil)
+
+	Regexp = g.NewNativeModule("regexp", rgx)
 }
 
 /*doc

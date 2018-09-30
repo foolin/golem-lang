@@ -26,7 +26,7 @@ data to and from byte-level and textual representations.
 */
 
 // Encoding is the "encoding" module in the standard library
-var Encoding g.Struct
+var Encoding g.Module
 
 func init() {
 
@@ -38,9 +38,11 @@ func init() {
 		})
 	g.Assert(err == nil)
 
-	Encoding, err = g.NewFrozenStruct(
+	encoding, err := g.NewFrozenStruct(
 		map[string]g.Field{
 			"json": g.NewField(json),
 		})
 	g.Assert(err == nil)
+
+	Encoding = g.NewNativeModule("encoding", encoding)
 }

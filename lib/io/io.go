@@ -31,7 +31,7 @@ for parallel execution.
 */
 
 // Io is the "io" module in the standard library
-var Io g.Struct
+var Io g.Module
 
 func init() {
 
@@ -44,9 +44,11 @@ func init() {
 
 	g.Assert(err == nil)
 
-	Io, err = g.NewFrozenStruct(
+	io, err := g.NewFrozenStruct(
 		map[string]g.Field{
 			"ioutil": g.NewField(ioutil),
 		})
 	g.Assert(err == nil)
+
+	Io = g.NewNativeModule("io", io)
 }
