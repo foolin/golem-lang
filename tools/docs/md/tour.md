@@ -2,6 +2,42 @@
 
 Welcome to the tour of the Golem Programming Language.
 
+* [Hello, world](#hello-world)
+* [Basic Types](#basic-types)
+* [Comments](#comments)
+* [Variables](#variables)
+* [Collections](#collections)
+  * [List](#list)
+  * [Dict](#dict)
+  * [Set](#set)
+  * [Tuple](#tuple)
+  * [`len`](#len)
+* [Fields](#fields)
+* [Control Structures](#control-structures)
+* [Functions](#functions)
+  * [Function Syntax](#function-syntax)
+  * [Lambdas](#lambdas)
+  * [Named Functions](#named-functions)
+  * [Closures](#closures)
+  * [Optional Parameters](#optional-parameters)
+  * [Variadic Functions](#variadic-functions)
+  * [Arity](#arity)
+* [Structs](#structs)
+  * [Struct Syntax](#struct-syntax)
+  * [Properties](#properties)
+  * [Merging Structs](#merging-structs)
+  * [Using Structs to build complex values](#using-structs-to-build-complex-values)
+* [Errors](#errors)
+* [Concurrency](#concurrency)
+* [Immutability](#immutability)
+* [Introspection](#introspection)
+* [Command Line Executable](#command-line-executable)
+  * [Modules](#modules)
+  * [The `main()` function](#the-main-function)
+  * [Standard Library](#standard-library)
+  * [Examples](#examples)
+* [Embedding](#embedding)
+
 ## Hello, world
 
 Let's get started with the proverbial hello world program.  In this tour, we will 
@@ -276,7 +312,7 @@ for (k, v) in d {
 }
 ```
 
-There is one more iterable type -- ranges.  Ranges are created via the `range`
+There is one more iterable type -- ranges.  Ranges are created via the [`range`](builtins.html#range)
 builtin function.  A range is an immutable value that represents a sequence of integers.  
 
 ```
@@ -296,7 +332,7 @@ simply represent a sequence that can be iterated over.
 
 A [Function](func.html) is a sequence of [`expressions`](#TODO) and [`statements`](#TODO) 
 that can be invoked to perform a task. We have already encountered quite a few 
-functions: builtin functions like `println`, and a few fields like the ones on a list.
+functions: builtin functions like `println`, and a few field functions like the ones on a list.
 
 ### Function Syntax
 
@@ -423,7 +459,7 @@ Here is an example of a closure that acts as a
 fn foo(n) {
     return fn(i) {
         return n += i
-    }; 
+    } 
 }
 let f = foo(4)
 println([f(1), f(2), f(3)])
@@ -488,7 +524,7 @@ println(arity(println))
 
 Golem is not an object-oriented language.  It does not have classes, objects, 
 inheritance, or constructors.  What it does have, however, are values 
-which we call "structs".
+which we call [Structs](struct.html).
 
 ### Struct Syntax
 
@@ -726,9 +762,10 @@ functionality from Go's `sync` package.
 
 ## Immutability
 
-Golem supports immutability via the `freeze()` builtin function, which makes a mutable
-value become immutable.  You can check if a value is immutable via the `frozen()`
-builtin function. `freeze()` always returns the value that you pass into it.
+Golem supports immutability via the [`freeze`](builtins.html#freeze)  builtin function, 
+which makes a mutable value become immutable.  You can check if a value is immutable 
+via the [`frozen`](builtins.html#frozen) builtin function. `freeze()` always returns 
+the value that you pass into it.
 
 ```
 let s = freeze(struct { a: 1, b: 2 })
@@ -742,7 +779,7 @@ try {
 }
 ```
 
-`freeze()` only has an affect on Lists, Dicts, Sets and Structs.  All other values 
+`freeze()` only has an effect on Lists, Dicts, Sets and Structs.  All other values 
 are already immutable, so calling `freeze()` on them has no effect
 
 Immutabilty and concurrency go hand in hand.  By using immutable 
@@ -757,15 +794,128 @@ using closures.
 
 ## Introspection
 
-## Embedding
+There is a builtin function called [`type`](builtins.html#type)  that will return a string 
+describing the type of a value.  Here is a program that will print a list 
+of every possible type:
 
-## Command Line Interface
+```
+let values = [
+    null, true, "", 0, 0.0, fn(){}, 
+    [], range(0,1), (0,1), dict{}, set{}, 
+    struct{}, chan()]
+println(values.map(type))
+```
+
+There is another builtin function called [`fields`](builtins.html#fields) that will 
+return the set of all fields belonging to a given value.  There is 
+also [`has`](builtins.html#has), which returns whether a value has a given field:
+
+```
+let s = struct { a: 1, b: 2 }
+println(fields(s))
+println(['a', 'b', 'c'].map(|e| => has(s, e)))
+```
+
+## Command Line Executable
+
+Thus far, we have been running Golem in the browser via the magic of 
+[WebAssembly](https://github.com/golang/go/wiki/WebAssembly).  
+
+It is also possible to run Golem from the command line as an executable (and via many 
+[other routes](#embedding) as well).
+
+To do this, you must first compile a version of the Golem.  This requires that you have 
+the Go language toolchain installed on your system, with at least version 1.9.
+
+Clone the Golem [repository](https://github.com/mjarmy/golem-lang) into the proper
+place in your go development environment, `cd` into the top level directory of the repo, 
+and type `make`.  This will build Golem, and place the `golem` executable 
+in a sub-directory called `build`.
+
+Then, fire up your [IDE](https://github.com/mjarmy/golem-lang/wiki/IDE-Support) 
+of choice, and type the Golem code of your choice into a file named "tour.glm",
+and run it like so: `./build/golem tour.glm`.
 
 ### Modules
 
-private 
+In addition to supporting all of the builtin functions that we have seen so far, 
+the `golem` executable supports a new concept called "modules".
+
+The Golem CLI actually compiles the "tour.glm" file that you made eariler into a
+`module` called "tour".  Modules are the fundamental unit of compilation in Golem, 
+and are also used for namespace management. 
+
+All you need to do to create your own modules that the `golem` executable can use is
+create a file with the name you want.  As an example, lets create a module 
+called foo, and reference in the tour module.
+
+In a file called "foo.glm", place the following:
+
+```nowasm
+fn square(x) {
+    return x*x
+}
+```
+
+And then in your "tour.glm", you can reference the "foo" module 
+via the `import` statement, like this:
+
+```nowasm
+import foo
+assert(foo.square(5) == 25)
+```
 
 ### The `main()` Function
+
+You can pass arguments into a Golem CLI program by defining a `main()` function, that
+accepts exactly one parameter.  The parameter will always be a list of the
+command line arguments.
+
+```nowasm
+fn main(args) {
+    for i in range(0, len(args)) {
+        println('argument ', i, ' is "', args[i], '"')
+    }
+}
+```
+
 ### Standard Library
 
+Golem has a [Standard Library](http://localhost:8080/reference.html#standard-library) 
+that is implemented as a collection of modules. The standard library is based primarily
+on Go's standard library.  
 
+Golem's standard library is rather small at this time --  one of the major pieces of 
+work still to be done is to build out the library.
+
+When embedding the Golem interpreter in a Go program, some or all of 
+the standard library can be included in the sandboxed environment. The 
+`golem` executable makes the entire standard library available.
+
+To use one of the modules from the standard library, simply import it like
+you would any module, e.g. `import os`.
+
+### Examples
+
+In the Golem github repo, there are a couple of good examples of substantial programs
+that can be run via the `golem` executable.
+
+First, there is the Golem program that creates the static web site that you are reading
+right now:
+
+[https://github.com/mjarmy/golem-lang/blob/master/tools/docs/makeDocs.glm](https://github.com/mjarmy/golem-lang/blob/master/tools/docs/makeDocs.glm)
+
+And second, there is a large program in the bench_test directory that allows Golem to 
+test itself as part of the build process:
+
+[https://github.com/mjarmy/golem-lang/blob/master/bench_test/core_test.glm](https://github.com/mjarmy/golem-lang/blob/master/bench_test/core_test.glm)
+
+## Embedding
+
+So far, we have seen Golem in action in two contexts: as a 
+[WebAssembly](https://github.com/mjarmy/golem-lang/blob/master/tools/docs/wasm.go) executable, and
+a [command line](https://github.com/mjarmy/golem-lang/blob/master/cli/golem.go) executable.
+
+Golem is easy to embed in a Go program in other ways though.  If you are interested
+in learning more about how to embed Golem in Go, please head over to 
+the [Embedding](embedding.html) document.

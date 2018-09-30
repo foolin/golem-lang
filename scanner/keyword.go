@@ -57,6 +57,7 @@ var reservedWords = map[string]bool{
 	"protected": true,
 	"pub":       true,
 	"public":    true,
+	"pure":      true,
 	"rsync":     true,
 	"rune":      true,
 	"select":    true,

@@ -2,7 +2,7 @@
 
 ## Interfaces
 
-Interfaces define the various intrinsic capabilities of Golems standard types.
+Interfaces define the various intrinsic capabilities of Golem's standard types.
 
 ### Hashable
 

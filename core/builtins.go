@@ -424,7 +424,7 @@ var BuiltinMerge = NewVariadicNativeFunc(
 /*doc
 ### `range`
 
-`range` creates a Range, starting at "from" (inclusive) and going until
+`range` creates a [Range](range.html), starting at "from" (inclusive) and going until
 "to" (exclusive).
 
 The optional "step" parameter, which defaults to 1,
