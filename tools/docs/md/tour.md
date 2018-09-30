@@ -334,6 +334,8 @@ A [Function](func.html) is a sequence of [`expressions`](#TODO) and [`statements
 that can be invoked to perform a task. We have already encountered quite a few 
 functions: builtin functions like `println`, and a few field functions like the ones on a list.
 
+Functions are first-class values -- they can be passed around just like any other value.
+
 ### Function Syntax
 
 Functions are created with the `fn` keyword:
