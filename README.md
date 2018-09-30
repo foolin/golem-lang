@@ -9,4 +9,4 @@ Golem borrows ideas from many other languages, including Go, Python, Javascript 
 Please consult the [documentation](https://mjarmy.github.io/golem-lang/) to learn 
 more about Golem.
 
-<img src="/images/snippet.png?raw=true" width="256">
+<img src="/images/snippet.png?raw=true" width="600">
