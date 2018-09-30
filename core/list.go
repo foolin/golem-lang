@@ -146,7 +146,7 @@ func (ls *list) Values() []Value {
 
 func (ls *list) Contains(ev Eval, val Value) (Bool, Error) {
 
-	idx, err := ls.IndexOf(ev, val)
+	idx, err := ls.Index(ev, val)
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +159,7 @@ func (ls *list) Contains(ev Eval, val Value) (Bool, Error) {
 	return NewBool(!eq.BoolVal()), nil
 }
 
-func (ls *list) IndexOf(ev Eval, val Value) (Int, Error) {
+func (ls *list) Index(ev Eval, val Value) (Int, Error) {
 	for i, v := range ls.values {
 		eq, err := val.Eq(ev, v)
 		if err != nil {
@@ -412,7 +412,7 @@ A List has the following fields:
 * [clear](#clear)
 * [contains](#contains)
 * [filter](#filter)
-* [indexOf](#indexof)
+* [index](#index)
 * [isEmpty](#isempty)
 * [join](#join)
 * [map](#map)
@@ -557,25 +557,25 @@ var listMethods = map[string]Method{
 		}),
 
 	/*doc
-	### `indexOf`
+	### `index`
 
-	`indexOf` returns the index of the given value in the list, or -1 if the value
+	`index` returns the index of the given value in the list, or -1 if the value
 	is not contained in the list.
 
-	* signature: `indexOf(val <Value>) <Int>`
+	* signature: `index(val <Value>) <Int>`
 	* example:
 
 	```
 	let a = ['x', 'y', 'z']
-	println(a.indexOf('z'))
+	println(a.index('z'))
 	```
 
 	*/
-	"indexOf": NewFixedMethod(
+	"index": NewFixedMethod(
 		[]Type{AnyType}, true,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			ls := self.(List)
-			return ls.IndexOf(ev, params[0])
+			return ls.Index(ev, params[0])
 		}),
 
 	/*doc

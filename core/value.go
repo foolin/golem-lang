@@ -175,7 +175,7 @@ type (
 
 		IsEmpty() Bool
 		Contains(Eval, Value) (Bool, Error)
-		IndexOf(Eval, Value) (Int, Error)
+		Index(Eval, Value) (Int, Error)
 		Join(Eval, Str) (Str, Error)
 
 		Clear() (List, Error)

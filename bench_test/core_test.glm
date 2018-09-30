@@ -782,7 +782,7 @@ fn testList() {
     fail(|| => x.clear(), "ImmutableValue")
     x.isEmpty()
     x.contains(1)
-    x.indexOf(1)
+    x.index(1)
     x.map(|e| => e)
     x.reduce(0, |acc, e| => acc + e)
     x.filter(|e| => e)
@@ -800,7 +800,7 @@ fn testList() {
     assert(set { 
         'isEmpty', 
         'contains', 
-        'indexOf', 
+        'index', 
         'join',
         'map',
         'reduce',
@@ -818,7 +818,7 @@ fn testList() {
     assert(x.isEmpty == golem.getField(x, 'isEmpty'))
     assert(x.contains == golem.getField(x, 'contains'))
     assert(x.join == golem.getField(x, 'join'))
-    assert(x.indexOf == golem.getField(x, 'indexOf'))
+    assert(x.index == golem.getField(x, 'index'))
     assert(x.map == golem.getField(x, 'map'))
     assert(x.reduce == golem.getField(x, 'reduce'))
     assert(x.filter == golem.getField(x, 'filter'))
@@ -899,10 +899,10 @@ fn testList() {
         fn () {
             let a = []
             assert(!a.contains('x'))
-            assert(a.indexOf('x') == -1)
+            assert(a.index('x') == -1)
             a = ['z', 'x']
             assert(a.contains('x'))
-            assert(a.indexOf('x') == 1)
+            assert(a.index('x') == 1)
         },
         fn () {
             const a = [1, 2, 3]
@@ -1441,7 +1441,7 @@ fn testArity() {
             "clear":    struct { kind: "Fixed", required: 0 }, 
             "contains": struct { kind: "Fixed", required: 1 }, 
             "filter":   struct { kind: "Fixed", required: 1 }, 
-            "indexOf":  struct { kind: "Fixed", required: 1 }, 
+            "index":    struct { kind: "Fixed", required: 1 }, 
             "isEmpty":  struct { kind: "Fixed", required: 0 }, 
             "map":      struct { kind: "Fixed", required: 1 }, 
             "reduce":   struct { kind: "Fixed", required: 2 }, 

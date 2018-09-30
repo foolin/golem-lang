@@ -129,7 +129,7 @@ println(b[-1]) // negative indexes start from the end
 Use the "slice operator" to create a new list from part of an existing list.
 If you leave off the first or last value of the slice operation, the resulting slice
 will start at the beginning or end.  Negative values work with slices in the same 
-way that they do with lists.
+way that they do with indexes.
 
 ```
 let c = ['x', 'y', 'z']
@@ -205,12 +205,12 @@ ls.add('a')
 ls.addAll(['b', 'c'])
 println(ls)
 println(ls.contains('c'))
-println(ls.indexOf('b'))
+println(ls.index('b'))
 println(ls.join(','))
 ```
 
 Note that the fields we see in the above example -- `isEmpty`, `add`, `addAll`,
-`contains`, `indexOf`, and `join` -- are all [functions](#functions).  Most fields 
+`contains`, `index`, and `join` -- are all [functions](#functions).  Most fields 
 that are built in to the various Golem types are functions.
 
 ## Control Structures
