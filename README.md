@@ -10,5 +10,5 @@ Javascript and Lua.
 Please consult the [documentation](https://mjarmy.github.io/golem-lang/) to learn 
 more about Golem.
 
-<img src="/images/snippet.png?raw=true" width="450">
+<img src="/images/snippet.png?raw=true" width="500">
 
