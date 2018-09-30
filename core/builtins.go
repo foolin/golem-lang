@@ -8,58 +8,6 @@ import (
 	"fmt"
 )
 
-type (
-	// BuiltinManager manages the built-in functions (and other built-in values)
-	// for a given instance of the Interpreter
-	BuiltinManager interface {
-		Builtins() []Value
-		Contains(s string) bool
-		IndexOf(s string) int
-	}
-
-	// BuiltinEntry is an entry in a BuiltinManager
-	BuiltinEntry struct {
-		Name  string
-		Value Value
-	}
-
-	builtinManager struct {
-		values []Value
-		lookup map[string]int
-	}
-)
-
-// NewBuiltinManager creates a new BuiltinManager
-func NewBuiltinManager(entries []*BuiltinEntry) BuiltinManager {
-	values := make([]Value, len(entries))
-	lookup := make(map[string]int)
-	for i, e := range entries {
-		values[i] = e.Value
-		lookup[e.Name] = i
-	}
-	return &builtinManager{values, lookup}
-}
-
-func (b *builtinManager) Builtins() []Value {
-	return b.values
-}
-
-func (b *builtinManager) Contains(s string) bool {
-	_, ok := b.lookup[s]
-	return ok
-
-}
-
-func (b *builtinManager) IndexOf(s string) int {
-	index, ok := b.lookup[s]
-	if !ok {
-		panic("unknown builtin")
-	}
-	return index
-}
-
-//-----------------------------------------------------------------
-
 /*doc
 
 ## Standard Builtins
@@ -87,20 +35,20 @@ are suitable for use in sandboxed environments.
 
 // StandardBuiltins containts the built-ins that are
 // pure functions.  These functions do not do any form of I/O.
-var StandardBuiltins = []*BuiltinEntry{
-	{"arity", BuiltinArity},
-	{"assert", BuiltinAssert},
-	{"chan", BuiltinChan},
-	{"fields", BuiltinFields},
-	{"freeze", BuiltinFreeze},
-	{"frozen", BuiltinFrozen},
-	{"has", BuiltinHas},
-	{"iter", BuiltinIter},
-	{"len", BuiltinLen},
-	{"merge", BuiltinMerge},
-	{"range", BuiltinRange},
-	{"str", BuiltinStr},
-	{"type", BuiltinType},
+var StandardBuiltins = map[string]Value{
+	"arity":  BuiltinArity,
+	"assert": BuiltinAssert,
+	"chan":   BuiltinChan,
+	"fields": BuiltinFields,
+	"freeze": BuiltinFreeze,
+	"frozen": BuiltinFrozen,
+	"has":    BuiltinHas,
+	"iter":   BuiltinIter,
+	"len":    BuiltinLen,
+	"merge":  BuiltinMerge,
+	"range":  BuiltinRange,
+	"str":    BuiltinStr,
+	"type":   BuiltinType,
 }
 
 //-----------------------------------------------------------------
@@ -518,9 +466,9 @@ environments.
 */
 
 // UnsandboxedBuiltins are builtins that are not pure functions
-var UnsandboxedBuiltins = []*BuiltinEntry{
-	{"print", BuiltinPrint},
-	{"println", BuiltinPrintln},
+var UnsandboxedBuiltins = map[string]Value{
+	"print":   BuiltinPrint,
+	"println": BuiltinPrintln,
 }
 
 /*doc

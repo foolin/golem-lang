@@ -22,12 +22,10 @@ func tassert(t *testing.T, flag bool) {
 	}
 }
 
-var builtins []*g.BuiltinEntry = []*g.BuiltinEntry{
-	{Name: "assert", Value: g.BuiltinAssert},
-	{Name: "println", Value: g.BuiltinPrintln},
-}
-
-var builtinMgr = g.NewBuiltinManager(builtins)
+var builtinMgr = compiler.NewBuiltinManager(map[string]g.Value{
+	"assert":  g.BuiltinAssert,
+	"println": g.BuiltinPrintln,
+})
 
 func testCompile(t *testing.T, code string) *bc.Module {
 

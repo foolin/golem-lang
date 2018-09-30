@@ -56,11 +56,10 @@ func ok(t *testing.T, pool *bc.Pool, expect *bc.Pool) {
 	}
 }
 
-var builtins = []*g.BuiltinEntry{
-	{"assert", g.BuiltinAssert},
-	{"println", g.BuiltinPrintln},
-}
-var builtinMgr = g.NewBuiltinManager(builtins)
+var builtinMgr = NewBuiltinManager(map[string]g.Value{
+	"assert":  g.BuiltinAssert,
+	"println": g.BuiltinPrintln,
+})
 
 func testCompile(t *testing.T, code string) *bc.Module {
 

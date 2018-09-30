@@ -151,16 +151,18 @@ func main() {
 	}
 
 	// use all of the available builtin functions
-	var builtins []*g.BuiltinEntry = append(
-		g.StandardBuiltins,
-		g.UnsandboxedBuiltins...)
+	var builtins = map[string]g.Value{}
+	for k, v := range g.StandardBuiltins {
+		builtins[k] = v
+	}
+	for k, v := range g.UnsandboxedBuiltins {
+		builtins[k] = v
+	}
 
 	// add a builtin function for the standard library
-	builtins = append(
-		builtins,
-		&g.BuiltinEntry{Name: "_lib", Value: lib.BuiltinLib})
+	builtins["_lib"] = lib.BuiltinLib
 
-	builtinMgr := g.NewBuiltinManager(builtins)
+	builtinMgr := compiler.NewBuiltinManager(builtins)
 
 	//-------------------------------------------------------------
 	// parse, compile, interpret

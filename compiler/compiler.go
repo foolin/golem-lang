@@ -27,7 +27,7 @@ type Compiler interface {
 
 type compiler struct {
 	poolBuilder *poolBuilder
-	builtInMgr  g.BuiltinManager
+	builtInMgr  BuiltinManager
 	mod         *bc.Module
 
 	funcs   []*ast.FnExpr
@@ -40,7 +40,7 @@ type compiler struct {
 
 // NewCompiler creates a new Compiler
 func NewCompiler(
-	builtInMgr g.BuiltinManager,
+	builtInMgr BuiltinManager,
 	astMod *ast.Module) Compiler {
 
 	mod := &bc.Module{

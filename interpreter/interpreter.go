@@ -7,6 +7,7 @@ package interpreter
 import (
 	//	"fmt"
 
+	"github.com/mjarmy/golem-lang/compiler"
 	g "github.com/mjarmy/golem-lang/core"
 	bc "github.com/mjarmy/golem-lang/core/bytecode"
 )
@@ -17,7 +18,7 @@ import (
 
 // Interpreter interprets Golem bytecode.
 type Interpreter struct {
-	builtInMgr g.BuiltinManager
+	builtInMgr compiler.BuiltinManager
 	modules    []*bc.Module
 	modMap     map[string]*bc.Module
 
@@ -26,7 +27,7 @@ type Interpreter struct {
 
 // NewInterpreter creates a new Interpreter
 func NewInterpreter(
-	builtInMgr g.BuiltinManager,
+	builtInMgr compiler.BuiltinManager,
 	modules []*bc.Module) *Interpreter {
 
 	modMap := make(map[string]*bc.Module)

@@ -7,7 +7,6 @@ package compiler
 import (
 	"github.com/mjarmy/golem-lang/analyzer"
 	"github.com/mjarmy/golem-lang/ast"
-	g "github.com/mjarmy/golem-lang/core"
 	bc "github.com/mjarmy/golem-lang/core/bytecode"
 	"github.com/mjarmy/golem-lang/parser"
 	"github.com/mjarmy/golem-lang/scanner"
@@ -19,7 +18,7 @@ type ModuleResolver func(moduleName string) (*scanner.Source, error)
 // CompileSourceFully compiles all of the Modules needed to run the program
 // that is defined in the provided Source.
 func CompileSourceFully(
-	builtinMgr g.BuiltinManager,
+	builtinMgr BuiltinManager,
 	resolver ModuleResolver,
 	source *scanner.Source) ([]*bc.Module, []error) {
 
@@ -58,7 +57,7 @@ func CompileSourceFully(
 
 // CompileSource compiles a Module from Source
 func CompileSource(
-	builtinMgr g.BuiltinManager,
+	builtinMgr BuiltinManager,
 	source *scanner.Source) (*ast.Module, *bc.Module, []error) {
 
 	// scan
