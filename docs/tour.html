@@ -140,7 +140,7 @@ println(b[-1]) // negative indexes start from the end</textarea>
     </div>
 </div>
 
-<p>Use the “slice operator” to create a new list from part of an existing list. If you leave off the first or last value of the slice operation, the resulting slice will start at the beginning or end. Negative values work with slices in the same way that they do with lists.</p>
+<p>Use the “slice operator” to create a new list from part of an existing list. If you leave off the first or last value of the slice operation, the resulting slice will start at the beginning or end. Negative values work with slices in the same way that they do with indexes.</p>
 <div class="play">
     <div class="input">
         <textarea id="src33" rows="5" spellcheck="false">let c = [&#39;x&#39;, &#39;y&#39;, &#39;z&#39;]
@@ -235,7 +235,7 @@ ls.add(&#39;a&#39;)
 ls.addAll([&#39;b&#39;, &#39;c&#39;])
 println(ls)
 println(ls.contains(&#39;c&#39;))
-println(ls.indexOf(&#39;b&#39;))
+println(ls.index(&#39;b&#39;))
 println(ls.join(&#39;,&#39;))</textarea>
     </div>
     <div class="output"><pre id="result39"></pre></div>
@@ -244,7 +244,7 @@ println(ls.join(&#39;,&#39;))</textarea>
     </div>
 </div>
 
-<p>Note that the fields we see in the above example – <code>isEmpty</code>, <code>add</code>, <code>addAll</code>, <code>contains</code>, <code>indexOf</code>, and <code>join</code> – are all <a href="#functions">functions</a>. Most fields that are built in to the various Golem types are functions.</p>
+<p>Note that the fields we see in the above example – <code>isEmpty</code>, <code>add</code>, <code>addAll</code>, <code>contains</code>, <code>index</code>, and <code>join</code> – are all <a href="#functions">functions</a>. Most fields that are built in to the various Golem types are functions.</p>
 <h2 id="control-structures">Control Structures</h2>
 <p>Golem has a familiar set of control structures: <code>if</code>, <code>while</code>, <code>switch</code>, and <code>for</code>.</p>
 <div class="play">
@@ -387,6 +387,7 @@ for i in range(0, len(list)) {
 <p>Note that ranges do not actually contain a list of all the specified integers. They simply represent a sequence that can be iterated over.</p>
 <h2 id="functions">Functions</h2>
 <p>A <a href="func.html">Function</a> is a sequence of <a href="#TODO"><code>expressions</code></a> and <a href="#TODO"><code>statements</code></a> that can be invoked to perform a task. We have already encountered quite a few functions: builtin functions like <code>println</code>, and a few field functions like the ones on a list.</p>
+<p>Functions are first-class values – they can be passed around just like any other value.</p>
 <h3 id="function-syntax">Function Syntax</h3>
 <p>Functions are created with the <code>fn</code> keyword:</p>
 <div class="play">

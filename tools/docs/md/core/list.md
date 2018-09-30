@@ -23,7 +23,7 @@ A List has the following fields:
 * [clear](#clear)
 * [contains](#contains)
 * [filter](#filter)
-* [indexOf](#indexof)
+* [index](#index)
 * [isEmpty](#isempty)
 * [join](#join)
 * [map](#map)
@@ -97,17 +97,17 @@ let a = [1, 2, 3, 4, 5]
 println(a.filter(|e| => e % 2 == 0))
 ```
 
-### `indexOf`
+### `index`
 
-`indexOf` returns the index of the given value in the list, or -1 if the value
+`index` returns the index of the given value in the list, or -1 if the value
 is not contained in the list.
 
-* signature: `indexOf(val <Value>) <Int>`
+* signature: `index(val <Value>) <Int>`
 * example:
 
 ```
 let a = ['x', 'y', 'z']
-println(a.indexOf('z'))
+println(a.index('z'))
 ```
 
 ### `isEmpty`
