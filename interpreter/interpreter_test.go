@@ -10,7 +10,6 @@ import (
 
 	"github.com/mjarmy/golem-lang/compiler"
 	g "github.com/mjarmy/golem-lang/core"
-	bc "github.com/mjarmy/golem-lang/core/bytecode"
 	"github.com/mjarmy/golem-lang/scanner"
 )
 
@@ -54,7 +53,7 @@ func TestEvalCode(t *testing.T) {
 	tassert(t, err == nil)
 	var mod g.Module = g.NewNativeModule("foo", stc)
 
-	val, err = EvalCode("import foo; foo.b + a", blt, NewLibrary([]g.Module{mod}, nil))
+	val, err = EvalCode("import foo; foo.b + a", blt, NewImporter([]g.Module{mod}))
 	ok(t, val, err, g.NewInt(3))
 }
 
@@ -117,21 +116,44 @@ let b = 5
 	ok(t, val, err, g.Null)
 }
 
-func TestImport(t *testing.T) {
+type testImporter struct {
+	sourceMap map[string]*scanner.Source
+	moduleMap map[string]g.Module
+}
 
-	sourceMap := map[string]*scanner.Source{
-		"a": &scanner.Source{Name: "a", Path: "a.glm", Code: "import c; let x = 1;"},
-		"b": &scanner.Source{Name: "b", Path: "b.glm", Code: "import c; let y = c.z - 1;"},
-		"c": &scanner.Source{Name: "c", Path: "c.glm", Code: "let z = 3;"},
+func (imp *testImporter) GetModule(itp *Interpreter, name string) (g.Module, error) {
+
+	if m, ok := imp.moduleMap[name]; ok {
+		return m, nil
 	}
 
-	counter := 0
-	resolver := func(name string) (*bc.Module, error) {
-		if src, ok := sourceMap[name]; ok {
-			counter++
-			return compiler.CompileSource(src, nil)
+	if src, ok := imp.sourceMap[name]; ok {
+		m, err := compiler.CompileSource(src, nil)
+		if err != nil {
+			return nil, err
 		}
-		return nil, g.UndefinedModule(name)
+
+		_, err = itp.EvalModule(m)
+		if err != nil {
+			return nil, err
+		}
+
+		imp.moduleMap[name] = m
+		return m, nil
+	}
+
+	return nil, g.UndefinedModule(name)
+}
+
+func TestImport(t *testing.T) {
+
+	imp := &testImporter{
+		map[string]*scanner.Source{
+			"a": &scanner.Source{Name: "a", Path: "a.glm", Code: "import c; let x = 1;"},
+			"b": &scanner.Source{Name: "b", Path: "b.glm", Code: "import c; let y = c.z - 1;"},
+			"c": &scanner.Source{Name: "c", Path: "c.glm", Code: "let z = 3;"},
+		},
+		map[string]g.Module{},
 	}
 
 	srcMain := &scanner.Source{
@@ -142,10 +164,10 @@ func TestImport(t *testing.T) {
 	mod, err := compiler.CompileSource(srcMain, nil)
 	tassert(t, err == nil)
 
-	itp := NewInterpreter(nil, NewLibrary(nil, resolver))
+	itp := NewInterpreter(nil, imp)
 	val, err := itp.EvalModule(mod)
 	tassert(t, err == nil)
-	tassert(t, counter == 3)
+	tassert(t, len(imp.moduleMap) == 3)
 	tassert(t, reflect.DeepEqual(
 		val,
 		g.NewList([]g.Value{

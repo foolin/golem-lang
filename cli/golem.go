@@ -62,27 +62,53 @@ func readSourceFromFile(filename string) (*scanner.Source, error) {
 	return src, nil
 }
 
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil
+type importer struct {
+	builtins  []*g.Builtin
+	moduleMap map[string]g.Module
+	localDir  string
 }
 
-func makeResolver(localDir string, builtins []*g.Builtin) interpreter.Resolver {
-	return func(name string) (*bc.Module, error) {
+func newImporter(
+	builtins []*g.Builtin,
+	modules []g.Module,
+	localDir string) interpreter.Importer {
 
-		// check local dir
-		localPath := localDir + "/" + name + ".glm"
-		if !fileExists(localPath) {
-			return nil, fmt.Errorf("Cannot resolve module '%s'", name)
-		}
-
-		src, err := readSourceFromFile(localPath)
-		if err != nil {
-			return nil, err
-		}
-
-		return compiler.CompileSource(src, builtins)
+	var moduleMap = map[string]g.Module{}
+	for _, m := range modules {
+		moduleMap[m.Name()] = m
 	}
+	return &importer{builtins, moduleMap, localDir}
+}
+
+func (imp *importer) GetModule(
+	itp *interpreter.Interpreter,
+	name string) (g.Module, error) {
+
+	if m, ok := imp.moduleMap[name]; ok {
+		return m, nil
+	}
+
+	path := imp.localDir + "/" + name + ".glm"
+	if _, err := os.Stat(path); err != nil {
+		return nil, fmt.Errorf("Cannot resolve module '%s'", name)
+	}
+	src, err := readSourceFromFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	m, err := compiler.CompileSource(src, imp.builtins)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = itp.EvalModule(m)
+	if err != nil {
+		return nil, err
+	}
+
+	imp.moduleMap[name] = m
+	return m, nil
 }
 
 func commandLineArguments() g.List {
@@ -109,23 +135,19 @@ func main() {
 	}
 
 	//-------------------------------------------------------------
-	// setup
+	// builtins and modules
 	//-------------------------------------------------------------
-
-	// local directory
-	localDir, e := os.Getwd()
-	if e != nil {
-		exitError(e)
-	}
 
 	// use all of the available builtin functions
 	builtins := append(g.StandardBuiltins, g.UnsandboxedBuiltins...)
 
-	// resolve bytecode.Modules from the local dir
-	resolver := makeResolver(localDir, builtins)
-
-	// use the entire standard library
-	library := interpreter.NewLibrary(lib.StandardLibrary, resolver)
+	// use the entire standard library, and import bytecode.Modules
+	// from the local directory
+	localDir, e := os.Getwd()
+	if e != nil {
+		exitError(e)
+	}
+	importer := newImporter(builtins, lib.StandardLibrary, localDir)
 
 	//-------------------------------------------------------------
 	// parse, compile, interpret
@@ -144,7 +166,7 @@ func main() {
 	}
 
 	// interpret
-	itp := interpreter.NewInterpreter(builtins, library)
+	itp := interpreter.NewInterpreter(builtins, importer)
 	_, es := itp.EvalModule(mod)
 	if es != nil {
 		exitInterpreter(es)

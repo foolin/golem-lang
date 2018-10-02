@@ -20,14 +20,14 @@ import (
 func EvalCode(
 	code string,
 	builtins []*g.Builtin,
-	library Library) (g.Value, g.Error) {
+	importer Importer) (g.Value, g.Error) {
 
 	mod, err := CompileCode(code, builtins)
 	if err != nil {
 		return nil, err
 	}
 
-	itp := NewInterpreter(builtins, library)
+	itp := NewInterpreter(builtins, importer)
 	return itp.EvalModule(mod)
 }
 
@@ -49,17 +49,17 @@ func CompileCode(
 // Interpreter interprets Golem bytecode.
 type Interpreter struct {
 	builtins   []*g.Builtin
-	library    Library
+	importer   Importer
 	frameStack *frameStack
 }
 
-// NewInterpreter creates a new Interpreter.  If the library is nil,
+// NewInterpreter creates a new Interpreter.  If the importer is nil,
 // then no modules can be imported.
-func NewInterpreter(builtins []*g.Builtin, library Library) *Interpreter {
+func NewInterpreter(builtins []*g.Builtin, importer Importer) *Interpreter {
 
 	return &Interpreter{
 		builtins:   builtins,
-		library:    library,
+		importer:   importer,
 		frameStack: newFrameStack(),
 	}
 }
