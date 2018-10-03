@@ -103,15 +103,18 @@ type (
 		Concat(Str) Str
 
 		Contains(Str) Bool
-		Index(Str) Int
-		LastIndex(Str) Int
 		HasPrefix(Str) Bool
 		HasSuffix(Str) Bool
+		Index(Str) Int
+		LastIndex(Str) Int
+		Map(Eval, StrMapper) (Str, Error)
+		ParseFloat() (Float, Error)
+		ParseInt(Int) (Int, Error)
 		Replace(Str, Str, Int) Str
 		Split(Str) List
-		Trim(Str) Str
 		ToChars() List
-		Map(Eval, StrMapper) (Str, Error)
+		ToRunes() List
+		Trim(Str) Str
 	}
 
 	// StrMapper transform one string into another
@@ -121,8 +124,8 @@ type (
 	Number interface {
 		Basic
 
-		FloatVal() float64
-		IntVal() int64
+		ToFloat() float64
+		ToInt() int64
 
 		Add(Number) Number
 		Sub(Number) Number
@@ -149,6 +152,10 @@ type (
 		LeftShift(Int) (Int, Error)
 		RightShift(Int) (Int, Error)
 		Complement() Int
+
+		Abs() Int
+		Format(Int) Str
+		ToChar() (Str, Error)
 	}
 )
 

@@ -79,7 +79,7 @@ func (tp tuple) HashCode(ev Eval) (Int, Error) {
 		if err != nil {
 			return nil, err
 		}
-		hash += h.IntVal()
+		hash += h.ToInt()
 		hash += hash << 10
 		hash ^= hash >> 6
 	}

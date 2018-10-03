@@ -31,11 +31,11 @@ Floats have no fields.
 */
 type _float float64
 
-func (f _float) IntVal() int64 {
+func (f _float) ToInt() int64 {
 	return int64(f)
 }
 
-func (f _float) FloatVal() float64 {
+func (f _float) ToFloat() float64 {
 	return float64(f)
 }
 
@@ -63,7 +63,7 @@ func (f _float) ToStr(ev Eval) (Str, Error) {
 func (f _float) HashCode(ev Eval) (Int, Error) {
 
 	writer := new(bytes.Buffer)
-	err := binary.Write(writer, binary.LittleEndian, f.FloatVal())
+	err := binary.Write(writer, binary.LittleEndian, f.ToFloat())
 	if err != nil {
 		panic("Float.HashCode() write failed")
 	}
@@ -81,8 +81,8 @@ func (f _float) HashCode(ev Eval) (Int, Error) {
 
 func (f _float) Eq(ev Eval, val Value) (Bool, Error) {
 	if n, ok := val.(Number); ok {
-		fv := f.FloatVal()
-		nv := n.FloatVal()
+		fv := f.ToFloat()
+		nv := n.ToFloat()
 		return NewBool(fv == nv), nil
 	}
 	return False, nil
@@ -90,8 +90,8 @@ func (f _float) Eq(ev Eval, val Value) (Bool, Error) {
 
 func (f _float) Cmp(ev Eval, c Comparable) (Int, Error) {
 	if n, ok := c.(Number); ok {
-		fv := f.FloatVal()
-		nv := n.FloatVal()
+		fv := f.ToFloat()
+		nv := n.ToFloat()
 		if fv < nv {
 			return NegOne, nil
 		} else if fv > nv {
@@ -107,29 +107,29 @@ func (f _float) Cmp(ev Eval, c Comparable) (Int, Error) {
 // Number
 
 func (f _float) Add(n Number) Number {
-	fv := f.FloatVal()
-	nv := n.FloatVal()
+	fv := f.ToFloat()
+	nv := n.ToFloat()
 	return NewFloat(fv + nv)
 }
 
 func (f _float) Sub(n Number) Number {
-	fv := f.FloatVal()
-	nv := n.FloatVal()
+	fv := f.ToFloat()
+	nv := n.ToFloat()
 	return NewFloat(fv - nv)
 }
 
 func (f _float) Mul(n Number) Number {
-	fv := f.FloatVal()
-	nv := n.FloatVal()
+	fv := f.ToFloat()
+	nv := n.ToFloat()
 	return NewFloat(fv * nv)
 }
 
 func (f _float) Div(n Number) (Number, Error) {
-	if n.FloatVal() == 0.0 {
+	if n.ToFloat() == 0.0 {
 		return nil, DivideByZero()
 	}
-	fv := f.FloatVal()
-	nv := n.FloatVal()
+	fv := f.ToFloat()
+	nv := n.ToFloat()
 	return NewFloat(fv / nv), nil
 }
 

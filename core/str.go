@@ -6,6 +6,7 @@ package core
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 )
@@ -304,6 +305,37 @@ func (s str) Map(ev Eval, mapper StrMapper) (Str, Error) {
 	return NewStr(strings.Join(result, ""))
 }
 
+func (s str) ToRunes() List {
+
+	runes := []rune(string(s))
+
+	result := make([]Value, len(runes))
+	for i, r := range runes {
+		result[i] = NewInt(int64(r))
+	}
+	return NewList(result)
+}
+
+func (s str) ParseInt(base Int) (Int, Error) {
+
+	i, err := strconv.ParseInt(string(s), int(base.ToInt()), 64)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewInt(i), nil
+}
+
+func (s str) ParseFloat() (Float, Error) {
+
+	f, err := strconv.ParseFloat(string(s), 64)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewFloat(f), nil
+}
+
 //--------------------------------------------------------------
 // fields
 
@@ -316,9 +348,12 @@ A Str has the following fields:
 * [index](#index)
 * [lastIndex](#lastindex)
 * [map](#map)
+* [parseFloat](#parsefloat)
+* [parseInt](#parseint)
 * [replace](#replace)
 * [split](#split)
 * [toChars](#tochars)
+* [toRunes](#torunes)
 * [trim](#trim)
 
 */
@@ -453,6 +488,49 @@ var strMethods = map[string]Method{
 		}),
 
 	/*doc
+	### `parseFloat`
+
+	`parseFloat` converts the string to a floating-point number.
+
+	If the string is well-formed and near a valid floating point number, ParseFloat
+	returns the nearest floating point number rounded using IEEE754 unbiased rounding.
+
+	* signature: `parseFloat() <Float>`
+	* example: `'3.1415926535'.parseFloat()`
+
+	*/
+	"parseFloat": NewFixedMethod(
+		[]Type{}, false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			return self.(Str).ParseFloat()
+		}),
+
+	/*doc
+	### `parseInt`
+
+	`parseInt` interprets a string in the given base (0, 2 to 36)
+	and returns the corresponding value.
+
+	If base == 0, or base is omitted, the base is implied by the string's prefix: base 16 for "0x",
+	base 8 for "0", and base 10 otherwise. For bases 1, below 0 or above 36 an error is returned.
+
+	* signature: `parseInt(base = 0 <Int>) <Int>`
+	* example: `'1234'.parseInt()`
+
+	*/
+	"parseInt": NewMultipleMethod(
+		[]Type{},
+		[]Type{IntType},
+		false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			base := Zero
+			if len(params) == 1 {
+				base = params[0].(Int)
+			}
+			return self.(Str).ParseInt(base)
+		}),
+
+	/*doc
 	### `replace`
 
 	`replace` returns a copy of a string with the first n non-overlapping instances
@@ -514,6 +592,21 @@ var strMethods = map[string]Method{
 		func(self interface{}, ev Eval) (Value, Error) {
 			s := self.(Str)
 			return s.ToChars(), nil
+		}),
+
+	/*doc
+	### `toRunes`
+
+	`toRunes` splits a string into a list of single-rune Strs.
+
+	* signature: `toRunes() <List>`
+	* example: `'xyz'.toRunes()`
+
+	*/
+	"toRunes": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
+			s := self.(Str)
+			return s.ToRunes(), nil
 		}),
 
 	/*doc

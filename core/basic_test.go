@@ -280,9 +280,6 @@ func TestInt(t *testing.T) {
 	val = NewInt(0).Complement()
 	ok(t, val, nil, NewInt(-1))
 
-	names, err := One.FieldNames()
-	okNames(t, names, err, []string{})
-
 	bv, err = One.HasField("a")
 	ok(t, bv, err, false)
 
@@ -434,7 +431,7 @@ func TestBasicHashCode(t *testing.T) {
 //		if err != nil {
 //			panic(err)
 //		}
-//		return n.IntVal() < 0
+//		return n.ToInt() < 0
 //	})
 //
 //	fmt.Printf("%v\n", vals)

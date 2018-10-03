@@ -26,7 +26,37 @@
 </ul>
 <p>When applying an arithmetic operator <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code> to an Int, if the other operand is a Float, then the result will be a Float, otherwise the result will be an Int.</p>
 <p>Ints are <a href="interfaces.html#hashable"><code>hashable</code></a></p>
-<p>An Int has no fields.</p>
+<p>An Int has the following fields:</p>
+<ul>
+<li><a href="#abs">abs</a></li>
+<li><a href="#format">format</a></li>
+<li><a href="#tochar">toChar</a></li>
+<li><a href="#tofloat">toFloat</a></li>
+</ul>
+<h3 id="abs"><code>abs</code></h3>
+<p><code>abs</code> returns the absolute value of the int.</p>
+<ul>
+<li>signature: <code>abs() &lt;Int&gt;</code></li>
+<li>example: <code>let n = -1; println(n.abs())</code></li>
+</ul>
+<h3 id="format"><code>format</code></h3>
+<p><code>format</code> returns the string representation of int in the given base, for 2 &lt;= base &lt;= 36. The result uses the lower-case letters ‘a’ to ‘z’ for digit values &gt;= 10. If the base is omitted, it defaults to 10.</p>
+<ul>
+<li>signature: <code>format(base = 10 &lt;Int&gt;) &lt;Str&gt;</code></li>
+<li>example: <code>let n = 11259375; println(n.format(16))</code></li>
+</ul>
+<h3 id="tochar"><code>toChar</code></h3>
+<p><code>toChar</code> converts an int that is a valid rune into a string with a single unicode character.</p>
+<ul>
+<li>signature: <code>toChar() &lt;Str&gt;</code></li>
+<li>example: <code>let n = 19990; println(n.toChar())</code></li>
+</ul>
+<h3 id="tofloat"><code>toFloat</code></h3>
+<p><code>toFloat</code> converts an int to a float</p>
+<ul>
+<li>signature: <code>toFloat() &lt;Float&gt;</code></li>
+<li>example: <code>let n = 123; println(n.toFloat())</code></li>
+</ul>
 
 
             <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>

@@ -220,7 +220,7 @@ func (hm *HashMap) lookupBucket(ev Eval, key Value) int {
 		panic(err)
 	}
 
-	hv := int(hc.IntVal())
+	hv := int(hc.ToInt())
 	if hv < 0 {
 		hv = 0 - hv
 	}

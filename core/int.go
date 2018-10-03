@@ -6,6 +6,8 @@ package core
 
 import (
 	"fmt"
+	"strconv"
+	"unicode/utf8"
 )
 
 /*doc
@@ -30,8 +32,6 @@ operand is a Float, then the result will be a Float, otherwise the result will b
 
 Ints are [`hashable`](interfaces.html#hashable)
 
-An Int has no fields.
-
 */
 type _int int64
 
@@ -49,11 +49,11 @@ func NewInt(i int64) Int {
 	return _int(i)
 }
 
-func (i _int) IntVal() int64 {
+func (i _int) ToInt() int64 {
 	return int64(i)
 }
 
-func (i _int) FloatVal() float64 {
+func (i _int) ToFloat() float64 {
 	return float64(i)
 }
 
@@ -91,7 +91,7 @@ func (i _int) Eq(ev Eval, val Value) (Bool, Error) {
 
 	case _float:
 		a := float64(i)
-		b := t.FloatVal()
+		b := t.ToFloat()
 		return NewBool(a == b), nil
 
 	default:
@@ -113,7 +113,7 @@ func (i _int) Cmp(ev Eval, c Comparable) (Int, Error) {
 
 	case _float:
 		a := float64(i)
-		b := t.FloatVal()
+		b := t.ToFloat()
 		if a < b {
 			return NegOne, nil
 		} else if a > b {
@@ -138,7 +138,7 @@ func (i _int) Add(n Number) Number {
 
 	case _float:
 		a := float64(i)
-		b := t.FloatVal()
+		b := t.ToFloat()
 		return NewFloat(a + b)
 
 	default:
@@ -154,7 +154,7 @@ func (i _int) Sub(n Number) Number {
 
 	case _float:
 		a := float64(i)
-		b := t.FloatVal()
+		b := t.ToFloat()
 		return NewFloat(a - b)
 
 	default:
@@ -170,7 +170,7 @@ func (i _int) Mul(n Number) Number {
 
 	case _float:
 		a := float64(i)
-		b := t.FloatVal()
+		b := t.ToFloat()
 		return NewFloat(a * b)
 
 	default:
@@ -189,7 +189,7 @@ func (i _int) Div(n Number) (Number, Error) {
 
 	case _float:
 		a := float64(i)
-		b := t.FloatVal()
+		b := t.ToFloat()
 		if b == 0.0 {
 			return nil, DivideByZero()
 		}
@@ -271,21 +271,140 @@ func (i _int) Complement() Int {
 	return ^i
 }
 
+func (i _int) Abs() Int {
+	n := i.ToInt()
+	if n < 0 {
+		return NewInt(-n)
+	}
+	return i
+}
+
+func (i _int) Format(base Int) Str {
+	n := i.ToInt()
+	b := int(base.ToInt())
+	return MustStr(strconv.FormatInt(n, b))
+}
+
+func (i _int) ToChar() (Str, Error) {
+	r := rune(i.ToInt())
+
+	if !utf8.ValidRune(r) {
+		return nil, fmt.Errorf("InvalidUtf8Rune: %d is not a valid rune", r)
+	}
+
+	buf := make([]byte, utf8.RuneLen(r))
+	utf8.EncodeRune(buf, r)
+	return NewStr(string(buf))
+}
+
 //--------------------------------------------------------------
 // fields
 
+/*doc
+An Int has the following fields:
+
+* [abs](#abs)
+* [format](#format)
+* [toChar](#tochar)
+* [toFloat](#tofloat)
+
+*/
+
+var intMethods = map[string]Method{
+
+	/*doc
+	### `abs`
+
+	`abs` returns the absolute value of the int.
+
+	* signature: `abs() <Int>`
+	* example: `let n = -1; println(n.abs())`
+
+	*/
+	"abs": NewFixedMethod(
+		[]Type{}, false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			return self.(Int).Abs(), nil
+		}),
+
+	/*doc
+	### `format`
+
+	`format` returns the string representation of int in the given base,
+	for 2 <= base <= 36. The result uses the lower-case letters 'a' to 'z'
+	for digit values >= 10.  If the base is omitted, it defaults to 10.
+
+	* signature: `format(base = 10 <Int>) <Str>`
+	* example: `let n = 11259375; println(n.format(16))`
+
+	*/
+	"format": NewMultipleMethod(
+		[]Type{},
+		[]Type{IntType},
+		false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			base := NewInt(10)
+			if len(params) == 1 {
+				base = params[0].(Int)
+			}
+			return self.(Int).Format(base), nil
+		}),
+
+	/*doc
+	### `toChar`
+
+	`toChar` converts an int that is a valid rune into a string with a single
+	unicode character.
+
+	* signature: `toChar() <Str>`
+	* example: `let n = 19990; println(n.toChar())`
+
+	*/
+	"toChar": NewFixedMethod(
+		[]Type{}, false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			return self.(Int).ToChar()
+		}),
+
+	/*doc
+	### `toFloat`
+
+	`toFloat` converts an int to a float
+
+	* signature: `toFloat() <Float>`
+	* example: `let n = 123; println(n.toFloat())`
+
+	*/
+	"toFloat": NewFixedMethod(
+		[]Type{}, false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			return NewFloat(self.(Int).ToFloat()), nil
+		}),
+}
+
 func (i _int) FieldNames() ([]string, Error) {
-	return []string{}, nil
+	names := make([]string, 0, len(intMethods))
+	for name := range intMethods {
+		names = append(names, name)
+	}
+	return names, nil
 }
 
 func (i _int) HasField(name string) (bool, Error) {
-	return false, nil
+	_, ok := intMethods[name]
+	return ok, nil
 }
 
 func (i _int) GetField(ev Eval, name string) (Value, Error) {
+	if method, ok := intMethods[name]; ok {
+		return method.ToFunc(i, name), nil
+	}
 	return nil, NoSuchField(name)
 }
 
 func (i _int) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
+	if method, ok := intMethods[name]; ok {
+		return method.Invoke(i, ev, params)
+	}
 	return nil, NoSuchField(name)
 }

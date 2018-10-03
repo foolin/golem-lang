@@ -103,7 +103,7 @@ func TestVariadicMethod(t *testing.T) {
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			n := self.(int)
 			for _, p := range params {
-				n += int(p.(Int).IntVal())
+				n += int(p.(Int).ToInt())
 			}
 			return NewInt(int64(n)), nil
 		})
@@ -128,9 +128,9 @@ func TestMultipleMethod(t *testing.T) {
 		false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			n := self.(int)
-			n += int(params[0].(Int).IntVal())
+			n += int(params[0].(Int).ToInt())
 			if len(params) == 2 {
-				n += int(params[1].(Int).IntVal())
+				n += int(params[1].(Int).ToInt())
 			}
 
 			return NewInt(int64(n)), nil

@@ -150,7 +150,7 @@ var BuiltinChan = NewMultipleNativeFunc(
 		}
 
 		size := params[0].(Int)
-		return NewBufferedChan(int(size.IntVal())), nil
+		return NewBufferedChan(int(size.ToInt())), nil
 	})
 
 /*doc
@@ -410,7 +410,7 @@ var BuiltinRange = NewMultipleNativeFunc(
 			step = params[2].(Int)
 
 		}
-		return NewRange(from.IntVal(), to.IntVal(), step.IntVal())
+		return NewRange(from.ToInt(), to.ToInt(), step.ToInt())
 	})
 
 /*doc

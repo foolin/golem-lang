@@ -295,7 +295,7 @@ func (ls *list) Remove(ev Eval, index Int) (List, Error) {
 		return nil, ImmutableValue()
 	}
 
-	n := int(index.IntVal())
+	n := int(index.ToInt())
 	if n < 0 || n >= len(ls.values) {
 		return nil, IndexOutOfBounds(n)
 	}
@@ -339,7 +339,7 @@ var DefaultLesser = func(ev Eval, a Value, b Value) (Bool, Error) {
 		return nil, err
 	}
 
-	return NewBool(n.IntVal() < 0), nil
+	return NewBool(n.ToInt() < 0), nil
 }
 
 func (ls *list) Sort(ev Eval, lesser Lesser) (List, Error) {

@@ -33,9 +33,12 @@
 <li><a href="#index">index</a></li>
 <li><a href="#lastindex">lastIndex</a></li>
 <li><a href="#map">map</a></li>
+<li><a href="#parsefloat">parseFloat</a></li>
+<li><a href="#parseint">parseInt</a></li>
 <li><a href="#replace">replace</a></li>
 <li><a href="#split">split</a></li>
 <li><a href="#tochars">toChars</a></li>
+<li><a href="#torunes">toRunes</a></li>
 <li><a href="#trim">trim</a></li>
 </ul>
 <h3 id="contains"><code>contains</code></h3>
@@ -90,6 +93,20 @@ println(t)</textarea>
     </div>
 </div>
 
+<h3 id="parsefloat"><code>parseFloat</code></h3>
+<p><code>parseFloat</code> converts the string to a floating-point number.</p>
+<p>If the string is well-formed and near a valid floating point number, ParseFloat returns the nearest floating point number rounded using IEEE754 unbiased rounding.</p>
+<ul>
+<li>signature: <code>parseFloat() &lt;Float&gt;</code></li>
+<li>example: <code>'3.1415926535'.parseFloat()</code></li>
+</ul>
+<h3 id="parseint"><code>parseInt</code></h3>
+<p><code>parseInt</code> interprets a string in the given base (0, 2 to 36) and returns the corresponding value.</p>
+<p>If base == 0, or base is omitted, the base is implied by the string’s prefix: base 16 for “0x”, base 8 for “0”, and base 10 otherwise. For bases 1, below 0 or above 36 an error is returned.</p>
+<ul>
+<li>signature: <code>parseInt(base = 0 &lt;Int&gt;) &lt;Int&gt;</code></li>
+<li>example: <code>'1234'.parseInt()</code></li>
+</ul>
 <h3 id="replace"><code>replace</code></h3>
 <p><code>replace</code> returns a copy of a string with the first n non-overlapping instances of <code>old</code> replaced by <code>new</code>. If <code>old</code> is empty, it matches at the beginning of a string and after each UTF-8 sequence, yielding up to k+1 replacements for a k-rune string. If <code>n</code> &lt; 0, there is no limit on the number of replacements. The parameter <code>n</code> is optional, and defaults to -1.</p>
 <ul>
@@ -109,6 +126,12 @@ println(t)</textarea>
 <ul>
 <li>signature: <code>toChars() &lt;List&gt;</code></li>
 <li>example: <code>'xyz'.toChars()</code></li>
+</ul>
+<h3 id="torunes"><code>toRunes</code></h3>
+<p><code>toRunes</code> splits a string into a list of single-rune Strs.</p>
+<ul>
+<li>signature: <code>toRunes() &lt;List&gt;</code></li>
+<li>example: <code>'xyz'.toRunes()</code></li>
 </ul>
 <h3 id="trim"><code>trim</code></h3>
 <p><code>trim</code> returns a new string with all leading and trailing runes contained in cutset removed.</p>

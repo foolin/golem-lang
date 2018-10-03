@@ -63,7 +63,7 @@ func TestMethodFieldMap(t *testing.T) {
 		[]Type{},
 		false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
-			n := self.(Int).IntVal()
+			n := self.(Int).ToInt()
 			return NewInt(int64(n * n)), nil
 		})
 
@@ -142,19 +142,19 @@ func TestMergeFieldMaps(t *testing.T) {
 			"b": NewFixedMethod(
 				[]Type{}, false,
 				func(self interface{}, ev Eval, params []Value) (Value, Error) {
-					n := self.(Int).IntVal()
+					n := self.(Int).ToInt()
 					return NewInt(int64(n * 100)), nil
 				}),
 			"c": NewFixedMethod(
 				[]Type{}, false,
 				func(self interface{}, ev Eval, params []Value) (Value, Error) {
-					n := self.(Int).IntVal()
+					n := self.(Int).ToInt()
 					return NewInt(int64(n*100 + 1)), nil
 				}),
 			"f": NewFixedMethod(
 				[]Type{}, false,
 				func(self interface{}, ev Eval, params []Value) (Value, Error) {
-					n := self.(Int).IntVal()
+					n := self.(Int).ToInt()
 					return NewInt(int64(n*100 + 2)), nil
 				}),
 		},

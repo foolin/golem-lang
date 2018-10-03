@@ -25,7 +25,7 @@ func posIndex(v Value, length int) (int, Error) {
 		return -1, TypeMismatch(IntType, v.Type())
 	}
 
-	n := int(i.IntVal())
+	n := int(i.ToInt())
 	if n < 0 {
 		n = length + n
 	}

@@ -30,9 +30,12 @@ A Str has the following fields:
 * [index](#index)
 * [lastIndex](#lastindex)
 * [map](#map)
+* [parseFloat](#parsefloat)
+* [parseInt](#parseint)
 * [replace](#replace)
 * [split](#split)
 * [toChars](#tochars)
+* [toRunes](#torunes)
 * [trim](#trim)
 
 ### `contains`
@@ -91,6 +94,27 @@ let t = s.map(fn(c) {
 println(t)
 ```
 
+### `parseFloat`
+
+`parseFloat` converts the string to a floating-point number.
+
+If the string is well-formed and near a valid floating point number, ParseFloat
+returns the nearest floating point number rounded using IEEE754 unbiased rounding.
+
+* signature: `parseFloat() <Float>`
+* example: `'3.1415926535'.parseFloat()`
+
+### `parseInt`
+
+`parseInt` interprets a string in the given base (0, 2 to 36)
+and returns the corresponding value.
+
+If base == 0, or base is omitted, the base is implied by the string's prefix: base 16 for "0x",
+base 8 for "0", and base 10 otherwise. For bases 1, below 0 or above 36 an error is returned.
+
+* signature: `parseInt(base = 0 <Int>) <Int>`
+* example: `'1234'.parseInt()`
+
 ### `replace`
 
 `replace` returns a copy of a string with the first n non-overlapping instances
@@ -122,6 +146,13 @@ and sep are empty, `split` returns an empty list.
 
 * signature: `toChars() <List>`
 * example: `'xyz'.toChars()`
+
+### `toRunes`
+
+`toRunes` splits a string into a list of single-rune Strs.
+
+* signature: `toRunes() <List>`
+* example: `'xyz'.toRunes()`
 
 ### `trim`
 

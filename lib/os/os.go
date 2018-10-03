@@ -128,7 +128,7 @@ var exit g.Value = g.NewFixedNativeFunc(
 	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
 		n := params[0].(g.Int)
 
-		os.Exit(int(n.IntVal()))
+		os.Exit(int(n.ToInt()))
 
 		// we will never actually get here
 		return g.Null, nil

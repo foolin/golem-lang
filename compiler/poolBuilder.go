@@ -42,12 +42,12 @@ func (p *poolBuilder) constIndex(key g.Basic) int {
 
 		i, ok := v.(g.Int)
 		g.Assert(ok)
-		return int(i.IntVal())
+		return int(i.ToInt())
 	}
 	i := p.constants.Len()
 	err = p.constants.Put(ev, key, i)
 	g.Assert(err == nil)
-	return int(i.IntVal())
+	return int(i.ToInt())
 }
 
 func (p *poolBuilder) addTemplate(tpl *bc.FuncTemplate) {
@@ -73,7 +73,7 @@ func (p *poolBuilder) build() *bc.Pool {
 
 func (p *poolBuilder) makeConstants() []g.Basic {
 
-	n := int(p.constants.Len().IntVal())
+	n := int(p.constants.Len().ToInt())
 
 	entries := make([]*g.HEntry, 0, n)
 	itr := p.constants.Iterator()
@@ -84,7 +84,7 @@ func (p *poolBuilder) makeConstants() []g.Basic {
 	sort.Slice(entries, func(i, j int) bool {
 		x := entries[i].Value.(g.Int)
 		y := entries[j].Value.(g.Int)
-		return x.IntVal() < y.IntVal()
+		return x.ToInt() < y.ToInt()
 	})
 
 	constants := make([]g.Basic, n)

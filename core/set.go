@@ -103,7 +103,7 @@ func (s *set) Len(ev Eval) (Int, Error) {
 //---------------------------------------------------------------
 
 func (s *set) IsEmpty() Bool {
-	return NewBool(s.hashMap.Len().IntVal() == 0)
+	return NewBool(s.hashMap.Len().ToInt() == 0)
 }
 
 func (s *set) Contains(ev Eval, key Value) (Bool, Error) {

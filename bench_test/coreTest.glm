@@ -147,12 +147,29 @@ fn testInt() {
     assert('1' == str(1))
     assert('Int' == type(1))
 
-    assert(set {} == fields(1))
+    for f in fields(1) {
+        assert(has(1, f))
+    }
+    let n = 1
+    assert(n.toFloat == golem.getField(1, 'toFloat'))
+
     assert(!has(1, 'bogus'))
     util.fail(|| => 1 .bogus, "NoSuchField: Field 'bogus' not found") // Note that '1.bogus' util.fails to parse
     util.fail(|| => golem.getField(1, 'bogus'), "NoSuchField: Field 'bogus' not found")
     util.fail(|| => golem.setField(1, 'bogus', null), "TypeMismatch: Expected Struct, not Int")
     util.fail(|| => 1 .bogus = 'z', "TypeMismatch: Expected Struct, not Int")
+
+    n = 123
+    assert(123.0 == n.toFloat())
+    n = -1; assert(1 == n.abs())
+    n = 1;  assert(1 == n.abs())
+
+    n = 11259375 
+    assert('abcdef' == n.format(16))
+    assert('11259375' == n.format())
+
+    n = 19990
+    assert(n.toChar() == '世')
 }
 
 fn testFloat() {
@@ -589,11 +606,6 @@ fn testStr() {
     assert('Str' == type('a'))
 
     let s = 'a'
-    assert(set { 
-        'contains', 'index', 'lastIndex', 
-        'hasPrefix', 'hasSuffix',
-        'replace', 'split', 'trim', 'toChars', 'map'
-    } == fields(s))
     for f in fields(s) {
         assert(has(s, f))
     }
@@ -738,6 +750,18 @@ fn testStr() {
 
     s = '\t\nabc \n\t'
     assert('abc' == s.trim('\n\t '))
+
+    assert('abc'.toRunes() == [97, 98, 99])
+
+    assert(
+        ['1234'.parseInt(),
+        '0xabcdef'.parseInt(),
+        '0642'.parseInt(),
+        'abcdef'.parseInt(16),
+        'xyz'.parseInt(36)] ==
+        [1234, 11259375, 418, 11259375, 44027])
+
+    assert(3.1415926535 == '3.1415926535'.parseFloat())
 }
 
 fn testList() {

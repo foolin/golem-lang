@@ -161,10 +161,10 @@ func fromValue(ev g.Eval, val g.Value) (interface{}, g.Error) {
 		return val.(g.Bool).BoolVal(), nil
 
 	case g.IntType:
-		return val.(g.Int).IntVal(), nil
+		return val.(g.Int).ToInt(), nil
 
 	case g.FloatType:
-		return val.(g.Float).FloatVal(), nil
+		return val.(g.Float).ToFloat(), nil
 
 	case g.StrType:
 		return val.(g.Str).String(), nil

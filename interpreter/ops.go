@@ -422,11 +422,11 @@ func opCheckTuple(itp *Interpreter, f *frame) (g.Value, g.Error) {
 	if err != nil {
 		return nil, err
 	}
-	if expectedLen != int(tpLen.IntVal()) {
+	if expectedLen != int(tpLen.ToInt()) {
 		return nil, g.InvalidArgument(
 			fmt.Sprintf(
 				"Expected Tuple of length %d, not length %d",
-				expectedLen, int(tpLen.IntVal())))
+				expectedLen, int(tpLen.ToInt())))
 	}
 
 	// do not alter stack
@@ -1097,7 +1097,7 @@ func opLt(itp *Interpreter, f *frame) (g.Value, g.Error) {
 		return nil, err
 	}
 	f.stack = f.stack[:n]
-	f.stack[n-1] = g.NewBool(val.IntVal() < 0)
+	f.stack[n-1] = g.NewBool(val.ToInt() < 0)
 	f.ip++
 
 	return nil, nil
@@ -1118,7 +1118,7 @@ func opLte(itp *Interpreter, f *frame) (g.Value, g.Error) {
 		return nil, err
 	}
 	f.stack = f.stack[:n]
-	f.stack[n-1] = g.NewBool(val.IntVal() <= 0)
+	f.stack[n-1] = g.NewBool(val.ToInt() <= 0)
 	f.ip++
 
 	return nil, nil
@@ -1139,7 +1139,7 @@ func opGt(itp *Interpreter, f *frame) (g.Value, g.Error) {
 		return nil, err
 	}
 	f.stack = f.stack[:n]
-	f.stack[n-1] = g.NewBool(val.IntVal() > 0)
+	f.stack[n-1] = g.NewBool(val.ToInt() > 0)
 	f.ip++
 
 	return nil, nil
@@ -1160,7 +1160,7 @@ func opGte(itp *Interpreter, f *frame) (g.Value, g.Error) {
 		return nil, err
 	}
 	f.stack = f.stack[:n]
-	f.stack[n-1] = g.NewBool(val.IntVal() >= 0)
+	f.stack[n-1] = g.NewBool(val.ToInt() >= 0)
 	f.ip++
 
 	return nil, nil

@@ -120,7 +120,7 @@ func (d *dict) HashMap() *HashMap {
 //---------------------------------------------------------------
 
 func (d *dict) IsEmpty() Bool {
-	return NewBool(d.hashMap.Len().IntVal() == 0)
+	return NewBool(d.hashMap.Len().ToInt() == 0)
 }
 
 func (d *dict) Contains(ev Eval, key Value) (Bool, Error) {
