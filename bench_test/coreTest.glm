@@ -170,6 +170,8 @@ fn testInt() {
 
     n = 19990
     assert(n.toChar() == '世')
+
+    util.fail(|| => n.format(1234), "strconv: illegal AppendInt/FormatInt base")
 }
 
 fn testFloat() {
@@ -190,7 +192,6 @@ fn testFloat() {
     assert('1.1' == str(1.1))
     assert('Float' == type(1.1))
 
-    assert(set {} == fields(1.1))
     assert(!has(1.1, 'bogus'))
     util.fail(|| => 1.1 .bogus, "NoSuchField: Field 'bogus' not found") // Note that '1.1.bogus' util.fails to parse
     util.fail(|| => golem.getField(1.1, 'bogus'), "NoSuchField: Field 'bogus' not found")
@@ -202,6 +203,27 @@ fn testFloat() {
     assert(3.0 * 2.0 == 6.0)
     assert(3.0 / 2.0 == 1.5)
     util.fail(|| => 3.0 / 0.0, 'DivideByZero')
+
+    let n = -1.23
+    assert(1.23 == n.abs())
+    n = 2.2
+    assert(2.2 == n.abs())
+
+    n = 1.2
+    assert(n.ceil() == 2.0)
+    assert(n.floor() == 1.0)
+    assert(n.round() == 1.0)
+
+    n = 1.6
+    assert(n.ceil() == 2.0)
+    assert(n.floor() == 1.0)
+    assert(n.round() == 2.0)
+
+    n = 1.23
+    assert("1.23" == n.format("g"))
+    assert("1.230" == n.format("f", 3))
+    assert("1.230e+00" == n.format("e", 3))
+    util.fail(|| => n.format("z"), "'z' is an invalid format string")
 }
 
 fn testAssignment() {
@@ -809,21 +831,6 @@ fn testList() {
 
     assert('List' == type(x))
 
-    assert(set { 
-        'isEmpty', 
-        'contains', 
-        'index', 
-        'join',
-        'map',
-        'reduce',
-        'filter',
-
-        'add', 
-        'addAll',
-        'clear',
-        'remove', 
-        'sort' 
-    } == fields(x))
     for f in fields(x) {
         assert(has(x, f))
     }
@@ -1043,6 +1050,9 @@ fn testList() {
         },
         fn () {
             assert([1,2,3,4] == [2,1,4,3].sort())
+
+            assert((1,2,3) == [1,2,3].toTuple())
+            util.fail(|| => [1].toTuple(), 'invalid tuple size: 1')
         }
     ]
     for f in funcs { f(); }
@@ -1358,8 +1368,6 @@ fn testTuple() {
 
     assert('Tuple' == type(x))
 
-    assert(set { } == fields(x))
-
     assert(!has(x, 'bogus'))
     util.fail(|| => golem.getField(x, 'bogus'), "NoSuchField: Field 'bogus' not found")
     util.fail(|| => golem.setField(x, 'bogus', null), "TypeMismatch: Expected Struct, not Tuple")
@@ -1368,6 +1376,7 @@ fn testTuple() {
     //-----------------------------------------------
 
     assert([1, 2] == [x[0], x[1]])
+    assert((1,2,3).toList() == [1,2,3])
 }
 
 fn testChan() {
@@ -1431,36 +1440,6 @@ fn testArity() {
     assert(arity(println) == struct { kind: "Variadic", required: 0 })
     assert(arity(len)     == struct { kind: "Fixed",    required: 1 })
     assert(arity(range)   == struct { kind: "Multiple", required: 2, optional: 1 })
-
-    const v = []
-    const d = 
-        dict{}.addAll(
-            [].addAll(fields(v))
-                .map(|n| => (n, arity(golem.getField(v, n)))))
-
-    //// TODO
-    //const v = []
-    //const s = stream(fields(v))
-    //    .map(|n| => struct { name: n, field: golem.getField(v, n) })
-    //    .map(|s| => (s.name, arity(s.field)))
-    //const d = dict{}.addAll(s.toIter())  // option 1
-    //const e = s.toDict()                 // option 2
-
-    assert(d ==
-        dict { 
-            "add":      struct { kind: "Fixed", required: 1 }, 
-            "addAll":   struct { kind: "Fixed", required: 1 }, 
-            "clear":    struct { kind: "Fixed", required: 0 }, 
-            "contains": struct { kind: "Fixed", required: 1 }, 
-            "filter":   struct { kind: "Fixed", required: 1 }, 
-            "index":    struct { kind: "Fixed", required: 1 }, 
-            "isEmpty":  struct { kind: "Fixed", required: 0 }, 
-            "map":      struct { kind: "Fixed", required: 1 }, 
-            "reduce":   struct { kind: "Fixed", required: 2 }, 
-            "remove":   struct { kind: "Fixed", required: 1 },
-            "sort":     struct { kind: "Multiple", required: 0, optional: 1 },
-            "join":     struct { kind: "Multiple", required: 0, optional: 1 } 
-        })
 }
 
 fn testVariadic() {

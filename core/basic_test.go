@@ -359,9 +359,6 @@ func TestFloat(t *testing.T) {
 	val, err = NewFloat(3.3).Div(NewFloat(0.0))
 	fail(t, val, err, "DivideByZero")
 
-	names, err := a.FieldNames()
-	okNames(t, names, err, []string{})
-
 	bv, err = a.HasField("a")
 	ok(t, bv, err, false)
 

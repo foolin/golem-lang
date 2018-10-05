@@ -279,10 +279,20 @@ func (i _int) Abs() Int {
 	return i
 }
 
-func (i _int) Format(base Int) Str {
+func (i _int) Format(base Int) (s Str, err Error) {
+
 	n := i.ToInt()
 	b := int(base.ToInt())
-	return MustStr(strconv.FormatInt(n, b))
+
+	// catch panic from strconv
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("%v", r)
+		}
+	}()
+	s = MustStr(strconv.FormatInt(n, b))
+
+	return
 }
 
 func (i _int) ToChar() (Str, Error) {
@@ -347,7 +357,7 @@ var intMethods = map[string]Method{
 			if len(params) == 1 {
 				base = params[0].(Int)
 			}
-			return self.(Int).Format(base), nil
+			return self.(Int).Format(base)
 		}),
 
 	/*doc

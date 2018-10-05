@@ -8,6 +8,8 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"math"
+	"strconv"
 )
 
 /*doc
@@ -25,8 +27,6 @@ Valid operators for Float are:
 Applying an arithmetic operator to a Float always returns a Float.
 
 Floats are [`hashable`](interfaces.html#hashable)
-
-Floats have no fields.
 
 */
 type _float float64
@@ -138,20 +138,182 @@ func (f _float) Negate() Number {
 }
 
 //--------------------------------------------------------------
+// Float
+
+func (f _float) Abs() Float {
+	n := f.ToFloat()
+	if n < 0 {
+		return NewFloat(-n)
+	}
+	return f
+}
+
+func (f _float) Ceil() Float {
+	return _float(math.Ceil(f.ToFloat()))
+}
+
+func (f _float) Floor() Float {
+	return _float(math.Floor(f.ToFloat()))
+}
+
+func (f _float) Round() Float {
+	return _float(math.Round(f.ToFloat()))
+}
+
+func (f _float) Format(fstr Str, prec Int) (s Str, err Error) {
+
+	n := f.ToFloat()
+	fm, e := parseFloatFormat(fstr.String())
+	if e != nil {
+		return nil, e
+	}
+	p := int(prec.ToInt())
+
+	// catch panic from strconv
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("%v", r)
+		}
+	}()
+	s = MustStr(strconv.FormatFloat(n, fm, p, 64))
+
+	return
+}
+
+func parseFloatFormat(fstr string) (byte, error) {
+
+	switch fstr {
+
+	case "b", "e", "E", "f", "g", "G":
+		return []byte(fstr)[0], nil
+
+	default:
+		return 0, fmt.Errorf("'%s' is an invalid format string", fstr)
+	}
+}
+
+//--------------------------------------------------------------
 // fields
 
+/*doc
+A Float has the following fields:
+
+* [abs](#abs)
+* [ceil](#ceil)
+* [floor](#floor)
+* [format](#format)
+* [round](#round)
+
+*/
+
+var floatMethods = map[string]Method{
+
+	/*doc
+	### `abs`
+
+	`abs` returns the absolute value of the float.
+
+	* signature: `abs() <Float>`
+	* example: `let n = -1.2; println(n.abs())`
+
+	*/
+	"abs": NewFixedMethod(
+		[]Type{}, false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			return self.(Float).Abs(), nil
+		}),
+
+	/*doc
+	### `ceil`
+
+	`ceil` returns the least integer value greater than or equal to the float.
+
+	* signature: `ceil() <Float>`
+	* example: `let n = -1.2; println(n.ceil())`
+
+	*/
+	"ceil": NewFixedMethod(
+		[]Type{}, false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			return self.(Float).Ceil(), nil
+		}),
+
+	/*doc
+	### `floor`
+
+	`floor` returns the greatest integer value less than or equal to the float.
+
+	* signature: `floor() <Float>`
+	* example: `let n = -1.2; println(n.floor())`
+
+	*/
+	"floor": NewFixedMethod(
+		[]Type{}, false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			return self.(Float).Floor(), nil
+		}),
+
+	/*doc
+	### `format`
+
+	`format`
+
+	* signature: `format(fmt <Str>, prec = -1 <Int>) <Str>`
+	* example: `let n = 11259375; println(n.format(16))`
+
+	*/
+	"format": NewMultipleMethod(
+		[]Type{StrType},
+		[]Type{IntType},
+		false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			fstr := params[0].(Str)
+			prec := NewInt(-1)
+			if len(params) == 2 {
+				prec = params[1].(Int)
+			}
+			return self.(Float).Format(fstr, prec)
+		}),
+
+	/*doc
+	### `round`
+
+	`round` returns the nearest integer, rounding half away from zero.
+
+	* signature: `round() <Float>`
+	* example: `let n = -1.2; println(n.round())`
+
+	*/
+	"round": NewFixedMethod(
+		[]Type{}, false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			return self.(Float).Round(), nil
+		}),
+}
+
 func (f _float) FieldNames() ([]string, Error) {
-	return []string{}, nil
+	names := make([]string, 0, len(floatMethods))
+	for name := range floatMethods {
+		names = append(names, name)
+	}
+	return names, nil
 }
 
 func (f _float) HasField(name string) (bool, Error) {
-	return false, nil
+	_, ok := floatMethods[name]
+	return ok, nil
 }
 
 func (f _float) GetField(ev Eval, name string) (Value, Error) {
+	if method, ok := floatMethods[name]; ok {
+		return method.ToFunc(f, name), nil
+	}
 	return nil, NoSuchField(name)
 }
 
 func (f _float) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
+	if method, ok := floatMethods[name]; ok {
+		return method.Invoke(f, ev, params)
+	}
 	return nil, NoSuchField(name)
 }

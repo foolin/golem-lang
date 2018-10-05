@@ -191,6 +191,13 @@ func (ls *list) Join(ev Eval, delim Str) (Str, Error) {
 	return NewStr(strings.Join(result, delim.String()))
 }
 
+func (ls *list) ToTuple() (Tuple, Error) {
+	if len(ls.values) < 2 {
+		return nil, fmt.Errorf("invalid tuple size: %d", len(ls.values))
+	}
+	return NewTuple(CopyValues(ls.values)), nil
+}
+
 func (ls *list) Map(ev Eval, mapper Mapper) (List, Error) {
 
 	vals := make([]Value, len(ls.values))
@@ -221,21 +228,17 @@ func (ls *list) Reduce(ev Eval, initial Value, reducer Reducer) (Value, Error) {
 	return acc, nil
 }
 
-func (ls *list) Filter(ev Eval, filterer Filterer) (List, Error) {
+func (ls *list) Filter(ev Eval, pred Predicate) (List, Error) {
 
 	vals := []Value{}
 
 	for _, v := range ls.values {
-		flt, err := filterer(ev, v)
+		b, err := pred(ev, v)
 		if err != nil {
 			return nil, err
 		}
-		pred, ok := flt.(Bool)
-		if !ok {
-			return nil, TypeMismatch(BoolType, flt.Type())
-		}
 
-		eq, err := pred.Eq(ev, True)
+		eq, err := b.Eq(ev, True)
 		if err != nil {
 			return nil, err
 		}
@@ -419,6 +422,7 @@ A List has the following fields:
 * [reduce](#reduce)
 * [remove](#remove)
 * [sort](#sort)
+* [toTuple](#totuple)
 
 */
 
@@ -782,6 +786,22 @@ var listMethods = map[string]Method{
 				}
 				return result, nil
 			})
+		}),
+
+	/*doc
+	### `toTuple`
+
+	`toTuple` creates a new Tuple having the same elements as the list.  The list
+	must have at least 2 elements.
+
+	* signature: `toTuple() <List>`
+	* example: `[1,2,3].toTuple()`
+
+	*/
+	"toTuple": NewFixedMethod(
+		[]Type{}, false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			return self.(List).ToTuple()
 		}),
 }
 

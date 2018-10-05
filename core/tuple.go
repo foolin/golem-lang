@@ -26,8 +26,6 @@ Tuples are
 [`lenable`](interfaces.html#lenable) and
 [`hashable`](interfaces.html#hashable).
 
-Tuples have no fields.
-
 */
 
 type tuple []Value
@@ -114,21 +112,61 @@ func (tp tuple) Len(ev Eval) (Int, Error) {
 	return NewInt(int64(len(tp))), nil
 }
 
+func (tp tuple) ToList() List {
+	return NewList(CopyValues(tp))
+}
+
 //--------------------------------------------------------------
 // fields
 
+/*doc
+A Tuple has the following fields:
+
+* [toList](#tolist)
+
+*/
+
+var tupleMethods = map[string]Method{
+
+	/*doc
+	### `toList`
+
+	`toList` creates a new List having the same elements as the tuple.
+
+	* signature: `toList() <List>`
+	* example: `(1,2,3).toList()`
+
+	*/
+	"toList": NewFixedMethod(
+		[]Type{}, false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			return self.(Tuple).ToList(), nil
+		}),
+}
+
 func (tp tuple) FieldNames() ([]string, Error) {
-	return []string{}, nil
+	names := make([]string, 0, len(tupleMethods))
+	for name := range tupleMethods {
+		names = append(names, name)
+	}
+	return names, nil
 }
 
 func (tp tuple) HasField(name string) (bool, Error) {
-	return false, nil
+	_, ok := tupleMethods[name]
+	return ok, nil
 }
 
 func (tp tuple) GetField(ev Eval, name string) (Value, Error) {
+	if method, ok := tupleMethods[name]; ok {
+		return method.ToFunc(tp, name), nil
+	}
 	return nil, NoSuchField(name)
 }
 
 func (tp tuple) InvokeField(ev Eval, name string, params []Value) (Value, Error) {
+	if method, ok := tupleMethods[name]; ok {
+		return method.Invoke(tp, ev, params)
+	}
 	return nil, NoSuchField(name)
 }

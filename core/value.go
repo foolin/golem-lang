@@ -138,6 +138,13 @@ type (
 	Float interface {
 		Number
 		Comparable
+
+		Abs() Float
+		Ceil() Float
+		Floor() Float
+		Round() Float
+
+		Format(Str, Int) (Str, Error)
 	}
 
 	// An Int is an int64
@@ -154,7 +161,8 @@ type (
 		Complement() Int
 
 		Abs() Int
-		Format(Int) Str
+
+		Format(Int) (Str, Error)
 		ToChar() (Str, Error)
 	}
 )
@@ -190,6 +198,8 @@ type (
 		AddAll(Eval, Value) (List, Error)
 		Remove(Eval, Int) (List, Error)
 
+		ToTuple() (Tuple, Error)
+
 		// Sort sorts the list
 		Sort(Eval, Lesser) (List, Error)
 
@@ -200,20 +210,8 @@ type (
 		Reduce(Eval, Value, Reducer) (Value, Error)
 
 		// Filter creates a new list, leaving the current list unaltered
-		Filter(Eval, Filterer) (List, Error)
+		Filter(Eval, Predicate) (List, Error)
 	}
-
-	// Lesser returns whether the first param is less than the second param
-	Lesser func(Eval, Value, Value) (Bool, Error)
-
-	// Mapper transform one value into another
-	Mapper func(Eval, Value) (Value, Error)
-
-	// Reducer combines two values into one
-	Reducer func(Eval, Value, Value) (Value, Error)
-
-	// Filterer filters a value
-	Filterer func(Eval, Value) (Bool, Error)
 
 	// Range is an immutable, iterable representation of a sequence of integers
 	Range interface {
@@ -233,6 +231,8 @@ type (
 		Composite
 		Indexable
 		Lenable
+
+		ToList() List
 	}
 
 	// Dict is an associative array
@@ -283,6 +283,24 @@ type (
 		IterNext(Eval) (Bool, Error)
 		IterGet(Eval) (Value, Error)
 	}
+)
+
+//---------------------------------------------------------------
+// Transformer functions
+//---------------------------------------------------------------
+
+type (
+	// Lesser returns whether the first param is less than the second param
+	Lesser func(Eval, Value, Value) (Bool, Error)
+
+	// Mapper transform one value into another
+	Mapper func(Eval, Value) (Value, Error)
+
+	// Reducer combines two values into one
+	Reducer func(Eval, Value, Value) (Value, Error)
+
+	// Predicate is a boolean-valued function
+	Predicate func(Eval, Value) (Bool, Error)
 )
 
 //---------------------------------------------------------------
