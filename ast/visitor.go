@@ -241,8 +241,8 @@ func (tp *TupleExpr) Traverse(v Visitor) {
 
 // Traverse StructExpr
 func (stc *StructExpr) Traverse(v Visitor) {
-	for _, val := range stc.Values {
-		v.Visit(val)
+	for _, e := range stc.Entries {
+		v.Visit(e.Value)
 	}
 }
 
@@ -258,14 +258,19 @@ func (propNode *PropNode) Traverse(v Visitor) {
 // Traverse DictExpr
 func (dict *DictExpr) Traverse(v Visitor) {
 	for _, e := range dict.Entries {
-		v.Visit(e)
+		v.Visit(e.Value)
 	}
 }
 
-// Traverse DictEntryExpr
-func (de *DictEntryExpr) Traverse(v Visitor) {
+// Traverse DictEntry
+func (de *DictEntry) Traverse(v Visitor) {
 	v.Visit(de.Key)
 	v.Visit(de.Value)
+}
+
+// Traverse StructEntry
+func (se *StructEntry) Traverse(v Visitor) {
+	v.Visit(se.Value)
 }
 
 // Traverse ThisExpr
@@ -381,14 +386,16 @@ func (p *dump) Visit(node Node) {
 		p.buf.WriteString(fmt.Sprintf("BuiltinExpr(%q)\n", t.Fn.Text))
 
 	case *StructExpr:
-		p.buf.WriteString(fmt.Sprintf("StructExpr(%v,%v)\n", tokensString(t.Keys), t.Scope))
+		p.buf.WriteString(fmt.Sprintf("StructExpr(%v)\n", t.Scope))
 	case *PropNode:
 		p.buf.WriteString("PropNode\n")
 
 	case *DictExpr:
 		p.buf.WriteString("DictExpr\n")
-	case *DictEntryExpr:
-		p.buf.WriteString("DictEntryExpr\n")
+	case *DictEntry:
+		p.buf.WriteString("DictEntry\n")
+	case *StructEntry:
+		p.buf.WriteString("StructEntry\n")
 	case *ThisExpr:
 		p.buf.WriteString(fmt.Sprintf("ThisExpr(%v)\n", t.Variable))
 	case *ListExpr:

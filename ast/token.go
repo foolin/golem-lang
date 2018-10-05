@@ -102,6 +102,7 @@ const (
 	basicEnd
 
 	Ident
+	MagicField
 
 	BlankIdent
 	If
@@ -238,6 +239,8 @@ func (t TokenKind) String() string {
 
 	case Ident:
 		return "Ident"
+	case MagicField:
+		return "MagicField"
 
 	case If:
 		return "If"

@@ -335,6 +335,11 @@ func TestIdentOrKeyword(t *testing.T) {
 	ok(t, s, ast.Dict, "dict", 1, 13)
 	ok(t, s, ast.Set, "set", 1, 18)
 	ok(t, s, ast.EOF, "", 1, 21)
+
+	s = mustScanner(&Source{"", "", "$eq $hashCode $str"})
+	ok(t, s, ast.MagicField, "$eq", 1, 1)
+	ok(t, s, ast.MagicField, "$hashCode", 1, 5)
+	ok(t, s, ast.MagicField, "$str", 1, 15)
 }
 
 func TestComments(t *testing.T) {

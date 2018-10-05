@@ -351,6 +351,11 @@ func (s *Scanner) Next() *ast.Token {
 		case IsIdentStart(r):
 			return s.nextIdentOrKeyword()
 
+		case r == '$':
+			return s.nextMagicField()
+
+		case IsIdentStart(r):
+
 		case r == eof:
 			s.isDone = true
 			s.doneToken = &ast.Token{Kind: ast.EOF, Text: "", Position: pos}
@@ -360,6 +365,23 @@ func (s *Scanner) Next() *ast.Token {
 			return s.unexpectedChar(r, pos)
 		}
 	}
+}
+
+func (s *Scanner) nextMagicField() *ast.Token {
+
+	pos := s.pos
+	begin := s.cur.idx
+	r := s.cur.r
+	s.consume()
+
+	s.acceptWhile(IsIdentContinue)
+
+	text := s.Source.Code[begin:s.cur.idx]
+
+	if !IsMagicField(text) {
+		return s.unexpectedChar(r, pos)
+	}
+	return &ast.Token{Kind: ast.MagicField, Text: text, Position: pos}
 }
 
 func (s *Scanner) nextIdentOrKeyword() *ast.Token {

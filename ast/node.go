@@ -295,13 +295,18 @@ type (
 	StructExpr struct {
 		StructToken *Token
 		LBrace      *Token
-		Keys        []*Token
-		Values      []Node
+		Entries     []*StructEntry
 		RBrace      *Token
 
-		// ThisScope will always either be empty, or contain
+		// Scope will always either be empty, or contain
 		// a single 'this' Variable.
 		Scope StructScope
+	}
+
+	// StructEntry is an entry in a StructExpr
+	StructEntry struct {
+		Key   *Token
+		Value Node
 	}
 
 	// PropNode is a 'prop' value in a struct
@@ -329,12 +334,12 @@ type (
 	DictExpr struct {
 		DictToken *Token
 		LBrace    *Token
-		Entries   []*DictEntryExpr
+		Entries   []*DictEntry
 		RBrace    *Token
 	}
 
-	// DictEntryExpr is an entry in a DictExpr
-	DictEntryExpr struct {
+	// DictEntry is an entry in a DictExpr
+	DictEntry struct {
 		Key   Expression
 		Value Expression
 	}
@@ -412,7 +417,6 @@ func (*StructExpr) exprMarker()     {}
 func (*ThisExpr) exprMarker()       {}
 func (*FieldExpr) exprMarker()      {}
 func (*DictExpr) exprMarker()       {}
-func (*DictEntryExpr) exprMarker()  {}
 func (*IndexExpr) exprMarker()      {}
 func (*SliceExpr) exprMarker()      {}
 func (*SliceFromExpr) exprMarker()  {}
@@ -686,11 +690,17 @@ func (n *DictExpr) Begin() Pos { return n.DictToken.Position }
 // End DictExpr
 func (n *DictExpr) End() Pos { return n.RBrace.Position }
 
-// Begin DictEntryExpr
-func (n *DictEntryExpr) Begin() Pos { return n.Key.Begin() }
+// Begin DictEntry
+func (n *DictEntry) Begin() Pos { return n.Key.Begin() }
 
-// End DictEntryExpr
-func (n *DictEntryExpr) End() Pos { return n.Value.End() }
+// End DictEntry
+func (n *DictEntry) End() Pos { return n.Value.End() }
+
+// Begin StructEntry
+func (n *StructEntry) Begin() Pos { return n.Key.Position }
+
+// End StructEntry
+func (n *StructEntry) End() Pos { return n.Value.End() }
 
 // Begin IndexExpr
 func (n *IndexExpr) Begin() Pos { return n.Operand.Begin() }
@@ -1073,13 +1083,11 @@ func (n *StructExpr) String() string {
 	buf.WriteString("struct")
 
 	buf.WriteString(" { ")
-	for idx, k := range n.Keys {
-		if idx > 0 {
+	for i, e := range n.Entries {
+		if i > 0 {
 			buf.WriteString(", ")
 		}
-		buf.WriteString(k.Text)
-		buf.WriteString(": ")
-		buf.WriteString(n.Values[idx].String())
+		buf.WriteString(e.String())
 	}
 	buf.WriteString(" }")
 	return buf.String()
@@ -1125,9 +1133,17 @@ func (n *DictExpr) String() string {
 	return buf.String()
 }
 
-func (n *DictEntryExpr) String() string {
+func (n *DictEntry) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(n.Key.String())
+	buf.WriteString(": ")
+	buf.WriteString(n.Value.String())
+	return buf.String()
+}
+
+func (n *StructEntry) String() string {
+	var buf bytes.Buffer
+	buf.WriteString(n.Key.Text)
 	buf.WriteString(": ")
 	buf.WriteString(n.Value.String())
 	return buf.String()

@@ -1110,9 +1110,9 @@ func (c *compiler) visitExprStmt(es *ast.ExprStmt) {
 func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 
 	// add struct def to pool
-	def := make([]string, len(stc.Keys))
-	for i, k := range stc.Keys {
-		def[i] = k.Text
+	def := make([]string, len(stc.Entries))
+	for i, e := range stc.Entries {
+		def[i] = e.Key.Text
 	}
 	defIdx := c.poolBuilder.structDefIndex(def)
 
@@ -1126,9 +1126,10 @@ func (c *compiler) visitStructExpr(stc *ast.StructExpr) {
 	}
 
 	// init each field
-	for i, k := range stc.Keys {
+	for _, e := range stc.Entries {
+		k := e.Key
+		v := e.Value
 
-		v := stc.Values[i]
 		if p, ok := v.(*ast.PropNode); ok {
 
 			if p.Set == nil {

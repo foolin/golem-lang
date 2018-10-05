@@ -1154,86 +1154,70 @@ func (p *Parser) lambda() *ast.FnExpr {
 }
 
 func (p *Parser) structExpr() ast.Expression {
-	return p.structBody(p.expect(ast.Struct))
-}
 
-func (p *Parser) structBody(token *ast.Token) ast.Expression {
-
-	// key-value pairs
-	names := make(map[string]bool)
-	keys := []*ast.Token{}
-	values := []ast.Node{}
-	var rbrace *ast.Token
+	structToken := p.expect(ast.Struct)
 	lbrace := p.expect(ast.Lbrace)
 
-	switch p.cur.token.Kind {
-
-	case ast.Ident:
-
-		name := p.cur.token.Text
-		if _, ok := names[name]; ok {
-			panic(newParserError(p.scn.Source.Path, duplicateKey, p.cur.token))
+	if p.cur.token.Kind == ast.Rbrace {
+		return &ast.StructExpr{
+			StructToken: structToken,
+			LBrace:      lbrace,
+			Entries:     []*ast.StructEntry{},
+			RBrace:      p.consume().token,
+			Scope:       ast.NewStructScope(),
 		}
-		names[name] = true
-		keys = append(keys, p.cur.token)
+	}
 
-		p.consume()
-		p.expect(ast.Colon)
+	entry := p.structEntry()
+	entries := []*ast.StructEntry{entry}
 
-		if p.cur.token.Kind == ast.Prop {
-			values = append(values, p.property())
-		} else {
-			values = append(values, p.expression())
-		}
+	names := make(map[string]bool)
+	name := entry.Key.Text
+	names[name] = true
 
-	loop:
-		for {
-			switch p.cur.token.Kind {
-
-			case ast.Comma:
-				p.consume()
-
-				name := p.cur.token.Text
-				if _, ok := names[name]; ok {
-					panic(newParserError(p.scn.Source.Path, duplicateKey, p.cur.token))
-				}
-				names[name] = true
-				keys = append(keys, p.cur.token)
-
-				p.consume()
-				p.expect(ast.Colon)
-
-				if p.cur.token.Kind == ast.Prop {
-					values = append(values, p.property())
-				} else {
-					values = append(values, p.expression())
-				}
-
-			case ast.Rbrace:
-				rbrace = p.consume().token
-				break loop
-
-			default:
-				panic(p.unexpected())
+	for {
+		switch p.cur.token.Kind {
+		case ast.Rbrace:
+			return &ast.StructExpr{
+				StructToken: structToken,
+				LBrace:      lbrace,
+				Entries:     entries,
+				RBrace:      p.consume().token,
+				Scope:       ast.NewStructScope(),
 			}
+		case ast.Comma:
+			p.consume()
+			entry := p.structEntry()
+
+			name := entry.Key.Text
+			if _, ok := names[name]; ok {
+				panic(newParserError(p.scn.Source.Path, duplicateKey, entry.Key))
+			}
+			names[name] = true
+
+			entries = append(entries, entry)
+		default:
+			panic(p.unexpected())
 		}
+	}
+}
 
-	case ast.Rbrace:
-		rbrace = p.consume().token
+func (p *Parser) structEntry() *ast.StructEntry {
 
-	default:
-		panic(p.unexpected())
+	key := p.expect(ast.Ident)
+	p.expect(ast.Colon)
+
+	if p.cur.token.Kind == ast.Prop {
+		return &ast.StructEntry{
+			Key:   key,
+			Value: p.property(),
+		}
+	}
+	return &ast.StructEntry{
+		Key:   key,
+		Value: p.expression(),
 	}
 
-	// done
-	return &ast.StructExpr{
-		StructToken: token,
-		LBrace:      lbrace,
-		Keys:        keys,
-		Values:      values,
-		RBrace:      rbrace,
-		Scope:       ast.NewStructScope(),
-	}
 }
 
 func (p *Parser) property() *ast.PropNode {
@@ -1284,56 +1268,43 @@ func (p *Parser) propertyFunc() *ast.FnExpr {
 func (p *Parser) dictExpr() ast.Expression {
 
 	dictToken := p.expect(ast.Dict)
-
-	entries := []*ast.DictEntryExpr{}
-	var rbrace *ast.Token
-
 	lbrace := p.expect(ast.Lbrace)
 
-	switch p.cur.token.Kind {
-
-	case ast.Rbrace:
-		rbrace = p.consume().token
-
-	default:
-		key := p.expression()
-		p.expect(ast.Colon)
-		value := p.expression()
-		entries = append(entries, &ast.DictEntryExpr{
-			Key:   key,
-			Value: value,
-		})
-
-	loop:
-		for {
-			switch p.cur.token.Kind {
-
-			case ast.Comma:
-				p.consume()
-
-				key = p.expression()
-				p.expect(ast.Colon)
-				value = p.expression()
-				entries = append(entries, &ast.DictEntryExpr{
-					Key:   key,
-					Value: value,
-				})
-
-			case ast.Rbrace:
-				rbrace = p.consume().token
-				break loop
-
-			default:
-				panic(p.unexpected())
-			}
+	if p.cur.token.Kind == ast.Rbrace {
+		return &ast.DictExpr{
+			DictToken: dictToken,
+			LBrace:    lbrace,
+			Entries:   []*ast.DictEntry{},
+			RBrace:    p.consume().token,
 		}
 	}
 
-	return &ast.DictExpr{
-		DictToken: dictToken,
-		LBrace:    lbrace,
-		Entries:   entries,
-		RBrace:    rbrace,
+	entries := []*ast.DictEntry{p.dictEntry()}
+	for {
+		switch p.cur.token.Kind {
+		case ast.Rbrace:
+			return &ast.DictExpr{
+				DictToken: dictToken,
+				LBrace:    lbrace,
+				Entries:   entries,
+				RBrace:    p.consume().token,
+			}
+		case ast.Comma:
+			p.consume()
+			entries = append(entries, p.dictEntry())
+		default:
+			panic(p.unexpected())
+		}
+	}
+}
+
+func (p *Parser) dictEntry() *ast.DictEntry {
+	key := p.expression()
+	p.expect(ast.Colon)
+	value := p.expression()
+	return &ast.DictEntry{
+		Key:   key,
+		Value: value,
 	}
 }
 
