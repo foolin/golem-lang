@@ -36,7 +36,6 @@ Welcome to the tour of the Golem Programming Language.
   * [The `main()` function](#the-main-function)
   * [Standard Library](#standard-library)
   * [Examples](#examples)
-* [Embedding](#embedding)
 
 ## Hello, world
 
@@ -919,12 +918,3 @@ test itself as part of the build process:
 
 [https://github.com/mjarmy/golem-lang/blob/master/bench_test/benchTest.glm](https://github.com/mjarmy/golem-lang/blob/master/bench_test/benchTest.glm)
 
-## Embedding
-
-So far, we have seen Golem in action in two contexts: as a 
-[WebAssembly](https://github.com/mjarmy/golem-lang/blob/master/tools/docs/wasm.go) executable, and
-a [command line](https://github.com/mjarmy/golem-lang/blob/master/cli/golem.go) executable.
-
-However, it is easy to embed Golem inside a Go program in other ways.  If you are 
-interested in learning more about how to embed Golem in Go, please head over to 
-the [Embedding](embedding.html) document.

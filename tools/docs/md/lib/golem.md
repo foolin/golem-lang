@@ -6,8 +6,9 @@ on Golem values and code.
 
 `golem` has the following fields:
 
-* [getField](#getField)
-* [setField](#setField)
+* [getField](#getfield)
+* [setField](#setfield)
+* [toDict](#todict)
 
 ### `getField`
 
@@ -38,5 +39,17 @@ import golem
 let s = struct { a: 1, b: 2 }
 golem.setField(s, 'a', 3)
 println(s)
+```
+
+### `toDict`
+
+`toDict` converts a Struct into a Dict.
+
+* signature: `toDict(s <Struct>) <Dict>`
+* example:
+
+```
+import golem
+println(golem.toDict(struct { a: 1, b: 2 }))
 ```
 

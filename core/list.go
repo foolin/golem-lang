@@ -191,6 +191,10 @@ func (ls *list) Join(ev Eval, delim Str) (Str, Error) {
 	return NewStr(strings.Join(result, delim.String()))
 }
 
+func (ls *list) Copy() List {
+	return NewList(CopyValues(ls.values))
+}
+
 func (ls *list) ToTuple() (Tuple, Error) {
 	if len(ls.values) < 2 {
 		return nil, fmt.Errorf("invalid tuple size: %d", len(ls.values))
@@ -414,6 +418,7 @@ A List has the following fields:
 * [addAll](#addall)
 * [clear](#clear)
 * [contains](#contains)
+* [copy](#copy)
 * [filter](#filter)
 * [index](#index)
 * [isEmpty](#isempty)
@@ -510,6 +515,25 @@ var listMethods = map[string]Method{
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			ls := self.(List)
 			return ls.Contains(ev, params[0])
+		}),
+
+	/*doc
+	### `copy`
+
+	`copy` returns a shallow copy of the list
+
+	* signature: `copy() <List>`
+	* example:
+
+	```
+	println([1,2].copy())
+	```
+
+	*/
+	"copy": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
+			ls := self.(List)
+			return ls.Copy(), nil
 		}),
 
 	/*doc
@@ -798,9 +822,8 @@ var listMethods = map[string]Method{
 	* example: `[1,2,3].toTuple()`
 
 	*/
-	"toTuple": NewFixedMethod(
-		[]Type{}, false,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+	"toTuple": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
 			return self.(List).ToTuple()
 		}),
 }

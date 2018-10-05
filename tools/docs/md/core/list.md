@@ -22,6 +22,7 @@ A List has the following fields:
 * [addAll](#addall)
 * [clear](#clear)
 * [contains](#contains)
+* [copy](#copy)
 * [filter](#filter)
 * [index](#index)
 * [isEmpty](#isempty)
@@ -30,6 +31,7 @@ A List has the following fields:
 * [reduce](#reduce)
 * [remove](#remove)
 * [sort](#sort)
+* [toTuple](#totuple)
 
 ### `add`
 
@@ -78,6 +80,17 @@ println(a.clear())
 ```
 let a = [1, 2]
 println(a.contains(2))
+```
+
+### `copy`
+
+`copy` returns a shallow copy of the list
+
+* signature: `copy() <List>`
+* example:
+
+```
+println([1,2].copy())
 ```
 
 ### `filter`
@@ -191,4 +204,12 @@ let a = [7, 4, 11, 13, 6, 2, 9, 1]
 a.sort(|a, b| => b < a) // sort in reverse
 println(a)
 ```
+
+### `toTuple`
+
+`toTuple` creates a new Tuple having the same elements as the list.  The list
+must have at least 2 elements.
+
+* signature: `toTuple() <List>`
+* example: `[1,2,3].toTuple()`
 

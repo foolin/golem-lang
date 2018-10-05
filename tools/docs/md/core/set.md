@@ -16,6 +16,7 @@ A Set has the following fields:
 * [addAll](#addall)
 * [clear](#clear)
 * [contains](#contains)
+* [copy](#copy)
 * [isEmpty](#isempty)
 * [remove](#remove)
 
@@ -66,6 +67,17 @@ println(a.clear())
 ```
 let a = set {1, 2}
 println(a.contains(2))
+```
+
+### `copy`
+
+`copy` returns a shallow copy of the set
+
+* signature: `copy() <Set>`
+* example:
+
+```
+println(set {1,2}.copy())
 ```
 
 ### `isEmpty`

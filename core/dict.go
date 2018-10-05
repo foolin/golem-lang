@@ -198,6 +198,67 @@ func (d *dict) AddAll(ev Eval, val Value) (Dict, Error) {
 	return d, nil
 }
 
+func (d *dict) ToStruct(Eval) (Struct, Error) {
+
+	itr := d.hashMap.Iterator()
+	fields := map[string]Field{}
+
+	for itr.Next() {
+		entry := itr.Get()
+		s, ok := entry.Key.(Str)
+		if !ok {
+			return nil, fmt.Errorf("Dict key is not a string")
+		}
+		fields[s.String()] = NewField(entry.Value)
+	}
+
+	return NewStruct(fields)
+}
+
+func (d *dict) Keys(ev Eval) (Set, Error) {
+
+	itr := d.hashMap.Iterator()
+	keys := []Value{}
+
+	for itr.Next() {
+		entry := itr.Get()
+		keys = append(keys, entry.Key)
+	}
+
+	return NewSet(ev, keys)
+}
+
+func (d *dict) Values() List {
+
+	itr := d.hashMap.Iterator()
+	values := []Value{}
+
+	for itr.Next() {
+		entry := itr.Get()
+		values = append(values, entry.Value)
+	}
+
+	return NewList(values)
+}
+
+func (d *dict) Copy(ev Eval) (Dict, Error) {
+
+	itr := d.hashMap.Iterator()
+	entries := []*HEntry{}
+
+	for itr.Next() {
+		entry := itr.Get()
+		entries = append(entries, &HEntry{entry.Key, entry.Value})
+	}
+
+	hm, err := NewHashMap(ev, entries)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewDict(hm), nil
+}
+
 //---------------------------------------------------------------
 // Iterator
 
@@ -242,8 +303,11 @@ A Dict has the following fields:
 * [addAll](#addall)
 * [clear](#clear)
 * [contains](#contains)
+* [copy](#copy)
 * [isEmpty](#isempty)
+* [keys](#keys)
 * [remove](#remove)
+* [toStruct](#tostruct)
 
 */
 
@@ -314,6 +378,25 @@ var dictMethods = map[string]Method{
 		}),
 
 	/*doc
+	### `copy`
+
+	`copy` returns a shallow copy of the dict
+
+	* signature: `copy() <Dict>`
+	* example:
+
+	```
+	println(dict{'a':1,'b':2}.copy())
+	```
+
+	*/
+	"copy": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
+			d := self.(Dict)
+			return d.Copy(ev)
+		}),
+
+	/*doc
 	### `isEmpty`
 
 	`isEmpty` returns whether the dict contains any values.
@@ -326,6 +409,21 @@ var dictMethods = map[string]Method{
 		func(self interface{}, ev Eval) (Value, Error) {
 			d := self.(Dict)
 			return d.IsEmpty(), nil
+		}),
+
+	/*doc
+	### `keys`
+
+	`keys` returns a Set of the dict's keys.
+
+	* signature: `keys() <Set>`
+	* example: `println(dict {'a': 1, 'b': 2}.keys())`
+
+	*/
+	"keys": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
+			d := self.(Dict)
+			return d.Keys(ev)
 		}),
 
 	/*doc
@@ -349,6 +447,40 @@ var dictMethods = map[string]Method{
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			d := self.(Dict)
 			return d.Remove(ev, params[0])
+		}),
+
+	/*doc
+	### `toStruct`
+
+	`toStruct` converts a Dict into a Struct.
+
+	* signature: `toStruct() <Struct>`
+	* example:
+
+	```
+	let d = dict {'a': 1, 'b': 2}; println(d.toStruct())
+	```
+
+	*/
+	"toStruct": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
+			d := self.(Dict)
+			return d.ToStruct(ev)
+		}),
+
+	/*doc
+	### `values`
+
+	`values` returns a Set of the dict's values.
+
+	* signature: `values() <Set>`
+	* example: `println(dict {'a': 1, 'b': 2}.values())`
+
+	*/
+	"values": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
+			d := self.(Dict)
+			return d.Values(), nil
 		}),
 }
 

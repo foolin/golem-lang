@@ -181,6 +181,19 @@ func (s *set) Remove(ev Eval, key Value) (Set, Error) {
 	return s, nil
 }
 
+func (s *set) Copy(ev Eval) (Set, Error) {
+
+	values := []Value{}
+
+	itr := s.hashMap.Iterator()
+	for itr.Next() {
+		entry := itr.Get()
+		values = append(values, entry.Key)
+	}
+
+	return NewSet(ev, values)
+}
+
 //---------------------------------------------------------------
 // Iterator
 
@@ -226,6 +239,7 @@ A Set has the following fields:
 * [addAll](#addall)
 * [clear](#clear)
 * [contains](#contains)
+* [copy](#copy)
 * [isEmpty](#isempty)
 * [remove](#remove)
 
@@ -315,6 +329,25 @@ var setMethods = map[string]Method{
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			s := self.(Set)
 			return s.Contains(ev, params[0])
+		}),
+
+	/*doc
+	### `copy`
+
+	`copy` returns a shallow copy of the set
+
+	* signature: `copy() <Set>`
+	* example:
+
+	```
+	println(set {1,2}.copy())
+	```
+
+	*/
+	"copy": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
+			s := self.(Set)
+			return s.Copy(ev)
 		}),
 
 	/*doc

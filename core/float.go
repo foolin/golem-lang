@@ -259,7 +259,7 @@ var floatMethods = map[string]Method{
 	`format`
 
 	* signature: `format(fmt <Str>, prec = -1 <Int>) <Str>`
-	* example: `let n = 11259375; println(n.format(16))`
+	* example: `let n = 1.23; println(n.format("f"))`
 
 	*/
 	"format": NewMultipleMethod(

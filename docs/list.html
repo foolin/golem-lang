@@ -29,6 +29,7 @@
 <li><a href="#addall">addAll</a></li>
 <li><a href="#clear">clear</a></li>
 <li><a href="#contains">contains</a></li>
+<li><a href="#copy">copy</a></li>
 <li><a href="#filter">filter</a></li>
 <li><a href="#index">index</a></li>
 <li><a href="#isempty">isEmpty</a></li>
@@ -37,6 +38,7 @@
 <li><a href="#reduce">reduce</a></li>
 <li><a href="#remove">remove</a></li>
 <li><a href="#sort">sort</a></li>
+<li><a href="#totuple">toTuple</a></li>
 </ul>
 <h3 id="add"><code>add</code></h3>
 <p><code>add</code> adds a value to the end of the list, and returns the modified list.</p>
@@ -106,6 +108,22 @@ println(a.contains(2))</textarea>
     </div>
 </div>
 
+<h3 id="copy"><code>copy</code></h3>
+<p><code>copy</code> returns a shallow copy of the list</p>
+<ul>
+<li>signature: <code>copy() &lt;List&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src5" rows="1" spellcheck="false">println([1,2].copy())</textarea>
+    </div>
+    <div class="output"><pre id="result5"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src5', 'result5');">Run</button>
+    </div>
+</div>
+
 <h3 id="filter"><code>filter</code></h3>
 <p><code>filter</code> returns a new list by passing each of the elements of the current list into the given predicate. If the predicate returns <code>true</code> for an element, that element is added to the new list. The original list is unmodified.</p>
 <p>The predicate must accept one parameter of any type, and return a Bool.</p>
@@ -116,12 +134,12 @@ println(a.contains(2))</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src5" rows="2" spellcheck="false">let a = [1, 2, 3, 4, 5]
+        <textarea id="src6" rows="2" spellcheck="false">let a = [1, 2, 3, 4, 5]
 println(a.filter(|e| =&gt; e % 2 == 0))</textarea>
     </div>
-    <div class="output"><pre id="result5"></pre></div>
+    <div class="output"><pre id="result6"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src5', 'result5');">Run</button>
+        <button class="button" onClick="interpret('src6', 'result6');">Run</button>
     </div>
 </div>
 
@@ -133,12 +151,12 @@ println(a.filter(|e| =&gt; e % 2 == 0))</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src6" rows="2" spellcheck="false">let a = [&#39;x&#39;, &#39;y&#39;, &#39;z&#39;]
+        <textarea id="src7" rows="2" spellcheck="false">let a = [&#39;x&#39;, &#39;y&#39;, &#39;z&#39;]
 println(a.index(&#39;z&#39;))</textarea>
     </div>
-    <div class="output"><pre id="result6"></pre></div>
+    <div class="output"><pre id="result7"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src6', 'result6');">Run</button>
+        <button class="button" onClick="interpret('src7', 'result7');">Run</button>
     </div>
 </div>
 
@@ -156,11 +174,11 @@ println(a.index(&#39;z&#39;))</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src7" rows="1" spellcheck="false">println([1,2,3].join(&#39;:&#39;))</textarea>
+        <textarea id="src8" rows="1" spellcheck="false">println([1,2,3].join(&#39;:&#39;))</textarea>
     </div>
-    <div class="output"><pre id="result7"></pre></div>
+    <div class="output"><pre id="result8"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src7', 'result7');">Run</button>
+        <button class="button" onClick="interpret('src8', 'result8');">Run</button>
     </div>
 </div>
 
@@ -174,13 +192,13 @@ println(a.index(&#39;z&#39;))</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src8" rows="3" spellcheck="false">let a = [1,2,3]
+        <textarea id="src9" rows="3" spellcheck="false">let a = [1,2,3]
 let b = a.map(|e| =&gt; e * e)
 println(b)</textarea>
     </div>
-    <div class="output"><pre id="result8"></pre></div>
+    <div class="output"><pre id="result9"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src8', 'result8');">Run</button>
+        <button class="button" onClick="interpret('src9', 'result9');">Run</button>
     </div>
 </div>
 
@@ -194,13 +212,13 @@ println(b)</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src9" rows="3" spellcheck="false">let a = [1,2,3]
+        <textarea id="src10" rows="3" spellcheck="false">let a = [1,2,3]
 let b = a.reduce(0, |acc, e| =&gt; acc + e)
 println(b)</textarea>
     </div>
-    <div class="output"><pre id="result9"></pre></div>
+    <div class="output"><pre id="result10"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src9', 'result9');">Run</button>
+        <button class="button" onClick="interpret('src10', 'result10');">Run</button>
     </div>
 </div>
 
@@ -219,16 +237,22 @@ println(b)</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src10" rows="3" spellcheck="false">let a = [7, 4, 11, 13, 6, 2, 9, 1]
+        <textarea id="src11" rows="3" spellcheck="false">let a = [7, 4, 11, 13, 6, 2, 9, 1]
 a.sort(|a, b| =&gt; b &lt; a) // sort in reverse
 println(a)</textarea>
     </div>
-    <div class="output"><pre id="result10"></pre></div>
+    <div class="output"><pre id="result11"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src10', 'result10');">Run</button>
+        <button class="button" onClick="interpret('src11', 'result11');">Run</button>
     </div>
 </div>
 
+<h3 id="totuple"><code>toTuple</code></h3>
+<p><code>toTuple</code> creates a new Tuple having the same elements as the list. The list must have at least 2 elements.</p>
+<ul>
+<li>signature: <code>toTuple() &lt;List&gt;</code></li>
+<li>example: <code>[1,2,3].toTuple()</code></li>
+</ul>
 
 
             <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>

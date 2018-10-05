@@ -222,6 +222,33 @@ func (st *_struct) Eq(ev Eval, val Value) (Bool, Error) {
 	return True, nil
 }
 
+func (st *_struct) ToDict(ev Eval) (Dict, Error) {
+
+	names := st.fieldMap.names()
+	entries := make([]*HEntry, len(names))
+	for i, n := range names {
+		key := MustStr(n)
+		val, err := st.GetField(ev, n)
+		if err != nil {
+			return nil, err
+		}
+		entries[i] = &HEntry{key, val}
+	}
+
+	hm, err := NewHashMap(ev, entries)
+	if err != nil {
+		return nil, err
+	}
+	return NewDict(hm), nil
+}
+
+func (st *_struct) Internal(args ...interface{}) {
+
+	name := args[0].(string)
+	field := args[1].(Field)
+	st.fieldMap.replace(name, field)
+}
+
 //--------------------------------------------------------------
 // fields
 
@@ -248,11 +275,4 @@ func (st *_struct) SetField(ev Eval, name string, val Value) Error {
 	}
 
 	return st.fieldMap.set(ev, name, val)
-}
-
-func (st *_struct) Internal(args ...interface{}) {
-
-	name := args[0].(string)
-	field := args[1].(Field)
-	st.fieldMap.replace(name, field)
 }

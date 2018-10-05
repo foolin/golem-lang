@@ -25,6 +25,7 @@ func init() {
 		map[string]g.Field{
 			"getField": g.NewField(getField),
 			"setField": g.NewField(setField),
+			"toDict":   g.NewField(toDict),
 		})
 	g.Assert(err == nil)
 
@@ -34,8 +35,9 @@ func init() {
 /*doc
 `golem` has the following fields:
 
-* [getField](#getField)
-* [setField](#setField)
+* [getField](#getfield)
+* [setField](#setfield)
+* [toDict](#todict)
 
 */
 
@@ -105,4 +107,27 @@ var setField = g.NewFixedNativeFunc(
 			return nil, err
 		}
 		return g.Null, nil
+	})
+
+/*doc
+### `toDict`
+
+`toDict` converts a Struct into a Dict.
+
+* signature: `toDict(s <Struct>) <Dict>`
+* example:
+
+```
+import golem
+println(golem.toDict(struct { a: 1, b: 2 }))
+```
+
+*/
+
+var toDict = g.NewFixedNativeFunc(
+	[]g.Type{g.StructType},
+	true,
+	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
+		st := params[0].(g.Struct)
+		return st.ToDict(ev)
 	})

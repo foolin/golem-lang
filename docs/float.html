@@ -23,7 +23,44 @@
 </ul>
 <p>Applying an arithmetic operator to a Float always returns a Float.</p>
 <p>Floats are <a href="interfaces.html#hashable"><code>hashable</code></a></p>
-<p>Floats have no fields.</p>
+<p>A Float has the following fields:</p>
+<ul>
+<li><a href="#abs">abs</a></li>
+<li><a href="#ceil">ceil</a></li>
+<li><a href="#floor">floor</a></li>
+<li><a href="#format">format</a></li>
+<li><a href="#round">round</a></li>
+</ul>
+<h3 id="abs"><code>abs</code></h3>
+<p><code>abs</code> returns the absolute value of the float.</p>
+<ul>
+<li>signature: <code>abs() &lt;Float&gt;</code></li>
+<li>example: <code>let n = -1.2; println(n.abs())</code></li>
+</ul>
+<h3 id="ceil"><code>ceil</code></h3>
+<p><code>ceil</code> returns the least integer value greater than or equal to the float.</p>
+<ul>
+<li>signature: <code>ceil() &lt;Float&gt;</code></li>
+<li>example: <code>let n = -1.2; println(n.ceil())</code></li>
+</ul>
+<h3 id="floor"><code>floor</code></h3>
+<p><code>floor</code> returns the greatest integer value less than or equal to the float.</p>
+<ul>
+<li>signature: <code>floor() &lt;Float&gt;</code></li>
+<li>example: <code>let n = -1.2; println(n.floor())</code></li>
+</ul>
+<h3 id="format"><code>format</code></h3>
+<p><code>format</code></p>
+<ul>
+<li>signature: <code>format(fmt &lt;Str&gt;, prec = -1 &lt;Int&gt;) &lt;Str&gt;</code></li>
+<li>example: <code>let n = 1.23; println(n.format(&quot;f&quot;))</code></li>
+</ul>
+<h3 id="round"><code>round</code></h3>
+<p><code>round</code> returns the nearest integer, rounding half away from zero.</p>
+<ul>
+<li>signature: <code>round() &lt;Float&gt;</code></li>
+<li>example: <code>let n = -1.2; println(n.round())</code></li>
+</ul>
 
 
             <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>

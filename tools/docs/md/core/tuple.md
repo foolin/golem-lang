@@ -14,5 +14,14 @@ Tuples are
 [`lenable`](interfaces.html#lenable) and
 [`hashable`](interfaces.html#hashable).
 
-Tuples have no fields.
+A Tuple has the following fields:
+
+* [toList](#tolist)
+
+### `toList`
+
+`toList` creates a new List having the same elements as the tuple.
+
+* signature: `toList() <List>`
+* example: `(1,2,3).toList()`
 

@@ -137,9 +137,8 @@ var tupleMethods = map[string]Method{
 	* example: `(1,2,3).toList()`
 
 	*/
-	"toList": NewFixedMethod(
-		[]Type{}, false,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+	"toList": NewNullaryMethod(
+		func(self interface{}, ev Eval) (Value, Error) {
 			return self.(Tuple).ToList(), nil
 		}),
 }

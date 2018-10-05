@@ -16,8 +16,9 @@
 <p>The golem module defines functions that perform introspection and transformation on Golem values and code.</p>
 <p><code>golem</code> has the following fields:</p>
 <ul>
-<li><a href="#getField">getField</a></li>
-<li><a href="#setField">setField</a></li>
+<li><a href="#getfield">getField</a></li>
+<li><a href="#setfield">setField</a></li>
+<li><a href="#todict">toDict</a></li>
 </ul>
 <h3 id="getfield"><code>getField</code></h3>
 <p><code>getField</code> returns the value associated with a field name.</p>
@@ -40,6 +41,14 @@ println(a)</code></pre>
 let s = struct { a: 1, b: 2 }
 golem.setField(s, &#39;a&#39;, 3)
 println(s)</code></pre>
+<h3 id="todict"><code>toDict</code></h3>
+<p><code>toDict</code> converts a Struct into a Dict.</p>
+<ul>
+<li>signature: <code>toDict(s &lt;Struct&gt;) &lt;Dict&gt;</code></li>
+<li>example:</li>
+</ul>
+<pre><code>import golem
+println(golem.toDict(struct { a: 1, b: 2 }))</code></pre>
 
 
             <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>

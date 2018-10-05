@@ -19,8 +19,11 @@ A Dict has the following fields:
 * [addAll](#addall)
 * [clear](#clear)
 * [contains](#contains)
+* [copy](#copy)
 * [isEmpty](#isempty)
+* [keys](#keys)
 * [remove](#remove)
+* [toStruct](#tostruct)
 
 ### `addAll`
 
@@ -60,12 +63,30 @@ let d = dict {'a': 1, 'b': 2}
 println(d.contains('b'))
 ```
 
+### `copy`
+
+`copy` returns a shallow copy of the dict
+
+* signature: `copy() <Dict>`
+* example:
+
+```
+println(dict{'a':1,'b':2}.copy())
+```
+
 ### `isEmpty`
 
 `isEmpty` returns whether the dict contains any values.
 
 * signature: `isEmpty() <Bool>`
 * example: `println(dict {}.isEmpty())`
+
+### `keys`
+
+`keys` returns a Set of the dict's keys.
+
+* signature: `keys() <Set>`
+* example: `println(dict {'a': 1, 'b': 2}.keys())`
 
 ### `remove`
 
@@ -80,4 +101,22 @@ the dict is unmodified.
 let d = dict {'a': 1, 'b': 2}
 println(d.remove('a'))
 ```
+
+### `toStruct`
+
+`toStruct` converts a Dict into a Struct.
+
+* signature: `toStruct() <Struct>`
+* example:
+
+```
+let d = dict {'a': 1, 'b': 2}; println(d.toStruct())
+```
+
+### `values`
+
+`values` returns a Set of the dict's values.
+
+* signature: `values() <Set>`
+* example: `println(dict {'a': 1, 'b': 2}.values())`
 

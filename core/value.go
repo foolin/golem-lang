@@ -192,13 +192,13 @@ type (
 		Contains(Eval, Value) (Bool, Error)
 		Index(Eval, Value) (Int, Error)
 		Join(Eval, Str) (Str, Error)
+		Copy() List
+		ToTuple() (Tuple, Error)
 
 		Clear() (List, Error)
 		Add(Eval, Value) (List, Error)
 		AddAll(Eval, Value) (List, Error)
 		Remove(Eval, Int) (List, Error)
-
-		ToTuple() (Tuple, Error)
 
 		// Sort sorts the list
 		Sort(Eval, Lesser) (List, Error)
@@ -246,10 +246,16 @@ type (
 
 		IsEmpty() Bool
 		Contains(Eval, Value) (Bool, Error)
+		Copy(Eval) (Dict, Error)
 
 		Clear() (Dict, Error)
 		AddAll(Eval, Value) (Dict, Error)
 		Remove(Eval, Value) (Dict, Error)
+
+		ToStruct(Eval) (Struct, Error)
+
+		Keys(Eval) (Set, Error)
+		Values() List
 	}
 
 	// Set is a set of unique values
@@ -260,6 +266,7 @@ type (
 
 		IsEmpty() Bool
 		Contains(Eval, Value) (Bool, Error)
+		Copy(Eval) (Set, Error)
 
 		Clear() (Set, Error)
 		Add(Eval, Value) (Set, Error)
@@ -272,6 +279,7 @@ type (
 		Composite
 
 		SetField(Eval, string, Value) Error
+		ToDict(Eval) (Dict, Error)
 
 		// Internal is for use only by the Golem Compiler
 		Internal(...interface{})

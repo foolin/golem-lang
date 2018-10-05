@@ -26,8 +26,11 @@
 <li><a href="#addall">addAll</a></li>
 <li><a href="#clear">clear</a></li>
 <li><a href="#contains">contains</a></li>
+<li><a href="#copy">copy</a></li>
 <li><a href="#isempty">isEmpty</a></li>
+<li><a href="#keys">keys</a></li>
 <li><a href="#remove">remove</a></li>
+<li><a href="#tostruct">toStruct</a></li>
 </ul>
 <h3 id="addall"><code>addAll</code></h3>
 <p><code>addAll</code> adds all of the values in the given <a href="interfaces.html#iterable">Iterable</a> to the dict, and returns the modified dict. Each iterated element must be a 2-Tuple containing a key-value pair.</p>
@@ -37,12 +40,12 @@
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src11" rows="2" spellcheck="false">let d = dict {&#39;a&#39;: 1, &#39;b&#39;: 2}
+        <textarea id="src12" rows="2" spellcheck="false">let d = dict {&#39;a&#39;: 1, &#39;b&#39;: 2}
 println(d.addAll([(&#39;b&#39;, 2), (&#39;c&#39;, 3)]))</textarea>
     </div>
-    <div class="output"><pre id="result11"></pre></div>
+    <div class="output"><pre id="result12"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src11', 'result11');">Run</button>
+        <button class="button" onClick="interpret('src12', 'result12');">Run</button>
     </div>
 </div>
 
@@ -54,12 +57,12 @@ println(d.addAll([(&#39;b&#39;, 2), (&#39;c&#39;, 3)]))</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src12" rows="2" spellcheck="false">let d = dict {&#39;a&#39;: 1, &#39;b&#39;: 2}
+        <textarea id="src13" rows="2" spellcheck="false">let d = dict {&#39;a&#39;: 1, &#39;b&#39;: 2}
 println(d.clear())</textarea>
     </div>
-    <div class="output"><pre id="result12"></pre></div>
+    <div class="output"><pre id="result13"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src12', 'result12');">Run</button>
+        <button class="button" onClick="interpret('src13', 'result13');">Run</button>
     </div>
 </div>
 
@@ -71,12 +74,28 @@ println(d.clear())</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src13" rows="2" spellcheck="false">let d = dict {&#39;a&#39;: 1, &#39;b&#39;: 2}
+        <textarea id="src14" rows="2" spellcheck="false">let d = dict {&#39;a&#39;: 1, &#39;b&#39;: 2}
 println(d.contains(&#39;b&#39;))</textarea>
     </div>
-    <div class="output"><pre id="result13"></pre></div>
+    <div class="output"><pre id="result14"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src13', 'result13');">Run</button>
+        <button class="button" onClick="interpret('src14', 'result14');">Run</button>
+    </div>
+</div>
+
+<h3 id="copy"><code>copy</code></h3>
+<p><code>copy</code> returns a shallow copy of the dict</p>
+<ul>
+<li>signature: <code>copy() &lt;Dict&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src15" rows="1" spellcheck="false">println(dict{&#39;a&#39;:1,&#39;b&#39;:2}.copy())</textarea>
+    </div>
+    <div class="output"><pre id="result15"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src15', 'result15');">Run</button>
     </div>
 </div>
 
@@ -86,6 +105,12 @@ println(d.contains(&#39;b&#39;))</textarea>
 <li>signature: <code>isEmpty() &lt;Bool&gt;</code></li>
 <li>example: <code>println(dict {}.isEmpty())</code></li>
 </ul>
+<h3 id="keys"><code>keys</code></h3>
+<p><code>keys</code> returns a Set of the dict’s keys.</p>
+<ul>
+<li>signature: <code>keys() &lt;Set&gt;</code></li>
+<li>example: <code>println(dict {'a': 1, 'b': 2}.keys())</code></li>
+</ul>
 <h3 id="remove"><code>remove</code></h3>
 <p><code>remove</code> remove the entry associated with the given key from the dict, and returns modified dict. If the key is not present in the dict, then the dict is unmodified.</p>
 <ul>
@@ -94,15 +119,37 @@ println(d.contains(&#39;b&#39;))</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src14" rows="2" spellcheck="false">let d = dict {&#39;a&#39;: 1, &#39;b&#39;: 2}
+        <textarea id="src16" rows="2" spellcheck="false">let d = dict {&#39;a&#39;: 1, &#39;b&#39;: 2}
 println(d.remove(&#39;a&#39;))</textarea>
     </div>
-    <div class="output"><pre id="result14"></pre></div>
+    <div class="output"><pre id="result16"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src14', 'result14');">Run</button>
+        <button class="button" onClick="interpret('src16', 'result16');">Run</button>
     </div>
 </div>
 
+<h3 id="tostruct"><code>toStruct</code></h3>
+<p><code>toStruct</code> converts a Dict into a Struct.</p>
+<ul>
+<li>signature: <code>toStruct() &lt;Struct&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src17" rows="1" spellcheck="false">let d = dict {&#39;a&#39;: 1, &#39;b&#39;: 2}; println(d.toStruct())</textarea>
+    </div>
+    <div class="output"><pre id="result17"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src17', 'result17');">Run</button>
+    </div>
+</div>
+
+<h3 id="values"><code>values</code></h3>
+<p><code>values</code> returns a Set of the dict’s values.</p>
+<ul>
+<li>signature: <code>values() &lt;Set&gt;</code></li>
+<li>example: <code>println(dict {'a': 1, 'b': 2}.values())</code></li>
+</ul>
 
 
             <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>
