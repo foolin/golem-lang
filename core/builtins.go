@@ -30,6 +30,7 @@ are suitable for use in sandboxed environments.
 * [`freeze()`](#freeze)
 * [`frozen()`](#frozen)
 * [`has()`](#has)
+* [`hashCode()`](#hashcode)
 * [`iter()`](#iter)
 * [`len()`](#len)
 * [`merge()`](#merge)
@@ -49,6 +50,7 @@ var StandardBuiltins = []*Builtin{
 	{"freeze", BuiltinFreeze},
 	{"frozen", BuiltinFrozen},
 	{"has", BuiltinHas},
+	{"hashCode", BuiltinHashCode},
 	{"iter", BuiltinIter},
 	{"len", BuiltinLen},
 	{"merge", BuiltinMerge},
@@ -256,6 +258,27 @@ var BuiltinHas = NewFixedNativeFunc(
 			return nil, err
 		}
 		return NewBool(b), nil
+	})
+
+/*doc
+### `hashCode`
+
+`hashCode` returns the hash code of a [`hashable`](interfaces.html#hashable) value.
+
+* signature: `hashCode(val <Value>) <Int>`
+* example:
+
+```
+println(hashCode('abc'))
+```
+
+*/
+
+var BuiltinHashCode = NewFixedNativeFunc(
+	[]Type{AnyType},
+	false,
+	func(ev Eval, params []Value) (Value, Error) {
+		return params[0].HashCode(ev)
 	})
 
 /*doc

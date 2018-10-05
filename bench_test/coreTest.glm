@@ -857,6 +857,12 @@ fn testList() {
 
     const funcs = [
         fn () {
+
+            let ls = ['abc', 1, 1.0, true, (1,2)]
+            assert(
+                [ 30667607145652059, 1, 4607182418800017408, 1009, 310404483576 ] ==
+                ls.map(hashCode))
+
             assert([1,2] == [1,2].copy())
 
             let count = 0

@@ -22,6 +22,7 @@
 <li><a href="#freeze"><code>freeze()</code></a></li>
 <li><a href="#frozen"><code>frozen()</code></a></li>
 <li><a href="#has"><code>has()</code></a></li>
+<li><a href="#hashcode"><code>hashCode()</code></a></li>
 <li><a href="#iter"><code>iter()</code></a></li>
 <li><a href="#len"><code>len()</code></a></li>
 <li><a href="#merge"><code>merge()</code></a></li>
@@ -115,6 +116,22 @@ println(has(a, &#39;add&#39;))</textarea>
     </div>
 </div>
 
+<h3 id="hashcode"><code>hashCode</code></h3>
+<p><code>hashCode</code> returns the hash code of a <a href="interfaces.html#hashable"><code>hashable</code></a> value.</p>
+<ul>
+<li>signature: <code>hashCode(val &lt;Value&gt;) &lt;Int&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src28" rows="1" spellcheck="false">println(hashCode(&#39;abc&#39;))</textarea>
+    </div>
+    <div class="output"><pre id="result28"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src28', 'result28');">Run</button>
+    </div>
+</div>
+
 <h3 id="iter"><code>iter</code></h3>
 <p><code>iter</code> returns an iterator for an Iterable value. Str, List, Range, Dict, and Set are iterable.</p>
 <p>An iterator is a Struct that has two fields:</p>
@@ -131,15 +148,15 @@ println(has(a, &#39;add&#39;))</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src28" rows="5" spellcheck="false">let a = [1, 2, 3]
+        <textarea id="src29" rows="5" spellcheck="false">let a = [1, 2, 3]
 let itr = iter(a)
 while itr.next() {
     println(itr.get())
 }</textarea>
     </div>
-    <div class="output"><pre id="result28"></pre></div>
+    <div class="output"><pre id="result29"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src28', 'result28');">Run</button>
+        <button class="button" onClick="interpret('src29', 'result29');">Run</button>
     </div>
 </div>
 
@@ -157,7 +174,7 @@ while itr.next() {
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src29" rows="13" spellcheck="false">let a = struct { x: 1, y: 2 }
+        <textarea id="src30" rows="13" spellcheck="false">let a = struct { x: 1, y: 2 }
 let b = struct { y: 3, z: 4 }
 let c = merge(a, b)
 
@@ -171,9 +188,9 @@ println(a)
 println(b)
 println(c) // x is changed here too!</textarea>
     </div>
-    <div class="output"><pre id="result29"></pre></div>
+    <div class="output"><pre id="result30"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src29', 'result29');">Run</button>
+        <button class="button" onClick="interpret('src30', 'result30');">Run</button>
     </div>
 </div>
 
@@ -186,13 +203,13 @@ println(c) // x is changed here too!</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src30" rows="3" spellcheck="false">for i in range(0, 5) {
+        <textarea id="src31" rows="3" spellcheck="false">for i in range(0, 5) {
     println(i)
 }</textarea>
     </div>
-    <div class="output"><pre id="result30"></pre></div>
+    <div class="output"><pre id="result31"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src30', 'result30');">Run</button>
+        <button class="button" onClick="interpret('src31', 'result31');">Run</button>
     </div>
 </div>
 
@@ -210,13 +227,13 @@ println(c) // x is changed here too!</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src31" rows="3" spellcheck="false">println(type(1.23))
+        <textarea id="src32" rows="3" spellcheck="false">println(type(1.23))
 let a = [null, true, 1, &#39;xyz&#39;]
 println(a.map(type))</textarea>
     </div>
-    <div class="output"><pre id="result31"></pre></div>
+    <div class="output"><pre id="result32"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src31', 'result31');">Run</button>
+        <button class="button" onClick="interpret('src32', 'result32');">Run</button>
     </div>
 </div>
 

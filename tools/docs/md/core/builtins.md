@@ -13,6 +13,7 @@ are suitable for use in sandboxed environments.
 * [`freeze()`](#freeze)
 * [`frozen()`](#frozen)
 * [`has()`](#has)
+* [`hashCode()`](#hashcode)
 * [`iter()`](#iter)
 * [`len()`](#len)
 * [`merge()`](#merge)
@@ -93,6 +94,17 @@ println(frozen([3, 4]))
 ```
 let a = [1, 2]
 println(has(a, 'add'))
+```
+
+### `hashCode`
+
+`hashCode` returns the hash code of a [`hashable`](interfaces.html#hashable) value.
+
+* signature: `hashCode(val <Value>) <Int>`
+* example:
+
+```
+println(hashCode('abc'))
 ```
 
 ### `iter`

@@ -38,6 +38,7 @@
   * [freeze()](builtins.html#freeze)
   * [frozen()](builtins.html#frozen)
   * [has()](builtins.html#has)
+  * [hashCode()](builtins.html#hashcode)
   * [iter()](builtins.html#iter)
   * [len()](builtins.html#len)
   * [merge()](builtins.html#merge)
