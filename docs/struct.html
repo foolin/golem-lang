@@ -19,6 +19,22 @@
 <li>The equality operators <code>==</code>, <code>!=</code></li>
 </ul>
 <p>Structs do not have any pre-defined fields.</p>
+<p>Structs can have the following magic fields:</p>
+<h3 id="eq__"><code>__eq__</code></h3>
+<p><code>__eq__</code> overrides the <code>==</code> operator</p>
+<ul>
+<li>signature: <code>__eq__(x &lt;Value&gt;) &lt;Bool&gt;</code></li>
+</ul>
+<h3 id="hashcode__"><code>__hashCode__</code></h3>
+<p><code>__hashCode__</code> causes a struct to be <a href="interfaces.html#hashable">hashable</a>, so it can be used as a key in a dict, or an entry in a set. Note that if you define <code>__hashCode__</code>, you <em>must</em> also always define <code>__eq__</code>.</p>
+<ul>
+<li>signature: <code>__hashCode__() &lt;Int&gt;</code></li>
+</ul>
+<h3 id="str__"><code>__str__</code></h3>
+<p><code>__str__</code> overrides the value returned by the builtin function <a href="builtins.html#str"><code>str</code></a></p>
+<ul>
+<li>signature: <code>__str__() &lt;Str&gt;</code></li>
+</ul>
 
 
             <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>

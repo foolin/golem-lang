@@ -2,7 +2,7 @@
 ## golem
 
 The golem module defines functions that perform introspection and transformation
-on Golem values and code.
+on Golem values and code, as well as providing a few useful utility functions.
 
 `golem` has the following fields:
 
@@ -23,6 +23,21 @@ let a = [1, 2]
 let f = golem.getField(a, 'add')
 f(3)
 println(a)
+```
+
+### `makeHashCode`
+
+`makeHashCode` generates a hashCode for a sequence of
+[`hashable`](interfaces.html#hashable) values. `makeHashCode` uses the
+[Jenkins hash function](https://en.wikipedia.org/wiki/Jenkins_hash_function)
+algorithm.
+
+* signature: `makeHashCode(values... <Value>) <Int>`
+* example:
+
+```
+import golem
+println(golem.makeHashCode(1, 2, 3))
 ```
 
 ### `setField`

@@ -25,6 +25,8 @@
 <li><a href="#addall">addAll</a></li>
 <li><a href="#clear">clear</a></li>
 <li><a href="#contains">contains</a></li>
+<li><a href="#containsall">containsAll</a></li>
+<li><a href="#containsany">containsAny</a></li>
 <li><a href="#copy">copy</a></li>
 <li><a href="#isempty">isEmpty</a></li>
 <li><a href="#remove">remove</a></li>
@@ -97,6 +99,40 @@ println(a.contains(2))</textarea>
     </div>
 </div>
 
+<h3 id="containsall"><code>containsAll</code></h3>
+<p><code>containsAll</code> returns whether the set contains all of the values in the given <a href="interfaces.html#iterable">Iterable</a>.</p>
+<ul>
+<li>signature: <code>containsAll(itr &lt;Iterable&gt;) &lt;Bool&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src22" rows="2" spellcheck="false">let a = set {1, 2}
+println(a.containsAll([1, 2]))</textarea>
+    </div>
+    <div class="output"><pre id="result22"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src22', 'result22');">Run</button>
+    </div>
+</div>
+
+<h3 id="containsany"><code>containsAny</code></h3>
+<p><code>containsAny</code> returns whether the set contains all of the values in the given <a href="interfaces.html#iterable">Iterable</a>.</p>
+<ul>
+<li>signature: <code>containsAny(itr &lt;Iterable&gt;) &lt;Bool&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src23" rows="2" spellcheck="false">let a = set {1, 2}
+println(a.containsAny([1, 2]))</textarea>
+    </div>
+    <div class="output"><pre id="result23"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src23', 'result23');">Run</button>
+    </div>
+</div>
+
 <h3 id="copy"><code>copy</code></h3>
 <p><code>copy</code> returns a shallow copy of the set</p>
 <ul>
@@ -105,11 +141,11 @@ println(a.contains(2))</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src22" rows="1" spellcheck="false">println(set {1,2}.copy())</textarea>
+        <textarea id="src24" rows="1" spellcheck="false">println(set {1,2}.copy())</textarea>
     </div>
-    <div class="output"><pre id="result22"></pre></div>
+    <div class="output"><pre id="result24"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src22', 'result22');">Run</button>
+        <button class="button" onClick="interpret('src24', 'result24');">Run</button>
     </div>
 </div>
 
@@ -127,12 +163,12 @@ println(a.contains(2))</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src23" rows="2" spellcheck="false">let a = set {1, 2, 3}
+        <textarea id="src25" rows="2" spellcheck="false">let a = set {1, 2, 3}
 println(a.remove(2))</textarea>
     </div>
-    <div class="output"><pre id="result23"></pre></div>
+    <div class="output"><pre id="result25"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src23', 'result23');">Run</button>
+        <button class="button" onClick="interpret('src25', 'result25');">Run</button>
     </div>
 </div>
 

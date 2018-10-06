@@ -38,13 +38,13 @@
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src24" rows="3" spellcheck="false">println(arity(len))
+        <textarea id="src26" rows="3" spellcheck="false">println(arity(len))
 println(arity(println))
 println(arity(range))</textarea>
     </div>
-    <div class="output"><pre id="result24"></pre></div>
+    <div class="output"><pre id="result26"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src24', 'result24');">Run</button>
+        <button class="button" onClick="interpret('src26', 'result26');">Run</button>
     </div>
 </div>
 
@@ -68,11 +68,11 @@ println(arity(range))</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src25" rows="1" spellcheck="false">println(fields([]))</textarea>
+        <textarea id="src27" rows="1" spellcheck="false">println(fields([]))</textarea>
     </div>
-    <div class="output"><pre id="result25"></pre></div>
+    <div class="output"><pre id="result27"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src25', 'result25');">Run</button>
+        <button class="button" onClick="interpret('src27', 'result27');">Run</button>
     </div>
 </div>
 
@@ -90,12 +90,12 @@ println(arity(range))</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src26" rows="2" spellcheck="false">println(frozen(&#39;a&#39;))
+        <textarea id="src28" rows="2" spellcheck="false">println(frozen(&#39;a&#39;))
 println(frozen([3, 4]))</textarea>
     </div>
-    <div class="output"><pre id="result26"></pre></div>
+    <div class="output"><pre id="result28"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src26', 'result26');">Run</button>
+        <button class="button" onClick="interpret('src28', 'result28');">Run</button>
     </div>
 </div>
 
@@ -107,12 +107,12 @@ println(frozen([3, 4]))</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src27" rows="2" spellcheck="false">let a = [1, 2]
+        <textarea id="src29" rows="2" spellcheck="false">let a = [1, 2]
 println(has(a, &#39;add&#39;))</textarea>
     </div>
-    <div class="output"><pre id="result27"></pre></div>
+    <div class="output"><pre id="result29"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src27', 'result27');">Run</button>
+        <button class="button" onClick="interpret('src29', 'result29');">Run</button>
     </div>
 </div>
 
@@ -124,11 +124,11 @@ println(has(a, &#39;add&#39;))</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src28" rows="1" spellcheck="false">println(hashCode(&#39;abc&#39;))</textarea>
+        <textarea id="src30" rows="1" spellcheck="false">println(hashCode(&#39;abc&#39;))</textarea>
     </div>
-    <div class="output"><pre id="result28"></pre></div>
+    <div class="output"><pre id="result30"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src28', 'result28');">Run</button>
+        <button class="button" onClick="interpret('src30', 'result30');">Run</button>
     </div>
 </div>
 
@@ -148,15 +148,15 @@ println(has(a, &#39;add&#39;))</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src29" rows="5" spellcheck="false">let a = [1, 2, 3]
+        <textarea id="src31" rows="5" spellcheck="false">let a = [1, 2, 3]
 let itr = iter(a)
 while itr.next() {
     println(itr.get())
 }</textarea>
     </div>
-    <div class="output"><pre id="result29"></pre></div>
+    <div class="output"><pre id="result31"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src29', 'result29');">Run</button>
+        <button class="button" onClick="interpret('src31', 'result31');">Run</button>
     </div>
 </div>
 
@@ -174,7 +174,7 @@ while itr.next() {
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src30" rows="13" spellcheck="false">let a = struct { x: 1, y: 2 }
+        <textarea id="src32" rows="13" spellcheck="false">let a = struct { x: 1, y: 2 }
 let b = struct { y: 3, z: 4 }
 let c = merge(a, b)
 
@@ -188,9 +188,9 @@ println(a)
 println(b)
 println(c) // x is changed here too!</textarea>
     </div>
-    <div class="output"><pre id="result30"></pre></div>
+    <div class="output"><pre id="result32"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src30', 'result30');">Run</button>
+        <button class="button" onClick="interpret('src32', 'result32');">Run</button>
     </div>
 </div>
 
@@ -203,13 +203,13 @@ println(c) // x is changed here too!</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src31" rows="3" spellcheck="false">for i in range(0, 5) {
+        <textarea id="src33" rows="3" spellcheck="false">for i in range(0, 5) {
     println(i)
 }</textarea>
     </div>
-    <div class="output"><pre id="result31"></pre></div>
+    <div class="output"><pre id="result33"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src31', 'result31');">Run</button>
+        <button class="button" onClick="interpret('src33', 'result33');">Run</button>
     </div>
 </div>
 
@@ -227,13 +227,13 @@ println(c) // x is changed here too!</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src32" rows="3" spellcheck="false">println(type(1.23))
+        <textarea id="src34" rows="3" spellcheck="false">println(type(1.23))
 let a = [null, true, 1, &#39;xyz&#39;]
 println(a.map(type))</textarea>
     </div>
-    <div class="output"><pre id="result32"></pre></div>
+    <div class="output"><pre id="result34"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src32', 'result32');">Run</button>
+        <button class="button" onClick="interpret('src34', 'result34');">Run</button>
     </div>
 </div>
 

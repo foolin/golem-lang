@@ -16,6 +16,8 @@ A Set has the following fields:
 * [addAll](#addall)
 * [clear](#clear)
 * [contains](#contains)
+* [containsAll](#containsall)
+* [containsAny](#containsany)
 * [copy](#copy)
 * [isEmpty](#isempty)
 * [remove](#remove)
@@ -67,6 +69,32 @@ println(a.clear())
 ```
 let a = set {1, 2}
 println(a.contains(2))
+```
+
+### `containsAll`
+
+`containsAll` returns whether the set contains all of the values
+in the given [Iterable](interfaces.html#iterable).
+
+* signature: `containsAll(itr <Iterable>) <Bool>`
+* example:
+
+```
+let a = set {1, 2}
+println(a.containsAll([1, 2]))
+```
+
+### `containsAny`
+
+`containsAny` returns whether the set contains all of the values
+in the given [Iterable](interfaces.html#iterable).
+
+* signature: `containsAny(itr <Iterable>) <Bool>`
+* example:
+
+```
+let a = set {1, 2}
+println(a.containsAny([1, 2]))
 ```
 
 ### `copy`

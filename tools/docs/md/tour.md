@@ -25,6 +25,7 @@ Welcome to the tour of the Golem Programming Language.
 * [Structs](#structs)
   * [Struct Syntax](#struct-syntax)
   * [Properties](#properties)
+  * [Magic Fields](#magic-fields)
   * [Merging Structs](#merging-structs)
   * [Using Structs to build complex values](#using-structs-to-build-complex-values)
 * [Errors](#errors)
@@ -604,6 +605,103 @@ x = 4
 println([s.a, s.b, x, s.c()])
 ```
 
+### Magic Fields
+
+Let's consider the following program:
+
+```
+fn newRect(w, h) {
+    struct { 
+        width:  w, 
+        height: h, 
+        area:   || => this.width * this.height
+    } 
+}
+
+let a = newRect(1, 2)
+let b = newRect(1, 2)
+println(a == b)
+println(a.area == b.area)
+```
+
+If we run it, we can see that `a` does not equal `b`, even thought we feel that it
+should.  By default, structs are equal in Golem if *all* of the corresponding fields
+are equal.  The `area` function for each of our two structs is a separately-created value, 
+and functions in golem use "identity equality".  The two `area` functions are two 
+separate values that are not equal.
+
+There is a solution to this problem, which involves the use of something we call
+"magic fields". Magic fields are fields with stylized names, that have functions which 
+override default functionality.
+
+It is possible to override the default implementation of `==` by a specially named
+magic field called `__eq__`.  If we properly define a field with that name,
+Golem will use it when comparing a struct to another value for equality:
+
+```
+fn newRect(w, h) {
+    struct { 
+        width:  w, 
+        height: h, 
+        area:   || => this.width * this.height,
+
+        __eq__: fn(v) { 
+            has(v, 'width')  && this.width  == v.width  &&
+            has(v, 'height') && this.height == v.height
+        } 
+    } 
+}
+
+let a = newRect(1, 2)
+let b = newRect(1, 2)
+println(a == b)
+```
+
+There are two other magic fields:  `__str__`, which overrides the value returned by the
+builtin function [`str`](builtins.html#str), and `__hashCode__`, which causes a 
+struct to be [hashable](interfaces.html#hashable), so it can be used as a key
+in a dict, or an entry in a set. 
+
+Here is an example (that uses [has()](builtins.html#has):
+
+
+```
+fn newRect(w, h) {
+    struct { 
+        width:  w, 
+        height: h, 
+        area:   || => this.width * this.height,
+
+        __eq__: fn(v) { 
+            has(v, 'width')  && this.width  == v.width  &&
+            has(v, 'height') && this.height == v.height
+        }, 
+        __hashCode__: fn() { 
+            this.width*31 + this.height
+        },
+        __str__: fn() { ['(',
+            'width:',  this.width, ', ',
+            'height:', this.height,
+            ')'].join()
+        }
+    } 
+}
+
+let a = newRect(1, 2)
+let b = newRect(1, 2)
+println(a == b)
+println(str(a))
+
+let d = dict{ 
+    newRect(1, 2): 'foo', 
+    newRect(3, 4): 'bar'
+}
+println(d)
+```
+
+Currently there are just the three magic fields we have already seen, but future 
+versions of Golem will add more.
+
 ### Merging Structs
 
 The builtin-function `merge()` can be used to combine an arbitrary number of 
@@ -626,7 +724,7 @@ println(c) // x is changed here too!
 ```
 
 If there are any duplicated keys in the structs passed in to 'merge()', then the
-value associated with the first such key is used.  
+value associated with the *last* such key is used.  
 
 Also, note in the above example that if you change a value in one of the structs passed 
 in to merge(), the value changes in the merged struct as well.  That is because the 
@@ -635,43 +733,59 @@ that this behaviour can be quite useful.
 
 ### Using Structs to build complex values
 
-By using structs, closures, and `merge()` together, it is possible to simulate various 
+By using structs, closures, magic fields, and `merge()` together, it is possible to simulate various 
 features from other languages, including inheritance, multiple-inheritance, 
 prototype chains, and the like.
 
-For instance, consider the following program:
+The following program brings these features together:
 
 ```
-fn newRectangle(w, h) {
-    return struct {
-        width:  prop { || => w, |val| => w = val },
-        height: prop { || => h, |val| => h = val },
-        area:   || => w * h
-    }
+fn newRect(w, h) {
+    struct { 
+        width:  w, 
+        height: h, 
+        area:   || => this.width * this.height,
+
+        __eq__: fn(v) { 
+            has(v, 'width')  && this.width  == v.width  &&
+            has(v, 'height') && this.height == v.height
+        }, 
+        __str__: fn() { ['Rect(',
+            'width:',  this.width, ', ',
+            'height:', this.height,
+            ')'].join()
+        }
+    } 
 }
 
 fn newBox(rect, d) {
-    return merge(
-        rect, 
-        struct {
-            depth:  prop { || => d, |val| => d = val },
-            volume: || => rect.area() * d
-        })
+    merge(rect, struct { 
+        depth:  d, 
+        volume: || => rect.area() * this.depth,
+
+        __eq__: fn(v) { 
+            (rect == v) &&
+            has(v, 'depth')  && this.depth  == v.depth
+        }, 
+        __str__: fn() { ['Box(',
+            str(rect), ', ',
+            'depth:',  this.depth,
+            ')'].join()
+        }
+    }) 
 }
 
-let r = newRectangle(2, 3)
-let b = newBox(r, 4)
+let rect = newRect(2, 3)
+let box = newBox(rect, 4)
 
-println([b.width, b.height, b.depth, b.area(), b.volume()])
-r.width = 5
-println([b.width, b.height, b.depth, b.area(), b.volume()])
+println(rect)
+println(box)
+println('area: ', box.area(), ', volume: ', box.volume())
 ```
 
-The functions `newRectangle` and `newBox` are very much like what one might call "constructors"
-in another language.  The structs that they return have functions as entries 
-(e.g. `area()`), and these functions refer to captured variables (`w`, `h`, and `d`) 
-that are somewhat like member variables of a class.  As such, the functions are quite 
-a bit like what one might call a "method" in another language.
+The functions `newRect` and `newBox` are very much like what one might call "constructors"
+in another language.  The structs that they return have closures as entries,
+that are quite a bit like what one might call a "method" in another language.
 
 The use of the `merge()` function to create a box out of a rectangle is similar to
 how inheritance is used in other languages.  Does that mean that a Box is a subclass
@@ -680,7 +794,7 @@ due to the behaviour of merge(), they *are* inter-related in a way that is
 very much like inheritance.
 
 One of the primary goals of the Golem project is to explore the power provided by 
-the simple building blocks of functions, closures, structs and merge().  It is hoped
+the simple building blocks of closures, structs, properties, magic fields, and merge().  It is hoped
 that the simplicity and flexibility of these elements can be used to create a variety
 of complex runtime structures that are easy to reason about and use.  
 

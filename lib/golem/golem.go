@@ -73,7 +73,9 @@ var getField = g.NewFixedNativeFunc(
 ### `makeHashCode`
 
 `makeHashCode` generates a hashCode for a sequence of
-[`hashable`](interfaces.html#hashable) values.
+[`hashable`](interfaces.html#hashable) values. `makeHashCode` uses the
+[Jenkins hash function](https://en.wikipedia.org/wiki/Jenkins_hash_function)
+algorithm.
 
 * signature: `makeHashCode(values... <Value>) <Int>`
 * example:
@@ -89,6 +91,7 @@ var makeHashCode = g.NewVariadicNativeFunc(
 	[]g.Type{}, g.AnyType, true,
 	func(ev g.Eval, params []g.Value) (g.Value, g.Error) {
 
+		// https://en.wikipedia.org/wiki/Jenkins_hash_function
 		var hash int64
 		for _, v := range params {
 			h, err := v.HashCode(ev)

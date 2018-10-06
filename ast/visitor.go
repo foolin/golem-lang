@@ -246,7 +246,7 @@ func (stc *StructExpr) Traverse(v Visitor) {
 	}
 }
 
-// Traverse DictExpr
+// Traverse PropNode
 func (propNode *PropNode) Traverse(v Visitor) {
 	v.Visit(propNode.Get)
 
@@ -258,7 +258,7 @@ func (propNode *PropNode) Traverse(v Visitor) {
 // Traverse DictExpr
 func (dict *DictExpr) Traverse(v Visitor) {
 	for _, e := range dict.Entries {
-		v.Visit(e.Value)
+		e.Traverse(v)
 	}
 }
 

@@ -13,7 +13,7 @@
 
 
 <h2 id="golem">golem</h2>
-<p>The golem module defines functions that perform introspection and transformation on Golem values and code.</p>
+<p>The golem module defines functions that perform introspection and transformation on Golem values and code, as well as providing a few useful utility functions.</p>
 <p><code>golem</code> has the following fields:</p>
 <ul>
 <li><a href="#getfield">getField</a></li>
@@ -31,6 +31,14 @@ let a = [1, 2]
 let f = golem.getField(a, &#39;add&#39;)
 f(3)
 println(a)</code></pre>
+<h3 id="makehashcode"><code>makeHashCode</code></h3>
+<p><code>makeHashCode</code> generates a hashCode for a sequence of <a href="interfaces.html#hashable"><code>hashable</code></a> values. <code>makeHashCode</code> uses the <a href="https://en.wikipedia.org/wiki/Jenkins_hash_function">Jenkins hash function</a> algorithm.</p>
+<ul>
+<li>signature: <code>makeHashCode(values... &lt;Value&gt;) &lt;Int&gt;</code></li>
+<li>example:</li>
+</ul>
+<pre><code>import golem
+println(golem.makeHashCode(1, 2, 3))</code></pre>
 <h3 id="setfield"><code>setField</code></h3>
 <p><code>setField</code> sets the value associated with a field name. <code>setField</code> only works on Structs – you cannot set the fields of other types. <code>setField</code> returns <code>null</code> if it was successful.</p>
 <ul>
