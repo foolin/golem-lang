@@ -1339,6 +1339,17 @@ fn testSet() {
             s.remove('c');
             assert(s == set {});
             assert(len(s) == 0);
+        },
+        fn () {
+            let s = set {1, 2}
+
+            assert(s.containsAll([1, 2]))
+            assert(!s.containsAll([3, 4]))
+            assert(!s.containsAll([1, 3]))
+
+            assert(s.containsAny([1, 2]))
+            assert(!s.containsAny([3, 4]))
+            assert(s.containsAny([1, 3]))
         }
     ]
     for f in funcs { f(); }

@@ -268,6 +268,9 @@ type (
 		Contains(Eval, Value) (Bool, Error)
 		Copy(Eval) (Set, Error)
 
+		ContainsAll(Eval, Iterable) (Bool, Error)
+		ContainsAny(Eval, Iterable) (Bool, Error)
+
 		Clear() (Set, Error)
 		Add(Eval, Value) (Set, Error)
 		AddAll(Eval, Iterable) (Set, Error)

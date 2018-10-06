@@ -189,6 +189,82 @@ func (s *set) Copy(ev Eval) (Set, Error) {
 	return NewSet(ev, values)
 }
 
+func (s *set) ContainsAll(ev Eval, ibl Iterable) (Bool, Error) {
+
+	itr, err := ibl.NewIterator(ev)
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := itr.IterNext(ev)
+	if err != nil {
+		return nil, err
+	}
+	for b.BoolVal() {
+		v, err := itr.IterGet(ev)
+		if err != nil {
+			return nil, err
+		}
+
+		//--------------------------
+		c, err := s.hashMap.Contains(ev, v)
+		if err != nil {
+			return nil, err
+		}
+		if !c.BoolVal() {
+			return False, nil
+		}
+		//--------------------------
+
+		b, err = itr.IterNext(ev)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	//--------------------------
+	return True, nil
+	//--------------------------
+}
+
+func (s *set) ContainsAny(ev Eval, ibl Iterable) (Bool, Error) {
+
+	itr, err := ibl.NewIterator(ev)
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := itr.IterNext(ev)
+	if err != nil {
+		return nil, err
+	}
+	for b.BoolVal() {
+		v, err := itr.IterGet(ev)
+		if err != nil {
+			return nil, err
+		}
+
+		//--------------------------
+		c, err := s.hashMap.Contains(ev, v)
+		if err != nil {
+			return nil, err
+		}
+		if c.BoolVal() {
+			return True, nil
+		}
+		//--------------------------
+
+		b, err = itr.IterNext(ev)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	//--------------------------
+	return False, nil
+	//--------------------------
+}
+
 //---------------------------------------------------------------
 // Iterator
 
@@ -234,6 +310,8 @@ A Set has the following fields:
 * [addAll](#addall)
 * [clear](#clear)
 * [contains](#contains)
+* [containsAll](#containsall)
+* [containsAny](#containsany)
 * [copy](#copy)
 * [isEmpty](#isempty)
 * [remove](#remove)
@@ -330,6 +408,62 @@ var setMethods = map[string]Method{
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			s := self.(Set)
 			return s.Contains(ev, params[0])
+		}),
+
+	/*doc
+	### `containsAll`
+
+	`containsAll` returns whether the set contains all of the values
+	in the given [Iterable](interfaces.html#iterable).
+
+	* signature: `containsAll(itr <Iterable>) <Bool>`
+	* example:
+
+	```
+	let a = set {1, 2}
+	println(a.containsAll([1, 2]))
+	```
+
+	*/
+	"containsAll": NewFixedMethod(
+		[]Type{AnyType}, false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			s := self.(Set)
+
+			ibl, ok := params[0].(Iterable)
+			if !ok {
+				return nil, IterableMismatch(params[0].Type())
+			}
+
+			return s.ContainsAll(ev, ibl)
+		}),
+
+	/*doc
+	### `containsAny`
+
+	`containsAny` returns whether the set contains all of the values
+	in the given [Iterable](interfaces.html#iterable).
+
+	* signature: `containsAny(itr <Iterable>) <Bool>`
+	* example:
+
+	```
+	let a = set {1, 2}
+	println(a.containsAny([1, 2]))
+	```
+
+	*/
+	"containsAny": NewFixedMethod(
+		[]Type{AnyType}, false,
+		func(self interface{}, ev Eval, params []Value) (Value, Error) {
+			s := self.(Set)
+
+			ibl, ok := params[0].(Iterable)
+			if !ok {
+				return nil, IterableMismatch(params[0].Type())
+			}
+
+			return s.ContainsAny(ev, ibl)
 		}),
 
 	/*doc
