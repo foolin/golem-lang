@@ -169,6 +169,16 @@ func (st *_struct) HashCode(ev Eval) (Int, Error) {
 
 func (st *_struct) Eq(ev Eval, val Value) (Bool, Error) {
 
+	magic, err := st.HasField("__eq__")
+	if err != nil {
+		return nil, err
+	}
+	if magic {
+		return st.magicEq(ev, val)
+	}
+
+	//---------------------------------------
+
 	// same type
 	that, ok := val.(Struct)
 	if !ok {
@@ -220,6 +230,40 @@ func (st *_struct) Eq(ev Eval, val Value) (Bool, Error) {
 
 	// done
 	return True, nil
+}
+
+func (st *_struct) magicEq(ev Eval, val Value) (Bool, Error) {
+
+	fv, err := st.GetField(ev, "__eq__")
+	if err != nil {
+		return nil, err
+	}
+
+	fn, ok := fv.(Func)
+	if !ok {
+		return nil, fmt.Errorf(
+			"TypeMismatch: __eq__ must be a Func, not %s", fv.Type())
+	}
+
+	// check arity
+	expected := Arity{FixedArity, 1, 0}
+	if fn.Arity() != expected {
+		return nil, fmt.Errorf(
+			"ArityMismatch: __eq__ function must have 1 parameter")
+	}
+
+	result, err := fn.Invoke(ev, []Value{val})
+	if err != nil {
+		return nil, err
+	}
+
+	b, ok := result.(Bool)
+	if !ok {
+		return nil, fmt.Errorf(
+			"TypeMismatch: __eq__ must return a Bool, not %s", result.Type())
+	}
+
+	return b, nil
 }
 
 func (st *_struct) ToDict(ev Eval) (Dict, Error) {

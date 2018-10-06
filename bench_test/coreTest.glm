@@ -1761,6 +1761,26 @@ fn testStruct() {
 
             let s = struct { x: prop { || => 42 } }
             assert(dict { 'x': 42 } == golem.toDict(s))
+        },
+        fn () {
+            let a = struct { x: 1, __eq__: 'bogus' } 
+            let b = struct { x: 1 } 
+            util.fail(|| => a == b, 'TypeMismatch: __eq__ must be a Func, not Str')
+
+            a = struct {x: 1,  __eq__: || => null } 
+            util.fail(|| => a == b, 'ArityMismatch: __eq__ function must have 1 parameter')
+
+            a = struct { x: 1, __eq__: |v| => 'bogus' } 
+            util.fail(|| => a == b, 'TypeMismatch: __eq__ must return a Bool, not Str')
+
+            a = struct { 
+                x: 1, 
+                __eq__: fn(v) { 
+                    return has(v, 'x') && this.x == v.x
+                } 
+            } 
+            assert(a == b)
+            assert(b != a)
         }
     ]
     for f in funcs { f(); }
