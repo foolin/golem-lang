@@ -1781,6 +1781,13 @@ fn testStruct() {
             } 
             assert(a == b)
             assert(b != a)
+        },
+        fn () {
+            assert([0, 307143837, 310404483576, 323127450458703] == 
+                [golem.makeHashCode(),
+                 golem.makeHashCode(1),
+                 golem.makeHashCode(1, 2),
+                 golem.makeHashCode(1, 2, 3)])
         }
     ]
     for f in funcs { f(); }
