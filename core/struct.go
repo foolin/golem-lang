@@ -134,6 +134,16 @@ func (st *_struct) Frozen(ev Eval) (Bool, Error) {
 
 func (st *_struct) ToStr(ev Eval) (Str, Error) {
 
+	magic, err := st.HasField("__str__")
+	if err != nil {
+		return nil, err
+	}
+	if magic {
+		return st.magicStr(ev)
+	}
+
+	//---------------------------------------
+
 	var buf bytes.Buffer
 	buf.WriteString("struct {")
 
@@ -161,6 +171,40 @@ func (st *_struct) ToStr(ev Eval) (Str, Error) {
 
 	buf.WriteString(" }")
 	return NewStr(buf.String())
+}
+
+func (st *_struct) magicStr(ev Eval) (Str, Error) {
+
+	fv, err := st.GetField(ev, "__str__")
+	if err != nil {
+		return nil, err
+	}
+
+	fn, ok := fv.(Func)
+	if !ok {
+		return nil, fmt.Errorf(
+			"TypeMismatch: __str__ must be a Func, not %s", fv.Type())
+	}
+
+	// check arity
+	expected := Arity{FixedArity, 0, 0}
+	if fn.Arity() != expected {
+		return nil, fmt.Errorf(
+			"ArityMismatch: __str__ function must have 0 parameters")
+	}
+
+	result, err := fn.Invoke(ev, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	s, ok := result.(Str)
+	if !ok {
+		return nil, fmt.Errorf(
+			"TypeMismatch: __str__ must return a Str, not %s", result.Type())
+	}
+
+	return s, nil
 }
 
 func (st *_struct) HashCode(ev Eval) (Int, Error) {

@@ -1813,6 +1813,28 @@ fn testStruct() {
             }
             a = newPoint(1, 2)
             assert(hashCode(a) == 310404483576)
+        },
+        fn () {
+            let a = struct { x: 1, y: 2, __str__: 'bogus' } 
+            util.fail(|| => str(a), 'TypeMismatch: __str__ must be a Func, not Str')
+
+            a = struct { x: 1, y: 2, __str__: |v| => 'bogus' } 
+            util.fail(|| => str(a), 'ArityMismatch: __str__ function must have 0 parameters')
+
+            a = struct { x: 1, y: 2, __str__: || => 1 } 
+            util.fail(|| => str(a), 'TypeMismatch: __str__ must return a Str, not Int')
+
+            fn newPoint(_x, _y) {
+                struct { 
+                    x: _x, 
+                    y: _y, 
+                    __str__: fn() { 
+                        ['(', 'x: ', this.x, ', y: ', this.y, ')'].join()
+                    }
+                } 
+            }
+            a = newPoint(1, 2)
+            assert('(x: 1, y: 2)' == str(a))
         }
     ]
     for f in funcs { f(); }
