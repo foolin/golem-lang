@@ -1788,6 +1788,31 @@ fn testStruct() {
                  golem.makeHashCode(1),
                  golem.makeHashCode(1, 2),
                  golem.makeHashCode(1, 2, 3)])
+        },
+        fn () {
+            let a = struct { x: 1, y: 2 } 
+            util.fail(|| => hashCode(a), 'TypeMismatch: Type Struct cannot be hashed')
+
+            a = struct { x: 1, y: 2, __hashCode__: 'bogus' } 
+            util.fail(|| => hashCode(a), 'TypeMismatch: __hashCode__ must be a Func, not Str')
+
+            a = struct { x: 1, y: 2, __hashCode__: |v| => 'bogus' } 
+            util.fail(|| => hashCode(a), 'ArityMismatch: __hashCode__ function must have 0 parameters')
+
+            a = struct { x: 1, y: 2, __hashCode__: || => 'bogus' } 
+            util.fail(|| => hashCode(a), 'TypeMismatch: __hashCode__ must return an Int, not Str')
+
+            fn newPoint(_x, _y) {
+                struct { 
+                    x: _x, 
+                    y: _y, 
+                    __hashCode__: fn() { 
+                        golem.makeHashCode(this.x, this.y)
+                    }
+                } 
+            }
+            a = newPoint(1, 2)
+            assert(hashCode(a) == 310404483576)
         }
     ]
     for f in funcs { f(); }

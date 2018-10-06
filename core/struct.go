@@ -164,7 +164,52 @@ func (st *_struct) ToStr(ev Eval) (Str, Error) {
 }
 
 func (st *_struct) HashCode(ev Eval) (Int, Error) {
+
+	magic, err := st.HasField("__hashCode__")
+	if err != nil {
+		return nil, err
+	}
+	if magic {
+		return st.magicHashCode(ev)
+	}
+
+	//---------------------------------------
+
 	return nil, HashCodeMismatch(StructType)
+}
+
+func (st *_struct) magicHashCode(ev Eval) (Int, Error) {
+
+	fv, err := st.GetField(ev, "__hashCode__")
+	if err != nil {
+		return nil, err
+	}
+
+	fn, ok := fv.(Func)
+	if !ok {
+		return nil, fmt.Errorf(
+			"TypeMismatch: __hashCode__ must be a Func, not %s", fv.Type())
+	}
+
+	// check arity
+	expected := Arity{FixedArity, 0, 0}
+	if fn.Arity() != expected {
+		return nil, fmt.Errorf(
+			"ArityMismatch: __hashCode__ function must have 0 parameters")
+	}
+
+	result, err := fn.Invoke(ev, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	i, ok := result.(Int)
+	if !ok {
+		return nil, fmt.Errorf(
+			"TypeMismatch: __hashCode__ must return an Int, not %s", result.Type())
+	}
+
+	return i, nil
 }
 
 func (st *_struct) Eq(ev Eval, val Value) (Bool, Error) {
