@@ -263,14 +263,9 @@ func (ls *list) Add(ev Eval, val Value) (List, Error) {
 	return ls, nil
 }
 
-func (ls *list) AddAll(ev Eval, val Value) (List, Error) {
+func (ls *list) AddAll(ev Eval, ibl Iterable) (List, Error) {
 	if ls.frozen {
 		return nil, ImmutableValue()
-	}
-
-	ibl, ok := val.(Iterable)
-	if !ok {
-		return nil, IterableMismatch(val.Type())
 	}
 
 	itr, err := ibl.NewIterator(ev)
@@ -473,7 +468,13 @@ var listMethods = map[string]Method{
 		[]Type{AnyType}, false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			ls := self.(List)
-			return ls.AddAll(ev, params[0])
+
+			ibl, ok := params[0].(Iterable)
+			if !ok {
+				return nil, IterableMismatch(params[0].Type())
+			}
+
+			return ls.AddAll(ev, ibl)
 		}),
 
 	/*doc

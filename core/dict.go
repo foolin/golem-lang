@@ -148,15 +148,10 @@ func (d *dict) Remove(ev Eval, key Value) (Dict, Error) {
 	return d, nil
 }
 
-func (d *dict) AddAll(ev Eval, val Value) (Dict, Error) {
+func (d *dict) AddAll(ev Eval, ibl Iterable) (Dict, Error) {
 
 	if d.frozen {
 		return nil, ImmutableValue()
-	}
-
-	ibl, ok := val.(Iterable)
-	if !ok {
-		return nil, IterableMismatch(val.Type())
 	}
 
 	itr, err := ibl.NewIterator(ev)
@@ -333,7 +328,13 @@ var dictMethods = map[string]Method{
 		[]Type{AnyType}, false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			d := self.(Dict)
-			return d.AddAll(ev, params[0])
+
+			ibl, ok := params[0].(Iterable)
+			if !ok {
+				return nil, IterableMismatch(params[0].Type())
+			}
+
+			return d.AddAll(ev, ibl)
 		}),
 
 	/*doc

@@ -122,14 +122,9 @@ func (s *set) Add(ev Eval, val Value) (Set, Error) {
 	return s, nil
 }
 
-func (s *set) AddAll(ev Eval, val Value) (Set, Error) {
+func (s *set) AddAll(ev Eval, ibl Iterable) (Set, Error) {
 	if s.frozen {
 		return nil, ImmutableValue()
-	}
-
-	ibl, ok := val.(Iterable)
-	if !ok {
-		return nil, IterableMismatch(val.Type())
 	}
 
 	itr, err := ibl.NewIterator(ev)
@@ -287,7 +282,13 @@ var setMethods = map[string]Method{
 		[]Type{AnyType}, false,
 		func(self interface{}, ev Eval, params []Value) (Value, Error) {
 			s := self.(Set)
-			return s.AddAll(ev, params[0])
+
+			ibl, ok := params[0].(Iterable)
+			if !ok {
+				return nil, IterableMismatch(params[0].Type())
+			}
+
+			return s.AddAll(ev, ibl)
 		}),
 
 	/*doc

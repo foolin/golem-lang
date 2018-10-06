@@ -197,7 +197,7 @@ type (
 
 		Clear() (List, Error)
 		Add(Eval, Value) (List, Error)
-		AddAll(Eval, Value) (List, Error)
+		AddAll(Eval, Iterable) (List, Error)
 		Remove(Eval, Int) (List, Error)
 
 		// Sort sorts the list
@@ -249,7 +249,7 @@ type (
 		Copy(Eval) (Dict, Error)
 
 		Clear() (Dict, Error)
-		AddAll(Eval, Value) (Dict, Error)
+		AddAll(Eval, Iterable) (Dict, Error)
 		Remove(Eval, Value) (Dict, Error)
 
 		ToStruct(Eval) (Struct, Error)
@@ -270,7 +270,7 @@ type (
 
 		Clear() (Set, Error)
 		Add(Eval, Value) (Set, Error)
-		AddAll(Eval, Value) (Set, Error)
+		AddAll(Eval, Iterable) (Set, Error)
 		Remove(Eval, Value) (Set, Error)
 	}
 
