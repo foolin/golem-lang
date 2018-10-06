@@ -39,13 +39,3 @@ func IsIdentStart(r rune) bool {
 func IsIdentContinue(r rune) bool {
 	return unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_'
 }
-
-// IsMagicField returns whether a string is a magic field.
-func IsMagicField(text string) bool {
-	switch text {
-	case "$eq", "$hashCode", "$str":
-		return true
-	default:
-		return false
-	}
-}

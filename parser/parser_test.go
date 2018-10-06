@@ -587,6 +587,9 @@ func TestStruct(t *testing.T) {
 
 	p = newParser("struct { a: prop { || => x, |x,y| => y} }")
 	fail(t, p, "Invalid Property Setter at foo.glm:1:29")
+
+	p = newParser("struct { $foo: 1 }")
+	fail(t, p, "Unexpected Character '$' at foo.glm:1:10")
 }
 
 func TestPrimarySuffix(t *testing.T) {
