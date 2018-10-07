@@ -1030,8 +1030,10 @@ println(r.matchString(&#39;123&#39;))</code></pre>
 <p>And second, there is a large <a href="https://github.com/mjarmy/golem-lang/blob/master/bench_test/benchTest.glm">program</a> in the bench_test directory that allows Golem to test itself as part of the build process.</p>
 <h2 id="embedding-and-sandboxing">Embedding and Sandboxing</h2>
 <p>So far, we have seen Golem in action in two contexts: as a <a href="https://github.com/mjarmy/golem-lang/blob/master/tools/docs/wasm.go">WebAssembly</a> executable, and a <a href="https://github.com/mjarmy/golem-lang/blob/master/cli/golem.go">command line</a> executable.</p>
-<p>Golem has a very important concept which we call ‘sandboxing’, that allows you to run Golem code inside a Go program, and be completely sure that it does not interact with the outside world via I/O at all. Note that the WebAssembly executable is sandboxed, whereas the command line executable is not.</p>
-<p>There is an <a href="https://github.com/mjarmy/golem-lang/blob/master/examples/embedding/sandbox.go">example program</a> which starts with the simplest possible one-line program that interprets Golem code inside of a Go program, and then provides several more increasingly sophisticated examples of how to sandbox Golem.</p>
+<p>Golem has an important concept which we call ‘sandboxing’, that allows you to run Golem code inside a Go program, and be completely sure that it does not interact with the outside world via I/O at all. Note that the WebAssembly executable is sandboxed, whereas the command line executable is not.</p>
+<p>There is an <a href="https://github.com/mjarmy/golem-lang/blob/master/examples/embedding/sandbox.go">example program</a> which starts with the simplest possible one-line program that interprets Golem code inside of a Go program, and then provides several more increasingly sophisticated examples. Just do <code>go run examples/embedding/sandbox.go</code> to run the sandbox example.</p>
+<p>If you decide you <em>do</em> want to let Golem interact with the outside world, it is simple to create an unsandboxed environment for it to run in.</p>
+<p>If you want to explore Golem’s code base further, the best starting point is <a href="https://github.com/mjarmy/golem-lang/blob/master/core/value.go">value.go</a>, which defines all of the interfaces for Golem’s various types.</p>
 
 
             <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>

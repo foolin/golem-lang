@@ -1036,7 +1036,7 @@ So far, we have seen Golem in action in two contexts: as a
 [WebAssembly](https://github.com/mjarmy/golem-lang/blob/master/tools/docs/wasm.go) executable, and
 a [command line](https://github.com/mjarmy/golem-lang/blob/master/cli/golem.go) executable.
 
-Golem has a very important concept which we call 'sandboxing', that allows you to run Golem
+Golem has an important concept which we call 'sandboxing', that allows you to run Golem
 code inside a Go program, and be completely sure that it does not interact with the outside
 world via I/O at all.  Note that the WebAssembly executable is sandboxed, whereas the 
 command line executable is not.
@@ -1044,4 +1044,14 @@ command line executable is not.
 There is an [example program](https://github.com/mjarmy/golem-lang/blob/master/examples/embedding/sandbox.go) 
 which starts with the simplest possible one-line program that interprets Golem code 
 inside of a Go program, and then provides several more increasingly sophisticated 
-examples of how to sandbox Golem.
+examples.  Just do `go run examples/embedding/sandbox.go` to
+run the sandbox example.
+
+If you decide you *do* want to let Golem interact with the outside world, it is simple
+to create an unsandboxed environment for it to run in.
+
+If you want to explore Golem's code base further, the best starting point is
+[value.go](https://github.com/mjarmy/golem-lang/blob/master/core/value.go), which defines
+all of the interfaces for Golem's various types.
+
+
