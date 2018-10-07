@@ -139,15 +139,17 @@ func main() {
 	//-------------------------------------------------------------
 
 	// use all of the available builtin functions
-	builtins := append(g.StandardBuiltins, g.UnsandboxedBuiltins...)
+	builtins := append(g.SandboxBuiltins, g.SideEffectBuiltins...)
 
-	// use the entire standard library, and import bytecode.Modules
-	// from the local directory
+	// use the entire standard library
+	library := append(lib.SandboxLibrary, lib.SideEffectLibrary...)
+
+	// import bytecode.Modules from the local directory
 	localDir, e := os.Getwd()
 	if e != nil {
 		exitError(e)
 	}
-	importer := newImporter(builtins, lib.StandardLibrary, localDir)
+	importer := newImporter(builtins, library, localDir)
 
 	//-------------------------------------------------------------
 	// parse, compile, interpret

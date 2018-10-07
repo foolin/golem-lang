@@ -68,7 +68,7 @@ func interpret(i []js.Value) {
 	var buf bytes.Buffer
 
 	// make builtins
-	builtins := append(g.StandardBuiltins, makePrintBuiltins(&buf)...)
+	builtins := append(g.SandboxBuiltins, makePrintBuiltins(&buf)...)
 
 	// compile
 	code := in.Get("value").String()

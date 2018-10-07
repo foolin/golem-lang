@@ -16,10 +16,10 @@ type Builtin struct {
 
 /*doc
 
-## Standard Builtins
+## Sandbox Builtins
 
 Golem has a collection of standard builtin functions that provide
-various kinds of important functionality. All of the standard builtins
+various kinds of important functionality. All of the sandbox builtins
 are "pure" functions that do not do any form of I/O. As such they
 are suitable for use in sandboxed environments.
 
@@ -40,9 +40,9 @@ are suitable for use in sandboxed environments.
 
 */
 
-// StandardBuiltins containts the built-ins that are
+// SandboxBuiltins containts the built-ins that are
 // pure functions.  These functions do not do any form of I/O.
-var StandardBuiltins = []*Builtin{
+var SandboxBuiltins = []*Builtin{
 	{"arity", BuiltinArity},
 	{"assert", BuiltinAssert},
 	{"chan", BuiltinChan},
@@ -483,9 +483,9 @@ var BuiltinType = NewFixedNativeFunc(
 
 /*doc
 
-## Unsandboxed Builtins
+## SideEffect Builtins
 
-Golem also has "unsandboxed" builtins.  These functions
+Golem also has "side-effect" builtins.  These functions
 perform I/O, so they should not be included in sandboxed Golem
 environments.
 
@@ -494,8 +494,8 @@ environments.
 
 */
 
-// UnsandboxedBuiltins are builtins that are not pure functions
-var UnsandboxedBuiltins = []*Builtin{
+// SideEffectBuiltins are builtins that are not pure functions
+var SideEffectBuiltins = []*Builtin{
 	{"print", BuiltinPrint},
 	{"println", BuiltinPrintln},
 }

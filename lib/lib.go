@@ -14,11 +14,14 @@ import (
 	"github.com/mjarmy/golem-lang/lib/regexp"
 )
 
-var StandardLibrary = []g.Module{
+var SandboxLibrary = []g.Module{
 	encoding.Encoding,
 	golem.Golem,
+	regexp.Regexp,
+}
+
+var SideEffectLibrary = []g.Module{
 	io.Io,
 	os.Os,
 	path.Path,
-	regexp.Regexp,
 }

@@ -30,24 +30,27 @@
 
 ## Builtin Functions
 
-* Standard Builtins:
-  * [arity()](builtins.html#arity)
-  * [assert()](builtins.html#assert)
-  * [chan()](builtins.html#chan)
-  * [fields()](builtins.html#fields)
-  * [freeze()](builtins.html#freeze)
-  * [frozen()](builtins.html#frozen)
-  * [has()](builtins.html#has)
-  * [hashCode()](builtins.html#hashcode)
-  * [iter()](builtins.html#iter)
-  * [len()](builtins.html#len)
-  * [merge()](builtins.html#merge)
-  * [range()](builtins.html#range)
-  * [str()](builtins.html#str)
-  * [type()](builtins.html#type)
-* Unsandboxed Builtins:
-  * [print()](builtins.html#print)
-  * [println()](builtins.html#println)
+### Sandbox Builtins:
+
+* [arity()](builtins.html#arity)
+* [assert()](builtins.html#assert)
+* [chan()](builtins.html#chan)
+* [fields()](builtins.html#fields)
+* [freeze()](builtins.html#freeze)
+* [frozen()](builtins.html#frozen)
+* [has()](builtins.html#has)
+* [hashCode()](builtins.html#hashcode)
+* [iter()](builtins.html#iter)
+* [len()](builtins.html#len)
+* [merge()](builtins.html#merge)
+* [range()](builtins.html#range)
+* [str()](builtins.html#str)
+* [type()](builtins.html#type)
+
+### SideEffect Builtins:
+
+* [print()](builtins.html#print)
+* [println()](builtins.html#println)
 
 ## Syntax
 
@@ -55,13 +58,18 @@
 
 ## Standard Library
 
+### Sandbox Library:
+
 * [encoding](lib_encoding.html)
   * [encoding.json](lib_encodingjson.html)
 * [golem](lib_golem.html)
+* [regexp](lib_regexp.html)
+
+### SideEffect Library:
+
 * [io](lib_io.html)
   * [io.ioutil](lib_ioioutil.html)
 * [os](lib_os.html)
   * [os.exec](lib_osexec.html)
 * [path](lib_path.html)
   * [path.filepath](lib_pathfilepath.html)
-* [regexp](lib_regexp.html)
