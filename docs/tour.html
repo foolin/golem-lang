@@ -58,6 +58,7 @@
 <li><a href="#standard-library">Standard Library</a></li>
 <li><a href="#examples">Examples</a></li>
 </ul></li>
+<li><a href="#embedding-and-sandboxing">Embedding and Sandboxing</a></li>
 </ul>
 <h2 id="hello-world">Hello, world</h2>
 <p>Let’s get started with the proverbial hello world program. In this tour, we will be running Golem code directly in the browser, so press the <code>Run</code> button below to see the output of the program:</p>
@@ -1024,11 +1025,13 @@ let r = regexp.compile(&#39;abc&#39;)
 println(r.matchString(&#39;xyzabc&#39;))
 println(r.matchString(&#39;123&#39;))</code></pre>
 <h3 id="examples">Examples</h3>
-<p>In the Golem github repo, there are a couple of good examples of substantial programs that can be run via the <code>golem</code> executable.</p>
-<p>First, there is the Golem program that creates the static web site that you are reading right now:</p>
-<p><a href="https://github.com/mjarmy/golem-lang/blob/master/tools/docs/makeDocs.glm" class="uri">https://github.com/mjarmy/golem-lang/blob/master/tools/docs/makeDocs.glm</a></p>
-<p>And second, there is a large program in the bench_test directory that allows Golem to test itself as part of the build process:</p>
-<p><a href="https://github.com/mjarmy/golem-lang/blob/master/bench_test/benchTest.glm" class="uri">https://github.com/mjarmy/golem-lang/blob/master/bench_test/benchTest.glm</a></p>
+<p>In the Golem github repo, there are a couple of examples of substantial programs that can be run via the <code>golem</code> executable.</p>
+<p>First, there is the <a href="https://github.com/mjarmy/golem-lang/blob/master/tools/docs/makeDocs.glm">program</a> that creates the static web site that you are reading right now.</p>
+<p>And second, there is a large <a href="https://github.com/mjarmy/golem-lang/blob/master/bench_test/benchTest.glm">program</a> in the bench_test directory that allows Golem to test itself as part of the build process.</p>
+<h2 id="embedding-and-sandboxing">Embedding and Sandboxing</h2>
+<p>So far, we have seen Golem in action in two contexts: as a <a href="https://github.com/mjarmy/golem-lang/blob/master/tools/docs/wasm.go">WebAssembly</a> executable, and a <a href="https://github.com/mjarmy/golem-lang/blob/master/cli/golem.go">command line</a> executable.</p>
+<p>Golem has a very important concept which we call ‘sandboxing’, that allows you to run Golem code inside a Go program, and be completely sure that it does not interact with the outside world via I/O at all. Note that the WebAssembly executable is sandboxed, whereas the command line executable is not.</p>
+<p>There is an <a href="https://github.com/mjarmy/golem-lang/blob/master/examples/embedding/sandbox.go">example program</a> which starts with the simplest possible one-line program that interprets Golem code inside of a Go program, and then provides several more increasingly sophisticated examples of how to sandbox Golem.</p>
 
 
             <p><small><em>This page uses documentation from <a href="https://github.com/golang/go">Go</a> , which is licensed under the BSD-3-Clause license.</em></small>

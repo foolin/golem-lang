@@ -15,7 +15,7 @@
   * [Immutability](tour.html#immutability)
   * [Introspection](tour.html#introspection)
   * [Command Line Executable](tour.html#command-line-executable)
-* [Embedding](embedding.html)
+  * [Embedding and Sandboxing](tour.html#embedding-and-sandboxing)
 * [Reference](reference.html)
   * [Types](reference.html#types)
   * [Interfaces](reference.html#interfaces)

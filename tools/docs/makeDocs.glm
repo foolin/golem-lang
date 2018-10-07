@@ -163,14 +163,12 @@ fn createHtml() {
     os.exec.runCommand('pandoc', 'md/reference.md',  '-o', docsDir + 'reference.html')
     os.exec.runCommand('pandoc', 'md/syntax.md',     '-o', docsDir + 'syntax.html')
     os.exec.runCommand('pandoc', 'md/interfaces.md', '-o', docsDir + 'interfaces.html')
-    os.exec.runCommand('pandoc', 'md/embedding.md',  '-o', docsDir + 'embedding.html')
 
     wrapHtml(docsDir + 'index.html', 'The Golem Programming Language')
     wrapHtml(docsDir + 'tour.html', 'Golem Tour')
     wrapHtml(docsDir + 'reference.html', 'Golem Reference')
     wrapHtml(docsDir + 'syntax.html', 'Golem Reference')
     wrapHtml(docsDir + 'interfaces.html', 'Golem Reference')
-    wrapHtml(docsDir + 'embedding.html', 'Golem Reference')
 }
 
 //---------------------------------------------------------------

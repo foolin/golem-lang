@@ -1021,18 +1021,14 @@ println(r.matchString('123'))
 
 ### Examples
 
-In the Golem github repo, there are a couple of good examples of substantial programs
+In the Golem github repo, there are a couple of examples of substantial programs
 that can be run via the `golem` executable.
 
-First, there is the Golem program that creates the static web site that you are reading
-right now:
+First, there is the [program](https://github.com/mjarmy/golem-lang/blob/master/tools/docs/makeDocs.glm) 
+that creates the static web site that you are reading right now. 
 
-[https://github.com/mjarmy/golem-lang/blob/master/tools/docs/makeDocs.glm](https://github.com/mjarmy/golem-lang/blob/master/tools/docs/makeDocs.glm)
-
-And second, there is a large program in the bench_test directory that allows Golem to 
-test itself as part of the build process:
-
-[https://github.com/mjarmy/golem-lang/blob/master/bench_test/benchTest.glm](https://github.com/mjarmy/golem-lang/blob/master/bench_test/benchTest.glm)
+And second, there is a large [program](https://github.com/mjarmy/golem-lang/blob/master/bench_test/benchTest.glm) 
+in the bench_test directory that allows Golem to test itself as part of the build process.
 
 ## Embedding and Sandboxing
 
@@ -1045,6 +1041,7 @@ code inside a Go program, and be completely sure that it does not interact with 
 world via I/O at all.  Note that the WebAssembly executable is sandboxed, whereas the 
 command line executable is not.
 
-There is an example program which starts with the simplest possible one-line program
-that interprets Golem code inside of a Go program, and then provides several more
-increasingly sophisticated examples of how to sandbox Golem.
+There is an [example program](https://github.com/mjarmy/golem-lang/blob/master/examples/embedding/sandbox.go) 
+which starts with the simplest possible one-line program that interprets Golem code 
+inside of a Go program, and then provides several more increasingly sophisticated 
+examples of how to sandbox Golem.
