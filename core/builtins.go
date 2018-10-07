@@ -40,7 +40,7 @@ are suitable for use in sandboxed environments.
 
 */
 
-// SandboxBuiltins containts the built-ins that are
+// SandboxBuiltins contains the built-ins that are
 // pure functions.  These functions do not do any form of I/O.
 var SandboxBuiltins = []*Builtin{
 	{"arity", BuiltinArity},

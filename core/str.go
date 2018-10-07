@@ -40,20 +40,20 @@ Strs are
 
 type str string
 
-// NewStr creates a new String, or returns an error if a string
+// NewStr creates a new Str, or returns an error if the string
 // does not consist entirely of valid UTF-8-encoded runes.
 func NewStr(s string) (Str, Error) {
 
 	// Golang's builtin 'string' type is really just a slice of bytes.
-	// We are trying to define Golem strings as being a sequence of runes,
-	// so we check for that here.  We may have to relax this restriction in the future
-	// to allow for other valid character encodings that are not utf8.
+	// We define Golem strings as a sequence of runes, and we enforce that here.
 	if !utf8.ValidString(s) {
 		return nil, InvalidUtf8String()
 	}
 	return str(s), nil
 }
 
+// MustStr creates a new Str, or panics if the string
+// does not consist entirely of valid UTF-8-encoded runes.
 func MustStr(s string) Str {
 	sv, err := NewStr(s)
 	if err != nil {

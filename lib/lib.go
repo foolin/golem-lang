@@ -14,12 +14,14 @@ import (
 	"github.com/mjarmy/golem-lang/lib/regexp"
 )
 
+// SandboxLibrary contains modules that do not do any form of I/O.
 var SandboxLibrary = []g.Module{
 	encoding.Encoding,
 	golem.Golem,
 	regexp.Regexp,
 }
 
+// SideEffectLibrary contains modules that do I/O.
 var SideEffectLibrary = []g.Module{
 	io.Io,
 	os.Os,
