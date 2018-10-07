@@ -47,5 +47,5 @@ subject of a `for` loop.  The builtin function [iter()](builtins.html#iter) retu
 a [Struct](struct.html) that can be used to iterate over the entries in an iterable 
 value.  
 
-[Str](str.html), [List](list.html), [Range](range.html), [Dict](dict.html) 
+[Str](str.html), [List](list.html), [Tuple](tuple.html), [Range](range.html), [Dict](dict.html) 
 and [Set](set.html) are iterable.

@@ -12,6 +12,7 @@ The index operator can return a value of any type.
 
 Tuples are
 [`lenable`](interfaces.html#lenable) and
+[`iterable`](interfaces.html#iterable), and
 [`hashable`](interfaces.html#hashable).
 
 A Tuple has the following fields:

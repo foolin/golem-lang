@@ -37,7 +37,11 @@ type Stream interface {
 
 type (
 	stream struct {
-		itr Iterator
+		adv advancer
+	}
+
+	advancer interface {
+		advance(Eval) (Value, Error)
 	}
 )
 
@@ -48,48 +52,62 @@ func NewStream(ev Eval, ibl Iterable) (Stream, Error) {
 		return nil, err
 	}
 
-	return &stream{itr}, nil
+	return &stream{&iteratorAdvancer{itr}}, nil
 }
 
 //--------------------------------------------------------------
 // transformers
 //--------------------------------------------------------------
 
+type iteratorAdvancer struct {
+	itr Iterator
+}
+
+func (i *iteratorAdvancer) advance(ev Eval) (Value, Error) {
+
+	b, err := i.itr.IterNext(ev)
+	if err != nil {
+		return nil, err
+	}
+
+	if !b.BoolVal() {
+		return nil, nil
+	}
+
+	val, err := i.itr.IterGet(ev)
+	if err != nil {
+		return nil, err
+	}
+
+	return val, nil
+}
+
 //--------------------------------------------------------------
 // terminators
 //--------------------------------------------------------------
 
-func (s *stream) terminate(ev Eval, consume func(v Value) Error) Error {
-
-	b, err := s.itr.IterNext(ev)
-	if err != nil {
-		return err
-	}
-	for b.BoolVal() {
-		v, err := s.itr.IterGet(ev)
-		if err != nil {
-			return err
-		}
-
-		consume(v)
-
-		b, err = s.itr.IterNext(ev)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func (s *stream) ToList(ev Eval) (List, Error) {
+
 	values := []Value{}
-	err := s.terminate(ev, func(v Value) Error {
-		values = append(values, v)
-		return nil
-	})
+
+	//--------------
+	val, err := s.adv.advance(ev)
 	if err != nil {
 		return nil, err
 	}
+	for val != nil {
+		//--------------
+
+		values = append(values, val)
+
+		//--------------
+		val, err = s.adv.advance(ev)
+		if err != nil {
+			return nil, err
+		}
+	}
+	//--------------
+
 	return NewList(values), nil
 }
 
