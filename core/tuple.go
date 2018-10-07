@@ -24,6 +24,7 @@ The index operator can return a value of any type.
 
 Tuples are
 [`lenable`](interfaces.html#lenable) and
+[`iterable`](interfaces.html#iterable), and
 [`hashable`](interfaces.html#hashable).
 
 */
@@ -114,6 +115,42 @@ func (tp tuple) Len(ev Eval) (Int, Error) {
 
 func (tp tuple) ToList() List {
 	return NewList(CopyValues(tp))
+}
+
+func (tp tuple) Values() []Value {
+	return []Value(tp)
+}
+
+//---------------------------------------------------------------
+// Iterator
+
+type tupleIterator struct {
+	Struct
+	tp tuple
+	n  int
+}
+
+func (tp tuple) NewIterator(ev Eval) (Iterator, Error) {
+
+	itr := &tupleIterator{iteratorStruct(), tp, -1}
+
+	next, get := iteratorFields(ev, itr)
+	itr.Internal("next", next)
+	itr.Internal("get", get)
+
+	return itr, nil
+}
+
+func (i *tupleIterator) IterNext(ev Eval) (Bool, Error) {
+	i.n++
+	return NewBool(i.n < len(i.tp)), nil
+}
+
+func (i *tupleIterator) IterGet(ev Eval) (Value, Error) {
+	if (i.n >= 0) && (i.n < len(i.tp)) {
+		return i.tp[i.n], nil
+	}
+	return nil, NoSuchElement()
 }
 
 //--------------------------------------------------------------

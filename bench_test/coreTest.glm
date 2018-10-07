@@ -1376,7 +1376,7 @@ fn testTuple() {
     assert(x == freeze(x))
     assert(frozen(x))
 
-    util.fail(|| => iter(x), "TypeMismatch: Type Tuple has no iter()")
+    assert(iter(x) != null)
     assert(len(x) == 2)
     assert(len(y) == 3)
 

@@ -231,7 +231,9 @@ type (
 		Composite
 		Indexable
 		Lenable
+		Iterable
 
+		Values() []Value
 		ToList() List
 	}
 
