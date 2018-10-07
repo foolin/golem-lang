@@ -307,11 +307,17 @@ type (
 	// Mapper transform one value into another
 	Mapper func(Eval, Value) (Value, Error)
 
+	// Flattener transform a value into an Iterable
+	Flattener func(Eval, Value) (Iterable, Error)
+
 	// Reducer combines two values into one
 	Reducer func(Eval, Value, Value) (Value, Error)
 
 	// Predicate is a boolean-valued function
 	Predicate func(Eval, Value) (Bool, Error)
+
+	// Consumer is a function that returns no value
+	Consumer func(Eval, Value) Error
 )
 
 //---------------------------------------------------------------

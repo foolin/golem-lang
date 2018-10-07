@@ -10,5 +10,11 @@ inside a [Go](https://golang.org/) progam, with as little as one line of code.
 Please consult the [documentation](https://mjarmy.github.io/golem-lang/) to learn 
 more about Golem.
 
+Golem is in beta:
+
+    * Reasonable care has been taken to ensure that it works.
+    * Golem's syntax and API are reasonably stable.
+    * There are likely to still be bugs lurking about.
+
 <img src="/images/snippet.png?raw=true" width="500">
 

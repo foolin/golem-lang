@@ -56,6 +56,7 @@ var SandboxBuiltins = []*Builtin{
 	{"merge", BuiltinMerge},
 	{"range", BuiltinRange},
 	{"str", BuiltinStr},
+	{"stream", BuiltinStream},
 	{"type", BuiltinType},
 }
 
