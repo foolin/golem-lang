@@ -703,9 +703,9 @@ println(a.area == b.area)</textarea>
     </div>
 </div>
 
-<p>If we run it, we can see that <code>a</code> does not equal <code>b</code>, even thought we feel that it should. By default, structs are equal in Golem if <em>all</em> of the corresponding fields are equal. The <code>area</code> function for each of our two structs is a separately-created value, and functions in golem use “identity equality”. The two <code>area</code> functions are two separate values that are not equal.</p>
-<p>There is a solution to this problem, which involves the use of something we call “magic fields”. Magic fields are fields with stylized names, that have functions which override default functionality.</p>
-<p>It is possible to override the default implementation of <code>==</code> by a specially named magic field called <code>__eq__</code>. If we properly define a field with that name, Golem will use it when comparing a struct to another value for equality:</p>
+<p>If we run it, we can see that <code>a</code> does not equal <code>b</code>. By default, structs are equal in Golem if <em>all</em> of the corresponding fields are equal. The <code>area</code> function for each of our two structs is a separately-created value, and functions in golem use “identity equality”. The two <code>area</code> functions are two separate values that are not equal.</p>
+<p>Obviously it would be really nice if we could override this behaviour, so that the two structs are considered equal. The solution to this problem involves the use of something we call “magic fields”. Magic fields are fields with stylized names, that have functions which override default functionality.</p>
+<p>It is possible to override the default implementation of <code>==</code> using a specially named magic field called <code>__eq__</code>. If we properly define a field with that name, Golem will use it when comparing a struct to another value for equality. Here is an example (that makes use of the builtin function <a href="builtins.html#has">has</a>):</p>
 <div class="play">
     <div class="input">
         <textarea id="src73" rows="16" spellcheck="false">fn newRect(w, h) {
@@ -731,8 +731,7 @@ println(a == b)</textarea>
     </div>
 </div>
 
-<p>There are two other magic fields: <code>__str__</code>, which overrides the value returned by the builtin function <a href="builtins.html#str"><code>str</code></a>, and <code>__hashCode__</code>, which causes a struct to be <a href="interfaces.html#hashable">hashable</a>, so it can be used as a key in a dict, or an entry in a set.</p>
-<p>Here is an example (that uses <a href="builtins.html#has">has()</a>:</p>
+<p>There are two other magic fields: <code>__str__</code>, which overrides the value returned by the builtin function <a href="builtins.html#str"><code>str</code></a>, and <code>__hashCode__</code>, which causes a struct to be <a href="interfaces.html#hashable">hashable</a>, so it can be used as a key in a dict, or an entry in a set. For example:</p>
 <div class="play">
     <div class="input">
         <textarea id="src74" rows="31" spellcheck="false">fn newRect(w, h) {
@@ -802,7 +801,7 @@ println(c) // x is changed here too!</textarea>
 <p>Also, note in the above example that if you change a value in one of the structs passed in to merge(), the value changes in the merged struct as well. That is because the all three structs actually share a common set of fields. We will see in the next section that this behaviour can be quite useful.</p>
 <h3 id="using-structs-to-build-complex-values">Using Structs to build complex values</h3>
 <p>By using structs, closures, magic fields, and <code>merge()</code> together, it is possible to simulate various features from other languages, including inheritance, multiple-inheritance, prototype chains, and the like.</p>
-<p>The following program brings these features together:</p>
+<p>Here is a program that demonstrates Golem’s ability to create complex interrelated structs:</p>
 <div class="play">
     <div class="input">
         <textarea id="src76" rows="41" spellcheck="false">fn newRect(w, h) {

@@ -624,19 +624,21 @@ println(a == b)
 println(a.area == b.area)
 ```
 
-If we run it, we can see that `a` does not equal `b`, even thought we feel that it
-should.  By default, structs are equal in Golem if *all* of the corresponding fields
+If we run it, we can see that `a` does not equal `b`.  By default, structs are equal 
+in Golem if *all* of the corresponding fields
 are equal.  The `area` function for each of our two structs is a separately-created value, 
 and functions in golem use "identity equality".  The two `area` functions are two 
 separate values that are not equal.
 
-There is a solution to this problem, which involves the use of something we call
+Obviously it would be really nice if we could override this behaviour, so that the
+two structs are considered equal.  The solution to this problem involves the use of something we call
 "magic fields". Magic fields are fields with stylized names, that have functions which 
 override default functionality.
 
-It is possible to override the default implementation of `==` by a specially named
+It is possible to override the default implementation of `==` using a specially named
 magic field called `__eq__`.  If we properly define a field with that name,
-Golem will use it when comparing a struct to another value for equality:
+Golem will use it when comparing a struct to another value for equality.  Here 
+is an example (that makes use of the builtin function [has](builtins.html#has)):
 
 ```
 fn newRect(w, h) {
@@ -660,9 +662,7 @@ println(a == b)
 There are two other magic fields:  `__str__`, which overrides the value returned by the
 builtin function [`str`](builtins.html#str), and `__hashCode__`, which causes a 
 struct to be [hashable](interfaces.html#hashable), so it can be used as a key
-in a dict, or an entry in a set. 
-
-Here is an example (that uses [has()](builtins.html#has):
+in a dict, or an entry in a set. For example:
 
 
 ```
@@ -737,7 +737,8 @@ By using structs, closures, magic fields, and `merge()` together, it is possible
 features from other languages, including inheritance, multiple-inheritance, 
 prototype chains, and the like.
 
-The following program brings these features together:
+Here is a program that demonstrates Golem's ability to create complex interrelated structs:
+
 
 ```
 fn newRect(w, h) {
