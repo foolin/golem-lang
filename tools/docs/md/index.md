@@ -1,5 +1,10 @@
 # The Golem Programming Language
 
+This site contains the documentation for the [Golem](https://github.com/mjarmy/golem-lang) programming language.
+
+Golem is a general purpose, interpreted scripting language, that brings together ideas 
+from many other languages, including Go, Python, Javascript and Lua.
+
 * [Tour](tour.html)
   * [Hello, world](tour.html#hello-world)
   * [Basic Types](tour.html#basic-types)
