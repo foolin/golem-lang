@@ -100,8 +100,9 @@ println(a)
 As you might expect, the value of a const variable cannot be changed once it has
 been assigned.
 
-`let` and `const` are "statements" -- they do not return a value.  Assignments, on the
-other, are [expressions](#TODO), and evaluating an expression returns a value:
+`let` and `const` are [statements](syntax.html#statements) -- they do not return a 
+value.  Assignments, on the other, are [expressions](syntax.html#expressions), and 
+evaluating an expression returns a value:
 
 ```
 let a = 1
@@ -111,8 +112,8 @@ assert(a == b && b == 2)
 
 ## Collections
 
-Golem has four collection data types: [List](list.html), 
-[Dict](dict.html), [Set](set.html), and [Tuple](tuple.html) 
+Golem has four collection data types: [list](list.html), 
+[dict](dict.html), [set](set.html), and [tuple](tuple.html) 
 
 ### List
 
@@ -332,10 +333,10 @@ simply represent a sequence that can be iterated over.
 
 ## Functions
 
-A [Function](func.html) is a sequence of [expressions](#TODO) and [statements](#TODO) 
-that can be invoked to perform a task. We have already encountered quite a few 
-functions: [builtin functions](reference.html#builtin-functions) like `len`, and 
-a few field functions like the ones on a [list](list.html).
+A [Function](func.html) is a sequence of [expressions](syntax.html#expressions) 
+and [statements](syntax.html#statements) that can be invoked to perform a task. We 
+have already encountered quite a few functions: [builtin functions](reference.html#builtin-functions) 
+like `len`, and a few field functions like the ones on a [list](list.html).
 
 Functions are first-class values -- they can be passed around just like any other value.
 
@@ -664,8 +665,7 @@ println(a == b)
 
 There are two other magic fields:  `__str__`, which overrides the value returned by the
 builtin function [`str`](builtins.html#str), and `__hashCode__`, which causes a 
-struct to be [hashable](interfaces.html#hashable), so it can be used as a key
-in a dict, or an entry in a set. For example:
+struct to be [hashable](interfaces.html#hashable). For example:
 
 
 ```
@@ -727,11 +727,11 @@ println('b: ', b)
 println('c: ', c) // x is changed here too!
 ```
 
-If there are any duplicated keys in the structs passed in to 'merge()', then the
+If there are any duplicated keys in the structs passed in to `merge()`, then the
 value associated with the *last* such key is used.  
 
 Note in the above example that if you change a value in one of the structs passed 
-in to merge(), the value changes in the merged struct as well.  That is because the 
+in to `merge()`, the value changes in the merged struct as well.  That is because the 
 all three structs actually share a common set of fields.  We will see in the next section
 that this behaviour can be quite useful.
 
@@ -770,7 +770,7 @@ fn newBox(rect, d) {
 
         __eq__: fn(v) { 
             (rect == v) &&
-            has(v, 'depth')  && this.depth  == v.depth
+            has(v, 'depth') && this.depth == v.depth
         }, 
         __str__: fn() { ['Box(',
             str(rect), ', ',
@@ -931,7 +931,7 @@ try {
 }
 ```
 
-`freeze()` only has an effect on Lists, Dicts, Sets and Structs.  All other values 
+`freeze()` only has an effect on lists, dicts, sets and structs.  All other values 
 are already immutable, so calling `freeze()` on them has no effect
 
 Immutabilty and concurrency go hand in hand.  By using immutable 

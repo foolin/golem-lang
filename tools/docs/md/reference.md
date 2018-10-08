@@ -56,6 +56,8 @@
 ## Syntax
 
 * [Operator Precedence](syntax.html#operator-precedence)
+* [Expressions](syntax.html#expressions)
+* [Statements](syntax.html#statements)
 
 ## Standard Library
 

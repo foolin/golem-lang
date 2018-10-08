@@ -111,7 +111,7 @@ println(a)</textarea>
 </div>
 
 <p>As you might expect, the value of a const variable cannot be changed once it has been assigned.</p>
-<p><code>let</code> and <code>const</code> are “statements” – they do not return a value. Assignments, on the other, are <a href="#TODO">expressions</a>, and evaluating an expression returns a value:</p>
+<p><code>let</code> and <code>const</code> are <a href="syntax.html#statements">statements</a> – they do not return a value. Assignments, on the other, are <a href="syntax.html#expressions">expressions</a>, and evaluating an expression returns a value:</p>
 <div class="play">
     <div class="input">
         <textarea id="src39" rows="3" spellcheck="false">let a = 1
@@ -125,7 +125,7 @@ assert(a == b &amp;&amp; b == 2)</textarea>
 </div>
 
 <h2 id="collections">Collections</h2>
-<p>Golem has four collection data types: <a href="list.html">List</a>, <a href="dict.html">Dict</a>, <a href="set.html">Set</a>, and <a href="tuple.html">Tuple</a></p>
+<p>Golem has four collection data types: <a href="list.html">list</a>, <a href="dict.html">dict</a>, <a href="set.html">set</a>, and <a href="tuple.html">tuple</a></p>
 <h3 id="list">List</h3>
 <p>You can create a <a href="list.html">list</a> by enclosing a comma-delimited sequence of values in square brackets. Once you’ve created a list, you can use square brackets to access individual elements of a list (this is called the “index operator”).</p>
 <div class="play">
@@ -388,7 +388,7 @@ for i in range(0, len(list)) {
 
 <p>Note that ranges do not actually contain a list of all the specified integers. They simply represent a sequence that can be iterated over.</p>
 <h2 id="functions">Functions</h2>
-<p>A <a href="func.html">Function</a> is a sequence of <a href="#TODO">expressions</a> and <a href="#TODO">statements</a> that can be invoked to perform a task. We have already encountered quite a few functions: <a href="reference.html#builtin-functions">builtin functions</a> like <code>len</code>, and a few field functions like the ones on a <a href="list.html">list</a>.</p>
+<p>A <a href="func.html">Function</a> is a sequence of <a href="syntax.html#expressions">expressions</a> and <a href="syntax.html#statements">statements</a> that can be invoked to perform a task. We have already encountered quite a few functions: <a href="reference.html#builtin-functions">builtin functions</a> like <code>len</code>, and a few field functions like the ones on a <a href="list.html">list</a>.</p>
 <p>Functions are first-class values – they can be passed around just like any other value.</p>
 <h3 id="function-syntax">Function Syntax</h3>
 <p>Functions are created with the <code>fn</code> keyword:</p>
@@ -733,7 +733,7 @@ println(a == b)</textarea>
     </div>
 </div>
 
-<p>There are two other magic fields: <code>__str__</code>, which overrides the value returned by the builtin function <a href="builtins.html#str"><code>str</code></a>, and <code>__hashCode__</code>, which causes a struct to be <a href="interfaces.html#hashable">hashable</a>, so it can be used as a key in a dict, or an entry in a set. For example:</p>
+<p>There are two other magic fields: <code>__str__</code>, which overrides the value returned by the builtin function <a href="builtins.html#str"><code>str</code></a>, and <code>__hashCode__</code>, which causes a struct to be <a href="interfaces.html#hashable">hashable</a>. For example:</p>
 <div class="play">
     <div class="input">
         <textarea id="src75" rows="31" spellcheck="false">fn newRect(w, h) {
@@ -800,8 +800,8 @@ println(&#39;c: &#39;, c) // x is changed here too!</textarea>
     </div>
 </div>
 
-<p>If there are any duplicated keys in the structs passed in to ‘merge()’, then the value associated with the <em>last</em> such key is used.</p>
-<p>Note in the above example that if you change a value in one of the structs passed in to merge(), the value changes in the merged struct as well. That is because the all three structs actually share a common set of fields. We will see in the next section that this behaviour can be quite useful.</p>
+<p>If there are any duplicated keys in the structs passed in to <code>merge()</code>, then the value associated with the <em>last</em> such key is used.</p>
+<p>Note in the above example that if you change a value in one of the structs passed in to <code>merge()</code>, the value changes in the merged struct as well. That is because the all three structs actually share a common set of fields. We will see in the next section that this behaviour can be quite useful.</p>
 <h3 id="using-structs-to-build-complex-values">Using Structs to build complex values</h3>
 <p>By using structs, closures, magic fields, and <code>merge()</code> together, it is possible to simulate various features from other languages, including inheritance, multiple-inheritance, prototype chains, and the like.</p>
 <p>Here is a program that demonstrates Golem’s ability to create complex interrelated structs:</p>
@@ -832,7 +832,7 @@ fn newBox(rect, d) {
 
         __eq__: fn(v) { 
             (rect == v) &amp;&amp;
-            has(v, &#39;depth&#39;)  &amp;&amp; this.depth  == v.depth
+            has(v, &#39;depth&#39;) &amp;&amp; this.depth == v.depth
         }, 
         __str__: fn() { [&#39;Box(&#39;,
             str(rect), &#39;, &#39;,
@@ -995,7 +995,7 @@ try {
     </div>
 </div>
 
-<p><code>freeze()</code> only has an effect on Lists, Dicts, Sets and Structs. All other values are already immutable, so calling <code>freeze()</code> on them has no effect</p>
+<p><code>freeze()</code> only has an effect on lists, dicts, sets and structs. All other values are already immutable, so calling <code>freeze()</code> on them has no effect</p>
 <p>Immutabilty and concurrency go hand in hand. By using immutable values whenever possible, you can reduce the likelyhood of bugs in your concurrency code, and make it much easier to reason about as well.</p>
 <p>An important caveat regarding immutability is that although closures, like all functions, are immutable, they can still have enclosed state that can be modified. There is no way in Golem to freeze a closure after the fact so that it can no longer modify any of its captured variables. It is up to you to manage state properly if you are using closures.</p>
 <h2 id="introspection">Introspection</h2>

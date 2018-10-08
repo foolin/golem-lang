@@ -18,3 +18,15 @@ Golem's operators have the following precedence, from low to high:
 
 The unary operators are prefix, the incremental operators are postfix, and 
 all of the other operators are infix.
+
+### Expressions
+
+A formal definition of the syntax of expressions.
+
+TODO
+
+### Statements
+
+A formal definition of the syntax of statements.
+
+TODO
