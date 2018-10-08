@@ -16,4 +16,5 @@ Golem's operators have the following precedence, from low to high:
 | unary          | `-`, `!`, `~` |
 | incremental    | `++`, `--`  |
 
-Note that `++`, `--` are always postfix.
+The unary operators are prefix, the incremental operators are postfix, and 
+all of the other operators are infix.
