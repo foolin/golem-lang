@@ -10,6 +10,8 @@ import (
 
 type Stream interface {
 
+	// TODO implement all of these
+
 	// transformers
 	//DropWhile(Predicate) Error
 	Filter(Predicate) Error

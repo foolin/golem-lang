@@ -1887,6 +1887,25 @@ fn testMerge() {
     util.fail(|| => merge(f, g, b), error)
 }
 
+fn testStream() {
+    let a = [1, 2, 3]
+    assert([] == stream([]).filter(|e| => e < 3).toList())
+    assert([1,2] == stream(a).filter(|e| => e < 3).toList())
+    util.fail(|| => stream(a).filter().toList(),  'ArityMismatch: Expected 1 parameter, got 0')
+    util.fail(|| => stream(a).filter(|| => 42).toList(),  'ArityMismatch: filter function must have 1 parameter')
+    util.fail(|| => stream(a).filter(|e| => 42).toList(), 'TypeMismatch: filter function must return Bool, not Int')
+
+    assert([] == stream([]).map(|e| => e*e).toList())
+    assert([1,4,9] == stream(a).map(|e| => e*e).toList())
+    util.fail(|| => stream(a).map().toList(),  'ArityMismatch: Expected 1 parameter, got 0')
+    util.fail(|| => stream(a).map(|| => 42).toList(),  'ArityMismatch: map function must have 1 parameter')
+
+    assert(0 == stream([]).reduce(0, |a, e| => a + e))
+    assert(6 == stream(a).reduce(0, |a, e| => a + e))
+    util.fail(|| => stream(a).reduce(),  'ArityMismatch: Expected 2 parameters, got 0')
+    util.fail(|| => stream(a).reduce(0, || => 42),  'ArityMismatch: reduce function must have 2 parameters')
+}
+
 fn testTry() {
 
     const funcs = [
@@ -2209,7 +2228,8 @@ fn run() {
         ('testDict',   testDict),
         ('testSet',    testSet),
         ('testStruct', testStruct),
-        ('testMerge',  testMerge)
+        ('testMerge',  testMerge),
+        ('testStream', testStream)
 
     ]
     for f in funcs { 

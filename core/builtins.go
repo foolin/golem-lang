@@ -548,7 +548,7 @@ var streamMethods = map[string]Method{
 			expected := Arity{FixedArity, 1, 0}
 			if fn.Arity() != expected {
 				return nil, fmt.Errorf(
-					"ArityMismatch: map function must have 1 parameter")
+					"ArityMismatch: filter function must have 1 parameter")
 			}
 
 			// transform
