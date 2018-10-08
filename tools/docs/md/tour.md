@@ -116,7 +116,7 @@ Golem has four collection data types: [List](list.html),
 
 ### List
 
-You can create a list by enclosing a comma-delimited sequence of values in
+You can create a [list](list.html) by enclosing a comma-delimited sequence of values in
 square brackets.  Once you've created a list, you can use square brackets to access
 individual elements of a list (this is called the "index operator").  
 
@@ -150,9 +150,9 @@ println('abc'[:-1])
 
 ### Dict
 
-Golem's `dict` type is an 
+Golem's [`dict`](dict.html) type is an 
 [associative array](https://en.wikipedia.org/wiki/Associative_array).  The keys of a 
-dict can be any value that supports [hashing](interfaces.html#hashable). 
+dict can be any [hashable](interfaces.html#hashable) value. 
 
 ```
 let a = dict {'x': 1, 'y': 2}
@@ -163,7 +163,7 @@ println(a)
 
 ### Set
 
-A `set` is a unordered collection of distinct values.  Any value that can act as a key 
+A [`set`](set.html) is a unordered collection of distinct values.  Any value that can act as a key 
 in a dict can be a member of a set.
 
 ```
@@ -174,7 +174,7 @@ println(a.contains('x'))
 
 ### Tuple
 
-A `tuple` is an immutable list-like data structure.  Tuples must have at least two values.
+A [`tuple`](tuple.html) is an immutable list-like data structure.  Tuples must have at least two values.
 
 ```
 let a = (1, 2)
@@ -198,7 +198,7 @@ println([len(a), len(b), len(c)])
 A "field" in Golem is a named member of a value.  Each type has a collection 
 of fields that are associated with a given value.  
 
-As an example, here is  how to use some of the fields that are present on a list value:
+As an example, here is  how to use some of the fields that are present on a [list](list.html) value:
 
 ```
 let ls = []
@@ -300,7 +300,7 @@ for e in a {
 println(b)
 ```
 
-By convention, iterating over a dict produces a sequence of tuples.  You 
+Iterating over a dict produces a sequence of tuples.  You 
 can capture the values in the tuple directly in a `for` loop via
 "tuple destructuring":
 
@@ -332,9 +332,10 @@ simply represent a sequence that can be iterated over.
 
 ## Functions
 
-A [Function](func.html) is a sequence of [`expressions`](#TODO) and [`statements`](#TODO) 
+A [Function](func.html) is a sequence of [expressions](#TODO) and [statements](#TODO) 
 that can be invoked to perform a task. We have already encountered quite a few 
-functions: builtin functions like `println`, and a few field functions like the ones on a list.
+functions: [builtin functions](reference.html#builtin-functions) like `len`, and 
+a few field functions like the ones on a [list](list.html).
 
 Functions are first-class values -- they can be passed around just like any other value.
 
@@ -729,7 +730,7 @@ println('c: ', c) // x is changed here too!
 If there are any duplicated keys in the structs passed in to 'merge()', then the
 value associated with the *last* such key is used.  
 
-Also, note in the above example that if you change a value in one of the structs passed 
+Note in the above example that if you change a value in one of the structs passed 
 in to merge(), the value changes in the merged struct as well.  That is because the 
 all three structs actually share a common set of fields.  We will see in the next section
 that this behaviour can be quite useful.
@@ -788,7 +789,7 @@ println('area: ', box.area(), ', volume: ', box.volume())
 ```
 
 The functions `newRect` and `newBox` are very much like what one might call "constructors"
-in another language.  The structs that they return have closures as entries,
+in another language.  The structs that they return have fields that are closures,
 that are quite a bit like what one might call a "method" in another language.
 
 The use of the `merge()` function to create a box out of a rectangle is similar to
@@ -972,9 +973,9 @@ println(['a', 'b', 'c'].map(|e| => has(s, e)))
 Thus far, we have been running Golem in the browser via the magic of 
 [WebAssembly](https://github.com/golang/go/wiki/WebAssembly).  
 
-It is also possible to run Golem from the command line as an executable.
+It is also possible to run Golem from the command line.
 
-To do this, you must first compile a version of Golem into an executable.  This requires that you have 
+To do this, you must first compile a `golem` executable.  This requires that you have 
 the Go language toolchain installed on your system, with at least version 1.9.
 
 Clone the Golem [repository](https://github.com/mjarmy/golem-lang) into the proper
@@ -991,7 +992,7 @@ and run it like so: `./build/golem tour.glm`.
 In addition to supporting all of the builtin functions that we have seen so far, 
 the `golem` executable supports a concept called "modules".
 
-The Golem CLI actually compiles the "tour.glm" file that you made eariler into a
+The `golem` executable actually compiles the "tour.glm" file that you made eariler into a
 module called "tour".  Modules are the fundamental unit of compilation in Golem, 
 and are also used for namespace management. 
 
@@ -1017,7 +1018,7 @@ assert(foo.square(5) == 25)
 
 ### The `main()` Function
 
-You can pass arguments into a Golem CLI program by defining a `main()` function, that
+You can pass arguments into a `golem` executable program by defining a `main()` function, that
 accepts exactly one parameter.  The parameter will always be a list of the
 command line arguments.
 

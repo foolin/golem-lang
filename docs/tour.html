@@ -127,7 +127,7 @@ assert(a == b &amp;&amp; b == 2)</textarea>
 <h2 id="collections">Collections</h2>
 <p>Golem has four collection data types: <a href="list.html">List</a>, <a href="dict.html">Dict</a>, <a href="set.html">Set</a>, and <a href="tuple.html">Tuple</a></p>
 <h3 id="list">List</h3>
-<p>You can create a list by enclosing a comma-delimited sequence of values in square brackets. Once you’ve created a list, you can use square brackets to access individual elements of a list (this is called the “index operator”).</p>
+<p>You can create a <a href="list.html">list</a> by enclosing a comma-delimited sequence of values in square brackets. Once you’ve created a list, you can use square brackets to access individual elements of a list (this is called the “index operator”).</p>
 <div class="play">
     <div class="input">
         <textarea id="src40" rows="5" spellcheck="false">let a = []
@@ -170,7 +170,7 @@ println(&#39;abc&#39;[:-1])</textarea>
 </div>
 
 <h3 id="dict">Dict</h3>
-<p>Golem’s <code>dict</code> type is an <a href="https://en.wikipedia.org/wiki/Associative_array">associative array</a>. The keys of a dict can be any value that supports <a href="interfaces.html#hashable">hashing</a>.</p>
+<p>Golem’s <a href="dict.html"><code>dict</code></a> type is an <a href="https://en.wikipedia.org/wiki/Associative_array">associative array</a>. The keys of a dict can be any <a href="interfaces.html#hashable">hashable</a> value.</p>
 <div class="play">
     <div class="input">
         <textarea id="src43" rows="4" spellcheck="false">let a = dict {&#39;x&#39;: 1, &#39;y&#39;: 2}
@@ -185,7 +185,7 @@ println(a)</textarea>
 </div>
 
 <h3 id="set">Set</h3>
-<p>A <code>set</code> is a unordered collection of distinct values. Any value that can act as a key in a dict can be a member of a set.</p>
+<p>A <a href="set.html"><code>set</code></a> is a unordered collection of distinct values. Any value that can act as a key in a dict can be a member of a set.</p>
 <div class="play">
     <div class="input">
         <textarea id="src44" rows="3" spellcheck="false">let a = set {&#39;x&#39;, &#39;y&#39;}
@@ -199,7 +199,7 @@ println(a.contains(&#39;x&#39;))</textarea>
 </div>
 
 <h3 id="tuple">Tuple</h3>
-<p>A <code>tuple</code> is an immutable list-like data structure. Tuples must have at least two values.</p>
+<p>A <a href="tuple.html"><code>tuple</code></a> is an immutable list-like data structure. Tuples must have at least two values.</p>
 <div class="play">
     <div class="input">
         <textarea id="src45" rows="2" spellcheck="false">let a = (1, 2)
@@ -228,7 +228,7 @@ println([len(a), len(b), len(c)])</textarea>
 
 <h2 id="fields">Fields</h2>
 <p>A “field” in Golem is a named member of a value. Each type has a collection of fields that are associated with a given value.</p>
-<p>As an example, here is how to use some of the fields that are present on a list value:</p>
+<p>As an example, here is how to use some of the fields that are present on a <a href="list.html">list</a> value:</p>
 <div class="play">
     <div class="input">
         <textarea id="src47" rows="8" spellcheck="false">let ls = []
@@ -352,7 +352,7 @@ println(b)</textarea>
     </div>
 </div>
 
-<p>By convention, iterating over a dict produces a sequence of tuples. You can capture the values in the tuple directly in a <code>for</code> loop via “tuple destructuring”:</p>
+<p>Iterating over a dict produces a sequence of tuples. You can capture the values in the tuple directly in a <code>for</code> loop via “tuple destructuring”:</p>
 <div class="play">
     <div class="input">
         <textarea id="src54" rows="7" spellcheck="false">let d = dict { &quot;x&quot;: 1, &quot;y&quot;: 2, &quot;z&quot;: 3 }
@@ -388,7 +388,7 @@ for i in range(0, len(list)) {
 
 <p>Note that ranges do not actually contain a list of all the specified integers. They simply represent a sequence that can be iterated over.</p>
 <h2 id="functions">Functions</h2>
-<p>A <a href="func.html">Function</a> is a sequence of <a href="#TODO"><code>expressions</code></a> and <a href="#TODO"><code>statements</code></a> that can be invoked to perform a task. We have already encountered quite a few functions: builtin functions like <code>println</code>, and a few field functions like the ones on a list.</p>
+<p>A <a href="func.html">Function</a> is a sequence of <a href="#TODO">expressions</a> and <a href="#TODO">statements</a> that can be invoked to perform a task. We have already encountered quite a few functions: <a href="reference.html#builtin-functions">builtin functions</a> like <code>len</code>, and a few field functions like the ones on a <a href="list.html">list</a>.</p>
 <p>Functions are first-class values – they can be passed around just like any other value.</p>
 <h3 id="function-syntax">Function Syntax</h3>
 <p>Functions are created with the <code>fn</code> keyword:</p>
@@ -801,7 +801,7 @@ println(&#39;c: &#39;, c) // x is changed here too!</textarea>
 </div>
 
 <p>If there are any duplicated keys in the structs passed in to ‘merge()’, then the value associated with the <em>last</em> such key is used.</p>
-<p>Also, note in the above example that if you change a value in one of the structs passed in to merge(), the value changes in the merged struct as well. That is because the all three structs actually share a common set of fields. We will see in the next section that this behaviour can be quite useful.</p>
+<p>Note in the above example that if you change a value in one of the structs passed in to merge(), the value changes in the merged struct as well. That is because the all three structs actually share a common set of fields. We will see in the next section that this behaviour can be quite useful.</p>
 <h3 id="using-structs-to-build-complex-values">Using Structs to build complex values</h3>
 <p>By using structs, closures, magic fields, and <code>merge()</code> together, it is possible to simulate various features from other languages, including inheritance, multiple-inheritance, prototype chains, and the like.</p>
 <p>Here is a program that demonstrates Golem’s ability to create complex interrelated structs:</p>
@@ -855,7 +855,7 @@ println(&#39;area: &#39;, box.area(), &#39;, volume: &#39;, box.volume())</texta
     </div>
 </div>
 
-<p>The functions <code>newRect</code> and <code>newBox</code> are very much like what one might call “constructors” in another language. The structs that they return have closures as entries, that are quite a bit like what one might call a “method” in another language.</p>
+<p>The functions <code>newRect</code> and <code>newBox</code> are very much like what one might call “constructors” in another language. The structs that they return have fields that are closures, that are quite a bit like what one might call a “method” in another language.</p>
 <p>The use of the <code>merge()</code> function to create a box out of a rectangle is similar to how inheritance is used in other languages. Does that mean that a Box is a subclass of a Rectangle? Not really, no. There is no such thing as a “class” in Golem. However, due to the behaviour of merge(), they <em>are</em> inter-related in a way that is very much like inheritance.</p>
 <p>One of the primary goals of the Golem project is to explore the power provided by the simple building blocks of closures, structs, properties, magic fields, and <code>merge()</code>. It is hoped that the simplicity and flexibility of these elements can be used to create a variety of complex runtime structures that are easy to reason about and use.</p>
 <h2 id="stream"><code>stream()</code></h2>
@@ -1029,13 +1029,13 @@ println([&#39;a&#39;, &#39;b&#39;, &#39;c&#39;].map(|e| =&gt; has(s, e)))</texta
 
 <h2 id="command-line-executable">Command Line Executable</h2>
 <p>Thus far, we have been running Golem in the browser via the magic of <a href="https://github.com/golang/go/wiki/WebAssembly">WebAssembly</a>.</p>
-<p>It is also possible to run Golem from the command line as an executable.</p>
-<p>To do this, you must first compile a version of Golem into an executable. This requires that you have the Go language toolchain installed on your system, with at least version 1.9.</p>
+<p>It is also possible to run Golem from the command line.</p>
+<p>To do this, you must first compile a <code>golem</code> executable. This requires that you have the Go language toolchain installed on your system, with at least version 1.9.</p>
 <p>Clone the Golem <a href="https://github.com/mjarmy/golem-lang">repository</a> into the proper place in your go development environment, <code>cd</code> into the top level directory of the repo, and type <code>make</code>. This will build Golem, and place the <code>golem</code> executable in a sub-directory called <code>build</code>.</p>
 <p>Then, fire up your <a href="https://github.com/mjarmy/golem-lang/wiki/IDE-Support">IDE</a> of choice, type some Golem code into a file named “tour.glm”, and run it like so: <code>./build/golem tour.glm</code>.</p>
 <h3 id="modules">Modules</h3>
 <p>In addition to supporting all of the builtin functions that we have seen so far, the <code>golem</code> executable supports a concept called “modules”.</p>
-<p>The Golem CLI actually compiles the “tour.glm” file that you made eariler into a module called “tour”. Modules are the fundamental unit of compilation in Golem, and are also used for namespace management.</p>
+<p>The <code>golem</code> executable actually compiles the “tour.glm” file that you made eariler into a module called “tour”. Modules are the fundamental unit of compilation in Golem, and are also used for namespace management.</p>
 <p>All you need to do to create your own modules that the <code>golem</code> executable can use is create a file with the name you want. As an example, lets create a module called “foo”, and reference it in the “tour” module.</p>
 <p>In a file called “foo.glm”, place the following:</p>
 <pre class="nowasm"><code>fn square(x) {
@@ -1045,7 +1045,7 @@ println([&#39;a&#39;, &#39;b&#39;, &#39;c&#39;].map(|e| =&gt; has(s, e)))</texta
 <pre class="nowasm"><code>import foo
 assert(foo.square(5) == 25)</code></pre>
 <h3 id="the-main-function">The <code>main()</code> Function</h3>
-<p>You can pass arguments into a Golem CLI program by defining a <code>main()</code> function, that accepts exactly one parameter. The parameter will always be a list of the command line arguments.</p>
+<p>You can pass arguments into a <code>golem</code> executable program by defining a <code>main()</code> function, that accepts exactly one parameter. The parameter will always be a list of the command line arguments.</p>
 <pre class="nowasm"><code>fn main(args) {
     for i in range(0, len(args)) {
         println(&#39;argument &#39;, i, &#39; is &quot;&#39;, args[i], &#39;&quot;&#39;)

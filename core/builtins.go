@@ -492,7 +492,7 @@ println(stream(a)
     .reduce(0, |acc, e| => acc + e))
 ```
 
-A stream has the following fields:
+A stream has the following fields (TODO add a bunch more):
 
 */
 
