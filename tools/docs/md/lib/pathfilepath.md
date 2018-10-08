@@ -27,7 +27,7 @@ println(path.filepath.ext('foo.txt'))
 `walk` walks the file tree rooted at root, calling walkFn for each file or directory
 in the tree, including root.  The walkFn must accept two parameters.  The first
 parameter will be the path of the current file, and the second will be the
-[fileInfo](TODO) for the file.
+[fileInfo](lib_os.html#fileinfo) for the file.
 
 * signature: `Walk(root <Str>, walkFn <Func>) <Func>`
 * example:

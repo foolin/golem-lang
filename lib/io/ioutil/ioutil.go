@@ -35,7 +35,7 @@ import (
 
 `readDir` reads the directory named by dirname and returns a
 list of directory entries sorted by filename. The resulting
-list will be [fileinfo](#TODO) Structs.
+list will be [fileinfo](lib_os.html#fileinfo) Structs.
 
 * signature: `readDir(filename <Str>) <List>`
 * example:

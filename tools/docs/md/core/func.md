@@ -1,7 +1,7 @@
 ## Func
 
-A Func is a sequence of [`expressions`](#TODO) and [`statements`](#TODO) that can
-be invoked to perform a task.
+A function is a sequence of [expressions](syntax.html#expressions)
+and [statements](syntax.html#statements) that can be invoked to perform a task.
 
 Valid operators for Func are:
 

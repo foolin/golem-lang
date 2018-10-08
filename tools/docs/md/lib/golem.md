@@ -7,6 +7,7 @@ on Golem values and code, as well as providing a few useful utility functions.
 `golem` has the following fields:
 
 * [getField](#getfield)
+* [makeHashCode](#makehashcode)
 * [setField](#setfield)
 * [toDict](#todict)
 

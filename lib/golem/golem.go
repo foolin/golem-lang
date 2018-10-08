@@ -37,6 +37,7 @@ func init() {
 `golem` has the following fields:
 
 * [getField](#getfield)
+* [makeHashCode](#makehashcode)
 * [setField](#setfield)
 * [toDict](#todict)
 
