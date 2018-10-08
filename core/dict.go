@@ -12,8 +12,8 @@ import (
 /*doc
 ## Dict
 
-A Dict is an [associative array](https://en.wikipedia.org/wiki/Associative_array),
-in which the keys are all [`hashable`](interfaces.html#hashable).
+A Dict is an [associative array](https://en.wikipedia.org/wiki/Associative_array).  The
+keys of a dict are all [`hashable`](interfaces.html#hashable).
 
 Valid operators for Dict are:
 

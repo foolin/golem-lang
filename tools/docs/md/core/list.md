@@ -170,7 +170,7 @@ and ending with the last.  The original list is unmodified.
 
 The reducer function must accept two values, and return one value.
 
-* signature: `reduce(start <Value>, reducer <Func>) <List>`
+* signature: `reduce(initial <Value>, reducer <Func>) <List>`
 * reducer signature: `fn(accum <Value>, val <Value>) <Value>`
 * example:
 

@@ -18,12 +18,13 @@ are suitable for use in sandboxed environments.
 * [`len()`](#len)
 * [`merge()`](#merge)
 * [`range()`](#range)
+* [`stream()`](#stream)
 * [`str()`](#str)
 * [`type()`](#type)
 
 ### `arity`
 
-`arity` returns a Struct describing the [arity](https://en.wikipedia.org/wiki/Arity) of a Func.
+`arity` returns a [Struct](struct.html) describing the [arity](https://en.wikipedia.org/wiki/Arity) of a Func.
 A func's arity type is always either "Fixed", "Variadic", or "Multiple".
 
 * signature: `arity(f <Func>) <Struct>`
@@ -55,7 +56,7 @@ If the size is greater than 0, then a buffered channel of that size will be crea
 
 ### `fields`
 
-`fields` returns a Set of the names of a value's fields.
+`fields` returns a [Set](set.html) of the names of a value's fields.
 
 * signature: `fields(value <Value>) <Set>`
 * example:
@@ -88,7 +89,7 @@ println(frozen([3, 4]))
 
 `has` returns whether a value has a field with a given name.
 
-* signature: `has(name <Str>) <Bool>`
+* signature: `has(val <Value>, name <Str>) <Bool>`
 * example:
 
 ```
@@ -109,24 +110,14 @@ println(hashCode('abc'))
 
 ### `iter`
 
-`iter` returns an iterator for an Iterable value.  Str, List, Range, Dict,
-and Set are iterable.
+`iter` returns an "iterator" [Struct](struct.html) for an [iterable](interfaces.html#iterable)
+value.
 
-An iterator is a Struct that has two fields:
-
-* A `next()` function that
-returns whether there are any more values in the iterator,
-and advances the iterator forwards if there is another value.
-
-* A `get()` function that returns the currently available value.
-
-By convention, a new iterator has to have `next()` called on it to advance
+A new iterator must have `next()` called on it to advance
 to the first available value. Calling `get()` before the first call to `next()`
 throws an error.
 
-* signature: `iter(value <Iterable>) <Struct>`
-* `next` signature: `next() <Bool>`
-* `get` signature: `get() <Value>`
+* signature: `iter(itr <Iterable>) <Struct>`
 * example:
 
 ```
@@ -137,19 +128,29 @@ while itr.next() {
 }
 ```
 
+An iterator struct has the following fields.
+
+* `next()` returns whether there are any more values in the iterator,
+and advances the iterator forwards if there is another value.
+
+    * signature: `next() <Bool>`
+
+* `get()` returns the currently available value.
+
+    * signature: `get() <Value>`
+
 ### `len`
 
-`len` returns the length of a value that has a length.  Str, List, Tuple, Range, Dict,
-and Set have a length
+`len` returns the length of a value that has a [length](interfaces.html#lenable).
 
 * signature: `len(value <Lenable>) <Int>`
 * example: `println(len('abc'))`
 
 ### `merge`
 
-`merge` combines an arbitrary number of existing structs into a new struct.  If
+`merge` combines an arbitrary number of existing [structs](Struct.html) into a new struct.  If
 there are any duplicated keys in the structs passed in to 'merge()', then the
-value associated with the first such key is used.
+value associated with the *last* such key is used.
 
 * signature: `merge(structs... <Struct>) <Struct>`
 * example:
@@ -159,15 +160,16 @@ let a = struct { x: 1, y: 2 }
 let b = struct { y: 3, z: 4 }
 let c = merge(a, b)
 
-println(a)
-println(b)
-println(c)
+println('a: ', a)
+println('b: ', b)
+println('c: ', c)
 
 a.x = 10
 
-println(a)
-println(b)
-println(c) // x is changed here too!
+println()
+println('a: ', a)
+println('b: ', b)
+println('c: ', c) // x is changed here too!
 ```
 
 ### `range`
@@ -195,6 +197,72 @@ for i in range(0, 5) {
 
 * signature: `str(value <Value>) <Str>`
 * example: `println(str([null, true, 1, 'abc']))`
+
+### `stream`
+
+`stream` returns a "stream" [Struct](struct.html) for an [Iterable](interfaces.html#iterable)
+value.
+
+A stream performs a series of transforms on a sequence of iterated values, and then
+collects the values into a final result.
+
+Streams have two kinds of fields:
+
+* Transformer functions, which perform some kind of transformation on the sequence of values in the stream.
+
+* Collector functions, which turn the sequence of values into a final result.
+
+Streams are lazy -- calling one of the transformer
+functions doesn't do any processing, it simply registers a new transformation,
+and then returns the modified stream.  Processing on the sequence of values in the stream
+does not start until one of the collector functions is called.
+
+Streams are "single use" values.  Once one of the collector functions has been called,
+an error will be thrown if any of the stream's functions are called.
+
+* signature: `stream(itr <Iterable>) <Struct>`
+* example:
+
+```
+// print the sum of the even squares
+let a = [1, 2, 3, 4, 5]
+println(stream(a)
+    .map(|e| => e*e)
+    .filter(|e| => e % 2 == 0)
+    .reduce(0, |acc, e| => acc + e))
+```
+
+A stream has the following fields:
+
+#### transformer functions
+
+* `filter()` adds a "filter" transformation to the stream, by removing elements
+which do not match the provided predicate function.  The predicate function
+must accept one value, and must return a boolean value.
+
+    * signature: `filter(predicate <Func>) <Stream>`
+    * predicate signature: `fn(val <Value>) <Bool>`
+
+* `map()` adds a "map" transformation to the stream, by transforming elements
+according to the provided mapping function.  The mapping function must accept
+one value, and must return one value.
+
+    * signature: `map(mapping <Func>) <Stream>`
+    * mapping signature: `fn(val <Value>) <Value>`
+
+#### collector functions
+
+* `reduce()` reduces the stream to a single value, by applying a "reducer" function
+to an accumulated value and each element in the stream.
+Accumulation is done starting with the first element in the stream,
+and ending with the last.  The reducer function must accept two values, and return one value.
+
+    * signature: `reduce(initial <Value>, reducer <Func>) <List>`
+    * reducer signature: `fn(accum <Value>, val <Value>) <Value>`
+
+* `toList()` collects the stream's sequence of values into a [List](list.html).
+
+    * signature: `toList() <List>`
 
 ### `type`
 

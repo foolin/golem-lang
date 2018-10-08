@@ -223,7 +223,8 @@ fn foo(x, y) {
 
 //--------------------------------------------------------------
 // Create an interpreter that calls a function in a
-// compiled module and stores the result in the module
+// compiled module.  The function modifys a captured top-level
+// variable in the module.
 //--------------------------------------------------------------
 
 func example7() {

@@ -206,7 +206,7 @@ println(b)</textarea>
 <p><code>reduce</code> reduces the list to a single value, by applying a “reducer” function to an accumulated value and each element in the list. Accumulation is done starting with the first element in the list, and ending with the last. The original list is unmodified.</p>
 <p>The reducer function must accept two values, and return one value.</p>
 <ul>
-<li>signature: <code>reduce(start &lt;Value&gt;, reducer &lt;Func&gt;) &lt;List&gt;</code></li>
+<li>signature: <code>reduce(initial &lt;Value&gt;, reducer &lt;Func&gt;) &lt;List&gt;</code></li>
 <li>reducer signature: <code>fn(accum &lt;Value&gt;, val &lt;Value&gt;) &lt;Value&gt;</code></li>
 <li>example:</li>
 </ul>

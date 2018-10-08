@@ -11,23 +11,23 @@ import (
 type Stream interface {
 
 	// transformers
-	//DropWhile(Predicate)
-	//Filter(Predicate)
-	//Flatten(Flattener)
-	//Limit(Int)
-	//Map(Mapper)
-	//Peek(Consumer)
-	//Skip(Int)
-	//TakeWhile(Predicate)
+	//DropWhile(Predicate) Error
+	Filter(Predicate) Error
+	//Flatten(Flattener) Error
+	//Limit(Int) Error
+	Map(Mapper) Error
+	//Peek(Consumer) Error
+	//Skip(Int) Error
+	//TakeWhile(Predicate) Error
 
-	// terminators
+	// collectors
 	//AllMatch(Eval, Predicate) (Bool, Error)
 	//AnyMatch(Eval, Predicate) (Bool, Error)
 	//Count(Eval) (Int, Error)
 	//ForEach(Eval, Consumer) Error
 	//Max(Eval, Lesser) (Value, Error)
 	//Min(Eval, Lesser) (Value, Error)
-	//Reduce(Eval, Value, Reducer) (Value, Error)
+	Reduce(Eval, Value, Reducer) (Value, Error)
 	//ToDict(Eval) (Dict, Error)
 	ToList(Eval) (List, Error)
 	//ToSet(Eval) (Set, Error)
@@ -35,37 +35,43 @@ type Stream interface {
 	//ToTuple(Eval) (Tuple, Error)
 }
 
-type (
-	stream struct {
-		adv advancer
-	}
+type stream struct {
+	adv       advancer
+	collected bool
+	this      Struct
+}
 
+func NewStream(itr Iterator) (Stream, Error) {
+	return &stream{&iteratorAdvancer{itr}, false, nil}, nil
+}
+
+//--------------------------------------------------------------
+// advancers
+//--------------------------------------------------------------
+
+type (
 	advancer interface {
 		advance(Eval) (Value, Error)
 	}
-)
 
-func NewStream(ev Eval, ibl Iterable) (Stream, Error) {
-
-	itr, err := ibl.NewIterator(ev)
-	if err != nil {
-		return nil, err
+	iteratorAdvancer struct {
+		itr Iterator
 	}
 
-	return &stream{&iteratorAdvancer{itr}}, nil
-}
+	filterAdvancer struct {
+		base advancer
+		pred Predicate
+	}
 
-//--------------------------------------------------------------
-// transformers
-//--------------------------------------------------------------
+	mapAdvancer struct {
+		base   advancer
+		mapper Mapper
+	}
+)
 
-type iteratorAdvancer struct {
-	itr Iterator
-}
+func (a *iteratorAdvancer) advance(ev Eval) (Value, Error) {
 
-func (i *iteratorAdvancer) advance(ev Eval) (Value, Error) {
-
-	b, err := i.itr.IterNext(ev)
+	b, err := a.itr.IterNext(ev)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +80,7 @@ func (i *iteratorAdvancer) advance(ev Eval) (Value, Error) {
 		return nil, nil
 	}
 
-	val, err := i.itr.IterGet(ev)
+	val, err := a.itr.IterGet(ev)
 	if err != nil {
 		return nil, err
 	}
@@ -82,11 +88,112 @@ func (i *iteratorAdvancer) advance(ev Eval) (Value, Error) {
 	return val, nil
 }
 
+func (a *filterAdvancer) advance(ev Eval) (Value, Error) {
+
+	val, err := a.base.advance(ev)
+	if val == nil || err != nil {
+		return val, err
+	}
+	b, err := a.pred(ev, val)
+	if err != nil {
+		return nil, err
+	}
+
+	for !b.BoolVal() {
+		val, err = a.base.advance(ev)
+		if val == nil || err != nil {
+			return val, err
+		}
+		b, err = a.pred(ev, val)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return val, nil
+}
+
+func (a *mapAdvancer) advance(ev Eval) (Value, Error) {
+
+	v1, err := a.base.advance(ev)
+	if v1 == nil || err != nil {
+		return v1, err
+	}
+	v2, err := a.mapper(ev, v1)
+	if err != nil {
+		return nil, err
+	}
+
+	return v2, nil
+}
+
 //--------------------------------------------------------------
-// terminators
+// transformers
 //--------------------------------------------------------------
 
+func (s *stream) Filter(pred Predicate) Error {
+
+	if s.collected {
+		return fmt.Errorf("stream has already been collected")
+	}
+
+	s.adv = &filterAdvancer{s.adv, pred}
+	return nil
+}
+
+func (s *stream) Map(mapper Mapper) Error {
+
+	if s.collected {
+		return fmt.Errorf("stream has already been collected")
+	}
+
+	s.adv = &mapAdvancer{s.adv, mapper}
+	return nil
+}
+
+//--------------------------------------------------------------
+// collectors
+//--------------------------------------------------------------
+
+func (s *stream) Reduce(ev Eval, initial Value, reducer Reducer) (Value, Error) {
+
+	if s.collected {
+		return nil, fmt.Errorf("stream has already been collected")
+	}
+	s.collected = true
+
+	acc := initial
+
+	//--------------
+	val, err := s.adv.advance(ev)
+	if err != nil {
+		return nil, err
+	}
+	for val != nil {
+
+		//--------------
+		acc, err = reducer(ev, acc, val)
+		if err != nil {
+			return nil, err
+		}
+		//--------------
+
+		val, err = s.adv.advance(ev)
+		if err != nil {
+			return nil, err
+		}
+	}
+	//--------------
+
+	return acc, nil
+}
+
 func (s *stream) ToList(ev Eval) (List, Error) {
+
+	if s.collected {
+		return nil, fmt.Errorf("stream has already been collected")
+	}
+	s.collected = true
 
 	values := []Value{}
 
@@ -96,11 +203,11 @@ func (s *stream) ToList(ev Eval) (List, Error) {
 		return nil, err
 	}
 	for val != nil {
-		//--------------
 
+		//--------------
 		values = append(values, val)
-
 		//--------------
+
 		val, err = s.adv.advance(ev)
 		if err != nil {
 			return nil, err
@@ -110,35 +217,3 @@ func (s *stream) ToList(ev Eval) (List, Error) {
 
 	return NewList(values), nil
 }
-
-//--------------------------------------------------------------
-// builtin
-//--------------------------------------------------------------
-
-var streamMethods = map[string]Method{
-
-	"toList": NewFixedMethod(
-		[]Type{}, false,
-		func(self interface{}, ev Eval, params []Value) (Value, Error) {
-			s := self.(Stream)
-			return s.ToList(ev)
-		}),
-}
-
-// BuiltinStream returns a stream Struct.
-var BuiltinStream = NewFixedNativeFunc(
-	[]Type{AnyType},
-	false,
-	func(ev Eval, params []Value) (Value, Error) {
-		ibl, ok := params[0].(Iterable)
-		if !ok {
-			return nil, fmt.Errorf("TypeMismatch: stream() expected iterable value, got %s", params[0].Type())
-		}
-
-		s, err := NewStream(ev, ibl)
-		if err != nil {
-			return nil, err
-		}
-
-		return NewMethodStruct(s, streamMethods)
-	})

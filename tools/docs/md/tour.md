@@ -11,7 +11,7 @@ Welcome to the tour of the Golem Programming Language.
   * [Dict](#dict)
   * [Set](#set)
   * [Tuple](#tuple)
-  * [`len`](#len)
+  * [`len()`](#len)
 * [Fields](#fields)
 * [Control Structures](#control-structures)
 * [Functions](#functions)
@@ -28,6 +28,7 @@ Welcome to the tour of the Golem Programming Language.
   * [Magic Fields](#magic-fields)
   * [Merging Structs](#merging-structs)
   * [Using Structs to build complex values](#using-structs-to-build-complex-values)
+* [`stream()`](#stream)
 * [Errors](#errors)
 * [Concurrency](#concurrency)
 * [Immutability](#immutability)
@@ -705,7 +706,7 @@ versions of Golem will add more.
 
 ### Merging Structs
 
-The builtin-function `merge()` can be used to combine an arbitrary number of 
+The builtin-function [`merge()`](builtins.html#merge) can be used to combine an arbitrary number of 
 existing structs into a new struct.
 
 ```
@@ -713,15 +714,16 @@ let a = struct { x: 1, y: 2 }
 let b = struct { y: 3, z: 4 }
 let c = merge(a, b)
 
-println(a)
-println(b)
-println(c)
+println('a: ', a)
+println('b: ', b)
+println('c: ', c)
 
 a.x = 10
 
-println(a)
-println(b)
-println(c) // x is changed here too!
+println()
+println('a: ', a)
+println('b: ', b)
+println('c: ', c) // x is changed here too!
 ```
 
 If there are any duplicated keys in the structs passed in to 'merge()', then the
@@ -796,9 +798,40 @@ due to the behaviour of merge(), they *are* inter-related in a way that is
 very much like inheritance.
 
 One of the primary goals of the Golem project is to explore the power provided by 
-the simple building blocks of closures, structs, properties, magic fields, and merge().  It is hoped
+the simple building blocks of closures, structs, properties, magic fields, and `merge()`.  It is hoped
 that the simplicity and flexibility of these elements can be used to create a variety
 of complex runtime structures that are easy to reason about and use.  
+
+## `stream()`
+
+We have already seen the `map()`, `filter()`, and `reduce()` functions on a list:
+
+```
+// print the sum of the even squares
+let a = [1, 2, 3, 4, 5]
+let b = a.map(|e| => e*e)
+let c = b.filter(|e| => e % 2 == 0)
+println(c.reduce(0, |acc, e| => acc + e))
+```
+
+The above program is rather inefficient though.  We ended up creating two extra lists
+in order to create the final reduced value that we wanted.
+
+There is a builtin function called [`stream()`](builtins.html#stream) that will allow us
+to perform the same operation much more efficiently:
+
+```
+// print the sum of the even squares
+let a = [1, 2, 3, 4, 5]
+println(stream(a)
+    .map(|e| => e*e)
+    .filter(|e| => e % 2 == 0)
+    .reduce(0, |acc, e| => acc + e))
+```
+
+A stream performs a series of transforms on a sequence of iterated values, and then
+collects the values into a final result.  Streams can be used to perform complex 
+transformations and reductions in an efficient manner.  
 
 ## Errors
 
@@ -880,9 +913,9 @@ functionality from Go's `sync` package.
 
 ## Immutability
 
-Golem supports immutability via the [`freeze`](builtins.html#freeze)  builtin function, 
+Golem supports immutability via the [`freeze()`](builtins.html#freeze)  builtin function, 
 which makes a mutable value become immutable.  You can check if a value is immutable 
-via the [`frozen`](builtins.html#frozen) builtin function. `freeze()` always returns 
+via the [`frozen()`](builtins.html#frozen) builtin function. `freeze()` always returns 
 the value that you pass into it.
 
 ```
@@ -941,7 +974,7 @@ Thus far, we have been running Golem in the browser via the magic of
 
 It is also possible to run Golem from the command line as an executable.
 
-To do this, you must first compile a version of the Golem.  This requires that you have 
+To do this, you must first compile a version of Golem into an executable.  This requires that you have 
 the Go language toolchain installed on your system, with at least version 1.9.
 
 Clone the Golem [repository](https://github.com/mjarmy/golem-lang) into the proper
@@ -950,7 +983,7 @@ and type `make`.  This will build Golem, and place the `golem` executable
 in a sub-directory called `build`.
 
 Then, fire up your [IDE](https://github.com/mjarmy/golem-lang/wiki/IDE-Support) 
-of choice, and type the Golem code of your choice into a file named "tour.glm",
+of choice, type some Golem code into a file named "tour.glm",
 and run it like so: `./build/golem tour.glm`.
 
 ### Modules
@@ -1043,8 +1076,8 @@ command line executable is not.
 
 There is an [example program](https://github.com/mjarmy/golem-lang/blob/master/examples/embedding/sandbox.go) 
 which starts with the simplest possible one-line program that interprets Golem code 
-inside of a Go program, and then provides several more increasingly sophisticated 
-examples.  Just do `go run examples/embedding/sandbox.go` to
+inside of a Go program, and then provides several more increasingly complicated 
+examples.  Type `go run examples/embedding/sandbox.go` to
 run the sandbox example.
 
 If you decide you *do* want to let Golem interact with the outside world, it is simple

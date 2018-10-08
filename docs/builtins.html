@@ -27,11 +27,12 @@
 <li><a href="#len"><code>len()</code></a></li>
 <li><a href="#merge"><code>merge()</code></a></li>
 <li><a href="#range"><code>range()</code></a></li>
+<li><a href="#stream"><code>stream()</code></a></li>
 <li><a href="#str"><code>str()</code></a></li>
 <li><a href="#type"><code>type()</code></a></li>
 </ul>
 <h3 id="arity"><code>arity</code></h3>
-<p><code>arity</code> returns a Struct describing the <a href="https://en.wikipedia.org/wiki/Arity">arity</a> of a Func. A func’s arity type is always either “Fixed”, “Variadic”, or “Multiple”.</p>
+<p><code>arity</code> returns a <a href="struct.html">Struct</a> describing the <a href="https://en.wikipedia.org/wiki/Arity">arity</a> of a Func. A func’s arity type is always either “Fixed”, “Variadic”, or “Multiple”.</p>
 <ul>
 <li>signature: <code>arity(f &lt;Func&gt;) &lt;Struct&gt;</code></li>
 <li>example:</li>
@@ -61,7 +62,7 @@ println(arity(range))</textarea>
 <li>example: <code>let ch = chan()</code></li>
 </ul>
 <h3 id="fields"><code>fields</code></h3>
-<p><code>fields</code> returns a Set of the names of a value’s fields.</p>
+<p><code>fields</code> returns a <a href="set.html">Set</a> of the names of a value’s fields.</p>
 <ul>
 <li>signature: <code>fields(value &lt;Value&gt;) &lt;Set&gt;</code></li>
 <li>example:</li>
@@ -102,7 +103,7 @@ println(frozen([3, 4]))</textarea>
 <h3 id="has"><code>has</code></h3>
 <p><code>has</code> returns whether a value has a field with a given name.</p>
 <ul>
-<li>signature: <code>has(name &lt;Str&gt;) &lt;Bool&gt;</code></li>
+<li>signature: <code>has(val &lt;Value&gt;, name &lt;Str&gt;) &lt;Bool&gt;</code></li>
 <li>example:</li>
 </ul>
 <div class="play">
@@ -133,17 +134,10 @@ println(has(a, &#39;add&#39;))</textarea>
 </div>
 
 <h3 id="iter"><code>iter</code></h3>
-<p><code>iter</code> returns an iterator for an Iterable value. Str, List, Range, Dict, and Set are iterable.</p>
-<p>An iterator is a Struct that has two fields:</p>
+<p><code>iter</code> returns an “iterator” <a href="struct.html">Struct</a> for an <a href="interfaces.html#iterable">iterable</a> value.</p>
+<p>A new iterator must have <code>next()</code> called on it to advance to the first available value. Calling <code>get()</code> before the first call to <code>next()</code> throws an error.</p>
 <ul>
-<li><p>A <code>next()</code> function that returns whether there are any more values in the iterator, and advances the iterator forwards if there is another value.</p></li>
-<li><p>A <code>get()</code> function that returns the currently available value.</p></li>
-</ul>
-<p>By convention, a new iterator has to have <code>next()</code> called on it to advance to the first available value. Calling <code>get()</code> before the first call to <code>next()</code> throws an error.</p>
-<ul>
-<li>signature: <code>iter(value &lt;Iterable&gt;) &lt;Struct&gt;</code></li>
-<li><code>next</code> signature: <code>next() &lt;Bool&gt;</code></li>
-<li><code>get</code> signature: <code>get() &lt;Value&gt;</code></li>
+<li>signature: <code>iter(itr &lt;Iterable&gt;) &lt;Struct&gt;</code></li>
 <li>example:</li>
 </ul>
 <div class="play">
@@ -160,33 +154,45 @@ while itr.next() {
     </div>
 </div>
 
+<p>An iterator struct has the following fields.</p>
+<ul>
+<li><p><code>next()</code> returns whether there are any more values in the iterator, and advances the iterator forwards if there is another value.</p>
+<ul>
+<li>signature: <code>next() &lt;Bool&gt;</code></li>
+</ul></li>
+<li><p><code>get()</code> returns the currently available value.</p>
+<ul>
+<li>signature: <code>get() &lt;Value&gt;</code></li>
+</ul></li>
+</ul>
 <h3 id="len"><code>len</code></h3>
-<p><code>len</code> returns the length of a value that has a length. Str, List, Tuple, Range, Dict, and Set have a length</p>
+<p><code>len</code> returns the length of a value that has a <a href="interfaces.html#lenable">length</a>.</p>
 <ul>
 <li>signature: <code>len(value &lt;Lenable&gt;) &lt;Int&gt;</code></li>
 <li>example: <code>println(len('abc'))</code></li>
 </ul>
 <h3 id="merge"><code>merge</code></h3>
-<p><code>merge</code> combines an arbitrary number of existing structs into a new struct. If there are any duplicated keys in the structs passed in to ‘merge()’, then the value associated with the first such key is used.</p>
+<p><code>merge</code> combines an arbitrary number of existing <a href="Struct.html">structs</a> into a new struct. If there are any duplicated keys in the structs passed in to ‘merge()’, then the value associated with the <em>last</em> such key is used.</p>
 <ul>
 <li>signature: <code>merge(structs... &lt;Struct&gt;) &lt;Struct&gt;</code></li>
 <li>example:</li>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src32" rows="13" spellcheck="false">let a = struct { x: 1, y: 2 }
+        <textarea id="src32" rows="14" spellcheck="false">let a = struct { x: 1, y: 2 }
 let b = struct { y: 3, z: 4 }
 let c = merge(a, b)
 
-println(a)
-println(b)
-println(c)
+println(&#39;a: &#39;, a)
+println(&#39;b: &#39;, b)
+println(&#39;c: &#39;, c)
 
 a.x = 10
 
-println(a)
-println(b)
-println(c) // x is changed here too!</textarea>
+println()
+println(&#39;a: &#39;, a)
+println(&#39;b: &#39;, b)
+println(&#39;c: &#39;, c) // x is changed here too!</textarea>
     </div>
     <div class="output"><pre id="result32"></pre></div>
     <div class="buttons">
@@ -219,6 +225,61 @@ println(c) // x is changed here too!</textarea>
 <li>signature: <code>str(value &lt;Value&gt;) &lt;Str&gt;</code></li>
 <li>example: <code>println(str([null, true, 1, 'abc']))</code></li>
 </ul>
+<h3 id="stream"><code>stream</code></h3>
+<p><code>stream</code> returns a “stream” <a href="struct.html">Struct</a> for an <a href="interfaces.html#iterable">Iterable</a> value.</p>
+<p>A stream performs a series of transforms on a sequence of iterated values, and then collects the values into a final result.</p>
+<p>Streams have two kinds of fields:</p>
+<ul>
+<li><p>Transformer functions, which perform some kind of transformation on the sequence of values in the stream.</p></li>
+<li><p>Collector functions, which turn the sequence of values into a final result.</p></li>
+</ul>
+<p>Streams are lazy – calling one of the transformer functions doesn’t do any processing, it simply registers a new transformation, and then returns the modified stream. Processing on the sequence of values in the stream does not start until one of the collector functions is called.</p>
+<p>Streams are “single use” values. Once one of the collector functions has been called, an error will be thrown if any of the stream’s functions are called.</p>
+<ul>
+<li>signature: <code>stream(itr &lt;Iterable&gt;) &lt;Struct&gt;</code></li>
+<li>example:</li>
+</ul>
+<div class="play">
+    <div class="input">
+        <textarea id="src34" rows="6" spellcheck="false">// print the sum of the even squares
+let a = [1, 2, 3, 4, 5]
+println(stream(a)
+    .map(|e| =&gt; e*e)
+    .filter(|e| =&gt; e % 2 == 0)
+    .reduce(0, |acc, e| =&gt; acc + e))</textarea>
+    </div>
+    <div class="output"><pre id="result34"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src34', 'result34');">Run</button>
+    </div>
+</div>
+
+<p>A stream has the following fields:</p>
+<h4 id="transformer-functions">transformer functions</h4>
+<ul>
+<li><p><code>filter()</code> adds a “filter” transformation to the stream, by removing elements which do not match the provided predicate function. The predicate function must accept one value, and must return a boolean value.</p>
+<ul>
+<li>signature: <code>filter(predicate &lt;Func&gt;) &lt;Stream&gt;</code></li>
+<li>predicate signature: <code>fn(val &lt;Value&gt;) &lt;Bool&gt;</code></li>
+</ul></li>
+<li><p><code>map()</code> adds a “map” transformation to the stream, by transforming elements according to the provided mapping function. The mapping function must accept one value, and must return one value.</p>
+<ul>
+<li>signature: <code>map(mapping &lt;Func&gt;) &lt;Stream&gt;</code></li>
+<li>mapping signature: <code>fn(val &lt;Value&gt;) &lt;Value&gt;</code></li>
+</ul></li>
+</ul>
+<h4 id="collector-functions">collector functions</h4>
+<ul>
+<li><p><code>reduce()</code> reduces the stream to a single value, by applying a “reducer” function to an accumulated value and each element in the stream. Accumulation is done starting with the first element in the stream, and ending with the last. The reducer function must accept two values, and return one value.</p>
+<ul>
+<li>signature: <code>reduce(initial &lt;Value&gt;, reducer &lt;Func&gt;) &lt;List&gt;</code></li>
+<li>reducer signature: <code>fn(accum &lt;Value&gt;, val &lt;Value&gt;) &lt;Value&gt;</code></li>
+</ul></li>
+<li><p><code>toList()</code> collects the stream’s sequence of values into a <a href="list.html">List</a>.</p>
+<ul>
+<li>signature: <code>toList() &lt;List&gt;</code></li>
+</ul></li>
+</ul>
 <h3 id="type"><code>type</code></h3>
 <p><code>type</code> returns the type of a value.</p>
 <ul>
@@ -227,13 +288,13 @@ println(c) // x is changed here too!</textarea>
 </ul>
 <div class="play">
     <div class="input">
-        <textarea id="src34" rows="3" spellcheck="false">println(type(1.23))
+        <textarea id="src35" rows="3" spellcheck="false">println(type(1.23))
 let a = [null, true, 1, &#39;xyz&#39;]
 println(a.map(type))</textarea>
     </div>
-    <div class="output"><pre id="result34"></pre></div>
+    <div class="output"><pre id="result35"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src34', 'result34');">Run</button>
+        <button class="button" onClick="interpret('src35', 'result35');">Run</button>
     </div>
 </div>
 

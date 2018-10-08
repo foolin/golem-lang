@@ -10,6 +10,7 @@
   * [Control Structures](tour.html#control-structures)
   * [Functions](tour.html#functions)
   * [Structs](tour.html#structs)
+  * [`stream()`](tour.html#stream)
   * [Errors](tour.html#errors)
   * [Concurrency](tour.html#concurrency)
   * [Immutability](tour.html#immutability)

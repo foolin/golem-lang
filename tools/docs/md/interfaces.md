@@ -7,7 +7,8 @@ Interfaces define the various intrinsic capabilities of Golem's standard types.
 ### Hashable
 
 A value is hashable if it can be a key in a [Dict](dict.html) or 
-[Set](set.html).  
+[Set](set.html).  The builtin function [hashCode()](builtins.html#hashcode) 
+returns the hashCode of a hashable value.  
 
 [Str](str.html), [Int](int.html), [Float](float.html), [Bool](bool.html), 
 and [Tuple](tuple.html) are hashable. 

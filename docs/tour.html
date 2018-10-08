@@ -25,7 +25,7 @@
 <li><a href="#dict">Dict</a></li>
 <li><a href="#set">Set</a></li>
 <li><a href="#tuple">Tuple</a></li>
-<li><a href="#len"><code>len</code></a></li>
+<li><a href="#len"><code>len()</code></a></li>
 </ul></li>
 <li><a href="#fields">Fields</a></li>
 <li><a href="#control-structures">Control Structures</a></li>
@@ -47,6 +47,7 @@
 <li><a href="#merging-structs">Merging Structs</a></li>
 <li><a href="#using-structs-to-build-complex-values">Using Structs to build complex values</a></li>
 </ul></li>
+<li><a href="#stream"><code>stream()</code></a></li>
 <li><a href="#errors">Errors</a></li>
 <li><a href="#concurrency">Concurrency</a></li>
 <li><a href="#immutability">Immutability</a></li>
@@ -64,11 +65,11 @@
 <p>Let’s get started with the proverbial hello world program. In this tour, we will be running Golem code directly in the browser, so press the <code>Run</code> button below to see the output of the program:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src35" rows="1" spellcheck="false">println(&#39;Hello, world.&#39;);</textarea>
+        <textarea id="src36" rows="1" spellcheck="false">println(&#39;Hello, world.&#39;);</textarea>
     </div>
-    <div class="output"><pre id="result35"></pre></div>
+    <div class="output"><pre id="result36"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src35', 'result35');">Run</button>
+        <button class="button" onClick="interpret('src36', 'result36');">Run</button>
     </div>
 </div>
 
@@ -77,16 +78,16 @@
 <p>Golem’s basic primitive types include <a href="bool.html">bool</a>, <a href="int.html">int</a>, <a href="float.html">float</a> and <a href="str.html">string</a> There is also <a href="null.html">null</a>, which represents the absence of a value. Basic values are immutable.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src36" rows="6" spellcheck="false">println(null)
+        <textarea id="src37" rows="6" spellcheck="false">println(null)
 println(false)
 println(true)
 println(1 + 2)
 println(3.0 / 4.0)
 println(&#39;abc&#39; + &quot;def&quot;)</textarea>
     </div>
-    <div class="output"><pre id="result36"></pre></div>
+    <div class="output"><pre id="result37"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src36', 'result36');">Run</button>
+        <button class="button" onClick="interpret('src37', 'result37');">Run</button>
     </div>
 </div>
 
@@ -98,14 +99,14 @@ println(&#39;abc&#39; + &quot;def&quot;)</textarea>
 <p>Values can be assigned to variables. Variables are declared via either the <code>let</code> or <code>const</code> keyword. It is an error to refer to a variable before it has been declared.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src37" rows="4" spellcheck="false">let a = 1
+        <textarea id="src38" rows="4" spellcheck="false">let a = 1
 const b = 2
 a = b + 3
 println(a)</textarea>
     </div>
-    <div class="output"><pre id="result37"></pre></div>
+    <div class="output"><pre id="result38"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src37', 'result37');">Run</button>
+        <button class="button" onClick="interpret('src38', 'result38');">Run</button>
     </div>
 </div>
 
@@ -113,13 +114,13 @@ println(a)</textarea>
 <p><code>let</code> and <code>const</code> are “statements” – they do not return a value. Assignments, on the other, are <a href="#TODO">expressions</a>, and evaluating an expression returns a value:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src38" rows="3" spellcheck="false">let a = 1
+        <textarea id="src39" rows="3" spellcheck="false">let a = 1
 let b = (a = 2)
 assert(a == b &amp;&amp; b == 2)</textarea>
     </div>
-    <div class="output"><pre id="result38"></pre></div>
+    <div class="output"><pre id="result39"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src38', 'result38');">Run</button>
+        <button class="button" onClick="interpret('src39', 'result39');">Run</button>
     </div>
 </div>
 
@@ -129,26 +130,11 @@ assert(a == b &amp;&amp; b == 2)</textarea>
 <p>You can create a list by enclosing a comma-delimited sequence of values in square brackets. Once you’ve created a list, you can use square brackets to access individual elements of a list (this is called the “index operator”).</p>
 <div class="play">
     <div class="input">
-        <textarea id="src39" rows="5" spellcheck="false">let a = []
+        <textarea id="src40" rows="5" spellcheck="false">let a = []
 let b = [3,4,5]
 assert(a.isEmpty())
 assert(b[0] == 3)
 println(b[-1]) // negative indexes start from the end</textarea>
-    </div>
-    <div class="output"><pre id="result39"></pre></div>
-    <div class="buttons">
-        <button class="button" onClick="interpret('src39', 'result39');">Run</button>
-    </div>
-</div>
-
-<p>Use the “slice operator” to create a new list from part of an existing list. If you leave off the first or last value of the slice operation, the resulting slice will start at the beginning or end. Negative values work with slices in the same way that they do with indexes.</p>
-<div class="play">
-    <div class="input">
-        <textarea id="src40" rows="5" spellcheck="false">let c = [&#39;x&#39;, &#39;y&#39;, &#39;z&#39;]
-println(c[1:3])
-println(c[:3])
-println(c[2:])
-println(c[1:-1])</textarea>
     </div>
     <div class="output"><pre id="result40"></pre></div>
     <div class="buttons">
@@ -156,11 +142,14 @@ println(c[1:-1])</textarea>
     </div>
 </div>
 
-<p>Indexing and slicing works on strings too:</p>
+<p>Use the “slice operator” to create a new list from part of an existing list. If you leave off the first or last value of the slice operation, the resulting slice will start at the beginning or end. Negative values work with slices in the same way that they do with indexes.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src41" rows="2" spellcheck="false">println(&#39;abc&#39;[1])
-println(&#39;abc&#39;[:-1])</textarea>
+        <textarea id="src41" rows="5" spellcheck="false">let c = [&#39;x&#39;, &#39;y&#39;, &#39;z&#39;]
+println(c[1:3])
+println(c[:3])
+println(c[2:])
+println(c[1:-1])</textarea>
     </div>
     <div class="output"><pre id="result41"></pre></div>
     <div class="buttons">
@@ -168,14 +157,11 @@ println(&#39;abc&#39;[:-1])</textarea>
     </div>
 </div>
 
-<h3 id="dict">Dict</h3>
-<p>Golem’s <code>dict</code> type is an <a href="https://en.wikipedia.org/wiki/Associative_array">associative array</a>. The keys of a dict can be any value that supports <a href="interfaces.html#hashable">hashing</a>.</p>
+<p>Indexing and slicing works on strings too:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src42" rows="4" spellcheck="false">let a = dict {&#39;x&#39;: 1, &#39;y&#39;: 2}
-println(a[&#39;x&#39;])
-a[&#39;z&#39;] = 3
-println(a)</textarea>
+        <textarea id="src42" rows="2" spellcheck="false">println(&#39;abc&#39;[1])
+println(&#39;abc&#39;[:-1])</textarea>
     </div>
     <div class="output"><pre id="result42"></pre></div>
     <div class="buttons">
@@ -183,13 +169,14 @@ println(a)</textarea>
     </div>
 </div>
 
-<h3 id="set">Set</h3>
-<p>A <code>set</code> is a unordered collection of distinct values. Any value that can act as a key in a dict can be a member of a set.</p>
+<h3 id="dict">Dict</h3>
+<p>Golem’s <code>dict</code> type is an <a href="https://en.wikipedia.org/wiki/Associative_array">associative array</a>. The keys of a dict can be any value that supports <a href="interfaces.html#hashable">hashing</a>.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src43" rows="3" spellcheck="false">let a = set {&#39;x&#39;, &#39;y&#39;}
-println(a)
-println(a.contains(&#39;x&#39;))</textarea>
+        <textarea id="src43" rows="4" spellcheck="false">let a = dict {&#39;x&#39;: 1, &#39;y&#39;: 2}
+println(a[&#39;x&#39;])
+a[&#39;z&#39;] = 3
+println(a)</textarea>
     </div>
     <div class="output"><pre id="result43"></pre></div>
     <div class="buttons">
@@ -197,12 +184,13 @@ println(a.contains(&#39;x&#39;))</textarea>
     </div>
 </div>
 
-<h3 id="tuple">Tuple</h3>
-<p>A <code>tuple</code> is an immutable list-like data structure. Tuples must have at least two values.</p>
+<h3 id="set">Set</h3>
+<p>A <code>set</code> is a unordered collection of distinct values. Any value that can act as a key in a dict can be a member of a set.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src44" rows="2" spellcheck="false">let a = (1, 2)
-println(a)</textarea>
+        <textarea id="src44" rows="3" spellcheck="false">let a = set {&#39;x&#39;, &#39;y&#39;}
+println(a)
+println(a.contains(&#39;x&#39;))</textarea>
     </div>
     <div class="output"><pre id="result44"></pre></div>
     <div class="buttons">
@@ -210,18 +198,31 @@ println(a)</textarea>
     </div>
 </div>
 
-<h3 id="len"><code>len</code></h3>
-<p>The builtin function <a href="builtins.html#len"><code>len</code></a> can be used to get the length of any of the collections. <code>len</code> will also return the length of a string.</p>
+<h3 id="tuple">Tuple</h3>
+<p>A <code>tuple</code> is an immutable list-like data structure. Tuples must have at least two values.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src45" rows="4" spellcheck="false">let a = [1, 2, 3]
-let b = &#39;lmnop&#39;
-let c = dict {&quot;x&quot;: 3}
-println([len(a), len(b), len(c)])</textarea>
+        <textarea id="src45" rows="2" spellcheck="false">let a = (1, 2)
+println(a)</textarea>
     </div>
     <div class="output"><pre id="result45"></pre></div>
     <div class="buttons">
         <button class="button" onClick="interpret('src45', 'result45');">Run</button>
+    </div>
+</div>
+
+<h3 id="len"><code>len</code></h3>
+<p>The builtin function <a href="builtins.html#len"><code>len</code></a> can be used to get the length of any of the collections. <code>len</code> will also return the length of a string.</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src46" rows="4" spellcheck="false">let a = [1, 2, 3]
+let b = &#39;lmnop&#39;
+let c = dict {&quot;x&quot;: 3}
+println([len(a), len(b), len(c)])</textarea>
+    </div>
+    <div class="output"><pre id="result46"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src46', 'result46');">Run</button>
     </div>
 </div>
 
@@ -230,7 +231,7 @@ println([len(a), len(b), len(c)])</textarea>
 <p>As an example, here is how to use some of the fields that are present on a list value:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src46" rows="8" spellcheck="false">let ls = []
+        <textarea id="src47" rows="8" spellcheck="false">let ls = []
 assert(ls.isEmpty())
 ls.add(&#39;a&#39;)
 ls.addAll([&#39;b&#39;, &#39;c&#39;])
@@ -239,9 +240,9 @@ println(ls.contains(&#39;c&#39;))
 println(ls.index(&#39;b&#39;))
 println(ls.join(&#39;,&#39;))</textarea>
     </div>
-    <div class="output"><pre id="result46"></pre></div>
+    <div class="output"><pre id="result47"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src46', 'result46');">Run</button>
+        <button class="button" onClick="interpret('src47', 'result47');">Run</button>
     </div>
 </div>
 
@@ -250,24 +251,11 @@ println(ls.join(&#39;,&#39;))</textarea>
 <p>Golem has a familiar set of control structures: <code>if</code>, <code>while</code>, <code>switch</code>, and <code>for</code>.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src47" rows="5" spellcheck="false">let a = 2
+        <textarea id="src48" rows="5" spellcheck="false">let a = 2
 while a &lt; 100 {
     a = a * a 
 }
 println(a)</textarea>
-    </div>
-    <div class="output"><pre id="result47"></pre></div>
-    <div class="buttons">
-        <button class="button" onClick="interpret('src47', 'result47');">Run</button>
-    </div>
-</div>
-
-<p>Golem also has <code>break</code> and <code>continue</code>, which will break out of a <code>while</code> or <code>for</code> loop, or continue at the top of the loop, as in other languages.</p>
-<p>Golem has ‘ternary-if’ expressions as well:</p>
-<div class="play">
-    <div class="input">
-        <textarea id="src48" rows="2" spellcheck="false">const a = 10
-println(a &lt; 3 ? 4 : 5)</textarea>
     </div>
     <div class="output"><pre id="result48"></pre></div>
     <div class="buttons">
@@ -275,10 +263,23 @@ println(a &lt; 3 ? 4 : 5)</textarea>
     </div>
 </div>
 
+<p>Golem also has <code>break</code> and <code>continue</code>, which will break out of a <code>while</code> or <code>for</code> loop, or continue at the top of the loop, as in other languages.</p>
+<p>Golem has ‘ternary-if’ expressions as well:</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src49" rows="2" spellcheck="false">const a = 10
+println(a &lt; 3 ? 4 : 5)</textarea>
+    </div>
+    <div class="output"><pre id="result49"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src49', 'result49');">Run</button>
+    </div>
+</div>
+
 <p><code>switch</code> works roughly the same way as it does in other languages, except that you can switch on any value, not just integers. Also, there is no ‘fall-through’ – at most only one case will be executed. Therefore the <code>break</code> keyword is not applicable to switches.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src49" rows="11" spellcheck="false">let a = &#39;abc&#39;
+        <textarea id="src50" rows="11" spellcheck="false">let a = &#39;abc&#39;
 let b = 0
 switch a {
     case 0:
@@ -290,16 +291,16 @@ switch a {
 }
 println(b)</textarea>
     </div>
-    <div class="output"><pre id="result49"></pre></div>
+    <div class="output"><pre id="result50"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src49', 'result49');">Run</button>
+        <button class="button" onClick="interpret('src50', 'result50');">Run</button>
     </div>
 </div>
 
 <p>You can have multiple expressions in a case statement. The body of the case will be executed if at least on of the expressions matches:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src50" rows="12" spellcheck="false">let s = &#39;&#39;
+        <textarea id="src51" rows="12" spellcheck="false">let s = &#39;&#39;
 let i = 0
 while i &lt; 4 {
     switch i {
@@ -312,16 +313,16 @@ while i &lt; 4 {
 }
 println(s)</textarea>
     </div>
-    <div class="output"><pre id="result50"></pre></div>
+    <div class="output"><pre id="result51"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src50', 'result50');">Run</button>
+        <button class="button" onClick="interpret('src51', 'result51');">Run</button>
     </div>
 </div>
 
 <p>You can leave the expression out after the <code>switch</code> keyword. This lets you switch on a sequence of boolean case statements, which is sometimes easier to read than a cascade of ‘if, else-if, else-if’ statmements:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src51" rows="7" spellcheck="false">let a = 0
+        <textarea id="src52" rows="7" spellcheck="false">let a = 0
 switch {
     case a &lt; 1:
         println(&#39;foo&#39;)
@@ -329,38 +330,21 @@ switch {
         println(&#39;bar&#39;)
 }</textarea>
     </div>
-    <div class="output"><pre id="result51"></pre></div>
-    <div class="buttons">
-        <button class="button" onClick="interpret('src51', 'result51');">Run</button>
-    </div>
-</div>
-
-<p>Golem’s <code>for</code> statement iterates over a sequence of values derived from an <a href="interfaces.html#iterable">iterable</a> value.</p>
-<div class="play">
-    <div class="input">
-        <textarea id="src52" rows="6" spellcheck="false">let a = [1, 2, 3]
-let b = 0
-for e in a {
-    b += e
-}
-println(b)</textarea>
-    </div>
     <div class="output"><pre id="result52"></pre></div>
     <div class="buttons">
         <button class="button" onClick="interpret('src52', 'result52');">Run</button>
     </div>
 </div>
 
-<p>By convention, iterating over a dict produces a sequence of tuples. You can capture the values in the tuple directly in a <code>for</code> loop via “tuple destructuring”:</p>
+<p>Golem’s <code>for</code> statement iterates over a sequence of values derived from an <a href="interfaces.html#iterable">iterable</a> value.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src53" rows="7" spellcheck="false">let d = dict { &quot;x&quot;: 1, &quot;y&quot;: 2, &quot;z&quot;: 3 }
-for e in d {
-    println(e)
+        <textarea id="src53" rows="6" spellcheck="false">let a = [1, 2, 3]
+let b = 0
+for e in a {
+    b += e
 }
-for (k, v) in d {
-    println(&quot;key: &quot;, k, &quot;, value: &quot;, v)
-}</textarea>
+println(b)</textarea>
     </div>
     <div class="output"><pre id="result53"></pre></div>
     <div class="buttons">
@@ -368,10 +352,27 @@ for (k, v) in d {
     </div>
 </div>
 
+<p>By convention, iterating over a dict produces a sequence of tuples. You can capture the values in the tuple directly in a <code>for</code> loop via “tuple destructuring”:</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src54" rows="7" spellcheck="false">let d = dict { &quot;x&quot;: 1, &quot;y&quot;: 2, &quot;z&quot;: 3 }
+for e in d {
+    println(e)
+}
+for (k, v) in d {
+    println(&quot;key: &quot;, k, &quot;, value: &quot;, v)
+}</textarea>
+    </div>
+    <div class="output"><pre id="result54"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src54', 'result54');">Run</button>
+    </div>
+</div>
+
 <p>There is one more iterable type – ranges. Ranges are created via the <a href="builtins.html#range"><code>range</code></a> builtin function. A range is an immutable value that represents a sequence of integers.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src54" rows="7" spellcheck="false">let list = [&quot;frog&quot;, &quot;cow&quot;, &quot;rabbit&quot;]
+        <textarea id="src55" rows="7" spellcheck="false">let list = [&quot;frog&quot;, &quot;cow&quot;, &quot;rabbit&quot;]
 for i in range(0, len(list)) {
     if list[i] == &quot;cow&quot; {
         println(&quot;The cow is at element &quot;, i)
@@ -379,9 +380,9 @@ for i in range(0, len(list)) {
     }
 }</textarea>
     </div>
-    <div class="output"><pre id="result54"></pre></div>
+    <div class="output"><pre id="result55"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src54', 'result54');">Run</button>
+        <button class="button" onClick="interpret('src55', 'result55');">Run</button>
     </div>
 </div>
 
@@ -393,24 +394,10 @@ for i in range(0, len(list)) {
 <p>Functions are created with the <code>fn</code> keyword:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src55" rows="4" spellcheck="false">let a = fn(x) {
+        <textarea id="src56" rows="4" spellcheck="false">let a = fn(x) {
     return x * 7
 }
 assert(a(6) == 42)</textarea>
-    </div>
-    <div class="output"><pre id="result55"></pre></div>
-    <div class="buttons">
-        <button class="button" onClick="interpret('src55', 'result55');">Run</button>
-    </div>
-</div>
-
-<p>Functions do not have to have an explicit <code>return</code> statement. If there is no <code>return</code>, they will return the last expression that was evaluated. If no expression is evaluated in the function, <code>null</code> is returned.</p>
-<div class="play">
-    <div class="input">
-        <textarea id="src56" rows="4" spellcheck="false">let a = fn() {}
-let b = fn(x) { x * x; } // semicolon required here!
-assert(a() == null)
-assert(b(3) == 9)</textarea>
     </div>
     <div class="output"><pre id="result56"></pre></div>
     <div class="buttons">
@@ -418,14 +405,13 @@ assert(b(3) == 9)</textarea>
     </div>
 </div>
 
-<p>A <code>return</code> statement without a value is syntactically invalid – all return statements must include a value to return.</p>
-<p>You can declare the formal parameters of a function to be constant. In the following example, the formal parameter ‘b’ is constant, so it cannot be changed inside the function:</p>
+<p>Functions do not have to have an explicit <code>return</code> statement. If there is no <code>return</code>, they will return the last expression that was evaluated. If no expression is evaluated in the function, <code>null</code> is returned.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src57" rows="4" spellcheck="false">fn foo(const b) {
-    return b + 42
-}
-println(foo(12))</textarea>
+        <textarea id="src57" rows="4" spellcheck="false">let a = fn() {}
+let b = fn(x) { x * x; } // semicolon required here!
+assert(a() == null)
+assert(b(3) == 9)</textarea>
     </div>
     <div class="output"><pre id="result57"></pre></div>
     <div class="buttons">
@@ -433,16 +419,14 @@ println(foo(12))</textarea>
     </div>
 </div>
 
-<h3 id="lambdas">Lambdas</h3>
-<p>Golem also supports ‘lambda’ syntax, via the <code>=&gt;</code> operator. Lambdas provide a lightweight way to define a function on the fly. The body of a lambda function is a single expression.</p>
+<p>A <code>return</code> statement without a value is syntactically invalid – all return statements must include a value to return.</p>
+<p>You can declare the formal parameters of a function to be constant. In the following example, the formal parameter ‘b’ is constant, so it cannot be changed inside the function:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src58" rows="6" spellcheck="false">let a = || =&gt; 3
-let b = |x| =&gt; x * x
-let c = |x, y| =&gt; (x + y) * 5
-println(a())
-println(b(2))
-println(c(1, 2))</textarea>
+        <textarea id="src58" rows="4" spellcheck="false">fn foo(const b) {
+    return b + 42
+}
+println(foo(12))</textarea>
     </div>
     <div class="output"><pre id="result58"></pre></div>
     <div class="buttons">
@@ -450,16 +434,16 @@ println(c(1, 2))</textarea>
     </div>
 </div>
 
-<p>Here is an example which passes lambdas to some list functions that expect a function as a parameter:</p>
+<h3 id="lambdas">Lambdas</h3>
+<p>Golem also supports ‘lambda’ syntax, via the <code>=&gt;</code> operator. Lambdas provide a lightweight way to define a function on the fly. The body of a lambda function is a single expression.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src59" rows="7" spellcheck="false">const ls = [1, 2, 3, 4, 5]
-let squares = ls.map(|x| =&gt; x * x)
-let addedUp = ls.reduce(0, |acc, x| =&gt; acc + x)
-let even = ls.filter(|x| =&gt; (x % 2 == 0))
-println(squares)
-println(addedUp)
-println(even)</textarea>
+        <textarea id="src59" rows="6" spellcheck="false">let a = || =&gt; 3
+let b = |x| =&gt; x * x
+let c = |x, y| =&gt; (x + y) * 5
+println(a())
+println(b(2))
+println(c(1, 2))</textarea>
     </div>
     <div class="output"><pre id="result59"></pre></div>
     <div class="buttons">
@@ -467,17 +451,16 @@ println(even)</textarea>
     </div>
 </div>
 
-<h3 id="named-functions">Named Functions</h3>
-<p>Consider the following program, in which function <code>a</code> calls function <code>b</code>:</p>
+<p>Here is an example which passes lambdas to some list functions that expect a function as a parameter:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src60" rows="7" spellcheck="false">const b = fn() {
-    return 42
-}
-const a = fn() {
-    return b()
-}
-println(a())</textarea>
+        <textarea id="src60" rows="7" spellcheck="false">const ls = [1, 2, 3, 4, 5]
+let squares = ls.map(|x| =&gt; x * x)
+let addedUp = ls.reduce(0, |acc, x| =&gt; acc + x)
+let even = ls.filter(|x| =&gt; (x % 2 == 0))
+println(squares)
+println(addedUp)
+println(even)</textarea>
     </div>
     <div class="output"><pre id="result60"></pre></div>
     <div class="buttons">
@@ -485,14 +468,15 @@ println(a())</textarea>
     </div>
 </div>
 
-<p>This program works because <code>b</code> is declared before <code>a</code>. However, if we reverse the order of declarations, we get a compilation error, because <code>b</code> has not yet been defined.</p>
+<h3 id="named-functions">Named Functions</h3>
+<p>Consider the following program, in which function <code>a</code> calls function <code>b</code>:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src61" rows="7" spellcheck="false">const a = fn() {
-    return b()
-}
-const b = fn() {
+        <textarea id="src61" rows="7" spellcheck="false">const b = fn() {
     return 42
+}
+const a = fn() {
+    return b()
 }
 println(a())</textarea>
     </div>
@@ -502,10 +486,27 @@ println(a())</textarea>
     </div>
 </div>
 
+<p>This program works because <code>b</code> is declared before <code>a</code>. However, if we reverse the order of declarations, we get a compilation error, because <code>b</code> has not yet been defined.</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src62" rows="7" spellcheck="false">const a = fn() {
+    return b()
+}
+const b = fn() {
+    return 42
+}
+println(a())</textarea>
+    </div>
+    <div class="output"><pre id="result62"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src62', 'result62');">Run</button>
+    </div>
+</div>
+
 <p>It is often the case that we need to allow for forward references like the one above. Golem provides a feature called ‘Named Functions’ that offers this functionality. Named functions are declared at the beginning of a given scope. For example:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src62" rows="7" spellcheck="false">fn a() {
+        <textarea id="src63" rows="7" spellcheck="false">fn a() {
     return b()
 }
 fn b() {
@@ -513,9 +514,9 @@ fn b() {
 }
 assert(a() == 42)</textarea>
     </div>
-    <div class="output"><pre id="result62"></pre></div>
+    <div class="output"><pre id="result63"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src62', 'result62');">Run</button>
+        <button class="button" onClick="interpret('src63', 'result63');">Run</button>
     </div>
 </div>
 
@@ -526,7 +527,7 @@ assert(a() == 42)</textarea>
 <p>Here is an example of a closure that acts as a <a href="http://www.paulgraham.com/accgen.html">accumulator generator</a>:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src63" rows="7" spellcheck="false">fn foo(n) {
+        <textarea id="src64" rows="7" spellcheck="false">fn foo(n) {
     return fn(i) {
         return n += i
     } 
@@ -534,9 +535,9 @@ assert(a() == 42)</textarea>
 let f = foo(4)
 println([f(1), f(2), f(3)])</textarea>
     </div>
-    <div class="output"><pre id="result63"></pre></div>
+    <div class="output"><pre id="result64"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src63', 'result63');">Run</button>
+        <button class="button" onClick="interpret('src64', 'result64');">Run</button>
     </div>
 </div>
 
@@ -545,24 +546,12 @@ println([f(1), f(2), f(3)])</textarea>
 <p>Functions can be declared with optional parameters as well. In the following example, the <code>y</code> parameter defaults to 0 unless the function is invoked with two parameters:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src64" rows="6" spellcheck="false">fn a(x, y = 0) {
+        <textarea id="src65" rows="6" spellcheck="false">fn a(x, y = 0) {
     return x + y
 }
 
 println(a(1))
 println(a(1, 2))</textarea>
-    </div>
-    <div class="output"><pre id="result64"></pre></div>
-    <div class="buttons">
-        <button class="button" onClick="interpret('src64', 'result64');">Run</button>
-    </div>
-</div>
-
-<h3 id="variadic-functions">Variadic Functions</h3>
-<p>Functions can also be declared with ‘variadic’ parameters. <code>println</code> is actually a variadic function – it will accept any number of parameters:</p>
-<div class="play">
-    <div class="input">
-        <textarea id="src65" rows="1" spellcheck="false">println(&#39;frog&#39;, &#39;cow&#39;, &#39;rabbit&#39;)</textarea>
     </div>
     <div class="output"><pre id="result65"></pre></div>
     <div class="buttons">
@@ -570,19 +559,31 @@ println(a(1, 2))</textarea>
     </div>
 </div>
 
+<h3 id="variadic-functions">Variadic Functions</h3>
+<p>Functions can also be declared with ‘variadic’ parameters. <code>println</code> is actually a variadic function – it will accept any number of parameters:</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src66" rows="1" spellcheck="false">println(&#39;frog&#39;, &#39;cow&#39;, &#39;rabbit&#39;)</textarea>
+    </div>
+    <div class="output"><pre id="result66"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src66', 'result66');">Run</button>
+    </div>
+</div>
+
 <p>Use an ellipsis (three dots) to declare a variadic parameter:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src66" rows="6" spellcheck="false">fn a(x, ls...) {
+        <textarea id="src67" rows="6" spellcheck="false">fn a(x, ls...) {
     ls.map(|e| =&gt; e + x)
 }
 println(a(1))
 println(a(1, 2))
 println(a(1, 2, 3))</textarea>
     </div>
-    <div class="output"><pre id="result66"></pre></div>
+    <div class="output"><pre id="result67"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src66', 'result66');">Run</button>
+        <button class="button" onClick="interpret('src67', 'result67');">Run</button>
     </div>
 </div>
 
@@ -591,13 +592,13 @@ println(a(1, 2, 3))</textarea>
 <p>There is a builtin function called <a href="builtins.html#arity">arity()</a> that returns a <a href="#structs">struct</a> that describes the <a href="https://en.wikipedia.org/wiki/Arity">arity</a> of a function. Here is a program that prints the arity of 3 of the builtin functions we have already used:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src67" rows="3" spellcheck="false">println(arity(len))
+        <textarea id="src68" rows="3" spellcheck="false">println(arity(len))
 println(arity(range))
 println(arity(println))</textarea>
     </div>
-    <div class="output"><pre id="result67"></pre></div>
+    <div class="output"><pre id="result68"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src67', 'result67');">Run</button>
+        <button class="button" onClick="interpret('src68', 'result68');">Run</button>
     </div>
 </div>
 
@@ -607,23 +608,7 @@ println(arity(println))</textarea>
 <p>Structs are created via the <code>struct</code> keyword.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src68" rows="2" spellcheck="false">let s = struct { a: 1, b: 2 }
-println(s)</textarea>
-    </div>
-    <div class="output"><pre id="result68"></pre></div>
-    <div class="buttons">
-        <button class="button" onClick="interpret('src68', 'result68');">Run</button>
-    </div>
-</div>
-
-<p>In the above example, we’ve created a struct that has two fields, <code>a</code> and <code>b</code>. Remember that a “field” in Golem is a named member of a value. Structs are values that have an arbitrary collection of fields.</p>
-<p>Structs are similar to dicts in some ways, but quite different in others. The field names of a struct can only be strings, and furthermore they must be valid identifiers – they cannot have spaces or special characters.</p>
-<p>The dot operator, <code>.</code>, is used on structs to get or set the fields of a struct:</p>
-<div class="play">
-    <div class="input">
-        <textarea id="src69" rows="4" spellcheck="false">let s = struct { a: 1, b: 2 }
-println(s)
-s.a = 3
+        <textarea id="src69" rows="2" spellcheck="false">let s = struct { a: 1, b: 2 }
 println(s)</textarea>
     </div>
     <div class="output"><pre id="result69"></pre></div>
@@ -632,11 +617,14 @@ println(s)</textarea>
     </div>
 </div>
 
-<p>Once a struct is created, it cannot have new fields added to it, or existing fields removed. The <em>values</em> associated with the fields can be changed though, as we saw in the previous example.</p>
-<p>The <code>this</code> keyword is used in Golem to allow a struct to refer to itself. In Golem, <code>this</code> is only valid inside a struct, and it is always lexically scoped to refer to the innermost enclosing struct.</p>
+<p>In the above example, we’ve created a struct that has two fields, <code>a</code> and <code>b</code>. Remember that a “field” in Golem is a named member of a value. Structs are values that have an arbitrary collection of fields.</p>
+<p>Structs are similar to dicts in some ways, but quite different in others. The field names of a struct can only be strings, and furthermore they must be valid identifiers – they cannot have spaces or special characters.</p>
+<p>The dot operator, <code>.</code>, is used on structs to get or set the fields of a struct:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src70" rows="2" spellcheck="false">let s = struct { a: 1, b: 2, c: this.a + this.b }
+        <textarea id="src70" rows="4" spellcheck="false">let s = struct { a: 1, b: 2 }
+println(s)
+s.a = 3
 println(s)</textarea>
     </div>
     <div class="output"><pre id="result70"></pre></div>
@@ -645,11 +633,24 @@ println(s)</textarea>
     </div>
 </div>
 
+<p>Once a struct is created, it cannot have new fields added to it, or existing fields removed. The <em>values</em> associated with the fields can be changed though, as we saw in the previous example.</p>
+<p>The <code>this</code> keyword is used in Golem to allow a struct to refer to itself. In Golem, <code>this</code> is only valid inside a struct, and it is always lexically scoped to refer to the innermost enclosing struct.</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src71" rows="2" spellcheck="false">let s = struct { a: 1, b: 2, c: this.a + this.b }
+println(s)</textarea>
+    </div>
+    <div class="output"><pre id="result71"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src71', 'result71');">Run</button>
+    </div>
+</div>
+
 <h3 id="properties">Properties</h3>
 <p>Structs can have properties defined on them using the <code>prop</code> keyword, so that a given field has a ‘getter’ function, and optional ‘setter’ function. The getter function must take 0 parameters, and the setter function must take 1 parameter. If the setter function is omitted, the property is readonly. Properties are useful for hiding the inner workings of a struct behind a simpler facade. Here is an example (which uses <a href="#errors">try-catch</a>):</p>
 <div class="play">
     <div class="input">
-        <textarea id="src71" rows="25" spellcheck="false">let x = 2
+        <textarea id="src72" rows="25" spellcheck="false">let x = 2
 let s = struct {
 
     // &#39;a&#39; is a readonly property with a getter function.
@@ -675,9 +676,9 @@ println([s.a, s.b, x, s.c()])
 x = 4
 println([s.a, s.b, x, s.c()])</textarea>
     </div>
-    <div class="output"><pre id="result71"></pre></div>
+    <div class="output"><pre id="result72"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src71', 'result71');">Run</button>
+        <button class="button" onClick="interpret('src72', 'result72');">Run</button>
     </div>
 </div>
 
@@ -685,7 +686,7 @@ println([s.a, s.b, x, s.c()])</textarea>
 <p>Let’s consider the following program:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src72" rows="12" spellcheck="false">fn newRect(w, h) {
+        <textarea id="src73" rows="12" spellcheck="false">fn newRect(w, h) {
     struct { 
         width:  w, 
         height: h, 
@@ -698,9 +699,9 @@ let b = newRect(1, 2)
 println(a == b)
 println(a.area == b.area)</textarea>
     </div>
-    <div class="output"><pre id="result72"></pre></div>
+    <div class="output"><pre id="result73"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src72', 'result72');">Run</button>
+        <button class="button" onClick="interpret('src73', 'result73');">Run</button>
     </div>
 </div>
 
@@ -709,7 +710,7 @@ println(a.area == b.area)</textarea>
 <p>It is possible to override the default implementation of <code>==</code> using a specially named magic field called <code>__eq__</code>. If we properly define a field with that name, Golem will use it when comparing a struct to another value for equality. Here is an example (that makes use of the builtin function <a href="builtins.html#has">has</a>):</p>
 <div class="play">
     <div class="input">
-        <textarea id="src73" rows="16" spellcheck="false">fn newRect(w, h) {
+        <textarea id="src74" rows="16" spellcheck="false">fn newRect(w, h) {
     struct { 
         width:  w, 
         height: h, 
@@ -726,16 +727,16 @@ let a = newRect(1, 2)
 let b = newRect(1, 2)
 println(a == b)</textarea>
     </div>
-    <div class="output"><pre id="result73"></pre></div>
+    <div class="output"><pre id="result74"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src73', 'result73');">Run</button>
+        <button class="button" onClick="interpret('src74', 'result74');">Run</button>
     </div>
 </div>
 
 <p>There are two other magic fields: <code>__str__</code>, which overrides the value returned by the builtin function <a href="builtins.html#str"><code>str</code></a>, and <code>__hashCode__</code>, which causes a struct to be <a href="interfaces.html#hashable">hashable</a>, so it can be used as a key in a dict, or an entry in a set. For example:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src74" rows="31" spellcheck="false">fn newRect(w, h) {
+        <textarea id="src75" rows="31" spellcheck="false">fn newRect(w, h) {
     struct { 
         width:  w, 
         height: h, 
@@ -767,34 +768,35 @@ let d = dict{
 }
 println(d)</textarea>
     </div>
-    <div class="output"><pre id="result74"></pre></div>
+    <div class="output"><pre id="result75"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src74', 'result74');">Run</button>
+        <button class="button" onClick="interpret('src75', 'result75');">Run</button>
     </div>
 </div>
 
 <p>Currently there are just the three magic fields we have already seen, but future versions of Golem will add more.</p>
 <h3 id="merging-structs">Merging Structs</h3>
-<p>The builtin-function <code>merge()</code> can be used to combine an arbitrary number of existing structs into a new struct.</p>
+<p>The builtin-function <a href="builtins.html#merge"><code>merge()</code></a> can be used to combine an arbitrary number of existing structs into a new struct.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src75" rows="13" spellcheck="false">let a = struct { x: 1, y: 2 }
+        <textarea id="src76" rows="14" spellcheck="false">let a = struct { x: 1, y: 2 }
 let b = struct { y: 3, z: 4 }
 let c = merge(a, b)
 
-println(a)
-println(b)
-println(c)
+println(&#39;a: &#39;, a)
+println(&#39;b: &#39;, b)
+println(&#39;c: &#39;, c)
 
 a.x = 10
 
-println(a)
-println(b)
-println(c) // x is changed here too!</textarea>
+println()
+println(&#39;a: &#39;, a)
+println(&#39;b: &#39;, b)
+println(&#39;c: &#39;, c) // x is changed here too!</textarea>
     </div>
-    <div class="output"><pre id="result75"></pre></div>
+    <div class="output"><pre id="result76"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src75', 'result75');">Run</button>
+        <button class="button" onClick="interpret('src76', 'result76');">Run</button>
     </div>
 </div>
 
@@ -805,7 +807,7 @@ println(c) // x is changed here too!</textarea>
 <p>Here is a program that demonstrates Golem’s ability to create complex interrelated structs:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src76" rows="41" spellcheck="false">fn newRect(w, h) {
+        <textarea id="src77" rows="41" spellcheck="false">fn newRect(w, h) {
     struct { 
         width:  w, 
         height: h, 
@@ -847,44 +849,24 @@ println(rect)
 println(box)
 println(&#39;area: &#39;, box.area(), &#39;, volume: &#39;, box.volume())</textarea>
     </div>
-    <div class="output"><pre id="result76"></pre></div>
-    <div class="buttons">
-        <button class="button" onClick="interpret('src76', 'result76');">Run</button>
-    </div>
-</div>
-
-<p>The functions <code>newRect</code> and <code>newBox</code> are very much like what one might call “constructors” in another language. The structs that they return have closures as entries, that are quite a bit like what one might call a “method” in another language.</p>
-<p>The use of the <code>merge()</code> function to create a box out of a rectangle is similar to how inheritance is used in other languages. Does that mean that a Box is a subclass of a Rectangle? Not really, no. There is no such thing as a “class” in Golem. However, due to the behaviour of merge(), they <em>are</em> inter-related in a way that is very much like inheritance.</p>
-<p>One of the primary goals of the Golem project is to explore the power provided by the simple building blocks of closures, structs, properties, magic fields, and merge(). It is hoped that the simplicity and flexibility of these elements can be used to create a variety of complex runtime structures that are easy to reason about and use.</p>
-<h2 id="errors">Errors</h2>
-<p>Golem uses the familiar ’try-catch-finally` syntax that exists in many C-family languages.</p>
-<div class="play">
-    <div class="input">
-        <textarea id="src77" rows="7" spellcheck="false">try {
-    let z = 4 / 0
-}
-catch e {
-    println(e.error) 
-    println(e.stackTrace) 
-}</textarea>
-    </div>
     <div class="output"><pre id="result77"></pre></div>
     <div class="buttons">
         <button class="button" onClick="interpret('src77', 'result77');">Run</button>
     </div>
 </div>
 
-<p>The error value in a <code>catch</code> clause is always a struct with an <code>error</code> field and a <code>stackTrace</code> field.</p>
-<p>You can throw an exception using the <code>throw</code> keyword, followed by an expression that evaluates to a string.</p>
+<p>The functions <code>newRect</code> and <code>newBox</code> are very much like what one might call “constructors” in another language. The structs that they return have closures as entries, that are quite a bit like what one might call a “method” in another language.</p>
+<p>The use of the <code>merge()</code> function to create a box out of a rectangle is similar to how inheritance is used in other languages. Does that mean that a Box is a subclass of a Rectangle? Not really, no. There is no such thing as a “class” in Golem. However, due to the behaviour of merge(), they <em>are</em> inter-related in a way that is very much like inheritance.</p>
+<p>One of the primary goals of the Golem project is to explore the power provided by the simple building blocks of closures, structs, properties, magic fields, and <code>merge()</code>. It is hoped that the simplicity and flexibility of these elements can be used to create a variety of complex runtime structures that are easy to reason about and use.</p>
+<h2 id="stream"><code>stream()</code></h2>
+<p>We have already seen the <code>map()</code>, <code>filter()</code>, and <code>reduce()</code> functions on a list:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src78" rows="7" spellcheck="false">try {
-    throw &#39;FooError: foo&#39;
-}
-catch e {
-    println(e.error) 
-    println(e.stackTrace) 
-}</textarea>
+        <textarea id="src78" rows="5" spellcheck="false">// print the sum of the even squares
+let a = [1, 2, 3, 4, 5]
+let b = a.map(|e| =&gt; e*e)
+let c = b.filter(|e| =&gt; e % 2 == 0)
+println(c.reduce(0, |acc, e| =&gt; acc + e))</textarea>
     </div>
     <div class="output"><pre id="result78"></pre></div>
     <div class="buttons">
@@ -892,10 +874,64 @@ catch e {
     </div>
 </div>
 
+<p>The above program is rather inefficient though. We ended up creating two extra lists in order to create the final reduced value that we wanted.</p>
+<p>There is a builtin function called <a href="builtins.html#stream"><code>stream()</code></a> that will allow us to perform the same operation much more efficiently:</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src79" rows="6" spellcheck="false">// print the sum of the even squares
+let a = [1, 2, 3, 4, 5]
+println(stream(a)
+    .map(|e| =&gt; e*e)
+    .filter(|e| =&gt; e % 2 == 0)
+    .reduce(0, |acc, e| =&gt; acc + e))</textarea>
+    </div>
+    <div class="output"><pre id="result79"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src79', 'result79');">Run</button>
+    </div>
+</div>
+
+<p>A stream performs a series of transforms on a sequence of iterated values, and then collects the values into a final result. Streams can be used to perform complex transformations and reductions in an efficient manner.</p>
+<h2 id="errors">Errors</h2>
+<p>Golem uses the familiar ’try-catch-finally` syntax that exists in many C-family languages.</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src80" rows="7" spellcheck="false">try {
+    let z = 4 / 0
+}
+catch e {
+    println(e.error) 
+    println(e.stackTrace) 
+}</textarea>
+    </div>
+    <div class="output"><pre id="result80"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src80', 'result80');">Run</button>
+    </div>
+</div>
+
+<p>The error value in a <code>catch</code> clause is always a struct with an <code>error</code> field and a <code>stackTrace</code> field.</p>
+<p>You can throw an exception using the <code>throw</code> keyword, followed by an expression that evaluates to a string.</p>
+<div class="play">
+    <div class="input">
+        <textarea id="src81" rows="7" spellcheck="false">try {
+    throw &#39;FooError: foo&#39;
+}
+catch e {
+    println(e.error) 
+    println(e.stackTrace) 
+}</textarea>
+    </div>
+    <div class="output"><pre id="result81"></pre></div>
+    <div class="buttons">
+        <button class="button" onClick="interpret('src81', 'result81');">Run</button>
+    </div>
+</div>
+
 <p>There is also a <code>finally</code> clause, which is always executed no matter what happens inside the try block or catch clause:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src79" rows="10" spellcheck="false">try {
+        <textarea id="src82" rows="10" spellcheck="false">try {
     throw &#39;FooError: foo&#39;
 }
 catch e {
@@ -906,9 +942,9 @@ finally {
     println(&#39;finally&#39;)
 }</textarea>
     </div>
-    <div class="output"><pre id="result79"></pre></div>
+    <div class="output"><pre id="result82"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src79', 'result79');">Run</button>
+        <button class="button" onClick="interpret('src82', 'result82');">Run</button>
     </div>
 </div>
 
@@ -918,7 +954,7 @@ finally {
 <p>Golem uses the Go Language’s <a href="https://tour.golang.org/concurrency/1">concurrency system</a>. This means that Golem has ‘goroutines’, channels and the ability to send and receive messages.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src80" rows="13" spellcheck="false">fn sum(s, c) {
+        <textarea id="src83" rows="13" spellcheck="false">fn sum(s, c) {
     c.send(s.reduce(0, |acc, x| =&gt; acc+x))
 }
 
@@ -932,18 +968,18 @@ go sum(s[n:], c)
 let result = [c.recv(), c.recv()]
 println(result)</textarea>
     </div>
-    <div class="output"><pre id="result80"></pre></div>
+    <div class="output"><pre id="result83"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src80', 'result80');">Run</button>
+        <button class="button" onClick="interpret('src83', 'result83');">Run</button>
     </div>
 </div>
 
 <p>Golem’s concurrency is not finished yet. In the near future it will be enhanced with the <code>select</code> keyword, the ability to range over a channel, and various pieces of functionality from Go’s <code>sync</code> package.</p>
 <h2 id="immutability">Immutability</h2>
-<p>Golem supports immutability via the <a href="builtins.html#freeze"><code>freeze</code></a> builtin function, which makes a mutable value become immutable. You can check if a value is immutable via the <a href="builtins.html#frozen"><code>frozen</code></a> builtin function. <code>freeze()</code> always returns the value that you pass into it.</p>
+<p>Golem supports immutability via the <a href="builtins.html#freeze"><code>freeze()</code></a> builtin function, which makes a mutable value become immutable. You can check if a value is immutable via the <a href="builtins.html#frozen"><code>frozen()</code></a> builtin function. <code>freeze()</code> always returns the value that you pass into it.</p>
 <div class="play">
     <div class="input">
-        <textarea id="src81" rows="9" spellcheck="false">let s = freeze(struct { a: 1, b: 2 })
+        <textarea id="src84" rows="9" spellcheck="false">let s = freeze(struct { a: 1, b: 2 })
 println(frozen(s))
 
 try {
@@ -953,9 +989,9 @@ try {
     println(e.error)
 }</textarea>
     </div>
-    <div class="output"><pre id="result81"></pre></div>
+    <div class="output"><pre id="result84"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src81', 'result81');">Run</button>
+        <button class="button" onClick="interpret('src84', 'result84');">Run</button>
     </div>
 </div>
 
@@ -966,37 +1002,37 @@ try {
 <p>There is a builtin function called <a href="builtins.html#type"><code>type</code></a> that will return a string describing the type of a value. Here is a program that will print a list of every possible type:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src82" rows="5" spellcheck="false">let values = [
+        <textarea id="src85" rows="5" spellcheck="false">let values = [
     null, true, &quot;&quot;, 0, 0.0, fn(){}, 
     [], range(0,1), (0,1), dict{}, set{}, 
     struct{}, chan()]
 println(values.map(type))</textarea>
     </div>
-    <div class="output"><pre id="result82"></pre></div>
+    <div class="output"><pre id="result85"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src82', 'result82');">Run</button>
+        <button class="button" onClick="interpret('src85', 'result85');">Run</button>
     </div>
 </div>
 
 <p>There is another builtin function called <a href="builtins.html#fields"><code>fields</code></a> that will return the set of all fields belonging to a given value. There is also <a href="builtins.html#has"><code>has</code></a>, which returns whether a value has a given field:</p>
 <div class="play">
     <div class="input">
-        <textarea id="src83" rows="3" spellcheck="false">let s = struct { a: 1, b: 2 }
+        <textarea id="src86" rows="3" spellcheck="false">let s = struct { a: 1, b: 2 }
 println(fields(s))
 println([&#39;a&#39;, &#39;b&#39;, &#39;c&#39;].map(|e| =&gt; has(s, e)))</textarea>
     </div>
-    <div class="output"><pre id="result83"></pre></div>
+    <div class="output"><pre id="result86"></pre></div>
     <div class="buttons">
-        <button class="button" onClick="interpret('src83', 'result83');">Run</button>
+        <button class="button" onClick="interpret('src86', 'result86');">Run</button>
     </div>
 </div>
 
 <h2 id="command-line-executable">Command Line Executable</h2>
 <p>Thus far, we have been running Golem in the browser via the magic of <a href="https://github.com/golang/go/wiki/WebAssembly">WebAssembly</a>.</p>
 <p>It is also possible to run Golem from the command line as an executable.</p>
-<p>To do this, you must first compile a version of the Golem. This requires that you have the Go language toolchain installed on your system, with at least version 1.9.</p>
+<p>To do this, you must first compile a version of Golem into an executable. This requires that you have the Go language toolchain installed on your system, with at least version 1.9.</p>
 <p>Clone the Golem <a href="https://github.com/mjarmy/golem-lang">repository</a> into the proper place in your go development environment, <code>cd</code> into the top level directory of the repo, and type <code>make</code>. This will build Golem, and place the <code>golem</code> executable in a sub-directory called <code>build</code>.</p>
-<p>Then, fire up your <a href="https://github.com/mjarmy/golem-lang/wiki/IDE-Support">IDE</a> of choice, and type the Golem code of your choice into a file named “tour.glm”, and run it like so: <code>./build/golem tour.glm</code>.</p>
+<p>Then, fire up your <a href="https://github.com/mjarmy/golem-lang/wiki/IDE-Support">IDE</a> of choice, type some Golem code into a file named “tour.glm”, and run it like so: <code>./build/golem tour.glm</code>.</p>
 <h3 id="modules">Modules</h3>
 <p>In addition to supporting all of the builtin functions that we have seen so far, the <code>golem</code> executable supports a concept called “modules”.</p>
 <p>The Golem CLI actually compiles the “tour.glm” file that you made eariler into a module called “tour”. Modules are the fundamental unit of compilation in Golem, and are also used for namespace management.</p>
@@ -1031,7 +1067,7 @@ println(r.matchString(&#39;123&#39;))</code></pre>
 <h2 id="embedding-and-sandboxing">Embedding and Sandboxing</h2>
 <p>So far, we have seen Golem in action in two contexts: as a <a href="https://github.com/mjarmy/golem-lang/blob/master/tools/docs/wasm.go">WebAssembly</a> executable, and a <a href="https://github.com/mjarmy/golem-lang/blob/master/cli/golem.go">command line</a> executable.</p>
 <p>Golem has an important concept which we call ‘sandboxing’, that allows you to run Golem code inside a Go program, and be completely sure that it does not interact with the outside world via I/O at all. Note that the WebAssembly executable is sandboxed, whereas the command line executable is not.</p>
-<p>There is an <a href="https://github.com/mjarmy/golem-lang/blob/master/examples/embedding/sandbox.go">example program</a> which starts with the simplest possible one-line program that interprets Golem code inside of a Go program, and then provides several more increasingly sophisticated examples. Just do <code>go run examples/embedding/sandbox.go</code> to run the sandbox example.</p>
+<p>There is an <a href="https://github.com/mjarmy/golem-lang/blob/master/examples/embedding/sandbox.go">example program</a> which starts with the simplest possible one-line program that interprets Golem code inside of a Go program, and then provides several more increasingly complicated examples. Type <code>go run examples/embedding/sandbox.go</code> to run the sandbox example.</p>
 <p>If you decide you <em>do</em> want to let Golem interact with the outside world, it is simple to create an unsandboxed environment for it to run in.</p>
 <p>If you want to explore Golem’s code base further, the best starting point is <a href="https://github.com/mjarmy/golem-lang/blob/master/core/value.go">value.go</a>, which defines all of the interfaces for Golem’s various types.</p>
 

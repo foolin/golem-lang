@@ -45,6 +45,7 @@
 * [merge()](builtins.html#merge)
 * [range()](builtins.html#range)
 * [str()](builtins.html#str)
+* [stream()](builtins.html#stream)
 * [type()](builtins.html#type)
 
 ### SideEffect Builtins:
