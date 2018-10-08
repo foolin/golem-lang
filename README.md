@@ -8,7 +8,8 @@ or it can be easily [embedded](https://github.com/mjarmy/golem-lang/blob/master/
 inside a [Go](https://golang.org/) progam.
 
 Please consult the [documentation](https://mjarmy.github.io/golem-lang/) to learn 
-more about Golem.
+more about Golem. The [tour](https://mjarmy.github.io/golem-lang/tour.html) is a good
+place to start.
 
 Golem is in beta:
 
