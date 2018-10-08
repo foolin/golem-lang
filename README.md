@@ -12,9 +12,9 @@ more about Golem.
 
 Golem is in beta:
 
-    * Reasonable care has been taken to ensure that it works.
-    * Golem's syntax and API are reasonably stable.
-    * There are likely to still be bugs lurking about.
+* Reasonable care has been taken to ensure that it works.
+* Golem's syntax and API are reasonably stable.
+* There are likely to still be bugs lurking about.
 
 <img src="/images/snippet.png?raw=true" width="500">
 
