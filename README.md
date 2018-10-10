@@ -11,6 +11,11 @@ Please consult the [documentation](https://mjarmy.github.io/golem-lang/) to lear
 more about Golem. The [tour](https://mjarmy.github.io/golem-lang/tour.html) is a good
 place to start.
 
+If you just want to compile it and run it, do:
+
+* `make`
+* `build/golem examples/fibonacci.glm`
+
 Golem is in beta:
 
 * Reasonable care has been taken to ensure that it works.

@@ -1032,7 +1032,7 @@ fn main(args) {
 
 ### Standard Library
 
-Golem has a [Standard Library](http://localhost:8080/reference.html#standard-library) 
+Golem has a [Standard Library](reference.html#standard-library) 
 that is implemented as a collection of modules. The standard library is based primarily
 on Go's standard library.  
 

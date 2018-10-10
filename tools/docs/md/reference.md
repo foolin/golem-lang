@@ -21,12 +21,12 @@
 
 ## Interfaces
 
-* [Hashable](interfaces.html#hashable)
 * [Comparable](interfaces.html#comparable)
+* [Hashable](interfaces.html#hashable)
 * [Indexable](interfaces.html#indexable)
+* [Iterable](interfaces.html#iterable)
 * [Lenable](interfaces.html#lenable)
 * [Sliceable](interfaces.html#sliceable)
-* [Iterable](interfaces.html#iterable)
 
 ## Builtin Functions
 
